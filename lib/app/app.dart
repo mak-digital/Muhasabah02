@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../features/home/home_screen.dart';
 
 class MuhasabahApp extends StatelessWidget {
   const MuhasabahApp({super.key});
@@ -12,17 +13,7 @@ class MuhasabahApp extends StatelessWidget {
         colorSchemeSeed: Colors.teal,
         useMaterial3: true,
       ),
-      home: const Scaffold(
-        body: Center(
-          child: Text(
-            'Muhasabah02',
-            style: TextStyle(
-              fontSize: 32,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-      ),
+      home: const HomeScreen(),
     );
   }
 }
