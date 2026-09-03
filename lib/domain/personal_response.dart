@@ -110,6 +110,7 @@ class PersonalResponse {
     this.archivedAt,
     this.provenance,
     this.schemaVersion = kPersonalResponseSchemaVersion,
+    this.synthetic = false,
   });
 
   final String id;
@@ -119,6 +120,7 @@ class PersonalResponse {
   final DateTime? archivedAt;
   final ResponseProvenance? provenance;
   final int schemaVersion;
+  final bool synthetic;
 
   bool get isArchived => archivedAt != null;
 
@@ -128,6 +130,7 @@ class PersonalResponse {
     DateTime? archivedAt,
     bool clearArchivedAt = false,
     ResponseProvenance? provenance,
+    bool? synthetic,
   }) {
     return PersonalResponse(
       id: id,
@@ -137,6 +140,7 @@ class PersonalResponse {
       archivedAt: clearArchivedAt ? null : (archivedAt ?? this.archivedAt),
       provenance: provenance ?? this.provenance,
       schemaVersion: schemaVersion,
+      synthetic: synthetic ?? this.synthetic,
     );
   }
 
@@ -149,6 +153,7 @@ class PersonalResponse {
       if (editedAt != null) 'editedAt': editedAt!.toIso8601String(),
       if (archivedAt != null) 'archivedAt': archivedAt!.toIso8601String(),
       if (provenance != null) 'provenance': provenance!.toJson(),
+      if (synthetic) 'synthetic': true,
     };
   }
 
@@ -173,6 +178,7 @@ class PersonalResponse {
       schemaVersion: json['schemaVersion'] is int
           ? json['schemaVersion'] as int
           : kPersonalResponseSchemaVersion,
+      synthetic: json['synthetic'] == true,
     );
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:muhasabah02/app/app.dart';
 import 'package:muhasabah02/application/providers.dart';
+import 'package:muhasabah02/data/app_prefs.dart';
 import 'package:muhasabah02/data/memory_repositories.dart';
 import 'package:muhasabah02/domain/daily_check_in.dart';
 import 'package:muhasabah02/domain/prayer.dart';
@@ -19,6 +20,9 @@ Widget testApp({
       ),
       responseRepositoryProvider.overrideWithValue(
         responses ?? MemoryResponseRepository(),
+      ),
+      appPrefsProvider.overrideWithValue(
+        MemoryAppPrefs(applicationReflectionAcknowledged: true),
       ),
       if (now != null) nowProvider.overrideWithValue(now),
     ],

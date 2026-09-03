@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Muhasabah dashboard visual review</title>
+  <style>
+    body { font-family: system-ui, sans-serif; background: #f4f1ea; color: #1d2a2c; margin: 0; padding: 24px; }
+    h1, h2 { font-weight: 600; }
+    .phone { width: 390px; min-height: 760px; background: #fff; border-radius: 28px; box-shadow: 0 12px 40px rgba(0,0,0,.12); padding: 20px 16px 32px; margin: 16px 16px 32px 0; display: inline-block; vertical-align: top; }
+    .bar { font-size: 13px; color: #5c6e7a; margin-bottom: 12px; }
+    .card { border-radius: 16px; padding: 14px; margin-bottom: 10px; color: #14323a; }
+    .salah { background: #d7eceb; }
+    .quran { background: #d7e4f2; }
+    .dhikr { background: #d9eedf; }
+    .family { background: #eadff2; }
+    .charity { background: #f4e6c8; }
+    .fasting { background: #dde1f4; }
+    .muted { font-size: 12px; color: #4d5c63; }
+    .row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid #2f6f73; display: inline-block; }
+    .dot.empty { border-style: dotted; background: transparent; }
+    .dot.fill { background: #2f6f73; }
+    .dot.alt { background: transparent; }
+    .grid { display: grid; grid-template-columns: 18px repeat(5, 16px); gap: 6px; align-items: center; font-size: 10px; }
+    .banner { background: #fff8e8; border-radius: 12px; padding: 10px 12px; font-size: 12px; margin-bottom: 12px; }
+    .cta { background: #2f6f73; color: white; border: 0; border-radius: 12px; padding: 10px 12px; width: 100%; margin-top: 8px; }
+    .note { max-width: 720px; line-height: 1.45; }
+  </style>
+</head>
+<body>
+  <h1>Visual review gate — Home Summary Dashboard</h1>
+  <p class="note">Mockups only. Colour identifies domains. Shape encodes recorded / not done / unanswered. No scores, ranks, streaks, or heatmap intensity.</p>
+
+  <div class="phone" id="dashboard">
+    <div class="bar">Home · Summary</div>
+    <div class="banner">Sample/demo records are visible. They stay until you archive them.</div>
+    <div class="card salah"><strong>Salah</strong><div class="muted">Recent: mixed recorded states · 2 unanswered today</div></div>
+    <div class="card quran"><strong>Qur’an</strong><div class="muted">Reading recorded · meaning unanswered</div></div>
+    <div class="card dhikr"><strong>Dhikr</strong><div class="muted">Morning adhkar recorded</div></div>
+    <div class="card family"><strong>Family</strong><div class="muted">Parent communication recorded</div></div>
+    <div class="card charity"><strong>Charity</strong><div class="muted">No answer recorded</div></div>
+    <div class="card fasting"><strong>Fasting</strong><div class="muted">Weekly Sunnah fasting recorded</div></div>
+    <div class="card" style="background:#eef2f4"><strong>Current review snapshot</strong><div class="muted">7 days · recorded 5 of 7 days · missing excluded from outcomes</div></div>
+    <div class="card" style="background:#eef2f4"><strong>Recognition</strong><div class="muted">Descriptive patterns appear in 30- and 90-day views only</div></div>
+    <div class="card" style="background:#eef2f4"><strong>PONDER</strong><div class="muted">What do you notice about your recorded Qur’an engagement in this period?</div></div>
+    <button class="cta">Add a response</button>
+  </div>
+
+  <div class="phone" id="domain-cards">
+    <div class="bar">Domain card examples</div>
+    <div class="card salah"><strong>Salah · teal family</strong><div class="muted">Fajr / Dhuhr variants stay in-family. Not a grade.</div></div>
+    <div class="card quran"><strong>Qur’an · blue family</strong></div>
+    <div class="card dhikr"><strong>Dhikr · green family</strong></div>
+    <div class="card family"><strong>Family · purple family</strong></div>
+    <div class="card charity"><strong>Charity · amber family</strong></div>
+    <div class="card fasting"><strong>Fasting · indigo family</strong></div>
+  </div>
+
+  <div class="phone" id="summary">
+    <div class="bar">Summary card examples</div>
+    <div class="card salah">
+      <strong>Salah · this period</strong>
+      <div class="muted">On time among recorded only · unanswered listed separately</div>
+      <div class="row" style="margin-top:8px">
+        <span class="dot fill"></span> recorded activity
+        <span class="dot alt"></span> recorded not done
+        <span class="dot empty"></span> unanswered
+      </div>
+    </div>
+    <div class="card quran">
+      <strong>Qur’an · unanswered indicator</strong>
+      <div class="muted">Meaning: no answer recorded (not a negative)</div>
+    </div>
+  </div>
+
+  <div class="phone" id="progress">
+    <div class="bar">Progress · weekly calendar</div>
+    <div class="muted" style="margin-bottom:8px">Rows = weekdays · Columns = weeks</div>
+    <div class="grid">
+      <span></span><span>3</span><span>10</span><span>17</span><span>24</span><span>31</span>
+      <span>M</span><span class="dot fill"></span><span class="dot empty"></span><span class="dot fill"></span><span class="dot alt"></span><span class="dot fill"></span>
+      <span>T</span><span class="dot fill"></span><span class="dot fill"></span><span class="dot empty"></span><span class="dot fill"></span><span class="dot empty"></span>
+      <span>W</span><span class="dot empty"></span><span class="dot fill"></span><span class="dot fill"></span><span class="dot fill"></span><span class="dot alt"></span>
+      <span>T</span><span class="dot fill"></span><span class="dot alt"></span><span class="dot fill"></span><span class="dot empty"></span><span class="dot fill"></span>
+      <span>F</span><span class="dot fill"></span><span class="dot fill"></span><span class="dot fill"></span><span class="dot fill"></span><span class="dot fill"></span>
+      <span>S</span><span class="dot empty"></span><span class="dot fill"></span><span class="dot empty"></span><span class="dot fill"></span><span class="dot empty"></span>
+      <span>S</span><span class="dot alt"></span><span class="dot empty"></span><span class="dot fill"></span><span class="dot fill"></span><span class="dot empty"></span>
+    </div>
+    <p class="muted">90D uses Earlier 30 / Middle 30 / Recent 30 calendars. Marker size is identical in every state.</p>
+  </div>
+</body>
+</html>

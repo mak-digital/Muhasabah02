@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../application/providers.dart';
+import '../../domain/activities.dart';
 import '../../domain/context_catalog.dart';
 import '../../domain/copy.dart';
 import '../../domain/daily_check_in.dart';
@@ -48,7 +49,11 @@ class DayEvidenceScreen extends ConsumerWidget {
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 4),
-              Text('${Copy.youRecorded} the following on $dateKey.'),
+              if (record.synthetic)
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 12),
+                  child: Text('Sample/demo record'),
+                ),
               const SizedBox(height: 12),
               Text('Salah', style: Theme.of(context).textTheme.titleMedium),
               for (final prayer in PrayerId.values) ...[
@@ -71,7 +76,7 @@ class DayEvidenceScreen extends ConsumerWidget {
               ],
               const SizedBox(height: 8),
               Text('Qur’an', style: Theme.of(context).textTheme.titleMedium),
-              for (final dimension in QuranDimension.values) ...[
+              for (final dimension in quranDailyDimensions) ...[
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   title: Text(dimension.label),
@@ -96,6 +101,23 @@ class DayEvidenceScreen extends ConsumerWidget {
                     evidenceId: '$dateKey:quran:${dimension.name}',
                     labelSnapshot: '${dimension.label} on $dateKey',
                   ),
+                ),
+              ],
+              if (record
+                  .quranOutcome(QuranDimension.applicationReflection)
+                  .isRecorded) ...[
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Application Reflection'),
+                  subtitle: Text(
+                    record
+                        .quranOutcome(QuranDimension.applicationReflection)
+                        .legendLabel,
+                  ),
+                ),
+                Text(
+                  Copy.applicationReflectionNote,
+                  style: Theme.of(context).textTheme.bodySmall,
                 ),
               ],
               ListTile(
@@ -125,6 +147,31 @@ class DayEvidenceScreen extends ConsumerWidget {
                       ? 'An entry was saved'
                       : record.personalReflectionStatus.labelHint,
                 ),
+              ),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Fasting'),
+                subtitle: Text(record.fasting.activityId),
+              ),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Financial charity'),
+                subtitle: Text(record.charity.activityId),
+              ),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Zakat'),
+                subtitle: Text(record.zakat.label),
+              ),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Family / kinship'),
+                subtitle: Text(record.family.activityId),
+              ),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Hadith engagement'),
+                subtitle: Text(record.hadith.activityId),
               ),
               if (record.contexts.isNotEmpty) ...[
                 const SizedBox(height: 8),
@@ -171,12 +218,4 @@ class DayEvidenceScreen extends ConsumerWidget {
       ),
     );
   }
-}
-
-extension on EntryStatus {
-  String get labelHint => switch (this) {
-    EntryStatus.unanswered => 'Not recorded',
-    EntryStatus.noneToday => 'No entry today',
-    EntryStatus.recorded => 'Entry saved',
-  };
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../app/theme.dart';
 import '../../application/providers.dart';
 import '../../domain/analytics.dart';
 import '../../domain/copy.dart';
@@ -8,6 +9,7 @@ import '../../domain/date_key.dart';
 import '../../domain/other_domains.dart';
 import '../../domain/personal_response.dart';
 import '../../domain/review_period.dart';
+import '../home/dashboard_cards.dart';
 import '../progress/salah_progress_screen.dart';
 import '../recognition/recognition_screen.dart';
 import '../recorded_days/recorded_days_screen.dart';
@@ -93,10 +95,9 @@ class ReviewScreen extends ConsumerWidget {
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               const SizedBox(height: 12),
-              _navCard(
-                context,
+              DashboardNavCard(
                 title: 'Salah Progress',
-                subtitle: 'Independent prayer traces for ${period.shortLabel}',
+                body: 'Independent prayer traces for ${period.shortLabel}',
                 onTap: () => Navigator.push(
                   context,
                   MaterialPageRoute<void>(
@@ -104,10 +105,10 @@ class ReviewScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-              _navCard(
-                context,
+              const SizedBox(height: 8),
+              DashboardNavCard(
                 title: 'Qur’an Progress',
-                subtitle: 'Seven independent dimensions',
+                body: 'Independent Qur’an dimensions for this period',
                 onTap: () => Navigator.push(
                   context,
                   MaterialPageRoute<void>(
@@ -115,10 +116,10 @@ class ReviewScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-              _navCard(
-                context,
+              const SizedBox(height: 8),
+              DashboardNavCard(
                 title: Copy.recordedDaysTitle,
-                subtitle: Copy.historicalReflectionTitle,
+                body: Copy.historicalReflectionTitle,
                 onTap: () => Navigator.push(
                   context,
                   MaterialPageRoute<void>(
@@ -126,11 +127,10 @@ class ReviewScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-              _navCard(
-                context,
+              const SizedBox(height: 8),
+              DashboardNavCard(
                 title: 'Recognition',
-                subtitle:
-                    'Descriptive context patterns in 30- and 90-day views',
+                body: 'Descriptive context patterns in 30- and 90-day views',
                 onTap: () => Navigator.push(
                   context,
                   MaterialPageRoute<void>(
@@ -194,38 +194,22 @@ class ReviewScreen extends ConsumerWidget {
   }
 
   Widget _fact(BuildContext context, String label, String value) {
+    final brightness = Theme.of(context).brightness;
     return SizedBox(
       width: 160,
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(label, style: Theme.of(context).textTheme.labelMedium),
-              const SizedBox(height: 4),
-              Text(value, style: Theme.of(context).textTheme.bodyMedium),
-            ],
-          ),
+      child: WashPanel(
+        color: MuhasabahColors.wash(
+          MuhasabahColors.summaryWash,
+          MuhasabahColors.summaryWashDark,
+          brightness,
         ),
-      ),
-    );
-  }
-
-  Widget _navCard(
-    BuildContext context, {
-    required String title,
-    required String subtitle,
-    required VoidCallback onTap,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Card(
-        child: ListTile(
-          title: Text(title),
-          subtitle: Text(subtitle),
-          trailing: const Icon(Icons.chevron_right),
-          onTap: onTap,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(label, style: Theme.of(context).textTheme.labelMedium),
+            const SizedBox(height: 4),
+            Text(value, style: Theme.of(context).textTheme.bodyMedium),
+          ],
         ),
       ),
     );

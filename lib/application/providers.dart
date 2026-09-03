@@ -1,10 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../data/app_prefs.dart';
 import '../data/memory_repositories.dart';
 import '../data/repositories.dart';
 import '../domain/daily_check_in.dart';
 import '../domain/personal_response.dart';
 import '../domain/review_period.dart';
+
+final appPrefsProvider = Provider<AppPrefs>((ref) => MemoryAppPrefs());
 
 final checkInRepositoryProvider = Provider<CheckInRepository>(
   (ref) => MemoryCheckInRepository(),
@@ -19,6 +22,8 @@ final nowProvider = Provider<DateTime>((ref) => DateTime.now());
 final reviewPeriodProvider = StateProvider<ReviewPeriod>(
   (ref) => ReviewPeriod.days7,
 );
+
+final prefsTickProvider = StateProvider<int>((ref) => 0);
 
 final themeModePrefProvider = StateProvider<int>((ref) => 0);
 

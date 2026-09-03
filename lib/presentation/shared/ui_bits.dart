@@ -1,5 +1,22 @@
 import 'package:flutter/material.dart';
 
+class WashPanel extends StatelessWidget {
+  const WashPanel({super.key, required this.color, required this.child});
+
+  final Color color;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: color,
+      borderRadius: BorderRadius.circular(16),
+      clipBehavior: Clip.antiAlias,
+      child: Padding(padding: const EdgeInsets.all(16), child: child),
+    );
+  }
+}
+
 class EmptyState extends StatelessWidget {
   const EmptyState({
     super.key,
@@ -80,7 +97,7 @@ class PeriodSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
+    final selector = Semantics(
       label: 'Period selector',
       child: SegmentedButton<int>(
         segments: const [
@@ -91,6 +108,17 @@ class PeriodSelector extends StatelessWidget {
         selected: {days},
         onSelectionChanged: (value) => onChanged(value.first),
       ),
+    );
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minWidth: constraints.maxWidth),
+            child: selector,
+          ),
+        );
+      },
     );
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muhasabah02/application/providers.dart';
+import 'package:muhasabah02/data/app_prefs.dart';
 import 'package:muhasabah02/data/memory_repositories.dart';
 import 'package:muhasabah02/domain/copy.dart';
 import 'package:muhasabah02/presentation/recorded_days/day_evidence_screen.dart';
@@ -17,8 +18,8 @@ void main() {
     expect(find.text(Copy.homeCheckIn), findsOneWidget);
     await tester.tap(find.text(Copy.homeCheckIn));
     await tester.pumpAndSettle();
-    expect(find.text('Salah'), findsOneWidget);
-    await tester.tap(find.text('Prayed on time').first);
+    expect(find.text('Salah'), findsWidgets);
+    await tester.tap(find.text('Prayed alone on time').first);
     await tester.pumpAndSettle();
     await tester.ensureVisible(find.text('Save check-in'));
     await tester.tap(find.text('Save check-in'));
@@ -66,7 +67,7 @@ void main() {
     await tester.ensureVisible(find.text('Qur’an Progress'));
     await tester.tap(find.text('Qur’an Progress'));
     await tester.pumpAndSettle();
-    expect(find.text(Copy.ponderPrompt), findsOneWidget);
+    expect(find.text(Copy.ponderPrompt), findsWidgets);
     await tester.pageBack();
     await tester.pumpAndSettle();
     await tester.tap(find.text(Copy.myResponse));
@@ -107,6 +108,9 @@ void main() {
           checkInRepositoryProvider.overrideWithValue(checkIns),
           responseRepositoryProvider.overrideWithValue(
             MemoryResponseRepository(),
+          ),
+          appPrefsProvider.overrideWithValue(
+            MemoryAppPrefs(applicationReflectionAcknowledged: true),
           ),
         ],
         child: const MaterialApp(

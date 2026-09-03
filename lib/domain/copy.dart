@@ -30,4 +30,13 @@ class Copy {
   static const missingDays = 'Days with no check-in';
   static const recordedDays = 'Days with a saved check-in';
   static const unansweredNotMissed = 'Not recorded is not the same as missed.';
+  static const applicationReflectionIntroTitle = 'Application Reflection';
+  static const seePonderExplore = 'SEE → PONDER → EXPLORE';
+  static const sampleDataNotice =
+      'Sample/demo records are visible. They stay until you archive them.';
+  static const archiveSamplePrompt =
+      'Would you like to archive the sample records and use only your own records?';
+  static const settingsTitle = 'Settings';
+  static const aboutMuhasabah = 'About Muhasabah';
+  static const dataManagement = 'Developer / Data Management';
 }

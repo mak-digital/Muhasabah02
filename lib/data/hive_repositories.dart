@@ -1,5 +1,6 @@
 import 'package:hive_flutter/hive_flutter.dart';
 
+import '../data/app_prefs.dart';
 import '../domain/daily_check_in.dart';
 import '../domain/personal_response.dart';
 import 'codecs.dart';
@@ -7,6 +8,7 @@ import 'repositories.dart';
 
 const checkInsBoxName = 'muhasabah_checkins_v5';
 const responsesBoxName = 'muhasabah_responses_v1';
+const prefsBoxName = 'muhasabah_prefs_v1';
 
 class HiveCheckInRepository implements CheckInRepository {
   HiveCheckInRepository(this._box);
@@ -151,13 +153,64 @@ class HiveResponseRepository implements ResponseRepository {
   }
 }
 
-Future<({HiveCheckInRepository checkIns, HiveResponseRepository responses})>
+class HiveAppPrefs implements AppPrefs {
+  HiveAppPrefs(this._box);
+
+  final Box<String> _box;
+
+  static const _sampleSeeded = 'sample_seeded';
+  static const _sampleRemoved = 'sample_removed_by_user';
+  static const _archiveDismissed = 'archive_prompt_dismissed';
+  static const _applicationAck = 'application_reflection_ack';
+
+  bool _flag(String key) => _box.get(key) == 'true';
+
+  Future<void> _setFlag(String key, bool value) =>
+      _box.put(key, value ? 'true' : 'false');
+
+  @override
+  bool get sampleSeeded => _flag(_sampleSeeded);
+
+  @override
+  bool get sampleRemovedByUser => _flag(_sampleRemoved);
+
+  @override
+  bool get archivePromptDismissed => _flag(_archiveDismissed);
+
+  @override
+  bool get applicationReflectionAcknowledged => _flag(_applicationAck);
+
+  @override
+  Future<void> setSampleSeeded(bool value) => _setFlag(_sampleSeeded, value);
+
+  @override
+  Future<void> setSampleRemovedByUser(bool value) =>
+      _setFlag(_sampleRemoved, value);
+
+  @override
+  Future<void> setArchivePromptDismissed(bool value) =>
+      _setFlag(_archiveDismissed, value);
+
+  @override
+  Future<void> setApplicationReflectionAcknowledged(bool value) =>
+      _setFlag(_applicationAck, value);
+}
+
+Future<
+  ({
+    HiveCheckInRepository checkIns,
+    HiveResponseRepository responses,
+    HiveAppPrefs prefs,
+  })
+>
 openHiveRepositories() async {
   await Hive.initFlutter();
   final checkIns = await Hive.openBox<String>(checkInsBoxName);
   final responses = await Hive.openBox<String>(responsesBoxName);
+  final prefs = await Hive.openBox<String>(prefsBoxName);
   return (
     checkIns: HiveCheckInRepository(checkIns),
     responses: HiveResponseRepository(responses),
+    prefs: HiveAppPrefs(prefs),
   );
 }

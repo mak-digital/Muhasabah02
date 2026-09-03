@@ -1,9 +1,10 @@
+import 'activities.dart';
 import 'other_domains.dart';
 import 'prayer.dart';
 import 'quran.dart';
 import 'recorded_context.dart';
 
-const int kDailyCheckInSchemaVersion = 5;
+const int kDailyCheckInSchemaVersion = 6;
 const int kRecordableFieldCount = 10;
 
 class DailyCheckIn {
@@ -33,6 +34,12 @@ class DailyCheckIn {
     this.gratitudeText,
     this.personalReflectionStatus = EntryStatus.unanswered,
     this.personalReflectionText,
+    this.fasting = const DomainObservation(),
+    this.charity = const DomainObservation(),
+    this.zakat = ZakatStatus.unanswered,
+    this.family = const DomainObservation(),
+    this.hadith = const DomainObservation(),
+    this.activities = const {},
     this.contexts = const [],
     this.synthetic = false,
   });
@@ -48,6 +55,12 @@ class DailyCheckIn {
   final String? gratitudeText;
   final EntryStatus personalReflectionStatus;
   final String? personalReflectionText;
+  final DomainObservation fasting;
+  final DomainObservation charity;
+  final ZakatStatus zakat;
+  final DomainObservation family;
+  final DomainObservation hadith;
+  final Map<String, RecordedActivity> activities;
   final List<RecordedContext> contexts;
   final bool synthetic;
 
@@ -57,6 +70,71 @@ class DailyCheckIn {
 
   TernaryOutcome quranOutcome(QuranDimension dimension) =>
       quran[dimension] ?? TernaryOutcome.unanswered;
+
+  RecordedActivity activityFor(String key) {
+    final stored = activities[key];
+    if (stored != null) return stored;
+    if (key.startsWith('salah.')) {
+      final name = key.substring(6);
+      final id = PrayerId.values.where((item) => item.name == name);
+      if (id.isNotEmpty) {
+        return RecordedActivity(
+          id: ActivityCatalog.canonicalSalahId(prayer(id.first)),
+        );
+      }
+    }
+    if (key.startsWith('quran.')) {
+      final name = key.substring(6);
+      final dimension = QuranDimension.values.where(
+        (item) => item.name == name,
+      );
+      if (dimension.isNotEmpty) {
+        return RecordedActivity(
+          id: ActivityCatalog.canonicalTernaryId(
+            quranOutcome(dimension.first),
+            ActivityCatalog.forQuran(dimension.first),
+          ),
+        );
+      }
+    }
+    if (key == ActivityCatalog.dhikrKey) {
+      return RecordedActivity(
+        id: switch (dhikr) {
+          DhikrStatus.unanswered => ActivityIds.unanswered,
+          DhikrStatus.didNot => ActivityIds.noActivity,
+          DhikrStatus.practised => 'dailyRemembrance',
+        },
+      );
+    }
+    if (key == ActivityCatalog.conductKey) {
+      return RecordedActivity(
+        id: switch (conduct) {
+          ConductStatus.unanswered => ActivityIds.unanswered,
+          ConductStatus.didNot => ActivityIds.noActivity,
+          ConductStatus.noted => 'kindness',
+        },
+      );
+    }
+    if (key == ActivityCatalog.gratitudeKey) {
+      return RecordedActivity(
+        id: switch (gratitudeStatus) {
+          EntryStatus.unanswered => ActivityIds.unanswered,
+          EntryStatus.noneToday => ActivityIds.noActivity,
+          EntryStatus.recorded => 'namedBlessing',
+        },
+      );
+    }
+    if (key == ActivityCatalog.reflectionKey) {
+      return RecordedActivity(
+        id: switch (personalReflectionStatus) {
+          EntryStatus.unanswered => ActivityIds.unanswered,
+          EntryStatus.noneToday => ActivityIds.noActivity,
+          EntryStatus.recorded => 'privateNote',
+        },
+      );
+    }
+    return const RecordedActivity(id: ActivityIds.unanswered);
+  }
 
   RecordedContext? contextFor(QuranDimension subject, String polarity) {
     for (final item in contexts) {
@@ -80,13 +158,21 @@ class DailyCheckIn {
 
   bool get hasAnyRecordedEvidence {
     if (answeredRecordableCount > 0) return true;
-    for (final dimension in QuranDimension.values) {
+    for (final dimension in quranDailyDimensions) {
       if (quranOutcome(dimension).isRecorded) return true;
+    }
+    if (fasting.isRecorded ||
+        charity.isRecorded ||
+        zakat.isRecorded ||
+        family.isRecorded ||
+        hadith.isRecorded) {
+      return true;
     }
     return contexts.isNotEmpty;
   }
 
   DailyCheckIn copyWith({
+    int? schemaVersion,
     DateTime? savedAt,
     Map<PrayerId, PrayerStatus>? salah,
     Map<QuranDimension, TernaryOutcome>? quran,
@@ -98,12 +184,18 @@ class DailyCheckIn {
     EntryStatus? personalReflectionStatus,
     String? personalReflectionText,
     bool clearPersonalReflectionText = false,
+    DomainObservation? fasting,
+    DomainObservation? charity,
+    ZakatStatus? zakat,
+    DomainObservation? family,
+    DomainObservation? hadith,
+    Map<String, RecordedActivity>? activities,
     List<RecordedContext>? contexts,
     bool? synthetic,
   }) {
     return DailyCheckIn(
       dateKey: dateKey,
-      schemaVersion: schemaVersion,
+      schemaVersion: schemaVersion ?? this.schemaVersion,
       savedAt: savedAt ?? this.savedAt,
       salah: salah ?? this.salah,
       quran: quran ?? this.quran,
@@ -118,13 +210,40 @@ class DailyCheckIn {
       personalReflectionText: clearPersonalReflectionText
           ? null
           : (personalReflectionText ?? this.personalReflectionText),
+      fasting: fasting ?? this.fasting,
+      charity: charity ?? this.charity,
+      zakat: zakat ?? this.zakat,
+      family: family ?? this.family,
+      hadith: hadith ?? this.hadith,
+      activities: activities ?? this.activities,
       contexts: contexts ?? this.contexts,
       synthetic: synthetic ?? this.synthetic,
     );
   }
 
+  DailyCheckIn withActivity(String key, RecordedActivity activity) {
+    return copyWith(activities: {...activities, key: activity});
+  }
+
   DailyCheckIn withPrayer(PrayerId id, PrayerStatus status) {
-    return copyWith(salah: {...salah, id: status});
+    return copyWith(
+      salah: {...salah, id: status},
+      activities: {
+        ...activities,
+        ActivityCatalog.salahKey(id): RecordedActivity(
+          id: ActivityCatalog.canonicalSalahId(status),
+        ),
+      },
+    );
+  }
+
+  DailyCheckIn withSalahActivity(PrayerId id, RecordedActivity activity) {
+    final option = ActivityCatalog.find(ActivityCatalog.salah, activity.id);
+    final status = option?.prayerStatus ?? PrayerStatus.unanswered;
+    return copyWith(
+      salah: {...salah, id: status},
+      activities: {...activities, ActivityCatalog.salahKey(id): activity},
+    );
   }
 
   DailyCheckIn withQuran(QuranDimension dimension, TernaryOutcome outcome) {
@@ -135,10 +254,33 @@ class DailyCheckIn {
       if (c.polarity == 'negative') return outcome == TernaryOutcome.negative;
       return false;
     }).toList();
+    final catalog = ActivityCatalog.forQuran(dimension);
+    final canonical = catalog.isEmpty
+        ? ActivityIds.unanswered
+        : ActivityCatalog.canonicalTernaryId(outcome, catalog);
     return copyWith(
       quran: {...quran, dimension: outcome},
       contexts: nextContexts,
+      activities: {
+        ...activities,
+        ActivityCatalog.quranKey(dimension): RecordedActivity(id: canonical),
+      },
     );
+  }
+
+  DailyCheckIn withQuranActivity(
+    QuranDimension dimension,
+    RecordedActivity activity,
+  ) {
+    final option = ActivityCatalog.find(
+      ActivityCatalog.forQuran(dimension),
+      activity.id,
+    );
+    final outcome = option?.ternary ?? TernaryOutcome.unanswered;
+    return withQuran(
+      dimension,
+      outcome,
+    ).withActivity(ActivityCatalog.quranKey(dimension), activity);
   }
 
   DailyCheckIn withContext(RecordedContext context) {
@@ -181,6 +323,16 @@ class DailyCheckIn {
       'personalReflection': {
         'status': personalReflectionStatus.name,
         if (personalReflectionText != null) 'text': personalReflectionText,
+      },
+      'fasting': fasting.toJson(),
+      'charity': charity.toJson(),
+      'zakat': zakat.name,
+      'family': family.toJson(),
+      'hadith': hadith.toJson(),
+      'activities': {
+        for (final entry in activities.entries)
+          if (entry.value.id != ActivityIds.unanswered)
+            entry.key: entry.value.toJson(),
       },
       'contexts': contexts.map((c) => c.toJson()).toList(),
       if (synthetic) 'synthetic': true,
@@ -250,6 +402,14 @@ class DailyCheckIn {
       }
     }
 
+    final activities = <String, RecordedActivity>{};
+    final rawActivities = json['activities'];
+    if (rawActivities is Map) {
+      for (final entry in rawActivities.entries) {
+        activities['${entry.key}'] = RecordedActivity.fromJson(entry.value);
+      }
+    }
+
     DateTime? savedAt;
     final rawSaved = json['savedAt'];
     if (rawSaved is String) {
@@ -268,6 +428,12 @@ class DailyCheckIn {
       gratitudeText: gratitudeText,
       personalReflectionStatus: reflectionStatus,
       personalReflectionText: reflectionText,
+      fasting: DomainObservation.fromJson(json['fasting']),
+      charity: DomainObservation.fromJson(json['charity']),
+      zakat: zakatFromJson(json['zakat']),
+      family: DomainObservation.fromJson(json['family']),
+      hadith: DomainObservation.fromJson(json['hadith']),
+      activities: activities,
       contexts: contexts,
       synthetic: json['synthetic'] == true,
     );

@@ -10,6 +10,11 @@ enum QuranDimension {
 
 enum TernaryOutcome { unanswered, positive, negative }
 
+List<QuranDimension> get quranDailyDimensions => [
+  for (final dimension in QuranDimension.values)
+    if (dimension != QuranDimension.applicationReflection) dimension,
+];
+
 extension QuranDimensionX on QuranDimension {
   String get jsonKey => name;
 
@@ -60,7 +65,8 @@ extension QuranDimensionX on QuranDimension {
 
   bool get isPrimaryDailyItem => this == QuranDimension.reading;
 
-  bool get isNeutralPeerDimension => this != QuranDimension.reading;
+  bool get isNeutralPeerDimension =>
+      this != QuranDimension.reading && !isApplicationReflection;
 
   bool get allowsPositiveContext => switch (this) {
     QuranDimension.meaning ||

@@ -8,4 +8,4 @@ Android backup is disabled (`allowBackup=false`) with exclude rules for cloud ba
 
 The app does not claim encryption-at-rest, forensic deletion, or absolute confidentiality.
 
-Tests use synthetic data only.
+Tests use synthetic/sample data only. First-install sample records are tagged `synthetic` and are not treated as telemetry.

@@ -37,8 +37,7 @@ int _sundayBasedWeekday(DateTime date) => date.weekday % 7;
 
 DateTime startOfWeek(DateTime date, {required int firstDayOfWeekIndex}) {
   final local = _dateOnly(date);
-  final offset =
-      (_sundayBasedWeekday(local) - firstDayOfWeekIndex + 7) % 7;
+  final offset = (_sundayBasedWeekday(local) - firstDayOfWeekIndex + 7) % 7;
   return _addCalendarDays(local, -offset);
 }
 

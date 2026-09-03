@@ -94,25 +94,23 @@ class SalahProgressScreen extends ConsumerWidget {
   ) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                prayer.label,
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 8),
-              ProgressCalendarSection(
-                dateKeys: keys,
-                periodDays: period.days,
-                cellBuilder: (context, key) =>
-                    _dayMarker(context, prayer, key, index[key]),
-              ),
-            ],
-          ),
+      child: WashPanel(
+        color: Color.alphaBlend(
+          MuhasabahColors.prayer(prayer).withValues(alpha: 0.16),
+          Theme.of(context).colorScheme.surface,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(prayer.label, style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
+            ProgressCalendarSection(
+              dateKeys: keys,
+              periodDays: period.days,
+              cellBuilder: (context, key) =>
+                  _dayMarker(context, prayer, key, index[key]),
+            ),
+          ],
         ),
       ),
     );
@@ -258,7 +256,7 @@ class QuranProgressScreen extends ConsumerWidget {
                 ],
               ),
               const SizedBox(height: 16),
-              for (final dimension in QuranDimension.values)
+              for (final dimension in quranDailyDimensions)
                 _dimensionCard(context, dimension, keys, index, period),
             ],
           );
@@ -289,77 +287,77 @@ class QuranProgressScreen extends ConsumerWidget {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+      child: WashPanel(
+        color: Color.alphaBlend(
+          MuhasabahColors.quran(dimension).withValues(alpha: 0.16),
+          Theme.of(context).colorScheme.surface,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              dimension.label,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            if (dimension.isNeutralPeerDimension)
               Text(
-                dimension.label,
-                style: Theme.of(context).textTheme.titleMedium,
+                'Recorded on $recordedDays of ${keys.length} days · activity days $positiveDays · recorded as not done $negativeDays',
               ),
-              if (dimension.isNeutralPeerDimension)
-                Text(
-                  'Recorded on $recordedDays of ${keys.length} days · activity days $positiveDays · recorded as not done $negativeDays',
+            if (dimension.isApplicationReflection)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  Copy.applicationReflectionNote,
+                  style: Theme.of(context).textTheme.bodySmall,
                 ),
-              if (dimension.isApplicationReflection)
-                Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: Text(
-                    Copy.applicationReflectionNote,
-                    style: Theme.of(context).textTheme.bodySmall,
+              ),
+            const SizedBox(height: 8),
+            ProgressCalendarSection(
+              dateKeys: keys,
+              periodDays: period.days,
+              cellBuilder: (context, key) {
+                final record = index[key];
+                final outcome = record == null
+                    ? TernaryOutcome.unanswered
+                    : record.quranOutcome(dimension);
+                final kind = markerForRecorded(
+                  recorded: outcome.isRecorded,
+                  positive: outcome == TernaryOutcome.positive,
+                );
+                return ProgressDayCell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute<void>(
+                        builder: (_) => DayEvidenceScreen(dateKey: key),
+                      ),
+                    );
+                  },
+                  marker: RecordedStateMarker(
+                    color: MuhasabahColors.quran(dimension),
+                    kind: kind,
+                    symbol: outcome == TernaryOutcome.negative
+                        ? Icons.remove
+                        : null,
+                    semanticLabel:
+                        '$key ${weekdayNameForDate(key)} ${dimension.label} ${outcome.legendLabel}',
                   ),
-                ),
-              const SizedBox(height: 8),
-              ProgressCalendarSection(
-                dateKeys: keys,
+                );
+              },
+            ),
+            AddResponseButton(
+              compact: true,
+              provenance: ResponseProvenance(
+                originType: ProvenanceOrigin.progressDimension,
+                domain: 'quran',
+                subject: dimension.name,
                 periodDays: period.days,
-                cellBuilder: (context, key) {
-                  final record = index[key];
-                  final outcome = record == null
-                      ? TernaryOutcome.unanswered
-                      : record.quranOutcome(dimension);
-                  final kind = markerForRecorded(
-                    recorded: outcome.isRecorded,
-                    positive: outcome == TernaryOutcome.positive,
-                  );
-                  return ProgressDayCell(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute<void>(
-                          builder: (_) => DayEvidenceScreen(dateKey: key),
-                        ),
-                      );
-                    },
-                    marker: RecordedStateMarker(
-                      color: MuhasabahColors.quran(dimension),
-                      kind: kind,
-                      symbol: outcome == TernaryOutcome.negative
-                          ? Icons.remove
-                          : null,
-                      semanticLabel:
-                          '$key ${weekdayNameForDate(key)} ${dimension.label} ${outcome.legendLabel}',
-                    ),
-                  );
-                },
+                labelSnapshot: '${dimension.label} (${period.shortLabel})',
               ),
-              AddResponseButton(
-                compact: true,
-                provenance: ResponseProvenance(
-                  originType: ProvenanceOrigin.progressDimension,
-                  domain: 'quran',
-                  subject: dimension.name,
-                  periodDays: period.days,
-                  labelSnapshot: '${dimension.label} (${period.shortLabel})',
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
-

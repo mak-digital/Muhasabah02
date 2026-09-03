@@ -9,12 +9,14 @@ import 'package:muhasabah02/domain/quran.dart';
 void main() {
   final now = DateTime(2026, 9, 3);
 
-  test('synthetic plan covers 100 days with gaps and unanswered values', () {
+  test('synthetic plan covers 120 days with gaps and unanswered values', () {
     final plan = generateSyntheticCheckIns(now: now);
-    expect(plan.savedDays + plan.missingDays, 100);
+    expect(plan.savedDays + plan.missingDays, 120);
     expect(plan.missingDays, greaterThanOrEqualTo(12));
-    expect(plan.savedDays, lessThan(100));
+    expect(plan.savedDays, lessThan(120));
     expect(plan.records.every((record) => record.synthetic), isTrue);
+    expect(plan.responses, isNotEmpty);
+    expect(plan.responses.every((item) => item.synthetic), isTrue);
 
     final unansweredSalahDays = plan.records.where((record) {
       return PrayerId.values.any(
@@ -30,12 +32,20 @@ void main() {
     expect(mixedSalahDays.length, greaterThan(plan.savedDays ~/ 4));
 
     final unansweredQuranDays = plan.records.where((record) {
-      return QuranDimension.values.any(
+      return quranDailyDimensions.any(
         (dimension) =>
             record.quranOutcome(dimension) == TernaryOutcome.unanswered,
       );
     });
     expect(unansweredQuranDays, isNotEmpty);
+    expect(
+      plan.records.every(
+        (record) =>
+            record.quranOutcome(QuranDimension.applicationReflection) ==
+            TernaryOutcome.unanswered,
+      ),
+      isTrue,
+    );
 
     final perfectDays = plan.records.where((record) {
       final salahPerfect = PrayerId.values.every(
@@ -58,7 +68,7 @@ void main() {
       final result = await seeder.generateInto(repo, now: now);
       final stored = await repo.allHealthy();
       expect(stored.length, result.written);
-      expect(stored.length, lessThan(100));
+      expect(stored.length, lessThan(120));
       expect(result.missingDays, greaterThan(0));
       expect(stored.first.schemaVersion, kDailyCheckInSchemaVersion);
 

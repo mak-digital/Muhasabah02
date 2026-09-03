@@ -25,56 +25,67 @@ class ProgressCalendarGrid extends StatelessWidget {
     if (layout.weekCount == 0) return const SizedBox.shrink();
 
     const stride = AppDimensions.progressCalendarStride;
-    return Semantics(
-      container: true,
-      label: 'Weekly calendar. Rows are weekdays. Columns are weeks.',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+    final gridWidth =
+        AppDimensions.progressWeekdayLabelWidth + layout.weekCount * stride;
+    final grid = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const SizedBox(width: AppDimensions.progressWeekdayLabelWidth),
+            for (var week = 0; week < layout.weekCount; week++)
+              SizedBox(
+                width: stride,
+                height: AppDimensions.progressCalendarHeaderHeight,
+                child: Text(
+                  '${layout.weekStarts[week].day}',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.labelSmall,
+                ),
+              ),
+          ],
+        ),
+        for (var row = 0; row < kCalendarWeekdayCount; row++)
           Row(
             children: [
-              const SizedBox(width: AppDimensions.progressWeekdayLabelWidth),
+              SizedBox(
+                width: AppDimensions.progressWeekdayLabelWidth,
+                height: stride,
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    localizations.narrowWeekdays[(firstDay + row) % 7],
+                    style: Theme.of(context).textTheme.labelSmall,
+                  ),
+                ),
+              ),
               for (var week = 0; week < layout.weekCount; week++)
                 SizedBox(
                   width: stride,
-                  height: AppDimensions.progressCalendarHeaderHeight,
-                  child: Text(
-                    '${layout.weekStarts[week].day}',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.labelSmall,
+                  height: stride,
+                  child: Align(
+                    alignment: Alignment.center,
+                    child: _cell(context, layout.keyAt(row: row, week: week)),
                   ),
                 ),
             ],
           ),
-          for (var row = 0; row < kCalendarWeekdayCount; row++)
-            Row(
-              children: [
-                SizedBox(
-                  width: AppDimensions.progressWeekdayLabelWidth,
-                  height: stride,
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      localizations.narrowWeekdays[(firstDay + row) % 7],
-                      style: Theme.of(context).textTheme.labelSmall,
-                    ),
-                  ),
-                ),
-                for (var week = 0; week < layout.weekCount; week++)
-                  SizedBox(
-                    width: stride,
-                    height: stride,
-                    child: Align(
-                      alignment: Alignment.center,
-                      child: _cell(
-                        context,
-                        layout.keyAt(row: row, week: week),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-        ],
+      ],
+    );
+    return Semantics(
+      container: true,
+      label: 'Weekly calendar. Rows are weekdays. Columns are weeks.',
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          if (!constraints.hasBoundedWidth ||
+              gridWidth <= constraints.maxWidth) {
+            return grid;
+          }
+          return SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: SizedBox(width: gridWidth, child: grid),
+          );
+        },
       ),
     );
   }

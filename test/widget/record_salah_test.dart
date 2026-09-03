@@ -11,7 +11,7 @@ void main() {
   testWidgets('five salah prayers record independently without scores', (
     tester,
   ) async {
-    tester.view.physicalSize = const Size(400, 1800);
+    tester.view.physicalSize = const Size(400, 3600);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
@@ -23,9 +23,7 @@ void main() {
           checkInRepositoryProvider.overrideWithValue(checkIns),
           nowProvider.overrideWithValue(DateTime(2026, 9, 3)),
         ],
-        child: MaterialApp(
-          home: CheckInScreen(date: DateTime(2026, 9, 3)),
-        ),
+        child: MaterialApp(home: CheckInScreen(date: DateTime(2026, 9, 3))),
       ),
     );
     await tester.pumpAndSettle();

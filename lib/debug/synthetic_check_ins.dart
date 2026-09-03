@@ -1,23 +1,29 @@
 import 'dart:math';
 
+import '../domain/activities.dart';
 import '../domain/context_catalog.dart';
 import '../domain/daily_check_in.dart';
 import '../domain/date_key.dart';
 import '../domain/other_domains.dart';
+import '../domain/personal_response.dart';
 import '../domain/prayer.dart';
 import '../domain/quran.dart';
 import '../domain/recorded_context.dart';
 
-const int kSyntheticWindowDays = 100;
+const int kSyntheticWindowDays = 120;
+const String kSampleDataNotice =
+    'These records are sample/demo data. You can edit them. They stay until you remove them.';
 
 class SyntheticCheckInPlan {
   const SyntheticCheckInPlan({
     required this.records,
     required this.missingDateKeys,
+    required this.responses,
   });
 
   final List<DailyCheckIn> records;
   final List<String> missingDateKeys;
+  final List<PersonalResponse> responses;
 
   int get savedDays => records.length;
   int get missingDays => missingDateKeys.length;
@@ -32,12 +38,12 @@ SyntheticCheckInPlan generateSyntheticCheckIns({
   final keys = periodDateKeys(windowDays, now: now);
   final missing = <String>{};
 
-  while (missing.length < 12) {
+  while (missing.length < 16) {
     missing.add(keys[random.nextInt(keys.length)]);
   }
   for (final key in keys) {
-    if (missing.length >= 20) break;
-    if (random.nextDouble() < 0.08) missing.add(key);
+    if (missing.length >= 26) break;
+    if (random.nextDouble() < 0.07) missing.add(key);
   }
 
   final records = <DailyCheckIn>[];
@@ -48,58 +54,164 @@ SyntheticCheckInPlan generateSyntheticCheckIns({
   return SyntheticCheckInPlan(
     records: records,
     missingDateKeys: missing.toList()..sort(),
+    responses: _sampleResponses(now),
   );
 }
 
+List<PersonalResponse> _sampleResponses(DateTime now) {
+  return [
+    PersonalResponse(
+      id: 'sample-response-ponder',
+      text: 'I notice midweek reading often looks different from what I recorded on Fridays.',
+      createdAt: now.subtract(const Duration(days: 12)),
+      synthetic: true,
+      provenance: const ResponseProvenance(
+        originType: ProvenanceOrigin.quranPonder,
+        domain: 'quran',
+        periodDays: 30,
+        labelSnapshot: 'Qur’an PONDER (sample)',
+      ),
+    ),
+    PersonalResponse(
+      id: 'sample-response-progress',
+      text: 'A note to keep: Fajr and Isha were recorded independently more often than I expected.',
+      createdAt: now.subtract(const Duration(days: 40)),
+      synthetic: true,
+      provenance: const ResponseProvenance(
+        originType: ProvenanceOrigin.progressDimension,
+        domain: 'salah',
+        subject: 'fajr',
+        periodDays: 90,
+        labelSnapshot: 'Fajr (sample 90 days)',
+      ),
+    ),
+  ];
+}
+
 DailyCheckIn _day(String key, DateTime date, Random random) {
+  final friday = date.weekday == DateTime.friday;
   final weekend =
       date.weekday == DateTime.friday || date.weekday == DateTime.saturday;
-  final salah = <PrayerId, PrayerStatus>{
-    for (final id in PrayerId.values) id: _salah(id, weekend, random),
-  };
-  if (salah.values.every((status) => status == PrayerStatus.onTime)) {
-    salah[PrayerId.isha] = PrayerStatus.unanswered;
-  }
-
-  final quran = <QuranDimension, TernaryOutcome>{
-    for (final dimension in QuranDimension.values)
-      dimension: _quran(dimension, random),
-  };
-  if (quran.values.every((outcome) => outcome == TernaryOutcome.positive)) {
-    quran[QuranDimension.applicationReflection] = TernaryOutcome.unanswered;
-  }
+  final mondayThursday =
+      date.weekday == DateTime.monday || date.weekday == DateTime.thursday;
+  final whiteDays = date.day == 13 || date.day == 14 || date.day == 15;
+  final monthEnd = date.day >= 25;
 
   var record = DailyCheckIn(
     dateKey: key,
-    salah: salah,
-    quran: quran,
-    dhikr: _pick(random, [
-      (0.22, DhikrStatus.unanswered),
-      (0.55, DhikrStatus.practised),
-      (1.0, DhikrStatus.didNot),
-    ]),
-    conduct: _pick(random, [
-      (0.35, ConductStatus.unanswered),
-      (0.70, ConductStatus.noted),
-      (1.0, ConductStatus.didNot),
-    ]),
-    gratitudeStatus: _pick(random, [
-      (0.40, EntryStatus.unanswered),
-      (0.70, EntryStatus.noneToday),
-      (1.0, EntryStatus.recorded),
-    ]),
-    personalReflectionStatus: _pick(random, [
-      (0.50, EntryStatus.unanswered),
-      (0.78, EntryStatus.noneToday),
-      (1.0, EntryStatus.recorded),
-    ]),
+    salah: {for (final id in PrayerId.values) id: PrayerStatus.unanswered},
+    quran: {
+      for (final dimension in QuranDimension.values)
+        dimension: TernaryOutcome.unanswered,
+    },
     synthetic: true,
   );
 
-  for (final dimension in QuranDimension.values) {
+  for (final id in PrayerId.values) {
+    record = record.withSalahActivity(id, _salahActivity(id, friday, random));
+  }
+  if (PrayerId.values.every((id) => record.prayer(id) == PrayerStatus.onTime)) {
+    record = record.withSalahActivity(
+      PrayerId.isha,
+      const RecordedActivity(id: ActivityIds.unanswered),
+    );
+  }
+
+  for (final dimension in quranDailyDimensions) {
+    record = record.withQuranActivity(
+      dimension,
+      _quranActivity(dimension, friday, random),
+    );
+  }
+
+  record = record.copyWith(
+    dhikr: _dhikrStatus(weekend, random),
+    conduct: _conductStatus(random),
+    gratitudeStatus: monthEnd
+        ? EntryStatus.recorded
+        : _pick(random, [
+            (0.38, EntryStatus.unanswered),
+            (0.68, EntryStatus.noneToday),
+            (1.0, EntryStatus.recorded),
+          ]),
+    gratitudeText: monthEnd
+        ? 'A recorded gratitude note for this sample day.'
+        : null,
+    personalReflectionStatus: _pick(random, [
+      (0.48, EntryStatus.unanswered),
+      (0.76, EntryStatus.noneToday),
+      (1.0, EntryStatus.recorded),
+    ]),
+    fasting: DomainObservation(
+      activityId: whiteDays
+          ? 'monthlyFasting'
+          : mondayThursday && random.nextDouble() < 0.45
+          ? 'weeklySunnah'
+          : random.nextDouble() < 0.12
+          ? ActivityIds.noActivity
+          : ActivityIds.unanswered,
+    ),
+    charity: DomainObservation(
+      activityId: monthEnd && random.nextDouble() < 0.55
+          ? 'voluntaryCharity'
+          : random.nextDouble() < 0.12
+          ? 'communitySupport'
+          : random.nextDouble() < 0.18
+          ? ActivityIds.noActivity
+          : ActivityIds.unanswered,
+    ),
+    zakat: date.day == 1
+        ? ZakatStatus.planned
+        : date.month == 9 && date.day == 15
+        ? ZakatStatus.due
+        : random.nextDouble() < 0.04
+        ? ZakatStatus.notApplicable
+        : ZakatStatus.unanswered,
+    family: DomainObservation(
+      activityId: weekend
+          ? (random.nextDouble() < 0.55
+                ? 'parentCommunication'
+                : 'familyCommunication')
+          : random.nextDouble() < 0.18
+          ? 'relativeCommunication'
+          : random.nextDouble() < 0.2
+          ? ActivityIds.noActivity
+          : ActivityIds.unanswered,
+    ),
+    hadith: DomainObservation(
+      activityId: friday && random.nextDouble() < 0.5
+          ? 'listening'
+          : random.nextDouble() < 0.22
+          ? 'reading'
+          : random.nextDouble() < 0.2
+          ? ActivityIds.noActivity
+          : ActivityIds.unanswered,
+    ),
+  );
+
+  if (record.gratitudeStatus == EntryStatus.recorded &&
+      (record.gratitudeText == null || record.gratitudeText!.isEmpty)) {
+    record = record.copyWith(gratitudeText: 'A short sample gratitude note.');
+  }
+  if (record.personalReflectionStatus == EntryStatus.recorded) {
+    record = record.copyWith(
+      personalReflectionText: 'A short sample personal-reflection note.',
+    );
+  }
+
+  record = record.withActivity(
+    ActivityCatalog.dhikrKey,
+    RecordedActivity(id: _dhikrActivityId(record.dhikr)),
+  );
+  record = record.withActivity(
+    ActivityCatalog.conductKey,
+    RecordedActivity(id: _conductActivityId(record.conduct)),
+  );
+
+  for (final dimension in quranDailyDimensions) {
     final outcome = record.quranOutcome(dimension);
     if (!contextAllowed(dimension, outcome)) continue;
-    if (random.nextDouble() > 0.42) continue;
+    if (random.nextDouble() > 0.38) continue;
     final polarity = outcome == TernaryOutcome.positive
         ? 'positive'
         : 'negative';
@@ -116,63 +228,83 @@ DailyCheckIn _day(String key, DateTime date, Random random) {
   return record;
 }
 
-PrayerStatus _salah(PrayerId id, bool weekend, Random random) {
-  final roll = random.nextDouble() + (weekend ? 0.04 : 0);
-  return switch (id) {
-    PrayerId.fajr => _band(roll, unanswered: 0.20, onTime: 0.42, late: 0.78),
-    PrayerId.dhuhr => _band(roll, unanswered: 0.12, onTime: 0.68, late: 0.88),
-    PrayerId.asr => _band(roll, unanswered: 0.16, onTime: 0.58, late: 0.84),
-    PrayerId.maghrib => _band(roll, unanswered: 0.10, onTime: 0.72, late: 0.90),
-    PrayerId.isha => _band(roll, unanswered: 0.18, onTime: 0.55, late: 0.82),
-  };
+RecordedActivity _salahActivity(PrayerId id, bool friday, Random random) {
+  final roll = random.nextDouble() + (friday ? 0.06 : 0);
+  if (roll < 0.14) {
+    return const RecordedActivity(id: ActivityIds.unanswered);
+  }
+  if (friday && roll < 0.58) {
+    return const RecordedActivity(id: 'congregationOnTime');
+  }
+  if (roll < 0.42) {
+    return const RecordedActivity(id: 'aloneOnTime');
+  }
+  if (roll < 0.62) {
+    return const RecordedActivity(id: 'prayedLate');
+  }
+  if (roll < 0.74) {
+    return const RecordedActivity(id: 'joinedCongregationLate');
+  }
+  if (roll < 0.86) {
+    return const RecordedActivity(id: 'smallCongregation');
+  }
+  if (roll < 0.93) {
+    return const RecordedActivity(id: 'missedMadeUp');
+  }
+  return const RecordedActivity(id: 'missed');
 }
 
-PrayerStatus _band(
-  double roll, {
-  required double unanswered,
-  required double onTime,
-  required double late,
-}) {
-  if (roll < unanswered) return PrayerStatus.unanswered;
-  if (roll < onTime) return PrayerStatus.onTime;
-  if (roll < late) return PrayerStatus.late;
-  return PrayerStatus.missed;
+RecordedActivity _quranActivity(
+  QuranDimension dimension,
+  bool friday,
+  Random random,
+) {
+  final roll = random.nextDouble() + (friday ? 0.08 : 0);
+  if (roll < 0.18) {
+    return const RecordedActivity(id: ActivityIds.unanswered);
+  }
+  if (roll > 0.82) {
+    return const RecordedActivity(id: ActivityIds.noActivity);
+  }
+  final catalog = ActivityCatalog.forQuran(dimension)
+      .where(
+        (option) =>
+            option.ternary == TernaryOutcome.positive &&
+            option.id != ActivityIds.other,
+      )
+      .toList();
+  if (catalog.isEmpty) {
+    return const RecordedActivity(id: ActivityIds.unanswered);
+  }
+  return RecordedActivity(id: catalog[random.nextInt(catalog.length)].id);
 }
 
-TernaryOutcome _quran(QuranDimension dimension, Random random) {
-  final roll = random.nextDouble();
-  return switch (dimension) {
-    QuranDimension.reading => _ternary(roll, unanswered: 0.16, positive: 0.70),
-    QuranDimension.meaning => _ternary(roll, unanswered: 0.32, positive: 0.68),
-    QuranDimension.memorisation => _ternary(
-      roll,
-      unanswered: 0.48,
-      positive: 0.70,
-    ),
-    QuranDimension.revision => _ternary(roll, unanswered: 0.44, positive: 0.72),
-    QuranDimension.tafsir => _ternary(roll, unanswered: 0.50, positive: 0.74),
-    QuranDimension.reflection => _ternary(
-      roll,
-      unanswered: 0.38,
-      positive: 0.72,
-    ),
-    QuranDimension.applicationReflection => _ternary(
-      roll,
-      unanswered: 0.46,
-      positive: 0.76,
-    ),
-  };
+DhikrStatus _dhikrStatus(bool weekend, Random random) {
+  final roll = random.nextDouble() + (weekend ? 0.05 : 0);
+  if (roll < 0.20) return DhikrStatus.unanswered;
+  if (roll < 0.78) return DhikrStatus.practised;
+  return DhikrStatus.didNot;
 }
 
-TernaryOutcome _ternary(
-  double roll, {
-  required double unanswered,
-  required double positive,
-}) {
-  if (roll < unanswered) return TernaryOutcome.unanswered;
-  if (roll < positive) return TernaryOutcome.positive;
-  return TernaryOutcome.negative;
+ConductStatus _conductStatus(Random random) {
+  return _pick(random, [
+    (0.34, ConductStatus.unanswered),
+    (0.72, ConductStatus.noted),
+    (1.0, ConductStatus.didNot),
+  ]);
 }
+
+String _dhikrActivityId(DhikrStatus status) => switch (status) {
+  DhikrStatus.unanswered => ActivityIds.unanswered,
+  DhikrStatus.didNot => ActivityIds.noActivity,
+  DhikrStatus.practised => 'dailyRemembrance',
+};
+
+String _conductActivityId(ConductStatus status) => switch (status) {
+  ConductStatus.unanswered => ActivityIds.unanswered,
+  ConductStatus.didNot => ActivityIds.noActivity,
+  ConductStatus.noted => 'kindness',
+};
 
 T _pick<T>(Random random, List<(double, T)> table) {
   final roll = random.nextDouble();

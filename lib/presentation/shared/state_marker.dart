@@ -121,10 +121,7 @@ class _MarkerPainter extends CustomPainter {
       oldDelegate.color != color || oldDelegate.kind != kind;
 }
 
-MarkerKind markerForRecorded({
-  required bool recorded,
-  required bool positive,
-}) {
+MarkerKind markerForRecorded({required bool recorded, required bool positive}) {
   if (!recorded) return MarkerKind.unanswered;
   if (positive) return MarkerKind.filled;
   return MarkerKind.outlined;

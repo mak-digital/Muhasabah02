@@ -50,7 +50,10 @@ class HistoryScreen extends ConsumerWidget {
                 child: ListTile(
                   title: Text(record.dateKey),
                   subtitle: Text(
-                    '${record.answeredRecordableCount}/$kRecordableFieldCount recordable fields answered',
+                    [
+                      '${record.answeredRecordableCount}/$kRecordableFieldCount recordable fields answered',
+                      if (record.synthetic) 'Sample/demo',
+                    ].join(' · '),
                   ),
                   trailing: const Icon(Icons.edit_outlined),
                   onTap: () {

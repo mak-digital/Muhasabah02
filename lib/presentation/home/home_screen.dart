@@ -1,17 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../app/theme.dart';
 import '../../application/providers.dart';
+import '../../debug/synthetic_check_in_seeder.dart';
 import '../../domain/copy.dart';
 import '../../domain/daily_check_in.dart';
+import '../../domain/dashboard_summary.dart';
 import '../../domain/date_key.dart';
 import '../../domain/personal_response.dart';
+import '../../domain/recognition.dart';
+import '../../domain/review_period.dart';
+import '../../domain/sample_retirement.dart';
 import '../checkin/check_in_screen.dart';
 import '../history/history_screen.dart';
+import '../progress/salah_progress_screen.dart';
+import '../recognition/recognition_screen.dart';
 import '../response/response_editor_screen.dart';
 import '../review/review_screen.dart';
+import '../settings/application_reflection_screen.dart';
+import '../settings/settings_screen.dart';
 import '../shared/ui_bits.dart';
-import 'debug_synthetic_data_card.dart';
+import 'dashboard_cards.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -19,11 +29,19 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final checkIns = ref.watch(checkInsProvider);
-    final todayKey = dateKey(ref.watch(nowProvider));
     return Scaffold(
       appBar: AppBar(
         title: const Text(Copy.appName),
         actions: [
+          IconButton(
+            tooltip: 'Settings',
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute<void>(builder: (_) => const SettingsScreen()),
+              );
+            },
+            icon: const Icon(Icons.settings_outlined),
+          ),
           IconButton(
             tooltip: 'Theme',
             onPressed: () {
@@ -38,75 +56,220 @@ class HomeScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Text(
-            'A private place to record, review, and respond — without scores or prescriptions.',
-            style: Theme.of(context).textTheme.bodyLarge,
-          ),
-          const SizedBox(height: 16),
           checkIns.when(
             loading: () => const LinearProgressIndicator(),
             error: (_, _) => const Text(
               'Saved check-ins could not be loaded. Healthy records are kept.',
             ),
             data: (records) {
-              DailyCheckIn? today;
-              for (final record in records) {
-                if (record.dateKey == todayKey) today = record;
-              }
-              return Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Today',
-                        style: Theme.of(context).textTheme.titleMedium,
+              final prefs = ref.watch(appPrefsProvider);
+              ref.watch(prefsTickProvider);
+              final offerArchive = shouldOfferSampleArchive(
+                records: records,
+                now: ref.watch(nowProvider),
+                dismissed: prefs.archivePromptDismissed,
+              );
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (records.any((record) => record.synthetic))
+                    Material(
+                      color: MuhasabahColors.wash(
+                        MuhasabahColors.sampleBannerWash,
+                        MuhasabahColors.sampleBannerWashDark,
+                        Theme.of(context).brightness,
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        today == null
-                            ? 'No check-in saved for $todayKey yet.'
-                            : 'Saved ${today.answeredRecordableCount}/$kRecordableFieldCount recordable fields. Additional Qur’an observations are independent.',
+                      borderRadius: BorderRadius.circular(12),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 10,
+                        ),
+                        child: Text(
+                          Copy.sampleDataNotice,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
                       ),
-                    ],
-                  ),
-                ),
+                    ),
+                  if (offerArchive) ...[
+                    const SizedBox(height: 8),
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(Copy.archiveSamplePrompt),
+                            const SizedBox(height: 8),
+                            Wrap(
+                              spacing: 8,
+                              children: [
+                                FilledButton(
+                                  onPressed: () async {
+                                    await const SyntheticCheckInSeeder()
+                                        .clearFrom(
+                                          ref.read(checkInRepositoryProvider),
+                                          responses: ref.read(
+                                            responseRepositoryProvider,
+                                          ),
+                                        );
+                                    await prefs.setSampleRemovedByUser(true);
+                                    await prefs.setArchivePromptDismissed(true);
+                                    await ref
+                                        .read(checkInsProvider.notifier)
+                                        .reload();
+                                    await ref
+                                        .read(responsesProvider.notifier)
+                                        .reload();
+                                  },
+                                  child: const Text('Archive sample records'),
+                                ),
+                                TextButton(
+                                  onPressed: () async {
+                                    await prefs.setArchivePromptDismissed(true);
+                                    ref
+                                        .read(prefsTickProvider.notifier)
+                                        .state++;
+                                  },
+                                  child: const Text('Keep sample records'),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 8),
+                  ..._dashboard(context, records: records, ref: ref),
+                ],
               );
             },
           ),
-          const SizedBox(height: 16),
-          FilledButton.icon(
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute<void>(builder: (_) => const CheckInScreen()),
-              );
-            },
-            icon: const Icon(Icons.edit_calendar_outlined),
-            label: const Text(Copy.homeCheckIn),
-          ),
-          const SizedBox(height: 8),
-          OutlinedButton.icon(
-            onPressed: () => _switchTab(context, 1),
-            icon: const Icon(Icons.insights_outlined),
-            label: const Text(Copy.homeReview),
-          ),
-          const SizedBox(height: 8),
-          OutlinedButton.icon(
-            onPressed: () => _switchTab(context, 2),
-            icon: const Icon(Icons.history),
-            label: const Text(Copy.homeManage),
-          ),
-          const SizedBox(height: 24),
-          const SectionHeader('How this app works'),
-          const Text(
-            'RECORD → REFLECT → REVIEW → RECOGNISE → PONDER → RESPOND\n\nMissing answers are not treated as missed. Responses are yours; the app does not prescribe worship.',
-          ),
-          const SizedBox(height: 16),
-          const DebugSyntheticDataCard(),
         ],
       ),
     );
+  }
+
+  List<Widget> _dashboard(
+    BuildContext context, {
+    required List<DailyCheckIn> records,
+    required WidgetRef ref,
+  }) {
+    final period = ref.watch(reviewPeriodProvider);
+    final now = ref.watch(nowProvider);
+    final keys = periodDateKeys(period.days, now: now);
+    final inPeriod = [
+      for (final record in records)
+        if (keys.contains(record.dateKey)) record,
+    ];
+    final recognitionCount = period == ReviewPeriod.days7
+        ? 0
+        : const RecognitionEngine()
+              .detect(records: inPeriod, period: period)
+              .length;
+    final snapshot = buildHomeDashboard(
+      records: records,
+      now: now,
+      period: period,
+      recognitionCount: recognitionCount,
+    );
+    void open(Widget page) {
+      Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => page));
+    }
+
+    final brightness = Theme.of(context).brightness;
+    return [
+      FilledButton.icon(
+        onPressed: () => open(const CheckInScreen()),
+        icon: const Icon(Icons.edit_calendar_outlined),
+        label: const Text(Copy.homeCheckIn),
+      ),
+      const SizedBox(height: 12),
+      DashboardDomainCard(
+        model: snapshot.salah,
+        color: MuhasabahColors.wash(
+          MuhasabahColors.salahWash,
+          MuhasabahColors.salahWashDark,
+          brightness,
+        ),
+        onTap: () => open(const SalahProgressScreen()),
+      ),
+      const SizedBox(height: 10),
+      DashboardDomainCard(
+        model: snapshot.quran,
+        color: MuhasabahColors.wash(
+          MuhasabahColors.quranWash,
+          MuhasabahColors.quranWashDark,
+          brightness,
+        ),
+        onTap: () => open(const QuranProgressScreen()),
+      ),
+      const SizedBox(height: 10),
+      DashboardDomainCard(
+        model: snapshot.dhikr,
+        color: MuhasabahColors.wash(
+          MuhasabahColors.dhikrWash,
+          MuhasabahColors.dhikrWashDark,
+          brightness,
+        ),
+        onTap: () => open(const CheckInScreen()),
+      ),
+      const SizedBox(height: 10),
+      DashboardDomainCard(
+        model: snapshot.family,
+        color: MuhasabahColors.wash(
+          MuhasabahColors.familyWash,
+          MuhasabahColors.familyWashDark,
+          brightness,
+        ),
+        onTap: () => open(const CheckInScreen()),
+      ),
+      const SizedBox(height: 10),
+      DashboardDomainCard(
+        model: snapshot.charity,
+        color: MuhasabahColors.wash(
+          MuhasabahColors.charityWash,
+          MuhasabahColors.charityWashDark,
+          brightness,
+        ),
+        onTap: () => open(const CheckInScreen()),
+      ),
+      const SizedBox(height: 10),
+      DashboardDomainCard(
+        model: snapshot.fasting,
+        color: MuhasabahColors.wash(
+          MuhasabahColors.fastingWash,
+          MuhasabahColors.fastingWashDark,
+          brightness,
+        ),
+        onTap: () => open(const CheckInScreen()),
+      ),
+      const SizedBox(height: 12),
+      DashboardNavCard(
+        title: 'Current review snapshot',
+        body: snapshot.reviewLine,
+        onTap: () => _switchTab(context, 1),
+      ),
+      const SizedBox(height: 10),
+      DashboardNavCard(
+        title: 'Recognition',
+        body: snapshot.recognitionLine,
+        onTap: () => open(const RecognitionScreen()),
+      ),
+      const SizedBox(height: 10),
+      DashboardPonderCard(onTap: () => open(const QuranProgressScreen())),
+      const SizedBox(height: 10),
+      FilledButton(
+        onPressed: () => open(const ResponseEditorScreen()),
+        child: const Text(Copy.addAResponse),
+      ),
+      const SizedBox(height: 16),
+      Text(
+        'A private place to record, review, and respond — without scores or prescriptions. Colour identifies the domain, not spiritual rank. ${Copy.unansweredNotMissed}',
+        style: Theme.of(context).textTheme.bodySmall,
+      ),
+    ];
   }
 
   void _switchTab(BuildContext context, int index) {
@@ -129,6 +292,16 @@ class AppShellState extends ConsumerState<AppShell> {
 
   @override
   Widget build(BuildContext context) {
+    final prefs = ref.watch(appPrefsProvider);
+    ref.watch(prefsTickProvider);
+    if (!prefs.applicationReflectionAcknowledged) {
+      return ApplicationReflectionIntroScreen(
+        onContinue: () async {
+          await prefs.setApplicationReflectionAcknowledged(true);
+          ref.read(prefsTickProvider.notifier).state++;
+        },
+      );
+    }
     final pages = const [
       HomeScreen(),
       ReviewScreen(),

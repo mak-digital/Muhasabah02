@@ -49,4 +49,9 @@ extension ConductStatusX on ConductStatus {
 extension EntryStatusX on EntryStatus {
   bool get isRecorded => this != EntryStatus.unanswered;
   bool get hasTextEntry => this == EntryStatus.recorded;
+  String get labelHint => switch (this) {
+    EntryStatus.unanswered => 'Not recorded',
+    EntryStatus.recorded => 'An entry was saved',
+    EntryStatus.noneToday => 'No entry today',
+  };
 }

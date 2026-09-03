@@ -22,6 +22,39 @@ class MuhasabahColors {
   static const conduct = Color(0xFF7A6A55);
   static const gratitude = Color(0xFF8A7048);
   static const journal = Color(0xFF5C6E7A);
+  static const fasting = Color(0xFF3F4C8A);
+  static const charity = Color(0xFFC48A3C);
+  static const family = Color(0xFF7A5B8F);
+  static const hadith = Color(0xFF4A6D8C);
+  static const zakat = Color(0xFFB8873A);
+
+  static const salahFamily = Color(0xFF2F6F73);
+  static const quranFamily = Color(0xFF3D6B99);
+  static const dhikrFamily = Color(0xFF3F7D6A);
+  static const familyFamily = Color(0xFF7A5B8F);
+  static const charityFamily = Color(0xFFC48A3C);
+  static const fastingFamily = Color(0xFF3F4C8A);
+
+  static const salahWash = Color(0xFFD7ECEB);
+  static const quranWash = Color(0xFFD7E4F2);
+  static const dhikrWash = Color(0xFFD9EEDF);
+  static const familyWash = Color(0xFFEADFF2);
+  static const charityWash = Color(0xFFF4E6C8);
+  static const fastingWash = Color(0xFFC5CCEB);
+  static const summaryWash = Color(0xFFEEF2F4);
+  static const sampleBannerWash = Color(0xFFFFF8E8);
+
+  static const salahWashDark = Color(0xFF243F42);
+  static const quranWashDark = Color(0xFF24384A);
+  static const dhikrWashDark = Color(0xFF243F36);
+  static const familyWashDark = Color(0xFF3A2C44);
+  static const charityWashDark = Color(0xFF433318);
+  static const fastingWashDark = Color(0xFF2A3050);
+  static const summaryWashDark = Color(0xFF2A3336);
+  static const sampleBannerWashDark = Color(0xFF3A3424);
+
+  static Color wash(Color light, Color dark, Brightness brightness) =>
+      brightness == Brightness.dark ? dark : light;
 
   static Color prayer(PrayerId id) => switch (id) {
     PrayerId.fajr => fajr,
@@ -52,15 +85,17 @@ ThemeData buildMuhasabahTheme({required Brightness brightness}) {
     useMaterial3: true,
     colorScheme: scheme,
     visualDensity: VisualDensity.standard,
+    scaffoldBackgroundColor: isDark ? scheme.surface : const Color(0xFFF4F1EA),
     appBarTheme: AppBarTheme(
       centerTitle: false,
       scrolledUnderElevation: 0.5,
-      backgroundColor: scheme.surface,
+      backgroundColor: isDark ? scheme.surface : const Color(0xFFF4F1EA),
       foregroundColor: scheme.onSurface,
     ),
     cardTheme: CardThemeData(
       elevation: 0,
       color: scheme.surfaceContainerLow,
+      clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       margin: EdgeInsets.zero,
     ),
