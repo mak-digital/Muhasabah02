@@ -1,17 +1,34 @@
-# muhasabah02
+# Muhasabah
 
-Private local-first Islamic self-reflection application.
+Private, local-first Islamic self-reflection. The app helps you record practice and look at what you recorded. It does not score iman, prescribe worship, or gamify streaks.
 
-## Getting Started
+Canonical flow: **RECORD → REFLECT → REVIEW → RECOGNISE → PONDER → RESPOND**
 
-This project is a starting point for a Flutter application.
+## Build and run (Android)
 
-A few resources to get you started if this is your first Flutter project:
+```bash
+flutter pub get
+flutter analyze
+flutter test
+flutter run -d emulator-5554
+flutter build apk --debug
+flutter build apk --release
+flutter build appbundle --release
+```
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+Debug APK: `build/app/outputs/flutter-apk/app-debug.apk`
+Release APK: `build/app/outputs/flutter-apk/app-release.apk`
+Release AAB: `build/app/outputs/bundle/release/app-release.aab`
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Release builds currently sign with the Android debug keystore unless you supply production credentials.
+
+## Product
+
+See `docs/PRODUCT_SPEC.md`. Guardrails: `docs/product_guardrails.md`. Architecture: `docs/architecture.md`. Privacy: `docs/privacy.md`. Tests: `docs/testing.md`.
+
+## Known limitations
+
+- No production Play signing key is configured in this repository.
+- Hive stores JSON documents on-device; this is not claimed as encryption-at-rest.
+- Delete removes the app-managed record only; it is not forensic secure erasure.
+- Nested `muhasabah02/` copy, zip, and text dump in the tree are leftover artifacts and are not the application source.
