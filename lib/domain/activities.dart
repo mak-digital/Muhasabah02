@@ -357,7 +357,7 @@ class ActivityCatalog {
   static const quranReflection = <ActivityOption>[
     ActivityOption(
       id: 'privateReflection',
-      label: 'Private reflection',
+      label: 'Private Qur’anic Reflection',
       ternary: TernaryOutcome.positive,
     ),
     ActivityOption(
@@ -367,7 +367,7 @@ class ActivityCatalog {
     ),
     ActivityOption(
       id: 'sharedReflection',
-      label: 'Shared a reflection',
+      label: 'Shared a Qur’anic Reflection',
       ternary: TernaryOutcome.positive,
     ),
     ActivityOption(
@@ -378,6 +378,29 @@ class ActivityCatalog {
     ActivityOption(
       id: ActivityIds.unanswered,
       label: 'No answer recorded',
+      ternary: TernaryOutcome.unanswered,
+    ),
+    ActivityOption(
+      id: ActivityIds.other,
+      label: 'Other',
+      ternary: TernaryOutcome.positive,
+    ),
+  ];
+
+  static const quranConsciousApplication = <ActivityOption>[
+    ActivityOption(
+      id: 'noticedPracticalRelevance',
+      label: 'Noticed a possible practical relevance',
+      ternary: TernaryOutcome.positive,
+    ),
+    ActivityOption(
+      id: ActivityIds.noActivity,
+      label: 'Recorded as not done',
+      ternary: TernaryOutcome.negative,
+    ),
+    ActivityOption(
+      id: ActivityIds.unanswered,
+      label: 'Unanswered',
       ternary: TernaryOutcome.unanswered,
     ),
     ActivityOption(
@@ -730,6 +753,7 @@ class ActivityCatalog {
       QuranDimension.revision => quranRevision,
       QuranDimension.tafsir => quranTafsir,
       QuranDimension.reflection => quranReflection,
+      QuranDimension.consciousApplication => quranConsciousApplication,
       QuranDimension.applicationReflection => const [],
     };
   }

@@ -8,6 +8,7 @@ import '../../domain/copy.dart';
 import '../../domain/daily_check_in.dart';
 import '../../domain/dashboard_summary.dart';
 import '../../domain/date_key.dart';
+import '../../domain/home_traces.dart';
 import '../../domain/personal_response.dart';
 import '../../domain/recognition.dart';
 import '../../domain/review_period.dart';
@@ -22,6 +23,11 @@ import '../settings/application_reflection_screen.dart';
 import '../settings/settings_screen.dart';
 import '../shared/ui_bits.dart';
 import 'dashboard_cards.dart';
+import 'marks_guide_sheet.dart';
+import 'optional_domain_home_card.dart';
+import 'quran_home_card.dart';
+import 'reflection_home_cards.dart';
+import 'salah_home_card.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -33,6 +39,13 @@ class HomeScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text(Copy.appName),
         actions: [
+          Tooltip(
+            message: Copy.marksGuideTitle,
+            child: TextButton(
+              onPressed: () => showMarksGuide(context),
+              child: Text('ⓘ ${Copy.marksGuide}'),
+            ),
+          ),
           IconButton(
             tooltip: 'Settings',
             onPressed: () {
@@ -178,7 +191,6 @@ class HomeScreen extends ConsumerWidget {
       Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => page));
     }
 
-    final brightness = Theme.of(context).brightness;
     return [
       FilledButton.icon(
         onPressed: () => open(const CheckInScreen()),
@@ -186,64 +198,57 @@ class HomeScreen extends ConsumerWidget {
         label: const Text(Copy.homeCheckIn),
       ),
       const SizedBox(height: 12),
-      DashboardDomainCard(
-        model: snapshot.salah,
-        color: MuhasabahColors.wash(
-          MuhasabahColors.salahWash,
-          MuhasabahColors.salahWashDark,
-          brightness,
-        ),
-        onTap: () => open(const SalahProgressScreen()),
+      const ReflectionOfTheWeekCard(),
+      const SizedBox(height: 12),
+      SalahHomeCard(records: records),
+      const SizedBox(height: 10),
+      QuranHomeCard(records: records),
+      const SizedBox(height: 10),
+      OptionalDomainHomeCard(
+        records: records,
+        title: 'Dhikr',
+        rows: dhikrHomeRows,
+        washLight: MuhasabahColors.dhikrWash,
+        washDark: MuhasabahColors.dhikrWashDark,
+        family: MuhasabahColors.dhikrFamily,
       ),
       const SizedBox(height: 10),
-      DashboardDomainCard(
-        model: snapshot.quran,
-        color: MuhasabahColors.wash(
-          MuhasabahColors.quranWash,
-          MuhasabahColors.quranWashDark,
-          brightness,
-        ),
-        onTap: () => open(const QuranProgressScreen()),
+      OptionalDomainHomeCard(
+        records: records,
+        title: 'Fasting',
+        rows: fastingHomeRows,
+        washLight: MuhasabahColors.fastingWash,
+        washDark: MuhasabahColors.fastingWashDark,
+        family: MuhasabahColors.fastingFamily,
       ),
       const SizedBox(height: 10),
-      DashboardDomainCard(
-        model: snapshot.dhikr,
-        color: MuhasabahColors.wash(
-          MuhasabahColors.dhikrWash,
-          MuhasabahColors.dhikrWashDark,
-          brightness,
-        ),
-        onTap: () => open(const CheckInScreen()),
+      OptionalDomainHomeCard(
+        records: records,
+        title: Copy.familyCommunityCare,
+        rows: familyHomeRows,
+        washLight: MuhasabahColors.familyWash,
+        washDark: MuhasabahColors.familyWashDark,
+        family: MuhasabahColors.familyFamily,
       ),
       const SizedBox(height: 10),
-      DashboardDomainCard(
-        model: snapshot.family,
-        color: MuhasabahColors.wash(
-          MuhasabahColors.familyWash,
-          MuhasabahColors.familyWashDark,
-          brightness,
-        ),
-        onTap: () => open(const CheckInScreen()),
+      OptionalDomainHomeCard(
+        records: records,
+        title: 'Charity',
+        rows: charityHomeRows,
+        washLight: MuhasabahColors.charityWash,
+        washDark: MuhasabahColors.charityWashDark,
+        family: MuhasabahColors.charityFamily,
+        includeZakat: true,
       ),
       const SizedBox(height: 10),
-      DashboardDomainCard(
-        model: snapshot.charity,
-        color: MuhasabahColors.wash(
-          MuhasabahColors.charityWash,
-          MuhasabahColors.charityWashDark,
-          brightness,
-        ),
-        onTap: () => open(const CheckInScreen()),
-      ),
-      const SizedBox(height: 10),
-      DashboardDomainCard(
-        model: snapshot.fasting,
-        color: MuhasabahColors.wash(
-          MuhasabahColors.fastingWash,
-          MuhasabahColors.fastingWashDark,
-          brightness,
-        ),
-        onTap: () => open(const CheckInScreen()),
+      OptionalDomainHomeCard(
+        records: records,
+        title: 'Hadith',
+        rows: hadithHomeRows,
+        washLight: MuhasabahColors.hadithWash,
+        washDark: MuhasabahColors.hadithWashDark,
+        family: MuhasabahColors.hadithFamily,
+        includeHadithFocus: true,
       ),
       const SizedBox(height: 12),
       DashboardNavCard(
@@ -252,6 +257,10 @@ class HomeScreen extends ConsumerWidget {
         onTap: () => _switchTab(context, 1),
       ),
       const SizedBox(height: 10),
+      NoticedThisWeekCard(records: records),
+      const SizedBox(height: 10),
+      PatternsNoticedCard(records: records),
+      const SizedBox(height: 10),
       DashboardNavCard(
         title: 'Recognition',
         body: snapshot.recognitionLine,
@@ -259,6 +268,8 @@ class HomeScreen extends ConsumerWidget {
       ),
       const SizedBox(height: 10),
       DashboardPonderCard(onTap: () => open(const QuranProgressScreen())),
+      const SizedBox(height: 10),
+      const WeeklyJournalCard(),
       const SizedBox(height: 10),
       FilledButton(
         onPressed: () => open(const ResponseEditorScreen()),

@@ -83,7 +83,7 @@ HomeDashboardSnapshot buildHomeDashboard({
           'This period: ${reading.desirable} read-or-listened among ${reading.recorded} recorded',
       unansweredLine: _ternaryUnanswered(
         today?.quranOutcome(QuranDimension.reading),
-        subject: 'Reading/listening',
+        subject: 'Recitation',
       ),
     ),
     dhikr: _observationCard(
@@ -171,9 +171,9 @@ String _quranRecent(DailyCheckIn? today) {
   if (today == null) return 'No check-in saved for today.';
   final outcome = today.quranOutcome(QuranDimension.reading);
   return switch (outcome) {
-    TernaryOutcome.positive => 'Today: reading/listening recorded as activity.',
-    TernaryOutcome.negative => 'Today: recorded as not done.',
-    TernaryOutcome.unanswered => 'Today: reading/listening not recorded.',
+    TernaryOutcome.positive => 'Today: Recitation recorded as engagement.',
+    TernaryOutcome.negative => 'Today: Recitation recorded as not done.',
+    TernaryOutcome.unanswered => 'Today: Recitation unanswered.',
   };
 }
 

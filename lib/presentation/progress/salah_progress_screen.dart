@@ -62,15 +62,11 @@ class SalahProgressScreen extends ConsumerWidget {
                 runSpacing: 8,
                 children: const [
                   _Legend(kind: MarkerKind.filled, label: 'Prayed on time'),
+                  _Legend(kind: MarkerKind.outlined, label: 'Late'),
                   _Legend(
-                    kind: MarkerKind.outlined,
-                    label: 'Late',
-                    icon: Icons.schedule,
-                  ),
-                  _Legend(
-                    kind: MarkerKind.outlined,
+                    kind: MarkerKind.missed,
                     label: 'Missed',
-                    icon: Icons.close,
+                    color: MuhasabahColors.missedEarth,
                   ),
                   _Legend(kind: MarkerKind.unanswered, label: 'Not recorded'),
                 ],
@@ -127,14 +123,10 @@ class SalahProgressScreen extends ConsumerWidget {
         : record.prayer(prayer);
     final kind = switch (status) {
       PrayerStatus.onTime => MarkerKind.filled,
-      PrayerStatus.late || PrayerStatus.missed => MarkerKind.outlined,
+      PrayerStatus.late => MarkerKind.outlined,
+      PrayerStatus.missed => MarkerKind.missed,
       PrayerStatus.unanswered => MarkerKind.unanswered,
     };
-    final icon = status == PrayerStatus.missed
-        ? Icons.close
-        : status == PrayerStatus.late
-        ? Icons.schedule
-        : null;
     return ProgressDayCell(
       onTap: () {
         Navigator.push(
@@ -145,9 +137,10 @@ class SalahProgressScreen extends ConsumerWidget {
         );
       },
       marker: RecordedStateMarker(
-        color: MuhasabahColors.prayer(prayer),
+        color: status == PrayerStatus.missed
+            ? MuhasabahColors.missedEarth
+            : MuhasabahColors.prayer(prayer),
         kind: kind,
-        symbol: icon,
         semanticLabel:
             '$key ${weekdayNameForDate(key)} ${prayer.label} ${status.label}',
       ),
@@ -156,11 +149,17 @@ class SalahProgressScreen extends ConsumerWidget {
 }
 
 class _Legend extends StatelessWidget {
-  const _Legend({required this.kind, required this.label, this.icon});
+  const _Legend({
+    required this.kind,
+    required this.label,
+    this.icon,
+    this.color,
+  });
 
   final MarkerKind kind;
   final String label;
   final IconData? icon;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
@@ -168,7 +167,7 @@ class _Legend extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         RecordedStateMarker(
-          color: Theme.of(context).colorScheme.primary,
+          color: color ?? Theme.of(context).colorScheme.primary,
           kind: kind,
           symbol: icon,
           semanticLabel: label,
@@ -303,11 +302,11 @@ class QuranProgressScreen extends ConsumerWidget {
               Text(
                 'Recorded on $recordedDays of ${keys.length} days · activity days $positiveDays · recorded as not done $negativeDays',
               ),
-            if (dimension.isApplicationReflection)
+            if (dimension == QuranDimension.consciousApplication)
               Padding(
                 padding: const EdgeInsets.only(top: 4),
                 child: Text(
-                  Copy.applicationReflectionNote,
+                  Copy.consciousApplicationNote,
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ),

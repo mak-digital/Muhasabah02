@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Muhasabah remediation — visual review</title>
+  <style>
+    :root {
+      --bg: #f4f1ea;
+      --ink: #1d2a2c;
+      --muted: #4d5c63;
+      --salah: #d7eceb;
+      --quran: #d7e4f2;
+      --dhikr: #d9eedf;
+      --family: #eadff2;
+      --charity: #f4e6c8;
+      --fasting: #c5cceb;
+      --hadith: #d5e3ee;
+      --summary: #eef2f4;
+      --teal: #2f6f73;
+      --banner: #fff8e8;
+    }
+    body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--ink); margin: 0; padding: 24px; }
+    h1, h2, h3 { font-weight: 600; }
+    .note { max-width: 760px; line-height: 1.45; color: var(--muted); }
+    .phone { width: 390px; min-height: 720px; background: #fff; border-radius: 28px; box-shadow: 0 12px 40px rgba(0,0,0,.12); padding: 18px 16px 28px; margin: 16px 16px 32px 0; display: inline-block; vertical-align: top; box-sizing: border-box; }
+    .bar { font-size: 13px; color: #5c6e7a; margin-bottom: 10px; display: flex; justify-content: space-between; }
+    .banner { background: var(--banner); border-radius: 12px; padding: 10px 12px; font-size: 12px; margin-bottom: 10px; }
+    .cta { background: var(--teal); color: #fff; border: 0; border-radius: 12px; padding: 10px 12px; width: 100%; font-size: 14px; }
+    .card { border-radius: 16px; padding: 12px; margin-bottom: 10px; }
+    .muted { font-size: 12px; color: var(--muted); line-height: 1.35; }
+    .title { font-weight: 600; font-size: 16px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+    .grid { display: grid; gap: 6px; align-items: center; font-size: 10px; color: var(--muted); }
+    .salah-grid { grid-template-columns: 52px repeat(7, 1fr); }
+    .quran-grid { grid-template-columns: 88px repeat(7, 1fr); }
+    .one-row { grid-template-columns: repeat(7, 1fr); }
+    .dot { width: 14px; height: 14px; border-radius: 50%; display: inline-block; margin: 0 auto; }
+    .dot.fill { background: var(--teal); }
+    .dot.alt { background: transparent; border: 2px solid var(--teal); box-sizing: border-box; }
+    .dot.empty { background: transparent; border: 2px dotted rgba(47,111,115,.45); box-sizing: border-box; }
+    .dot.q { background: #3d6b99; }
+    .dot.qalt { border: 2px solid #3d6b99; background: transparent; box-sizing: border-box; }
+    .dot.qempty { border: 2px dotted rgba(61,107,153,.45); background: transparent; box-sizing: border-box; }
+    .dot.f { background: #7a5b8f; }
+    .dot.falt { border: 2px solid #7a5b8f; background: transparent; box-sizing: border-box; }
+    .dot.fempty { border: 2px dotted rgba(122,91,143,.45); background: transparent; box-sizing: border-box; }
+    .cell { display: flex; justify-content: center; cursor: pointer; min-height: 22px; align-items: center; }
+    .cell:focus { outline: 2px solid var(--teal); outline-offset: 2px; border-radius: 8px; }
+    .wd { text-align: center; font-weight: 600; }
+    .sheet { background: var(--summary); border-radius: 16px; padding: 12px; margin-top: 10px; }
+    .path { display: block; width: 100%; text-align: left; border: 0; background: #fff; border-radius: 12px; padding: 10px 12px; margin-top: 8px; font-size: 13px; }
+    .chip { display: inline-block; border-radius: 999px; padding: 6px 10px; font-size: 12px; margin: 0 6px 6px 0; background: #fff; border: 1px solid #c5d0d4; }
+    .chip.on { background: var(--salah); border-color: var(--teal); }
+    .section { font-size: 12px; font-weight: 600; color: var(--muted); margin: 14px 0 8px; letter-spacing: .04em; text-transform: uppercase; }
+    .set-card { background: var(--summary); border-radius: 16px; overflow: hidden; margin-bottom: 10px; }
+    .set-row { display: flex; gap: 12px; align-items: center; padding: 12px; background: #fff; border-bottom: 1px solid #e6eaec; }
+    .set-row:last-child { border-bottom: 0; }
+    .ico { width: 36px; height: 36px; border-radius: 10px; background: var(--salah); color: var(--teal); display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+    .set-row b { display: block; font-size: 14px; }
+    .legend { font-size: 11px; color: var(--muted); margin-top: 8px; }
+    .legend span { margin-right: 10px; }
+    .nav { display: flex; justify-content: space-around; margin-top: 16px; font-size: 10px; color: var(--muted); }
+    .nav .on { color: var(--teal); font-weight: 600; }
+    ul.audit { max-width: 760px; line-height: 1.45; }
+  </style>
+</head>
+<body>
+  <h1>Remediation visual review</h1>
+  <p class="note">Mockups only. No application code in this pass. Colour identifies domain. Filled = recorded activity, outlined = recorded not done / late or missed (shape, not a grade), dotted = unanswered (not missed). Cells are tappable.</p>
+
+  <h2>1. Home — compact 7-day domain grids</h2>
+  <p class="note">Replaces paragraph summaries. Last 7 days as columns (M–S). Sample banner and check-in stay. Hadith is a peer domain card. Click any marker (see phone 2).</p>
+
+  <div class="phone" id="dashboard">
+    <div class="bar"><strong>Muhasabah</strong><span>⚙ ☼</span></div>
+    <div class="banner">Sample/demo records are visible. They stay until you archive them.</div>
+    <button class="cta">Start today’s check-in</button>
+    <div class="card" style="background:var(--salah); margin-top:10px">
+      <div class="title">Salah <span>›</span></div>
+      <div class="grid salah-grid">
+        <span></span><span class="wd">M</span><span class="wd">T</span><span class="wd">W</span><span class="wd">T</span><span class="wd">F</span><span class="wd">S</span><span class="wd">S</span>
+        <span>Fajr</span><span class="cell"><i class="dot fill"></i></span><span class="cell"><i class="dot empty"></i></span><span class="cell"><i class="dot fill"></i></span><span class="cell"><i class="dot alt"></i></span><span class="cell"><i class="dot fill"></i></span><span class="cell"><i class="dot empty"></i></span><span class="cell"><i class="dot fill"></i></span>
+        <span>Dhuhr</span><span class="cell"><i class="dot fill"></i></span><span class="cell"><i class="dot fill"></i></span><span class="cell"><i class="dot empty"></i></span><span class="cell"><i class="dot fill"></i></span><span class="cell"><i class="dot alt"></i></span><span class="cell"><i class="dot fill"></i></span><span class="cell"><i class="dot empty"></i></span>
+        <span>Asr</span><span class="cell"><i class="dot empty"></i></span><span class="cell"><i class="dot fill"></i></span><span class="cell"><i class="dot fill"></i></span><span class="cell"><i class="dot empty"></i></span><span class="cell"><i class="dot fill"></i></span><span class="cell"><i class="dot alt"></i></span><span class="cell"><i class="dot fill"></i></span>
+        <span>Maghrib</span><span class="cell"><i class="dot fill"></i></span><span class="cell"><i class="dot alt"></i></span><span class="cell"><i class="dot fill"></i></span><span class="cell"><i class="dot fill"></i></span><span class="cell"><i class="dot empty"></i></span><span class="cell"><i class="dot fill"></i></span><span class="cell"><i class="dot fill"></i></span>
+        <span>Isha</span><span class="cell"><i class="dot alt"></i></span><span class="cell"><i class="dot empty"></i></span><span class="cell"><i class="dot fill"></i></span><span class="cell"><i class="dot fill"></i></span><span class="cell"><i class="dot fill"></i></span><span class="cell"><i class="dot empty"></i></span><span class="cell"><i class="dot alt"></i></span>
+      </div>
+      <div class="legend"><span><i class="dot fill"></i> on time</span><span><i class="dot alt"></i> late or missed</span><span><i class="dot empty"></i> unanswered</span></div>
+    </div>
+    <div class="card" style="background:var(--quran)">
+      <div class="title">Qur’an <span>›</span></div>
+      <p class="muted">Rows are dimensions. Same 7 weekdays. Application Reflection is not a daily Home metric.</p>
+    </div>
+    <div class="card" style="background:var(--dhikr)"><div class="title">Dhikr <span>›</span></div>
+      <div class="grid one-row">
+        <span class="cell"><i class="dot fill"></i></span><span class="cell"><i class="dot fill"></i></span><span class="cell"><i class="dot empty"></i></span><span class="cell"><i class="dot fill"></i></span><span class="cell"><i class="dot alt"></i></span><span class="cell"><i class="dot fill"></i></span><span class="cell"><i class="dot empty"></i></span>
+      </div>
+    </div>
+    <div class="card" style="background:var(--family)"><div class="title">Family <span>›</span></div>
+      <div class="grid one-row">
+        <span class="cell"><i class="dot fill"></i></span><span class="cell"><i class="dot empty"></i></span><span class="cell"><i class="dot fill"></i></span><span class="cell"><i class="dot fill"></i></span><span class="cell"><i class="dot empty"></i></span><span class="cell"><i class="dot fill"></i></span><span class="cell"><i class="dot alt"></i></span>
+      </div>
+    </div>
+    <div class="card" style="background:var(--charity)"><div class="title">Charity <span>›</span></div>
+      <div class="grid one-row">
+        <span class="cell"><i class="dot empty"></i></span><span class="cell"><i class="dot fill"></i></span><span class="cell"><i class="dot empty"></i></span><span class="cell"><i class="dot fill"></i></span><span class="cell"><i class="dot fill"></i></span><span class="cell"><i class="dot empty"></i></span><span class="cell"><i class="dot empty"></i></span>
+      </div>
+    </div>
+    <div class="card" style="background:var(--fasting)"><div class="title">Fasting <span>›</span></div>
+      <div class="grid one-row">
+        <span class="cell"><i class="dot empty"></i></span><span class="cell"><i class="dot empty"></i></span><span class="cell"><i class="dot empty"></i></span><span class="cell"><i class="dot fill"></i></span><span class="cell"><i class="dot empty"></i></span><span class="cell"><i class="dot empty"></i></span><span class="cell"><i class="dot empty"></i></span>
+      </div>
+    </div>
+    <div class="card" style="background:var(--hadith)"><div class="title">Hadith <span>›</span></div>
+      <div class="grid one-row">
+        <span class="cell"><i class="dot fill"></i></span><span class="cell"><i class="dot empty"></i></span><span class="cell"><i class="dot empty"></i></span><span class="cell"><i class="dot fill"></i></span><span class="cell"><i class="dot empty"></i></span><span class="cell"><i class="dot fill"></i></span><span class="cell"><i class="dot empty"></i></span>
+      </div>
+    </div>
+    <div class="nav"><span class="on">Home</span><span>Review</span><span>History</span><span>My Response</span></div>
+  </div>
+
+  <div class="phone" id="click-behaviour">
+    <div class="bar"><strong>After tap · Fajr · Wednesday</strong></div>
+    <div class="card" style="background:var(--salah)">
+      <div class="title">Salah</div>
+      <p class="muted">Focused cell: Wednesday Fajr · recorded late. Colour is Fajr identity, not a grade.</p>
+    </div>
+    <div class="sheet">
+      <strong>Open from this day</strong>
+      <p class="muted">Same paths for every state, including unanswered. Unanswered is not missed.</p>
+      <button class="path">Day evidence · 2026-09-02</button>
+      <button class="path">Historical Reflection for this date</button>
+      <button class="path">Optional contributing factors (you recorded…)</button>
+      <button class="path">Add a response (optional)</button>
+    </div>
+  </div>
+
+  <h2 id="salah-card">2. Salah card</h2>
+  <div class="phone">
+    <div class="bar">Salah · last 7 days</div>
+    <div class="card" style="background:var(--salah)">
+      <div class="title">Salah</div>
+      <div class="grid salah-grid">
+        <span></span><span class="wd">M</span><span class="wd">T</span><span class="wd">W</span><span class="wd">T</span><span class="wd">F</span><span class="wd">S</span><span class="wd">S</span>
+        <span>Fajr</span><span class="cell"><i class="dot fill"></i></span><span class="cell"><i class="dot empty"></i></span><span class="cell"><i class="dot fill"></i></span><span class="cell"><i class="dot alt"></i></span><span class="cell"><i class="dot fill"></i></span><span class="cell"><i class="dot empty"></i></span><span class="cell"><i class="dot fill"></i></span>
+        <span>Dhuhr</span><span class="cell"><i class="dot fill"></i></span><span class="cell"><i class="dot fill"></i></span><span class="cell"><i class="dot empty"></i></span><span class="cell"><i class="dot fill"></i></span><span class="cell"><i class="dot alt"></i></span><span class="cell"><i class="dot fill"></i></span><span class="cell"><i class="dot empty"></i></span>
+        <span>Asr</span><span class="cell"><i class="dot empty"></i></span><span class="cell"><i class="dot fill"></i></span><span class="cell"><i class="dot fill"></i></span><span class="cell"><i class="dot empty"></i></span><span class="cell"><i class="dot fill"></i></span><span class="cell"><i class="dot alt"></i></span><span class="cell"><i class="dot fill"></i></span>
+        <span>Maghrib</span><span class="cell"><i class="dot fill"></i></span><span class="cell"><i class="dot alt"></i></span><span class="cell"><i class="dot fill"></i></span><span class="cell"><i class="dot fill"></i></span><span class="cell"><i class="dot empty"></i></span><span class="cell"><i class="dot fill"></i></span><span class="cell"><i class="dot fill"></i></span>
+        <span>Isha</span><span class="cell"><i class="dot alt"></i></span><span class="cell"><i class="dot empty"></i></span><span class="cell"><i class="dot fill"></i></span><span class="cell"><i class="dot fill"></i></span><span class="cell"><i class="dot fill"></i></span><span class="cell"><i class="dot empty"></i></span><span class="cell"><i class="dot alt"></i></span>
+      </div>
+      <p class="muted" style="margin-top:8px">Five independent rows. Missing days stay dotted. Title tap opens Salah Progress (30/90). Cell tap opens the day sheet.</p>
+    </div>
+  </div>
+
+  <h2 id="quran-card">3. Qur’an card</h2>
+  <div class="phone">
+    <div class="bar">Qur’an · last 7 days</div>
+    <div class="card" style="background:var(--quran)">
+      <div class="title">Qur’an</div>
+      <div class="grid quran-grid">
+        <span></span><span class="wd">M</span><span class="wd">T</span><span class="wd">W</span><span class="wd">T</span><span class="wd">F</span><span class="wd">S</span><span class="wd">S</span>
+        <span>Reading</span><span class="cell"><i class="dot q"></i></span><span class="cell"><i class="dot q"></i></span><span class="cell"><i class="dot qempty"></i></span><span class="cell"><i class="dot q"></i></span><span class="cell"><i class="dot qalt"></i></span><span class="cell"><i class="dot q"></i></span><span class="cell"><i class="dot qempty"></i></span>
+        <span>Meaning</span><span class="cell"><i class="dot qempty"></i></span><span class="cell"><i class="dot q"></i></span><span class="cell"><i class="dot qempty"></i></span><span class="cell"><i class="dot q"></i></span><span class="cell"><i class="dot q"></i></span><span class="cell"><i class="dot qempty"></i></span><span class="cell"><i class="dot qalt"></i></span>
+        <span>Memorisation</span><span class="cell"><i class="dot qempty"></i></span><span class="cell"><i class="dot qempty"></i></span><span class="cell"><i class="dot q"></i></span><span class="cell"><i class="dot qempty"></i></span><span class="cell"><i class="dot qempty"></i></span><span class="cell"><i class="dot q"></i></span><span class="cell"><i class="dot qempty"></i></span>
+        <span>Revision</span><span class="cell"><i class="dot q"></i></span><span class="cell"><i class="dot qempty"></i></span><span class="cell"><i class="dot q"></i></span><span class="cell"><i class="dot qalt"></i></span><span class="cell"><i class="dot qempty"></i></span><span class="cell"><i class="dot q"></i></span><span class="cell"><i class="dot qempty"></i></span>
+        <span>Tafsir</span><span class="cell"><i class="dot qempty"></i></span><span class="cell"><i class="dot q"></i></span><span class="cell"><i class="dot qempty"></i></span><span class="cell"><i class="dot qempty"></i></span><span class="cell"><i class="dot q"></i></span><span class="cell"><i class="dot qempty"></i></span><span class="cell"><i class="dot qempty"></i></span>
+        <span>Reflection</span><span class="cell"><i class="dot q"></i></span><span class="cell"><i class="dot qempty"></i></span><span class="cell"><i class="dot qempty"></i></span><span class="cell"><i class="dot q"></i></span><span class="cell"><i class="dot qempty"></i></span><span class="cell"><i class="dot qempty"></i></span><span class="cell"><i class="dot q"></i></span>
+      </div>
+      <p class="muted" style="margin-top:8px">Filled = recorded activity. Outlined = recorded not done. Dotted = no answer. Application Reflection stays on Settings / About, not this card.</p>
+    </div>
+  </div>
+
+  <h2 id="family-card">4. Family card</h2>
+  <div class="phone">
+    <div class="bar">Family · last 7 days</div>
+    <div class="card" style="background:var(--family)">
+      <div class="title">Family</div>
+      <div class="grid one-row" style="margin-bottom:8px">
+        <span class="wd">M</span><span class="wd">T</span><span class="wd">W</span><span class="wd">T</span><span class="wd">F</span><span class="wd">S</span><span class="wd">S</span>
+        <span class="cell"><i class="dot f"></i></span><span class="cell"><i class="dot fempty"></i></span><span class="cell"><i class="dot f"></i></span><span class="cell"><i class="dot f"></i></span><span class="cell"><i class="dot fempty"></i></span><span class="cell"><i class="dot f"></i></span><span class="cell"><i class="dot falt"></i></span>
+      </div>
+      <p class="muted">One row because Family is a single daily observation (not five prayers). Marker meaning matches other domains. Title tap opens check-in Family section. Cell tap opens that day’s evidence.</p>
+      <p class="muted"><strong>Catalog (proposed, not Salah):</strong> Contacted parents · Visited parents · Contacted relatives · Family gathering · Family support · Checked on family member · No activity · Other</p>
+    </div>
+  </div>
+
+  <h2 id="factors">5. Second-level factor capture</h2>
+  <p class="note">Optional. Does not complete the check-in. Copy uses “You recorded…”. Recognition may count structured IDs. Never “this caused”.</p>
+
+  <div class="phone">
+    <div class="bar">Check-in · Fajr</div>
+    <div class="card" style="background:var(--salah)">
+      <div class="title">Status</div>
+      <span class="chip">On time</span>
+      <span class="chip on">Late</span>
+      <span class="chip">Missed</span>
+      <span class="chip">Unanswered</span>
+      <p class="muted" style="margin-top:8px">Absence stays unanswered. Late is not inferred from a blank day.</p>
+    </div>
+    <div class="card" style="background:var(--summary)">
+      <div class="title">Optional factors</div>
+      <p class="muted">Skip entirely, or pick any that you want to remember. Not a score.</p>
+      <p class="muted"><strong>You recorded support from…</strong></p>
+      <span class="chip">Slept early</span>
+      <span class="chip">Planned ahead</span>
+      <span class="chip on">Congregation reminder</span>
+      <span class="chip">Family support</span>
+      <span class="chip">Travel planning</span>
+      <span class="chip">Other</span>
+      <p class="muted" style="margin-top:10px"><strong>You recorded a challenge from…</strong></p>
+      <span class="chip on">Overslept</span>
+      <span class="chip">Work commitment</span>
+      <span class="chip">Travel</span>
+      <span class="chip">Health</span>
+      <span class="chip">Forgot</span>
+      <span class="chip">Other</span>
+    </div>
+  </div>
+
+  <div class="phone">
+    <div class="bar">Same pattern · Qur’an reading</div>
+    <div class="card" style="background:var(--quran)">
+      <div class="title">Reading / listening</div>
+      <span class="chip on">Read independently</span>
+      <span class="chip">No activity</span>
+      <span class="chip">Unanswered</span>
+      <span class="chip">Other</span>
+    </div>
+    <div class="card" style="background:var(--summary)">
+      <p class="muted"><strong>You recorded support from…</strong></p>
+      <span class="chip on">Time was available</span>
+      <span class="chip">Quiet space</span>
+      <span class="chip">Reminder</span>
+      <span class="chip">Other</span>
+      <p class="muted" style="margin-top:8px">Dhikr, Family, Charity, Fasting, Gratitude, Conduct, and personal Reflection use the same optional two-band factor UI with domain-specific IDs.</p>
+    </div>
+  </div>
+
+  <h2 id="settings">6. Settings</h2>
+  <div class="phone">
+    <div class="bar"><strong>Settings</strong></div>
+    <div class="section">Account &amp; data</div>
+    <div class="set-card">
+      <div class="set-row"><div class="ico">▤</div><div><b>Manage past check-ins</b><span class="muted">Edit or remove saved days</span></div></div>
+      <div class="set-row"><div class="ico">✎</div><div><b>My Response</b><span class="muted">Private notes, optional</span></div></div>
+    </div>
+    <div class="section">Developer &amp; sample data</div>
+    <div class="set-card">
+      <div class="set-row"><div class="ico">↻</div><div><b>Recreate sample data</b><span class="muted">Sample only; personal days kept</span></div></div>
+      <div class="set-row"><div class="ico">⌫</div><div><b>Remove sample data</b><span class="muted">Never automatic later</span></div></div>
+      <div class="set-row"><div class="ico">↩</div><div><b>Restore sample data</b><span class="muted">Does not overwrite personal days</span></div></div>
+    </div>
+    <div class="section">Application</div>
+    <div class="set-card">
+      <div class="set-row"><div class="ico">☼</div><div><b>Appearance</b><span class="muted">System, light, dark</span></div></div>
+      <div class="set-row"><div class="ico">Aa</div><div><b>Text size</b><span class="muted">Follows device scale</span></div></div>
+    </div>
+    <div class="section">Privacy</div>
+    <div class="set-card">
+      <div class="set-row"><div class="ico">○</div><div><b>On-device storage</b><span class="muted">No telemetry. Delete is not forensic erasure.</span></div></div>
+    </div>
+    <div class="section">About Muhasabah</div>
+    <div class="set-card">
+      <div class="set-row"><div class="ico">◆</div><div><b>Application Reflection</b><span class="muted">SEE → PONDER → EXPLORE</span></div></div>
+    </div>
+  </div>
+
+  <h2>Proposed catalogs (implementation later)</h2>
+  <ul class="audit">
+    <li><strong>Dhikr:</strong> Morning adhkar, Evening adhkar, General remembrance, Gratitude remembrance, Travel adhkar, Family remembrance, No activity, Other</li>
+    <li><strong>Family:</strong> Contacted parents, Visited parents, Contacted relatives, Family gathering, Family support, Checked on family member, No activity, Other</li>
+    <li><strong>Charity:</strong> Voluntary charity, Community support, Educational support, Family support, Emergency support, Food support, No charity activity, Other</li>
+    <li><strong>Fasting:</strong> Voluntary fast completed, Voluntary fast partially completed, Make-up fast completed, Monthly fast completed, Ramadan preparation, No fasting activity, Other</li>
+  </ul>
+  <p class="note">Audit write-up: <code>docs/visual_review/REMEDIATION_AUDIT.md</code></p>
+</body>
+</html>

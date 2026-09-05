@@ -39,4 +39,52 @@ class Copy {
   static const settingsTitle = 'Settings';
   static const aboutMuhasabah = 'About Muhasabah';
   static const dataManagement = 'Developer / Data Management';
+  static const appearancePreferences = 'Appearance & Preferences';
+  static const firstDayOfWeek = 'First day of week';
+  static const firstDayOfWeekNote =
+      'Changes how weeks are shown. Saved records are not altered.';
+  static const marksGuide = 'Guide';
+  static const marksGuideTitle = 'Marks Guide';
+  static const marksGuideIntro =
+      'These marks show what was recorded.\n\nThey do not measure spirituality, worth, rank, achievement, success or failure.\n\nMissing records are not treated as missed.\n\nColours identify domains only.';
+  static const currentWeek = 'Current week';
+  static const patternsNoticed = 'Patterns Noticed';
+  static const patternsNoticedNote =
+      'Observations from what you recorded. Not improvement, decline, or a score.';
+  static const viewEvidence = 'View evidence';
+  static const situationNotesTitle = 'Context notes';
+  static const situationNotesNote =
+      'Optional. You authored these. They are not causes and are not interpreted automatically.';
+  static const hadithMemorisationFocus = 'Current Memorisation Focus';
+  static const factorsYouNoticed = 'Factors you noticed';
+  static const recordedFactors = 'Recorded factors';
+  static const meaningFillsRecitation =
+      'Recitation with Meaning as engagement also records Recitation as engagement for this day.';
+  static const recitationLockedByMeaning =
+      'Recitation with Meaning is recorded as engagement today. Change that first to record Recitation as not done or unanswered.';
+  static const personalReflection = 'Personal Reflection';
+  static const consciousApplicationNote =
+      'Conscious Application records that you noticed a possible practical relevance. It is not evidence of action, implementation, obedience, or completion of a Response. It is not Application Reflection.';
+  static const personalAspirations = 'Personal Aspirations';
+  static const reflectionPreferences = 'Reflection Preferences';
+  static const reflectionsQuotations = 'Reflections & Quotations';
+  static const baselinesTitle = 'Baselines';
+  static const baselinesNote =
+      'Baselines store recorded patterns only. They are not scores, success rates, or achievements.';
+  static const aspirationsNote =
+      'Aspirations are yours. They are optional. They are never scored, graded, or marked achieved or failed.';
+  static const quotationCadence = 'Quotation cadence';
+  static const quotationCadenceNote =
+      'Quotes rotate by calendar. They are not chosen from your records.';
+  static const reflectionOfTheWeek = 'Reflection of the Week';
+  static const noticedThisWeek = 'Noticed This Week';
+  static const noticedThisWeekNote =
+      'Observation only. Not a comparison, trend, or judgment.';
+  static const weeklyJournalTitle = 'This week I noticed…';
+  static const weeklyJournalNote =
+      'Optional. Stored on this device. Not analysed and not scored.';
+  static const familyCommunityCare = 'Family & Community Care';
+  static const viewSource = 'View source';
+  static const saveQuoteToResponse = 'Save to my response';
+  static const youRecordedColon = 'You recorded:';
 }

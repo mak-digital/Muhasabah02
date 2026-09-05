@@ -9,6 +9,7 @@ import '../../domain/daily_check_in.dart';
 import '../../domain/other_domains.dart';
 import '../../domain/personal_response.dart';
 import '../../domain/prayer.dart';
+import '../../domain/home_traces.dart';
 import '../../domain/quran.dart';
 import '../shared/add_response_button.dart';
 import '../shared/ui_bits.dart';
@@ -62,6 +63,12 @@ class DayEvidenceScreen extends ConsumerWidget {
                   title: Text(prayer.label),
                   subtitle: Text(record.prayer(prayer).label),
                 ),
+                if (prayer == PrayerId.dhuhr && record.jumuahCongregation)
+                  const ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text('Friday congregation'),
+                    subtitle: Text('Attended'),
+                  ),
                 AddResponseButton(
                   compact: true,
                   provenance: ResponseProvenance(
@@ -74,6 +81,29 @@ class DayEvidenceScreen extends ConsumerWidget {
                   ),
                 ),
               ],
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Jumu‘ah'),
+                subtitle: Text(record.jumuah.label),
+              ),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Tahajjud'),
+                subtitle: Text(switch (record.tahajjud) {
+                  TernaryOutcome.positive => 'Performed',
+                  TernaryOutcome.negative => 'Not performed',
+                  TernaryOutcome.unanswered => 'Not recorded',
+                }),
+              ),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Ishraq'),
+                subtitle: Text(switch (record.ishraq) {
+                  TernaryOutcome.positive => 'Performed',
+                  TernaryOutcome.negative => 'Not performed',
+                  TernaryOutcome.unanswered => 'Not recorded',
+                }),
+              ),
               const SizedBox(height: 8),
               Text('Qur’an', style: Theme.of(context).textTheme.titleMedium),
               for (final dimension in quranDailyDimensions) ...[
@@ -86,9 +116,9 @@ class DayEvidenceScreen extends ConsumerWidget {
                     TernaryOutcome.unanswered => 'Not recorded',
                   }),
                 ),
-                if (dimension.isApplicationReflection)
+                if (dimension == QuranDimension.consciousApplication)
                   Text(
-                    Copy.applicationReflectionNote,
+                    Copy.consciousApplicationNote,
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 AddResponseButton(
@@ -141,7 +171,7 @@ class DayEvidenceScreen extends ConsumerWidget {
               ),
               ListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('Personal reflection'),
+                title: const Text(Copy.personalReflection),
                 subtitle: Text(
                   record.personalReflectionStatus == EntryStatus.recorded
                       ? 'An entry was saved'
@@ -173,6 +203,77 @@ class DayEvidenceScreen extends ConsumerWidget {
                 title: const Text('Hadith engagement'),
                 subtitle: Text(record.hadith.activityId),
               ),
+              if (record.homeTraces.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Text(
+                  'Home traces',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                for (final entry in record.homeTraces.entries)
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(
+                      homeTraceRowByKey(entry.key)?.label ?? entry.key,
+                    ),
+                    subtitle: Text(switch (entry.value) {
+                      TernaryOutcome.positive => 'Recorded engagement',
+                      TernaryOutcome.negative => 'Recorded as not done',
+                      TernaryOutcome.unanswered => 'Not recorded',
+                    }),
+                  ),
+              ],
+              if (record.homeTraceFactors.values.any(
+                (item) => !item.isEmpty,
+              )) ...[
+                const SizedBox(height: 8),
+                Text(
+                  Copy.factorsYouNoticed,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                Text(
+                  'You recorded these factors. They are not causes.',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+                for (final entry in record.homeTraceFactors.entries)
+                  if (!entry.value.isEmpty)
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(
+                        homeTraceRowByKey(entry.key)?.label ?? entry.key,
+                      ),
+                      subtitle: Text(
+                        [
+                          ...entry.value.supportIds.map(
+                            (id) => ContextCatalog.labelFor(id, 'positive'),
+                          ),
+                          ...entry.value.challengeIds.map(
+                            (id) => ContextCatalog.labelFor(id, 'negative'),
+                          ),
+                          if (entry.value.otherText != null &&
+                              entry.value.otherText!.trim().isNotEmpty)
+                            entry.value.otherText!.trim(),
+                        ].join(', '),
+                      ),
+                    ),
+              ],
+              if (!record.situationNotes.isEmpty) ...[
+                const SizedBox(height: 8),
+                Text(
+                  Copy.situationNotesTitle,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                Text(
+                  Copy.situationNotesNote,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text(Copy.youRecorded),
+                  subtitle: Text(
+                    record.situationNotes.displayLabels.join(', '),
+                  ),
+                ),
+              ],
               if (record.contexts.isNotEmpty) ...[
                 const SizedBox(height: 8),
                 Text(

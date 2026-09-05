@@ -4,11 +4,13 @@ import '../domain/activities.dart';
 import '../domain/context_catalog.dart';
 import '../domain/daily_check_in.dart';
 import '../domain/date_key.dart';
+import '../domain/home_traces.dart';
 import '../domain/other_domains.dart';
 import '../domain/personal_response.dart';
 import '../domain/prayer.dart';
 import '../domain/quran.dart';
 import '../domain/recorded_context.dart';
+import '../domain/salah_factors.dart';
 
 const int kSyntheticWindowDays = 120;
 const String kSampleDataNotice =
@@ -117,6 +119,44 @@ DailyCheckIn _day(String key, DateTime date, Random random) {
     );
   }
 
+  if (friday) {
+    record = record.copyWith(
+      jumuah: random.nextDouble() < 0.22
+          ? PrayerStatus.unanswered
+          : random.nextDouble() < 0.12
+          ? PrayerStatus.missed
+          : PrayerStatus.onTime,
+      jumuahCongregation:
+          record.prayer(PrayerId.dhuhr) == PrayerStatus.onTime &&
+          random.nextDouble() < 0.7,
+    );
+  }
+  record = record.copyWith(
+    tahajjud: _pick(random, [
+      (0.55, TernaryOutcome.unanswered),
+      (0.82, TernaryOutcome.positive),
+      (1.0, TernaryOutcome.negative),
+    ]),
+    ishraq: _pick(random, [
+      (0.58, TernaryOutcome.unanswered),
+      (0.84, TernaryOutcome.positive),
+      (1.0, TernaryOutcome.negative),
+    ]),
+  );
+  if (random.nextDouble() < 0.22) {
+    record = record.withSalahFactors(
+      PrayerId.fajr.name,
+      SalahFactorCapture(
+        supportIds: random.nextDouble() < 0.5
+            ? const ['salah.alarmWorked']
+            : const [],
+        challengeIds: random.nextDouble() < 0.5
+            ? const ['salah.overslept']
+            : const [],
+      ),
+    );
+  }
+
   for (final dimension in quranDailyDimensions) {
     record = record.withQuranActivity(
       dimension,
@@ -207,6 +247,17 @@ DailyCheckIn _day(String key, DateTime date, Random random) {
     ActivityCatalog.conductKey,
     RecordedActivity(id: _conductActivityId(record.conduct)),
   );
+
+  for (final row in allHomeTraceRows) {
+    final outcome = _pick(random, [
+      (0.52, TernaryOutcome.unanswered),
+      (0.82, TernaryOutcome.positive),
+      (1.0, TernaryOutcome.negative),
+    ]);
+    if (outcome != TernaryOutcome.unanswered) {
+      record = record.withHomeTrace(row.storageKey, outcome);
+    }
+  }
 
   for (final dimension in quranDailyDimensions) {
     final outcome = record.quranOutcome(dimension);

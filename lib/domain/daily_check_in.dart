@@ -1,8 +1,11 @@
 import 'activities.dart';
+import 'home_traces.dart';
 import 'other_domains.dart';
 import 'prayer.dart';
 import 'quran.dart';
 import 'recorded_context.dart';
+import 'salah_factors.dart';
+import 'situation_notes.dart';
 
 const int kDailyCheckInSchemaVersion = 6;
 const int kRecordableFieldCount = 10;
@@ -26,6 +29,7 @@ class DailyCheckIn {
       QuranDimension.revision: TernaryOutcome.unanswered,
       QuranDimension.tafsir: TernaryOutcome.unanswered,
       QuranDimension.reflection: TernaryOutcome.unanswered,
+      QuranDimension.consciousApplication: TernaryOutcome.unanswered,
       QuranDimension.applicationReflection: TernaryOutcome.unanswered,
     },
     this.dhikr = DhikrStatus.unanswered,
@@ -41,6 +45,14 @@ class DailyCheckIn {
     this.hadith = const DomainObservation(),
     this.activities = const {},
     this.contexts = const [],
+    this.jumuah = PrayerStatus.unanswered,
+    this.tahajjud = TernaryOutcome.unanswered,
+    this.ishraq = TernaryOutcome.unanswered,
+    this.jumuahCongregation = false,
+    this.salahFactors = const {},
+    this.homeTraces = const {},
+    this.homeTraceFactors = const {},
+    this.situationNotes = const SituationNotes(),
     this.synthetic = false,
   });
 
@@ -62,7 +74,18 @@ class DailyCheckIn {
   final DomainObservation hadith;
   final Map<String, RecordedActivity> activities;
   final List<RecordedContext> contexts;
+  final PrayerStatus jumuah;
+  final TernaryOutcome tahajjud;
+  final TernaryOutcome ishraq;
+  final bool jumuahCongregation;
+  final Map<String, SalahFactorCapture> salahFactors;
+  final Map<String, TernaryOutcome> homeTraces;
+  final Map<String, SalahFactorCapture> homeTraceFactors;
+  final SituationNotes situationNotes;
   final bool synthetic;
+
+  TernaryOutcome homeTrace(String storageKey) =>
+      homeTraces[storageKey] ?? TernaryOutcome.unanswered;
 
   factory DailyCheckIn.empty(String dateKey) => DailyCheckIn(dateKey: dateKey);
 
@@ -168,6 +191,20 @@ class DailyCheckIn {
         hadith.isRecorded) {
       return true;
     }
+    if (jumuah.isRecorded ||
+        tahajjud.isRecorded ||
+        ishraq.isRecorded ||
+        jumuahCongregation ||
+        salahFactors.isNotEmpty) {
+      return true;
+    }
+    if (homeTraces.values.any((outcome) => outcome.isRecorded)) {
+      return true;
+    }
+    if (homeTraceFactors.values.any((item) => !item.isEmpty) ||
+        !situationNotes.isEmpty) {
+      return true;
+    }
     return contexts.isNotEmpty;
   }
 
@@ -191,6 +228,14 @@ class DailyCheckIn {
     DomainObservation? hadith,
     Map<String, RecordedActivity>? activities,
     List<RecordedContext>? contexts,
+    PrayerStatus? jumuah,
+    TernaryOutcome? tahajjud,
+    TernaryOutcome? ishraq,
+    bool? jumuahCongregation,
+    Map<String, SalahFactorCapture>? salahFactors,
+    Map<String, TernaryOutcome>? homeTraces,
+    Map<String, SalahFactorCapture>? homeTraceFactors,
+    SituationNotes? situationNotes,
     bool? synthetic,
   }) {
     return DailyCheckIn(
@@ -217,6 +262,14 @@ class DailyCheckIn {
       hadith: hadith ?? this.hadith,
       activities: activities ?? this.activities,
       contexts: contexts ?? this.contexts,
+      jumuah: jumuah ?? this.jumuah,
+      tahajjud: tahajjud ?? this.tahajjud,
+      ishraq: ishraq ?? this.ishraq,
+      jumuahCongregation: jumuahCongregation ?? this.jumuahCongregation,
+      salahFactors: salahFactors ?? this.salahFactors,
+      homeTraces: homeTraces ?? this.homeTraces,
+      homeTraceFactors: homeTraceFactors ?? this.homeTraceFactors,
+      situationNotes: situationNotes ?? this.situationNotes,
       synthetic: synthetic ?? this.synthetic,
     );
   }
@@ -247,24 +300,45 @@ class DailyCheckIn {
   }
 
   DailyCheckIn withQuran(QuranDimension dimension, TernaryOutcome outcome) {
+    if (!canSetQuranOutcome(
+      quran: quran,
+      dimension: dimension,
+      outcome: outcome,
+    )) {
+      return this;
+    }
+    var nextQuran = {...quran, dimension: outcome};
+    if (dimension == QuranDimension.meaning &&
+        outcome == TernaryOutcome.positive) {
+      nextQuran[QuranDimension.reading] = TernaryOutcome.positive;
+    }
     final nextContexts = contexts.where((c) {
-      if (c.subject != dimension) return true;
-      if (!contextAllowed(dimension, outcome)) return false;
-      if (c.polarity == 'positive') return outcome == TernaryOutcome.positive;
-      if (c.polarity == 'negative') return outcome == TernaryOutcome.negative;
+      final current = nextQuran[c.subject] ?? TernaryOutcome.unanswered;
+      if (!contextAllowed(c.subject, current)) return false;
+      if (c.polarity == 'positive') return current == TernaryOutcome.positive;
+      if (c.polarity == 'negative') return current == TernaryOutcome.negative;
       return false;
     }).toList();
-    final catalog = ActivityCatalog.forQuran(dimension);
-    final canonical = catalog.isEmpty
-        ? ActivityIds.unanswered
-        : ActivityCatalog.canonicalTernaryId(outcome, catalog);
+    final activitiesNext = {...activities};
+    void writeActivity(QuranDimension dim, TernaryOutcome value) {
+      final catalog = ActivityCatalog.forQuran(dim);
+      final canonical = catalog.isEmpty
+          ? ActivityIds.unanswered
+          : ActivityCatalog.canonicalTernaryId(value, catalog);
+      activitiesNext[ActivityCatalog.quranKey(dim)] = RecordedActivity(
+        id: canonical,
+      );
+    }
+
+    writeActivity(dimension, outcome);
+    if (dimension == QuranDimension.meaning &&
+        outcome == TernaryOutcome.positive) {
+      writeActivity(QuranDimension.reading, TernaryOutcome.positive);
+    }
     return copyWith(
-      quran: {...quran, dimension: outcome},
+      quran: nextQuran,
       contexts: nextContexts,
-      activities: {
-        ...activities,
-        ActivityCatalog.quranKey(dimension): RecordedActivity(id: canonical),
-      },
+      activities: activitiesNext,
     );
   }
 
@@ -277,10 +351,50 @@ class DailyCheckIn {
       activity.id,
     );
     final outcome = option?.ternary ?? TernaryOutcome.unanswered;
+    if (!canSetQuranOutcome(
+      quran: quran,
+      dimension: dimension,
+      outcome: outcome,
+    )) {
+      return this;
+    }
     return withQuran(
       dimension,
       outcome,
     ).withActivity(ActivityCatalog.quranKey(dimension), activity);
+  }
+
+  DailyCheckIn withSalahFactors(String subject, SalahFactorCapture capture) {
+    final next = {...salahFactors};
+    if (capture.isEmpty) {
+      next.remove(subject);
+    } else {
+      next[subject] = capture;
+    }
+    return copyWith(salahFactors: next);
+  }
+
+  DailyCheckIn withHomeTrace(String storageKey, TernaryOutcome outcome) {
+    final next = {...homeTraces};
+    if (outcome == TernaryOutcome.unanswered) {
+      next.remove(storageKey);
+    } else {
+      next[storageKey] = outcome;
+    }
+    return copyWith(homeTraces: next);
+  }
+
+  DailyCheckIn withHomeTraceFactors(
+    String storageKey,
+    SalahFactorCapture capture,
+  ) {
+    final next = {...homeTraceFactors};
+    if (capture.isEmpty) {
+      next.remove(storageKey);
+    } else {
+      next[storageKey] = capture;
+    }
+    return copyWith(homeTraceFactors: next);
   }
 
   DailyCheckIn withContext(RecordedContext context) {
@@ -335,6 +449,30 @@ class DailyCheckIn {
             entry.key: entry.value.toJson(),
       },
       'contexts': contexts.map((c) => c.toJson()).toList(),
+      if (jumuah.isRecorded ||
+          tahajjud.isRecorded ||
+          ishraq.isRecorded ||
+          jumuahCongregation ||
+          salahFactors.isNotEmpty)
+        'salahTrace': {
+          if (jumuah.isRecorded) 'jumuah': jumuah.jsonValue,
+          if (tahajjud.isRecorded) 'tahajjud': tahajjud.name,
+          if (ishraq.isRecorded) 'ishraq': ishraq.name,
+          if (jumuahCongregation) 'jumuahCongregation': true,
+          if (salahFactors.isNotEmpty)
+            'factors': {
+              for (final entry in salahFactors.entries)
+                if (!entry.value.isEmpty) entry.key: entry.value.toJson(),
+            },
+        },
+      if (tracesToJson(homeTraces).isNotEmpty)
+        'homeTraces': tracesToJson(homeTraces),
+      if (homeTraceFactors.values.any((item) => !item.isEmpty))
+        'homeTraceFactors': {
+          for (final entry in homeTraceFactors.entries)
+            if (!entry.value.isEmpty) entry.key: entry.value.toJson(),
+        },
+      if (!situationNotes.isEmpty) 'situationNotes': situationNotes.toJson(),
       if (synthetic) 'synthetic': true,
     };
   }
@@ -416,6 +554,26 @@ class DailyCheckIn {
       savedAt = DateTime.tryParse(rawSaved);
     }
 
+    PrayerStatus jumuah = PrayerStatus.unanswered;
+    TernaryOutcome tahajjud = TernaryOutcome.unanswered;
+    TernaryOutcome ishraq = TernaryOutcome.unanswered;
+    var jumuahCongregation = false;
+    final salahFactors = <String, SalahFactorCapture>{};
+    final traceJson = json['salahTrace'];
+    if (traceJson is Map) {
+      jumuah = prayerStatusFromJson(traceJson['jumuah']);
+      tahajjud = ternaryFromJson(traceJson['tahajjud']);
+      ishraq = ternaryFromJson(traceJson['ishraq']);
+      jumuahCongregation = traceJson['jumuahCongregation'] == true;
+      final factorsJson = traceJson['factors'];
+      if (factorsJson is Map) {
+        for (final entry in factorsJson.entries) {
+          final parsed = SalahFactorCapture.fromJson(entry.value);
+          if (parsed != null) salahFactors['${entry.key}'] = parsed;
+        }
+      }
+    }
+
     return DailyCheckIn(
       dateKey: date,
       schemaVersion: version,
@@ -435,7 +593,25 @@ class DailyCheckIn {
       hadith: DomainObservation.fromJson(json['hadith']),
       activities: activities,
       contexts: contexts,
+      jumuah: jumuah,
+      tahajjud: tahajjud,
+      ishraq: ishraq,
+      jumuahCongregation: jumuahCongregation,
+      salahFactors: salahFactors,
+      homeTraces: tracesFromJson(json['homeTraces']),
+      homeTraceFactors: _factorsMap(json['homeTraceFactors']),
+      situationNotes: SituationNotes.fromJson(json['situationNotes']),
       synthetic: json['synthetic'] == true,
     );
+  }
+
+  static Map<String, SalahFactorCapture> _factorsMap(Object? json) {
+    if (json is! Map) return const {};
+    final map = <String, SalahFactorCapture>{};
+    for (final entry in json.entries) {
+      final parsed = SalahFactorCapture.fromJson(entry.value);
+      if (parsed != null) map['${entry.key}'] = parsed;
+    }
+    return map;
   }
 }

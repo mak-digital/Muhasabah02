@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Remaining Home domain cards — visual review</title>
+  <style>
+    :root {
+      --bg: #f4f1ea;
+      --ink: #1d2a2c;
+      --muted: #4d5c63;
+      --summary: #eef2f4;
+      --missed: #8a6a62;
+      --mark: 14px;
+      --teal: #2f6f73;
+      --blue: #3d6b99;
+      --green: #3f7d6a;
+      --purple: #7a5b8f;
+      --amber: #c48a3c;
+      --indigo: #3f4c8a;
+      --steel: #4a6d8c;
+      --salah: #d7eceb;
+      --quran: #d7e4f2;
+      --dhikr: #d9eedf;
+      --family: #eadff2;
+      --charity: #f4e6c8;
+      --fasting: #c5cceb;
+      --hadith: #d4e2ee;
+    }
+    body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--ink); margin: 0; padding: 24px; }
+    h1, h2, h3 { font-weight: 600; }
+    .note { max-width: 860px; line-height: 1.45; color: var(--muted); }
+    .callout { max-width: 860px; border-left: 3px solid var(--green); padding: 8px 12px; margin: 12px 0 20px; color: var(--muted); font-size: 13px; line-height: 1.45; }
+    .toc { max-width: 860px; }
+    .phone { width: 390px; background: #fff; border-radius: 28px; box-shadow: 0 12px 40px rgba(0,0,0,.12); padding: 18px 16px 24px; margin: 16px 16px 28px 0; display: inline-block; vertical-align: top; box-sizing: border-box; }
+    .phone.tall { padding: 0 0 16px; overflow: hidden; }
+    .bar { font-size: 13px; color: #5c6e7a; margin-bottom: 10px; }
+    .appbar { display: flex; align-items: center; gap: 4px; padding: 14px 10px 8px 16px; }
+    .appbar h2 { margin: 0; font-size: 18px; flex: 1; font-weight: 600; }
+    .guide { border: 0; background: transparent; color: var(--teal); font-size: 13px; font-weight: 600; padding: 8px 10px; cursor: pointer; }
+    .pad { padding: 0 16px; }
+    .banner { background: #fff8e8; border-radius: 12px; padding: 10px 12px; font-size: 12px; margin-bottom: 10px; }
+    .cta { background: var(--teal); color: #fff; border: 0; border-radius: 14px; padding: 12px; width: 100%; font-size: 14px; margin-bottom: 10px; }
+    .card { border-radius: 16px; padding: 12px; margin-bottom: 10px; }
+    .c-dhikr { background: var(--dhikr); }
+    .c-family { background: var(--family); }
+    .c-charity { background: var(--charity); }
+    .c-fasting { background: var(--fasting); }
+    .c-hadith { background: var(--hadith); }
+    .c-salah { background: var(--salah); }
+    .c-quran { background: var(--quran); }
+    .c-sum { background: var(--summary); }
+    .head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+    .head button { width: 36px; height: 36px; border: 0; border-radius: 10px; font-size: 18px; cursor: pointer; }
+    .h-dhikr { background: rgba(63,125,106,.14); color: var(--green); }
+    .h-family { background: rgba(122,91,143,.14); color: var(--purple); }
+    .h-charity { background: rgba(196,138,60,.16); color: var(--amber); }
+    .h-fasting { background: rgba(63,76,138,.14); color: var(--indigo); }
+    .h-hadith { background: rgba(74,109,140,.14); color: var(--steel); }
+    .h-salah { background: rgba(47,111,115,.12); color: var(--teal); }
+    .h-quran { background: rgba(61,107,153,.14); color: var(--blue); }
+    .head h3 { margin: 0; font-size: 16px; font-weight: 600; text-align: center; flex: 1; }
+    .weekline { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 12px; color: var(--muted); }
+    .weekline button { border: 0; background: #fff; border-radius: 999px; padding: 4px 10px; font-size: 12px; cursor: pointer; }
+    .wdrow { display: grid; grid-template-columns: 92px repeat(7, 1fr); gap: 4px; margin-bottom: 6px; font-size: 10px; font-weight: 600; color: var(--muted); text-align: center; }
+    .fri { font-weight: 700; }
+    .band { border-radius: 12px; padding: 8px 6px 6px; margin-bottom: 6px; }
+    .band-lab { font-size: 10px; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); padding: 0 4px 6px; font-weight: 600; }
+    .grid { display: grid; grid-template-columns: 86px repeat(7, 1fr); gap: 5px 3px; align-items: center; }
+    .row-lab { font-size: 10px; line-height: 1.15; color: var(--ink); padding-left: 4px; }
+    .cell { height: 22px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 6px; }
+    .cell:focus { outline: 2px solid currentColor; }
+    .m { width: var(--mark); height: var(--mark); border-radius: 50%; box-sizing: border-box; flex-shrink: 0; position: relative; }
+    .fill { }
+    .outline { background: transparent; border: 1.5px solid; }
+    .empty { background: transparent; border: 1.5px dotted; }
+    .f-dhikr { background: var(--green); }
+    .o-dhikr { border-color: var(--green); }
+    .e-dhikr { border-color: rgba(63,125,106,.45); }
+    .f-family { background: var(--purple); }
+    .o-family { border-color: var(--purple); }
+    .e-family { border-color: rgba(122,91,143,.45); }
+    .f-charity { background: var(--amber); }
+    .o-charity { border-color: var(--amber); }
+    .e-charity { border-color: rgba(196,138,60,.5); }
+    .f-fasting { background: var(--indigo); }
+    .o-fasting { border-color: var(--indigo); }
+    .e-fasting { border-color: rgba(63,76,138,.45); }
+    .f-hadith { background: var(--steel); }
+    .o-hadith { border-color: var(--steel); }
+    .e-hadith { border-color: rgba(74,109,140,.45); }
+    .f-salah { background: var(--teal); }
+    .e-salah { border-color: rgba(47,111,115,.45); }
+    .f-quran { background: var(--blue); }
+    .e-quran { border-color: rgba(61,107,153,.45); }
+    .z { width: 11px; height: 11px; transform: rotate(45deg); box-sizing: border-box; flex-shrink: 0; border-radius: 1px; }
+    .z-due { background: transparent; border: 1.5px solid var(--amber); }
+    .z-planned { border: 1.5px solid var(--amber); background: linear-gradient(135deg, var(--amber) 50%, transparent 50%); }
+    .z-paid { background: var(--amber); }
+    .z-na { transform: none; width: 12px; height: 2px; background: var(--muted); border-radius: 1px; }
+    .z-empty { transform: rotate(45deg); background: transparent; border: 1.5px dotted rgba(196,138,60,.55); }
+    .zakat-strip { display: flex; align-items: center; gap: 8px; background: #f8eed8; border-radius: 10px; padding: 8px 10px; margin-top: 4px; }
+    .zakat-strip span { font-size: 11px; color: var(--ink); }
+    .sheet { background: var(--summary); border-radius: 16px; padding: 12px; }
+    .caption { font-size: 13px; font-weight: 600; margin: 0 0 8px; }
+    .chip { display: inline-block; border-radius: 999px; padding: 6px 10px; font-size: 12px; margin: 0 6px 6px 0; background: #fff; border: 1px solid #c5d0d4; }
+    .chip.on { border-width: 1.5px; }
+    .muted { font-size: 12px; color: var(--muted); line-height: 1.4; }
+    .nav { display: grid; grid-template-columns: repeat(4, 1fr); background: var(--summary); margin-top: 8px; padding: 10px 0 4px; text-align: center; font-size: 10px; color: var(--muted); }
+    .ex { display: grid; grid-template-columns: 28px 1fr; gap: 8px; align-items: center; font-size: 13px; margin-bottom: 8px; }
+    table { border-collapse: collapse; max-width: 960px; font-size: 12px; margin: 12px 0 24px; background: #fff; }
+    th, td { border: 1px solid #d5dde2; padding: 8px 10px; text-align: left; vertical-align: top; }
+    th { background: var(--summary); }
+    .tiny { font-size: 11px; color: var(--muted); margin: 0 0 8px; }
+    .foot { font-size: 11px; color: var(--muted); text-align: center; line-height: 1.4; margin: 8px 16px 0; }
+  </style>
+</head>
+<body>
+  <h1>Remaining Home domain cards</h1>
+  <p class="note">Mockups only. No implementation. Salah and Qur’an cards are already approved and shown abbreviated in the composed dashboard. Persistent legends stay off cards. Marks live in Home <strong>ⓘ Guide</strong>. First day of week here is Monday (default). Markers are 14px. Colour identifies the domain, not rank. Dotted cells are unanswered — not missed.</p>
+  <p class="callout"><strong>Layer 1</strong> for daily rows: Recorded engagement · Recorded as not done · Unanswered. <strong>Zakat</strong> uses a separate diamond language: Due · Planned · Paid · Not applicable. <strong>Layer 2</strong> is optional Factors you noticed (provenance, not causes).</p>
+  <p class="note toc"><a href="#dhikr">Dhikr</a> · <a href="#family">Family</a> · <a href="#charity">Charity</a> · <a href="#fasting">Fasting</a> · <a href="#hadith">Hadith</a> · <a href="#home">Full Home</a> · <a href="#order">Order</a> · <a href="#guide">Guide additions</a></p>
+
+  <h2 id="dhikr">1. Dhikr card</h2>
+  <p class="note">Green family. Proposed daily rows. Group tints are sections, not grades. Gratitude Dhikr is remembrance of thanks — it is not the check-in Personal / gratitude note field.</p>
+  <div class="phone" id="dhikr-card">
+    <div class="bar">Home · SEE → PONDER → EXPLORE</div>
+    <div class="card c-dhikr">
+      <div class="head">
+        <button class="h-dhikr" type="button" aria-label="Previous week">‹</button>
+        <h3>Dhikr</h3>
+        <button class="h-dhikr" type="button" aria-label="Next week">›</button>
+      </div>
+      <div class="weekline">
+        <span>31 Aug – 6 Sep</span>
+        <button type="button">This week</button>
+      </div>
+      <div class="wdrow">
+        <span></span><span>M</span><span>T</span><span>W</span><span>T</span><span class="fri">F</span><span>S</span><span>S</span>
+      </div>
+      <div class="band" style="background:#cfe8dc">
+        <div class="band-lab">Timed adhkar</div>
+        <div class="grid">
+          <span class="row-lab">Morning Adhkar</span>
+          <span class="cell"><span class="m fill f-dhikr"></span></span>
+          <span class="cell"><span class="m empty e-dhikr"></span></span>
+          <span class="cell"><span class="m fill f-dhikr"></span></span>
+          <span class="cell"><span class="m outline o-dhikr"></span></span>
+          <span class="cell"><span class="m fill f-dhikr"></span></span>
+          <span class="cell"><span class="m empty e-dhikr"></span></span>
+          <span class="cell"><span class="m empty e-dhikr"></span></span>
+          <span class="row-lab">Evening Adhkar</span>
+          <span class="cell"><span class="m empty e-dhikr"></span></span>
+          <span class="cell"><span class="m fill f-dhikr"></span></span>
+          <span class="cell"><span class="m fill f-dhikr"></span></span>
+          <span class="cell"><span class="m empty e-dhikr"></span></span>
+          <span class="cell"><span class="m outline o-dhikr"></span></span>
+          <span class="cell"><span class="m fill f-dhikr"></span></span>
+          <span class="cell"><span class="m empty e-dhikr"></span></span>
+        </div>
+      </div>
+      <div class="band" style="background:#dcefe4">
+        <div class="band-lab">Other remembrance</div>
+        <div class="grid">
+          <span class="row-lab">General Dhikr</span>
+          <span class="cell"><span class="m fill f-dhikr"></span></span>
+          <span class="cell"><span class="m empty e-dhikr"></span></span>
+          <span class="cell"><span class="m empty e-dhikr"></span></span>
+          <span class="cell"><span class="m fill f-dhikr"></span></span>
+          <span class="cell"><span class="m empty e-dhikr"></span></span>
+          <span class="cell"><span class="m fill f-dhikr"></span></span>
+          <span class="cell"><span class="m outline o-dhikr"></span></span>
+          <span class="row-lab">Gratitude Dhikr</span>
+          <span class="cell"><span class="m empty e-dhikr"></span></span>
+          <span class="cell"><span class="m fill f-dhikr"></span></span>
+          <span class="cell"><span class="m empty e-dhikr"></span></span>
+          <span class="cell"><span class="m empty e-dhikr"></span></span>
+          <span class="cell"><span class="m fill f-dhikr"></span></span>
+          <span class="cell"><span class="m empty e-dhikr"></span></span>
+          <span class="cell"><span class="m empty e-dhikr"></span></span>
+          <span class="row-lab">Travel Dhikr</span>
+          <span class="cell"><span class="m empty e-dhikr"></span></span>
+          <span class="cell"><span class="m empty e-dhikr"></span></span>
+          <span class="cell"><span class="m outline o-dhikr"></span></span>
+          <span class="cell"><span class="m empty e-dhikr"></span></span>
+          <span class="cell"><span class="m empty e-dhikr"></span></span>
+          <span class="cell"><span class="m fill f-dhikr"></span></span>
+          <span class="cell"><span class="m empty e-dhikr"></span></span>
+        </div>
+      </div>
+    </div>
+    <p class="tiny">No legend on the card. Title tap would open Dhikr Progress. Cell tap opens a compact sheet, not a full editor.</p>
+  </div>
+
+  <div class="phone">
+    <div class="bar">Morning Adhkar · 3 Sep · Layer 1</div>
+    <div class="sheet">
+      <div class="caption">What happened?</div>
+      <span class="chip on" style="border-color:var(--green)">Recorded engagement</span>
+      <span class="chip">Recorded as not done</span>
+      <span class="chip">Unanswered</span>
+      <p class="muted">Does not score dhikr. Unanswered is not missed. Editing belongs in check-in; this sheet is a compact view.</p>
+    </div>
+  </div>
+  <div class="phone">
+    <div class="bar">Optional · Layer 2</div>
+    <div class="sheet">
+      <div class="caption">Factors you noticed</div>
+      <p class="muted">Stored. Skippable. Never causes, never completion, never scoring.</p>
+      <p class="muted"><strong>Support</strong></p>
+      <span class="chip on">Reminder or cue</span>
+      <span class="chip">After Salah</span>
+      <span class="chip">Quiet space</span>
+      <span class="chip">Existing routine</span>
+      <span class="chip">Family participation</span>
+      <span class="chip">Travel setting</span>
+      <span class="chip">Other</span>
+      <p class="muted"><strong>Challenges</strong></p>
+      <span class="chip">Limited time</span>
+      <span class="chip on">Fatigue</span>
+      <span class="chip">Forgot</span>
+      <span class="chip">Device distraction</span>
+      <span class="chip">Competing priorities</span>
+      <span class="chip">Other</span>
+    </div>
+  </div>
+
+  <h2 id="family">2. Family card</h2>
+  <p class="note">Purple family. Contact and visit stay independent. Dotted cells are not “estranged” or “failed kinship.” <strong>Family Support</strong> here is kinship care, not charitable giving (see Charity).</p>
+  <div class="phone" id="family-card">
+    <div class="bar">Home · week grid</div>
+    <div class="card c-family">
+      <div class="head">
+        <button class="h-family" type="button" aria-label="Previous week">‹</button>
+        <h3>Family</h3>
+        <button class="h-family" type="button" aria-label="Next week">›</button>
+      </div>
+      <div class="weekline">
+        <span>31 Aug – 6 Sep</span>
+        <button type="button">This week</button>
+      </div>
+      <div class="wdrow">
+        <span></span><span>M</span><span>T</span><span>W</span><span>T</span><span class="fri">F</span><span>S</span><span>S</span>
+      </div>
+      <div class="band" style="background:#e4d4f0">
+        <div class="band-lab">Parents</div>
+        <div class="grid">
+          <span class="row-lab">Parents Contact</span>
+          <span class="cell"><span class="m fill f-family"></span></span>
+          <span class="cell"><span class="m empty e-family"></span></span>
+          <span class="cell"><span class="m fill f-family"></span></span>
+          <span class="cell"><span class="m empty e-family"></span></span>
+          <span class="cell"><span class="m fill f-family"></span></span>
+          <span class="cell"><span class="m empty e-family"></span></span>
+          <span class="cell"><span class="m outline o-family"></span></span>
+          <span class="row-lab">Parents Visit</span>
+          <span class="cell"><span class="m empty e-family"></span></span>
+          <span class="cell"><span class="m empty e-family"></span></span>
+          <span class="cell"><span class="m empty e-family"></span></span>
+          <span class="cell"><span class="m empty e-family"></span></span>
+          <span class="cell"><span class="m empty e-family"></span></span>
+          <span class="cell"><span class="m fill f-family"></span></span>
+          <span class="cell"><span class="m empty e-family"></span></span>
+        </div>
+      </div>
+      <div class="band" style="background:#eee4f4">
+        <div class="band-lab">Wider kinship</div>
+        <div class="grid">
+          <span class="row-lab">Family Contact</span>
+          <span class="cell"><span class="m empty e-family"></span></span>
+          <span class="cell"><span class="m fill f-family"></span></span>
+          <span class="cell"><span class="m empty e-family"></span></span>
+          <span class="cell"><span class="m fill f-family"></span></span>
+          <span class="cell"><span class="m empty e-family"></span></span>
+          <span class="cell"><span class="m fill f-family"></span></span>
+          <span class="cell"><span class="m empty e-family"></span></span>
+          <span class="row-lab">Relative Contact</span>
+          <span class="cell"><span class="m empty e-family"></span></span>
+          <span class="cell"><span class="m empty e-family"></span></span>
+          <span class="cell"><span class="m outline o-family"></span></span>
+          <span class="cell"><span class="m empty e-family"></span></span>
+          <span class="cell"><span class="m empty e-family"></span></span>
+          <span class="cell"><span class="m fill f-family"></span></span>
+          <span class="cell"><span class="m empty e-family"></span></span>
+          <span class="row-lab">Family Support</span>
+          <span class="cell"><span class="m fill f-family"></span></span>
+          <span class="cell"><span class="m empty e-family"></span></span>
+          <span class="cell"><span class="m empty e-family"></span></span>
+          <span class="cell"><span class="m empty e-family"></span></span>
+          <span class="cell"><span class="m fill f-family"></span></span>
+          <span class="cell"><span class="m empty e-family"></span></span>
+          <span class="cell"><span class="m empty e-family"></span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="phone">
+    <div class="bar">Parents Visit · 5 Sep · Layer 1</div>
+    <div class="sheet">
+      <div class="caption">What happened?</div>
+      <span class="chip on" style="border-color:var(--purple)">Recorded engagement</span>
+      <span class="chip">Recorded as not done</span>
+      <span class="chip">Unanswered</span>
+      <p class="muted">Visit unanswered on other days is not a missed visit. Distance is not inferred.</p>
+    </div>
+  </div>
+  <div class="phone">
+    <div class="bar">Optional · Layer 2</div>
+    <div class="sheet">
+      <div class="caption">Factors you noticed</div>
+      <p class="muted"><strong>Support</strong></p>
+      <span class="chip on">Reminder or cue</span>
+      <span class="chip">Existing routine</span>
+      <span class="chip">Family gathering</span>
+      <span class="chip">Travel home</span>
+      <span class="chip">Shared meal</span>
+      <span class="chip">Other</span>
+      <p class="muted"><strong>Challenges</strong></p>
+      <span class="chip">Distance</span>
+      <span class="chip on">Work commitments</span>
+      <span class="chip">Limited time</span>
+      <span class="chip">Health</span>
+      <span class="chip">Travel</span>
+      <span class="chip">Competing priorities</span>
+      <span class="chip">Other</span>
+    </div>
+  </div>
+
+  <h2 id="charity">3. Charity card and Zakat</h2>
+  <p class="note">Amber family. Daily giving uses the shared circle language. <strong>Zakat is not a circle.</strong> Diamonds (Due / Planned / Paid) and a short bar (Not applicable) so zakat is never read as missed salah or failed sadaqah. Most zakat cells in a week stay unanswered (dotted diamond) unless that day has a zakat observation.</p>
+  <div class="phone" id="charity-card">
+    <div class="bar">Home · weekly grid</div>
+    <div class="card c-charity">
+      <div class="head">
+        <button class="h-charity" type="button" aria-label="Previous week">‹</button>
+        <h3>Charity</h3>
+        <button class="h-charity" type="button" aria-label="Next week">›</button>
+      </div>
+      <div class="weekline">
+        <span>31 Aug – 6 Sep</span>
+        <button type="button">This week</button>
+      </div>
+      <div class="wdrow">
+        <span></span><span>M</span><span>T</span><span>W</span><span>T</span><span class="fri">F</span><span>S</span><span>S</span>
+      </div>
+      <div class="band" style="background:#f3ddb0">
+        <div class="band-lab">Giving noticed</div>
+        <div class="grid">
+          <span class="row-lab">Voluntary Charity</span>
+          <span class="cell"><span class="m fill f-charity"></span></span>
+          <span class="cell"><span class="m empty e-charity"></span></span>
+          <span class="cell"><span class="m empty e-charity"></span></span>
+          <span class="cell"><span class="m fill f-charity"></span></span>
+          <span class="cell"><span class="m empty e-charity"></span></span>
+          <span class="cell"><span class="m outline o-charity"></span></span>
+          <span class="cell"><span class="m empty e-charity"></span></span>
+          <span class="row-lab">Community Support</span>
+          <span class="cell"><span class="m empty e-charity"></span></span>
+          <span class="cell"><span class="m empty e-charity"></span></span>
+          <span class="cell"><span class="m fill f-charity"></span></span>
+          <span class="cell"><span class="m empty e-charity"></span></span>
+          <span class="cell"><span class="m empty e-charity"></span></span>
+          <span class="cell"><span class="m empty e-charity"></span></span>
+          <span class="cell"><span class="m empty e-charity"></span></span>
+          <span class="row-lab">Family Support</span>
+          <span class="cell"><span class="m empty e-charity"></span></span>
+          <span class="cell"><span class="m fill f-charity"></span></span>
+          <span class="cell"><span class="m empty e-charity"></span></span>
+          <span class="cell"><span class="m empty e-charity"></span></span>
+          <span class="cell"><span class="m empty e-charity"></span></span>
+          <span class="cell"><span class="m fill f-charity"></span></span>
+          <span class="cell"><span class="m empty e-charity"></span></span>
+          <span class="row-lab">Educational Support</span>
+          <span class="cell"><span class="m empty e-charity"></span></span>
+          <span class="cell"><span class="m empty e-charity"></span></span>
+          <span class="cell"><span class="m empty e-charity"></span></span>
+          <span class="cell"><span class="m empty e-charity"></span></span>
+          <span class="cell"><span class="m fill f-charity"></span></span>
+          <span class="cell"><span class="m empty e-charity"></span></span>
+          <span class="cell"><span class="m empty e-charity"></span></span>
+          <span class="row-lab">Emergency Support</span>
+          <span class="cell"><span class="m empty e-charity"></span></span>
+          <span class="cell"><span class="m empty e-charity"></span></span>
+          <span class="cell"><span class="m empty e-charity"></span></span>
+          <span class="cell"><span class="m outline o-charity"></span></span>
+          <span class="cell"><span class="m empty e-charity"></span></span>
+          <span class="cell"><span class="m empty e-charity"></span></span>
+          <span class="cell"><span class="m empty e-charity"></span></span>
+        </div>
+      </div>
+      <div class="band" style="background:#f6e8c4">
+        <div class="band-lab">Zakat status</div>
+        <div class="grid">
+          <span class="row-lab">Zakat</span>
+          <span class="cell" title="Unanswered"><span class="z z-empty"></span></span>
+          <span class="cell" title="Due"><span class="z z-due"></span></span>
+          <span class="cell" title="Unanswered"><span class="z z-empty"></span></span>
+          <span class="cell" title="Planned"><span class="z z-planned"></span></span>
+          <span class="cell" title="Unanswered"><span class="z z-empty"></span></span>
+          <span class="cell" title="Paid"><span class="z z-paid"></span></span>
+          <span class="cell" title="Not applicable"><span class="z z-na"></span></span>
+        </div>
+        <div class="zakat-strip">
+          <span class="z z-paid"></span>
+          <span>This week includes a Paid observation. Diamonds are zakat, not sadaqah circles. Not a score.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Zakat marker examples (for Guide, not on the card)</h3>
+  <div class="phone">
+    <div class="bar">Marks Guide · proposed Zakat section</div>
+    <div class="sheet">
+      <div class="ex"><span class="z z-due"></span><span>Due — recorded that zakat is due</span></div>
+      <div class="ex"><span class="z z-planned"></span><span>Planned — recorded an intention or plan</span></div>
+      <div class="ex"><span class="z z-paid"></span><span>Paid — recorded that zakat was paid</span></div>
+      <div class="ex"><span class="z z-na"></span><span>Not applicable — recorded that zakat does not apply. Not missed.</span></div>
+      <div class="ex"><span class="z z-empty"></span><span>Unanswered — no zakat observation that day</span></div>
+      <p class="muted">Paid is not an achievement badge. Due is not a warning red. Not applicable is not a slash-missed mark.</p>
+    </div>
+  </div>
+  <div class="phone">
+    <div class="bar">Voluntary Charity · 3 Sep · Layer 1</div>
+    <div class="sheet">
+      <div class="caption">What happened?</div>
+      <span class="chip on" style="border-color:var(--amber)">Recorded engagement</span>
+      <span class="chip">Recorded as not done</span>
+      <span class="chip">Unanswered</span>
+      <p class="muted">Does not complete Zakat. Zakat stays independent.</p>
+    </div>
+  </div>
+  <div class="phone">
+    <div class="bar">Zakat · 5 Sep · Layer 1 (four states + unanswered)</div>
+    <div class="sheet">
+      <div class="caption">Zakat status</div>
+      <span class="chip">Due</span>
+      <span class="chip">Planned</span>
+      <span class="chip on" style="border-color:var(--amber)">Paid</span>
+      <span class="chip">Not applicable</span>
+      <span class="chip">Unanswered</span>
+      <p class="muted">Not a ternary engagement row. Not inferred from Voluntary Charity.</p>
+    </div>
+  </div>
+  <div class="phone">
+    <div class="bar">Optional · Layer 2</div>
+    <div class="sheet">
+      <div class="caption">Factors you noticed</div>
+      <p class="muted"><strong>Support</strong></p>
+      <span class="chip on">Payday or means available</span>
+      <span class="chip">Reminder or cue</span>
+      <span class="chip">Community collection</span>
+      <span class="chip">Seeing a need</span>
+      <span class="chip">Family participation</span>
+      <span class="chip">Other</span>
+      <p class="muted"><strong>Challenges</strong></p>
+      <span class="chip">Limited means</span>
+      <span class="chip">Competing priorities</span>
+      <span class="chip on">Forgot</span>
+      <span class="chip">Uncertainty about channel</span>
+      <span class="chip">Other</span>
+    </div>
+  </div>
+
+  <h2 id="fasting">4. Fasting card</h2>
+  <p class="note">Indigo family. Most cells in a typical week stay unanswered. That is expected. Unanswered is not “broke the fast” and not missed. Make-up Fast is an observation, not a debt tracker or remaining-count.</p>
+  <div class="phone" id="fasting-card">
+    <div class="bar">Home · sparse week is valid</div>
+    <div class="card c-fasting">
+      <div class="head">
+        <button class="h-fasting" type="button" aria-label="Previous week">‹</button>
+        <h3>Fasting</h3>
+        <button class="h-fasting" type="button" aria-label="Next week">›</button>
+      </div>
+      <div class="weekline">
+        <span>31 Aug – 6 Sep</span>
+        <button type="button">This week</button>
+      </div>
+      <div class="wdrow">
+        <span></span><span>M</span><span>T</span><span>W</span><span>T</span><span class="fri">F</span><span>S</span><span>S</span>
+      </div>
+      <div class="band" style="background:#b7c0e4">
+        <div class="band-lab">Voluntary and make-up</div>
+        <div class="grid">
+          <span class="row-lab">Weekly Sunnah Fast</span>
+          <span class="cell"><span class="m fill f-fasting"></span></span>
+          <span class="cell"><span class="m empty e-fasting"></span></span>
+          <span class="cell"><span class="m empty e-fasting"></span></span>
+          <span class="cell"><span class="m fill f-fasting"></span></span>
+          <span class="cell"><span class="m empty e-fasting"></span></span>
+          <span class="cell"><span class="m empty e-fasting"></span></span>
+          <span class="cell"><span class="m empty e-fasting"></span></span>
+          <span class="row-lab">Monthly Fast</span>
+          <span class="cell"><span class="m empty e-fasting"></span></span>
+          <span class="cell"><span class="m empty e-fasting"></span></span>
+          <span class="cell"><span class="m empty e-fasting"></span></span>
+          <span class="cell"><span class="m empty e-fasting"></span></span>
+          <span class="cell"><span class="m empty e-fasting"></span></span>
+          <span class="cell"><span class="m fill f-fasting"></span></span>
+          <span class="cell"><span class="m empty e-fasting"></span></span>
+          <span class="row-lab">Make-up Fast</span>
+          <span class="cell"><span class="m empty e-fasting"></span></span>
+          <span class="cell"><span class="m outline o-fasting"></span></span>
+          <span class="cell"><span class="m empty e-fasting"></span></span>
+          <span class="cell"><span class="m empty e-fasting"></span></span>
+          <span class="cell"><span class="m empty e-fasting"></span></span>
+          <span class="cell"><span class="m empty e-fasting"></span></span>
+          <span class="cell"><span class="m empty e-fasting"></span></span>
+          <span class="row-lab">Ramadan Preparation</span>
+          <span class="cell"><span class="m empty e-fasting"></span></span>
+          <span class="cell"><span class="m empty e-fasting"></span></span>
+          <span class="cell"><span class="m empty e-fasting"></span></span>
+          <span class="cell"><span class="m empty e-fasting"></span></span>
+          <span class="cell"><span class="m empty e-fasting"></span></span>
+          <span class="cell"><span class="m empty e-fasting"></span></span>
+          <span class="cell"><span class="m empty e-fasting"></span></span>
+        </div>
+      </div>
+    </div>
+    <p class="tiny">Monday and Thursday filled on Weekly Sunnah Fast is a recording, not a streak or Sunnah grade. Ramadan Preparation all-dotted in September is unanswered, not failure.</p>
+  </div>
+  <div class="phone">
+    <div class="bar">Weekly Sunnah Fast · 31 Aug · Layer 1</div>
+    <div class="sheet">
+      <div class="caption">What happened?</div>
+      <span class="chip on" style="border-color:var(--indigo)">Recorded engagement</span>
+      <span class="chip">Recorded as not done</span>
+      <span class="chip">Unanswered</span>
+      <p class="muted">No remaining-fasts counter. No Ramadan countdown.</p>
+    </div>
+  </div>
+  <div class="phone">
+    <div class="bar">Optional · Layer 2</div>
+    <div class="sheet">
+      <div class="caption">Factors you noticed</div>
+      <p class="muted"><strong>Support</strong></p>
+      <span class="chip on">Existing routine</span>
+      <span class="chip">Health felt sufficient</span>
+      <span class="chip">Community programme</span>
+      <span class="chip">Reminder or cue</span>
+      <span class="chip">Other</span>
+      <p class="muted"><strong>Challenges</strong></p>
+      <span class="chip">Health</span>
+      <span class="chip">Travel</span>
+      <span class="chip on">Work commitments</span>
+      <span class="chip">Fatigue</span>
+      <span class="chip">Competing priorities</span>
+      <span class="chip">Other</span>
+    </div>
+  </div>
+
+  <h2 id="hadith">5. Hadith card</h2>
+  <p class="note">Steel blue family. Row labelled <strong>Reflection</strong> in this proposal. If implemented, visible copy should be <strong>Hadith Reflection</strong> so it is not Qur’anic Reflection, Application Reflection, or Personal Reflection.</p>
+  <div class="phone" id="hadith-card">
+    <div class="bar">Home · weekly grid</div>
+    <div class="card c-hadith">
+      <div class="head">
+        <button class="h-hadith" type="button" aria-label="Previous week">‹</button>
+        <h3>Hadith</h3>
+        <button class="h-hadith" type="button" aria-label="Next week">›</button>
+      </div>
+      <div class="weekline">
+        <span>31 Aug – 6 Sep</span>
+        <button type="button">This week</button>
+      </div>
+      <div class="wdrow">
+        <span></span><span>M</span><span>T</span><span>W</span><span>T</span><span class="fri">F</span><span>S</span><span>S</span>
+      </div>
+      <div class="band" style="background:#c5d7e6">
+        <div class="band-lab">Encounter</div>
+        <div class="grid">
+          <span class="row-lab">Reading</span>
+          <span class="cell"><span class="m fill f-hadith"></span></span>
+          <span class="cell"><span class="m empty e-hadith"></span></span>
+          <span class="cell"><span class="m fill f-hadith"></span></span>
+          <span class="cell"><span class="m empty e-hadith"></span></span>
+          <span class="cell"><span class="m fill f-hadith"></span></span>
+          <span class="cell"><span class="m empty e-hadith"></span></span>
+          <span class="cell"><span class="m empty e-hadith"></span></span>
+          <span class="row-lab">Listening</span>
+          <span class="cell"><span class="m empty e-hadith"></span></span>
+          <span class="cell"><span class="m fill f-hadith"></span></span>
+          <span class="cell"><span class="m empty e-hadith"></span></span>
+          <span class="cell"><span class="m fill f-hadith"></span></span>
+          <span class="cell"><span class="m empty e-hadith"></span></span>
+          <span class="cell"><span class="m empty e-hadith"></span></span>
+          <span class="cell"><span class="m outline o-hadith"></span></span>
+        </div>
+      </div>
+      <div class="band" style="background:#d0deea">
+        <div class="band-lab">Retention and study</div>
+        <div class="grid">
+          <span class="row-lab">Memorisation</span>
+          <span class="cell"><span class="m empty e-hadith"></span></span>
+          <span class="cell"><span class="m empty e-hadith"></span></span>
+          <span class="cell"><span class="m fill f-hadith"></span></span>
+          <span class="cell"><span class="m empty e-hadith"></span></span>
+          <span class="cell"><span class="m empty e-hadith"></span></span>
+          <span class="cell"><span class="m empty e-hadith"></span></span>
+          <span class="cell"><span class="m empty e-hadith"></span></span>
+          <span class="row-lab">Study Circle</span>
+          <span class="cell"><span class="m empty e-hadith"></span></span>
+          <span class="cell"><span class="m empty e-hadith"></span></span>
+          <span class="cell"><span class="m empty e-hadith"></span></span>
+          <span class="cell"><span class="m empty e-hadith"></span></span>
+          <span class="cell"><span class="m fill f-hadith"></span></span>
+          <span class="cell"><span class="m empty e-hadith"></span></span>
+          <span class="cell"><span class="m empty e-hadith"></span></span>
+          <span class="row-lab">Teaching / Discussion</span>
+          <span class="cell"><span class="m empty e-hadith"></span></span>
+          <span class="cell"><span class="m empty e-hadith"></span></span>
+          <span class="cell"><span class="m empty e-hadith"></span></span>
+          <span class="cell"><span class="m empty e-hadith"></span></span>
+          <span class="cell"><span class="m outline o-hadith"></span></span>
+          <span class="cell"><span class="m empty e-hadith"></span></span>
+          <span class="cell"><span class="m empty e-hadith"></span></span>
+        </div>
+      </div>
+      <div class="band" style="background:#dae6ef">
+        <div class="band-lab">Notice</div>
+        <div class="grid">
+          <span class="row-lab">Hadith Reflection</span>
+          <span class="cell"><span class="m fill f-hadith"></span></span>
+          <span class="cell"><span class="m empty e-hadith"></span></span>
+          <span class="cell"><span class="m empty e-hadith"></span></span>
+          <span class="cell"><span class="m fill f-hadith"></span></span>
+          <span class="cell"><span class="m empty e-hadith"></span></span>
+          <span class="cell"><span class="m empty e-hadith"></span></span>
+          <span class="cell"><span class="m empty e-hadith"></span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="phone">
+    <div class="bar">Hadith Reflection · 3 Sep · Layer 1</div>
+    <div class="sheet">
+      <div class="caption">What happened?</div>
+      <span class="chip on" style="border-color:var(--steel)">Recorded engagement</span>
+      <span class="chip">Recorded as not done</span>
+      <span class="chip">Unanswered</span>
+      <p class="muted">Does not write Qur’anic Reflection. Does not write Application Reflection. Teaching / Discussion is not proof of teaching competence.</p>
+    </div>
+  </div>
+  <div class="phone">
+    <div class="bar">Optional · Layer 2</div>
+    <div class="sheet">
+      <div class="caption">Factors you noticed</div>
+      <p class="muted"><strong>Support</strong></p>
+      <span class="chip">Book or recording available</span>
+      <span class="chip on">Study circle</span>
+      <span class="chip">Teacher guidance</span>
+      <span class="chip">Commute audio</span>
+      <span class="chip">Existing routine</span>
+      <span class="chip">Other</span>
+      <p class="muted"><strong>Challenges</strong></p>
+      <span class="chip">Limited time</span>
+      <span class="chip">Device distraction</span>
+      <span class="chip on">Competing priorities</span>
+      <span class="chip">Fatigue</span>
+      <span class="chip">Other</span>
+    </div>
+  </div>
+
+  <h2 id="home">6. Home Dashboard — all cards together</h2>
+  <p class="note">Salah and Qur’an shown as short snapshots so the remaining cards fit a review frame. A real device would scroll. That length is the main density risk.</p>
+  <div class="phone tall" id="home-all" style="height:auto">
+    <div class="appbar">
+      <h2>Muhasabah</h2>
+      <button class="guide" type="button">ⓘ Guide</button>
+      <button type="button" aria-label="Settings" style="border:0;background:transparent;font-size:16px;width:40px">⚙</button>
+    </div>
+    <div class="pad">
+      <div class="banner">Sample/demo records are visible. They stay until you archive them.</div>
+      <button class="cta" type="button">Start today’s check-in</button>
+      <div class="card c-salah">
+        <div class="head">
+          <button class="h-salah" type="button">‹</button>
+          <h3>Salah</h3>
+          <button class="h-salah" type="button">›</button>
+        </div>
+        <div class="weekline"><span>31 Aug – 6 Sep</span><button type="button">This week</button></div>
+        <div class="wdrow" style="grid-template-columns:58px repeat(7,1fr)">
+          <span></span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span>
+        </div>
+        <div class="grid" style="grid-template-columns:52px repeat(7,1fr)">
+          <span class="row-lab">Fajr</span>
+          <span class="cell"><span class="m fill f-salah"></span></span>
+          <span class="cell"><span class="m empty e-salah"></span></span>
+          <span class="cell"><span class="m fill f-salah"></span></span>
+          <span class="cell"><span class="m fill f-salah"></span></span>
+          <span class="cell"><span class="m fill f-salah"></span></span>
+          <span class="cell"><span class="m empty e-salah"></span></span>
+          <span class="cell"><span class="m empty e-salah"></span></span>
+        </div>
+        <p class="tiny">Approved Salah card continues below the fold on device.</p>
+      </div>
+      <div class="card c-quran">
+        <div class="head">
+          <button class="h-quran" type="button">‹</button>
+          <h3>Qur’an</h3>
+          <button class="h-quran" type="button">›</button>
+        </div>
+        <div class="weekline"><span>31 Aug – 6 Sep</span><button type="button">This week</button></div>
+        <div class="grid">
+          <span class="row-lab">Recitation</span>
+          <span class="cell"><span class="m fill f-quran"></span></span>
+          <span class="cell"><span class="m empty e-quran"></span></span>
+          <span class="cell"><span class="m fill f-quran"></span></span>
+          <span class="cell"><span class="m fill f-quran"></span></span>
+          <span class="cell"><span class="m fill f-quran"></span></span>
+          <span class="cell"><span class="m empty e-quran"></span></span>
+          <span class="cell"><span class="m empty e-quran"></span></span>
+        </div>
+        <p class="tiny">Approved Qur’an groups continue on device.</p>
+      </div>
+      <div class="card c-dhikr">
+        <div class="head"><button class="h-dhikr" type="button">‹</button><h3>Dhikr</h3><button class="h-dhikr" type="button">›</button></div>
+        <div class="weekline"><span>31 Aug – 6 Sep</span><button type="button">This week</button></div>
+        <div class="grid">
+          <span class="row-lab">Morning Adhkar</span>
+          <span class="cell"><span class="m fill f-dhikr"></span></span>
+          <span class="cell"><span class="m empty e-dhikr"></span></span>
+          <span class="cell"><span class="m fill f-dhikr"></span></span>
+          <span class="cell"><span class="m outline o-dhikr"></span></span>
+          <span class="cell"><span class="m fill f-dhikr"></span></span>
+          <span class="cell"><span class="m empty e-dhikr"></span></span>
+          <span class="cell"><span class="m empty e-dhikr"></span></span>
+        </div>
+        <p class="tiny">Full five rows on the dedicated card mockup above.</p>
+      </div>
+      <div class="card c-fasting">
+        <div class="head"><button class="h-fasting" type="button">‹</button><h3>Fasting</h3><button class="h-fasting" type="button">›</button></div>
+        <div class="weekline"><span>31 Aug – 6 Sep</span><button type="button">This week</button></div>
+        <div class="grid">
+          <span class="row-lab">Weekly Sunnah Fast</span>
+          <span class="cell"><span class="m fill f-fasting"></span></span>
+          <span class="cell"><span class="m empty e-fasting"></span></span>
+          <span class="cell"><span class="m empty e-fasting"></span></span>
+          <span class="cell"><span class="m fill f-fasting"></span></span>
+          <span class="cell"><span class="m empty e-fasting"></span></span>
+          <span class="cell"><span class="m empty e-fasting"></span></span>
+          <span class="cell"><span class="m empty e-fasting"></span></span>
+        </div>
+      </div>
+      <div class="card c-family">
+        <div class="head"><button class="h-family" type="button">‹</button><h3>Family</h3><button class="h-family" type="button">›</button></div>
+        <div class="weekline"><span>31 Aug – 6 Sep</span><button type="button">This week</button></div>
+        <div class="grid">
+          <span class="row-lab">Parents Contact</span>
+          <span class="cell"><span class="m fill f-family"></span></span>
+          <span class="cell"><span class="m empty e-family"></span></span>
+          <span class="cell"><span class="m fill f-family"></span></span>
+          <span class="cell"><span class="m empty e-family"></span></span>
+          <span class="cell"><span class="m fill f-family"></span></span>
+          <span class="cell"><span class="m empty e-family"></span></span>
+          <span class="cell"><span class="m outline o-family"></span></span>
+        </div>
+      </div>
+      <div class="card c-charity">
+        <div class="head"><button class="h-charity" type="button">‹</button><h3>Charity</h3><button class="h-charity" type="button">›</button></div>
+        <div class="weekline"><span>31 Aug – 6 Sep</span><button type="button">This week</button></div>
+        <div class="grid">
+          <span class="row-lab">Voluntary Charity</span>
+          <span class="cell"><span class="m fill f-charity"></span></span>
+          <span class="cell"><span class="m empty e-charity"></span></span>
+          <span class="cell"><span class="m empty e-charity"></span></span>
+          <span class="cell"><span class="m fill f-charity"></span></span>
+          <span class="cell"><span class="m empty e-charity"></span></span>
+          <span class="cell"><span class="m outline o-charity"></span></span>
+          <span class="cell"><span class="m empty e-charity"></span></span>
+          <span class="row-lab">Zakat</span>
+          <span class="cell"><span class="z z-empty"></span></span>
+          <span class="cell"><span class="z z-due"></span></span>
+          <span class="cell"><span class="z z-empty"></span></span>
+          <span class="cell"><span class="z z-planned"></span></span>
+          <span class="cell"><span class="z z-empty"></span></span>
+          <span class="cell"><span class="z z-paid"></span></span>
+          <span class="cell"><span class="z z-na"></span></span>
+        </div>
+      </div>
+      <div class="card c-hadith">
+        <div class="head"><button class="h-hadith" type="button">‹</button><h3>Hadith</h3><button class="h-hadith" type="button">›</button></div>
+        <div class="weekline"><span>31 Aug – 6 Sep</span><button type="button">This week</button></div>
+        <div class="grid">
+          <span class="row-lab">Reading</span>
+          <span class="cell"><span class="m fill f-hadith"></span></span>
+          <span class="cell"><span class="m empty e-hadith"></span></span>
+          <span class="cell"><span class="m fill f-hadith"></span></span>
+          <span class="cell"><span class="m empty e-hadith"></span></span>
+          <span class="cell"><span class="m fill f-hadith"></span></span>
+          <span class="cell"><span class="m empty e-hadith"></span></span>
+          <span class="cell"><span class="m empty e-hadith"></span></span>
+        </div>
+      </div>
+      <div class="card c-sum"><strong>Current review snapshot</strong><p class="tiny">7 days · recorded days counted · missing excluded from outcomes</p></div>
+      <div class="card c-sum"><strong>Recognition</strong><p class="tiny">Available for 30-day and 90-day views.</p></div>
+      <div class="card c-sum"><strong>PONDER</strong><p class="tiny">What do you notice about what you recorded?</p></div>
+      <button class="cta" type="button">Add a response</button>
+      <p class="foot">Colour identifies the domain, not spiritual rank. Not recorded is not the same as missed.</p>
+    </div>
+    <div class="nav"><span>Home</span><span>Review</span><span>History</span><span>My Response</span></div>
+  </div>
+
+  <h2 id="order">7. Suggested card order</h2>
+  <table>
+    <thead>
+      <tr><th>Position</th><th>Card</th><th>Reason</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>1</td><td>Salah</td><td>Primary daily obligation grid (already approved).</td></tr>
+      <tr><td>2</td><td>Qur’an</td><td>Primary daily engagement grid (already approved).</td></tr>
+      <tr><td>3</td><td>Dhikr</td><td>Same worship-day rhythm as Salah / Qur’an; timed adhkar sit next to the prayer card.</td></tr>
+      <tr><td>4</td><td>Fasting</td><td>Short, sparse grid; placing it early avoids burying a mostly unanswered week at the bottom.</td></tr>
+      <tr><td>5</td><td>Family</td><td>Kinship after personal worship; before giving.</td></tr>
+      <tr><td>6</td><td>Charity + Zakat</td><td>Giving after kinship so Family Support and charitable Family Support are not adjacent twins.</td></tr>
+      <tr><td>7</td><td>Hadith</td><td>Study card last among domains so it is not confused with Qur’an immediately below Qur’an.</td></tr>
+      <tr><td>8+</td><td>Review · Recognition · PONDER · Add a response</td><td>SEE → PONDER → EXPLORE. Keep after the grids.</td></tr>
+    </tbody>
+  </table>
+  <p class="note">Do not add textual duplicate cards for the same domains. Conduct / gratitude notes stay in check-in, not as extra Home grids, unless separately approved.</p>
+
+  <h2 id="guide">8. Shared Guide additions (proposed)</h2>
+  <p class="note">If these cards are approved, Marks Guide gains domain colour examples and the Zakat diamond set. Cards still have no legends.</p>
+  <div class="phone">
+    <div class="bar">Home header · ⓘ Guide</div>
+    <div class="sheet">
+      <div class="caption">Marks Guide</div>
+      <p class="muted">These marks show what was recorded. They do not measure spirituality, worth, rank, success, failure, or achievement.</p>
+      <p class="muted"><strong>Daily rows (all domains except Zakat)</strong></p>
+      <div class="ex"><span class="m fill f-dhikr"></span><span>Recorded engagement</span></div>
+      <div class="ex"><span class="m outline o-dhikr"></span><span>Recorded as not done</span></div>
+      <div class="ex"><span class="m empty e-dhikr"></span><span>Unanswered</span></div>
+      <p class="muted"><strong>Zakat (diamonds)</strong></p>
+      <div class="ex"><span class="z z-due"></span><span>Due</span></div>
+      <div class="ex"><span class="z z-planned"></span><span>Planned</span></div>
+      <div class="ex"><span class="z z-paid"></span><span>Paid</span></div>
+      <div class="ex"><span class="z z-na"></span><span>Not applicable</span></div>
+      <p class="muted">Missing records are not treated as missed. Colour identifies domains. Factors you noticed are provenance, not causes.</p>
+    </div>
+  </div>
+
+  <h2>9. Out of this package</h2>
+  <p class="note">Do not implement these grids until visual approval. Do not add scores, streaks, remaining-zakat counters, or kinship league tables. No automatic fill between any of these new rows. Write-up: <code>remaining_domain_cards_review.md</code>.</p>
+</body>
+</html>

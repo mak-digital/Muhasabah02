@@ -1,23 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/dimensions.dart';
+import '../../application/providers.dart';
 import '../../domain/date_key.dart';
+import '../../domain/first_day_of_week.dart';
 import '../../domain/weekly_calendar.dart';
 
-class ProgressCalendarGrid extends StatelessWidget {
+class ProgressCalendarGrid extends ConsumerWidget {
   const ProgressCalendarGrid({
     super.key,
     required this.dateKeys,
     required this.cellBuilder,
+    this.firstDayOfWeekIndex,
   });
 
   final List<String> dateKeys;
   final Widget Function(BuildContext context, String dateKey) cellBuilder;
+  final int? firstDayOfWeekIndex;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(prefsTickProvider);
     final localizations = MaterialLocalizations.of(context);
-    final firstDay = localizations.firstDayOfWeekIndex;
+    final firstDay =
+        firstDayOfWeekIndex ??
+        ref
+            .read(appPrefsProvider)
+            .firstDayOfWeek
+            .sundayBasedIndex(localizations.firstDayOfWeekIndex);
     final layout = weeklyCalendarLayout(
       periodKeys: dateKeys,
       firstDayOfWeekIndex: firstDay,
@@ -55,6 +66,7 @@ class ProgressCalendarGrid extends StatelessWidget {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     localizations.narrowWeekdays[(firstDay + row) % 7],
+                    key: Key('calendar-weekday-row-$row'),
                     style: Theme.of(context).textTheme.labelSmall,
                   ),
                 ),

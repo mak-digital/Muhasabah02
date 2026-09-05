@@ -4,8 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../application/providers.dart';
 import '../../domain/copy.dart';
 import '../../domain/date_key.dart';
+import '../../domain/first_day_of_week.dart';
 import '../../domain/personal_response.dart';
 import '../../domain/review_period.dart';
+import '../../domain/weekly_calendar.dart';
 import '../shared/add_response_button.dart';
 import '../shared/ui_bits.dart';
 import 'day_evidence_screen.dart';
@@ -29,6 +31,13 @@ class RecordedDaysScreen extends ConsumerWidget {
         data: (records) {
           final keys = periodDateKeys(period.days, now: now).reversed.toList();
           final present = {for (final record in records) record.dateKey};
+          ref.watch(prefsTickProvider);
+          final firstDay = ref
+              .read(appPrefsProvider)
+              .firstDayOfWeek
+              .sundayBasedIndex(
+                MaterialLocalizations.of(context).firstDayOfWeekIndex,
+              );
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
@@ -50,29 +59,7 @@ class RecordedDaysScreen extends ConsumerWidget {
                 },
               ),
               const SizedBox(height: 12),
-              for (final key in keys)
-                Card(
-                  margin: const EdgeInsets.only(bottom: 8),
-                  child: ListTile(
-                    title: Text(key),
-                    subtitle: Text(
-                      present.contains(key)
-                          ? 'Check-in saved'
-                          : 'No check-in saved',
-                    ),
-                    enabled: present.contains(key),
-                    onTap: present.contains(key)
-                        ? () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute<void>(
-                                builder: (_) => DayEvidenceScreen(dateKey: key),
-                              ),
-                            );
-                          }
-                        : null,
-                  ),
-                ),
+              ..._groupedDayTiles(context, keys, present, firstDay),
               AddResponseButton(
                 provenance: ResponseProvenance(
                   originType: ProvenanceOrigin.historicalReflection,
@@ -85,5 +72,46 @@ class RecordedDaysScreen extends ConsumerWidget {
         },
       ),
     );
+  }
+
+  List<Widget> _groupedDayTiles(
+    BuildContext context,
+    List<String> keys,
+    Set<String> present,
+    int firstDay,
+  ) {
+    final widgets = <Widget>[];
+    String? lastWeekKey;
+    for (final key in keys) {
+      final start = weekStartForKey(key, firstDayOfWeekIndex: firstDay);
+      final weekKey = '${start.year}-${start.month}-${start.day}';
+      if (weekKey != lastWeekKey) {
+        lastWeekKey = weekKey;
+        widgets.add(SectionHeader(weekRangeLabel(start)));
+      }
+      widgets.add(
+        Card(
+          margin: const EdgeInsets.only(bottom: 8),
+          child: ListTile(
+            title: Text(key),
+            subtitle: Text(
+              present.contains(key) ? 'Check-in saved' : 'No check-in saved',
+            ),
+            enabled: present.contains(key),
+            onTap: present.contains(key)
+                ? () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute<void>(
+                        builder: (_) => DayEvidenceScreen(dateKey: key),
+                      ),
+                    );
+                  }
+                : null,
+          ),
+        ),
+      );
+    }
+    return widgets;
   }
 }

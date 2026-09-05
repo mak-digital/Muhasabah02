@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muhasabah02/domain/date_key.dart';
 import 'package:muhasabah02/app/dimensions.dart';
@@ -7,10 +8,12 @@ import 'package:muhasabah02/presentation/shared/state_marker.dart';
 
 void main() {
   Widget harness(Widget child) {
-    return MaterialApp(
-      locale: const Locale('en', 'US'),
-      home: Scaffold(
-        body: SingleChildScrollView(child: Center(child: child)),
+    return ProviderScope(
+      child: MaterialApp(
+        locale: const Locale('en', 'US'),
+        home: Scaffold(
+          body: SingleChildScrollView(child: Center(child: child)),
+        ),
       ),
     );
   }
@@ -62,6 +65,42 @@ void main() {
       expect(tester.getSize(find.byKey(unanswered)), expected);
     },
   );
+
+  testWidgets('late outline and missed slash share the 14px footprint', (
+    tester,
+  ) async {
+    const late = Key('marker-late');
+    const missed = Key('marker-missed');
+    await tester.pumpWidget(
+      harness(
+        const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            RecordedStateMarker(
+              key: late,
+              color: Colors.teal,
+              kind: MarkerKind.outlined,
+              semanticLabel: 'late',
+            ),
+            RecordedStateMarker(
+              key: missed,
+              color: Color(0xFF8A6A62),
+              kind: MarkerKind.missed,
+              semanticLabel: 'missed',
+            ),
+          ],
+        ),
+      ),
+    );
+    expect(
+      tester.getSize(find.byKey(late)),
+      tester.getSize(find.byKey(missed)),
+    );
+    expect(
+      tester.getSize(find.byKey(missed)),
+      const Size(AppDimensions.progressMarker, AppDimensions.progressMarker),
+    );
+  });
 
   testWidgets('calendar rows are weekdays and columns are weeks', (
     tester,

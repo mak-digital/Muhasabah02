@@ -1,0 +1,69 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:muhasabah02/data/memory_repositories.dart';
+import 'package:muhasabah02/domain/copy.dart';
+import 'package:muhasabah02/domain/daily_check_in.dart';
+import 'package:muhasabah02/domain/quran.dart';
+
+import '../support/test_app.dart';
+
+void main() {
+  testWidgets('settings expose baselines, aspirations, and quotation cadence', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(400, 1600);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final checkIns = MemoryCheckInRepository();
+    await checkIns.save(
+      DailyCheckIn.empty('2026-09-03')
+          .withHomeTrace('family.familyContact', TernaryOutcome.positive),
+    );
+
+    await tester.pumpWidget(
+      testApp(checkIns: checkIns, now: DateTime(2026, 9, 5)),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Settings'));
+    await tester.pumpAndSettle();
+    expect(find.text(Copy.reflectionPreferences), findsOneWidget);
+    expect(find.text(Copy.baselinesTitle), findsOneWidget);
+    expect(find.text(Copy.personalAspirations), findsOneWidget);
+    expect(find.text(Copy.reflectionsQuotations), findsOneWidget);
+
+    await tester.ensureVisible(find.text(Copy.baselinesTitle));
+    await tester.tap(find.text(Copy.baselinesTitle));
+    await tester.pumpAndSettle();
+    expect(find.text('Create from last 30 days'), findsOneWidget);
+    expect(find.textContaining('XP'), findsNothing);
+    await tester.tap(find.text('Create current snapshot baseline'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Sibling Contact'), findsWidgets);
+  });
+
+  testWidgets('hidden cadence removes Reflection of the Week', (tester) async {
+    tester.view.physicalSize = const Size(400, 2800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(testApp(now: DateTime(2026, 9, 5)));
+    await tester.pumpAndSettle();
+    expect(find.text(Copy.reflectionOfTheWeek), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Settings'));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text(Copy.quotationCadence));
+    await tester.tap(find.text(Copy.quotationCadence));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Hidden'));
+    await tester.pumpAndSettle();
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(find.text(Copy.reflectionOfTheWeek), findsNothing);
+  });
+}

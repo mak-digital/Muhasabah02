@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Qur’an Home card — revision 2</title>
+  <style>
+    :root {
+      --bg: #f4f1ea;
+      --ink: #1d2a2c;
+      --muted: #4d5c63;
+      --quran: #d7e4f2;
+      --recite: #cfe0ef;
+      --retain: #d5e4ea;
+      --study: #dce3f0;
+      --summary: #eef2f4;
+      --blue: #3d6b99;
+      --missed: #8a6a62;
+      --mark: 14px;
+    }
+    body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--ink); margin: 0; padding: 24px; }
+    h1, h2 { font-weight: 600; }
+    .note { max-width: 860px; line-height: 1.45; color: var(--muted); }
+    .phone { width: 390px; background: #fff; border-radius: 28px; box-shadow: 0 12px 40px rgba(0,0,0,.12); padding: 18px 16px 24px; margin: 16px 16px 28px 0; display: inline-block; vertical-align: top; box-sizing: border-box; }
+    .bar { font-size: 13px; color: #5c6e7a; margin-bottom: 10px; }
+    .card { background: var(--quran); border-radius: 16px; padding: 12px; }
+    .head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+    .head button { width: 36px; height: 36px; border: 0; border-radius: 10px; background: rgba(61,107,153,.14); color: var(--blue); font-size: 18px; cursor: pointer; }
+    .head h3 { margin: 0; font-size: 16px; font-weight: 600; text-align: center; flex: 1; }
+    .weekline { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 12px; color: var(--muted); }
+    .weekline button { border: 0; background: #fff; color: var(--blue); border-radius: 999px; padding: 4px 10px; font-size: 12px; cursor: pointer; }
+    .wdrow { display: grid; grid-template-columns: 92px repeat(7, 1fr); gap: 4px; margin-bottom: 6px; font-size: 10px; font-weight: 600; color: var(--muted); text-align: center; }
+    .fri { color: var(--blue); }
+    .band { border-radius: 12px; padding: 8px 6px 6px; margin-bottom: 6px; }
+    .recite { background: var(--recite); }
+    .retain { background: var(--retain); }
+    .study { background: var(--study); }
+    .band-lab { font-size: 10px; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); padding: 0 4px 6px; font-weight: 600; }
+    .grid { display: grid; grid-template-columns: 86px repeat(7, 1fr); gap: 5px 3px; align-items: center; }
+    .row-lab { font-size: 10px; line-height: 1.2; color: var(--ink); padding-left: 4px; }
+    .cell { height: 22px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 6px; }
+    .cell:focus { outline: 2px solid var(--blue); }
+    .m { width: var(--mark); height: var(--mark); border-radius: 50%; display: grid; place-items: center; box-sizing: border-box; flex-shrink: 0; position: relative; }
+    .fill { background: var(--blue); }
+    .late { background: transparent; border: 1.5px solid var(--blue); }
+    .miss { background: transparent; border: 1.5px solid var(--missed); }
+    .miss::after { content: ""; position: absolute; width: 10px; height: 1.5px; background: var(--missed); transform: rotate(-45deg); border-radius: 1px; }
+    .empty { background: transparent; border: 1.5px dotted rgba(61,107,153,.45); }
+    .legend { font-size: 11px; color: var(--muted); margin-top: 10px; line-height: 1.7; }
+    .legend i { display: inline-flex; vertical-align: middle; margin-right: 6px; }
+    .muted { font-size: 12px; color: var(--muted); line-height: 1.4; }
+    .sheet { background: var(--summary); border-radius: 16px; padding: 12px; margin-top: 10px; }
+    .chip { display: inline-block; border-radius: 999px; padding: 6px 10px; font-size: 12px; margin: 0 6px 6px 0; background: #fff; border: 1px solid #c5d0d4; }
+    .chip.on { background: var(--quran); border-color: var(--blue); }
+    .caption { font-size: 13px; font-weight: 600; margin: 0 0 8px; }
+    .callout { max-width: 860px; border-left: 3px solid var(--blue); padding: 8px 12px; margin: 12px 0 20px; color: var(--muted); font-size: 13px; line-height: 1.45; }
+    table { border-collapse: collapse; max-width: 960px; font-size: 12px; margin: 12px 0 24px; background: #fff; }
+    th, td { border: 1px solid #d5dde2; padding: 8px 10px; text-align: left; vertical-align: top; }
+    th { background: var(--quran); }
+    .ok { color: var(--blue); font-weight: 600; }
+    .no { color: var(--muted); }
+    ol.flow { max-width: 860px; color: var(--muted); line-height: 1.45; }
+  </style>
+</head>
+<body>
+  <h1>Qur’an Home card — revision 2</h1>
+  <p class="note">Mockup and interaction review only. Companion write-up: <code>quran_card_review.md</code>. Salah Home card stays as implemented. Other domain Home cards are not in this package.</p>
+  <p class="callout"><strong>Qur’anic Reflection</strong> is the Home row (verses, meanings, tafsir, lessons contemplated). <strong>Application Reflection</strong> stays Settings → About Muhasabah and is not a tracked domain. Do not say “App Reflection”.</p>
+  <p class="callout"><strong>Pending approval:</strong> Recitation with Meaning = Recorded engagement automatically sets Recitation = Recorded engagement on that date. No other automatic dependencies.</p>
+
+  <h2>1. Qur’an card (Monday first)</h2>
+  <div class="phone" id="quran-card">
+    <div class="bar">Home · SEE → PONDER → EXPLORE</div>
+    <div class="card">
+      <div class="head">
+        <button type="button" aria-label="Previous week">‹</button>
+        <h3>Qur’an</h3>
+        <button type="button" aria-label="Next week">›</button>
+      </div>
+      <div class="weekline">
+        <span>25 Aug – 31 Aug</span>
+        <button type="button">This week</button>
+      </div>
+      <div class="wdrow">
+        <span></span>
+        <span>M</span><span>T</span><span>W</span><span>T</span><span class="fri">F</span><span>S</span><span>S</span>
+      </div>
+
+      <div class="band recite">
+        <div class="band-lab">Recitation</div>
+        <div class="grid">
+          <span class="row-lab">Recitation</span>
+          <span class="cell" title="Engagement without meaning — valid"><span class="m fill"></span></span>
+          <span class="cell"><span class="m empty"></span></span>
+          <span class="cell" title="Filled because Meaning was recorded as engagement"><span class="m fill"></span></span>
+          <span class="cell"><span class="m fill"></span></span>
+          <span class="cell"><span class="m late"></span></span>
+          <span class="cell"><span class="m empty"></span></span>
+          <span class="cell"><span class="m fill"></span></span>
+
+          <span class="row-lab">Recitation with Meaning</span>
+          <span class="cell"><span class="m empty"></span></span>
+          <span class="cell"><span class="m empty"></span></span>
+          <span class="cell" title="Engagement — Recitation also engagement"><span class="m fill"></span></span>
+          <span class="cell"><span class="m fill"></span></span>
+          <span class="cell"><span class="m late"></span></span>
+          <span class="cell"><span class="m empty"></span></span>
+          <span class="cell"><span class="m empty"></span></span>
+        </div>
+      </div>
+
+      <div class="band retain">
+        <div class="band-lab">Retention</div>
+        <div class="grid">
+          <span class="row-lab">Memorisation</span>
+          <span class="cell"><span class="m empty"></span></span>
+          <span class="cell"><span class="m empty"></span></span>
+          <span class="cell"><span class="m fill"></span></span>
+          <span class="cell"><span class="m empty"></span></span>
+          <span class="cell"><span class="m empty"></span></span>
+          <span class="cell"><span class="m fill"></span></span>
+          <span class="cell"><span class="m late"></span></span>
+
+          <span class="row-lab">Revision</span>
+          <span class="cell"><span class="m fill"></span></span>
+          <span class="cell"><span class="m empty"></span></span>
+          <span class="cell"><span class="m empty"></span></span>
+          <span class="cell"><span class="m late"></span></span>
+          <span class="cell"><span class="m empty"></span></span>
+          <span class="cell"><span class="m fill"></span></span>
+          <span class="cell"><span class="m empty"></span></span>
+        </div>
+      </div>
+
+      <div class="band study">
+        <div class="band-lab">Study and notice</div>
+        <div class="grid">
+          <span class="row-lab">Tafsir</span>
+          <span class="cell"><span class="m empty"></span></span>
+          <span class="cell"><span class="m fill"></span></span>
+          <span class="cell"><span class="m empty"></span></span>
+          <span class="cell"><span class="m empty"></span></span>
+          <span class="cell"><span class="m fill"></span></span>
+          <span class="cell"><span class="m empty"></span></span>
+          <span class="cell"><span class="m empty"></span></span>
+
+          <span class="row-lab">Qur’anic Reflection</span>
+          <span class="cell"><span class="m fill"></span></span>
+          <span class="cell"><span class="m empty"></span></span>
+          <span class="cell"><span class="m empty"></span></span>
+          <span class="cell"><span class="m fill"></span></span>
+          <span class="cell"><span class="m empty"></span></span>
+          <span class="cell"><span class="m empty"></span></span>
+          <span class="cell"><span class="m fill"></span></span>
+
+          <span class="row-lab">Conscious Application</span>
+          <span class="cell"><span class="m empty"></span></span>
+          <span class="cell"><span class="m fill"></span></span>
+          <span class="cell"><span class="m empty"></span></span>
+          <span class="cell"><span class="m late"></span></span>
+          <span class="cell"><span class="m fill"></span></span>
+          <span class="cell"><span class="m empty"></span></span>
+          <span class="cell"><span class="m empty"></span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="note">Persistent legend is not on the card. Home header ⓘ Symbols holds Recorded engagement, Recorded as not done, and Unanswered.</p>
+
+  <h2>2. Semantic consistency on the card</h2>
+  <p class="note">Wednesday: Recitation with Meaning is engagement, so Recitation is also engagement (proposed auto-fill). Monday: Recitation engagement with Meaning unanswered — allowed. Friday: Recitation recorded as not done; Meaning also not done — allowed. No cell shows Meaning engagement over Recitation empty or not done.</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Source = Recorded engagement</th>
+        <th>Auto-write Recitation?</th>
+        <th>Auto-write anything else?</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Recitation with Meaning</td>
+        <td class="ok">Yes — same date only</td>
+        <td class="no">No</td>
+      </tr>
+      <tr>
+        <td>Recitation, Memorisation, Revision, Tafsir, Qur’anic Reflection, Conscious Application</td>
+        <td class="no">No</td>
+        <td class="no">No</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>3. Layer 1 — What happened?</h2>
+  <div class="phone" id="layer-1">
+    <div class="bar">Recitation with Meaning · 27 Aug</div>
+    <div class="sheet">
+      <div class="caption">Layer 1 · What happened?</div>
+      <span class="chip on">Recorded engagement</span>
+      <span class="chip">Recorded as not done</span>
+      <span class="chip">Unanswered</span>
+      <p class="muted">Selecting Recorded engagement also records Recitation as engagement for 27 Aug. Recitation is not marked missed. Other rows stay as they are.</p>
+    </div>
+  </div>
+  <div class="phone">
+    <div class="bar">Recitation · 29 Aug · blocked example</div>
+    <div class="sheet">
+      <div class="caption">Layer 1 · What happened?</div>
+      <span class="chip">Recorded engagement</span>
+      <span class="chip on">Recorded as not done</span>
+      <span class="chip">Unanswered</span>
+      <p class="muted">If Recitation with Meaning is already Recorded engagement, changing Recitation to not done or unanswered is blocked until Meaning is changed. Unanswered is not converted to missed.</p>
+    </div>
+  </div>
+
+  <h2>4. Layer 2 — Factors you noticed</h2>
+  <div class="phone" id="layer-2">
+    <div class="bar">Optional · does not complete the day</div>
+    <div class="sheet">
+      <div class="caption">Factors you noticed</div>
+      <p class="muted">Recorded factors. Things you noticed — not causes, scores, or recommendations. Skipping changes nothing.</p>
+      <p class="muted"><strong>You recorded support from…</strong></p>
+      <span class="chip">Time available</span>
+      <span class="chip on">Quiet space</span>
+      <span class="chip">Reminder or cue</span>
+      <span class="chip on">Translation available</span>
+      <span class="chip">Tafsir available</span>
+      <span class="chip">Community programme</span>
+      <span class="chip">Study circle</span>
+      <span class="chip">Teacher guidance</span>
+      <span class="chip">Family participation</span>
+      <span class="chip">Friend participation</span>
+      <span class="chip">Existing routine</span>
+      <span class="chip">Dedicated study session</span>
+      <span class="chip">Travel opportunity</span>
+      <span class="chip">Other</span>
+      <p class="muted" style="margin-top:8px"><strong>You recorded a challenge from…</strong></p>
+      <span class="chip">Limited time</span>
+      <span class="chip">Fatigue</span>
+      <span class="chip">Work commitments</span>
+      <span class="chip">Family commitments</span>
+      <span class="chip">Travel</span>
+      <span class="chip">Health</span>
+      <span class="chip">Social media distraction</span>
+      <span class="chip">Device distraction</span>
+      <span class="chip">Lack of routine</span>
+      <span class="chip">Competing priorities</span>
+      <span class="chip">Unexpected interruption</span>
+      <span class="chip">Other</span>
+    </div>
+  </div>
+
+  <h2>5. Example day-record flow</h2>
+  <ol class="flow">
+    <li>Open Qur’an → Recitation with Meaning for 27 Aug.</li>
+    <li>Layer 1: Recorded engagement. Recitation on 27 Aug becomes Recorded engagement (proposed auto-fill).</li>
+    <li>Layer 2: optional. Example: Quiet space, Translation available. Copy: “You recorded…”</li>
+    <li>Tafsir, Qur’anic Reflection, and Conscious Application remain unanswered unless the user records them. Not inferred. Not missed.</li>
+    <li>Conscious Application, if later recorded, is still not Application Reflection and not evidence of action.</li>
+  </ol>
+
+  <h2>6. Recognition wording</h2>
+  <div class="phone" id="recognition">
+    <div class="bar">Recognition · 30 days · descriptive only</div>
+    <div class="sheet">
+      <p class="muted">Context was recorded for 8 of 12 observations where you recorded Recitation with Meaning as not done.</p>
+      <p class="muted">Among those 8 observations, “Limited time” appeared on 5.</p>
+      <p class="muted">You recorded “Limited time” on these dates: 3 Aug, 10 Aug, 12 Aug, 19 Aug, 24 Aug.</p>
+      <p class="muted" style="margin-top:10px">You recorded “Study circle” on 4 of 6 observations where Qur’anic Reflection was recorded as engagement.</p>
+    </div>
+  </div>
+  <p class="note">Do not say caused, linked to, because, you should, or that Application Reflection / Conscious Application proves implementation.</p>
+
+  <h2>7. Out of this package</h2>
+  <p class="note">Do not implement Dhikr, Family, Charity, Fasting, or Hadith Home cards. Do not add Application Reflection as a Home row. Implementation waits on approval of the Recitation with Meaning → Recitation auto-fill and of the blocked reverse edit.</p>
+</body>
+</html>

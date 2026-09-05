@@ -13,6 +13,8 @@ import '../../domain/other_domains.dart';
 import '../../domain/prayer.dart';
 import '../../domain/quran.dart';
 import '../../domain/recorded_context.dart';
+import '../../domain/salah_factors.dart';
+import '../../domain/situation_notes.dart';
 import '../shared/activity_picker.dart';
 import '../shared/ui_bits.dart';
 
@@ -29,6 +31,7 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
   late DailyCheckIn _draft;
   late final TextEditingController _gratitude;
   late final TextEditingController _reflection;
+  late final TextEditingController _situationCustom;
   final Map<String, TextEditingController> _contextNotes = {};
   final Map<String, TextEditingController> _custom = {};
   var _loaded = false;
@@ -42,6 +45,7 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
     _draft = DailyCheckIn.empty(_key);
     _gratitude = TextEditingController();
     _reflection = TextEditingController();
+    _situationCustom = TextEditingController();
     Future<void>.microtask(_hydrate);
   }
 
@@ -59,6 +63,7 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
         _draft = existing;
         _gratitude.text = existing.gratitudeText ?? '';
         _reflection.text = existing.personalReflectionText ?? '';
+        _situationCustom.text = existing.situationNotes.customText ?? '';
       }
     });
   }
@@ -67,6 +72,7 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
   void dispose() {
     _gratitude.dispose();
     _reflection.dispose();
+    _situationCustom.dispose();
     for (final c in _contextNotes.values) {
       c.dispose();
     }
@@ -97,6 +103,8 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
           _optionalDomainsCard(),
           const SizedBox(height: 12),
           _contextCard(),
+          const SizedBox(height: 12),
+          _situationNotesCard(),
           if (_error != null) ...[
             const SizedBox(height: 12),
             Text(
@@ -135,6 +143,48 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
           ),
           const SizedBox(height: 12),
           for (final id in PrayerId.values) _prayerRow(id),
+          if (parseDateKey(_key).weekday == DateTime.friday) ...[
+            FilterChip(
+              key: const Key('salah-jumuah-congregation'),
+              selected: _draft.jumuahCongregation,
+              label: const Text('Friday congregation attended'),
+              onSelected: (selected) => setState(() {
+                _draft = _draft.copyWith(jumuahCongregation: selected);
+              }),
+            ),
+            const SizedBox(height: 8),
+          ],
+          Text(
+            'Friday prayer and voluntary prayers (optional)',
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+          const SizedBox(height: 4),
+          const Text(
+            'These stay off the recordable-field count. Unanswered is not missed.',
+          ),
+          const SizedBox(height: 8),
+          _extraPrayerStatus(
+            label: 'Jumu‘ah',
+            enabled: parseDateKey(_key).weekday == DateTime.friday,
+            status: _draft.jumuah,
+            onChanged: (status) => setState(() {
+              _draft = _draft.copyWith(jumuah: status);
+            }),
+          ),
+          _voluntaryRow(
+            label: 'Tahajjud',
+            outcome: _draft.tahajjud,
+            onChanged: (outcome) => setState(() {
+              _draft = _draft.copyWith(tahajjud: outcome);
+            }),
+          ),
+          _voluntaryRow(
+            label: 'Ishraq',
+            outcome: _draft.ishraq,
+            onChanged: (outcome) => setState(() {
+              _draft = _draft.copyWith(ishraq: outcome);
+            }),
+          ),
         ],
       ),
     );
@@ -185,6 +235,148 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
                 },
               ),
             ),
+          if (id == PrayerId.fajr ||
+              _draft.prayer(id).isRecorded ||
+              (_draft.salahFactors[id.name]?.isEmpty == false))
+            _salahFactors(id.name),
+        ],
+      ),
+    );
+  }
+
+  Widget _extraPrayerStatus({
+    required String label,
+    required bool enabled,
+    required PrayerStatus status,
+    required ValueChanged<PrayerStatus> onChanged,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: Theme.of(context).textTheme.titleSmall),
+          if (!enabled)
+            const Padding(
+              padding: EdgeInsets.only(top: 4, bottom: 4),
+              child: Text(
+                'Friday only. Other days stay blank, not unanswered.',
+              ),
+            ),
+          Wrap(
+            spacing: 8,
+            children: [
+              for (final option in PrayerStatus.values)
+                ChoiceChip(
+                  selected: status == option,
+                  label: Text(option.label),
+                  onSelected: enabled ? (_) => onChanged(option) : null,
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _voluntaryRow({
+    required String label,
+    required TernaryOutcome outcome,
+    required ValueChanged<TernaryOutcome> onChanged,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: Theme.of(context).textTheme.titleSmall),
+          Wrap(
+            spacing: 8,
+            children: [
+              ChoiceChip(
+                selected: outcome == TernaryOutcome.positive,
+                label: const Text('Performed'),
+                onSelected: (_) => onChanged(TernaryOutcome.positive),
+              ),
+              ChoiceChip(
+                selected: outcome == TernaryOutcome.negative,
+                label: const Text('Not performed'),
+                onSelected: (_) => onChanged(TernaryOutcome.negative),
+              ),
+              ChoiceChip(
+                selected: outcome == TernaryOutcome.unanswered,
+                label: const Text('Not recorded'),
+                onSelected: (_) => onChanged(TernaryOutcome.unanswered),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _salahFactors(String subject) {
+    final existing = _draft.salahFactors[subject] ?? const SalahFactorCapture();
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '${Copy.youRecorded} (optional contributing factors)',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          Wrap(
+            spacing: 8,
+            children: [
+              for (final factor in SalahFactorCatalog.support)
+                FilterChip(
+                  label: Text(factor.label),
+                  selected: existing.supportIds.contains(factor.id),
+                  onSelected: (selected) {
+                    final ids = [...existing.supportIds];
+                    if (selected) {
+                      if (!ids.contains(factor.id)) ids.add(factor.id);
+                    } else {
+                      ids.remove(factor.id);
+                    }
+                    setState(() {
+                      _draft = _draft.withSalahFactors(
+                        subject,
+                        SalahFactorCapture(
+                          supportIds: ids,
+                          challengeIds: existing.challengeIds,
+                          otherText: existing.otherText,
+                        ),
+                      );
+                    });
+                  },
+                ),
+              for (final factor in SalahFactorCatalog.challenge)
+                FilterChip(
+                  label: Text(factor.label),
+                  selected: existing.challengeIds.contains(factor.id),
+                  onSelected: (selected) {
+                    final ids = [...existing.challengeIds];
+                    if (selected) {
+                      if (!ids.contains(factor.id)) ids.add(factor.id);
+                    } else {
+                      ids.remove(factor.id);
+                    }
+                    setState(() {
+                      _draft = _draft.withSalahFactors(
+                        subject,
+                        SalahFactorCapture(
+                          supportIds: existing.supportIds,
+                          challengeIds: ids,
+                          otherText: existing.otherText,
+                        ),
+                      );
+                    });
+                  },
+                ),
+            ],
+          ),
         ],
       ),
     );
@@ -203,7 +395,7 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
           Text('Qur’an', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 4),
           const Text(
-            'Reading/listening is the daily item. Other Qur’an dimensions are independent observations.',
+            'Recitation is the daily item. Recitation with Meaning as engagement also records Recitation as engagement. Other Qur’an rows stay independent. Application Reflection is not recorded here.',
           ),
           const SizedBox(height: 12),
           for (final dimension in quranDailyDimensions) _quranBlock(dimension),
@@ -223,12 +415,40 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
           Text(dimension.label, style: Theme.of(context).textTheme.titleSmall),
           const SizedBox(height: 4),
           Text(dimension.question),
+          if (dimension == QuranDimension.meaning)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                Copy.meaningFillsRecitation,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ),
+          if (dimension == QuranDimension.reading &&
+              readingLockedByMeaning(_draft.quran))
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                Copy.recitationLockedByMeaning,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ),
           const SizedBox(height: 8),
           ActivityPicker(
             options: ActivityCatalog.forQuran(dimension),
             selectedId: selected.id,
             accent: MuhasabahColors.quran(dimension),
             onSelected: (option) => setState(() {
+              final outcome = option.ternary ?? TernaryOutcome.unanswered;
+              if (!canSetQuranOutcome(
+                quran: _draft.quran,
+                dimension: dimension,
+                outcome: outcome,
+              )) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text(Copy.recitationLockedByMeaning)),
+                );
+                return;
+              }
               _draft = _draft.withQuranActivity(
                 dimension,
                 RecordedActivity(
@@ -358,7 +578,7 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
               ),
             ),
           const SizedBox(height: 16),
-          const Text('Personal reflection'),
+          const Text(Copy.personalReflection),
           Wrap(
             spacing: 8,
             children: [
@@ -522,7 +742,7 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '${dimension.label} context',
+                '${dimension.label} · ${Copy.factorsYouNoticed}',
                 style: Theme.of(context).textTheme.titleSmall,
               ),
               Text(prompt),
@@ -590,15 +810,84 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Recorded context (optional)',
+              Copy.factorsYouNoticed,
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 4),
             const Text(
-              'These notes describe what you recorded. They are not causes.',
+              'Recorded factors. Things you noticed — not causes. Skipping changes nothing.',
             ),
             const SizedBox(height: 12),
             ...blocks,
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _situationNotesCard() {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              Copy.situationNotesTitle,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              Copy.situationNotesNote,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final option in SituationNoteCatalog.options)
+                  if (option.id != 'custom')
+                    FilterChip(
+                      label: Text(option.label),
+                      selected: _draft.situationNotes.ids.contains(option.id),
+                      onSelected: (selected) {
+                        final ids = [..._draft.situationNotes.ids];
+                        if (selected) {
+                          if (!ids.contains(option.id)) ids.add(option.id);
+                        } else {
+                          ids.remove(option.id);
+                        }
+                        setState(() {
+                          _draft = _draft.copyWith(
+                            situationNotes: SituationNotes(
+                              ids: ids,
+                              customText: _situationCustom.text.trim().isEmpty
+                                  ? null
+                                  : _situationCustom.text.trim(),
+                            ),
+                          );
+                        });
+                      },
+                    ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _situationCustom,
+              maxLines: 2,
+              decoration: const InputDecoration(
+                hintText: 'Custom note (optional)',
+              ),
+              onChanged: (value) {
+                _draft = _draft.copyWith(
+                  situationNotes: SituationNotes(
+                    ids: _draft.situationNotes.ids,
+                    customText: value.trim().isEmpty ? null : value.trim(),
+                  ),
+                );
+              },
+            ),
           ],
         ),
       ),
@@ -619,6 +908,14 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
             : _reflection.text,
       );
     }
+    next = next.copyWith(
+      situationNotes: SituationNotes(
+        ids: next.situationNotes.ids,
+        customText: _situationCustom.text.trim().isEmpty
+            ? null
+            : _situationCustom.text.trim(),
+      ),
+    );
     try {
       await ref.read(checkInsProvider.notifier).save(next);
       logAppEvent('checkin_saved');

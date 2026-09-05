@@ -37,7 +37,7 @@ void main() {
   testWidgets('home dashboard shows domain cards and ponder without scores', (
     tester,
   ) async {
-    tester.view.physicalSize = const Size(400, 1600);
+    tester.view.physicalSize = const Size(400, 6200);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
@@ -46,14 +46,24 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Salah'), findsWidgets);
     expect(find.text('Qur’an'), findsWidgets);
-    expect(find.text('Dhikr'), findsOneWidget);
-    expect(find.text('Family'), findsOneWidget);
-    expect(find.text('Charity'), findsOneWidget);
-    expect(find.text('Fasting'), findsOneWidget);
+    expect(find.text('Dhikr'), findsWidgets);
+    expect(find.text(Copy.familyCommunityCare), findsOneWidget);
+    expect(find.text('Charity'), findsWidgets);
+    expect(find.text('Fasting'), findsWidgets);
+    expect(find.text('Hadith'), findsWidgets);
+    expect(find.text(Copy.reflectionOfTheWeek), findsOneWidget);
+    expect(find.text(Copy.noticedThisWeek), findsOneWidget);
+    expect(find.text(Copy.weeklyJournalTitle), findsOneWidget);
+    expect(find.text(Copy.patternsNoticed), findsOneWidget);
+    expect(find.text(Copy.currentWeek), findsWidgets);
+    expect(find.text('Parent Contact'), findsOneWidget);
+    expect(find.text(Copy.hadithMemorisationFocus), findsOneWidget);
     expect(find.text(Copy.ponderPrompt), findsWidgets);
     expect(find.text('Recognition'), findsWidgets);
     expect(find.text(Copy.addAResponse), findsWidgets);
     expect(find.text(Copy.homeCheckIn), findsOneWidget);
+    expect(find.text('ⓘ ${Copy.marksGuide}'), findsOneWidget);
+    expect(find.byTooltip(Copy.marksGuideTitle), findsOneWidget);
     expect(find.textContaining('Score'), findsNothing);
     expect(find.textContaining('streak'), findsNothing);
 

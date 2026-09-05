@@ -28,7 +28,7 @@ class WeeklyCalendarLayout {
 
 DateTime _dateOnly(DateTime date) => DateTime(date.year, date.month, date.day);
 
-DateTime _addCalendarDays(DateTime date, int days) {
+DateTime addCalendarDays(DateTime date, int days) {
   final local = _dateOnly(date);
   return DateTime(local.year, local.month, local.day + days);
 }
@@ -38,7 +38,7 @@ int _sundayBasedWeekday(DateTime date) => date.weekday % 7;
 DateTime startOfWeek(DateTime date, {required int firstDayOfWeekIndex}) {
   final local = _dateOnly(date);
   final offset = (_sundayBasedWeekday(local) - firstDayOfWeekIndex + 7) % 7;
-  return _addCalendarDays(local, -offset);
+  return addCalendarDays(local, -offset);
 }
 
 int dartWeekdayForRow(int row, {required int firstDayOfWeekIndex}) {
@@ -71,13 +71,13 @@ WeeklyCalendarLayout weeklyCalendarLayout({
   final weekCount = lastWeekStart.difference(gridStart).inDays ~/ 7 + 1;
   final weekStarts = [
     for (var week = 0; week < weekCount; week++)
-      _addCalendarDays(gridStart, week * 7),
+      addCalendarDays(gridStart, week * 7),
   ];
   final keysByRowCol = <List<String?>>[];
   for (var row = 0; row < kCalendarWeekdayCount; row++) {
     final cols = <String?>[];
     for (var week = 0; week < weekCount; week++) {
-      final date = _addCalendarDays(gridStart, week * 7 + row);
+      final date = addCalendarDays(gridStart, week * 7 + row);
       final key = dateKey(date);
       cols.add(inPeriod.contains(key) ? key : null);
     }
@@ -109,4 +109,42 @@ List<String> progressCalendarChunkLabels(int periodDays) {
     return const ['Earlier 30', 'Middle 30', 'Recent 30'];
   }
   return const [];
+}
+
+String weekRangeLabel(DateTime weekStart) {
+  final start = DateTime(weekStart.year, weekStart.month, weekStart.day);
+  final end = DateTime(start.year, start.month, start.day + 6);
+  String stamp(DateTime date) {
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    return '${date.day} ${months[date.month - 1]}';
+  }
+
+  return '${stamp(start)} – ${stamp(end)}';
+}
+
+DateTime weekStartForKey(String key, {required int firstDayOfWeekIndex}) {
+  return startOfWeek(
+    parseDateKey(key),
+    firstDayOfWeekIndex: firstDayOfWeekIndex,
+  );
+}
+
+List<String> weekDateKeys(DateTime weekStart) {
+  return [
+    for (var day = 0; day < kCalendarWeekdayCount; day++)
+      dateKey(addCalendarDays(weekStart, day)),
+  ];
 }

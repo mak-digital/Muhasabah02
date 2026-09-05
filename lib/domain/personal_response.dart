@@ -29,6 +29,7 @@ enum ProvenanceOrigin {
   historicalReflection,
   quranPonder,
   completedCheckIn,
+  weeklyReflectionQuote,
 }
 
 class ResponseProvenance {

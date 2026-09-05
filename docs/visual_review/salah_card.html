@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Salah Home card — revision 2</title>
+  <style>
+    :root {
+      --bg: #f4f1ea;
+      --ink: #1d2a2c;
+      --muted: #4d5c63;
+      --salah: #d7eceb;
+      --oblig: #d2e8e6;
+      --friday: #d8e2ee;
+      --vol: #dceee4;
+      --summary: #eef2f4;
+      --teal: #2f6f73;
+      --missed: #8a6a62;
+      --mark: 14px;
+      --star: 9px;
+    }
+    body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--ink); margin: 0; padding: 24px; }
+    h1, h2 { font-weight: 600; }
+    .note { max-width: 780px; line-height: 1.45; color: var(--muted); }
+    .phone { width: 390px; background: #fff; border-radius: 28px; box-shadow: 0 12px 40px rgba(0,0,0,.12); padding: 18px 16px 24px; margin: 16px 16px 28px 0; display: inline-block; vertical-align: top; box-sizing: border-box; }
+    .bar { font-size: 13px; color: #5c6e7a; margin-bottom: 10px; }
+    .card { background: var(--salah); border-radius: 16px; padding: 12px; }
+    .head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+    .head button { width: 36px; height: 36px; border: 0; border-radius: 10px; background: rgba(47,111,115,.12); color: var(--teal); font-size: 18px; cursor: pointer; }
+    .head h3 { margin: 0; font-size: 16px; font-weight: 600; text-align: center; flex: 1; }
+    .weekline { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 12px; color: var(--muted); }
+    .weekline button { border: 0; background: #fff; color: var(--teal); border-radius: 999px; padding: 4px 10px; font-size: 12px; cursor: pointer; }
+    .wdrow { display: grid; grid-template-columns: 64px repeat(7, 1fr); gap: 4px; margin-bottom: 6px; font-size: 10px; font-weight: 600; color: var(--muted); text-align: center; }
+    .fri { color: var(--teal); }
+    .band { border-radius: 12px; padding: 8px 6px 6px; margin-bottom: 6px; }
+    .oblig { background: var(--oblig); }
+    .friday { background: var(--friday); }
+    .vol { background: var(--vol); }
+    .band-lab { font-size: 10px; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); padding: 0 4px 6px; font-weight: 600; }
+    .grid { display: grid; grid-template-columns: 58px repeat(7, 1fr); gap: 5px 3px; align-items: center; }
+    .row-lab { font-size: 11px; color: var(--ink); padding-left: 4px; }
+    .cell { height: 22px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 6px; }
+    .cell:focus { outline: 2px solid var(--teal); }
+    .cell.off { cursor: default; }
+    .m { width: var(--mark); height: var(--mark); border-radius: 50%; display: grid; place-items: center; box-sizing: border-box; flex-shrink: 0; position: relative; }
+    .fill { background: var(--teal); }
+    .late { background: transparent; border: 1.5px solid var(--teal); }
+    .miss { background: transparent; border: 1.5px solid var(--missed); }
+    .miss::after { content: ""; position: absolute; width: 10px; height: 1.5px; background: var(--missed); transform: rotate(-45deg); border-radius: 1px; }
+    .empty { background: transparent; border: 1.5px dotted rgba(47,111,115,.45); }
+    .star { width: var(--star); height: var(--star); display: block; }
+    .blank { width: var(--mark); height: var(--mark); }
+    .legend { font-size: 11px; color: var(--muted); margin-top: 10px; line-height: 1.7; }
+    .legend i { display: inline-flex; vertical-align: middle; margin-right: 6px; }
+    .muted { font-size: 12px; color: var(--muted); line-height: 1.4; }
+    .sheet { background: var(--summary); border-radius: 16px; padding: 12px; margin-top: 10px; }
+    .path { display: block; width: 100%; text-align: left; border: 0; background: #fff; border-radius: 12px; padding: 10px 12px; margin-top: 8px; font-size: 13px; }
+    .chip { display: inline-block; border-radius: 999px; padding: 6px 10px; font-size: 12px; margin: 0 6px 6px 0; background: #fff; border: 1px solid #c5d0d4; }
+    .chip.on { background: var(--salah); border-color: var(--teal); }
+    .caption { font-size: 13px; font-weight: 600; margin: 0 0 8px; }
+  </style>
+</head>
+<body>
+  <h1>Salah Home card — revision 2</h1>
+  <p class="note">Mockup only. Qur’an and other Home cards unchanged in this file’s history. Group tints identify sections, not rank. Markers stay 14px. Star is ~65% of the Dhuhr circle interior. Late is outline; Missed is outline plus diagonal slash in a muted earth tone — not a warning red. Unanswered remains dotted and is not missed. Card-foot legends moved to Home ⓘ Symbols — see <code>home_symbols.html</code>.</p>
+
+  <svg width="0" height="0" aria-hidden="true">
+    <symbol id="star" viewBox="0 0 24 24">
+      <path fill="#fff" d="M12 3.2l2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 15.5 7.2 18.1l.9-5.4L4.2 8.9l5.4-.8L12 3.2z"/>
+    </symbol>
+  </svg>
+
+  <h2>1. Salah card with grouped rows</h2>
+  <div class="phone" id="salah-card">
+    <div class="bar">Home · SEE → PONDER → EXPLORE</div>
+    <div class="card">
+      <div class="head">
+        <button type="button" aria-label="Previous week">‹</button>
+        <h3>Salah</h3>
+        <button type="button" aria-label="Next week">›</button>
+      </div>
+      <div class="weekline">
+        <span>25 Aug – 31 Aug</span>
+        <button type="button">This week</button>
+      </div>
+      <div class="wdrow">
+        <span></span>
+        <span>M</span><span>T</span><span>W</span><span>T</span><span class="fri">F</span><span>S</span><span>S</span>
+      </div>
+
+      <div class="band oblig">
+        <div class="band-lab">Obligatory Salah</div>
+        <div class="grid">
+          <span class="row-lab">Fajr</span>
+          <span class="cell"><span class="m fill"></span></span>
+          <span class="cell"><span class="m empty"></span></span>
+          <span class="cell"><span class="m fill"></span></span>
+          <span class="cell"><span class="m late"></span></span>
+          <span class="cell"><span class="m fill"></span></span>
+          <span class="cell"><span class="m empty"></span></span>
+          <span class="cell"><span class="m miss"></span></span>
+
+          <span class="row-lab">Dhuhr</span>
+          <span class="cell"><span class="m fill"></span></span>
+          <span class="cell"><span class="m fill"></span></span>
+          <span class="cell"><span class="m empty"></span></span>
+          <span class="cell"><span class="m fill"></span></span>
+          <span class="cell" title="Friday Dhuhr with congregational Jumu‘ah">
+            <span class="m fill"><svg class="star"><use href="#star"/></svg></span>
+          </span>
+          <span class="cell"><span class="m late"></span></span>
+          <span class="cell"><span class="m empty"></span></span>
+
+          <span class="row-lab">Asr</span>
+          <span class="cell"><span class="m empty"></span></span>
+          <span class="cell"><span class="m fill"></span></span>
+          <span class="cell"><span class="m fill"></span></span>
+          <span class="cell"><span class="m empty"></span></span>
+          <span class="cell"><span class="m fill"></span></span>
+          <span class="cell"><span class="m miss"></span></span>
+          <span class="cell"><span class="m fill"></span></span>
+
+          <span class="row-lab">Maghrib</span>
+          <span class="cell"><span class="m fill"></span></span>
+          <span class="cell"><span class="m late"></span></span>
+          <span class="cell"><span class="m fill"></span></span>
+          <span class="cell"><span class="m fill"></span></span>
+          <span class="cell"><span class="m empty"></span></span>
+          <span class="cell"><span class="m fill"></span></span>
+          <span class="cell"><span class="m fill"></span></span>
+
+          <span class="row-lab">Isha</span>
+          <span class="cell"><span class="m miss"></span></span>
+          <span class="cell"><span class="m empty"></span></span>
+          <span class="cell"><span class="m fill"></span></span>
+          <span class="cell"><span class="m fill"></span></span>
+          <span class="cell"><span class="m fill"></span></span>
+          <span class="cell"><span class="m empty"></span></span>
+          <span class="cell"><span class="m late"></span></span>
+        </div>
+      </div>
+
+      <div class="band friday">
+        <div class="band-lab">Friday Prayer</div>
+        <div class="grid">
+          <span class="row-lab">Jumu‘ah</span>
+          <span class="cell off"><span class="blank"></span></span>
+          <span class="cell off"><span class="blank"></span></span>
+          <span class="cell off"><span class="blank"></span></span>
+          <span class="cell off"><span class="blank"></span></span>
+          <span class="cell"><span class="m fill"></span></span>
+          <span class="cell off"><span class="blank"></span></span>
+          <span class="cell off"><span class="blank"></span></span>
+        </div>
+      </div>
+
+      <div class="band vol">
+        <div class="band-lab">Voluntary Prayers</div>
+        <div class="grid">
+          <span class="row-lab">Tahajjud</span>
+          <span class="cell"><span class="m fill"></span></span>
+          <span class="cell"><span class="m empty"></span></span>
+          <span class="cell"><span class="m late"></span></span>
+          <span class="cell"><span class="m empty"></span></span>
+          <span class="cell"><span class="m fill"></span></span>
+          <span class="cell"><span class="m empty"></span></span>
+          <span class="cell"><span class="m empty"></span></span>
+
+          <span class="row-lab">Ishraq</span>
+          <span class="cell"><span class="m empty"></span></span>
+          <span class="cell"><span class="m fill"></span></span>
+          <span class="cell"><span class="m empty"></span></span>
+          <span class="cell"><span class="m empty"></span></span>
+          <span class="cell"><span class="m late"></span></span>
+          <span class="cell"><span class="m empty"></span></span>
+          <span class="cell"><span class="m fill"></span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="note">Persistent legend is not on the card. Home header ⓘ Symbols holds On time, Late, Missed, Unanswered, and Friday congregational Jumu‘ah.</p>
+
+  <h2>2. Friday star (larger, same footprint)</h2>
+  <div class="phone">
+    <div class="card">
+      <p class="muted">14px marker. Star ~9px (about 65% of interior). Not a larger icon.</p>
+      <div style="display:flex; gap:24px; align-items:center; padding:12px 8px;">
+        <div style="text-align:center">
+          <span class="m fill"></span>
+          <div class="muted" style="margin-top:6px">On time</div>
+        </div>
+        <div style="text-align:center">
+          <span class="m fill"><svg class="star"><use href="#star"/></svg></span>
+          <div class="muted" style="margin-top:6px">Friday Dhuhr + congregation</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>3. State legends (Late ≠ Missed)</h2>
+  <div class="phone" id="legend">
+    <div class="card">
+      <div class="legend">
+        <div><i class="m fill"></i> On time</div>
+        <div><i class="m late"></i> Late</div>
+        <div><i class="m miss"></i> Missed</div>
+        <div><i class="m empty"></i> Unanswered</div>
+        <div><i class="m fill"><svg class="star"><use href="#star"/></svg></i> Friday congregational Jumu‘ah</div>
+      </div>
+      <p class="muted" style="margin-top:8px">Missed uses a muted earth outline and slash, not traffic-light red. Unanswered stays dotted and is never drawn as missed.</p>
+    </div>
+  </div>
+
+  <h2>4. Missed vs Late</h2>
+  <div class="phone">
+    <div class="card">
+      <div class="grid" style="grid-template-columns: 80px 1fr 1fr 1fr;">
+        <span></span><span class="muted" style="text-align:center">Late</span><span class="muted" style="text-align:center">Missed</span><span class="muted" style="text-align:center">Unanswered</span>
+        <span class="row-lab">Fajr</span>
+        <span class="cell"><span class="m late"></span></span>
+        <span class="cell"><span class="m miss"></span></span>
+        <span class="cell"><span class="m empty"></span></span>
+      </div>
+      <p class="muted" style="margin-top:8px">Late = teal outline. Missed = muted outline + diagonal slash. Unanswered = dotted. Missing a day is still dotted, not slashed.</p>
+    </div>
+  </div>
+
+  <h2>5. Week navigation and factors (unchanged purpose)</h2>
+  <div class="phone">
+    <div class="card">
+      <div class="head">
+        <button type="button">‹</button>
+        <h3>Salah</h3>
+        <button type="button">›</button>
+      </div>
+      <div class="weekline">
+        <span>18 Aug – 24 Aug</span>
+        <button type="button">This week</button>
+      </div>
+      <p class="muted">Previous week, next week, and return to the current week stay on the card. Cells remain tappable.</p>
+    </div>
+    <div class="sheet">
+      <div class="caption">Layer 1 · What happened?</div>
+      <span class="chip">On time</span>
+      <span class="chip on">Late</span>
+      <span class="chip">Missed</span>
+      <span class="chip">Unanswered</span>
+      <div class="caption" style="margin-top:12px">Layer 2 · Optional contributing factors</div>
+      <p class="muted">You recorded… — never “this caused”. Not scored.</p>
+      <span class="chip on">Alarm worked</span>
+      <span class="chip">Slept early</span>
+      <span class="chip on">Overslept</span>
+      <span class="chip">Other</span>
+    </div>
+  </div>
+</body>
+</html>

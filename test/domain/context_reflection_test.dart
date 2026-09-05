@@ -35,7 +35,7 @@ void main() {
     );
     expect(
       contextAllowed(QuranDimension.tafsir, TernaryOutcome.negative),
-      isFalse,
+      isTrue,
     );
     expect(
       contextAllowed(QuranDimension.reflection, TernaryOutcome.positive),
@@ -43,7 +43,7 @@ void main() {
     );
     expect(
       contextAllowed(QuranDimension.reflection, TernaryOutcome.negative),
-      isFalse,
+      isTrue,
     );
     expect(
       contextAllowed(
@@ -54,7 +54,14 @@ void main() {
     );
     expect(
       contextAllowed(QuranDimension.reading, TernaryOutcome.positive),
-      isFalse,
+      isTrue,
+    );
+    expect(
+      contextAllowed(
+        QuranDimension.consciousApplication,
+        TernaryOutcome.positive,
+      ),
+      isTrue,
     );
   });
 

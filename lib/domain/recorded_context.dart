@@ -67,9 +67,3 @@ class RecordedContext {
     );
   }
 }
-
-bool contextAllowed(QuranDimension subject, TernaryOutcome outcome) {
-  if (outcome == TernaryOutcome.positive) return subject.allowsPositiveContext;
-  if (outcome == TernaryOutcome.negative) return subject.allowsNegativeContext;
-  return false;
-}

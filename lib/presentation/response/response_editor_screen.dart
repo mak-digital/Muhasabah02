@@ -9,10 +9,16 @@ import '../../domain/personal_response.dart';
 import '../shared/ui_bits.dart';
 
 class ResponseEditorScreen extends ConsumerStatefulWidget {
-  const ResponseEditorScreen({super.key, this.existing, this.provenance});
+  const ResponseEditorScreen({
+    super.key,
+    this.existing,
+    this.provenance,
+    this.initialText,
+  });
 
   final PersonalResponse? existing;
   final ResponseProvenance? provenance;
+  final String? initialText;
 
   @override
   ConsumerState<ResponseEditorScreen> createState() =>
@@ -26,7 +32,9 @@ class _ResponseEditorScreenState extends ConsumerState<ResponseEditorScreen> {
   @override
   void initState() {
     super.initState();
-    _controller = TextEditingController(text: widget.existing?.text ?? '');
+    _controller = TextEditingController(
+      text: widget.existing?.text ?? widget.initialText ?? '',
+    );
   }
 
   @override

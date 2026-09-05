@@ -29,11 +29,25 @@ class MuhasabahColors {
   static const zakat = Color(0xFFB8873A);
 
   static const salahFamily = Color(0xFF2F6F73);
+  static const missedEarth = Color(0xFF8A6A62);
+  static const salahObligatoryBand = Color(0xFFD2E8E6);
+  static const salahFridayBand = Color(0xFFD8E2EE);
+  static const salahVoluntaryBand = Color(0xFFDCEEE4);
+  static const salahObligatoryBandDark = Color(0xFF2A4546);
+  static const salahFridayBandDark = Color(0xFF2C3A4A);
+  static const salahVoluntaryBandDark = Color(0xFF2A4438);
   static const quranFamily = Color(0xFF3D6B99);
+  static const quranRecitationBand = Color(0xFFCFE0EF);
+  static const quranRetentionBand = Color(0xFFD5E4EA);
+  static const quranStudyBand = Color(0xFFDCE3F0);
+  static const quranRecitationBandDark = Color(0xFF2A3C4C);
+  static const quranRetentionBandDark = Color(0xFF2A4046);
+  static const quranStudyBandDark = Color(0xFF2C3548);
   static const dhikrFamily = Color(0xFF3F7D6A);
   static const familyFamily = Color(0xFF7A5B8F);
   static const charityFamily = Color(0xFFC48A3C);
   static const fastingFamily = Color(0xFF3F4C8A);
+  static const hadithFamily = Color(0xFF4A6D8C);
 
   static const salahWash = Color(0xFFD7ECEB);
   static const quranWash = Color(0xFFD7E4F2);
@@ -41,6 +55,7 @@ class MuhasabahColors {
   static const familyWash = Color(0xFFEADFF2);
   static const charityWash = Color(0xFFF4E6C8);
   static const fastingWash = Color(0xFFC5CCEB);
+  static const hadithWash = Color(0xFFD4E2EE);
   static const summaryWash = Color(0xFFEEF2F4);
   static const sampleBannerWash = Color(0xFFFFF8E8);
 
@@ -50,6 +65,7 @@ class MuhasabahColors {
   static const familyWashDark = Color(0xFF3A2C44);
   static const charityWashDark = Color(0xFF433318);
   static const fastingWashDark = Color(0xFF2A3050);
+  static const hadithWashDark = Color(0xFF2A3848);
   static const summaryWashDark = Color(0xFF2A3336);
   static const sampleBannerWashDark = Color(0xFF3A3424);
 
@@ -71,6 +87,7 @@ class MuhasabahColors {
     QuranDimension.revision => revision,
     QuranDimension.tafsir => tafsir,
     QuranDimension.reflection => reflection,
+    QuranDimension.consciousApplication => application,
     QuranDimension.applicationReflection => application,
   };
 }

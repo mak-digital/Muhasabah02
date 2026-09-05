@@ -2,7 +2,12 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 import '../data/app_prefs.dart';
 import '../domain/daily_check_in.dart';
+import '../domain/first_day_of_week.dart';
+import '../domain/home_traces.dart';
+import '../domain/personal_aspiration.dart';
+import '../domain/personal_baseline.dart';
 import '../domain/personal_response.dart';
+import '../domain/quotation_cadence.dart';
 import 'codecs.dart';
 import 'repositories.dart';
 
@@ -162,6 +167,12 @@ class HiveAppPrefs implements AppPrefs {
   static const _sampleRemoved = 'sample_removed_by_user';
   static const _archiveDismissed = 'archive_prompt_dismissed';
   static const _applicationAck = 'application_reflection_ack';
+  static const _firstDayOfWeek = 'first_day_of_week';
+  static const _quotationCadence = 'quotation_cadence';
+  static const _baselines = 'personal_baselines';
+  static const _aspirations = 'personal_aspirations';
+  static const _weeklyJournals = 'weekly_journals';
+  static const _hadithFocus = 'hadith_memorisation_focus';
 
   bool _flag(String key) => _box.get(key) == 'true';
 
@@ -181,6 +192,10 @@ class HiveAppPrefs implements AppPrefs {
   bool get applicationReflectionAcknowledged => _flag(_applicationAck);
 
   @override
+  FirstDayOfWeekPref get firstDayOfWeek =>
+      FirstDayOfWeekPrefX.fromId(_box.get(_firstDayOfWeek));
+
+  @override
   Future<void> setSampleSeeded(bool value) => _setFlag(_sampleSeeded, value);
 
   @override
@@ -194,6 +209,57 @@ class HiveAppPrefs implements AppPrefs {
   @override
   Future<void> setApplicationReflectionAcknowledged(bool value) =>
       _setFlag(_applicationAck, value);
+
+  @override
+  Future<void> setFirstDayOfWeek(FirstDayOfWeekPref value) =>
+      _box.put(_firstDayOfWeek, value.id);
+
+  @override
+  QuotationCadence get quotationCadence =>
+      QuotationCadenceX.fromId(_box.get(_quotationCadence));
+
+  @override
+  List<PersonalBaseline> get baselines => decodeBaselines(_box.get(_baselines));
+
+  @override
+  List<PersonalAspiration> get aspirations =>
+      decodeAspirations(_box.get(_aspirations));
+
+  @override
+  String weeklyJournal(String weekKey) =>
+      decodeJournals(_box.get(_weeklyJournals))[weekKey] ?? '';
+
+  @override
+  Future<void> setQuotationCadence(QuotationCadence value) =>
+      _box.put(_quotationCadence, value.id);
+
+  @override
+  Future<void> setBaselines(List<PersonalBaseline> value) =>
+      _box.put(_baselines, encodeBaselines(value));
+
+  @override
+  Future<void> setAspirations(List<PersonalAspiration> value) =>
+      _box.put(_aspirations, encodeAspirations(value));
+
+  @override
+  Future<void> setWeeklyJournal(String weekKey, String text) async {
+    final next = decodeJournals(_box.get(_weeklyJournals));
+    final trimmed = text.trim();
+    if (trimmed.isEmpty) {
+      next.remove(weekKey);
+    } else {
+      next[weekKey] = text;
+    }
+    await _box.put(_weeklyJournals, encodeJournals(next));
+  }
+
+  @override
+  HadithMemorisationFocus get hadithMemorisationFocus =>
+      HadithMemorisationFocusX.fromId(_box.get(_hadithFocus));
+
+  @override
+  Future<void> setHadithMemorisationFocus(HadithMemorisationFocus value) =>
+      _box.put(_hadithFocus, value.name);
 }
 
 Future<

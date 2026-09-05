@@ -12,7 +12,9 @@ Starting suite (pre-implementation): 1 widget smoke test targeting a non-existen
 
 Domain tests cover Salah independence, missing ≠ missed, Qur’an dimension independence, Application Reflection firewall, structured activities, optional domains, analytics denominators, recognition thresholds, Response validation, sample-data retirement prompting, and corrupt-record isolation.
 
-Widget tests cover navigation, check-in persistence, History without scores, Review 7/30/90 without generated recommendations, PONDER copy, My Response empty/create, equal Salah Response CTAs, Progress marker alignment, unknown routes, and 1.5 text scale / theme toggle.
+Widget tests cover navigation, check-in persistence, History without scores, Review 7/30/90 without generated recommendations, PONDER copy, My Response empty/create, equal Salah Response CTAs, Progress marker alignment, first-day-of-week presentation, Marks Guide, remaining Home domain grids, Home order and Current week, baselines/aspirations/quotation cadence, Qur’an Meaning→Recitation fill, unknown routes, and 1.5 text scale / theme toggle.
+
+Current suite size: 92 tests.
 
 First install can seed ~120 days of sample DailyCheckIn records (and sample responses) through the production repository. Settings can recreate, remove, or restore sample data without deleting personal records. After ~21 consecutive personal days, Home may offer to archive sample records; deletion is never automatic.
 

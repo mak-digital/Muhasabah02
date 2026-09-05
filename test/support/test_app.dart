@@ -5,6 +5,7 @@ import 'package:muhasabah02/application/providers.dart';
 import 'package:muhasabah02/data/app_prefs.dart';
 import 'package:muhasabah02/data/memory_repositories.dart';
 import 'package:muhasabah02/domain/daily_check_in.dart';
+import 'package:muhasabah02/domain/first_day_of_week.dart';
 import 'package:muhasabah02/domain/prayer.dart';
 import 'package:muhasabah02/domain/quran.dart';
 
@@ -12,6 +13,7 @@ Widget testApp({
   MemoryCheckInRepository? checkIns,
   MemoryResponseRepository? responses,
   DateTime? now,
+  FirstDayOfWeekPref firstDayOfWeek = FirstDayOfWeekPref.monday,
 }) {
   return ProviderScope(
     overrides: [
@@ -22,7 +24,10 @@ Widget testApp({
         responses ?? MemoryResponseRepository(),
       ),
       appPrefsProvider.overrideWithValue(
-        MemoryAppPrefs(applicationReflectionAcknowledged: true),
+        MemoryAppPrefs(
+          applicationReflectionAcknowledged: true,
+          firstDayOfWeek: firstDayOfWeek,
+        ),
       ),
       if (now != null) nowProvider.overrideWithValue(now),
     ],

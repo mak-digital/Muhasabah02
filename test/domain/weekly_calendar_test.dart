@@ -31,6 +31,31 @@ void main() {
     expect(padding, greaterThan(0));
   });
 
+  test('Saturday-first week starts on Saturday', () {
+    final start = startOfWeek(DateTime(2026, 9, 3), firstDayOfWeekIndex: 6);
+    expect(start.weekday, DateTime.saturday);
+    expect(dateKey(start), '2026-08-29');
+  });
+
+  test('weekDateKeys follows the week start', () {
+    final start = startOfWeek(DateTime(2026, 9, 3), firstDayOfWeekIndex: 1);
+    expect(weekDateKeys(start), [
+      '2026-08-31',
+      '2026-09-01',
+      '2026-09-02',
+      '2026-09-03',
+      '2026-09-04',
+      '2026-09-05',
+      '2026-09-06',
+    ]);
+  });
+
+  test('Sunday-first week starts on Sunday', () {
+    final start = startOfWeek(DateTime(2026, 9, 3), firstDayOfWeekIndex: 0);
+    expect(start.weekday, DateTime.sunday);
+    expect(dateKey(start), '2026-08-30');
+  });
+
   test('padding days are not treated as period keys', () {
     final layout = weeklyCalendarLayout(
       periodKeys: const ['2026-08-05'],

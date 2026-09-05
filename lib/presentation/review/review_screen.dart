@@ -5,6 +5,7 @@ import '../../app/theme.dart';
 import '../../application/providers.dart';
 import '../../domain/analytics.dart';
 import '../../domain/copy.dart';
+import '../../domain/daily_check_in.dart';
 import '../../domain/date_key.dart';
 import '../../domain/other_domains.dart';
 import '../../domain/personal_response.dart';
@@ -174,6 +175,8 @@ class ReviewScreen extends ConsumerWidget {
                 ],
               ),
               const SizedBox(height: 8),
+              _situationNotesInPeriod(context, inPeriod),
+              const SizedBox(height: 8),
               Text(
                 narrativeCopy(narrative),
                 style: Theme.of(context).textTheme.bodyMedium,
@@ -189,6 +192,43 @@ class ReviewScreen extends ConsumerWidget {
             ],
           );
         },
+      ),
+    );
+  }
+
+  Widget _situationNotesInPeriod(
+    BuildContext context,
+    List<DailyCheckIn> inPeriod,
+  ) {
+    final labels = <String>{};
+    for (final record in inPeriod) {
+      labels.addAll(record.situationNotes.displayLabels);
+    }
+    if (labels.isEmpty) return const SizedBox.shrink();
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              Copy.situationNotesTitle,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              Copy.situationNotesNote,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 8),
+            const Text(Copy.youRecordedColon),
+            for (final label in labels)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text('• $label'),
+              ),
+          ],
+        ),
       ),
     );
   }

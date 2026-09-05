@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muhasabah02/domain/daily_check_in.dart';
 import 'package:muhasabah02/domain/prayer.dart';
+import 'package:muhasabah02/domain/quran.dart';
 
 void main() {
   test('unanswered salah is not missed', () {
@@ -42,6 +43,34 @@ void main() {
     expect(record.prayer(PrayerId.maghrib), PrayerStatus.unanswered);
     expect(record.prayer(PrayerId.isha), PrayerStatus.onTime);
     expect(record.answeredRecordableCount, 4);
+  });
+
+  test('salah extras do not change recordable-field count', () {
+    final record = DailyCheckIn.empty('2026-09-04').copyWith(
+      jumuah: PrayerStatus.onTime,
+      tahajjud: TernaryOutcome.positive,
+      ishraq: TernaryOutcome.negative,
+      jumuahCongregation: true,
+    );
+    expect(record.answeredRecordableCount, 0);
+    expect(record.hasAnyRecordedEvidence, isTrue);
+    final restored = DailyCheckIn.fromJson(record.toJson());
+    expect(restored.jumuah, PrayerStatus.onTime);
+    expect(restored.tahajjud, TernaryOutcome.positive);
+    expect(restored.ishraq, TernaryOutcome.negative);
+    expect(restored.jumuahCongregation, isTrue);
+  });
+
+  test('missing salahTrace stays unanswered and is not missed', () {
+    final record = DailyCheckIn.fromJson({
+      'schemaVersion': 6,
+      'dateKey': '2026-09-03',
+      'salah': {'fajr': 'onTime'},
+    });
+    expect(record.jumuah, PrayerStatus.unanswered);
+    expect(record.tahajjud, TernaryOutcome.unanswered);
+    expect(record.jumuahCongregation, isFalse);
+    expect(record.jumuah, isNot(PrayerStatus.missed));
   });
 
   test('round-trip json never turns unanswered into missed', () {
