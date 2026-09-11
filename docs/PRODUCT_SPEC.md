@@ -38,6 +38,8 @@ Requirements:
 - Full offline usability.
 - No telemetry, ads, cloud AI, or remote analytics in core functionality.
 - Preserve a sound existing architecture when working in an established repository.
+- Date keys remain Gregorian `YYYY-MM-DD`. Settings → Application → Calendar may show Gregorian or civil Islamic (Hijri) dates without rewriting records.
+- Settings → Application → **Domains** may hide domains from Home, Review, and today’s check-in without deleting stored records. The first look is **Salah, Qur’an & Akhlaq**: Salah & Prayer Quality, Qur’an Engagement, Hadith & Living Sunnah, Character & Morals (Akhlaq), Rights of Others (Huquq al-Ibad), and Charity. Knowledge & Beneficial Speech, Time & Barakah, Physical Health & Energy, Wealth & Stewardship, Ummah, Dhikr & Dua, Fasting, and Hajj stay available in Domains; they are not on that preset. Stored All or custom sets are not rewritten. Sick visit, sick contact, and support under stress sit on Rights of Others as Care in hardship. Opt-in Home cards use a one-line week (any recorded observation that day); Salah, Qur’an, Hadith, Akhlaq, Huquq, and Charity keep full week matrices. Check-in later bands start closed. The same screen holds **this season’s mix**: one saved set of domains, bands, and rows to notice. It is not a score, a programme, or a second hide-list. Named starting points copy a set; Custom is the same mix after editing; Same as Domains follows visibility. Mix rows on a hidden domain are kept and appear on Home only when that domain is shown. The mix does not rewrite records. Unanswered mix rows are not missed.
 - Prefer feature-oriented layers such as `domain/`, `data/`, `application/`, `presentation/` when compatible with the codebase.
 - Avoid new dependencies unless they materially reduce risk or complexity.
 
@@ -59,21 +61,25 @@ REVIEW
 │   ├── 30 days
 │   └── 90 days
 ├── Progress details
-│   ├── Salah
-│   └── Qur’an
+│   ├── Salah & Prayer Quality
+│   └── Qur’an Engagement
 ├── Recorded days
 └── My Response
 ```
 
 Evidence exploration may lead to Recorded Context, Recognition, supporting dates, Historical Reflection, and optional Response creation.
 
-Home should remain simple. Do not turn it into a dense analytics dashboard.
+Home should remain simple. Do not turn it into a dense analytics dashboard. Home shows one domain week at a time (previous/next short names); check-in, Reflection of the Week, and notices stay on the same page. Today’s full check-in shows one domain form at a time the same way; Other and context notes stay on that page. Under the domain week, Home shows a This week look-back of presence marks (not scores).
 
 ---
 
 ## 4. RECORD — daily check-in
 
-### 4.1 Salah
+### 4.1 Salah & Prayer Quality
+
+Core question (orientation only; not scored and not a spiritual grade):
+
+**Was my heart present when I stood before Allah?**
 
 Track the five daily prayers independently:
 
@@ -92,9 +98,15 @@ At minimum distinguish:
 
 Never infer `missed` from absence.
 
+Do not record or score presence of heart as a grade.
+
 Do not create a combined spiritual score.
 
-### 4.2 Qur’an
+### 4.2 Qur’an Engagement
+
+Core question (orientation only; not scored and not a spiritual grade):
+
+**Did I let the Qur’an speak to me today?**
 
 Provide seven independent dimensions:
 
@@ -107,6 +119,8 @@ Provide seven independent dimensions:
 7. Application Reflection
 
 Reading/listening is the primary daily Qur’an engagement item. The other six are independent observations.
+
+Do not record or score whether the Qur’an “spoke” as a grade.
 
 For optional activities, selecting the activity must not automatically mean a positive outcome. Ask for an explicit status.
 
@@ -168,18 +182,230 @@ Answers:
 
 Application Reflection records reflection on possible practical relevance only. It is not evidence of action, implementation, obedience, compliance, successful application, or completion of a Response.
 
-### 4.3 Other established domains
+### 4.3 Hadith & Living Sunnah
+
+Core question (orientation only; not scored and not a spiritual grade):
+
+**Did a teaching of the Prophet ﷺ reach my day?**
+
+Place this domain immediately after Qur’an Engagement on Home, check-in, and Review. Storage id stays `hadith`. Include it on the Salah, Qur’an & Akhlaq preset.
+
+Retain factual recording for existing Hadith rows (reading, listening, memorisation, revision, study circle, teaching/discussion, Hadith reflection). Add one application observation: **Noticed a sunnah in how I lived today** (`hadith.livedSunnah`). Unanswered is not a failed revival.
+
+Current Memorisation Focus stays an AppPrefs value, not a daily grade.
+
+Do not:
+
+- Title the domain as a revival campaign
+- Add a sunnah checklist, revival score, or streak
+- Auto-fill Living Sunnah from Character & Morals
+- Treat this card as a second Qur’an log
+
+These traces do not increase `recordableFieldCount`.
+
+### 4.4 Dhikr & Dua
+
+Core question (orientation only; not scored and not a spiritual grade):
+
+**Did I remember Allah outside of prayer?**
+
+Retain factual recording for existing Dhikr rows (post-fard adhkar, morning and evening, other remembrance). Do not score remembrance.
+
+### 4.5 Character & Morals (Akhlaq)
+
+Core question (orientation only; not scored and not a spiritual grade):
+
+**Did my behavior today invite people toward goodness?**
+
+Record self-focused observations only:
+
+- Virtues noticed: patience, humility, truthfulness, gentleness, courage, thankfulness in how I acted, contentment
+- Paused before reacting
+- Honesty in small matters
+- Let go of a grudge
+- Guarded how I spoke (tone); modest dress; guarded my gaze
+- Walked away from an argument; held back from a habit I am trying to leave
+- Optional struggle note (for example: I was impatient today, but I caught myself)
+
+Do not:
+
+- Let the user rate themselves as a good or bad person
+- Create a character score or personality grade
+- Suggest perfection is expected
+- Allow logging someone else’s flaw
+- Present the domain as a performance review
+- Treat patience as only silence; it may also be firmness
+- Name vices, keep a days-clean streak, or infer unanswered as a relapse or a sin
+- Auto-fill from Gratitude Dhikr or Knowledge’s held-back speech
+
+Unanswered is not a failing. Marks mean “I noticed this in myself” or “I did not notice this today”, not a moral verdict. The habit on the self-control row is not named in the app. Optional struggle notes are text and do not count toward `recordableFieldCount`. Older `akhlaq.guardedMyGlance` marks stay stored and still appear on Historical Reflection.
+
+### 4.6 Rights of Others (Huquq al-Ibad)
+
+Core question (orientation only; not scored and not a spiritual grade):
+
+**Did I fulfill, harm, or neglect anyone’s right over me?**
+
+Record the user’s own obligations toward people Allah placed in their life, framed as investment, not a chore list:
+
+- Household: parents, grandparents, spouse, children, siblings
+- Extended family: other relatives
+- Neighbours and work: neighbours, colleagues and friends
+- The people: fellow Muslims, non-Muslims
+- Repair: a step toward reconciliation; turning back over a neglected right
+- Care in hardship: sick visit; sick contact; support under stress
+
+Examples of attending to a right (orientation only): kind speech, presence, service, and dua for parents; honouring grandparents; patience, kind words, fulfilling one’s own obligations, and presence with a spouse; teaching, presence in play, fairness, and guarded speech with children; keeping ties with siblings; keeping ties with other relatives; a check-in, a gift, not harming, and helping a neighbour; trustworthiness, keeping a confidence, sincere advice, and not backbiting with colleagues and friends; salaam, help in need, and dua for Muslims; justice, kindness, good neighbourliness, and character with non-Muslims.
+
+Do not:
+
+- Let the user log what others owe them
+- Create relationship scores for family members or anyone else
+- Provide a venting field about other people
+- Shame family conflict
+- Treat patience as required in harm or abuse; safety and justice come first
+- Present the domain as a to-do list
+
+Unanswered is not neglect. Marks mean “I attended to a right I owe” or “I neglected a right I owe”, not a grade of a relationship. Reconciliation and turning back are optional observations. The app does not prescribe tawbah or sulh, and does not complete them. Care in hardship (sick visit, sick contact, support under stress) is a right of brotherhood on this domain, not a sadaqah channel. These traces do not increase `recordableFieldCount`.
+
+### 4.7 Knowledge & Beneficial Speech
+
+Core question (orientation only; not scored and not a spiritual grade):
+
+**Did I learn something true, and did I speak only what was beneficial?**
+
+Record self-focused observations. A single new fact is enough. The user does not need to be a scholar.
+
+- Seeking truth: learned something true (Islamic or beneficial worldly knowledge that is not logged on Qur’an or Hadith); beneficial reading (not Qur’an or Hadith; book, article, or lecture); asked to remove ignorance
+- Sharing: taught someone (even one fact to a child or colleague); sincere advice; wrote or created something beneficial
+- Beneficial speech: held back useless speech (gossip, argument, or excessive joking)
+
+Qur’an Engagement and Hadith & Living Sunnah have their own cards. This domain is residual learning and speech. That is orientation, not a rank.
+
+Do not:
+
+- Track hours studied or treat study time as a badge
+- Log controversial or divisive content consumption
+- Treat debate or argument as knowledge engagement
+- Suggest only scholars belong here
+- Congratulate the user for being learned
+- Treat all knowledge as equal
+
+Unanswered is not ignorance. Marks mean “I noticed this in myself” or “I did not notice this today”. These traces do not increase `recordableFieldCount`.
+
+### 4.8 Time & Barakah
+
+Core question (orientation only; not scored and not a spiritual grade):
+
+**Did I treat my time as a trust from Allah?**
+
+Record self-focused observations of presence, trust, and rest — not hours:
+
+- Presence: present in what I was doing
+- Trust: did something I had delayed; stepped away from idle time
+- Rest: rested from work as needed; began with intention
+
+The fard stays on Salah. Sleep stays on Physical Health. Do not auto-fill Time from Salah or Health.
+
+Do not:
+
+- Track hours or treat clocked time as a badge
+- Create a productivity score or hustle rank
+- Shame an unanswered day as wasted
+- Congratulate the user for being productive
+- Prescribe a daily schedule
+- Treat rest as failure
+- Record a second prayer-window log on this domain
+
+Unanswered is not wasted time. Marks mean “I noticed this in myself” or “I did not notice this today”. These traces do not increase `recordableFieldCount`. Older `time.guardedPrayerWindow` marks stay stored and still appear on Historical Reflection.
+
+### 4.9 Physical Health & Energy
+
+Core question (orientation only; not scored and not a spiritual grade):
+
+**Did I care for the body Allah entrusted to me?**
+
+Record self-focused care of the body as a trust, not fitness performance:
+
+- Sleep: quality; amount (observation, not an hour badge, and not Time’s rest from work)
+- Strength: movement for worship and service; energy for ibadah
+- Sustenance: nutrition (halal, healthy, moderation); simple hydration
+- Illness and harm: sought care in illness; avoided a harm to the body
+
+Do not:
+
+- Import fitness culture: calorie counting, body-shaming, or “gains”
+- Treat physical beauty as a spiritual goal
+- Track weight or other body metrics
+- Shame illness or disability
+- Encourage extreme fasting outside Ramadan
+- Ignore that physical and mental health are intertwined
+- Auto-fill sleep from Time’s rest, or Time from sleep
+
+Unanswered is not a failing of the body. Marks mean “I noticed this in myself” or “I did not notice this today”. These traces do not increase `recordableFieldCount`.
+
+### 4.10 Wealth & Stewardship
+
+Core question (orientation only; not scored and not a spiritual grade):
+
+**Did my spending and earning please Allah?**
+
+Record self-focused stewardship of wealth as a trust, not net worth:
+
+- Earning: earned from a halal source; stayed clear of riba
+- Restraint: avoided waste
+
+Giving (sadaqah, family support, community and care channels) and zakat due / planned / paid stay on Charity, without amounts. A smile is sadaqah. Giving rows formerly on Wealth are not shown on Home, check-in, or Progress; stored `wealth.*` giving marks are kept for Historical Reflection.
+
+Do not:
+
+- Track net worth or savings as a spiritual metric
+- Show charity leaderboards or “most generous” badges
+- Require amounts
+- Shame poverty or debt
+- Treat wealth as a sign of Allah’s pleasure
+- Ignore that some people cannot give money
+- Duplicate Charity giving or zakat on this domain
+
+Unanswered is not a failing of provision. Marks mean “I noticed this in myself” or “I did not notice this today”. These traces do not increase `recordableFieldCount`.
+
+### 4.11 Ummah
+
+Core question (orientation only; not scored and not a spiritual grade):
+
+**Did I serve anyone beyond myself today?**
+
+Record self-focused service beyond the household that is not a salah status and not a sadaqah channel, privately:
+
+- Masjid: class or gathering (not the fard). Jumu‘ah and the five prayers stay on Salah
+- Witness: da’wah by character (not argument; not Character & Morals’ virtue list)
+- Solidarity: supported the oppressed (dua, awareness, or material help); worked for unity; prayed for the Ummah
+- Earth: cared for the earth as a trust
+
+Help to a neighbour, community giving, and sick care stay on Rights of Others and Charity. Charity Family Support is a gift or extra support, not ordinary household nafaqa. “Served beyond myself” is not shown on Home, check-in, or Progress; stored `ummah.communityService` marks are kept for Historical Reflection. Masjid marks here are not a public check-in.
+
+Do not:
+
+- Make masjid attendance visible to others
+- Duplicate the fard or Jumu‘ah on this domain
+- Log political rants or sectarian arguments
+- Treat only organized volunteering as valid
+- Shame social anxiety or introversion
+- Ignore isolation (including converts and new immigrants)
+- Conflate community with an ethnic group — the Ummah is global
+
+Unanswered is not isolation or neglect of the Ummah. Marks mean “I noticed this in myself” or “I did not notice this today”. These traces do not increase `recordableFieldCount`.
+
+### 4.12 Other established domains
 
 If present in an existing implementation, retain factual recording for domains such as:
 
-- Dhikr / Istighfar
-- conduct / character reflection
 - gratitude
 - personal reflection
 
 Do not remove valid established domains merely because Progress emphasizes Salah and Qur’an.
 
-### 4.4 Persistence boundary
+### 4.13 Persistence boundary
 
 If the repository already uses `DailyCheckIn` schema v5 and `recordableFieldCount = 10`, preserve both unless a critical defect is proven.
 
@@ -217,7 +443,7 @@ Approved prompts:
 - Tafsir positive: `What supported your tafsir or explanation study today? (Optional)`
 - Reflection positive: `What supported or prompted your reflection today? (Optional)`
 
-Stable structured factor IDs should be used. Existing accepted factor catalogs in a repository are authoritative.
+Stable structured factor IDs should be used. Existing accepted factor catalogs in a repository are authoritative. Charity Giving and Care traces share one helping/distracting catalog (values, relationships, responsibility, influence, capacity; constraints, trust, conflict, organisation, competing priorities). It is not the Qur’an context list and not a per-row survey. Those factors remain optional provenance and never cause an outcome or score giving. Zakat stays a status, not a second factor list.
 
 ---
 
@@ -227,14 +453,14 @@ Keep these concepts distinct when both exist:
 
 ### Manage past check-ins
 
-- editable
-- may correct/delete previously saved records
+- compact week groups of saved days only; tap to edit; ⋮ or long-press to remove
+- All / 30 / 90 is a view filter only; field counts are not shown
 
 ### Recorded days / Historical Reflection
 
-- read-only evidence browsing
-- shows exactly what the user recorded
-- used by REVIEW and EXPLORE
+- compact week grid of saved vs empty days; empty days are visible and not treated as missed
+- tapping a saved day opens a compact, read-only day view grouped by domain washes
+- one Add a response control per page, not per field
 
 The navigation and wording must make the difference obvious.
 
@@ -283,7 +509,7 @@ Never implement a moral traffic-light system where green means spiritually good 
 
 All important state differences require shape/text redundancy so the UI remains understandable without colour.
 
-### 8.1 Salah Progress
+### 8.1 Salah & Prayer Quality Progress
 
 Support 7D / 30D / 90D.
 
@@ -300,7 +526,7 @@ A 30-day Salah heatmap is acceptable if readable and already established.
 
 Do not use daily red/green success/failure grading.
 
-### 8.2 Qur’an Progress
+### 8.2 Qur’an Engagement Progress
 
 Display seven peer dimensions:
 
@@ -312,13 +538,13 @@ Display seven peer dimensions:
 - Reflection
 - Application Reflection
 
-Use stable subdued accent colours with equal semantic weight.
+Use stable subdued accent colours with equal semantic weight for card washes. Marks share one colour; shape encodes the recorded state.
 
 Recommended presentation:
 
 - 7D: chronological seven-marker trace
-- 30D: compact wrapped chronological trace
-- 90D: Earlier 30 / Middle 30 / Recent 30 blocks
+- 30D: compact weekly calendar
+- 90D: one full-width weekly calendar for the last 90 days (today’s week rightmost), with month labels, two alternating shades of the domain colour on day cells only, a pale yellow halo on today’s mark, and period arrows to move to earlier or later 90-day windows
 
 For the six newer neutral dimensions, display factual counts such as `Recorded on X of Y days` and positive activity-day counts.
 
@@ -630,6 +856,8 @@ Use opaque IDs in errors when necessary.
 Use only synthetic test data.
 
 Preserve existing Android backup restrictions when present unless there is a documented reason to change them.
+
+Optional Unlock with this device may use the phone PIN, pattern, or biometrics before the app is shown. That is not encryption-at-rest.
 
 Do not claim encryption-at-rest, forensic secure deletion, or absolute confidentiality unless technically implemented and verified.
 

@@ -67,7 +67,7 @@ REVIEW
 
 Evidence exploration may lead to Recorded Context, Recognition, supporting dates, Historical Reflection, and optional Response creation.
 
-Home should remain simple. Do not turn it into a dense analytics dashboard.
+Home should remain simple. Do not turn it into a dense analytics dashboard. Home shows one domain week at a time (previous/next short names); check-in, Reflection of the Week, and notices stay on the same page. Today’s full check-in shows one domain form at a time the same way; Other and context notes stay on that page. Under the domain week, Home shows a This week look-back of presence marks (not scores).
 
 ---
 
@@ -312,13 +312,13 @@ Display seven peer dimensions:
 - Reflection
 - Application Reflection
 
-Use stable subdued accent colours with equal semantic weight.
+Use stable subdued accent colours with equal semantic weight for card washes. Marks share one colour; shape encodes the recorded state.
 
 Recommended presentation:
 
 - 7D: chronological seven-marker trace
 - 30D: compact wrapped chronological trace
-- 90D: Earlier 30 / Middle 30 / Recent 30 blocks
+- 90D: one full-width weekly calendar for the last 90 days (today’s week rightmost), with month labels, two alternating shades of the domain colour on day cells only, a pale yellow halo on today’s mark, and period arrows to move to earlier or later 90-day windows
 
 For the six newer neutral dimensions, display factual counts such as `Recorded on X of Y days` and positive activity-day counts.
 

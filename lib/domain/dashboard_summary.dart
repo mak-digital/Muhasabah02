@@ -2,6 +2,7 @@ import 'activities.dart';
 import 'analytics.dart';
 import 'daily_check_in.dart';
 import 'date_key.dart';
+import 'monitor_domain.dart';
 import 'other_domains.dart';
 import 'prayer.dart';
 import 'quran.dart';
@@ -70,14 +71,14 @@ HomeDashboardSnapshot buildHomeDashboard({
 
   return HomeDashboardSnapshot(
     salah: DomainCardModel(
-      title: 'Salah',
+      title: MonitorDomain.salah.label,
       recentLine: _salahRecent(today),
       periodLine:
           'This period: ${salahShareForPeriod.desirable} on time among ${salahShareForPeriod.recorded} recorded (missing excluded)',
       unansweredLine: _salahUnanswered(today),
     ),
     quran: DomainCardModel(
-      title: 'Qur’an',
+      title: MonitorDomain.quran.label,
       recentLine: _quranRecent(today),
       periodLine:
           'This period: ${reading.desirable} read-or-listened among ${reading.recorded} recorded',
@@ -87,7 +88,7 @@ HomeDashboardSnapshot buildHomeDashboard({
       ),
     ),
     dhikr: _observationCard(
-      title: 'Dhikr',
+      title: MonitorDomain.dhikr.label,
       todayLabel: today?.dhikr.label,
       recordedDays: inPeriod.where((r) => r.dhikr.isRecorded).length,
       periodDays: period.days,

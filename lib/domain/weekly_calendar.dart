@@ -1,4 +1,5 @@
 import 'date_key.dart';
+import 'display_calendar.dart';
 
 const int kCalendarWeekdayCount = 7;
 
@@ -98,41 +99,59 @@ List<List<String>> progressCalendarChunks(
   List<String> keys, {
   required int periodDays,
 }) {
-  if (periodDays >= 90 && keys.length >= 90) {
-    return [keys.sublist(0, 30), keys.sublist(30, 60), keys.sublist(60, 90)];
-  }
+  if (keys.isEmpty || periodDays <= 0) return const [];
   return [keys];
 }
 
 List<String> progressCalendarChunkLabels(int periodDays) {
-  if (periodDays >= 90) {
-    return const ['Earlier 30', 'Middle 30', 'Recent 30'];
-  }
+  if (periodDays <= 0) return const [];
   return const [];
 }
 
-String weekRangeLabel(DateTime weekStart) {
+int monthBandIndex(
+  String dateKey,
+  String periodStartKey, {
+  DisplayCalendar calendar = DisplayCalendar.gregorian,
+}) {
+  final date = displayParts(parseDateKey(dateKey), calendar);
+  final start = displayParts(parseDateKey(periodStartKey), calendar);
+  final months = (date.year - start.year) * 12 + (date.month - start.month);
+  return months.abs() % 2;
+}
+
+class WeekStartMonthSpan {
+  const WeekStartMonthSpan({required this.label, required this.span});
+
+  final String label;
+  final int span;
+}
+
+List<WeekStartMonthSpan> weekStartMonthSpans(
+  List<DateTime> weekStarts, {
+  DisplayCalendar calendar = DisplayCalendar.gregorian,
+}) {
+  final spans = <WeekStartMonthSpan>[];
+  for (final start in weekStarts) {
+    final label = displayMonthLabel(start, calendar);
+    if (spans.isNotEmpty && spans.last.label == label) {
+      spans[spans.length - 1] = WeekStartMonthSpan(
+        label: label,
+        span: spans.last.span + 1,
+      );
+    } else {
+      spans.add(WeekStartMonthSpan(label: label, span: 1));
+    }
+  }
+  return spans;
+}
+
+String weekRangeLabel(
+  DateTime weekStart, {
+  DisplayCalendar calendar = DisplayCalendar.gregorian,
+}) {
   final start = DateTime(weekStart.year, weekStart.month, weekStart.day);
   final end = DateTime(start.year, start.month, start.day + 6);
-  String stamp(DateTime date) {
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    return '${date.day} ${months[date.month - 1]}';
-  }
-
-  return '${stamp(start)} – ${stamp(end)}';
+  return '${formatDayMonth(start, calendar)} – ${formatDayMonth(end, calendar)}';
 }
 
 DateTime weekStartForKey(String key, {required int firstDayOfWeekIndex}) {

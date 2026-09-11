@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Proposal #5 — Akhlaq self-control (visual review)</title>
+  <style>
+    :root {
+      --bg: #f4f1ea;
+      --ink: #1d2a2c;
+      --muted: #4d5c63;
+      --line: #c5d0d4;
+      --teal: #2f6f73;
+      --akhlaq: #e8e0d4;
+      --knowledge: #d5e6ee;
+      --dhikr: #dce8e4;
+      --drop: #8a4a4a;
+      --keep: #2f6f73;
+      --rename: #6a5a20;
+      --add: #2f5f73;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      margin: 0;
+      padding: 24px;
+    }
+    h1 { font-size: 22px; font-weight: 700; margin: 0 0 8px; }
+    h2 { font-size: 16px; margin: 28px 0 10px; }
+    .note { max-width: 1100px; color: var(--muted); line-height: 1.5; font-size: 14px; }
+    .rules {
+      max-width: 1100px;
+      margin: 16px 0;
+      padding: 12px 14px;
+      background: #fff;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 20px;
+      font-size: 13px;
+      margin: 12px 0 8px;
+    }
+    .legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .swatch {
+      width: 14px; height: 14px; border-radius: 4px; display: inline-block;
+    }
+    .pair {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      align-items: flex-start;
+      margin-top: 8px;
+    }
+    .col { width: min(390px, 100%); }
+    .col h3 {
+      margin: 0 0 8px;
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .phone {
+      width: 100%;
+      background: #fff;
+      border-radius: 28px;
+      box-shadow: 0 12px 40px rgba(0,0,0,.12);
+      overflow: hidden;
+    }
+    .appbar { padding: 14px 16px 6px; font-size: 16px; font-weight: 600; }
+    .hint { padding: 0 16px 10px; font-size: 12px; color: var(--muted); line-height: 1.4; }
+    .body { padding: 0 16px 16px; }
+    .card { border-radius: 16px; padding: 14px 12px 12px; margin-bottom: 10px; }
+    .c-akhlaq { background: var(--akhlaq); }
+    .c-knowledge { background: var(--knowledge); }
+    .c-dhikr { background: var(--dhikr); }
+    .ghost {
+      opacity: 0.55;
+      outline: 1px dashed #9ab;
+    }
+    .domain {
+      margin: 0 0 4px;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+    }
+    .focus {
+      margin: 0 0 10px;
+      font-size: 12px;
+      font-style: italic;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+    .band {
+      margin: 8px 0 4px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+      font-size: 13px;
+      padding: 3px 0;
+    }
+    .mark {
+      width: 10px; height: 10px; border-radius: 50%;
+      border: 1.5px solid #2f6f73;
+      flex-shrink: 0;
+      align-self: center;
+    }
+    .mark.empty { border-style: dotted; opacity: 0.45; }
+    .drop {
+      text-decoration: line-through;
+      color: var(--drop);
+      text-decoration-thickness: 1.5px;
+    }
+    .rename { color: var(--rename); font-weight: 600; }
+    .add { color: var(--add); font-weight: 600; }
+    .keep { color: var(--keep); font-weight: 600; }
+    .tag {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      border-radius: 999px;
+      padding: 2px 7px;
+      white-space: nowrap;
+    }
+    .tag-drop { background: #f3dcdc; color: var(--drop); }
+    .tag-keep { background: #d7eceb; color: var(--keep); }
+    .tag-rename { background: #eee6c8; color: var(--rename); }
+    .tag-add { background: #d5e6ee; color: var(--add); }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      max-width: 1100px;
+      margin-top: 8px;
+      font-size: 13px;
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #e4e8ea; vertical-align: top; }
+    th { color: var(--muted); font-weight: 600; background: #faf8f4; }
+    .key { max-width: 1100px; margin-top: 20px; font-size: 12px; color: var(--muted); line-height: 1.5; }
+    code { font-size: 12px; }
+    .stack { font-size: 12px; color: var(--muted); margin: 0 0 8px; }
+  </style>
+</head>
+<body>
+  <h1>Proposal #5 — Akhlaq: gaze, speech, gratitude, and self-control</h1>
+  <p class="note">
+    Visual review of the implemented slice. Marks stay “I noticed this in myself”
+    / “I did not notice this today”. Unanswered is not a sin, and not a failed revival of character.
+  </p>
+  <div class="rules">
+    <strong>Suggested direction</strong>
+    <ol>
+      <li>Merge <strong>Modest gaze</strong> and <strong>Guarded my glance</strong> into one row: <strong>Guarded my gaze</strong>. Keep key <code>akhlaq.modestGaze</code>. Retire <code>akhlaq.guardedMyGlance</code> from Home (stored marks still readable).</li>
+      <li>Rename <strong>Modest speech</strong> to <strong>Guarded how I spoke (tone)</strong> so it is not Knowledge’s “Held back useless speech” (usefulness, not haya).</li>
+      <li>Rename Akhlaq <strong>Gratitude</strong> to <strong>Thankfulness in how I acted</strong>. Dhikr keeps <strong>Gratitude Dhikr</strong> (remembrance, not character).</li>
+      <li>Add <strong>one</strong> self-control row: <strong>Held back from a habit I am trying to leave</strong>. Same tone as walking away from an argument — noticed restraint, not a confession or a clean-day streak.</li>
+      <li>Keep the optional struggle note for when someone slipped and caught themselves. Do not name vices, score chastity, or prescribe tawbah.</li>
+    </ol>
+  </div>
+  <div class="legend">
+    <span><i class="swatch" style="background:var(--akhlaq)"></i> Akhlaq</span>
+    <span><i class="swatch" style="background:var(--knowledge)"></i> Knowledge</span>
+    <span><i class="swatch" style="background:var(--dhikr)"></i> Dhikr</span>
+    <span class="add">Add</span>
+    <span class="rename">Rename</span>
+    <span class="drop">Strike — merge or not this card</span>
+  </div>
+
+  <h2>Character &amp; Morals</h2>
+  <div class="pair">
+    <div class="col">
+      <h3>Now</h3>
+      <div class="phone">
+        <div class="appbar">Home</div>
+        <div class="hint">Two gaze rows. Speech and gratitude clash with Knowledge and Dhikr. Restraint is only argument-and-glance.</div>
+        <div class="body">
+          <div class="card c-akhlaq">
+            <p class="domain">Character &amp; Morals (Akhlaq)</p>
+            <p class="focus">Did my behavior today invite people toward goodness?</p>
+            <div class="band">Virtues I noticed</div>
+            <div class="row"><span>Patience … Courage</span><i class="mark empty"></i></div>
+            <div class="row"><span>Gratitude</span><i class="mark empty"></i></div>
+            <div class="row"><span>Contentment</span><i class="mark empty"></i></div>
+            <div class="band">Anger, honesty, forgiveness</div>
+            <div class="row"><span>Paused before reacting</span><i class="mark empty"></i></div>
+            <div class="row"><span>Honesty in small matters</span><i class="mark empty"></i></div>
+            <div class="row"><span>Let go of a grudge</span><i class="mark empty"></i></div>
+            <div class="band">Modesty</div>
+            <div class="row"><span>Modest speech</span><i class="mark empty"></i></div>
+            <div class="row"><span>Modest dress</span><i class="mark empty"></i></div>
+            <div class="row"><span>Modest gaze</span><i class="mark empty"></i></div>
+            <div class="band">Restraint</div>
+            <div class="row"><span>Walked away from an argument</span><i class="mark empty"></i></div>
+            <div class="row"><span>Guarded my glance</span><i class="mark empty"></i></div>
+            <p class="hint" style="padding:8px 0 0">Struggle note — optional text</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <h3>Proposed</h3>
+      <div class="phone">
+        <div class="appbar">Home</div>
+        <div class="hint">One gaze. Speech is tone. Gratitude is character. Self-control is one noticed hold-back, not a vice list.</div>
+        <div class="body">
+          <div class="card c-akhlaq">
+            <p class="domain">Character &amp; Morals (Akhlaq)</p>
+            <p class="focus">Did my behavior today invite people toward goodness?</p>
+            <div class="band">Virtues I noticed</div>
+            <div class="row"><span>Patience … Courage</span><i class="mark empty"></i></div>
+            <div class="row">
+              <span class="rename">Thankfulness in how I acted</span>
+              <span class="tag tag-rename">Rename</span>
+            </div>
+            <div class="row"><span>Contentment</span><i class="mark empty"></i></div>
+            <div class="band">Anger, honesty, forgiveness</div>
+            <div class="row"><span>Paused … Honesty … Let go of a grudge</span><i class="mark empty"></i></div>
+            <div class="band">Modesty</div>
+            <div class="row">
+              <span class="rename">Guarded how I spoke (tone)</span>
+              <span class="tag tag-rename">Rename</span>
+            </div>
+            <div class="row"><span>Modest dress</span><i class="mark empty"></i></div>
+            <div class="row">
+              <span class="rename">Guarded my gaze</span>
+              <span class="tag tag-rename">Merge</span>
+            </div>
+            <div class="band">Restraint</div>
+            <div class="row"><span>Walked away from an argument</span><i class="mark empty"></i></div>
+            <div class="row">
+              <span class="drop">Guarded my glance</span>
+              <span class="tag tag-drop">Merge into gaze</span>
+            </div>
+            <div class="row">
+              <span class="add">Held back from a habit I am trying to leave</span>
+              <span class="tag tag-add">Add</span>
+            </div>
+            <p class="hint" style="padding:8px 0 0">Struggle note stays. Example: I reached for it, then I stopped.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Why this motivates without scoring sin</h2>
+  <div class="pair">
+    <div class="col">
+      <h3>The hold-back row</h3>
+      <div class="phone">
+        <div class="appbar">Today’s check-in</div>
+        <div class="hint">Private. The habit is not named in the app. You know what you meant.</div>
+        <div class="body">
+          <div class="card c-akhlaq">
+            <p class="domain">Restraint</p>
+            <div class="row"><span>Walked away from an argument</span><i class="mark empty"></i></div>
+            <div class="row">
+              <span class="add">Held back from a habit I am trying to leave</span>
+              <i class="mark empty"></i>
+            </div>
+            <p class="hint" style="padding:8px 0 0">
+              Filled = I noticed this in myself.<br />
+              Outline = I did not notice this today.<br />
+              Empty = unanswered — not “I sinned”.
+            </p>
+            <p class="hint" style="padding:0">Struggle note: optional, yourself only. Not a confession field and not a grade.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <h3>Not this card</h3>
+      <div class="phone">
+        <div class="appbar">Boundaries</div>
+        <div class="hint">Motivation is noticing restraint. Shame, streaks, and named vices are out.</div>
+        <div class="body">
+          <div class="card ghost">
+            <p class="domain drop">Do not add</p>
+            <div class="row"><span class="drop">Sin checklist / named vices</span></div>
+            <div class="row"><span class="drop">Days clean, chastity streak, or “I did not sin”</span></div>
+            <div class="row"><span class="drop">Auto tawbah or a prescribed remedy</span></div>
+            <div class="row"><span class="drop">Logging someone else’s habit</span></div>
+            <div class="row"><span class="drop">A second glance row</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Speech and gratitude stay on their own cards</h2>
+  <div class="pair">
+    <div class="col">
+      <h3>Knowledge</h3>
+      <div class="phone">
+        <div class="appbar">Today’s check-in</div>
+        <div class="hint">Usefulness of speech. Not haya or tone.</div>
+        <div class="body">
+          <div class="card c-knowledge">
+            <p class="domain">Knowledge &amp; Beneficial Speech</p>
+            <p class="focus">Did I learn something true, and did I speak only what was beneficial?</p>
+            <div class="row"><span class="keep">Held back useless speech</span><span class="tag tag-keep">Keep</span></div>
+            <p class="hint" style="padding:8px 0 0">Gossip, argument, excessive joking. Akhlaq’s new speech row is tone and modesty, not “was it useful?”</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <h3>Dhikr</h3>
+      <div class="phone">
+        <div class="appbar">Home</div>
+        <div class="hint">Remembrance with the tongue. Not a character grade of being grateful.</div>
+        <div class="body">
+          <div class="card c-dhikr">
+            <p class="domain">Dhikr &amp; Dua</p>
+            <p class="focus">Did I remember Allah outside of prayer?</p>
+            <div class="band">Other remembrance</div>
+            <div class="row"><span class="keep">Gratitude Dhikr</span><span class="tag tag-keep">Keep</span></div>
+            <p class="hint" style="padding:8px 0 0">Akhlaq’s renamed row is thankfulness in how you acted. Same afternoon may be both. Do not auto-fill.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Row map</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Item</th>
+        <th>Now</th>
+        <th>Proposed</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Modest gaze + Guarded my glance</td>
+        <td>Two near-duplicate rows</td>
+        <td><span class="rename">Guarded my gaze</span> on <code>akhlaq.modestGaze</code>. <code>akhlaq.guardedMyGlance</code> retired from Home; stored marks stay on Historical Reflection.</td>
+      </tr>
+      <tr>
+        <td>Modest speech</td>
+        <td>Could be Knowledge’s useless-speech row</td>
+        <td><span class="rename">Guarded how I spoke (tone)</span>. Knowledge keeps Held back useless speech.</td>
+      </tr>
+      <tr>
+        <td>Akhlaq Gratitude</td>
+        <td>Same word as Gratitude Dhikr</td>
+        <td><span class="rename">Thankfulness in how I acted</span>. Key stays <code>akhlaq.gratitude</code>.</td>
+      </tr>
+      <tr>
+        <td>Held back from a habit I am trying to leave</td>
+        <td>—</td>
+        <td><span class="add">New</span> <code>akhlaq.heldBackFromAHabit</code>. The habit is not named. Unanswered is not a relapse.</td>
+      </tr>
+      <tr>
+        <td>Walked away from an argument</td>
+        <td>On Restraint</td>
+        <td><span class="keep">Keep</span> — interpersonal hold-back, not the habit row.</td>
+      </tr>
+      <tr>
+        <td>Struggle note</td>
+        <td>Optional text</td>
+        <td><span class="keep">Keep</span> — for catching yourself. Not a sin log and not a score.</td>
+      </tr>
+      <tr>
+        <td>Named vices, days clean, tawbah button</td>
+        <td>—</td>
+        <td><span class="drop">Do not add</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p class="key">
+    Implementation would merge one row, rename two labels, add one <code>akhlaq.*</code> trace, and tighten Akhlaq copy.
+    It would not bump <code>recordableFieldCount</code>, name habits, infer sin from unanswered, or auto-fill from Dhikr or Knowledge.
+    File: <code>docs/visual_review/akhlaq_self_control_proposal.html</code>
+  </p>
+</body>
+</html>

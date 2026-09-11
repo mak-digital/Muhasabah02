@@ -1,3 +1,5 @@
+import 'prayer.dart';
+
 class SalahFactorOption {
   const SalahFactorOption({required this.id, required this.label});
 
@@ -22,6 +24,47 @@ class SalahFactorCatalog {
     SalahFactorOption(id: 'salah.travel', label: 'Travel'),
     SalahFactorOption(id: 'salah.tired', label: 'Tired'),
   ];
+
+  /// Sleep and waking cues apply to night/early prayers, not daytime Salah.
+  static bool isNightPrayer(String subject) {
+    return subject == PrayerId.fajr.name || subject == 'tahajjud';
+  }
+
+  static List<SalahFactorOption> supportFor(String subject) {
+    if (isNightPrayer(subject)) {
+      return support;
+    }
+    return support
+        .where(
+          (factor) =>
+              factor.id != 'salah.sleptEarly' &&
+              factor.id != 'salah.alarmWorked',
+        )
+        .toList();
+  }
+
+  static List<SalahFactorOption> challengeFor(String subject) {
+    if (isNightPrayer(subject)) {
+      return challenge
+          .where((factor) => factor.id != 'salah.workCommitment')
+          .toList();
+    }
+    return challenge.where((factor) => factor.id != 'salah.overslept').toList();
+  }
+
+  static List<SalahFactorOption> withExisting(
+    List<SalahFactorOption> catalog,
+    Iterable<String> existingIds,
+  ) {
+    final next = [...catalog];
+    for (final id in existingIds) {
+      if (id.isEmpty) continue;
+      if (next.any((factor) => factor.id == id)) continue;
+      final known = find(id);
+      if (known != null) next.add(known);
+    }
+    return next;
+  }
 
   static SalahFactorOption? find(String id) {
     for (final option in [...support, ...challenge]) {

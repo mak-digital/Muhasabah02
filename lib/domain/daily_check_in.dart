@@ -53,6 +53,7 @@ class DailyCheckIn {
     this.homeTraces = const {},
     this.homeTraceFactors = const {},
     this.situationNotes = const SituationNotes(),
+    this.akhlaqStruggleNote,
     this.synthetic = false,
   });
 
@@ -82,10 +83,37 @@ class DailyCheckIn {
   final Map<String, TernaryOutcome> homeTraces;
   final Map<String, SalahFactorCapture> homeTraceFactors;
   final SituationNotes situationNotes;
+  final String? akhlaqStruggleNote;
   final bool synthetic;
 
   TernaryOutcome homeTrace(String storageKey) =>
       homeTraces[storageKey] ?? TernaryOutcome.unanswered;
+
+  /// Any observation that day for these rows. Not a score.
+  bool homeTraceDayRecorded({
+    required List<HomeTraceRow> rows,
+    bool includeZakat = false,
+    bool includeStruggleNote = false,
+  }) {
+    for (final row in rows) {
+      if (homeTrace(row.storageKey).isRecorded) return true;
+    }
+    if (includeZakat && zakat.isRecorded) return true;
+    if (includeStruggleNote &&
+        akhlaqStruggleNote != null &&
+        akhlaqStruggleNote!.trim().isNotEmpty) {
+      return true;
+    }
+    final prefix = rows.isEmpty ? '' : rows.first.storageKey.split('.').first;
+    return switch (prefix) {
+      'dhikr' => dhikr.isRecorded,
+      'fasting' => fasting.isRecorded,
+      'family' => family.isRecorded,
+      'charity' => charity.isRecorded,
+      'hadith' => hadith.isRecorded,
+      _ => false,
+    };
+  }
 
   factory DailyCheckIn.empty(String dateKey) => DailyCheckIn(dateKey: dateKey);
 
@@ -205,6 +233,9 @@ class DailyCheckIn {
         !situationNotes.isEmpty) {
       return true;
     }
+    if (akhlaqStruggleNote != null && akhlaqStruggleNote!.trim().isNotEmpty) {
+      return true;
+    }
     return contexts.isNotEmpty;
   }
 
@@ -236,6 +267,8 @@ class DailyCheckIn {
     Map<String, TernaryOutcome>? homeTraces,
     Map<String, SalahFactorCapture>? homeTraceFactors,
     SituationNotes? situationNotes,
+    String? akhlaqStruggleNote,
+    bool clearAkhlaqStruggleNote = false,
     bool? synthetic,
   }) {
     return DailyCheckIn(
@@ -270,6 +303,9 @@ class DailyCheckIn {
       homeTraces: homeTraces ?? this.homeTraces,
       homeTraceFactors: homeTraceFactors ?? this.homeTraceFactors,
       situationNotes: situationNotes ?? this.situationNotes,
+      akhlaqStruggleNote: clearAkhlaqStruggleNote
+          ? null
+          : (akhlaqStruggleNote ?? this.akhlaqStruggleNote),
       synthetic: synthetic ?? this.synthetic,
     );
   }
@@ -473,6 +509,8 @@ class DailyCheckIn {
             if (!entry.value.isEmpty) entry.key: entry.value.toJson(),
         },
       if (!situationNotes.isEmpty) 'situationNotes': situationNotes.toJson(),
+      if (akhlaqStruggleNote != null && akhlaqStruggleNote!.trim().isNotEmpty)
+        'akhlaqStruggleNote': akhlaqStruggleNote,
       if (synthetic) 'synthetic': true,
     };
   }
@@ -601,8 +639,15 @@ class DailyCheckIn {
       homeTraces: tracesFromJson(json['homeTraces']),
       homeTraceFactors: _factorsMap(json['homeTraceFactors']),
       situationNotes: SituationNotes.fromJson(json['situationNotes']),
+      akhlaqStruggleNote: _optionalNote(json['akhlaqStruggleNote']),
       synthetic: json['synthetic'] == true,
     );
+  }
+
+  static String? _optionalNote(Object? value) {
+    if (value is! String) return null;
+    final text = value.trim();
+    return text.isEmpty ? null : text;
   }
 
   static Map<String, SalahFactorCapture> _factorsMap(Object? json) {

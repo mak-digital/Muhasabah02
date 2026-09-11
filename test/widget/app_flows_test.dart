@@ -5,8 +5,10 @@ import 'package:muhasabah02/application/providers.dart';
 import 'package:muhasabah02/data/app_prefs.dart';
 import 'package:muhasabah02/data/memory_repositories.dart';
 import 'package:muhasabah02/domain/copy.dart';
+import 'package:muhasabah02/domain/monitor_domain.dart';
 import 'package:muhasabah02/presentation/recorded_days/day_evidence_screen.dart';
 
+import '../support/check_in_select.dart';
 import '../support/test_app.dart';
 
 void main() {
@@ -18,8 +20,12 @@ void main() {
     expect(find.text(Copy.homeCheckIn), findsOneWidget);
     await tester.tap(find.text(Copy.homeCheckIn));
     await tester.pumpAndSettle();
-    expect(find.text('Salah'), findsWidgets);
-    await tester.tap(find.text('Prayed alone on time').first);
+    expect(find.text(MonitorDomain.salah.label.toUpperCase()), findsOneWidget);
+    await chooseCheckInOption(
+      tester,
+      dropdownKey: const Key('salah-fajr'),
+      optionLabel: 'Prayed alone on time',
+    );
     await tester.pumpAndSettle();
     await tester.ensureVisible(find.text('Save check-in'));
     await tester.tap(find.text('Save check-in'));
@@ -38,34 +44,67 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text(Copy.historyTitle), findsOneWidget);
     expect(find.textContaining('Score'), findsNothing);
-    expect(find.text('2026-09-01'), findsOneWidget);
+    expect(find.text('1 Sep 2026'), findsOneWidget);
   });
 
   testWidgets('review has 7/30/90 and no generated recommendations', (
     tester,
   ) async {
-    await tester.pumpWidget(testApp());
+    tester.view.physicalSize = const Size(400, 2400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(testApp(visibleDomains: allVisibleDomains()));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Review'));
     await tester.pumpAndSettle();
-    expect(find.text('Period summary'), findsOneWidget);
+    expect(find.text(Copy.reviewThisPeriod), findsOneWidget);
     expect(find.text('7 days'), findsWidgets);
     expect(find.text('For the coming days'), findsNothing);
-    await tester.ensureVisible(find.text('Salah Progress'));
-    expect(find.text('Salah Progress'), findsOneWidget);
-    expect(find.text('Qur’an Progress'), findsOneWidget);
-    await tester.tap(find.text('30 days'));
+    await tester.ensureVisible(find.byKey(const Key('review-domain-salah')));
+    expect(find.byKey(const Key('review-domain-salah')), findsOneWidget);
+    expect(find.byKey(const Key('review-domain-quran')), findsOneWidget);
+    final reviewScroll = find.byType(Scrollable).last;
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('review-domain-dhikr')),
+      180,
+      scrollable: reviewScroll,
+    );
+    expect(find.byKey(const Key('review-domain-dhikr')), findsOneWidget);
+    expect(find.byKey(const Key('review-domain-fasting')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('review-domain-dhikr')));
+    await tester.pumpAndSettle();
+    expect(find.text('${MonitorDomain.dhikr.label} Progress'), findsWidgets);
+    expect(find.text('Post-fard Salah Adhkar'), findsWidgets);
+    expect(find.text('Faj'), findsOneWidget);
+    expect(find.text('Morning & Evening Adhkar'), findsOneWidget);
+    expect(find.text('Mor-Adk'), findsOneWidget);
+    expect(find.textContaining('for the week starting on'), findsWidgets);
+    expect(find.textContaining('Score'), findsNothing);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('review-domain-hadith')),
+      180,
+      scrollable: find.byType(Scrollable).last,
+    );
+    expect(find.byKey(const Key('review-domain-charity')), findsOneWidget);
+    expect(find.byKey(const Key('review-domain-hadith')), findsOneWidget);
   });
 
   testWidgets('ponder copy is static and my response empty state is frozen', (
     tester,
   ) async {
+    tester.view.physicalSize = const Size(400, 2400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
     await tester.pumpWidget(testApp());
     await tester.pumpAndSettle();
     await tester.tap(find.text('Review'));
     await tester.pumpAndSettle();
-    await tester.ensureVisible(find.text('Qur’an Progress'));
-    await tester.tap(find.text('Qur’an Progress'));
+    await tester.ensureVisible(find.byKey(const Key('review-domain-quran')));
+    await tester.tap(find.byKey(const Key('review-domain-quran')));
     await tester.pumpAndSettle();
     expect(find.text(Copy.ponderPrompt), findsWidgets);
     await tester.pageBack();
@@ -121,6 +160,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Prayed late'), findsOneWidget);
     expect(find.text('Missed'), findsOneWidget);
+    await tester.scrollUntilVisible(find.text(Copy.addAResponse), 300);
     expect(find.text(Copy.addAResponse), findsWidgets);
     await tester.scrollUntilVisible(
       find.text(Copy.applicationReflectionNote),
@@ -152,9 +192,16 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.byTooltip('Theme'));
+    await tester.tap(find.byTooltip('Settings'));
     await tester.pumpAndSettle();
-    await tester.tap(find.byTooltip('Theme'));
+    await tester.ensureVisible(find.text(Copy.appearance));
+    await tester.tap(find.text(Copy.appearance));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Dark'));
+    await tester.pumpAndSettle();
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    await tester.pageBack();
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
     await tester.ensureVisible(find.text(Copy.homeCheckIn));

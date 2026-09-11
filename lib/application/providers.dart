@@ -1,9 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 
 import '../data/app_prefs.dart';
 import '../data/memory_repositories.dart';
 import '../data/repositories.dart';
 import '../domain/daily_check_in.dart';
+import '../domain/monitor_domain.dart';
 import '../domain/personal_response.dart';
 import '../domain/review_period.dart';
 
@@ -24,6 +26,12 @@ final reviewPeriodProvider = StateProvider<ReviewPeriod>(
 );
 
 final prefsTickProvider = StateProvider<int>((ref) => 0);
+
+/// Last Home domain shown in this app session. Not stored. Not a score.
+final homeDomainStageProvider = StateProvider<MonitorDomain?>((ref) => null);
+
+/// Last full-check-in domain shown in this app session. Not stored. Not a score.
+final checkInDomainStageProvider = StateProvider<MonitorDomain?>((ref) => null);
 
 final themeModePrefProvider = StateProvider<int>((ref) => 0);
 

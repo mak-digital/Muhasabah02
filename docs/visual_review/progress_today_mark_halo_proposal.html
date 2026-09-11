@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Today highlight on marks only — visual review</title>
+  <style>
+    :root {
+      --bg: #f4f1ea;
+      --ink: #1d2a2c;
+      --muted: #4d5c63;
+      --line: #c5d0d4;
+      --teal: #3f7d6a;
+      --dhikr: #d9eedf;
+      --today: #fff8d6;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      margin: 0;
+      padding: 24px;
+    }
+    h1 { font-size: 22px; font-weight: 700; margin: 0 0 8px; }
+    .note, .rules, .key { max-width: 520px; }
+    .note { color: var(--muted); line-height: 1.5; font-size: 14px; }
+    .rules {
+      margin: 16px 0;
+      padding: 12px 14px;
+      background: #fff;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.55;
+      max-width: 520px;
+    }
+    .phone {
+      width: 390px;
+      background: #faf8f4;
+      border-radius: 28px;
+      box-shadow: 0 12px 40px rgba(0,0,0,.12);
+      overflow: hidden;
+    }
+    .appbar {
+      display: flex; align-items: center; gap: 10px;
+      padding: 14px 16px 8px; font-size: 16px; font-weight: 600;
+    }
+    .hint { padding: 0 16px 10px; font-size: 12px; color: var(--muted); }
+    .body { padding: 0 16px 20px; }
+    .period { display: flex; gap: 6px; margin-bottom: 8px; }
+    .chip {
+      flex: 1; text-align: center; font-size: 12px;
+      padding: 8px 6px; border-radius: 20px;
+      border: 1px solid var(--line); background: #fff;
+    }
+    .chip.on { background: #d7eceb; font-weight: 700; }
+    .guard { font-size: 12px; color: var(--muted); line-height: 1.4; margin: 0 0 12px; }
+    .matrix {
+      background: var(--dhikr);
+      border-radius: 16px;
+      padding: 10px;
+      margin-bottom: 12px;
+    }
+    .title-row { display: flex; align-items: center; gap: 6px; }
+    .title-row h2 {
+      flex: 1; margin: 0; font-size: 15px; font-weight: 700; text-align: center;
+    }
+    .nav {
+      width: 32px; height: 32px; border-radius: 16px;
+      border: 1px solid var(--line); background: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+    }
+    .week-of {
+      margin: 4px 0 8px; font-size: 12px; color: var(--muted); text-align: center;
+    }
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      table-layout: fixed;
+    }
+    th, td {
+      text-align: center; padding: 4px 1px;
+      font-size: 10px; font-weight: 600; color: var(--muted);
+      vertical-align: middle;
+    }
+    th.dow, td.dow {
+      width: 22px; text-align: left; font-size: 11px;
+      color: var(--ink); font-weight: 700;
+    }
+    th.date, td.date {
+      width: 26px; text-align: right; padding-right: 6px;
+      font-size: 11px; color: var(--muted);
+    }
+    .hlabel { display: block; font-size: 11px; color: var(--ink); }
+    .dot {
+      width: 16px; height: 16px; margin: 0 auto;
+      border-radius: 50%;
+      border: 1.6px dashed rgba(63,125,106,.45);
+    }
+    .dot.on { background: var(--teal); border-style: solid; border-color: var(--teal); }
+    .dot.off { background: transparent; border-style: solid; border-color: var(--teal); }
+    .dot.future { opacity: 0.28; }
+    .halo {
+      width: 26px; height: 26px; margin: 0 auto;
+      border-radius: 50%;
+      background: var(--today);
+      border: 1px solid #f3ecc0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .halo .dot { margin: 0; }
+    .compact { width: auto; }
+    .compact th, .compact td { width: 48px; }
+    .compact th.dow, .compact td.dow { width: 22px; }
+    .compact th.date, .compact td.date { width: 26px; }
+    .legend {
+      display: flex; flex-wrap: wrap; gap: 12px;
+      font-size: 11px; color: var(--muted); margin-top: 4px; align-items: center;
+    }
+    .legend .dot, .legend .halo { display: inline-flex; vertical-align: middle; margin: 0 4px 0 0; }
+    .legend .halo { width: 22px; height: 22px; }
+    .legend .halo .dot { width: 12px; height: 12px; }
+    .legend .dot { width: 12px; height: 12px; }
+    .key { margin-top: 18px; font-size: 13px; color: var(--muted); line-height: 1.5; }
+    code { font-size: 12px; }
+  </style>
+</head>
+<body>
+  <h1>Today highlight — marks only</h1>
+  <p class="note">
+    Sample layout only. No app change yet. Same 7-day matrices as now (arrows, local calendar,
+    future marks inactive). The yellow cue sits behind each of today’s circles, not as a bar
+    across the weekday, date, or whole row.
+  </p>
+  <div class="rules">
+    Light yellow is a pale halo on the mark only — not a bar across the row.
+    Weekday letter and date stay on the card wash. Tappable today marks stay those circled cells.
+    Future empty marks stay faded and inactive.
+  </div>
+
+  <div class="phone">
+    <div class="appbar">← Dhikr Progress</div>
+    <p class="hint">Today is Monday 7 Sep 2026. Yellow is on today’s circles only.</p>
+    <div class="body">
+      <div class="period">
+        <div class="chip on">7 days ✓</div>
+        <div class="chip">30 days</div>
+        <div class="chip">90 days</div>
+      </div>
+      <p class="guard">Colour identifies the domain, not rank. Missing records are not treated as missed.</p>
+
+      <section class="matrix">
+        <div class="title-row">
+          <div class="nav">←</div>
+          <h2>Post-fard Salah Adhkar</h2>
+          <div class="nav">→</div>
+        </div>
+        <p class="week-of">(for the week starting on 7 Sep 2026)</p>
+        <table>
+          <thead>
+            <tr>
+              <th class="dow"></th><th class="date"></th>
+              <th><span class="hlabel">Faj</span></th>
+              <th><span class="hlabel">Dhr</span></th>
+              <th><span class="hlabel">Asr</span></th>
+              <th><span class="hlabel">Mag</span></th>
+              <th><span class="hlabel">Isa</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="dow">M</td><td class="date">7</td>
+              <td><div class="halo"><div class="dot"></div></div></td>
+              <td><div class="halo"><div class="dot on"></div></div></td>
+              <td><div class="halo"><div class="dot"></div></div></td>
+              <td><div class="halo"><div class="dot"></div></div></td>
+              <td><div class="halo"><div class="dot off"></div></div></td>
+            </tr>
+            <tr>
+              <td class="dow">T</td><td class="date">8</td>
+              <td><div class="dot future"></div></td>
+              <td><div class="dot future"></div></td>
+              <td><div class="dot future"></div></td>
+              <td><div class="dot future"></div></td>
+              <td><div class="dot future"></div></td>
+            </tr>
+            <tr>
+              <td class="dow">W</td><td class="date">9</td>
+              <td><div class="dot future"></div></td>
+              <td><div class="dot future"></div></td>
+              <td><div class="dot future"></div></td>
+              <td><div class="dot future"></div></td>
+              <td><div class="dot future"></div></td>
+            </tr>
+            <tr>
+              <td class="dow">T</td><td class="date">10</td>
+              <td><div class="dot future"></div></td>
+              <td><div class="dot future"></div></td>
+              <td><div class="dot future"></div></td>
+              <td><div class="dot future"></div></td>
+              <td><div class="dot future"></div></td>
+            </tr>
+            <tr>
+              <td class="dow">F</td><td class="date">11</td>
+              <td><div class="dot future"></div></td>
+              <td><div class="dot future"></div></td>
+              <td><div class="dot future"></div></td>
+              <td><div class="dot future"></div></td>
+              <td><div class="dot future"></div></td>
+            </tr>
+            <tr>
+              <td class="dow">S</td><td class="date">12</td>
+              <td><div class="dot future"></div></td>
+              <td><div class="dot future"></div></td>
+              <td><div class="dot future"></div></td>
+              <td><div class="dot future"></div></td>
+              <td><div class="dot future"></div></td>
+            </tr>
+            <tr>
+              <td class="dow">S</td><td class="date">13</td>
+              <td><div class="dot future"></div></td>
+              <td><div class="dot future"></div></td>
+              <td><div class="dot future"></div></td>
+              <td><div class="dot future"></div></td>
+              <td><div class="dot future"></div></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="matrix">
+        <div class="title-row">
+          <div class="nav">←</div>
+          <h2>Morning &amp; Evening Adhkar</h2>
+          <div class="nav">→</div>
+        </div>
+        <p class="week-of">(for the week starting on 7 Sep 2026)</p>
+        <table class="compact">
+          <thead>
+            <tr>
+              <th class="dow"></th><th class="date"></th>
+              <th><span class="hlabel">Mor-Adk</span></th>
+              <th><span class="hlabel">Eve-Adk</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="dow">M</td><td class="date">7</td>
+              <td><div class="halo"><div class="dot on"></div></div></td>
+              <td><div class="halo"><div class="dot"></div></div></td>
+            </tr>
+            <tr>
+              <td class="dow">T</td><td class="date">8</td>
+              <td><div class="dot future"></div></td>
+              <td><div class="dot future"></div></td>
+            </tr>
+            <tr>
+              <td class="dow">W</td><td class="date">9</td>
+              <td><div class="dot future"></div></td>
+              <td><div class="dot future"></div></td>
+            </tr>
+            <tr>
+              <td class="dow">T</td><td class="date">10</td>
+              <td><div class="dot future"></div></td>
+              <td><div class="dot future"></div></td>
+            </tr>
+            <tr>
+              <td class="dow">F</td><td class="date">11</td>
+              <td><div class="dot future"></div></td>
+              <td><div class="dot future"></div></td>
+            </tr>
+            <tr>
+              <td class="dow">S</td><td class="date">12</td>
+              <td><div class="dot future"></div></td>
+              <td><div class="dot future"></div></td>
+            </tr>
+            <tr>
+              <td class="dow">S</td><td class="date">13</td>
+              <td><div class="dot future"></div></td>
+              <td><div class="dot future"></div></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <div class="legend">
+        <span><span class="halo"><span class="dot on"></span></span> today (circle only)</span>
+        <span><span class="dot on"></span> engagement</span>
+        <span><span class="dot future"></span> future, inactive</span>
+      </div>
+    </div>
+  </div>
+
+  <p class="key">
+    Open: <code>docs/visual_review/progress_today_mark_halo_proposal.html</code><br>
+    This HTML is not the Flutter app. If the circle-only yellow looks right, say so and it can be applied on every 7-day Progress matrix.
+  </p>
+</body>
+</html>

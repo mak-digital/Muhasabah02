@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Manage past check-ins — layout proposal</title>
+  <style>
+    :root {
+      --bg: #f4f1ea;
+      --ink: #1d2a2c;
+      --muted: #4d5c63;
+      --line: #c5d0d4;
+      --paper: #faf8f4;
+      --teal: #2f6f73;
+      --salah: #d7eceb;
+      --summary: #eef2f4;
+      --sample: #fff8e8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      margin: 0;
+      padding: 24px;
+    }
+    h1 { font-size: 22px; font-weight: 700; margin: 0 0 8px; }
+    h2 { font-size: 16px; margin: 28px 0 8px; }
+    .note, .rules { max-width: 960px; color: var(--muted); line-height: 1.55; font-size: 14px; }
+    .rules {
+      background: #fff;
+      color: var(--ink);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin: 16px 0 8px;
+    }
+    .phones { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; margin-top: 12px; }
+    .phone {
+      width: 390px;
+      background: var(--paper);
+      border-radius: 28px;
+      box-shadow: 0 12px 40px rgba(0,0,0,.12);
+      overflow: hidden;
+    }
+    .caption {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 12px 16px 0;
+    }
+    .appbar {
+      display: flex;
+      align-items: center;
+      padding: 10px 16px 8px;
+      font-size: 17px;
+      font-weight: 700;
+    }
+    .body { padding: 0 16px 20px; }
+    .guard { font-size: 12px; color: var(--muted); line-height: 1.4; margin: 0 0 10px; }
+    .card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+      border: 1px solid #ece8e0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card .t { font-size: 14px; font-weight: 650; }
+    .card .s { font-size: 12px; color: var(--muted); }
+    .card .chev { margin-left: auto; color: var(--muted); }
+    .week { font-size: 11px; font-weight: 700; letter-spacing: .04em; color: var(--muted); margin: 14px 0 6px; }
+    .group {
+      background: #fff;
+      border-radius: 14px;
+      border: 1px solid #ece8e0;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+    .row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-top: 1px solid #f0ece6;
+    }
+    .row:first-child { border-top: 0; }
+    .dow {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background: var(--salah);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 700;
+      line-height: 1.1;
+      color: var(--teal);
+      flex-shrink: 0;
+    }
+    .dow b { font-size: 13px; color: var(--ink); }
+    .meta { flex: 1; min-width: 0; }
+    .meta .t { font-size: 14px; font-weight: 650; }
+    .meta .s { font-size: 12px; color: var(--muted); }
+    .pill {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .03em;
+      text-transform: uppercase;
+      background: var(--sample);
+      border-radius: 8px;
+      padding: 2px 6px;
+      color: #6a5a32;
+    }
+    .menu { color: var(--muted); font-size: 18px; padding: 4px 2px; }
+    .sheet {
+      margin-top: 12px;
+      background: #fff;
+      border-radius: 16px;
+      border: 1px solid #ece8e0;
+      padding: 12px 14px;
+    }
+    .sheet h3 { margin: 0 0 8px; font-size: 15px; }
+    .sheet button {
+      display: block;
+      width: 100%;
+      text-align: left;
+      border: 0;
+      background: var(--summary);
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-top: 6px;
+      font-size: 14px;
+    }
+    .sheet .danger { color: #8a4a42; }
+    .filters { display: flex; gap: 6px; margin-bottom: 10px; }
+    .chip {
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+    .chip.on { background: var(--salah); font-weight: 700; border-color: #b7d4d2; }
+  </style>
+</head>
+<body>
+  <h1>Manage past check-ins — layout proposal</h1>
+  <p class="note">
+    Accepted and implemented. History tab: housekeeping of <strong>saved</strong> days.
+    Distinct from Recorded days (read-only Historical Reflection). No scores. Removal is not forensic erasure.
+  </p>
+
+  <div class="rules">
+    <strong>What is hard to read today</strong>
+    <ul>
+      <li>Each saved day is a bulky card. 120 sample days become a long stack of identical tiles.</li>
+      <li>The subtitle “8/10 recordable fields answered” looks like a score or completion grade.</li>
+      <li>Remove is only on long-press, with no visible control, so housekeeping is easy to miss.</li>
+      <li>The page does not say how it differs from Recorded days.</li>
+    </ul>
+    <strong>Proposed</strong>
+    <ol>
+      <li>One short guard: tap to edit; remove from the day menu. Not a score.</li>
+      <li>Optional All / 30 days / 90 days is a <em>view filter</em> only — records are not rewritten.</li>
+      <li>Weeks as one grouped list: weekday badge, date, “Tap to edit”, Sample pill, ⋮ menu.</li>
+      <li>⋮ opens Edit / Remove. Long-press can still remove. Confirm copy stays honest (not forensic erasure).</li>
+    </ol>
+    Recorded days keeps the calendar of saved vs empty. This page lists only days that already have a check-in.
+  </div>
+
+  <div class="phones">
+    <div class="phone">
+      <div class="caption">Current</div>
+      <div class="appbar">Manage past check-ins</div>
+      <div class="body">
+        <div class="week">31 Aug – 6 Sep</div>
+        <div class="card">
+          <div>
+            <div class="t">6 Sep 2026</div>
+            <div class="s">8/10 recordable fields answered · Sample/demo</div>
+          </div>
+          <div class="chev">✎</div>
+        </div>
+        <div class="card">
+          <div>
+            <div class="t">5 Sep 2026</div>
+            <div class="s">10/10 recordable fields answered · Sample/demo</div>
+          </div>
+          <div class="chev">✎</div>
+        </div>
+        <div class="card">
+          <div>
+            <div class="t">3 Sep 2026</div>
+            <div class="s">6/10 recordable fields answered</div>
+          </div>
+          <div class="chev">✎</div>
+        </div>
+        <p class="guard">…one card per saved day, all the way back through the sample window…</p>
+      </div>
+    </div>
+
+    <div class="phone">
+      <div class="caption">Proposed</div>
+      <div class="appbar">Manage past check-ins</div>
+      <div class="body">
+        <p class="guard">Edit a saved day, or remove the app’s record. This is not a score. Recorded days is the read-only view.</p>
+        <div class="filters">
+          <div class="chip on">All</div>
+          <div class="chip">30 days</div>
+          <div class="chip">90 days</div>
+        </div>
+        <div class="week">31 Aug – 6 Sep 2026</div>
+        <div class="group">
+          <div class="row">
+            <div class="dow">Sat<b>6</b></div>
+            <div class="meta">
+              <div class="t">6 Sep 2026</div>
+              <div class="s">Tap to edit</div>
+            </div>
+            <span class="pill">Sample</span>
+            <div class="menu">⋮</div>
+          </div>
+          <div class="row">
+            <div class="dow">Fri<b>5</b></div>
+            <div class="meta">
+              <div class="t">5 Sep 2026</div>
+              <div class="s">Tap to edit</div>
+            </div>
+            <span class="pill">Sample</span>
+            <div class="menu">⋮</div>
+          </div>
+          <div class="row">
+            <div class="dow">Wed<b>3</b></div>
+            <div class="meta">
+              <div class="t">3 Sep 2026</div>
+              <div class="s">Tap to edit</div>
+            </div>
+            <div class="menu">⋮</div>
+          </div>
+        </div>
+        <div class="week">24 – 30 Aug 2026</div>
+        <div class="group">
+          <div class="row">
+            <div class="dow">Sun<b>30</b></div>
+            <div class="meta">
+              <div class="t">30 Aug 2026</div>
+              <div class="s">Tap to edit</div>
+            </div>
+            <span class="pill">Sample</span>
+            <div class="menu">⋮</div>
+          </div>
+          <div class="row">
+            <div class="dow">Thu<b>27</b></div>
+            <div class="meta">
+              <div class="t">27 Aug 2026</div>
+              <div class="s">Tap to edit</div>
+            </div>
+            <span class="pill">Sample</span>
+            <div class="menu">⋮</div>
+          </div>
+        </div>
+        <div class="sheet">
+          <h3>5 Sep 2026</h3>
+          <button>Edit this check-in</button>
+          <button class="danger">Remove app record…</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -24,11 +24,50 @@ int daysInclusiveSpan(String startKey, String endKey) {
   return end.difference(start).inDays.abs() + 1;
 }
 
+const _shortMonths = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+];
+
+String dayMonthYear(DateTime date) {
+  final local = DateTime(date.year, date.month, date.day);
+  return '${local.day} ${_shortMonths[local.month - 1]} ${local.year}';
+}
+
+enum DateCellKind { past, today, future }
+
+DateCellKind dateCellKind(String key, DateTime now) {
+  final today = dateKey(now);
+  if (key == today) return DateCellKind.today;
+  if (key.compareTo(today) > 0) return DateCellKind.future;
+  return DateCellKind.past;
+}
+
 List<String> periodDateKeys(int days, {required DateTime now}) {
   final today = DateTime(now.year, now.month, now.day);
   return List<String>.generate(days, (i) {
     return dateKey(today.subtract(Duration(days: days - 1 - i)));
   });
+}
+
+List<String> shiftedPeriodDateKeys(
+  int days, {
+  required DateTime now,
+  required int periodsBack,
+}) {
+  final today = DateTime(now.year, now.month, now.day);
+  final end = today.subtract(Duration(days: periodsBack * days));
+  return periodDateKeys(days, now: end);
 }
 
 List<String> priorPeriodDateKeys(int days, {required DateTime now}) {

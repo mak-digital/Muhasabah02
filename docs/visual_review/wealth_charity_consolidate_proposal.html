@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Proposal #2 — Wealth vs Charity (visual review)</title>
+  <style>
+    :root {
+      --bg: #f4f1ea;
+      --ink: #1d2a2c;
+      --muted: #4d5c63;
+      --line: #c5d0d4;
+      --teal: #2f6f73;
+      --wealth: #ede6dc;
+      --charity: #f4e6c8;
+      --drop: #8a4a4a;
+      --keep: #2f6f73;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      margin: 0;
+      padding: 24px;
+    }
+    h1 { font-size: 22px; font-weight: 700; margin: 0 0 8px; }
+    h2 { font-size: 16px; margin: 28px 0 10px; }
+    .note { max-width: 1100px; color: var(--muted); line-height: 1.5; font-size: 14px; }
+    .rules {
+      max-width: 1100px;
+      margin: 16px 0;
+      padding: 12px 14px;
+      background: #fff;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 20px;
+      font-size: 13px;
+      margin: 12px 0 8px;
+    }
+    .legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .swatch {
+      width: 14px; height: 14px; border-radius: 4px; display: inline-block;
+    }
+    .pair {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      align-items: flex-start;
+      margin-top: 8px;
+    }
+    .col { width: min(390px, 100%); }
+    .col h3 {
+      margin: 0 0 8px;
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .phone {
+      width: 100%;
+      background: #fff;
+      border-radius: 28px;
+      box-shadow: 0 12px 40px rgba(0,0,0,.12);
+      overflow: hidden;
+    }
+    .appbar { padding: 14px 16px 6px; font-size: 16px; font-weight: 600; }
+    .hint { padding: 0 16px 10px; font-size: 12px; color: var(--muted); line-height: 1.4; }
+    .body { padding: 0 16px 16px; }
+    .card { border-radius: 16px; padding: 14px 12px 12px; margin-bottom: 10px; }
+    .c-wealth { background: var(--wealth); }
+    .c-charity { background: var(--charity); }
+    .domain {
+      margin: 0 0 4px;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+    .focus {
+      margin: 0 0 10px;
+      font-size: 12px;
+      font-style: italic;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+    .band {
+      margin: 8px 0 4px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+      font-size: 13px;
+      padding: 3px 0;
+    }
+    .mark {
+      width: 10px; height: 10px; border-radius: 50%;
+      border: 1.5px solid #2f6f73;
+      flex-shrink: 0;
+      align-self: center;
+    }
+    .mark.empty { border-style: dotted; opacity: 0.45; }
+    .zakat {
+      width: 0; height: 0;
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-bottom: 10px solid #b8873a;
+      flex-shrink: 0;
+      align-self: center;
+    }
+    .drop {
+      text-decoration: line-through;
+      color: var(--drop);
+      text-decoration-thickness: 1.5px;
+    }
+    .keep { color: var(--keep); font-weight: 600; }
+    .tag {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      border-radius: 999px;
+      padding: 2px 7px;
+      white-space: nowrap;
+    }
+    .tag-drop { background: #f3dcdc; color: var(--drop); }
+    .tag-keep { background: #d7eceb; color: var(--keep); }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      max-width: 1100px;
+      margin-top: 8px;
+      font-size: 13px;
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #e4e8ea; vertical-align: top; }
+    th { color: var(--muted); font-weight: 600; background: #faf8f4; }
+    .key { max-width: 1100px; margin-top: 20px; font-size: 12px; color: var(--muted); line-height: 1.5; }
+    code { font-size: 12px; }
+  </style>
+</head>
+<body>
+  <h1>Proposal #2 — Wealth &amp; Stewardship vs Charity</h1>
+  <p class="note">
+    Visual review only. No app code has changed. Strike-through marks giving rows that would leave
+    Wealth Home, check-in, and Progress. Stored <code>wealth.*</code> giving marks would not be
+    deleted; they would still appear on Historical Reflection. Amounts stay unrecorded. No
+    leaderboard.
+  </p>
+  <div class="rules">
+    <strong>Agreed direction</strong>
+    <ol>
+      <li><strong>Charity</strong> is where giving went: voluntary, family, community, educational, emergency, financial stress — plus zakat due / planned / paid (diamonds). No amounts.</li>
+      <li><strong>Wealth</strong> is how earning and spending were treated as a trust: halal source, stayed clear of riba, avoided waste.</li>
+      <li>Gave sadaqah, attended to zakat, hosted/gifted/family spend, and sadaqah jariyah leave Wealth. They duplicate Charity (and zakat diamonds).</li>
+      <li>Both cards stay on the Salah, Qur’an &amp; Akhlaq preset. Wealth is slimmed, not hidden.</li>
+      <li>Do not auto-fill Charity from Wealth, or the reverse. A smile remains sadaqah on Charity copy, not a second Wealth row.</li>
+    </ol>
+  </div>
+  <div class="legend">
+    <span><i class="swatch" style="background:var(--wealth)"></i> Wealth wash</span>
+    <span><i class="swatch" style="background:var(--charity)"></i> Charity wash</span>
+    <span class="drop">Strike-through — hide from Home / check-in / Progress</span>
+    <span class="keep">Keep</span>
+  </div>
+
+  <h2>Home (both domains stay visible)</h2>
+  <div class="pair">
+    <div class="col">
+      <h3>Now</h3>
+      <div class="phone">
+        <div class="appbar">Home</div>
+        <div class="hint">Giving is logged twice: Wealth acts and Charity channels, plus zakat twice.</div>
+        <div class="body">
+          <div class="card c-wealth">
+            <p class="domain">Wealth &amp; Stewardship</p>
+            <p class="focus">Did my spending and earning please Allah?</p>
+            <div class="band">Earning</div>
+            <div class="row"><span>Earned from a halal source</span><i class="mark empty"></i></div>
+            <div class="row"><span>Stayed clear of riba</span><i class="mark empty"></i></div>
+            <div class="band">Giving</div>
+            <div class="row"><span>Gave sadaqah</span><i class="mark empty"></i></div>
+            <div class="row"><span>Attended to zakat</span><i class="mark empty"></i></div>
+            <div class="row"><span>Hosted, gifted, or spent on family</span><i class="mark empty"></i></div>
+            <div class="row"><span>Ongoing charity (sadaqah jariyah)</span><i class="mark empty"></i></div>
+            <div class="band">Restraint</div>
+            <div class="row"><span>Avoided waste</span><i class="mark empty"></i></div>
+          </div>
+          <div class="card c-charity">
+            <p class="domain">Charity</p>
+            <div class="band">Giving</div>
+            <div class="row"><span>Voluntary Charity</span><i class="mark empty"></i></div>
+            <div class="row"><span>Family Support</span><i class="mark empty"></i></div>
+            <div class="row"><span>Community Support</span><i class="mark empty"></i></div>
+            <div class="band">Care</div>
+            <div class="row"><span>Educational Support</span><i class="mark empty"></i></div>
+            <div class="row"><span>Emergency Support</span><i class="mark empty"></i></div>
+            <div class="row"><span>Support Under Financial Stress</span><i class="mark empty"></i></div>
+            <div class="band">Zakat status</div>
+            <div class="row"><span>Zakat</span><i class="zakat"></i></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <h3>Proposed</h3>
+      <div class="phone">
+        <div class="appbar">Home</div>
+        <div class="hint">Wealth = earning and waste. Charity = giving channels and zakat. Same two cards, no double giving.</div>
+        <div class="body">
+          <div class="card c-wealth">
+            <p class="domain">Wealth &amp; Stewardship <span class="tag tag-keep">Slim</span></p>
+            <p class="focus">Did my spending and earning please Allah?</p>
+            <div class="band">Earning</div>
+            <div class="row"><span>Earned from a halal source</span><i class="mark empty"></i></div>
+            <div class="row"><span>Stayed clear of riba</span><i class="mark empty"></i></div>
+            <div class="band drop">Giving — move to Charity</div>
+            <div class="row"><span class="drop">Gave sadaqah</span> <span class="tag tag-drop">Dup</span></div>
+            <div class="row"><span class="drop">Attended to zakat</span> <span class="tag tag-drop">Dup</span></div>
+            <div class="row"><span class="drop">Hosted, gifted, or spent on family</span> <span class="tag tag-drop">Dup</span></div>
+            <div class="row"><span class="drop">Ongoing charity (sadaqah jariyah)</span> <span class="tag tag-drop">Dup</span></div>
+            <div class="band">Restraint</div>
+            <div class="row"><span>Avoided waste</span><i class="mark empty"></i></div>
+          </div>
+          <div class="card c-charity">
+            <p class="domain">Charity <span class="tag tag-keep">Keep</span></p>
+            <p class="focus">The act of giving — no amounts. A smile is sadaqah.</p>
+            <div class="band">Giving</div>
+            <div class="row"><span>Voluntary Charity</span><i class="mark empty"></i></div>
+            <div class="row"><span>Family Support</span><i class="mark empty"></i></div>
+            <div class="row"><span>Community Support</span><i class="mark empty"></i></div>
+            <div class="band">Care</div>
+            <div class="row"><span>Educational Support</span><i class="mark empty"></i></div>
+            <div class="row"><span>Emergency Support</span><i class="mark empty"></i></div>
+            <div class="row"><span>Support Under Financial Stress</span><i class="mark empty"></i></div>
+            <div class="band">Zakat status</div>
+            <div class="row"><span>Zakat (due / planned / paid)</span><i class="zakat"></i></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Check-in rows (same strike)</h2>
+  <div class="pair">
+    <div class="col">
+      <h3>Now</h3>
+      <div class="phone">
+        <div class="appbar">Today’s check-in</div>
+        <div class="hint">Gave sadaqah, then Voluntary Charity. Zakat as a ternary and as diamonds.</div>
+        <div class="body">
+          <div class="card c-wealth">
+            <p class="domain">Wealth &amp; Stewardship</p>
+            <div class="row"><span>Earned from a halal source</span></div>
+            <div class="row"><span>Stayed clear of riba</span></div>
+            <div class="row"><span>Gave sadaqah</span></div>
+            <div class="row"><span>Attended to zakat</span></div>
+            <div class="row"><span>Hosted, gifted, or spent on family</span></div>
+            <div class="row"><span>Ongoing charity (sadaqah jariyah)</span></div>
+            <div class="row"><span>Avoided waste</span></div>
+          </div>
+          <div class="card c-charity">
+            <p class="domain">Charity</p>
+            <div class="row"><span>Voluntary Charity</span></div>
+            <div class="row"><span>Family Support</span></div>
+            <div class="row"><span>Community Support</span></div>
+            <div class="row"><span>Zakat due / planned / paid</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <h3>Proposed</h3>
+      <div class="phone">
+        <div class="appbar">Today’s check-in</div>
+        <div class="hint">Wealth note: giving and zakat are on Charity. No calculator. No amounts.</div>
+        <div class="body">
+          <div class="card c-wealth">
+            <p class="domain">Wealth &amp; Stewardship <span class="tag tag-keep">Slim</span></p>
+            <div class="row"><span>Earned from a halal source</span></div>
+            <div class="row"><span>Stayed clear of riba</span></div>
+            <div class="row"><span class="drop">Gave sadaqah</span></div>
+            <div class="row"><span class="drop">Attended to zakat</span></div>
+            <div class="row"><span class="drop">Hosted, gifted, or spent on family</span></div>
+            <div class="row"><span class="drop">Ongoing charity (sadaqah jariyah)</span></div>
+            <div class="row"><span>Avoided waste</span></div>
+          </div>
+          <div class="card c-charity">
+            <p class="domain">Charity <span class="tag tag-keep">Keep</span></p>
+            <div class="row"><span>Voluntary Charity</span></div>
+            <div class="row"><span>Family Support</span></div>
+            <div class="row"><span>Community Support</span></div>
+            <div class="row"><span>Educational Support</span></div>
+            <div class="row"><span>Emergency Support</span></div>
+            <div class="row"><span>Support Under Financial Stress</span></div>
+            <div class="row"><span>Zakat due / planned / paid</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Row map</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Wealth row (now)</th>
+        <th>Charity already covers</th>
+        <th>Proposed</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Earned from a halal source</td>
+        <td>—</td>
+        <td><span class="keep">Keep on Wealth</span></td>
+      </tr>
+      <tr>
+        <td>Stayed clear of riba</td>
+        <td>—</td>
+        <td><span class="keep">Keep on Wealth</span></td>
+      </tr>
+      <tr>
+        <td class="drop">Gave sadaqah</td>
+        <td>Voluntary Charity (the act, no amount)</td>
+        <td><span class="drop">Hide</span> — same act</td>
+      </tr>
+      <tr>
+        <td class="drop">Attended to zakat</td>
+        <td>Zakat due / planned / paid diamonds</td>
+        <td><span class="drop">Hide</span> — no second zakat ternary, no calculator</td>
+      </tr>
+      <tr>
+        <td class="drop">Hosted, gifted, or spent on family</td>
+        <td>Family Support</td>
+        <td><span class="drop">Hide</span></td>
+      </tr>
+      <tr>
+        <td class="drop">Ongoing charity (sadaqah jariyah)</td>
+        <td>Educational / community / voluntary channels</td>
+        <td><span class="drop">Hide</span> — not a new Charity row</td>
+      </tr>
+      <tr>
+        <td>Avoided waste</td>
+        <td>—</td>
+        <td><span class="keep">Keep on Wealth</span> — not a giving channel</td>
+      </tr>
+      <tr>
+        <td>—</td>
+        <td>Community, emergency, financial-stress support</td>
+        <td><span class="keep">Charity only</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p class="key">
+    Not in this mock: deleting Wealth, adding jariyah as a Charity row, requiring amounts, or writing Charity from Wealth marks.
+    Implementation would slim <code>wealthHomeRows</code> the same way Family contact rows were retired: keys stay readable for Historical Reflection.
+    File: <code>docs/visual_review/wealth_charity_consolidate_proposal.html</code>
+  </p>
+</body>
+</html>

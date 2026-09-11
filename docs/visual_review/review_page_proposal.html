@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Review page — layout proposal</title>
+  <style>
+    :root {
+      --bg: #f4f1ea;
+      --ink: #1d2a2c;
+      --muted: #4d5c63;
+      --line: #c5d0d4;
+      --paper: #faf8f4;
+      --teal: #2f6f73;
+      --salah: #d7eceb;
+      --quran: #d7e4f2;
+      --dhikr: #d9eedf;
+      --fasting: #c5cceb;
+      --family: #eadff2;
+      --charity: #f4e6c8;
+      --hadith: #d4e2ee;
+      --summary: #eef2f4;
+      --ponder: #fff8e8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      margin: 0;
+      padding: 24px;
+    }
+    h1 { font-size: 22px; font-weight: 700; margin: 0 0 8px; }
+    h2 { font-size: 16px; margin: 28px 0 8px; }
+    .note, .rules { max-width: 920px; color: var(--muted); line-height: 1.55; font-size: 14px; }
+    .rules {
+      background: #fff;
+      color: var(--ink);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin: 16px 0 8px;
+    }
+    .rules strong { font-weight: 650; }
+    .phones { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; margin-top: 12px; }
+    .phone {
+      width: 390px;
+      background: var(--paper);
+      border-radius: 28px;
+      box-shadow: 0 12px 40px rgba(0,0,0,.12);
+      overflow: hidden;
+    }
+    .caption {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 12px 16px 0;
+    }
+    .appbar {
+      display: flex;
+      align-items: center;
+      padding: 10px 16px 8px;
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .body { padding: 0 16px 20px; }
+    .period { display: flex; gap: 6px; margin-bottom: 10px; }
+    .chip {
+      flex: 1;
+      text-align: center;
+      font-size: 12px;
+      padding: 8px 6px;
+      border-radius: 20px;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+    .chip.on { background: var(--salah); font-weight: 700; border-color: #b7d4d2; }
+    .range { font-size: 12px; color: var(--muted); text-align: center; margin: -4px 0 12px; }
+    .blurb { font-size: 13px; color: var(--muted); line-height: 1.4; margin: 0 0 12px; }
+    .navcard {
+      background: #fff;
+      border-radius: 14px;
+      padding: 12px 14px;
+      margin-bottom: 8px;
+      border: 1px solid #ece8e0;
+    }
+    .navcard strong { display: block; font-size: 14px; }
+    .navcard span { font-size: 12px; color: var(--muted); }
+    .facts { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
+    .fact {
+      width: 160px;
+      background: var(--summary);
+      border-radius: 12px;
+      padding: 10px;
+      font-size: 12px;
+    }
+    .fact b { display: block; font-weight: 600; margin-bottom: 4px; }
+    .cta {
+      width: 100%;
+      background: var(--teal);
+      color: #fff;
+      border: 0;
+      border-radius: 12px;
+      padding: 12px;
+      font-weight: 600;
+      margin-top: 8px;
+    }
+    .section {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 14px 0 8px;
+    }
+    .hero {
+      background: #fff;
+      border-radius: 16px;
+      padding: 14px;
+      margin-bottom: 12px;
+      border: 1px solid #ece8e0;
+    }
+    .hero .k { font-size: 12px; color: var(--muted); }
+    .hero .v { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; margin: 2px 0 8px; }
+    .meters { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .meter { background: var(--summary); border-radius: 10px; padding: 8px 10px; }
+    .meter .k { font-size: 11px; color: var(--muted); }
+    .meter .v { font-size: 14px; font-weight: 650; }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .dom {
+      border-radius: 14px;
+      padding: 12px;
+      min-height: 88px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .dom .name { font-weight: 700; font-size: 14px; }
+    .dom .line { font-size: 11px; color: #2a3c40; margin-top: 4px; line-height: 1.35; }
+    .dom .go { font-size: 11px; font-weight: 650; margin-top: 8px; opacity: .75; }
+    .salah { background: var(--salah); }
+    .quran { background: var(--quran); }
+    .dhikr { background: var(--dhikr); }
+    .fasting { background: var(--fasting); }
+    .family { background: var(--family); }
+    .charity { background: var(--charity); }
+    .hadith { background: var(--hadith); }
+    .wide { grid-column: 1 / -1; }
+    .look {
+      background: #fff;
+      border-radius: 14px;
+      padding: 12px 14px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid #ece8e0;
+    }
+    .look .ico {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: var(--summary);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+    }
+    .look strong { display: block; font-size: 14px; }
+    .look span { font-size: 12px; color: var(--muted); }
+    .look .chev { margin-left: auto; color: var(--muted); }
+    .ponder {
+      background: var(--ponder);
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-size: 13px;
+      line-height: 1.45;
+      margin-bottom: 8px;
+    }
+    .ponder .k { font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: #6a5a32; margin-bottom: 4px; }
+    .notes {
+      background: #fff;
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-size: 13px;
+      border: 1px solid #ece8e0;
+    }
+    .notes ul { margin: 6px 0 0; padding-left: 18px; color: var(--muted); }
+    .guard { font-size: 11px; color: var(--muted); line-height: 1.4; margin: 0 0 10px; }
+  </style>
+</head>
+<body>
+  <h1>Review page — layout proposal</h1>
+  <p class="note">
+    Accepted and implemented on the Review tab. Colour still identifies domains; counts describe what was recorded.
+    No scores, ranks, streaks, or heatmaps. Missing is not missed.
+  </p>
+
+  <div class="rules">
+    <strong>What is hard to read today</strong>
+    <ul>
+      <li>Seven identical white “Progress” rows come first, so the period facts sit below the fold.</li>
+      <li>Domain colour (the language used on Home) is unused, so Review feels like a settings list.</li>
+      <li>Recorded days and Recognition sit in the same stack as Salah/Qur’an, mixing “open a calendar” with “understand this period”.</li>
+      <li>The SEE → PONDER → EXPLORE order from the product spec is reversed: explore links, then facts, then the narrative.</li>
+    </ul>
+    <strong>Proposed reading order</strong>
+    <ol>
+      <li><strong>Choose the window</strong> — 7 / 30 / 90, with the date range under the chips.</li>
+      <li><strong>See the period</strong> — recorded vs unanswered days, then a two-column domain mosaic.</li>
+      <li><strong>Explore</strong> — tap a domain wash to open that Progress calendar (same destinations as now).</li>
+      <li><strong>Look closer</strong> — Recorded days and Recognition, visually quieter.</li>
+      <li><strong>Ponder, then respond</strong> — the existing descriptive narrative, then Add a response.</li>
+    </ol>
+  </div>
+
+  <div class="phones">
+    <div class="phone">
+      <div class="caption">Current · 7 days</div>
+      <div class="appbar">Review</div>
+      <div class="body">
+        <div class="period">
+          <div class="chip on">7 days</div>
+          <div class="chip">30 days</div>
+          <div class="chip">90 days</div>
+        </div>
+        <p class="blurb"><strong style="color:var(--ink);font-size:16px;display:block;margin-bottom:4px">Period summary</strong>
+          A private place to understand what you previously recorded. This screen does not change records or prescribe what to do next.</p>
+        <div class="navcard"><strong>Salah Progress</strong><span>Independent prayer traces for 7 days</span></div>
+        <div class="navcard"><strong>Qur’an Progress</strong><span>Independent Qur’an dimensions for this period</span></div>
+        <div class="navcard"><strong>Dhikr Progress</strong><span>Independent traces for this period. Missing is not missed.</span></div>
+        <div class="navcard"><strong>Fasting Progress</strong><span>Independent traces for this period. Missing is not missed.</span></div>
+        <div class="navcard"><strong>Family &amp; Community Care Progress</strong><span>Independent traces…</span></div>
+        <div class="navcard"><strong>Charity Progress</strong><span>Independent traces…</span></div>
+        <div class="navcard"><strong>Hadith Progress</strong><span>Independent traces…</span></div>
+        <div class="navcard"><strong>Recorded days</strong><span>Historical Reflection</span></div>
+        <div class="navcard"><strong>Recognition</strong><span>Descriptive context patterns in 30- and 90-day views</span></div>
+        <div class="facts">
+          <div class="fact"><b>Recorded days</b>5 of 7</div>
+          <div class="fact"><b>Missing days</b>2 of 7</div>
+          <div class="fact"><b>Salah recorded observations</b>18 on time among 24 recorded</div>
+        </div>
+        <button class="cta">Add a response</button>
+      </div>
+    </div>
+
+    <div class="phone">
+      <div class="caption">Proposed · 7 days</div>
+      <div class="appbar">Review</div>
+      <div class="body">
+        <div class="period">
+          <div class="chip on">7 days</div>
+          <div class="chip">30 days</div>
+          <div class="chip">90 days</div>
+        </div>
+        <div class="range">31 Aug – 6 Sep 2026</div>
+        <p class="guard">A private reading of what you recorded. This screen does not change records or tell you what to do next.</p>
+
+        <div class="hero">
+          <div class="k">This period</div>
+          <div class="v">5 of 7 days have a record</div>
+          <div class="meters">
+            <div class="meter"><div class="k">Unanswered days</div><div class="v">2 of 7</div></div>
+            <div class="meter"><div class="k">Context notes</div><div class="v">Travel, illness</div></div>
+          </div>
+        </div>
+
+        <div class="section">Domains · tap to open Progress</div>
+        <div class="grid">
+          <div class="dom salah">
+            <div>
+              <div class="name">Salah</div>
+              <div class="line">18 on time among 24 recorded prayers. Missing excluded.</div>
+            </div>
+            <div class="go">Open Progress →</div>
+          </div>
+          <div class="dom quran">
+            <div>
+              <div class="name">Qur’an</div>
+              <div class="line">4 read-or-listened among 5 recorded days.</div>
+            </div>
+            <div class="go">Open Progress →</div>
+          </div>
+          <div class="dom dhikr">
+            <div>
+              <div class="name">Dhikr</div>
+              <div class="line">3 days with a recorded observation.</div>
+            </div>
+            <div class="go">Open Progress →</div>
+          </div>
+          <div class="dom fasting">
+            <div>
+              <div class="name">Fasting</div>
+              <div class="line">1 day recorded. White Days are orientation only.</div>
+            </div>
+            <div class="go">Open Progress →</div>
+          </div>
+          <div class="dom family">
+            <div>
+              <div class="name">Family &amp; Community</div>
+              <div class="line">2 days with a recorded observation.</div>
+            </div>
+            <div class="go">Open Progress →</div>
+          </div>
+          <div class="dom charity">
+            <div>
+              <div class="name">Charity</div>
+              <div class="line">1 day recorded. Zakat shown on Progress.</div>
+            </div>
+            <div class="go">Open Progress →</div>
+          </div>
+          <div class="dom hadith wide">
+            <div>
+              <div class="name">Hadith</div>
+              <div class="line">1 day with a recorded observation.</div>
+            </div>
+            <div class="go">Open Progress →</div>
+          </div>
+        </div>
+
+        <div class="section">Look closer</div>
+        <div class="look">
+          <div class="ico">▦</div>
+          <div>
+            <strong>Recorded days</strong>
+            <span>Read any saved day. Historical Reflection.</span>
+          </div>
+          <div class="chev">›</div>
+        </div>
+        <div class="look">
+          <div class="ico">◎</div>
+          <div>
+            <strong>Recognition</strong>
+            <span>Descriptive patterns in 30- and 90-day views.</span>
+          </div>
+          <div class="chev">›</div>
+        </div>
+
+        <div class="section">Ponder</div>
+        <div class="ponder">
+          <div class="k">What the records show</div>
+          This week’s Salah observations are mixed among the days you answered. Unanswered days are not treated as missed.
+        </div>
+
+        <div class="notes">
+          <strong>You also recorded</strong>
+          <ul>
+            <li>Gratitude entries: 2</li>
+            <li>Personal-reflection entries: 1</li>
+            <li>Character observations: 2 days</li>
+          </ul>
+        </div>
+        <button class="cta">Add a response</button>
+      </div>
+    </div>
+  </div>
+
+  <h2>Same layout · 30 days (Recognition becomes relevant)</h2>
+  <p class="note">Period chips stay at the top. Domain mosaic stays; only the snapshot numbers and Recognition hint change. Hidden domains simply omit their tile.</p>
+
+  <div class="phones">
+    <div class="phone">
+      <div class="caption">Proposed · 30 days</div>
+      <div class="appbar">Review</div>
+      <div class="body">
+        <div class="period">
+          <div class="chip">7 days</div>
+          <div class="chip on">30 days</div>
+          <div class="chip">90 days</div>
+        </div>
+        <div class="range">8 Aug – 6 Sep 2026</div>
+        <div class="hero">
+          <div class="k">This period</div>
+          <div class="v">22 of 30 days have a record</div>
+          <div class="meters">
+            <div class="meter"><div class="k">Unanswered days</div><div class="v">8 of 30</div></div>
+            <div class="meter"><div class="k">Context notes</div><div class="v">Travel</div></div>
+          </div>
+        </div>
+        <div class="section">Domains · tap to open Progress</div>
+        <div class="grid">
+          <div class="dom salah"><div class="name">Salah</div><div class="line">On time among recorded only.</div><div class="go">Open Progress →</div></div>
+          <div class="dom quran"><div class="name">Qur’an</div><div class="line">Read-or-listened among recorded.</div><div class="go">Open Progress →</div></div>
+        </div>
+        <div class="section">Look closer</div>
+        <div class="look">
+          <div class="ico">◎</div>
+          <div>
+            <strong>Recognition</strong>
+            <span>30-day view is available for this window.</span>
+          </div>
+          <div class="chev">›</div>
+        </div>
+        <div class="ponder">
+          <div class="k">What the records show</div>
+          Descriptive Salah narrative for 30 days. No improvement or decline wording.
+        </div>
+        <button class="cta">Add a response</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

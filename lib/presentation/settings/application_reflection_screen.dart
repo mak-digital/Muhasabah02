@@ -34,7 +34,7 @@ class ApplicationReflectionIntroScreen extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           const Text(
-            'Colour identifies domains. Missing answers are not treated as missed. The app does not score spirituality or prescribe worship.',
+            'The card wash identifies domains. Marks share one colour. Missing answers are not treated as missed. The app does not score spirituality or prescribe worship.',
           ),
         ],
       ),

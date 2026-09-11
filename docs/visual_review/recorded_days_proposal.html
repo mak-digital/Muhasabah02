@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Recorded days &amp; Historical Reflection — layout proposal</title>
+  <style>
+    :root {
+      --bg: #f4f1ea;
+      --ink: #1d2a2c;
+      --muted: #4d5c63;
+      --line: #c5d0d4;
+      --paper: #faf8f4;
+      --teal: #2f6f73;
+      --salah: #d7eceb;
+      --quran: #d7e4f2;
+      --dhikr: #d9eedf;
+      --fasting: #c5cceb;
+      --family: #eadff2;
+      --charity: #f4e6c8;
+      --hadith: #d4e2ee;
+      --summary: #eef2f4;
+      --ok: #2f6f73;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      margin: 0;
+      padding: 24px;
+    }
+    h1 { font-size: 22px; font-weight: 700; margin: 0 0 8px; }
+    h2 { font-size: 16px; margin: 28px 0 8px; }
+    .note, .rules { max-width: 960px; color: var(--muted); line-height: 1.55; font-size: 14px; }
+    .rules {
+      background: #fff;
+      color: var(--ink);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin: 16px 0 8px;
+    }
+    .phones { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; margin-top: 12px; }
+    .phone {
+      width: 390px;
+      background: var(--paper);
+      border-radius: 28px;
+      box-shadow: 0 12px 40px rgba(0,0,0,.12);
+      overflow: hidden;
+    }
+    .caption {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 12px 16px 0;
+    }
+    .appbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px 8px;
+      font-size: 17px;
+      font-weight: 700;
+    }
+    .back { font-weight: 400; color: var(--muted); }
+    .body { padding: 0 16px 20px; }
+    .guard { font-size: 12px; color: var(--muted); line-height: 1.4; margin: 0 0 10px; }
+    .period { display: flex; gap: 6px; margin-bottom: 10px; }
+    .chip {
+      flex: 1;
+      text-align: center;
+      font-size: 12px;
+      padding: 8px 6px;
+      border-radius: 20px;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+    .chip.on { background: var(--salah); font-weight: 700; border-color: #b7d4d2; }
+    .week { font-size: 11px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); margin: 12px 0 6px; }
+    .card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 12px 14px;
+      margin-bottom: 8px;
+      border: 1px solid #ece8e0;
+    }
+    .card .t { font-size: 14px; font-weight: 650; }
+    .card .s { font-size: 12px; color: var(--muted); }
+    .off { opacity: .45; }
+    .cta {
+      width: 100%;
+      background: var(--teal);
+      color: #fff;
+      border: 0;
+      border-radius: 12px;
+      padding: 12px;
+      font-weight: 600;
+      margin-top: 8px;
+    }
+    .cta.ghost {
+      background: transparent;
+      color: var(--teal);
+      border: 1px solid var(--teal);
+      padding: 6px 10px;
+      width: auto;
+      font-size: 12px;
+      margin: 0 0 8px;
+    }
+    .row7 {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+      margin-bottom: 4px;
+    }
+    .dow { font-size: 10px; text-align: center; color: var(--muted); font-weight: 700; }
+    .day {
+      text-align: center;
+      border-radius: 10px;
+      padding: 8px 0 6px;
+      background: #fff;
+      border: 1px solid #ece8e0;
+      font-size: 12px;
+    }
+    .day b { display: block; font-size: 14px; }
+    .day .st { font-size: 9px; color: var(--muted); margin-top: 2px; }
+    .day.saved { background: var(--salah); border-color: #b7d4d2; font-weight: 650; }
+    .day.empty { color: #8a969b; }
+    .legend { display: flex; gap: 12px; font-size: 11px; color: var(--muted); margin: 4px 0 8px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 4px; }
+    .dot.on { background: var(--teal); }
+    .dot.off { border: 1px dotted #8a969b; background: transparent; }
+    .band {
+      border-radius: 14px;
+      padding: 10px 10px 6px;
+      margin-bottom: 8px;
+    }
+    .band h3 {
+      margin: 0 0 6px;
+      font-size: 12px;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+    }
+    .kv {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 5px 2px;
+      border-top: 1px solid rgba(0,0,0,.06);
+      font-size: 13px;
+    }
+    .kv:first-of-type { border-top: 0; }
+    .kv .name { font-weight: 600; }
+    .kv .val { font-size: 12px; color: #2a3c40; text-align: right; max-width: 58%; }
+    .kv.quiet .name, .kv.quiet .val { color: #7a8a90; font-weight: 400; }
+    .pill {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .03em;
+      text-transform: uppercase;
+      color: #6a5a32;
+      background: #fff8e8;
+      border-radius: 8px;
+      padding: 2px 6px;
+      display: inline-block;
+      margin-left: 6px;
+    }
+    .foot { font-size: 12px; color: var(--muted); margin: 8px 0; }
+  </style>
+</head>
+<body>
+  <h1>Recorded days &amp; Historical Reflection</h1>
+  <p class="note">
+    Accepted and implemented. Two read-only pages from Review → Look closer.
+    Still no scores. Unanswered is not missed. Editing stays in Manage past check-ins.
+  </p>
+
+  <div class="rules">
+    <strong>What is hard to read today</strong>
+    <ul>
+      <li><strong>Recorded days</strong> uses one large card per calendar day, including empty days, so 30- and 90-day lists are long before any saved day is understood.</li>
+      <li><strong>Historical Reflection (the day)</strong> is a stack of ListTiles. Every Salah and Qur’an row also has its own “Add a response” button, so the recorded states are buried.</li>
+    </ul>
+    <strong>Proposed</strong>
+    <ol>
+      <li>Recorded days: a compact week grid. Saved days are washed and tappable; empty days stay visible but quiet.</li>
+      <li>The day: domain wash bands with tight name / state rows. Unanswered is muted. One Add a response at the bottom of the day (optional small note control per row later if needed — not a full button on every line).</li>
+    </ol>
+  </div>
+
+  <h2>1. Recorded days</h2>
+  <div class="phones">
+    <div class="phone">
+      <div class="caption">Current</div>
+      <div class="appbar"><span class="back">←</span> Recorded days</div>
+      <div class="body">
+        <p class="guard">Historical Reflection is read-only. To edit a day, use Manage past check-ins.</p>
+        <div class="period">
+          <div class="chip on">7 days</div>
+          <div class="chip">30 days</div>
+          <div class="chip">90 days</div>
+        </div>
+        <div class="week">31 Aug – 6 Sep</div>
+        <div class="card"><div class="t">6 Sep 2026</div><div class="s">Check-in saved</div></div>
+        <div class="card"><div class="t">5 Sep 2026</div><div class="s">Check-in saved</div></div>
+        <div class="card"><div class="t">4 Sep 2026</div><div class="s">No check-in saved</div></div>
+        <div class="card off"><div class="t">3 Sep 2026</div><div class="s">No check-in saved</div></div>
+        <div class="card"><div class="t">2 Sep 2026</div><div class="s">Check-in saved</div></div>
+        <button class="cta">Add a response</button>
+      </div>
+    </div>
+
+    <div class="phone">
+      <div class="caption">Proposed</div>
+      <div class="appbar"><span class="back">←</span> Recorded days</div>
+      <div class="body">
+        <p class="guard">Read-only. Tap a saved day to view it. Editing is in Manage past check-ins.</p>
+        <div class="period">
+          <div class="chip on">7 days</div>
+          <div class="chip">30 days</div>
+          <div class="chip">90 days</div>
+        </div>
+        <div class="legend">
+          <span><i class="dot on"></i>Saved — open</span>
+          <span><i class="dot off"></i>No check-in</span>
+        </div>
+        <div class="week">31 Aug – 6 Sep 2026 · 5 of 7 saved</div>
+        <div class="row7">
+          <div class="dow">M</div><div class="dow">T</div><div class="dow">W</div><div class="dow">T</div><div class="dow">F</div><div class="dow">S</div><div class="dow">S</div>
+        </div>
+        <div class="row7">
+          <div class="day saved"><b>31</b><div class="st">Saved</div></div>
+          <div class="day saved"><b>1</b><div class="st">Saved</div></div>
+          <div class="day empty"><b>2</b><div class="st">—</div></div>
+          <div class="day saved"><b>3</b><div class="st">Saved</div></div>
+          <div class="day saved"><b>4</b><div class="st">Saved</div></div>
+          <div class="day empty"><b>5</b><div class="st">—</div></div>
+          <div class="day saved"><b>6</b><div class="st">Saved</div></div>
+        </div>
+        <p class="foot">Empty days stay visible so missing is not hidden. They are not tappable and are not treated as missed.</p>
+        <button class="cta">Add a response</button>
+      </div>
+    </div>
+  </div>
+
+  <h2>2. Historical Reflection — one day</h2>
+  <div class="phones">
+    <div class="phone">
+      <div class="caption">Current</div>
+      <div class="appbar"><span class="back">←</span> 3 Sep 2026</div>
+      <div class="body">
+        <div class="card"><div class="t">Historical Reflection</div><div class="s">Sample/demo record</div></div>
+        <div class="week">Salah</div>
+        <div class="card"><div class="t">Fajr</div><div class="s">Prayed alone on time</div></div>
+        <button class="cta ghost">Add a response</button>
+        <div class="card"><div class="t">Dhuhr</div><div class="s">Prayed late</div></div>
+        <button class="cta ghost">Add a response</button>
+        <div class="card"><div class="t">Asr</div><div class="s">Not recorded</div></div>
+        <button class="cta ghost">Add a response</button>
+        <div class="card"><div class="t">Maghrib</div><div class="s">Missed</div></div>
+        <p class="foot">…Qur’an, Dhikr, Fasting, Family, Charity, Hadith, traces, factors — each as a full ListTile…</p>
+      </div>
+    </div>
+
+    <div class="phone">
+      <div class="caption">Proposed</div>
+      <div class="appbar"><span class="back">←</span> 3 Sep 2026</div>
+      <div class="body">
+        <p class="guard">Historical Reflection · read-only <span class="pill">Sample</span></p>
+        <div class="band" style="background:var(--salah)">
+          <h3>Salah</h3>
+          <div class="kv"><span class="name">Fajr</span><span class="val">On time</span></div>
+          <div class="kv"><span class="name">Dhuhr</span><span class="val">Late · Friday congregation</span></div>
+          <div class="kv quiet"><span class="name">Asr</span><span class="val">Not recorded</span></div>
+          <div class="kv"><span class="name">Maghrib</span><span class="val">Missed</span></div>
+          <div class="kv"><span class="name">Isha</span><span class="val">On time</span></div>
+          <div class="kv"><span class="name">Jumu‘ah</span><span class="val">Recorded</span></div>
+          <div class="kv quiet"><span class="name">Tahajjud</span><span class="val">Not recorded</span></div>
+          <div class="kv"><span class="name">Ishraq</span><span class="val">Not performed</span></div>
+        </div>
+        <div class="band" style="background:var(--quran)">
+          <h3>Qur’an</h3>
+          <div class="kv"><span class="name">Recitation</span><span class="val">Recorded engagement</span></div>
+          <div class="kv"><span class="name">With meaning</span><span class="val">Recorded engagement</span></div>
+          <div class="kv quiet"><span class="name">Memorisation</span><span class="val">Not recorded</span></div>
+          <div class="kv"><span class="name">Revision</span><span class="val">Recorded as not done</span></div>
+        </div>
+        <div class="band" style="background:var(--dhikr)">
+          <h3>Dhikr</h3>
+          <div class="kv"><span class="name">Post-fard Fajr</span><span class="val">Recorded engagement</span></div>
+          <div class="kv quiet"><span class="name">Morning</span><span class="val">Not recorded</span></div>
+        </div>
+        <div class="band" style="background:var(--family)">
+          <h3>Family &amp; Community</h3>
+          <div class="kv"><span class="name">Parents · contact</span><span class="val">Recorded engagement</span></div>
+        </div>
+        <div class="band" style="background:var(--summary)">
+          <h3>Notes on this day</h3>
+          <div class="kv"><span class="name">Context</span><span class="val">Travel</span></div>
+          <div class="kv"><span class="name">Gratitude</span><span class="val">An entry was saved</span></div>
+          <div class="kv quiet"><span class="name">Personal reflection</span><span class="val">Not recorded</span></div>
+        </div>
+        <p class="foot">Factors you noticed stay under the row they belong to, quieter, and are never treated as causes.</p>
+        <button class="cta">Add a response</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

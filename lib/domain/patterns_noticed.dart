@@ -1,18 +1,27 @@
 import 'daily_check_in.dart';
 import 'date_key.dart';
-import 'home_traces.dart';
+import 'monitor_domain.dart';
+import 'personal_mix.dart';
 import 'quran.dart';
+
+enum PatternKind { weekdayPeak, weekend, multiWeek }
 
 class NoticedPattern {
   const NoticedPattern({
     required this.sentence,
     required this.dateKeys,
     required this.subjectLabel,
+    required this.kind,
+    required this.highlightedWeekdays,
+    this.domain,
   });
 
   final String sentence;
   final List<String> dateKeys;
   final String subjectLabel;
+  final PatternKind kind;
+  final Set<int> highlightedWeekdays;
+  final MonitorDomain? domain;
 }
 
 String _weekdayName(int weekday) {
@@ -30,16 +39,25 @@ String _weekdayName(int weekday) {
 List<NoticedPattern> noticedPatterns({
   required List<DailyCheckIn> records,
   required DateTime now,
+  Set<MonitorDomain>? visibleDomains,
+  PersonalMix mix = PersonalMix.sameAsDomains,
 }) {
-  final keys = periodDateKeys(90, now: now);
+  final visible =
+      visibleDomains ?? Set<MonitorDomain>.from(MonitorDomain.values);
+  final mixKeys = resolvePersonalMixKeys(mix, visible);
+  final periodKeys = periodDateKeys(90, now: now);
   final index = {for (final record in records) record.dateKey: record};
   final patterns = <NoticedPattern>[];
 
-  void consider(String label, TernaryOutcome Function(DailyCheckIn?) read) {
+  void consider(
+    String label,
+    MonitorDomain domain,
+    TernaryOutcome Function(DailyCheckIn?) read,
+  ) {
     final byWeekday = List<int>.filled(8, 0);
     final dates = <String>[];
     final weeks = <String>{};
-    for (final key in keys) {
+    for (final key in periodKeys) {
       if (read(index[key]) != TernaryOutcome.positive) continue;
       dates.add(key);
       final date = parseDateKey(key);
@@ -68,6 +86,9 @@ List<NoticedPattern> noticedPatterns({
                 '$label records appear more frequently on ${_weekdayName(peak)}.',
             dateKeys: dates,
             subjectLabel: label,
+            kind: PatternKind.weekdayPeak,
+            highlightedWeekdays: {peak},
+            domain: domain,
           ),
         );
       }
@@ -79,6 +100,9 @@ List<NoticedPattern> noticedPatterns({
             sentence: '$label records appear mostly on weekends.',
             dateKeys: dates,
             subjectLabel: label,
+            kind: PatternKind.weekend,
+            highlightedWeekdays: {DateTime.saturday, DateTime.sunday},
+            domain: domain,
           ),
         );
       }
@@ -89,20 +113,28 @@ List<NoticedPattern> noticedPatterns({
           sentence: '$label appears across multiple weeks.',
           dateKeys: dates,
           subjectLabel: label,
+          kind: PatternKind.multiWeek,
+          highlightedWeekdays: const {},
+          domain: domain,
         ),
       );
     }
   }
 
-  consider(
-    'Qur’anic Reflection',
-    (record) =>
-        record?.quranOutcome(QuranDimension.reflection) ??
-        TernaryOutcome.unanswered,
-  );
-  for (final row in allHomeTraceRows) {
+  if (mixKeys.contains('quran.reflection')) {
+    consider(
+      'Qur’anic Reflection',
+      MonitorDomain.quran,
+      (record) =>
+          record?.quranOutcome(QuranDimension.reflection) ??
+          TernaryOutcome.unanswered,
+    );
+  }
+  for (final row in homeTraceRowsForVisible(visible)) {
+    if (!mixKeys.contains(row.storageKey)) continue;
     consider(
       row.label,
+      monitorDomainForStorageKey(row.storageKey) ?? MonitorDomain.quran,
       (record) =>
           record?.homeTrace(row.storageKey) ?? TernaryOutcome.unanswered,
     );

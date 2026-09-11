@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../app/dimensions.dart';
+import '../../app/theme.dart';
 import '../../domain/activities.dart';
 
 enum MarkerKind { filled, outlined, unanswered, selected, missed }
@@ -10,7 +11,7 @@ enum MarkerKind { filled, outlined, unanswered, selected, missed }
 class RecordedStateMarker extends StatelessWidget {
   const RecordedStateMarker({
     super.key,
-    required this.color,
+    this.color = MuhasabahColors.mark,
     required this.kind,
     this.symbol,
     this.symbolColor,
@@ -154,7 +155,7 @@ class ZakatStateMarker extends StatelessWidget {
   const ZakatStateMarker({
     super.key,
     required this.status,
-    required this.color,
+    this.color = MuhasabahColors.mark,
   });
 
   final ZakatStatus status;
@@ -273,36 +274,39 @@ class ProgressDayCell extends StatelessWidget {
     super.key,
     required this.marker,
     this.caption,
-    required this.onTap,
+    this.onTap,
   });
 
   final Widget marker;
   final String? caption;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
+    final body = Column(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        marker,
+        if (caption != null)
+          SizedBox(
+            width: AppDimensions.progressMarker,
+            height: AppDimensions.progressMarkerCaptionHeight,
+            child: Text(
+              caption!,
+              maxLines: 1,
+              overflow: TextOverflow.clip,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.labelSmall,
+            ),
+          ),
+      ],
+    );
+    if (onTap == null) return body;
     return InkWell(
       onTap: onTap,
       customBorder: const CircleBorder(),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          marker,
-          if (caption != null)
-            SizedBox(
-              width: AppDimensions.progressMarker,
-              height: AppDimensions.progressMarkerCaptionHeight,
-              child: Text(
-                caption!,
-                maxLines: 1,
-                overflow: TextOverflow.clip,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.labelSmall,
-              ),
-            ),
-        ],
-      ),
+      child: body,
     );
   }
 }

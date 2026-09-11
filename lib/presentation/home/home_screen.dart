@@ -9,20 +9,26 @@ import '../../domain/daily_check_in.dart';
 import '../../domain/dashboard_summary.dart';
 import '../../domain/date_key.dart';
 import '../../domain/home_traces.dart';
-import '../../domain/personal_response.dart';
+import '../../domain/monitor_domain.dart';
+import '../../domain/personal_mix.dart';
 import '../../domain/recognition.dart';
 import '../../domain/review_period.dart';
+import '../../domain/salah_extras.dart';
 import '../../domain/sample_retirement.dart';
 import '../checkin/check_in_screen.dart';
 import '../history/history_screen.dart';
+import '../progress/optional_domain_progress_screen.dart';
 import '../progress/salah_progress_screen.dart';
 import '../recognition/recognition_screen.dart';
 import '../response/response_editor_screen.dart';
+import '../response/response_list_screen.dart';
 import '../review/review_screen.dart';
 import '../settings/application_reflection_screen.dart';
 import '../settings/settings_screen.dart';
-import '../shared/ui_bits.dart';
+import '../shared/state_marker.dart';
 import 'dashboard_cards.dart';
+import 'home_domain_stage.dart';
+import 'home_lookback_card.dart';
 import 'marks_guide_sheet.dart';
 import 'optional_domain_home_card.dart';
 import 'quran_home_card.dart';
@@ -43,7 +49,36 @@ class HomeScreen extends ConsumerWidget {
             message: Copy.marksGuideTitle,
             child: TextButton(
               onPressed: () => showMarksGuide(context),
-              child: Text('ⓘ ${Copy.marksGuide}'),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ExcludeSemantics(
+                    child: RecordedStateMarker(
+                      kind: MarkerKind.filled,
+                      semanticLabel: '',
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  ExcludeSemantics(
+                    child: Text(
+                      '/',
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: MuhasabahColors.mark,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  ExcludeSemantics(
+                    child: RecordedStateMarker(
+                      kind: MarkerKind.outlined,
+                      semanticLabel: '',
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  const Text(Copy.marksGuide),
+                ],
+              ),
             ),
           ),
           IconButton(
@@ -55,111 +90,99 @@ class HomeScreen extends ConsumerWidget {
             },
             icon: const Icon(Icons.settings_outlined),
           ),
-          IconButton(
-            tooltip: 'Theme',
-            onPressed: () {
-              final current = ref.read(themeModePrefProvider);
-              ref.read(themeModePrefProvider.notifier).state =
-                  (current + 1) % 3;
-            },
-            icon: const Icon(Icons.brightness_6_outlined),
-          ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          checkIns.when(
-            loading: () => const LinearProgressIndicator(),
-            error: (_, _) => const Text(
-              'Saved check-ins could not be loaded. Healthy records are kept.',
-            ),
-            data: (records) {
-              final prefs = ref.watch(appPrefsProvider);
-              ref.watch(prefsTickProvider);
-              final offerArchive = shouldOfferSampleArchive(
-                records: records,
-                now: ref.watch(nowProvider),
-                dismissed: prefs.archivePromptDismissed,
-              );
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  if (records.any((record) => record.synthetic))
-                    Material(
-                      color: MuhasabahColors.wash(
-                        MuhasabahColors.sampleBannerWash,
-                        MuhasabahColors.sampleBannerWashDark,
-                        Theme.of(context).brightness,
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 10,
-                        ),
-                        child: Text(
-                          Copy.sampleDataNotice,
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                      ),
+      body: checkIns.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (_, _) => const Padding(
+          padding: EdgeInsets.all(16),
+          child: Text(
+            'Saved check-ins could not be loaded. Healthy records are kept.',
+          ),
+        ),
+        data: (records) {
+          final prefs = ref.watch(appPrefsProvider);
+          ref.watch(prefsTickProvider);
+          final offerArchive = shouldOfferSampleArchive(
+            records: records,
+            now: ref.watch(nowProvider),
+            dismissed: prefs.archivePromptDismissed,
+          );
+          return ListView(
+            primary: false,
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(16),
+            children: [
+              if (records.any((record) => record.synthetic))
+                Material(
+                  color: MuhasabahColors.wash(
+                    MuhasabahColors.sampleBannerWash,
+                    MuhasabahColors.sampleBannerWashDark,
+                    Theme.of(context).brightness,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
                     ),
-                  if (offerArchive) ...[
-                    const SizedBox(height: 8),
-                    Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                    child: Text(
+                      Copy.sampleDataNotice,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ),
+                ),
+              if (offerArchive) ...[
+                const SizedBox(height: 8),
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(Copy.archiveSamplePrompt),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
                           children: [
-                            Text(Copy.archiveSamplePrompt),
-                            const SizedBox(height: 8),
-                            Wrap(
-                              spacing: 8,
-                              children: [
-                                FilledButton(
-                                  onPressed: () async {
-                                    await const SyntheticCheckInSeeder()
-                                        .clearFrom(
-                                          ref.read(checkInRepositoryProvider),
-                                          responses: ref.read(
-                                            responseRepositoryProvider,
-                                          ),
-                                        );
-                                    await prefs.setSampleRemovedByUser(true);
-                                    await prefs.setArchivePromptDismissed(true);
-                                    await ref
-                                        .read(checkInsProvider.notifier)
-                                        .reload();
-                                    await ref
-                                        .read(responsesProvider.notifier)
-                                        .reload();
-                                  },
-                                  child: const Text('Archive sample records'),
-                                ),
-                                TextButton(
-                                  onPressed: () async {
-                                    await prefs.setArchivePromptDismissed(true);
-                                    ref
-                                        .read(prefsTickProvider.notifier)
-                                        .state++;
-                                  },
-                                  child: const Text('Keep sample records'),
-                                ),
-                              ],
+                            FilledButton(
+                              onPressed: () async {
+                                await const SyntheticCheckInSeeder().clearFrom(
+                                  ref.read(checkInRepositoryProvider),
+                                  responses: ref.read(
+                                    responseRepositoryProvider,
+                                  ),
+                                );
+                                await prefs.setSampleRemovedByUser(true);
+                                await prefs.setArchivePromptDismissed(true);
+                                await ref
+                                    .read(checkInsProvider.notifier)
+                                    .reload();
+                                await ref
+                                    .read(responsesProvider.notifier)
+                                    .reload();
+                              },
+                              child: const Text('Archive sample records'),
+                            ),
+                            TextButton(
+                              onPressed: () async {
+                                await prefs.setArchivePromptDismissed(true);
+                                ref.read(prefsTickProvider.notifier).state++;
+                              },
+                              child: const Text('Keep sample records'),
                             ),
                           ],
                         ),
-                      ),
+                      ],
                     ),
-                  ],
-                  const SizedBox(height: 8),
-                  ..._dashboard(context, records: records, ref: ref),
-                ],
-              );
-            },
-          ),
-        ],
+                  ),
+                ),
+              ],
+              const SizedBox(height: 8),
+              ..._dashboard(context, records: records, ref: ref),
+            ],
+          );
+        },
       ),
     );
   }
@@ -187,6 +210,18 @@ class HomeScreen extends ConsumerWidget {
       period: period,
       recognitionCount: recognitionCount,
     );
+    final visible = ref.watch(appPrefsProvider).visibleDomains;
+    final mix = ref.watch(appPrefsProvider).personalMix;
+    final mixKeys = resolvePersonalMixKeys(mix, visible);
+    final season = personalMixSeasonLine(mix, visible);
+    final homeDomains = homeMixDomains(visible, mix);
+    final showQuranSurfaces =
+        visible.contains(MonitorDomain.quran) &&
+        (mix.kind == PersonalMixKind.sameAsDomains ||
+            mixIncludesQuran(mixKeys));
+    final hajjStatus = ref.watch(appPrefsProvider).hajjStatus;
+    final showHajjPonder =
+        homeDomains.contains(MonitorDomain.hajj) && hajjStatus.showsPreparation;
     void open(Widget page) {
       Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => page));
     }
@@ -200,75 +235,57 @@ class HomeScreen extends ConsumerWidget {
       const SizedBox(height: 12),
       const ReflectionOfTheWeekCard(),
       const SizedBox(height: 12),
-      SalahHomeCard(records: records),
-      const SizedBox(height: 10),
-      QuranHomeCard(records: records),
-      const SizedBox(height: 10),
-      OptionalDomainHomeCard(
+      if (season != null) ...[
+        Text(
+          '${Copy.personalMixSeasonPrefix} $season.',
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+        const SizedBox(height: 10),
+      ],
+      HomeDomainStage(
+        domains: homeDomains,
+        cardFor: (domain) => _homeDomainCard(
+          records: records,
+          domain: domain,
+          mix: mix,
+          mixKeys: mixKeys,
+        ),
+      ),
+      if (homeDomains.isNotEmpty) const SizedBox(height: 10),
+      HomeLookbackCard(
         records: records,
-        title: 'Dhikr',
-        rows: dhikrHomeRows,
-        washLight: MuhasabahColors.dhikrWash,
-        washDark: MuhasabahColors.dhikrWashDark,
-        family: MuhasabahColors.dhikrFamily,
+        onOpenReview: () => _switchTab(context, 1),
       ),
       const SizedBox(height: 10),
-      OptionalDomainHomeCard(
-        records: records,
-        title: 'Fasting',
-        rows: fastingHomeRows,
-        washLight: MuhasabahColors.fastingWash,
-        washDark: MuhasabahColors.fastingWashDark,
-        family: MuhasabahColors.fastingFamily,
-      ),
-      const SizedBox(height: 10),
-      OptionalDomainHomeCard(
-        records: records,
-        title: Copy.familyCommunityCare,
-        rows: familyHomeRows,
-        washLight: MuhasabahColors.familyWash,
-        washDark: MuhasabahColors.familyWashDark,
-        family: MuhasabahColors.familyFamily,
-      ),
-      const SizedBox(height: 10),
-      OptionalDomainHomeCard(
-        records: records,
-        title: 'Charity',
-        rows: charityHomeRows,
-        washLight: MuhasabahColors.charityWash,
-        washDark: MuhasabahColors.charityWashDark,
-        family: MuhasabahColors.charityFamily,
-        includeZakat: true,
-      ),
-      const SizedBox(height: 10),
-      OptionalDomainHomeCard(
-        records: records,
-        title: 'Hadith',
-        rows: hadithHomeRows,
-        washLight: MuhasabahColors.hadithWash,
-        washDark: MuhasabahColors.hadithWashDark,
-        family: MuhasabahColors.hadithFamily,
-        includeHadithFocus: true,
-      ),
-      const SizedBox(height: 12),
-      DashboardNavCard(
-        title: 'Current review snapshot',
-        body: snapshot.reviewLine,
-        onTap: () => _switchTab(context, 1),
-      ),
-      const SizedBox(height: 10),
-      NoticedThisWeekCard(records: records),
-      const SizedBox(height: 10),
-      PatternsNoticedCard(records: records),
-      const SizedBox(height: 10),
-      DashboardNavCard(
-        title: 'Recognition',
-        body: snapshot.recognitionLine,
-        onTap: () => open(const RecognitionScreen()),
-      ),
-      const SizedBox(height: 10),
-      DashboardPonderCard(onTap: () => open(const QuranProgressScreen())),
-      const SizedBox(height: 10),
+      if (showQuranSurfaces) ...[
+        DashboardNavCard(
+          title: 'Recognition',
+          body: snapshot.recognitionLine,
+          onTap: () => open(const RecognitionScreen()),
+        ),
+        const SizedBox(height: 10),
+        DashboardPonderCard(onTap: () => open(const QuranProgressScreen())),
+        const SizedBox(height: 10),
+      ],
+      if (showHajjPonder) ...[
+        DashboardNavCard(
+          title: 'PONDER',
+          body: hajjStatus == HajjStatus.preparing
+              ? Copy.hajjPonderPreparing
+              : Copy.hajjPonderDue,
+          onTap: () => open(
+            OptionalDomainProgressScreen(
+              title: MonitorDomain.hajj.label,
+              focusQuestion: MonitorDomain.hajj.focusQuestion,
+              note: Copy.hajjObservationNote,
+              rows: hajjHomeRows,
+              family: MuhasabahColors.hajjFamily,
+              includeHajjStatus: true,
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+      ],
       const WeeklyJournalCard(),
       const SizedBox(height: 10),
       FilledButton(
@@ -277,10 +294,187 @@ class HomeScreen extends ConsumerWidget {
       ),
       const SizedBox(height: 16),
       Text(
-        'A private place to record, review, and respond — without scores or prescriptions. Colour identifies the domain, not spiritual rank. ${Copy.unansweredNotMissed}',
+        'A private place to record, review, and respond — without scores or prescriptions. The card wash identifies the domain, not spiritual rank. Marks share one colour. ${Copy.unansweredNotMissed}',
         style: Theme.of(context).textTheme.bodySmall,
       ),
     ];
+  }
+
+  Widget _homeDomainCard({
+    required List<DailyCheckIn> records,
+    required MonitorDomain domain,
+    required PersonalMix mix,
+    required Set<String> mixKeys,
+  }) {
+    final inMix =
+        mix.kind != PersonalMixKind.sameAsDomains &&
+        mixTouchesDomain(mixKeys, domain);
+    final useCompact = mix.kind == PersonalMixKind.sameAsDomains
+        ? usesCompactHomeWeek(domain)
+        : !inMix;
+    switch (domain) {
+      case MonitorDomain.salah:
+        return SalahHomeCard(
+          records: records,
+          compactWeek: useCompact,
+          displayRows: inMix ? mixSalahRows(mixKeys) : SalahTraceRow.values,
+        );
+      case MonitorDomain.quran:
+        return QuranHomeCard(
+          records: records,
+          compactWeek: useCompact,
+          displayDimensions: inMix ? mixQuranDimensions(mixKeys) : null,
+        );
+      case MonitorDomain.hadith:
+        return OptionalDomainHomeCard(
+          records: records,
+          title: domain.label,
+          focus: domain.focusQuestion,
+          rows: inMix ? mixTraceRows(domain, mixKeys) : hadithHomeRows,
+          progressRows: hadithHomeRows,
+          washLight: MuhasabahColors.hadithWash,
+          washDark: MuhasabahColors.hadithWashDark,
+          family: MuhasabahColors.hadithFamily,
+          includeHadithFocus: true,
+          compactWeek: useCompact,
+        );
+      case MonitorDomain.dhikr:
+        return OptionalDomainHomeCard(
+          records: records,
+          title: domain.label,
+          focus: domain.focusQuestion,
+          rows: inMix ? mixTraceRows(domain, mixKeys) : dhikrHomeRows,
+          progressRows: dhikrHomeRows,
+          washLight: MuhasabahColors.dhikrWash,
+          washDark: MuhasabahColors.dhikrWashDark,
+          family: MuhasabahColors.dhikrFamily,
+          compactWeek: useCompact,
+        );
+      case MonitorDomain.akhlaq:
+        return OptionalDomainHomeCard(
+          records: records,
+          title: domain.label,
+          focus: domain.focusQuestion,
+          rows: inMix ? mixTraceRows(domain, mixKeys) : akhlaqHomeRows,
+          progressRows: akhlaqHomeRows,
+          washLight: MuhasabahColors.akhlaqWash,
+          washDark: MuhasabahColors.akhlaqWashDark,
+          family: MuhasabahColors.akhlaqFamily,
+          includeStruggleNote: true,
+          compactWeek: useCompact,
+        );
+      case MonitorDomain.huquq:
+        return OptionalDomainHomeCard(
+          records: records,
+          title: domain.label,
+          focus: domain.focusQuestion,
+          rows: inMix ? mixTraceRows(domain, mixKeys) : huquqHomeRows,
+          progressRows: huquqHomeRows,
+          washLight: MuhasabahColors.huquqWash,
+          washDark: MuhasabahColors.huquqWashDark,
+          family: MuhasabahColors.huquqFamily,
+          compactWeek: useCompact,
+        );
+      case MonitorDomain.knowledge:
+        return OptionalDomainHomeCard(
+          records: records,
+          title: domain.label,
+          focus: domain.focusQuestion,
+          rows: inMix ? mixTraceRows(domain, mixKeys) : knowledgeHomeRows,
+          progressRows: knowledgeHomeRows,
+          washLight: MuhasabahColors.knowledgeWash,
+          washDark: MuhasabahColors.knowledgeWashDark,
+          family: MuhasabahColors.knowledgeFamily,
+          compactWeek: useCompact,
+        );
+      case MonitorDomain.time:
+        return OptionalDomainHomeCard(
+          records: records,
+          title: domain.label,
+          focus: domain.focusQuestion,
+          rows: inMix ? mixTraceRows(domain, mixKeys) : timeHomeRows,
+          progressRows: timeHomeRows,
+          washLight: MuhasabahColors.timeWash,
+          washDark: MuhasabahColors.timeWashDark,
+          family: MuhasabahColors.timeFamily,
+          compactWeek: useCompact,
+        );
+      case MonitorDomain.health:
+        return OptionalDomainHomeCard(
+          records: records,
+          title: domain.label,
+          focus: domain.focusQuestion,
+          rows: inMix ? mixTraceRows(domain, mixKeys) : healthHomeRows,
+          progressRows: healthHomeRows,
+          washLight: MuhasabahColors.healthWash,
+          washDark: MuhasabahColors.healthWashDark,
+          family: MuhasabahColors.healthFamily,
+          compactWeek: useCompact,
+        );
+      case MonitorDomain.wealth:
+        return OptionalDomainHomeCard(
+          records: records,
+          title: domain.label,
+          focus: domain.focusQuestion,
+          rows: inMix ? mixTraceRows(domain, mixKeys) : wealthHomeRows,
+          progressRows: wealthHomeRows,
+          washLight: MuhasabahColors.wealthWash,
+          washDark: MuhasabahColors.wealthWashDark,
+          family: MuhasabahColors.wealthFamily,
+          compactWeek: useCompact,
+        );
+      case MonitorDomain.ummah:
+        return OptionalDomainHomeCard(
+          records: records,
+          title: domain.label,
+          focus: domain.focusQuestion,
+          rows: inMix ? mixTraceRows(domain, mixKeys) : ummahHomeRows,
+          progressRows: ummahHomeRows,
+          washLight: MuhasabahColors.ummahWash,
+          washDark: MuhasabahColors.ummahWashDark,
+          family: MuhasabahColors.ummahFamily,
+          compactWeek: useCompact,
+        );
+      case MonitorDomain.fasting:
+        return OptionalDomainHomeCard(
+          records: records,
+          title: 'Fasting',
+          rows: inMix ? mixTraceRows(domain, mixKeys) : fastingHomeRows,
+          progressRows: fastingHomeRows,
+          washLight: MuhasabahColors.fastingWash,
+          washDark: MuhasabahColors.fastingWashDark,
+          family: MuhasabahColors.fastingFamily,
+          highlightLunarWhiteDays: true,
+          compactWeek: useCompact,
+        );
+      case MonitorDomain.hajj:
+        final includeHajj = !inMix || mixIncludesHajj(mixKeys);
+        return OptionalDomainHomeCard(
+          records: records,
+          title: MonitorDomain.hajj.label,
+          focus: MonitorDomain.hajj.focusQuestion,
+          rows: inMix ? mixTraceRows(domain, mixKeys) : hajjHomeRows,
+          progressRows: hajjHomeRows,
+          washLight: MuhasabahColors.hajjWash,
+          washDark: MuhasabahColors.hajjWashDark,
+          family: MuhasabahColors.hajjFamily,
+          includeHajjStatus: includeHajj,
+          compactWeek: useCompact,
+        );
+      case MonitorDomain.charity:
+        final includeZakat = !inMix || mixIncludesZakat(mixKeys);
+        return OptionalDomainHomeCard(
+          records: records,
+          title: 'Charity',
+          rows: inMix ? mixTraceRows(domain, mixKeys) : charityHomeRows,
+          progressRows: charityHomeRows,
+          washLight: MuhasabahColors.charityWash,
+          washDark: MuhasabahColors.charityWashDark,
+          family: MuhasabahColors.charityFamily,
+          includeZakat: includeZakat,
+          compactWeek: useCompact,
+        );
+    }
   }
 
   void _switchTab(BuildContext context, int index) {
@@ -346,93 +540,6 @@ class AppShellState extends ConsumerState<AppShell> {
             label: Copy.myResponse,
           ),
         ],
-      ),
-    );
-  }
-}
-
-class ResponseListScreen extends ConsumerWidget {
-  const ResponseListScreen({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final async = ref.watch(responsesProvider);
-    return Scaffold(
-      appBar: AppBar(title: const Text(Copy.myResponse)),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute<void>(
-              builder: (_) => const ResponseEditorScreen(),
-            ),
-          );
-        },
-        icon: const Icon(Icons.add),
-        label: const Text(Copy.addAResponse),
-      ),
-      body: async.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => const EmptyState(
-          title: Copy.myResponse,
-          message: 'Saved responses could not be listed. Existing records were left unchanged.',
-        ),
-        data: (items) {
-          if (items.isEmpty) {
-            return EmptyState(
-              title: Copy.myResponse,
-              message:
-                  '${Copy.myResponseDescription}\n\n${Copy.emptyResponses}',
-              action: FilledButton(
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => const ResponseEditorScreen(),
-                    ),
-                  );
-                },
-                child: const Text(Copy.addAResponse),
-              ),
-            );
-          }
-          final active = items.where((item) => !item.isArchived).toList();
-          final archived = items.where((item) => item.isArchived).toList();
-          return ListView(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
-            children: [
-              Text(
-                Copy.myResponseDescription,
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-              const SizedBox(height: 12),
-              for (final item in active) _tile(context, ref, item),
-              if (archived.isNotEmpty) ...[
-                const SectionHeader('Archived'),
-                for (final item in archived) _tile(context, ref, item),
-              ],
-            ],
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _tile(BuildContext context, WidgetRef ref, PersonalResponse item) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 10),
-      child: ListTile(
-        title: Text(item.text, maxLines: 3, overflow: TextOverflow.ellipsis),
-        subtitle: Text(
-          item.provenance == null
-              ? 'Independent note'
-              : item.provenance!.displayLine,
-        ),
-        onTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute<void>(
-              builder: (_) => ResponseDetailScreen(id: item.id),
-            ),
-          );
-        },
       ),
     );
   }

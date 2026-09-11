@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Personal mix — one mix (visual review)</title>
+  <style>
+    :root {
+      --bg: #f4f1ea;
+      --ink: #1d2a2c;
+      --muted: #4d5c63;
+      --line: #d5ddd8;
+      --teal: #2f6f73;
+      --salah: #d7eceb;
+      --quran: #d7e4f2;
+      --hadith: #d4e2ee;
+      --akhlaq: #e8e0d4;
+      --huquq: #e2e8dc;
+      --charity: #f4e6c8;
+      --knowledge: #d5e6ee;
+      --time: #e4e6d8;
+      --health: #e6ddd4;
+      --chip: #e8eee9;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      margin: 0;
+      padding: 24px;
+    }
+    h1 { font-size: 22px; font-weight: 700; margin: 0 0 8px; }
+    h2 { font-size: 16px; margin: 28px 0 10px; }
+    .note { max-width: 1240px; color: var(--muted); line-height: 1.5; font-size: 14px; }
+    .rules {
+      max-width: 1240px;
+      margin: 16px 0;
+      padding: 12px 14px;
+      background: #fff;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+    .pair {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      align-items: flex-start;
+      margin-top: 8px;
+    }
+    .col { width: min(360px, 100%); }
+    .col h3 {
+      margin: 0 0 8px;
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .phone {
+      width: 100%;
+      background: #fff;
+      border-radius: 28px;
+      border: 1px solid var(--line);
+      overflow: hidden;
+    }
+    .appbar { padding: 14px 16px 4px; font-size: 16px; font-weight: 600; }
+    .hint { padding: 0 16px 10px; font-size: 12px; color: var(--muted); line-height: 1.4; }
+    .body { padding: 0 16px 16px; }
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+    .chip {
+      font-size: 11px;
+      padding: 5px 9px;
+      border-radius: 999px;
+      background: var(--chip);
+      color: var(--ink);
+      border: 1px solid transparent;
+    }
+    .chip.on {
+      background: var(--salah);
+      border-color: var(--teal);
+      font-weight: 600;
+    }
+    .tree { font-size: 12px; line-height: 1.35; }
+    .dom {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+      padding: 7px 0;
+      border-top: 1px solid #eef1f0;
+    }
+    .box {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+      border: 1.5px solid var(--teal);
+      margin-top: 1px;
+      flex: none;
+    }
+    .box.on { background: var(--teal); }
+    .box.half {
+      background: linear-gradient(90deg, var(--teal) 50%, #fff 50%);
+    }
+    .name { font-weight: 650; }
+    .sub { color: var(--muted); font-weight: 400; }
+    .indent { padding-left: 22px; }
+    .band {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 6px 0 2px;
+    }
+    .row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      padding: 3px 0;
+      color: var(--muted);
+    }
+    .row.on { color: var(--ink); font-weight: 600; }
+    .card { border-radius: 16px; padding: 12px; margin-bottom: 8px; }
+    .domain { margin: 0 0 2px; font-size: 13px; font-weight: 700; }
+    .focus { margin: 0 0 8px; font-size: 11px; font-style: italic; color: var(--muted); }
+    .days {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+      margin-top: 6px;
+    }
+    .dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      border: 1.5px solid #2f6f73;
+      margin: 0 auto;
+      opacity: 0.4;
+    }
+    .dot.on { opacity: 1; background: #2f6f73; }
+    .matrix {
+      display: grid;
+      grid-template-columns: 72px repeat(7, 1fr);
+      gap: 3px 2px;
+      font-size: 10px;
+      color: var(--muted);
+      align-items: center;
+    }
+    .season {
+      font-size: 12px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+    .tile {
+      border-radius: 12px;
+      padding: 8px 10px;
+      margin: 6px 0;
+      font-size: 12px;
+    }
+    .tile .k {
+      font-size: 10px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    .closed { opacity: 0.72; }
+    .chev { float: right; color: var(--muted); }
+    .key { max-width: 1240px; margin-top: 20px; font-size: 12px; color: var(--muted); line-height: 1.5; }
+    code { font-size: 12px; }
+  </style>
+</head>
+<body>
+  <h1>Personal mix — one mix at a time</h1>
+  <p class="note">
+    Implemented as one saved mix. Named chips copy a starting set; Custom is the same mix after editing.
+    Same as Domains follows visibility. Not a score. Does not rewrite saved days.
+  </p>
+  <div class="rules">
+    <strong>Example mix in these phones</strong>
+    Salah (all five prayers) · Qur’an Recitation and Meaning · Hadith Encounter (Reading, Listening) ·
+    Akhlaq Restraint only (held back from a habit) · Huquq Parents · Charity Giving.
+    Other visible domains stay on Home as compact weeks. They are not in the mix.
+  </div>
+
+  <h2>Settings, Home, and check-in for that mix</h2>
+  <div class="pair">
+    <div class="col">
+      <h3>1. Settings → Personal mix</h3>
+      <div class="phone">
+        <div class="appbar">Personal mix</div>
+        <div class="hint">Where I want to notice this season. Not a score. Does not rewrite saved days.</div>
+        <div class="body">
+          <div class="chips">
+            <span class="chip">Worship I notice</span>
+            <span class="chip">Character &amp; rights</span>
+            <span class="chip">Trusts I notice</span>
+            <span class="chip">People I notice</span>
+            <span class="chip on">Custom</span>
+            <span class="chip">Same as Domains</span>
+          </div>
+          <div class="tree">
+            <div class="dom">
+              <span class="box on"></span>
+              <div>
+                <div class="name">Salah &amp; Prayer Quality</div>
+                <div class="sub">All five prayers</div>
+              </div>
+            </div>
+            <div class="dom">
+              <span class="box half"></span>
+              <div>
+                <div class="name">Qur’an Engagement</div>
+                <div class="indent">
+                  <div class="row on"><span class="box on"></span> Recitation</div>
+                  <div class="row on"><span class="box on"></span> Recitation with Meaning</div>
+                  <div class="row"><span class="box"></span> Memorisation</div>
+                  <div class="row"><span class="box"></span> Revision</div>
+                  <div class="row"><span class="box"></span> Tafsir</div>
+                  <div class="row"><span class="box"></span> Qur’anic Reflection</div>
+                </div>
+              </div>
+            </div>
+            <div class="dom">
+              <span class="box half"></span>
+              <div>
+                <div class="name">Hadith &amp; Living Sunnah</div>
+                <div class="indent">
+                  <div class="band">Encounter</div>
+                  <div class="row on"><span class="box on"></span> Reading</div>
+                  <div class="row on"><span class="box on"></span> Listening</div>
+                  <div class="band">Live</div>
+                  <div class="row"><span class="box"></span> Noticed a sunnah in how I lived today</div>
+                </div>
+              </div>
+            </div>
+            <div class="dom">
+              <span class="box half"></span>
+              <div>
+                <div class="name">Character &amp; Morals</div>
+                <div class="indent">
+                  <div class="band">Restraint</div>
+                  <div class="row on"><span class="box on"></span> Held back from a habit I am trying to leave</div>
+                  <div class="band">Virtues I noticed</div>
+                  <div class="row"><span class="box"></span> Patience · Humility · …</div>
+                </div>
+              </div>
+            </div>
+            <div class="dom">
+              <span class="box half"></span>
+              <div>
+                <div class="name">Rights of Others</div>
+                <div class="indent">
+                  <div class="row on"><span class="box on"></span> Parents</div>
+                  <div class="row"><span class="box"></span> Spouse · Children · …</div>
+                </div>
+              </div>
+            </div>
+            <div class="dom">
+              <span class="box half"></span>
+              <div>
+                <div class="name">Charity</div>
+                <div class="indent">
+                  <div class="band">Giving</div>
+                  <div class="row on"><span class="box on"></span> Financial · Time · A smile</div>
+                  <div class="band">Zakat status</div>
+                  <div class="row"><span class="box"></span> Zakat</div>
+                </div>
+              </div>
+            </div>
+            <div class="dom">
+              <span class="box"></span>
+              <div>
+                <div class="name">Dhikr, Knowledge, Time, Health…</div>
+                <div class="sub">Not in this mix. Still visible if Domains shows them.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col">
+      <h3>2. Home for that mix</h3>
+      <div class="phone">
+        <div class="appbar">Home</div>
+        <div class="hint">Mix domains keep a full week. Other visible domains stay one line. Title still opens Progress.</div>
+        <div class="body">
+          <div class="season">
+            This season I am noticing Salah, Qur’an Recitation and Meaning, Hadith Encounter, holding back from a habit, Parents’ rights, and giving.
+          </div>
+          <div class="card" style="background:var(--salah)">
+            <p class="domain">Salah &amp; Prayer Quality</p>
+            <p class="focus">Was my heart present when I stood before Allah?</p>
+            <div class="matrix">
+              <span></span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span>
+              <span>Fajr</span><span class="dot on"></span><span class="dot"></span><span class="dot on"></span><span class="dot"></span><span class="dot on"></span><span class="dot"></span><span class="dot"></span>
+              <span>Dhuhr</span><span class="dot on"></span><span class="dot on"></span><span class="dot"></span><span class="dot on"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+              <span>Asr</span><span class="dot"></span><span class="dot on"></span><span class="dot on"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            </div>
+          </div>
+          <div class="card" style="background:var(--quran)">
+            <p class="domain">Qur’an Engagement</p>
+            <div class="matrix">
+              <span></span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span>
+              <span>Recitation</span><span class="dot on"></span><span class="dot"></span><span class="dot on"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+              <span>Meaning</span><span class="dot on"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            </div>
+          </div>
+          <div class="card" style="background:var(--hadith)">
+            <p class="domain">Hadith &amp; Living Sunnah</p>
+            <div class="matrix">
+              <span></span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span>
+              <span>Reading</span><span class="dot"></span><span class="dot on"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+              <span>Listening</span><span class="dot on"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            </div>
+          </div>
+          <div class="card" style="background:var(--akhlaq)">
+            <p class="domain">Character &amp; Morals</p>
+            <p class="focus">Restraint only in this mix — other Akhlaq rows stay on Progress.</p>
+            <div class="matrix">
+              <span></span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span>
+              <span>Held back</span><span class="dot"></span><span class="dot on"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            </div>
+          </div>
+          <div class="card" style="background:var(--huquq)">
+            <p class="domain">Rights of Others</p>
+            <div class="matrix">
+              <span></span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span>
+              <span>Parents</span><span class="dot on"></span><span class="dot on"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            </div>
+          </div>
+          <div class="card" style="background:var(--charity)">
+            <p class="domain">Charity</p>
+            <div class="days">
+              <span class="dot on"></span><span class="dot"></span><span class="dot on"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            </div>
+          </div>
+          <div class="card" style="background:var(--time)">
+            <p class="domain">Time &amp; Barakah</p>
+            <p class="focus">Visible, not in the mix — compact week</p>
+            <div class="days">
+              <span class="dot"></span><span class="dot on"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col">
+      <h3>3. Today’s check-in</h3>
+      <div class="phone">
+        <div class="appbar">Check-in · 10 Sep 2026</div>
+        <div class="hint">Mix first. First band open. Later bands closed. Other domains after, collapsed. Save still writes the whole day.</div>
+        <div class="body">
+          <div class="tile" style="background:var(--salah)">
+            <div class="k">Salah &amp; Prayer Quality</div>
+            Fajr · Dhuhr · Asr · Maghrib · Isha
+          </div>
+          <div class="tile" style="background:var(--quran)">
+            <div class="k">Qur’an Engagement</div>
+            Recitation<br />Recitation with Meaning
+          </div>
+          <div class="tile" style="background:var(--hadith)">
+            <div class="k">Hadith &amp; Living Sunnah</div>
+            Encounter — Reading, Listening<br />
+            <span class="closed">Retention <span class="chev">▸</span></span>
+          </div>
+          <div class="tile" style="background:var(--akhlaq)">
+            <div class="k">Character &amp; Morals</div>
+            Restraint — Held back from a habit I am trying to leave<br />
+            <span class="closed">Virtues I noticed <span class="chev">▸</span></span>
+          </div>
+          <div class="tile" style="background:var(--huquq)">
+            <div class="k">Rights of Others</div>
+            Household — Parents<br />
+            <span class="closed">Repair <span class="chev">▸</span></span>
+          </div>
+          <div class="tile" style="background:var(--charity)">
+            <div class="k">Charity</div>
+            Giving<br />
+            <span class="closed">Zakat status <span class="chev">▸</span></span>
+          </div>
+          <div class="tile closed" style="background:#f3f4f2">
+            Also recorded today <span class="chev">▸</span><br />
+            Dhikr, Knowledge, Time, Health, Wealth, Ummah, Fasting, Family
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="key">
+    Domains setting still decides what exists on Home. Personal mix only orders and expands what the person is noticing.
+    Tapping a named chip would replace this Custom set; editing any row turns the chip back to Custom.
+    Storage keys stay as they are. No <code>recordableFieldCount</code> change. Marks still share one colour.
+  </p>
+</body>
+</html>

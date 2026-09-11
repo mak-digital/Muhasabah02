@@ -44,6 +44,16 @@ extension SalahTraceRowX on SalahTraceRow {
   };
 }
 
+const kSalahObligatoryBand = 'Obligatory Salah';
+const kSalahFridayBand = 'Friday Prayer';
+const kSalahVoluntaryBand = 'Voluntary Prayers';
+
+String salahHomeBand(SalahTraceRow row) {
+  if (row.isObligatory) return kSalahObligatoryBand;
+  if (row.isFridayPrayer) return kSalahFridayBand;
+  return kSalahVoluntaryBand;
+}
+
 const obligatorySalahRows = [
   SalahTraceRow.fajr,
   SalahTraceRow.dhuhr,

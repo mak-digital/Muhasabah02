@@ -54,7 +54,7 @@ SyntheticCheckInPlan generateSyntheticCheckIns({
     records.add(_day(key, parseDateKey(key), random));
   }
   return SyntheticCheckInPlan(
-    records: records,
+    records: _withRecognitionClusters(records, now: now),
     missingDateKeys: missing.toList()..sort(),
     responses: _sampleResponses(now),
   );
@@ -88,6 +88,94 @@ List<PersonalResponse> _sampleResponses(DateTime now) {
       ),
     ),
   ];
+}
+
+List<DailyCheckIn> _withRecognitionClusters(
+  List<DailyCheckIn> records, {
+  required DateTime now,
+}) {
+  final byKey = {for (final record in records) record.dateKey: record};
+  final last30 = periodDateKeys(30, now: now);
+  final last90 = periodDateKeys(90, now: now);
+
+  void cluster({
+    required List<String> windowKeys,
+    required QuranDimension subject,
+    required TernaryOutcome outcome,
+    required String factorId,
+    int target = 8,
+  }) {
+    final saved = [
+      for (final key in windowKeys)
+        if (byKey.containsKey(key)) key,
+    ];
+    if (saved.length < 5) return;
+    final chosen = _spreadKeys(saved, target.clamp(5, saved.length));
+    if (chosen.length < 5) return;
+    if (daysInclusiveSpan(chosen.first, chosen.last) < 7) return;
+    final polarity = outcome == TernaryOutcome.positive
+        ? 'positive'
+        : 'negative';
+    for (final key in chosen) {
+      var record = byKey[key]!;
+      record = record.withQuran(subject, outcome);
+      record = record.withContext(
+        RecordedContext(
+          subject: subject,
+          polarity: polarity,
+          factorIds: [factorId],
+        ),
+      );
+      byKey[key] = record;
+    }
+  }
+
+  cluster(
+    windowKeys: last30,
+    subject: QuranDimension.meaning,
+    outcome: TernaryOutcome.positive,
+    factorId: 'routine',
+  );
+  cluster(
+    windowKeys: last90,
+    subject: QuranDimension.meaning,
+    outcome: TernaryOutcome.positive,
+    factorId: 'routine',
+    target: 16,
+  );
+  cluster(
+    windowKeys: last30,
+    subject: QuranDimension.revision,
+    outcome: TernaryOutcome.negative,
+    factorId: 'fatigue',
+  );
+  cluster(
+    windowKeys: last90,
+    subject: QuranDimension.revision,
+    outcome: TernaryOutcome.negative,
+    factorId: 'fatigue',
+    target: 16,
+  );
+  cluster(
+    windowKeys: last90,
+    subject: QuranDimension.tafsir,
+    outcome: TernaryOutcome.positive,
+    factorId: 'quran.studyCircle',
+    target: 16,
+  );
+
+  return [for (final record in records) byKey[record.dateKey]!];
+}
+
+List<String> _spreadKeys(List<String> sorted, int count) {
+  if (sorted.length <= count) return List<String>.from(sorted);
+  final out = <String>[];
+  for (var i = 0; i < count; i++) {
+    final idx = (i * (sorted.length - 1) / (count - 1)).round();
+    final key = sorted[idx];
+    if (out.isEmpty || out.last != key) out.add(key);
+  }
+  return out;
 }
 
 DailyCheckIn _day(String key, DateTime date, Random random) {
@@ -257,6 +345,11 @@ DailyCheckIn _day(String key, DateTime date, Random random) {
     if (outcome != TernaryOutcome.unanswered) {
       record = record.withHomeTrace(row.storageKey, outcome);
     }
+  }
+  if (random.nextDouble() < 0.14) {
+    record = record.copyWith(
+      akhlaqStruggleNote: 'I was impatient today, but I caught myself.',
+    );
   }
 
   for (final dimension in quranDailyDimensions) {

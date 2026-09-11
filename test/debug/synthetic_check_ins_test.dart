@@ -3,8 +3,11 @@ import 'package:muhasabah02/data/memory_repositories.dart';
 import 'package:muhasabah02/debug/synthetic_check_in_seeder.dart';
 import 'package:muhasabah02/debug/synthetic_check_ins.dart';
 import 'package:muhasabah02/domain/daily_check_in.dart';
+import 'package:muhasabah02/domain/date_key.dart';
 import 'package:muhasabah02/domain/prayer.dart';
 import 'package:muhasabah02/domain/quran.dart';
+import 'package:muhasabah02/domain/recognition.dart';
+import 'package:muhasabah02/domain/review_period.dart';
 
 void main() {
   final now = DateTime(2026, 9, 3);
@@ -58,6 +61,60 @@ void main() {
       return salahPerfect || quranPerfect;
     });
     expect(perfectDays, isEmpty);
+  });
+
+  test('synthetic plan includes Recognition context clusters', () {
+    final plan = generateSyntheticCheckIns(now: now);
+    final keys30 = periodDateKeys(30, now: now).toSet();
+    final keys90 = periodDateKeys(90, now: now).toSet();
+    final in30 = [
+      for (final record in plan.records)
+        if (keys30.contains(record.dateKey)) record,
+    ];
+    final in90 = [
+      for (final record in plan.records)
+        if (keys90.contains(record.dateKey)) record,
+    ];
+    final patterns30 = const RecognitionEngine().detect(
+      records: in30,
+      period: ReviewPeriod.days30,
+    );
+    final patterns90 = const RecognitionEngine().detect(
+      records: in90,
+      period: ReviewPeriod.days90,
+    );
+    expect(patterns30, isNotEmpty);
+    expect(
+      patterns30.any(
+        (pattern) =>
+            pattern.subject == QuranDimension.meaning &&
+            pattern.factorId == 'routine',
+      ),
+      isTrue,
+    );
+    expect(
+      patterns30.any(
+        (pattern) =>
+            pattern.subject == QuranDimension.revision &&
+            pattern.factorId == 'fatigue',
+      ),
+      isTrue,
+    );
+    expect(patterns90, isNotEmpty);
+    expect(
+      patterns90.any(
+        (pattern) =>
+            pattern.subject == QuranDimension.tafsir &&
+            pattern.factorId == 'quran.studyCircle',
+      ),
+      isTrue,
+    );
+    expect(
+      patterns30.every(
+        (pattern) => !pattern.factorLine.toLowerCase().contains('caused'),
+      ),
+      isTrue,
+    );
   });
 
   test(

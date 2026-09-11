@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Proposal #6 — Time vs Salah vs Health (visual review)</title>
+  <style>
+    :root {
+      --bg: #f4f1ea;
+      --ink: #1d2a2c;
+      --muted: #4d5c63;
+      --line: #c5d0d4;
+      --teal: #2f6f73;
+      --salah: #d7eceb;
+      --time: #e4e6d8;
+      --health: #e4eadc;
+      --drop: #8a4a4a;
+      --keep: #2f6f73;
+      --rename: #6a5a20;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      margin: 0;
+      padding: 24px;
+    }
+    h1 { font-size: 22px; font-weight: 700; margin: 0 0 8px; }
+    h2 { font-size: 16px; margin: 28px 0 10px; }
+    .note { max-width: 1100px; color: var(--muted); line-height: 1.5; font-size: 14px; }
+    .rules {
+      max-width: 1100px;
+      margin: 16px 0;
+      padding: 12px 14px;
+      background: #fff;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 20px;
+      font-size: 13px;
+      margin: 12px 0 8px;
+    }
+    .legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .swatch {
+      width: 14px; height: 14px; border-radius: 4px; display: inline-block;
+    }
+    .pair {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      align-items: flex-start;
+      margin-top: 8px;
+    }
+    .col { width: min(390px, 100%); }
+    .col h3 {
+      margin: 0 0 8px;
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .phone {
+      width: 100%;
+      background: #fff;
+      border-radius: 28px;
+      box-shadow: 0 12px 40px rgba(0,0,0,.12);
+      overflow: hidden;
+    }
+    .appbar { padding: 14px 16px 6px; font-size: 16px; font-weight: 600; }
+    .hint { padding: 0 16px 10px; font-size: 12px; color: var(--muted); line-height: 1.4; }
+    .body { padding: 0 16px 16px; }
+    .card { border-radius: 16px; padding: 14px 12px 12px; margin-bottom: 10px; }
+    .c-salah { background: var(--salah); }
+    .c-time { background: var(--time); }
+    .c-health { background: var(--health); }
+    .ghost {
+      opacity: 0.55;
+      outline: 1px dashed #9ab;
+    }
+    .domain {
+      margin: 0 0 4px;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+    }
+    .focus {
+      margin: 0 0 10px;
+      font-size: 12px;
+      font-style: italic;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+    .band {
+      margin: 8px 0 4px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+      font-size: 13px;
+      padding: 3px 0;
+    }
+    .mark {
+      width: 10px; height: 10px; border-radius: 50%;
+      border: 1.5px solid #2f6f73;
+      flex-shrink: 0;
+      align-self: center;
+    }
+    .mark.empty { border-style: dotted; opacity: 0.45; }
+    .drop {
+      text-decoration: line-through;
+      color: var(--drop);
+      text-decoration-thickness: 1.5px;
+    }
+    .rename { color: var(--rename); font-weight: 600; }
+    .keep { color: var(--keep); font-weight: 600; }
+    .tag {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      border-radius: 999px;
+      padding: 2px 7px;
+      white-space: nowrap;
+    }
+    .tag-drop { background: #f3dcdc; color: var(--drop); }
+    .tag-keep { background: #d7eceb; color: var(--keep); }
+    .tag-rename { background: #eee6c8; color: var(--rename); }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      max-width: 1100px;
+      margin-top: 8px;
+      font-size: 13px;
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #e4e8ea; vertical-align: top; }
+    th { color: var(--muted); font-weight: 600; background: #faf8f4; }
+    .key { max-width: 1100px; margin-top: 20px; font-size: 12px; color: var(--muted); line-height: 1.5; }
+    code { font-size: 12px; }
+  </style>
+</head>
+<body>
+  <h1>Proposal #6 — Time vs Salah vs Health</h1>
+  <p class="note">
+    Visual review of the implemented slice. Storage keys stay as they are.
+    Unanswered is not wasted time, a missed prayer, or failed sleep. Hours are not tracked.
+  </p>
+  <div class="rules">
+    <strong>Suggested direction</strong>
+    <ol>
+      <li>Retire <strong>Guarded a prayer window from waste</strong> from Time Home, check-in, and Progress. The fard is already on Salah (on time / late / missed / unanswered). A second “prayer window” row reads as another salah log.</li>
+      <li>Keep the key <code>time.guardedPrayerWindow</code> readable on Historical Reflection. Do not auto-fill Time from Salah.</li>
+      <li>Rename Time <strong>Rested as needed</strong> to <strong>Rested from work as needed</strong> so it is not Health’s sleep hours.</li>
+      <li>Health keeps <strong>Sleep quality</strong> and <strong>Sleep amount</strong> as body-care observations, not an hour badge and not Time’s pause from striving.</li>
+      <li>Copy: Time is the trust of the day. Salah is standing for the prayer. Health is the body. Same afternoon may be both rest and sleep. Do not infer one from the other.</li>
+    </ol>
+  </div>
+  <div class="legend">
+    <span><i class="swatch" style="background:var(--salah)"></i> Salah</span>
+    <span><i class="swatch" style="background:var(--time)"></i> Time</span>
+    <span><i class="swatch" style="background:var(--health)"></i> Health</span>
+    <span class="rename">Rename</span>
+    <span class="drop">Strike — not this card</span>
+  </div>
+
+  <h2>Time &amp; Barakah</h2>
+  <div class="pair">
+    <div class="col">
+      <h3>Now</h3>
+      <div class="phone">
+        <div class="appbar">Home</div>
+        <div class="hint">Prayer window sits next to presence. Rest could be a nap or a night’s sleep.</div>
+        <div class="body">
+          <div class="card c-time">
+            <p class="domain">Time &amp; Barakah</p>
+            <p class="focus">Did I treat my time as a trust from Allah?</p>
+            <div class="band">Presence</div>
+            <div class="row"><span>Present in what I was doing</span><i class="mark empty"></i></div>
+            <div class="row"><span>Guarded a prayer window from waste</span><i class="mark empty"></i></div>
+            <div class="band">Trust</div>
+            <div class="row"><span>Did something I had delayed</span><i class="mark empty"></i></div>
+            <div class="row"><span>Stepped away from idle time</span><i class="mark empty"></i></div>
+            <div class="band">Rest</div>
+            <div class="row"><span>Rested as needed</span><i class="mark empty"></i></div>
+            <div class="row"><span>Began with intention</span><i class="mark empty"></i></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <h3>Proposed</h3>
+      <div class="phone">
+        <div class="appbar">Home</div>
+        <div class="hint">Presence and idle time stay. Prayer status leaves this card. Rest is a pause from work, not hours in bed.</div>
+        <div class="body">
+          <div class="card c-time">
+            <p class="domain">Time &amp; Barakah</p>
+            <p class="focus">Did I treat my time as a trust from Allah?</p>
+            <div class="band">Presence</div>
+            <div class="row"><span class="keep">Present in what I was doing</span><i class="mark empty"></i></div>
+            <div class="row">
+              <span class="drop">Guarded a prayer window from waste</span>
+              <span class="tag tag-drop">Salah</span>
+            </div>
+            <div class="band">Trust</div>
+            <div class="row"><span class="keep">Did something I had delayed</span><i class="mark empty"></i></div>
+            <div class="row"><span class="keep">Stepped away from idle time</span><i class="mark empty"></i></div>
+            <div class="band">Rest</div>
+            <div class="row">
+              <span class="rename">Rested from work as needed</span>
+              <span class="tag tag-rename">Rename</span>
+            </div>
+            <div class="row"><span class="keep">Began with intention</span><i class="mark empty"></i></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Salah keeps the prayer; Health keeps sleep</h2>
+  <div class="pair">
+    <div class="col">
+      <h3>Salah</h3>
+      <div class="phone">
+        <div class="appbar">Home</div>
+        <div class="hint">On time / late / missed / unanswered. That is the prayer window.</div>
+        <div class="body">
+          <div class="card c-salah">
+            <p class="domain">Salah &amp; Prayer Quality</p>
+            <p class="focus">Was my heart present when I stood before Allah?</p>
+            <div class="row"><span class="keep">Fajr … Isha</span><span class="tag tag-keep">Keep</span></div>
+            <div class="row"><span class="keep">Tahajjud, Ishraq</span></div>
+            <p class="hint" style="padding:8px 0 0">Time does not record whether the fard was on time. Do not auto-fill Time from these marks.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <h3>Health</h3>
+      <div class="phone">
+        <div class="appbar">Home</div>
+        <div class="hint">The body at rest. Not a productivity pause and not clocked hours.</div>
+        <div class="body">
+          <div class="card c-health">
+            <p class="domain">Physical Health &amp; Energy</p>
+            <p class="focus">Did I care for the body Allah entrusted to me?</p>
+            <div class="band">Sleep</div>
+            <div class="row"><span class="keep">Sleep quality</span><span class="tag tag-keep">Keep</span></div>
+            <div class="row"><span class="keep">Sleep amount</span><span class="tag tag-keep">Keep</span></div>
+            <p class="hint" style="padding:8px 0 0">Observation, not an hour badge. Time’s rest is stepping back from work. A nap that cares for the body may be noticed here. Same day may be both. Do not auto-fill.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Not a third clock</h2>
+  <div class="pair">
+    <div class="col">
+      <h3>Boundaries</h3>
+      <div class="phone">
+        <div class="appbar">Do not add</div>
+        <div class="hint">Time is not a schedule, Salah is not wasted minutes, Health is not a sleep tracker.</div>
+        <div class="body">
+          <div class="card ghost">
+            <p class="domain drop">Do not add</p>
+            <div class="row"><span class="drop">Hours slept / hours worked</span></div>
+            <div class="row"><span class="drop">“Protected Fajr window” as a Time row</span></div>
+            <div class="row"><span class="drop">Productivity score or hustle badge</span></div>
+            <div class="row"><span class="drop">Auto-fill rest from sleep, or prayer window from on-time Salah</span></div>
+            <div class="row"><span class="drop">Shame unanswered Time as a wasted day</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <h3>Copy (Time)</h3>
+      <div class="phone">
+        <div class="appbar">Today’s check-in</div>
+        <div class="hint">Orientation only.</div>
+        <div class="body">
+          <div class="card c-time">
+            <p class="domain">Time &amp; Barakah</p>
+            <p class="focus">Did I treat my time as a trust from Allah?</p>
+            <p class="hint" style="padding:0 0 8px">
+              The fard stays on Salah. Sleep stays on Physical Health.<br /><br />
+              Presence is attention in what you were doing. Trust may be doing something delayed, or stepping away from idle time. Rest from work as needed is part of the trust; it is not failure and it is not a sleep log.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Row map</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Item</th>
+        <th>Now</th>
+        <th>Proposed</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Guarded a prayer window from waste</td>
+        <td>On Time Presence</td>
+        <td><span class="drop">Retire from Home</span>. Key <code>time.guardedPrayerWindow</code> stays stored. Salah already has the prayer.</td>
+      </tr>
+      <tr>
+        <td>Present in what I was doing</td>
+        <td>On Time</td>
+        <td><span class="keep">Keep</span> — presence, not a salah status.</td>
+      </tr>
+      <tr>
+        <td>Stepped away from idle time</td>
+        <td>On Time</td>
+        <td><span class="keep">Keep</span> — idle minutes, not “did I pray?”</td>
+      </tr>
+      <tr>
+        <td>Rested as needed</td>
+        <td>Could be Health sleep</td>
+        <td><span class="rename">Rested from work as needed</span>. Key stays <code>time.restedAsNeeded</code>.</td>
+      </tr>
+      <tr>
+        <td>Began with intention</td>
+        <td>On Time Rest</td>
+        <td><span class="keep">Keep</span></td>
+      </tr>
+      <tr>
+        <td>Salah Fajr–Isha</td>
+        <td>On time / late / missed / unanswered</td>
+        <td><span class="keep">Keep</span> — this is the prayer window.</td>
+      </tr>
+      <tr>
+        <td>Sleep quality / amount</td>
+        <td>On Health</td>
+        <td><span class="keep">Keep</span>. Copy: not Time’s rest from work, not an hour badge.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p class="key">
+    Implementation would retire one Time row from Home, rename rest, and tighten Time/Health copy.
+    It would not bump <code>recordableFieldCount</code>, add hours, or infer Time from Salah or Health.
+    File: <code>docs/visual_review/time_salah_health_consolidate_proposal.html</code>
+  </p>
+</body>
+</html>

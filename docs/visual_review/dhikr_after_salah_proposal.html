@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dhikr after Salah — visual review</title>
+  <style>
+    :root {
+      --bg: #f4f1ea;
+      --ink: #1d2a2c;
+      --muted: #4d5c63;
+      --line: #c5d0d4;
+      --teal: #2f6f73;
+      --dhikr: #d9eedf;
+      --indent: 20px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      margin: 0;
+      padding: 24px;
+    }
+    h1 { font-size: 22px; font-weight: 700; margin: 0 0 8px; }
+    .note, .rules, .key { max-width: 960px; }
+    .note { color: var(--muted); line-height: 1.5; font-size: 14px; }
+    .rules {
+      margin: 16px 0;
+      padding: 12px 14px;
+      background: #fff;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+    .phones { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; }
+    .phone {
+      width: 390px;
+      background: #fff;
+      border-radius: 28px;
+      box-shadow: 0 12px 40px rgba(0,0,0,.12);
+      overflow: hidden;
+    }
+    .appbar { padding: 14px 16px 8px; font-size: 16px; font-weight: 600; }
+    .hint { padding: 0 16px 10px; font-size: 12px; color: var(--muted); }
+    .body { padding: 0 16px 16px; max-height: 720px; overflow: auto; }
+    .card { background: var(--dhikr); border-radius: 16px; padding: 14px 12px 12px; }
+    .domain {
+      margin: 0 0 4px;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .sub { margin: 0 0 10px; font-size: 12px; color: var(--muted); line-height: 1.35; }
+    .band {
+      background: rgba(47,111,115,.1);
+      border-radius: 12px;
+      padding: 8px 6px 6px;
+      margin-bottom: 8px;
+    }
+    .band-new {
+      outline: 1.5px dashed rgba(47,111,115,.45);
+    }
+    .band-label {
+      margin: 0 0 6px 2px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .row { margin-bottom: 10px; }
+    .row:last-child { margin-bottom: 4px; }
+    .row-label { margin: 0 0 6px; font-size: 14px; font-weight: 700; }
+    select {
+      width: calc(100% - var(--indent));
+      margin-left: var(--indent);
+      appearance: none;
+      background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath fill='%234d5c63' d='M0 0l6 8 6-8z'/%3E%3C/svg%3E") no-repeat right 12px center;
+      background-size: 10px 7px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 8px 32px 8px 12px;
+      font-size: 13px;
+    }
+    .week {
+      display: grid;
+      grid-template-columns: 92px repeat(7, 1fr);
+      gap: 4px 2px;
+      align-items: center;
+      font-size: 11px;
+    }
+    .days { color: var(--muted); text-align: center; font-weight: 600; }
+    .name { font-size: 11px; }
+    .dot {
+      width: 14px;
+      height: 14px;
+      margin: 0 auto;
+      border-radius: 50%;
+      border: 1.5px dashed rgba(47,111,115,.4);
+    }
+    .dot.on { background: var(--teal); border-style: solid; }
+    .dot.off { border-style: solid; background: transparent; }
+    .newtag {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: var(--teal);
+      margin-left: 6px;
+    }
+    .key { margin-top: 18px; font-size: 13px; color: var(--muted); line-height: 1.5; }
+  </style>
+</head>
+<body>
+  <h1>Proposed Dhikr layout — after each obligatory prayer</h1>
+  <p class="note">
+    Implemented in the app. Five independent rows for post-fard adhkar (Fajr, Dhuhr, Asr, Maghrib, Isha) sit in a band
+    <strong>above</strong> Morning Adhkar and Evening Adhkar. Same Home week-grid marks and check-in dropdowns as other Dhikr rows.
+    Missing is not missed. Colour still identifies Dhikr, not rank.
+  </p>
+  <div class="rules">
+    <strong>Proposed order</strong><br>
+    1. <strong>POST-FARD SALAH ADHKAR</strong> — Fajr, Dhuhr, Asr, Maghrib, Isha (new).<br>
+    2. <strong>MORNING AND EVENING</strong> — Morning Adhkar, Evening Adhkar (today’s timed pair).<br>
+    3. <strong>OTHER REMEMBRANCE</strong> — General Dhikr, Gratitude Dhikr, Travel Remembrance (unchanged).<br>
+    Each of the five post-fard rows is independent. Not recorded is allowed. No scores.
+  </div>
+
+  <div class="phones">
+    <div class="phone">
+      <div class="appbar">Home · Dhikr card</div>
+      <p class="hint">Week grid. New band outlined. Marks are the same as today.</p>
+      <div class="body">
+        <div class="card">
+          <p class="domain">Dhikr</p>
+          <p class="sub">31 Aug – 6 Sep · Current week</p>
+
+          <div class="band band-new">
+            <p class="band-label">Post-fard Salah Adhkar</p>
+            <div class="week">
+              <div></div>
+              <div class="days">M</div><div class="days">T</div><div class="days">W</div><div class="days">T</div><div class="days">F</div><div class="days">S</div><div class="days">S</div>
+              <div class="name">Fajr</div>
+              <div class="dot on"></div><div class="dot"></div><div class="dot on"></div><div class="dot off"></div><div class="dot on"></div><div class="dot"></div><div class="dot"></div>
+              <div class="name">Dhuhr</div>
+              <div class="dot"></div><div class="dot on"></div><div class="dot"></div><div class="dot on"></div><div class="dot on"></div><div class="dot"></div><div class="dot"></div>
+              <div class="name">Asr</div>
+              <div class="dot on"></div><div class="dot"></div><div class="dot"></div><div class="dot on"></div><div class="dot off"></div><div class="dot"></div><div class="dot"></div>
+              <div class="name">Maghrib</div>
+              <div class="dot on"></div><div class="dot on"></div><div class="dot"></div><div class="dot"></div><div class="dot on"></div><div class="dot"></div><div class="dot"></div>
+              <div class="name">Isha</div>
+              <div class="dot"></div><div class="dot on"></div><div class="dot on"></div><div class="dot"></div><div class="dot on"></div><div class="dot"></div><div class="dot"></div>
+            </div>
+          </div>
+
+          <div class="band">
+            <p class="band-label">Morning and evening</p>
+            <div class="week">
+              <div></div>
+              <div class="days">M</div><div class="days">T</div><div class="days">W</div><div class="days">T</div><div class="days">F</div><div class="days">S</div><div class="days">S</div>
+              <div class="name">Morning Adhkar</div>
+              <div class="dot on"></div><div class="dot"></div><div class="dot on"></div><div class="dot"></div><div class="dot on"></div><div class="dot"></div><div class="dot"></div>
+              <div class="name">Evening Adhkar</div>
+              <div class="dot"></div><div class="dot on"></div><div class="dot"></div><div class="dot on"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+            </div>
+          </div>
+
+          <div class="band">
+            <p class="band-label">Other remembrance</p>
+            <div class="week">
+              <div></div>
+              <div class="days">M</div><div class="days">T</div><div class="days">W</div><div class="days">T</div><div class="days">F</div><div class="days">S</div><div class="days">S</div>
+              <div class="name">General Dhikr</div>
+              <div class="dot"></div><div class="dot"></div><div class="dot on"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+              <div class="name">Gratitude Dhikr</div>
+              <div class="dot on"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+              <div class="name">Travel Remembrance</div>
+              <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="phone">
+      <div class="appbar">Check-in · Dhikr</div>
+      <p class="hint">Domain-only or full check-in. New rows first. Dropdowns indented.</p>
+      <div class="body">
+        <div class="card">
+          <p class="domain">Dhikr</p>
+          <p class="sub">Each row is independent. Absence is not missed.</p>
+
+          <p class="band-label">Post-fard Salah Adhkar</p>
+          <div class="row">
+            <p class="row-label">Fajr</p>
+            <select>
+              <option selected>Not recorded</option>
+              <option>Recorded engagement</option>
+              <option>Recorded as not done</option>
+            </select>
+          </div>
+          <div class="row">
+            <p class="row-label">Dhuhr</p>
+            <select>
+              <option selected>Not recorded</option>
+              <option>Recorded engagement</option>
+              <option>Recorded as not done</option>
+            </select>
+          </div>
+          <div class="row">
+            <p class="row-label">Asr</p>
+            <select>
+              <option selected>Not recorded</option>
+              <option>Recorded engagement</option>
+              <option>Recorded as not done</option>
+            </select>
+          </div>
+          <div class="row">
+            <p class="row-label">Maghrib</p>
+            <select>
+              <option selected>Not recorded</option>
+              <option>Recorded engagement</option>
+              <option>Recorded as not done</option>
+            </select>
+          </div>
+          <div class="row">
+            <p class="row-label">Isha</p>
+            <select>
+              <option selected>Not recorded</option>
+              <option>Recorded engagement</option>
+              <option>Recorded as not done</option>
+            </select>
+          </div>
+
+          <p class="band-label">Morning and evening</p>
+          <div class="row">
+            <p class="row-label">Morning Adhkar</p>
+            <select>
+              <option selected>Not recorded</option>
+              <option>Recorded engagement</option>
+              <option>Recorded as not done</option>
+            </select>
+          </div>
+          <div class="row">
+            <p class="row-label">Evening Adhkar</p>
+            <select>
+              <option selected>Not recorded</option>
+              <option>Recorded engagement</option>
+              <option>Recorded as not done</option>
+            </select>
+          </div>
+
+          <p class="band-label">Other remembrance</p>
+          <div class="row">
+            <p class="row-label">General Dhikr</p>
+            <select>
+              <option selected>Not recorded</option>
+              <option>Recorded engagement</option>
+              <option>Recorded as not done</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="key">
+    Open this file in a browser: <code>docs/visual_review/dhikr_after_salah_proposal.html</code><br>
+    Dashed outline on this mock marked the new band only. The Flutter Home card uses the same bands without a dashed outline.
+  </p>
+</body>
+</html>

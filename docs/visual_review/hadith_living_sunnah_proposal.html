@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Proposal #4 — Hadith &amp; Living Sunnah (visual review)</title>
+  <style>
+    :root {
+      --bg: #f4f1ea;
+      --ink: #1d2a2c;
+      --muted: #4d5c63;
+      --line: #c5d0d4;
+      --teal: #2f6f73;
+      --quran: #d7e4f2;
+      --hadith: #d4e2ee;
+      --knowledge: #d5e6ee;
+      --akhlaq: #e8e0d4;
+      --drop: #8a4a4a;
+      --keep: #2f6f73;
+      --rename: #6a5a20;
+      --add: #2f5f73;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      margin: 0;
+      padding: 24px;
+    }
+    h1 { font-size: 22px; font-weight: 700; margin: 0 0 8px; }
+    h2 { font-size: 16px; margin: 28px 0 10px; }
+    .note { max-width: 1100px; color: var(--muted); line-height: 1.5; font-size: 14px; }
+    .rules {
+      max-width: 1100px;
+      margin: 16px 0;
+      padding: 12px 14px;
+      background: #fff;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 20px;
+      font-size: 13px;
+      margin: 12px 0 8px;
+    }
+    .legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .swatch {
+      width: 14px; height: 14px; border-radius: 4px; display: inline-block;
+    }
+    .pair {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      align-items: flex-start;
+      margin-top: 8px;
+    }
+    .col { width: min(390px, 100%); }
+    .col h3 {
+      margin: 0 0 8px;
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .phone {
+      width: 100%;
+      background: #fff;
+      border-radius: 28px;
+      box-shadow: 0 12px 40px rgba(0,0,0,.12);
+      overflow: hidden;
+    }
+    .appbar { padding: 14px 16px 6px; font-size: 16px; font-weight: 600; }
+    .hint { padding: 0 16px 10px; font-size: 12px; color: var(--muted); line-height: 1.4; }
+    .body { padding: 0 16px 16px; }
+    .card { border-radius: 16px; padding: 14px 12px 12px; margin-bottom: 10px; }
+    .c-quran { background: var(--quran); }
+    .c-hadith { background: var(--hadith); }
+    .c-knowledge { background: var(--knowledge); }
+    .c-akhlaq { background: var(--akhlaq); }
+    .ghost {
+      opacity: 0.55;
+      outline: 1px dashed #9ab;
+    }
+    .domain {
+      margin: 0 0 4px;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+    }
+    .focus {
+      margin: 0 0 10px;
+      font-size: 12px;
+      font-style: italic;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+    .band {
+      margin: 8px 0 4px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+      font-size: 13px;
+      padding: 3px 0;
+    }
+    .mark {
+      width: 10px; height: 10px; border-radius: 50%;
+      border: 1.5px solid #2f6f73;
+      flex-shrink: 0;
+      align-self: center;
+    }
+    .mark.empty { border-style: dotted; opacity: 0.45; }
+    .drop {
+      text-decoration: line-through;
+      color: var(--drop);
+      text-decoration-thickness: 1.5px;
+    }
+    .rename { color: var(--rename); font-weight: 600; }
+    .add { color: var(--add); font-weight: 600; }
+    .keep { color: var(--keep); font-weight: 600; }
+    .tag {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      border-radius: 999px;
+      padding: 2px 7px;
+      white-space: nowrap;
+    }
+    .tag-drop { background: #f3dcdc; color: var(--drop); }
+    .tag-keep { background: #d7eceb; color: var(--keep); }
+    .tag-rename { background: #eee6c8; color: var(--rename); }
+    .tag-add { background: #d5e6ee; color: var(--add); }
+    .tag-move { background: #e8e0d4; color: #6a5a20; }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      max-width: 1100px;
+      margin-top: 8px;
+      font-size: 13px;
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #e4e8ea; vertical-align: top; }
+    th { color: var(--muted); font-weight: 600; background: #faf8f4; }
+    .key { max-width: 1100px; margin-top: 20px; font-size: 12px; color: var(--muted); line-height: 1.5; }
+    code { font-size: 12px; }
+    .stack { font-size: 12px; color: var(--muted); margin: 0 0 8px; }
+  </style>
+</head>
+<body>
+  <h1>Proposal #4 — Hadith &amp; Living Sunnah (under Qur’an)</h1>
+  <p class="note">
+    Visual review of the implemented slice. Storage id stays <code>hadith</code>.
+    No sunnah checklist, no revival score, no auto-fill from Akhlaq or Qur’an.
+  </p>
+  <div class="rules">
+    <strong>Suggested direction</strong>
+    <ol>
+      <li>Rename the domain to <strong>Hadith &amp; Living Sunnah</strong> (not “Reviving Sunnah in Life-Hadith”).</li>
+      <li>Focus (orientation only): <em>Did a teaching of the Prophet ﷺ reach my day?</em></li>
+      <li>Place the card <strong>immediately after Qur’an</strong> on Home, check-in, and Review.</li>
+      <li>Put it on the <strong>Salah, Qur’an &amp; Akhlaq</strong> preset so “after Qur’an” is actually visible.</li>
+      <li>Keep learning rows. Add <strong>one</strong> application row: “Noticed a sunnah in how I lived today” — same tone as Qur’an Conscious Application, not a completed revival.</li>
+      <li>Knowledge stays the residual card. Copy: Qur’an and Hadith have their own cards. Optionally rename “Beneficial reading.”</li>
+      <li>Current Memorisation Focus stays an AppPrefs value, not a daily score.</li>
+    </ol>
+  </div>
+  <div class="legend">
+    <span><i class="swatch" style="background:var(--quran)"></i> Qur’an</span>
+    <span><i class="swatch" style="background:var(--hadith)"></i> Hadith</span>
+    <span><i class="swatch" style="background:var(--knowledge)"></i> Knowledge</span>
+    <span class="add">Add</span>
+    <span class="rename">Rename</span>
+    <span class="drop">Strike — not this card</span>
+  </div>
+
+  <h2>Home order</h2>
+  <div class="pair">
+    <div class="col">
+      <h3>Now</h3>
+      <div class="phone">
+        <div class="appbar">Home</div>
+        <div class="hint">Hadith is last and off the basic preset. No focus question. Study only.</div>
+        <div class="body">
+          <p class="stack">Salah → Qur’an → Dhikr → Akhlaq → … → Charity → <strong>Hadith</strong></p>
+          <div class="card c-quran">
+            <p class="domain">Qur’an Engagement</p>
+            <p class="focus">Did I let the Qur’an speak to me today?</p>
+            <div class="row"><span>Recitation</span><i class="mark empty"></i></div>
+            <div class="row"><span>Conscious Application</span><i class="mark empty"></i></div>
+          </div>
+          <div class="card ghost">
+            <p class="domain drop">… Dhikr, Akhlaq, Huquq, Knowledge, Time …</p>
+          </div>
+          <div class="card c-hadith">
+            <p class="domain">Hadith</p>
+            <p class="focus drop">No focus question</p>
+            <div class="band">Encounter</div>
+            <div class="row"><span>Reading</span><i class="mark empty"></i></div>
+            <div class="row"><span>Listening</span><i class="mark empty"></i></div>
+            <div class="band">Retention</div>
+            <div class="row"><span>Memorisation</span><i class="mark empty"></i></div>
+            <div class="row"><span>Revision</span><i class="mark empty"></i></div>
+            <div class="band">Learning</div>
+            <div class="row"><span>Study Circle</span><i class="mark empty"></i></div>
+            <div class="row"><span>Teaching / Discussion</span><i class="mark empty"></i></div>
+            <div class="band">Notice</div>
+            <div class="row"><span>Hadith Reflection</span><i class="mark empty"></i></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <h3>Proposed</h3>
+      <div class="phone">
+        <div class="appbar">Home</div>
+        <div class="hint">Revelation, then the Prophet’s teaching. Application is one noticed row, not a programme.</div>
+        <div class="body">
+          <p class="stack">Salah → Qur’an → <strong>Hadith &amp; Living Sunnah</strong> → Dhikr → Akhlaq → …</p>
+          <div class="card c-quran">
+            <p class="domain">Qur’an Engagement</p>
+            <p class="focus">Did I let the Qur’an speak to me today?</p>
+            <div class="row"><span>Recitation … Conscious Application</span><i class="mark empty"></i></div>
+          </div>
+          <div class="card c-hadith">
+            <p class="domain">Hadith &amp; Living Sunnah <span class="tag tag-rename">Rename</span> <span class="tag tag-move">After Qur’an</span></p>
+            <p class="focus">Did a teaching of the Prophet ﷺ reach my day?</p>
+            <div class="band">Encounter</div>
+            <div class="row"><span>Reading</span><i class="mark empty"></i></div>
+            <div class="row"><span>Listening</span><i class="mark empty"></i></div>
+            <div class="band">Retention</div>
+            <div class="row"><span>Memorisation</span><i class="mark empty"></i></div>
+            <div class="row"><span>Revision</span><i class="mark empty"></i></div>
+            <div class="band">Learning</div>
+            <div class="row"><span>Study Circle</span><i class="mark empty"></i></div>
+            <div class="row"><span>Teaching / Discussion</span><i class="mark empty"></i></div>
+            <div class="band">Notice</div>
+            <div class="row"><span>Hadith Reflection</span><i class="mark empty"></i></div>
+            <div class="band">Live</div>
+            <div class="row">
+              <span class="add">Noticed a sunnah in how I lived today</span>
+              <span class="tag tag-add">Add</span>
+            </div>
+          </div>
+          <div class="card ghost">
+            <p class="domain">Dhikr &amp; Dua — then Akhlaq, Huquq, Knowledge …</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Knowledge (residual) and what not to copy</h2>
+  <div class="pair">
+    <div class="col">
+      <h3>Knowledge — proposed copy</h3>
+      <div class="phone">
+        <div class="appbar">Today’s check-in</div>
+        <div class="hint">Same rows. Scripture is not logged here.</div>
+        <div class="body">
+          <div class="card c-knowledge">
+            <p class="domain">Knowledge &amp; Beneficial Speech</p>
+            <p class="focus">Did I learn something true, and did I speak only what was beneficial?</p>
+            <p class="hint" style="padding:0 0 8px">Qur’an and Hadith &amp; Living Sunnah have their own cards. This is other learning and speech.</p>
+            <div class="row"><span>Learned something true</span></div>
+            <div class="row">
+              <span><span class="drop">Beneficial reading</span><br /><span class="rename">Beneficial reading (not Qur’an or Hadith)</span></span>
+              <span class="tag tag-rename">Rename</span>
+            </div>
+            <div class="row"><span>Asked to remove ignorance</span></div>
+            <div class="row"><span>Taught someone</span></div>
+            <div class="row"><span>Held back useless speech</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <h3>Not this card</h3>
+      <div class="phone">
+        <div class="appbar">Boundaries</div>
+        <div class="hint">Same afternoon may be both Akhlaq and Living Sunnah. Do not auto-fill.</div>
+        <div class="body">
+          <div class="card c-quran">
+            <p class="domain">Qur’an</p>
+            <div class="row"><span>Conscious Application — from an ayah, not a hadith</span></div>
+          </div>
+          <div class="card c-akhlaq">
+            <p class="domain">Character &amp; Morals</p>
+            <div class="row"><span>Patience, gaze, speech — who I was, not “I revived a sunnah”</span></div>
+          </div>
+          <div class="card c-hadith">
+            <p class="domain drop">Do not add</p>
+            <div class="row"><span class="drop">Sunnah checklist / 12 sunnahs today</span></div>
+            <div class="row"><span class="drop">Revival score or streak</span></div>
+            <div class="row"><span class="drop">“Reviving Sunnah in Life-Hadith” as the title</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Row map</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Item</th>
+        <th>Now</th>
+        <th>Proposed</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Domain label</td>
+        <td>Hadith</td>
+        <td><span class="rename">Hadith &amp; Living Sunnah</span>. Id stays <code>hadith</code>.</td>
+      </tr>
+      <tr>
+        <td>Focus</td>
+        <td>None</td>
+        <td><span class="add">Did a teaching of the Prophet ﷺ reach my day?</span> Orientation only.</td>
+      </tr>
+      <tr>
+        <td>Home / Review / check-in order</td>
+        <td>Last among domains</td>
+        <td>Immediately after Qur’an Engagement</td>
+      </tr>
+      <tr>
+        <td>Basic preset</td>
+        <td>Hidden with Dhikr, Fasting, Family</td>
+        <td>Shown with Salah and Qur’an</td>
+      </tr>
+      <tr>
+        <td>Reading, listening, memorise, revise, circle, teach, reflect</td>
+        <td>On Hadith</td>
+        <td><span class="keep">Keep</span></td>
+      </tr>
+      <tr>
+        <td>Noticed a sunnah in how I lived today</td>
+        <td>—</td>
+        <td><span class="add">New</span> <code>hadith.livedSunnah</code> (name can be adjusted). Unanswered is not a failed revival.</td>
+      </tr>
+      <tr>
+        <td>Memorisation focus</td>
+        <td>AppPrefs</td>
+        <td><span class="keep">Keep</span> — not a daily grade</td>
+      </tr>
+      <tr>
+        <td>Knowledge “Beneficial reading”</td>
+        <td>Could be a tafsir session</td>
+        <td><span class="rename">Beneficial reading (not Qur’an or Hadith)</span></td>
+      </tr>
+      <tr>
+        <td>Knowledge “Taught someone”</td>
+        <td>Any fact</td>
+        <td><span class="keep">Keep</span> for non-hadith teaching. Teaching a hadith stays on this card.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p class="key">
+    Implementation would change labels, Home/check-in/Review order, the basic preset, one new <code>hadith.*</code> trace, and Knowledge copy.
+    It would not bump <code>recordableFieldCount</code>, add checklists, or infer Living Sunnah from Akhlaq.
+    File: <code>docs/visual_review/hadith_living_sunnah_proposal.html</code>
+  </p>
+</body>
+</html>

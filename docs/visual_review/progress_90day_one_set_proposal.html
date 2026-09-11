@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Last 3 months Progress — month shades — visual review</title>
+  <style>
+    :root {
+      --bg: #f4f1ea;
+      --ink: #1d2a2c;
+      --muted: #4d5c63;
+      --line: #c5d0d4;
+      --fajr: #5b6abf;
+      --wash: #d7eceb;
+      --m0: #b9dcd8;
+      --m1: #e7f5f3;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      margin: 0;
+      padding: 24px;
+    }
+    h1 { font-size: 22px; font-weight: 700; margin: 0 0 8px; }
+    .note, .rules, .key { max-width: 720px; }
+    .note { color: var(--muted); line-height: 1.5; font-size: 14px; }
+    .rules {
+      margin: 16px 0;
+      padding: 12px 14px;
+      background: #fff;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.55;
+      max-width: 720px;
+    }
+    .swatches { display: flex; gap: 10px; margin-top: 8px; flex-wrap: wrap; }
+    .swatch {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12px; color: var(--muted);
+    }
+    .swatch i {
+      width: 18px; height: 18px; border-radius: 4px;
+      display: inline-block; border: 1px solid rgba(47,111,115,.18);
+    }
+    .phone {
+      width: 390px;
+      background: #faf8f4;
+      border-radius: 28px;
+      box-shadow: 0 12px 40px rgba(0,0,0,.12);
+      overflow: hidden;
+    }
+    .appbar {
+      display: flex; align-items: center; gap: 10px;
+      padding: 14px 16px 8px; font-size: 16px; font-weight: 600;
+    }
+    .hint { padding: 0 10px 10px 16px; font-size: 12px; color: var(--muted); }
+    .body { padding: 0 8px 20px 16px; }
+    .period { display: flex; gap: 6px; margin-bottom: 8px; }
+    .chip {
+      flex: 1; text-align: center; font-size: 12px;
+      padding: 8px 6px; border-radius: 20px;
+      border: 1px solid var(--line); background: #fff;
+    }
+    .chip.on { background: #d7eceb; font-weight: 700; }
+    .guard { font-size: 12px; color: var(--muted); line-height: 1.4; margin: 0 0 12px; }
+    .card {
+      background: var(--wash);
+      border-radius: 16px;
+      padding: 10px 4px 10px 8px;
+      margin-bottom: 12px;
+    }
+    .card h2 { margin: 0 0 6px 4px; font-size: 15px; }
+    table.grid {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      table-layout: fixed;
+    }
+    .grid th, .grid td {
+      height: 22px;
+      padding: 0;
+      text-align: center;
+      vertical-align: middle;
+      font-size: 9px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .grid th.wd, .grid td.wd {
+      width: 16px;
+      text-align: left;
+      font-size: 11px;
+      color: var(--ink);
+    }
+    .grid th.now, .grid td.now { padding-right: 0; }
+    .grid td.m0 { background: var(--m0); border-radius: 3px; }
+    .grid td.m1 { background: var(--m1); border-radius: 3px; }
+    .dot {
+      width: 14px; height: 14px; margin: 0 auto;
+      border-radius: 50%;
+      border: 1.5px dashed rgba(91,106,191,.4);
+    }
+    .dot.on { background: var(--fajr); border-style: solid; border-color: var(--fajr); }
+    .dot.off { background: transparent; border-style: solid; border-color: var(--fajr); }
+    .dot.future { opacity: 0.28; }
+    .empty { width: 14px; height: 14px; margin: 0 auto; }
+    .fit { margin-top: 8px; font-size: 11px; color: var(--muted); line-height: 1.4; }
+    .key { margin-top: 18px; font-size: 13px; color: var(--muted); line-height: 1.5; }
+    code { font-size: 12px; }
+  </style>
+</head>
+<body>
+  <h1>Last 3 months — same-family month shades on day cells</h1>
+  <p class="note">
+    Implemented 90-day Progress: one full-width weekly grid for the last 90 days
+    through today. Oldest week on the left, the week that contains today flush
+    to the right. Default 14px marks. Two alternating shades of the domain
+    colour on day cells only.
+  </p>
+  <div class="rules">
+    Each month’s <strong>day cells</strong> alternate between two shades of the same domain
+    wash. Not a progressive fade, not off-white. Month titles, weekday letters, and week-start
+    numbers stay on the card. Week columns share the full card width so today’s week sits
+    against the right edge. A week that straddles two months tints each day by its own month.
+    Days after today stay empty and inactive. Missing is not missed.
+    <div class="swatches">
+      <span class="swatch"><i style="background:#b9dcd8"></i> Jun · Aug</span>
+      <span class="swatch"><i style="background:#e7f5f3"></i> Jul · Sep</span>
+    </div>
+  </div>
+
+  <div class="phone">
+    <div class="appbar">← Salah Progress</div>
+    <p class="hint">~90 days ending 7 Sep 2026. Grid fills the card; today’s week is the last column on the right.</p>
+    <div class="body">
+      <div class="period">
+        <div class="chip">7 days</div>
+        <div class="chip">30 days</div>
+        <div class="chip on">90 days ✓</div>
+      </div>
+      <p class="guard">Colour identifies the prayer, not rank. Month shade is only under the marks.</p>
+      <section class="card">
+        <h2>Fajr</h2>
+        <div id="cal"></div>
+        <p class="fit">Marks stay 14px. Week columns stretch so 7 Sep’s column meets the right edge.</p>
+      </section>
+    </div>
+  </div>
+
+  <p class="key">
+    Open: <code>docs/visual_review/progress_90day_one_set_proposal.html</code><br>
+    This HTML is not the Flutter app. If these two alternating month shades look right, say so and it can be implemented.
+  </p>
+
+  <script>
+    const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const DOW = ['M','T','W','T','F','S','S'];
+
+    function ymd(d) {
+      return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
+    }
+    function addDays(d, n) {
+      return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
+    }
+    function startOfMondayWeek(d) {
+      return addDays(d, -((d.getDay() + 6) % 7));
+    }
+    function seed(n) {
+      return Math.abs((Math.sin(n * 12.9898) * 43758.5453) % 1);
+    }
+    function markKind(i) {
+      const r = seed(i);
+      if (r < 0.38) return 'on';
+      if (r < 0.52) return 'off';
+      return '';
+    }
+
+    function render(el, today) {
+      const start = addDays(today, -89);
+      const end = today;
+      const oldestMonth = start.getMonth();
+      const gridStart = startOfMondayWeek(start);
+      const lastWeek = startOfMondayWeek(end);
+      const weekCount =
+        Math.round((lastWeek.getTime() - gridStart.getTime()) / 604800000) + 1;
+      const weeks = Array.from({ length: weekCount }, (_, w) => addDays(gridStart, w * 7));
+
+      const monthSpans = [];
+      for (const w of weeks) {
+        const label = MONTHS[w.getMonth()];
+        const last = monthSpans[monthSpans.length - 1];
+        if (last && last.label === label) last.span += 1;
+        else monthSpans.push({ label, span: 1 });
+      }
+
+      let html = '<table class="grid"><tr class="months"><th class="wd"></th>';
+      for (const s of monthSpans) html += `<th colspan="${s.span}">${s.label}</th>`;
+      html += '</tr><tr><th class="wd"></th>';
+      for (let w = 0; w < weekCount; w++) {
+        const nowCol = w === weekCount - 1 ? ' class="now"' : '';
+        html += `<th${nowCol}>${weeks[w].getDate()}</th>`;
+      }
+      html += '</tr>';
+
+      for (let row = 0; row < 7; row++) {
+        html += `<tr><td class="wd">${DOW[row]}</td>`;
+        for (let w = 0; w < weekCount; w++) {
+          const date = addDays(weeks[w], row);
+          const inRange = ymd(date) >= ymd(start) && ymd(date) <= ymd(end);
+          const nowCls = w === weekCount - 1 ? ' now' : '';
+          if (!inRange) {
+            html += `<td class="${nowCls.trim()}"><div class="empty"></div></td>`;
+            continue;
+          }
+          const offset =
+            (date.getFullYear() - start.getFullYear()) * 12 +
+            (date.getMonth() - oldestMonth);
+          const shade = Math.abs(offset) % 2;
+          const kind = markKind(ymd(date));
+          const dot = kind ? `dot ${kind}` : 'dot';
+          html += `<td class="m${shade}${nowCls}"><div class="${dot}"></div></td>`;
+        }
+        html += '</tr>';
+      }
+      html += '</table>';
+      el.innerHTML = html;
+    }
+
+    render(document.getElementById('cal'), new Date(2026, 8, 7));
+  </script>
+</body>
+</html>

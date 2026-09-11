@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Proposal — Hajj standing status (like Zakat, not a daily fard)</title>
+  <style>
+    :root {
+      --bg: #f4f1ea;
+      --ink: #1d2a2c;
+      --muted: #4d5c63;
+      --line: #c5d0d4;
+      --teal: #2f6f73;
+      --charity: #f4e6c8;
+      --hajj: #e8efe8;
+      --drop: #8a4a4a;
+      --keep: #2f6f73;
+      --mark: #3d4a4c;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      margin: 0;
+      padding: 24px;
+    }
+    h1 { font-size: 22px; font-weight: 700; margin: 0 0 8px; }
+    h2 { font-size: 16px; margin: 28px 0 10px; }
+    .note { max-width: 1100px; color: var(--muted); line-height: 1.5; font-size: 14px; }
+    .rules {
+      max-width: 1100px;
+      margin: 16px 0;
+      padding: 12px 14px;
+      background: #fff;
+      border-radius: 12px;
+      font-size: 13px; line-height: 1.55;
+    }
+    .rules strong { color: var(--keep); }
+    .rules .no { color: var(--drop); }
+    .pair { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; }
+    .col { width: min(390px, 100%); }
+    .col h3 {
+      margin: 0 0 8px;
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .phone {
+      width: 100%;
+      background: #fff;
+      border-radius: 28px;
+      box-shadow: 0 12px 40px rgba(0,0,0,.12);
+      overflow: hidden;
+    }
+    .appbar { padding: 14px 16px 6px; font-size: 16px; font-weight: 600; }
+    .hint { padding: 0 16px 10px; font-size: 12px; color: var(--muted); line-height: 1.4; }
+    .body { padding: 0 16px 16px; }
+    .card { border-radius: 16px; padding: 14px 12px 12px; margin-bottom: 10px; }
+    .c-charity { background: var(--charity); }
+    .c-hajj { background: var(--hajj); }
+    .domain { margin: 0 0 4px; font-size: 14px; font-weight: 700; }
+    .status {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #fff;
+      border: 1px solid var(--line);
+      margin: 6px 0 10px;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: 86px repeat(7, 1fr);
+      gap: 4px;
+      align-items: center;
+      margin-top: 6px;
+    }
+    .lab { font-size: 11px; line-height: 1.2; color: var(--muted); }
+    .cell { height: 28px; display: grid; place-items: center; }
+    .days { font-size: 10px; color: var(--muted); text-align: center; }
+    .dia {
+      width: 10px; height: 10px;
+      transform: rotate(45deg);
+      border: 1.5px solid var(--mark);
+    }
+    .dia.fill { background: var(--mark); }
+    .dia.half {
+      background: linear-gradient(135deg, var(--mark) 50%, transparent 50%);
+    }
+    .dash { width: 12px; height: 1.5px; background: var(--mark); opacity: .7; }
+    .empty { width: 10px; height: 10px; border: 1.5px solid var(--mark); border-radius: 50%; opacity: .35; }
+    .fillc { width: 10px; height: 10px; background: var(--mark); border-radius: 50%; }
+    .outline { width: 10px; height: 10px; border: 1.5px solid var(--mark); border-radius: 50%; }
+    .sheet {
+      margin-top: 8px;
+      background: #faf8f4;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 13px;
+    }
+    .sheet label { display: block; font-weight: 700; margin-bottom: 6px; }
+    select {
+      width: 100%;
+      padding: 8px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+    table { width: 100%; max-width: 1100px; border-collapse: collapse; font-size: 13px; }
+    th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    th { color: var(--muted); font-weight: 600; }
+  </style>
+</head>
+<body>
+  <h1>Hajj — standing status, user-owned</h1>
+  <p class="note">
+    Hajj is a pillar, like zakat. It should appear in the app so the user can name
+    whether it is due, not due, in preparation, or already performed — and then
+    ponder and prepare on their own terms. The app must not calculate ability,
+    set a deadline, or treat unanswered as missed.
+  </p>
+
+  <div class="rules">
+    <strong>Keep (parallel to Zakat).</strong>
+    User chooses the status. No amounts, no visa checklist as a score, no
+    “overdue”. Unanswered is empty, not a failing. Mix can include Hajj like
+    the zakat mix key. Daily preparation, if shown, is engagement / not today /
+    unanswered — same as Fasting rows.<br /><br />
+    <span class="no">Do not.</span>
+    Fatwa engine, istita‘ah calculator, age/wealth auto-due, Dhul-Hijjah
+    countdown as a command to travel, shame for not having gone, conflating
+    Umrah with the fard status, or a week of seven “Due” diamonds as if Hajj
+    were a daily fard like Salah.
+  </div>
+
+  <h2>Why not a Zakat-style week of diamonds for the pillar itself</h2>
+  <p class="note">
+    Zakat status is already a standing meaning painted across the week (due /
+    planned / paid). That is a bit awkward for an annual duty; it would be
+    worse for a once-in-a-lifetime pillar: seven identical “Performed” marks
+    every week forever. Hajj’s <em>pillar state</em> should live as one
+    standing record (like Hadith memorisation focus). A <em>daily</em> row is
+    only for noticing preparation on a given day, and only while the user has
+    named it due or in preparation.
+  </p>
+
+  <h2>Recommended marks</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Status</th>
+        <th>Meaning (user-owned)</th>
+        <th>Mark</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Not recorded</td>
+        <td>No claim yet. Not “you skipped Hajj”.</td>
+        <td>Empty</td>
+      </tr>
+      <tr>
+        <td>Not due</td>
+        <td>The user does not currently hold Hajj as due (ability, timing, or circumstance as they see it).</td>
+        <td>Dash — same language as zakat “not applicable”</td>
+      </tr>
+      <tr>
+        <td>Due</td>
+        <td>The user names Hajj as due. The app does not verify this.</td>
+        <td>Filled diamond (reuse zakat Due)</td>
+      </tr>
+      <tr>
+        <td>Preparing</td>
+        <td>Saving, health, learning rites, travel — noticed as preparation, not a progress bar.</td>
+        <td>Half diamond (reuse zakat Planned)</td>
+      </tr>
+      <tr>
+        <td>Performed</td>
+        <td>The user records that the fard Hajj has been performed.</td>
+        <td>Filled diamond with a quieter chip, not a trophy</td>
+      </tr>
+      <tr>
+        <td>Not applicable</td>
+        <td>User’s own exclusion (e.g. they do not take this on). Same humility as zakat N/A.</td>
+        <td>Dash</td>
+      </tr>
+    </tbody>
+  </table>
+  <p class="note">
+    Optional later, not in this first cut: a separate Umrah row (nafl), or
+    “repeat Hajj”. Do not fold those into the fard status.
+  </p>
+
+  <h2>Where it lives</h2>
+  <p class="note">
+    Not on Charity. Charity is giving (infaq, zakat). Hajj is pilgrimage.
+    Treat Hajj as its own optional Home card — same opt-in as Fasting —
+    with a standing status at the top and, when Due or Preparing, one week
+    row for “Noticed preparation”. Mix catalog key <code>hajj</code>.
+    Storage: standing status in prefs (not a tenth recordable field);
+    daily preparation in <code>homeTraces</code>.
+  </p>
+
+  <div class="pair">
+    <div class="col">
+      <h3>Today — Zakat on Charity (keep)</h3>
+      <div class="phone">
+        <div class="appbar">Home</div>
+        <p class="hint">Zakat remains a Charity band. Week diamonds stay as they are.</p>
+        <div class="body">
+          <div class="card c-charity">
+            <p class="domain">Charity</p>
+            <div class="row">
+              <span></span>
+              <span class="days">S</span><span class="days">M</span><span class="days">T</span>
+              <span class="days">W</span><span class="days">T</span><span class="days">F</span><span class="days">S</span>
+            </div>
+            <div class="row">
+              <span class="lab">Sadaqah</span>
+              <span class="cell"><span class="fillc"></span></span>
+              <span class="cell"><span class="outline"></span></span>
+              <span class="cell"><span class="empty"></span></span>
+              <span class="cell"><span class="fillc"></span></span>
+              <span class="cell"><span class="empty"></span></span>
+              <span class="cell"><span class="empty"></span></span>
+              <span class="cell"><span class="empty"></span></span>
+            </div>
+            <div class="row">
+              <span class="lab">Zakat</span>
+              <span class="cell"><span class="dia fill"></span></span>
+              <span class="cell"><span class="dia fill"></span></span>
+              <span class="cell"><span class="dia half"></span></span>
+              <span class="cell"><span class="dia half"></span></span>
+              <span class="cell"><span class="dia"></span></span>
+              <span class="cell"><span class="dia"></span></span>
+              <span class="cell"><span class="dia"></span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <h3>Proposed — Hajj card (standing + optional week)</h3>
+      <div class="phone">
+        <div class="appbar">Home</div>
+        <p class="hint">One status for the pillar. Preparation week only while Due or Preparing.</p>
+        <div class="body">
+          <div class="card c-hajj">
+            <p class="domain">Hajj</p>
+            <span class="status">Due · as I see it</span>
+            <div class="row">
+              <span></span>
+              <span class="days">S</span><span class="days">M</span><span class="days">T</span>
+              <span class="days">W</span><span class="days">T</span><span class="days">F</span><span class="days">S</span>
+            </div>
+            <div class="row">
+              <span class="lab">Noticed preparation</span>
+              <span class="cell"><span class="empty"></span></span>
+              <span class="cell"><span class="fillc"></span></span>
+              <span class="cell"><span class="outline"></span></span>
+              <span class="cell"><span class="empty"></span></span>
+              <span class="cell"><span class="empty"></span></span>
+              <span class="cell"><span class="empty"></span></span>
+              <span class="cell"><span class="empty"></span></span>
+            </div>
+          </div>
+          <div class="card c-hajj" style="opacity:.85">
+            <p class="domain">Hajj</p>
+            <span class="status">Performed</span>
+            <p class="hint" style="padding:0">No daily row. The standing status is enough. Historical Reflection still shows past preparation marks if any were stored.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Check-in</h2>
+  <div class="pair">
+    <div class="col">
+      <div class="phone">
+        <div class="appbar">Daily Check-In</div>
+        <div class="body">
+          <div class="sheet">
+            <label>Hajj</label>
+            <select>
+              <option>Not recorded</option>
+              <option selected>Due</option>
+              <option>Preparing</option>
+              <option>Not due</option>
+              <option>Performed</option>
+              <option>Not applicable</option>
+            </select>
+            <p class="hint" style="padding: 8px 0 0">This is your record, not a ruling. The app does not decide ability or timing.</p>
+          </div>
+          <div class="sheet">
+            <label>Noticed preparation</label>
+            <select>
+              <option>Not recorded</option>
+              <option selected>Noticed</option>
+              <option>Not today</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="phone">
+        <div class="appbar">Ponder</div>
+        <div class="body">
+          <p class="hint">Ponder may surface Hajj only if the user named it Due or Preparing — as a prompt to write, not as a command to book travel.</p>
+          <div class="sheet">
+            You recorded Hajj as due. What preparation, if any, would you like to notice this season?
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>FAQ line (if accepted)</h2>
+  <p class="note">
+    Hajj is a standing status you set: not due, due as you see it, preparing,
+    performed, or not applicable. The app does not calculate whether Hajj is
+    obligatory, does not set a year, and does not treat an empty mark as missed.
+    Daily preparation is optional noticing, not a countdown.
+  </p>
+</body>
+</html>

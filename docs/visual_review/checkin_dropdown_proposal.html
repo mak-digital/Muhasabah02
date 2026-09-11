@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Check-in dropdown proposal — visual review</title>
+  <style>
+    :root {
+      --bg: #f4f1ea;
+      --ink: #1d2a2c;
+      --muted: #4d5c63;
+      --line: #c5d0d4;
+      --teal: #2f6f73;
+      --salah: #d7eceb;
+      --quran: #d7e4f2;
+      --dhikr: #d9eedf;
+      --family: #eadff2;
+      --charity: #f4e6c8;
+      --fasting: #c5cceb;
+      --hadith: #d4e2ee;
+      --summary: #eef2f4;
+      --indent: 20px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      margin: 0;
+      padding: 24px;
+    }
+    h1 { font-size: 22px; font-weight: 700; margin: 0 0 8px; }
+    .note { max-width: 920px; color: var(--muted); line-height: 1.5; font-size: 14px; }
+    .rules {
+      max-width: 920px;
+      margin: 16px 0 8px;
+      padding: 12px 14px;
+      background: #fff;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .rules strong { color: var(--ink); }
+    .phones { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; margin-top: 16px; }
+    .phone {
+      width: 390px;
+      background: #fff;
+      border-radius: 28px;
+      box-shadow: 0 12px 40px rgba(0,0,0,.12);
+      overflow: hidden;
+    }
+    .appbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 16px 10px;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .hint {
+      padding: 0 16px 10px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .body { padding: 0 16px 16px; max-height: 640px; overflow: auto; }
+    .card { border-radius: 16px; padding: 14px 12px 10px; margin-bottom: 12px; }
+    .c-salah { background: var(--salah); }
+    .c-quran { background: var(--quran); }
+    .c-dhikr { background: var(--dhikr); }
+    .c-family { background: var(--family); }
+    .c-charity { background: var(--charity); }
+    .c-fasting { background: var(--fasting); }
+    .c-hadith { background: var(--hadith); }
+    .c-other { background: var(--summary); }
+    .domain {
+      margin: 0 0 4px;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .sub { margin: 0 0 12px; font-size: 12px; color: var(--muted); line-height: 1.35; }
+    .row { margin-bottom: 12px; }
+    .row-label {
+      margin: 0 0 6px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .indent {
+      margin-left: var(--indent);
+    }
+    select, .fake-select {
+      width: calc(100% - var(--indent));
+      margin-left: var(--indent);
+      appearance: none;
+      background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath fill='%234d5c63' d='M0 0l6 8 6-8z'/%3E%3C/svg%3E") no-repeat right 12px center;
+      background-size: 10px 7px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 32px 10px 12px;
+      font-size: 13px;
+      color: var(--ink);
+    }
+    .menu {
+      margin: 4px 0 0 var(--indent);
+      width: calc(100% - var(--indent));
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.12);
+      max-height: 220px;
+      overflow: auto;
+      font-size: 13px;
+    }
+    .menu div {
+      padding: 8px 12px;
+    }
+    .menu div:hover, .menu .on { background: rgba(47,111,115,.12); }
+    .caption { font-size: 11px; color: var(--muted); padding: 8px 16px 0; }
+    .save {
+      margin: 8px 16px 16px;
+      background: var(--teal);
+      color: #fff;
+      border: 0;
+      border-radius: 14px;
+      padding: 12px;
+      width: calc(100% - 32px);
+      font-size: 14px;
+    }
+    .key { font-size: 12px; max-width: 920px; margin-top: 20px; color: var(--muted); }
+    code { font-size: 12px; }
+  </style>
+</head>
+<body>
+  <h1>Proposed check-in data entry (dropdowns)</h1>
+  <p class="note">
+    Visual proposal only. No app code in this file. Native lists below are the current activity labels, sorted A–Z.
+    Missing / unanswered stays a valid choice. Colour still identifies the domain, not rank.
+  </p>
+  <div class="rules">
+    <strong>Layout rules in this mock</strong><br>
+    1. Domain title: CAPITAL, bold (SALAH, QUR’AN, DHIKR…).<br>
+    2. Prayer / row name: kept as written, bold (Fajr, Recitation, Morning Adhkar).<br>
+    3. Chosen value sits in a dropdown, indented from the left to show it is the next level under that name.<br>
+    4. Dropdown options are alphabetical. Default shown here is “No answer recorded” / “Unanswered” / “Not recorded” as today’s empty state.
+  </div>
+
+  <div class="phones">
+    <div class="phone">
+      <div class="appbar">Check-in · 2026-09-06</div>
+      <p class="hint">Not recorded is not the same as missed.</p>
+      <div class="body">
+        <div class="card c-salah">
+          <p class="domain">Salah</p>
+          <p class="sub">Each prayer is recorded independently. Absence is not missed.</p>
+
+          <div class="row">
+            <p class="row-label">Fajr</p>
+            <div class="fake-select">No answer recorded</div>
+            <div class="menu" aria-label="Fajr options, A–Z">
+              <div>Joined congregation late</div>
+              <div>Missed</div>
+              <div>Missed then made up later</div>
+              <div class="on">No answer recorded</div>
+              <div>Other</div>
+              <div>Prayed alone on time</div>
+              <div>Prayed in small congregation</div>
+              <div>Prayed late</div>
+              <div>Prayed on time in congregation</div>
+            </div>
+          </div>
+
+          <div class="row">
+            <p class="row-label">Dhuhr</p>
+            <select>
+              <option>Joined congregation late</option>
+              <option>Missed</option>
+              <option>Missed then made up later</option>
+              <option selected>No answer recorded</option>
+              <option>Other</option>
+              <option>Prayed alone on time</option>
+              <option>Prayed in small congregation</option>
+              <option>Prayed late</option>
+              <option>Prayed on time in congregation</option>
+            </select>
+          </div>
+          <div class="row">
+            <p class="row-label">Asr</p>
+            <select>
+              <option>Joined congregation late</option>
+              <option>Missed</option>
+              <option>Missed then made up later</option>
+              <option selected>No answer recorded</option>
+              <option>Other</option>
+              <option>Prayed alone on time</option>
+              <option>Prayed in small congregation</option>
+              <option>Prayed late</option>
+              <option>Prayed on time in congregation</option>
+            </select>
+          </div>
+          <div class="row">
+            <p class="row-label">Maghrib</p>
+            <select>
+              <option>Joined congregation late</option>
+              <option>Missed</option>
+              <option>Missed then made up later</option>
+              <option selected>No answer recorded</option>
+              <option>Other</option>
+              <option>Prayed alone on time</option>
+              <option>Prayed in small congregation</option>
+              <option>Prayed late</option>
+              <option>Prayed on time in congregation</option>
+            </select>
+          </div>
+          <div class="row">
+            <p class="row-label">Isha</p>
+            <select>
+              <option>Joined congregation late</option>
+              <option>Missed</option>
+              <option>Missed then made up later</option>
+              <option selected>No answer recorded</option>
+              <option>Other</option>
+              <option>Prayed alone on time</option>
+              <option>Prayed in small congregation</option>
+              <option>Prayed late</option>
+              <option>Prayed on time in congregation</option>
+            </select>
+          </div>
+
+          <p class="row-label" style="margin-top:8px">Friday prayer and voluntary prayers (optional)</p>
+          <p class="sub">These stay off the recordable-field count.</p>
+          <div class="row">
+            <p class="row-label">Jumu‘ah</p>
+            <select>
+              <option>Missed</option>
+              <option selected>Not recorded</option>
+              <option>Prayed late</option>
+              <option>Prayed on time</option>
+            </select>
+          </div>
+          <div class="row">
+            <p class="row-label">Tahajjud</p>
+            <select>
+              <option>Not performed</option>
+              <option selected>Not recorded</option>
+              <option>Performed</option>
+            </select>
+          </div>
+          <div class="row">
+            <p class="row-label">Ishraq</p>
+            <select>
+              <option>Not performed</option>
+              <option selected>Not recorded</option>
+              <option>Performed</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <button class="save" type="button">Save check-in</button>
+    </div>
+
+    <div class="phone">
+      <div class="appbar">Check-in · 2026-09-06</div>
+      <p class="hint">Same indent + A–Z lists for Qur’an rows.</p>
+      <div class="body">
+        <div class="card c-quran">
+          <p class="domain">Qur’an</p>
+          <p class="sub">Recitation is the daily item. Recitation with Meaning as engagement also records Recitation as engagement.</p>
+          <div class="row">
+            <p class="row-label">Recitation</p>
+            <select>
+              <option>Family study session</option>
+              <option>Listened to recitation</option>
+              <option>No activity</option>
+              <option selected>No answer recorded</option>
+              <option>Other</option>
+              <option>Read independently</option>
+              <option>Read with commentary</option>
+              <option>Read with translation</option>
+              <option>Study circle participation</option>
+            </select>
+          </div>
+          <div class="row">
+            <p class="row-label">Recitation with Meaning</p>
+            <select>
+              <option>Did not engage with meaning/translation</option>
+              <option>Discussed meaning</option>
+              <option selected>No answer recorded</option>
+              <option>Other</option>
+              <option>Read translation</option>
+              <option>Word or phrase study</option>
+            </select>
+          </div>
+          <div class="row">
+            <p class="row-label">Memorisation</p>
+            <select>
+              <option>Did not practise</option>
+              <option>New portion</option>
+              <option selected>No answer recorded</option>
+              <option>Other</option>
+              <option>Repeated a portion</option>
+              <option>With a teacher</option>
+            </select>
+          </div>
+          <div class="row">
+            <p class="row-label">Revision</p>
+            <select>
+              <option>Did not practise</option>
+              <option>Group revision</option>
+              <option selected>No answer recorded</option>
+              <option>Other</option>
+              <option>Private revision</option>
+              <option>Recited to someone</option>
+            </select>
+          </div>
+          <div class="row">
+            <p class="row-label">Tafsir</p>
+            <select>
+              <option>Attended a class</option>
+              <option>Did not study tafsir/explanation</option>
+              <option>Listened to explanation</option>
+              <option selected>No answer recorded</option>
+              <option>Other</option>
+              <option>Read tafsir</option>
+            </select>
+          </div>
+          <div class="row">
+            <p class="row-label">Qur’anic Reflection</p>
+            <select>
+              <option>Did not spend time reflecting</option>
+              <option>Journaled about an ayah</option>
+              <option selected>No answer recorded</option>
+              <option>Other</option>
+              <option>Private Qur’anic Reflection</option>
+              <option>Shared a Qur’anic Reflection</option>
+            </select>
+          </div>
+          <div class="row">
+            <p class="row-label">Conscious Application</p>
+            <select>
+              <option>Noticed a possible practical relevance</option>
+              <option>Other</option>
+              <option>Recorded as not done</option>
+              <option selected>Unanswered</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <button class="save" type="button">Save check-in</button>
+    </div>
+
+    <div class="phone">
+      <div class="appbar">Check-in · 2026-09-06</div>
+      <p class="hint">Home-row domains: one dropdown per row, A–Z ternary labels.</p>
+      <div class="body">
+        <div class="card c-dhikr">
+          <p class="domain">Dhikr</p>
+          <p class="sub">Same rows as Home. Independent. Missing is not missed.</p>
+          <p class="sub" style="text-transform:uppercase;letter-spacing:.04em;font-weight:600;font-size:10px;margin-bottom:8px">Timed adhkar</p>
+          <div class="row">
+            <p class="row-label">Morning Adhkar</p>
+            <select>
+              <option>Recorded as not done</option>
+              <option>Recorded engagement</option>
+              <option selected>Unanswered</option>
+            </select>
+          </div>
+          <div class="row">
+            <p class="row-label">Evening Adhkar</p>
+            <select>
+              <option>Recorded as not done</option>
+              <option>Recorded engagement</option>
+              <option selected>Unanswered</option>
+            </select>
+          </div>
+          <p class="sub" style="text-transform:uppercase;letter-spacing:.04em;font-weight:600;font-size:10px;margin-bottom:8px">Other remembrance</p>
+          <div class="row">
+            <p class="row-label">General Dhikr</p>
+            <select>
+              <option>Recorded as not done</option>
+              <option>Recorded engagement</option>
+              <option selected>Unanswered</option>
+            </select>
+          </div>
+          <div class="row">
+            <p class="row-label">Gratitude Dhikr</p>
+            <select>
+              <option>Recorded as not done</option>
+              <option>Recorded engagement</option>
+              <option selected>Unanswered</option>
+            </select>
+          </div>
+          <div class="row">
+            <p class="row-label">Travel Remembrance</p>
+            <select>
+              <option>Recorded as not done</option>
+              <option>Recorded engagement</option>
+              <option selected>Unanswered</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="card c-charity">
+          <p class="domain">Charity</p>
+          <p class="sub">Same rows as Home. Zakat is status only, no amounts.</p>
+          <div class="row">
+            <p class="row-label">Community Support</p>
+            <select>
+              <option>Recorded as not done</option>
+              <option>Recorded engagement</option>
+              <option selected>Unanswered</option>
+            </select>
+          </div>
+          <div class="row">
+            <p class="row-label">Educational Support</p>
+            <select>
+              <option>Recorded as not done</option>
+              <option>Recorded engagement</option>
+              <option selected>Unanswered</option>
+            </select>
+          </div>
+          <div class="row">
+            <p class="row-label">Emergency Support</p>
+            <select>
+              <option>Recorded as not done</option>
+              <option>Recorded engagement</option>
+              <option selected>Unanswered</option>
+            </select>
+          </div>
+          <div class="row">
+            <p class="row-label">Family Support</p>
+            <select>
+              <option>Recorded as not done</option>
+              <option>Recorded engagement</option>
+              <option selected>Unanswered</option>
+            </select>
+          </div>
+          <div class="row">
+            <p class="row-label">Support Under Financial Stress</p>
+            <select>
+              <option>Recorded as not done</option>
+              <option>Recorded engagement</option>
+              <option selected>Unanswered</option>
+            </select>
+          </div>
+          <div class="row">
+            <p class="row-label">Voluntary Charity</p>
+            <select>
+              <option>Recorded as not done</option>
+              <option>Recorded engagement</option>
+              <option selected>Unanswered</option>
+            </select>
+          </div>
+          <div class="row">
+            <p class="row-label">Zakat</p>
+            <select>
+              <option>Due</option>
+              <option>Not applicable</option>
+              <option selected>Not recorded</option>
+              <option>Paid</option>
+              <option>Planned</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <button class="save" type="button">Save check-in</button>
+    </div>
+
+    <div class="phone">
+      <div class="appbar">Check-in · 2026-09-06</div>
+      <p class="hint">Other observations, Fasting, Family, Hadith — same pattern.</p>
+      <div class="body">
+        <div class="card c-other">
+          <p class="domain">Other observations</p>
+          <div class="row">
+            <p class="row-label">Dhikr / Istighfar</p>
+            <select>
+              <option>Daily remembrance</option>
+              <option>Evening adhkar</option>
+              <option>Gratitude remembrance</option>
+              <option>Morning adhkar</option>
+              <option>No activity</option>
+              <option selected>No answer recorded</option>
+              <option>Other</option>
+              <option>Travel remembrance</option>
+            </select>
+          </div>
+          <div class="row">
+            <p class="row-label">Character / conduct</p>
+            <select>
+              <option>Apology or repair</option>
+              <option>Kindness or forbearance</option>
+              <option>No character observation recorded</option>
+              <option selected>No answer recorded</option>
+              <option>Other</option>
+              <option>Patience in a difficult moment</option>
+              <option>Truthfulness</option>
+            </select>
+          </div>
+          <div class="row">
+            <p class="row-label">Gratitude</p>
+            <select>
+              <option>No entry today</option>
+              <option selected>Not recorded</option>
+              <option>Wrote an entry</option>
+            </select>
+          </div>
+          <div class="row">
+            <p class="row-label">Personal Reflection</p>
+            <select>
+              <option>No entry today</option>
+              <option selected>Not recorded</option>
+              <option>Wrote an entry</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="card c-fasting">
+          <p class="domain">Fasting</p>
+          <div class="row">
+            <p class="row-label">Make-up Fast</p>
+            <select>
+              <option>Recorded as not done</option>
+              <option>Recorded engagement</option>
+              <option selected>Unanswered</option>
+            </select>
+          </div>
+          <div class="row">
+            <p class="row-label">Ramadan Preparation</p>
+            <select>
+              <option>Recorded as not done</option>
+              <option>Recorded engagement</option>
+              <option selected>Unanswered</option>
+            </select>
+          </div>
+          <div class="row">
+            <p class="row-label">Weekly Sunnah Fast</p>
+            <select>
+              <option>Recorded as not done</option>
+              <option>Recorded engagement</option>
+              <option selected>Unanswered</option>
+            </select>
+          </div>
+          <div class="row">
+            <p class="row-label">White Days (Ayyam Al-Bid)</p>
+            <select>
+              <option>Recorded as not done</option>
+              <option>Recorded engagement</option>
+              <option selected>Unanswered</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="card c-family">
+          <p class="domain">Family &amp; Community Care</p>
+          <div class="row">
+            <p class="row-label">Kinship Support</p>
+            <select>
+              <option>Recorded as not done</option>
+              <option>Recorded engagement</option>
+              <option selected>Unanswered</option>
+            </select>
+          </div>
+          <div class="row">
+            <p class="row-label">Parent Contact</p>
+            <select>
+              <option>Recorded as not done</option>
+              <option>Recorded engagement</option>
+              <option selected>Unanswered</option>
+            </select>
+          </div>
+          <div class="row">
+            <p class="row-label">Sick Visit</p>
+            <select>
+              <option>Recorded as not done</option>
+              <option>Recorded engagement</option>
+              <option selected>Unanswered</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="card c-hadith">
+          <p class="domain">Hadith</p>
+          <div class="row">
+            <p class="row-label">Listening</p>
+            <select>
+              <option>Recorded as not done</option>
+              <option>Recorded engagement</option>
+              <option selected>Unanswered</option>
+            </select>
+          </div>
+          <div class="row">
+            <p class="row-label">Current Memorisation Focus</p>
+            <select>
+              <option>Memorised</option>
+              <option>Memorising</option>
+              <option selected>Not recorded</option>
+              <option>Reviewing</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <button class="save" type="button">Save check-in</button>
+    </div>
+  </div>
+
+  <p class="key">
+    File: <code>docs/visual_review/checkin_dropdown_proposal.html</code>.
+    Optional factors (multi-select) are not shown here; they can stay as a later compact control so this screen stays uncrowded.
+    Confirm this layout before any Flutter implementation.
+  </p>
+</body>
+</html>

@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dhikr Progress 7-day matrices — visual review</title>
+  <style>
+    :root {
+      --bg: #f4f1ea;
+      --ink: #1d2a2c;
+      --muted: #4d5c63;
+      --line: #c5d0d4;
+      --teal: #3f7d6a;
+      --dhikr: #d9eedf;
+      --wash: #e8f4ec;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      margin: 0;
+      padding: 24px;
+    }
+    h1 { font-size: 22px; font-weight: 700; margin: 0 0 8px; }
+    .note, .rules, .key { max-width: 980px; }
+    .note { color: var(--muted); line-height: 1.5; font-size: 14px; }
+    .rules {
+      margin: 16px 0;
+      padding: 12px 14px;
+      background: #fff;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+    .phones { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; }
+    .phone {
+      width: 390px;
+      background: #faf8f4;
+      border-radius: 28px;
+      box-shadow: 0 12px 40px rgba(0,0,0,.12);
+      overflow: hidden;
+    }
+    .appbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 16px 8px;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .back { font-size: 20px; line-height: 1; }
+    .hint { padding: 0 16px 10px; font-size: 12px; color: var(--muted); }
+    .body { padding: 0 16px 20px; max-height: 760px; overflow: auto; }
+    .period {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+    .chip {
+      flex: 1;
+      text-align: center;
+      font-size: 12px;
+      padding: 8px 6px;
+      border-radius: 20px;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+    .chip.on {
+      background: #d7eceb;
+      border-color: #9bb8b8;
+      font-weight: 700;
+    }
+    .guard {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.4;
+      margin: 0 0 12px;
+    }
+    .matrix {
+      background: var(--dhikr);
+      border-radius: 16px;
+      padding: 12px 10px 10px;
+      margin-bottom: 12px;
+    }
+    .matrix h2 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 700;
+    }
+    .week-of {
+      margin: 4px 0 10px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 2px;
+      table-layout: fixed;
+    }
+    th, td {
+      text-align: center;
+      padding: 4px 1px;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--muted);
+      vertical-align: middle;
+    }
+    th.dow, td.dow {
+      width: 22px;
+      text-align: left;
+      font-size: 11px;
+      color: var(--ink);
+      font-weight: 700;
+    }
+    th.date, td.date {
+      width: 26px;
+      text-align: right;
+      padding-right: 6px;
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    th.mark {
+      vertical-align: bottom;
+      padding-bottom: 6px;
+    }
+    table.pair {
+      width: auto;
+    }
+    table.pair th.mark,
+    table.pair tbody td:not(.dow):not(.date) {
+      width: 48px;
+    }
+    .hlabel {
+      display: block;
+      font-size: 11px;
+      letter-spacing: 0.02em;
+    }
+    .vlabel {
+      display: inline-block;
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--ink);
+      white-space: nowrap;
+      line-height: 1;
+    }
+    .dot {
+      width: 16px;
+      height: 16px;
+      margin: 0 auto;
+      border-radius: 50%;
+      border: 1.6px dashed rgba(63,125,106,.45);
+    }
+    .dot.on {
+      background: var(--teal);
+      border-style: solid;
+      border-color: var(--teal);
+    }
+    .dot.off {
+      background: transparent;
+      border-style: solid;
+      border-color: var(--teal);
+    }
+    .legend {
+      display: flex;
+      gap: 12px;
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 8px;
+      align-items: center;
+    }
+    .legend .dot { width: 12px; height: 12px; margin: 0 4px 0 0; display: inline-block; vertical-align: middle; }
+    .proposed {
+      outline: 1.5px dashed rgba(63,125,106,.45);
+    }
+    .key { margin-top: 18px; font-size: 13px; color: var(--muted); line-height: 1.5; }
+    code { font-size: 12px; }
+  </style>
+</head>
+<body>
+  <h1>Proposed Dhikr Progress — 7-day matrices</h1>
+  <p class="note">
+    Implemented in the app for Dhikr 7-day Progress. 30-day and 90-day keep one calendar per row.
+    For the <strong>7-day</strong> period only, traces are grouped into three week matrices
+    instead of one calendar per row. Weekday letter and calendar date are separate columns.
+    Short headings (Faj–Isa) stay horizontal. Longer headings are shortened and set vertically
+    so mark columns stay even width. Marks are unchanged: filled = recorded engagement,
+    solid outline = recorded as not done, dashed = not recorded. Missing is not missed.
+    Colour still identifies Dhikr, not rank. No scores.
+  </p>
+  <div class="rules">
+    <strong>Proposed 7-day layout</strong><br>
+    1. <strong>Post-fard Salah Adhkar</strong> — subtitle: (for the week starting on 31 Aug 2026).
+    Columns: Faj, Dhr, Asr, Mag, Isa.<br>
+    2. <strong>Morning &amp; Evening Adhkar</strong> — same week subtitle. Vertical columns: Mor-Adk, Eve-Adk,
+    kept to two compact columns with empty space on the right.<br>
+    3. <strong>Other Adhkar</strong> — same week subtitle. Vertical columns: General, Gratitude, Travel, Personal, Other
+    (shortened from Other Adhkars so the five mark columns stay equal).
+    Personal and Other Adhkars are shown here as extra columns you asked to see.
+    Today the app only stores General, Gratitude, and Travel in this band.
+    30-day and 90-day Progress would keep the current one-calendar-per-row layout unless you say otherwise.
+  </div>
+
+  <div class="phones">
+    <div class="phone">
+      <div class="appbar"><span class="back">←</span> Dhikr Progress</div>
+      <p class="hint">7 days selected. Three matrices, one week each.</p>
+      <div class="body">
+        <div class="period">
+          <div class="chip on">7 days ✓</div>
+          <div class="chip">30 days</div>
+          <div class="chip">90 days</div>
+        </div>
+        <p class="guard">Colour identifies the domain, not rank. Missing records are not treated as missed.</p>
+
+        <section class="matrix">
+          <h2>Post-fard Salah Adhkar</h2>
+          <p class="week-of">(for the week starting on 31 Aug 2026)</p>
+          <table>
+            <thead>
+              <tr>
+                <th class="dow"></th>
+                <th class="date"></th>
+                <th class="mark"><span class="hlabel">Faj</span></th>
+                <th class="mark"><span class="hlabel">Dhr</span></th>
+                <th class="mark"><span class="hlabel">Asr</span></th>
+                <th class="mark"><span class="hlabel">Mag</span></th>
+                <th class="mark"><span class="hlabel">Isa</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="dow">M</td>
+                <td class="date">31</td>
+                <td><div class="dot on"></div></td>
+                <td><div class="dot"></div></td>
+                <td><div class="dot on"></div></td>
+                <td><div class="dot on"></div></td>
+                <td><div class="dot"></div></td>
+              </tr>
+              <tr>
+                <td class="dow">T</td>
+                <td class="date">1</td>
+                <td><div class="dot"></div></td>
+                <td><div class="dot on"></div></td>
+                <td><div class="dot"></div></td>
+                <td><div class="dot on"></div></td>
+                <td><div class="dot on"></div></td>
+              </tr>
+              <tr>
+                <td class="dow">W</td>
+                <td class="date">2</td>
+                <td><div class="dot on"></div></td>
+                <td><div class="dot"></div></td>
+                <td><div class="dot"></div></td>
+                <td><div class="dot"></div></td>
+                <td><div class="dot on"></div></td>
+              </tr>
+              <tr>
+                <td class="dow">T</td>
+                <td class="date">3</td>
+                <td><div class="dot off"></div></td>
+                <td><div class="dot on"></div></td>
+                <td><div class="dot on"></div></td>
+                <td><div class="dot"></div></td>
+                <td><div class="dot"></div></td>
+              </tr>
+              <tr>
+                <td class="dow">F</td>
+                <td class="date">4</td>
+                <td><div class="dot on"></div></td>
+                <td><div class="dot on"></div></td>
+                <td><div class="dot off"></div></td>
+                <td><div class="dot on"></div></td>
+                <td><div class="dot on"></div></td>
+              </tr>
+              <tr>
+                <td class="dow">S</td>
+                <td class="date">5</td>
+                <td><div class="dot"></div></td>
+                <td><div class="dot"></div></td>
+                <td><div class="dot"></div></td>
+                <td><div class="dot"></div></td>
+                <td><div class="dot"></div></td>
+              </tr>
+              <tr>
+                <td class="dow">S</td>
+                <td class="date">6</td>
+                <td><div class="dot"></div></td>
+                <td><div class="dot"></div></td>
+                <td><div class="dot"></div></td>
+                <td><div class="dot"></div></td>
+                <td><div class="dot"></div></td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="matrix">
+          <table class="pair">
+            <thead>
+              <tr>
+                <th class="dow"></th>
+                <th class="date"></th>
+                <th class="mark"><span class="vlabel">Mor-Adk</span></th>
+                <th class="mark"><span class="vlabel">Eve-Adk</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="dow">M</td>
+                <td class="date">31</td>
+                <td><div class="dot on"></div></td>
+                <td><div class="dot"></div></td>
+              </tr>
+              <tr>
+                <td class="dow">T</td>
+                <td class="date">1</td>
+                <td><div class="dot"></div></td>
+                <td><div class="dot on"></div></td>
+              </tr>
+              <tr>
+                <td class="dow">W</td>
+                <td class="date">2</td>
+                <td><div class="dot on"></div></td>
+                <td><div class="dot"></div></td>
+              </tr>
+              <tr>
+                <td class="dow">T</td>
+                <td class="date">3</td>
+                <td><div class="dot"></div></td>
+                <td><div class="dot on"></div></td>
+              </tr>
+              <tr>
+                <td class="dow">F</td>
+                <td class="date">4</td>
+                <td><div class="dot on"></div></td>
+                <td><div class="dot"></div></td>
+              </tr>
+              <tr>
+                <td class="dow">S</td>
+                <td class="date">5</td>
+                <td><div class="dot"></div></td>
+                <td><div class="dot"></div></td>
+              </tr>
+              <tr>
+                <td class="dow">S</td>
+                <td class="date">6</td>
+                <td><div class="dot"></div></td>
+                <td><div class="dot"></div></td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="matrix proposed">
+          <h2>Other Adhkar</h2>
+          <p class="week-of">(for the week starting on 31 Aug 2026)</p>
+          <table>
+            <thead>
+              <tr>
+                <th class="dow"></th>
+                <th class="date"></th>
+                <th class="mark"><span class="vlabel">General</span></th>
+                <th class="mark"><span class="vlabel">Gratitude</span></th>
+                <th class="mark"><span class="vlabel">Travel</span></th>
+                <th class="mark"><span class="vlabel">Personal</span></th>
+                <th class="mark"><span class="vlabel">Other</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="dow">M</td>
+                <td class="date">31</td>
+                <td><div class="dot"></div></td>
+                <td><div class="dot on"></div></td>
+                <td><div class="dot"></div></td>
+                <td><div class="dot"></div></td>
+                <td><div class="dot"></div></td>
+              </tr>
+              <tr>
+                <td class="dow">T</td>
+                <td class="date">1</td>
+                <td><div class="dot"></div></td>
+                <td><div class="dot"></div></td>
+                <td><div class="dot"></div></td>
+                <td><div class="dot"></div></td>
+                <td><div class="dot"></div></td>
+              </tr>
+              <tr>
+                <td class="dow">W</td>
+                <td class="date">2</td>
+                <td><div class="dot on"></div></td>
+                <td><div class="dot"></div></td>
+                <td><div class="dot"></div></td>
+                <td><div class="dot"></div></td>
+                <td><div class="dot"></div></td>
+              </tr>
+              <tr>
+                <td class="dow">T</td>
+                <td class="date">3</td>
+                <td><div class="dot"></div></td>
+                <td><div class="dot"></div></td>
+                <td><div class="dot"></div></td>
+                <td><div class="dot"></div></td>
+                <td><div class="dot off"></div></td>
+              </tr>
+              <tr>
+                <td class="dow">F</td>
+                <td class="date">4</td>
+                <td><div class="dot"></div></td>
+                <td><div class="dot"></div></td>
+                <td><div class="dot"></div></td>
+                <td><div class="dot on"></div></td>
+                <td><div class="dot"></div></td>
+              </tr>
+              <tr>
+                <td class="dow">S</td>
+                <td class="date">5</td>
+                <td><div class="dot"></div></td>
+                <td><div class="dot"></div></td>
+                <td><div class="dot"></div></td>
+                <td><div class="dot"></div></td>
+                <td><div class="dot"></div></td>
+              </tr>
+              <tr>
+                <td class="dow">S</td>
+                <td class="date">6</td>
+                <td><div class="dot"></div></td>
+                <td><div class="dot"></div></td>
+                <td><div class="dot"></div></td>
+                <td><div class="dot"></div></td>
+                <td><div class="dot"></div></td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="week-of" style="margin:8px 0 0">Dashed outline on this card marks proposed extra columns (Personal, Other Adhkars).</p>
+        </section>
+
+        <div class="legend">
+          <span><span class="dot on"></span> engagement</span>
+          <span><span class="dot off"></span> not done</span>
+          <span><span class="dot"></span> not recorded</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="key">
+    Open this file in a browser: <code>docs/visual_review/dhikr_progress_7day_proposal.html</code><br>
+    This HTML is not the Flutter app. Week start follows the current sample week (Monday 31 Aug 2026).
+  </p>
+</body>
+</html>

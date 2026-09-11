@@ -4,8 +4,8 @@ enum QuoteDomain { salah, quran, family, charity, fasting, hadith }
 
 extension QuoteDomainX on QuoteDomain {
   String get label => switch (this) {
-    QuoteDomain.salah => 'Salah',
-    QuoteDomain.quran => 'Qur’an',
+    QuoteDomain.salah => 'Salah & Prayer Quality',
+    QuoteDomain.quran => 'Qur’an Engagement',
     QuoteDomain.family => 'Family',
     QuoteDomain.charity => 'Charity',
     QuoteDomain.fasting => 'Fasting',

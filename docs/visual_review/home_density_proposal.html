@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Proposal #7 — Home density after #1–#6</title>
+  <style>
+    :root {
+      --bg: #f4f1ea;
+      --ink: #1d2a2c;
+      --muted: #4d5c63;
+      --salah: #d7eceb;
+      --quran: #d7e4f2;
+      --hadith: #d4e2ee;
+      --akhlaq: #e8e0d4;
+      --huquq: #e2e8dc;
+      --charity: #f4e6c8;
+      --knowledge: #d5e6ee;
+      --time: #e4e6d8;
+      --drop: #8a4a4a;
+      --keep: #2f6f73;
+      --rename: #6a5a20;
+      --add: #2f5f73;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      margin: 0;
+      padding: 24px;
+    }
+    h1 { font-size: 22px; font-weight: 700; margin: 0 0 8px; }
+    h2 { font-size: 16px; margin: 28px 0 10px; }
+    .note { max-width: 1100px; color: var(--muted); line-height: 1.5; font-size: 14px; }
+    .rules {
+      max-width: 1100px;
+      margin: 16px 0;
+      padding: 12px 14px;
+      background: #fff;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 20px;
+      font-size: 13px;
+      margin: 12px 0 8px;
+    }
+    .legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .pair {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      align-items: flex-start;
+      margin-top: 8px;
+    }
+    .col { width: min(390px, 100%); }
+    .col h3 {
+      margin: 0 0 8px;
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .phone {
+      width: 100%;
+      background: #fff;
+      border-radius: 28px;
+      box-shadow: 0 12px 40px rgba(0,0,0,.12);
+      overflow: hidden;
+    }
+    .appbar { padding: 14px 16px 6px; font-size: 16px; font-weight: 600; }
+    .hint { padding: 0 16px 10px; font-size: 12px; color: var(--muted); line-height: 1.4; }
+    .body { padding: 0 16px 16px; }
+    .card { border-radius: 16px; padding: 12px; margin-bottom: 8px; }
+    .ghost { opacity: 0.5; outline: 1px dashed #9ab; }
+    .domain { margin: 0 0 2px; font-size: 13px; font-weight: 700; }
+    .focus { margin: 0 0 8px; font-size: 11px; font-style: italic; color: var(--muted); }
+    .days {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+      margin-top: 6px;
+    }
+    .dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      border: 1.5px solid #2f6f73;
+      margin: 0 auto;
+      opacity: 0.4;
+    }
+    .dot.on { opacity: 1; background: #2f6f73; }
+    .row { font-size: 12px; padding: 2px 0; color: var(--muted); }
+    .drop { text-decoration: line-through; color: var(--drop); text-decoration-thickness: 1.5px; }
+    .keep { color: var(--keep); font-weight: 600; }
+    .rename { color: var(--rename); font-weight: 600; }
+    .tag {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      border-radius: 999px;
+      padding: 2px 7px;
+      white-space: nowrap;
+    }
+    .tag-drop { background: #f3dcdc; color: var(--drop); }
+    .tag-keep { background: #d7eceb; color: var(--keep); }
+    .tag-rename { background: #eee6c8; color: var(--rename); }
+    .tag-add { background: #d5e6ee; color: var(--add); }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      max-width: 1100px;
+      margin-top: 8px;
+      font-size: 13px;
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #e4e8ea; vertical-align: top; }
+    th { color: var(--muted); font-weight: 600; background: #faf8f4; }
+    .key { max-width: 1100px; margin-top: 20px; font-size: 12px; color: var(--muted); line-height: 1.5; }
+    code { font-size: 12px; }
+    .stack { font-size: 12px; color: var(--muted); margin: 0 0 8px; line-height: 1.45; }
+    .mini { font-size: 11px; color: var(--muted); }
+    .band {
+      margin: 6px 0 2px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <h1>Proposal #7 — Home density (updated after #1–#6)</h1>
+  <p class="note">
+    Implemented. Overlap work (#1–#6) already cut duplicate
+    <em>rows</em>. Home density is the number of <em>week grids</em> and first-look domains,
+    not leftover Family contact or a second prayer-window log.
+  </p>
+  <div class="rules">
+    <strong>What already landed (so #7 is not more row-merging)</strong>
+    <ul>
+      <li>#1 Family off the named preset; three sick-care rows.</li>
+      <li>#2 Wealth three earning rows; giving on Charity.</li>
+      <li>#3 Ummah without a second “served beyond myself” row.</li>
+      <li>#4 Hadith after Qur’an <em>and on the basic preset</em> — that added a grid.</li>
+      <li>#5 Gaze merged; one self-control row added. Akhlaq is still the densest card.</li>
+      <li>#6 Prayer window off Time; rest renamed. Time is already short.</li>
+    </ul>
+    <strong>Concern that still stands</strong>
+    Home is a stack of independent week matrices. The chip is named <strong>Salah, Qur’an &amp; Akhlaq</strong> but it currently shows <strong>eleven</strong> domain cards. Unset prefs still show <strong>all fourteen</strong> (including Dhikr’s twelve rows). Check-in then repeats every band in one scroll. Collapsing that by deleting more traces would fight #4–#5. Collapsing it into one shared grid would mix domain washes.
+  </div>
+
+  <h2>Suggested direction (three layers; implement in order)</h2>
+  <div class="rules">
+    <ol>
+      <li><strong>Named preset = short Home.</strong> Salah, Qur’an, Hadith &amp; Living Sunnah, Character &amp; Morals, Rights of Others, Charity. Knowledge, Time, Health, Wealth, and Ummah join Dhikr, Fasting, and Family as opt-in. Stored custom sets are not rewritten.</li>
+      <li><strong>First look is the named preset, not All.</strong> New installs (and a prefs value that has never been written) use that six-domain set. People who already chose All, or a custom mix, keep it. “All domains” remains one tap in Settings.</li>
+      <li><strong>Home compactness for opt-in cards only, if still long.</strong> Salah and Qur’an keep full week matrices. Hadith and Akhlaq on the short preset may keep full matrices (they are the worship/character core). Knowledge / Time / Health / Wealth / Ummah / Dhikr / Fasting / Family / Charity, when shown, use a <em>one-line week</em> (seven day marks = any recorded observation that day). Tap the title for the existing Progress matrix. No traces deleted.</li>
+      <li><strong>Check-in: collapse bands, do not delete them.</strong> Each domain card starts with the title, focus, and first band open; later bands are closed until tapped. Other observations (legacy Dhikr/Istighfar, gratitude text, personal reflection) move to the end, after domain cards.</li>
+    </ol>
+    <p style="margin:10px 0 0;font-size:13px">Do not: one mega-grid; scores or “completion %”; hide unanswered as missed; auto-fill across domains; bump <code>recordableFieldCount</code>; retire more Huquq or Akhlaq keys in this slice.</p>
+  </div>
+
+  <h2>Home — named preset</h2>
+  <div class="pair">
+    <div class="col">
+      <h3>Now (“Salah, Qur’an &amp; Akhlaq”)</h3>
+      <div class="phone">
+        <div class="appbar">Home</div>
+        <div class="hint">Eleven week grids after the quote. First install with unset prefs is worse: fourteen.</div>
+        <div class="body">
+          <p class="stack">Check-in → Quote → Salah → Qur’an → Hadith → Akhlaq → Huquq → Knowledge → Time → Health → Wealth → Ummah → Charity → snapshot…</p>
+          <div class="card" style="background:var(--salah)"><p class="domain">Salah — full matrix</p></div>
+          <div class="card" style="background:var(--quran)"><p class="domain">Qur’an — full matrix</p></div>
+          <div class="card" style="background:var(--hadith)"><p class="domain">Hadith — 8 rows × week</p></div>
+          <div class="card" style="background:var(--akhlaq)"><p class="domain">Akhlaq — 15 rows × week</p></div>
+          <div class="card" style="background:var(--huquq)"><p class="domain">Huquq — 12 rows × week</p></div>
+          <div class="card ghost"><p class="domain drop">Knowledge, Time, Health, Wealth, Ummah — still on this preset</p></div>
+          <div class="card" style="background:var(--charity)"><p class="domain">Charity — 6 rows + zakat</p></div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <h3>Proposed short Home</h3>
+      <div class="phone">
+        <div class="appbar">Home</div>
+        <div class="hint">Six domain cards. Opt-in domains stay in Settings. Full matrices stay on Progress.</div>
+        <div class="body">
+          <p class="stack">Check-in → Quote → Salah → Qur’an → Hadith → Akhlaq → Huquq → Charity → snapshot…</p>
+          <div class="card" style="background:var(--salah)">
+            <p class="domain">Salah &amp; Prayer Quality <span class="tag tag-keep">Full grid</span></p>
+            <p class="focus">Was my heart present when I stood before Allah?</p>
+            <p class="mini">Fajr … Isha week matrix unchanged.</p>
+          </div>
+          <div class="card" style="background:var(--quran)">
+            <p class="domain">Qur’an Engagement <span class="tag tag-keep">Full grid</span></p>
+            <p class="focus">Did I let the Qur’an speak to me today?</p>
+          </div>
+          <div class="card" style="background:var(--hadith)">
+            <p class="domain">Hadith &amp; Living Sunnah <span class="tag tag-keep">Full grid</span></p>
+            <p class="focus">Did a teaching of the Prophet ﷺ reach my day?</p>
+            <p class="mini">Stays after Qur’an. Still on the named preset.</p>
+          </div>
+          <div class="card" style="background:var(--akhlaq)">
+            <p class="domain">Character &amp; Morals <span class="tag tag-keep">Full grid</span></p>
+            <p class="focus">Did my behavior today invite people toward goodness?</p>
+            <p class="mini">Dense on purpose. Progress already has the same rows.</p>
+          </div>
+          <div class="card" style="background:var(--huquq)">
+            <p class="domain">Rights of Others <span class="tag tag-keep">Full grid</span></p>
+            <p class="mini">People card from #1. Not a second Family log.</p>
+          </div>
+          <div class="card" style="background:var(--charity)">
+            <p class="domain">Charity <span class="tag tag-keep">Full grid</span></p>
+            <p class="mini">Giving + zakat diamonds. Wealth stays opt-in.</p>
+          </div>
+          <div class="card ghost">
+            <p class="domain">Knowledge, Time, Health, Wealth, Ummah</p>
+            <p class="mini">Off this preset. Add in Settings → Domains. If added, layer 3 can show a one-line week.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>If an opt-in card is shown — compact week, not another 12-row grid</h2>
+  <div class="pair">
+    <div class="col">
+      <h3>Now (Knowledge on Home)</h3>
+      <div class="phone">
+        <div class="appbar">Home</div>
+        <div class="body">
+          <div class="card" style="background:var(--knowledge)">
+            <p class="domain">Knowledge &amp; Beneficial Speech</p>
+            <p class="focus">Did I learn something true…?</p>
+            <div class="band">Seeking truth</div>
+            <p class="row">Learned / Reading / Asked × 7 days</p>
+            <div class="band">Sharing</div>
+            <p class="row">Taught / Advice / Created × 7 days</p>
+            <div class="band">Beneficial speech</div>
+            <p class="row">Held back useless speech × 7 days</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <h3>Proposed compact (same traces)</h3>
+      <div class="phone">
+        <div class="appbar">Home</div>
+        <div class="hint">One row of day marks: any observation that day. Title opens Progress (full matrix) or today’s entry.</div>
+        <div class="body">
+          <div class="card" style="background:var(--knowledge)">
+            <p class="domain">Knowledge &amp; Beneficial Speech <span class="tag tag-rename">Compact</span></p>
+            <p class="focus">Did I learn something true, and did I speak only what was beneficial?</p>
+            <p class="mini">M T W T F S S</p>
+            <div class="days">
+              <i class="dot on"></i><i class="dot"></i><i class="dot on"></i>
+              <i class="dot"></i><i class="dot"></i><i class="dot on"></i><i class="dot"></i>
+            </div>
+            <p class="mini" style="margin-top:8px">7 rows still exist on check-in and Progress. Missing is not missed. A filled day is not a score.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Check-in bands</h2>
+  <div class="pair">
+    <div class="col">
+      <h3>Now</h3>
+      <div class="phone">
+        <div class="appbar">Today’s check-in</div>
+        <div class="hint">Hadith, then Other observations, then every Akhlaq/Huquq band open.</div>
+        <div class="body">
+          <p class="stack">Salah → Qur’an → Hadith → Other (Dhikr/Istighfar, gratitude, personal note) → Dhikr if visible → Akhlaq virtues + anger + modesty + restraint → Huquq household + …</p>
+          <div class="card" style="background:var(--akhlaq)">
+            <p class="domain">CHARACTER &amp; MORALS</p>
+            <p class="row">All four bands expanded</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <h3>Proposed</h3>
+      <div class="phone">
+        <div class="appbar">Today’s check-in</div>
+        <div class="hint">Same rows. Later bands closed. Other observations last.</div>
+        <div class="body">
+          <p class="stack">Salah → Qur’an → Hadith → Akhlaq → … → Other observations</p>
+          <div class="card" style="background:var(--akhlaq)">
+            <p class="domain">CHARACTER &amp; MORALS</p>
+            <p class="focus">Did my behavior today invite people toward goodness?</p>
+            <div class="band">Virtues I noticed ▾</div>
+            <p class="row">Patience … Thankfulness … Contentment</p>
+            <div class="band">Anger, honesty, forgiveness ▸ <span class="tag tag-rename">Closed</span></div>
+            <div class="band">Modesty ▸</div>
+            <div class="band">Restraint ▸</div>
+          </div>
+          <div class="card ghost">
+            <p class="domain">Other observations — last</p>
+            <p class="mini">Legacy Dhikr/Istighfar, gratitude text, personal reflection. Not a second Dhikr card.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Map</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Item</th>
+        <th>Now (after #1–#6)</th>
+        <th>Updated #7</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Named preset</td>
+        <td>11 domains, including Knowledge, Time, Health, Wealth, Ummah, Charity, Hadith</td>
+        <td><span class="rename">6 domains:</span> Salah, Qur’an, Hadith, Akhlaq, Huquq, Charity. Label can stay “Salah, Qur’an &amp; Akhlaq” or become “Worship &amp; character”.</td>
+      </tr>
+      <tr>
+        <td>Unset / first install</td>
+        <td>All 14 domains</td>
+        <td><span class="rename">Same six as the named preset</span>. Existing saved custom or All sets stay.</td>
+      </tr>
+      <tr>
+        <td>Knowledge, Time, Health, Wealth, Ummah</td>
+        <td>On the named preset; full week grids</td>
+        <td>Opt-in. If shown, compact one-line week (layer 3).</td>
+      </tr>
+      <tr>
+        <td>Dhikr, Fasting, Family</td>
+        <td>Already off named preset</td>
+        <td><span class="keep">Keep off preset.</span> Compact week if the person adds them.</td>
+      </tr>
+      <tr>
+        <td>Salah, Qur’an, Hadith, Akhlaq, Huquq, Charity on Home</td>
+        <td>Full matrices</td>
+        <td><span class="keep">Keep full matrices</span> on the short Home.</td>
+      </tr>
+      <tr>
+        <td>Akhlaq / Huquq / Hadith row catalogs</td>
+        <td>Already consolidated</td>
+        <td><span class="keep">No further retire in #7</span></td>
+      </tr>
+      <tr>
+        <td>Check-in Other observations</td>
+        <td>Between Qur’an/Hadith and domain traces</td>
+        <td>After domain cards. Bands accordion.</td>
+      </tr>
+      <tr>
+        <td>One shared Home grid / mosaic</td>
+        <td>—</td>
+        <td><span class="drop">Do not.</span> Review already has the mosaic.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p class="key">
+    Implementation would change the named preset, the unset/first-install default, optionally compact opt-in Home cards, and check-in band folding.
+    It would not delete traces, mix domain washes on one grid, or bump <code>recordableFieldCount</code>.
+    File: <code>docs/visual_review/home_density_proposal.html</code>
+  </p>
+</body>
+</html>

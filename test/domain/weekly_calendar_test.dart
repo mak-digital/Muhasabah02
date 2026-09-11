@@ -1,8 +1,16 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muhasabah02/domain/date_key.dart';
+import 'package:muhasabah02/domain/display_calendar.dart';
 import 'package:muhasabah02/domain/weekly_calendar.dart';
 
 void main() {
+  test('dateCellKind follows the local calendar day', () {
+    final now = DateTime(2026, 9, 4, 21, 15);
+    expect(dateCellKind('2026-09-03', now), DateCellKind.past);
+    expect(dateCellKind('2026-09-04', now), DateCellKind.today);
+    expect(dateCellKind('2026-09-05', now), DateCellKind.future);
+  });
+
   test('Monday-first week has seven weekday rows and week columns', () {
     final keys = periodDateKeys(30, now: DateTime(2026, 9, 3));
     final layout = weeklyCalendarLayout(
@@ -65,20 +73,56 @@ void main() {
     expect(layout.keyAt(row: 0, week: 0), isNull);
   });
 
-  test('90-day view splits into Earlier, Middle, and Recent 30-day blocks', () {
+  test('90-day view is one calendar window', () {
     final keys = periodDateKeys(90, now: DateTime(2026, 9, 3));
-    final chunks = progressCalendarChunks(keys, periodDays: 90);
-    expect(chunks, hasLength(3));
-    expect(chunks[0], hasLength(30));
-    expect(chunks[1], hasLength(30));
-    expect(chunks[2], hasLength(30));
-    expect(progressCalendarChunkLabels(90), [
-      'Earlier 30',
-      'Middle 30',
-      'Recent 30',
-    ]);
+    expect(progressCalendarChunks(keys, periodDays: 90), [keys]);
+    expect(progressCalendarChunkLabels(90), isEmpty);
     expect(progressCalendarChunks(keys.take(30).toList(), periodDays: 30), [
       keys.take(30).toList(),
     ]);
+    expect(
+      shiftedPeriodDateKeys(90, now: DateTime(2026, 9, 3), periodsBack: 0),
+      keys,
+    );
+    expect(
+      shiftedPeriodDateKeys(90, now: DateTime(2026, 9, 3), periodsBack: 1).last,
+      dateKey(DateTime(2026, 9, 3).subtract(const Duration(days: 90))),
+    );
+  });
+
+  test('monthBandIndex alternates by calendar month from period start', () {
+    expect(monthBandIndex('2026-06-06', '2026-06-06'), 0);
+    expect(monthBandIndex('2026-07-01', '2026-06-06'), 1);
+    expect(monthBandIndex('2026-08-15', '2026-06-06'), 0);
+  });
+
+  test('weekStartMonthSpans groups consecutive week-start months', () {
+    final spans = weekStartMonthSpans([
+      DateTime(2026, 5, 31),
+      DateTime(2026, 6, 7),
+      DateTime(2026, 6, 14),
+      DateTime(2026, 7, 5),
+    ]);
+    expect(spans, hasLength(3));
+    expect(spans[0].label, 'May');
+    expect(spans[0].span, 1);
+    expect(spans[1].label, 'Jun');
+    expect(spans[1].span, 2);
+    expect(spans[2].label, 'Jul');
+    expect(spans[2].span, 1);
+  });
+
+  test('weekRangeLabel uses Islamic month names when asked', () {
+    final label = weekRangeLabel(
+      DateTime(2026, 8, 31),
+      calendar: DisplayCalendar.islamic,
+    );
+    expect(label.contains('Aug'), isFalse);
+    expect(label.contains('Sep'), isFalse);
+    expect(label.contains('–'), isTrue);
+  });
+
+  test('dayMonthYear uses day month year without padding', () {
+    expect(dayMonthYear(DateTime(2026, 8, 31)), '31 Aug 2026');
   });
 }

@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Optional factors as dropdowns — visual review</title>
+  <style>
+    :root {
+      --bg: #f4f1ea;
+      --ink: #1d2a2c;
+      --muted: #4d5c63;
+      --line: #c5d0d4;
+      --teal: #2f6f73;
+      --salah: #d7eceb;
+      --quran: #d7e4f2;
+      --dhikr: #d9eedf;
+      --indent: 20px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      margin: 0;
+      padding: 24px;
+    }
+    h1 { font-size: 22px; font-weight: 700; margin: 0 0 8px; }
+    .note, .rules, .key { max-width: 960px; }
+    .note { color: var(--muted); line-height: 1.5; font-size: 14px; }
+    .rules {
+      margin: 16px 0;
+      padding: 12px 14px;
+      background: #fff;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+    table { border-collapse: collapse; width: 100%; margin-top: 8px; font-size: 13px; }
+    th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid #e4e8ea; vertical-align: top; }
+    th { color: var(--muted); font-weight: 600; }
+    .phones { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; }
+    .phone {
+      width: 390px;
+      background: #fff;
+      border-radius: 28px;
+      box-shadow: 0 12px 40px rgba(0,0,0,.12);
+      overflow: hidden;
+    }
+    .appbar { padding: 14px 16px 8px; font-size: 16px; font-weight: 600; }
+    .hint { padding: 0 16px 10px; font-size: 12px; color: var(--muted); }
+    .body { padding: 0 16px 16px; }
+    .card { border-radius: 16px; padding: 14px 12px 12px; }
+    .c-salah { background: var(--salah); }
+    .c-quran { background: var(--quran); }
+    .c-dhikr { background: var(--dhikr); }
+    .domain {
+      margin: 0 0 4px;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .sub { margin: 0 0 12px; font-size: 12px; color: var(--muted); line-height: 1.35; }
+    .row { margin-bottom: 12px; }
+    .row-label { margin: 0 0 6px; font-size: 14px; font-weight: 700; }
+    .group-label {
+      margin: 10px 0 6px var(--indent);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    select {
+      width: calc(100% - var(--indent));
+      margin-left: var(--indent);
+      appearance: none;
+      background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath fill='%234d5c63' d='M0 0l6 8 6-8z'/%3E%3C/svg%3E") no-repeat right 12px center;
+      background-size: 10px 7px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 32px 10px 12px;
+      font-size: 13px;
+      color: var(--ink);
+    }
+    .factor-block { display: none; }
+    .factor-block.show { display: block; }
+    .save {
+      margin: 8px 16px 16px;
+      background: var(--teal);
+      color: #fff;
+      border: 0;
+      border-radius: 14px;
+      padding: 12px;
+      width: calc(100% - 32px);
+      font-size: 14px;
+    }
+    .key { margin-top: 20px; font-size: 12px; color: var(--muted); }
+    code { font-size: 12px; }
+  </style>
+</head>
+<body>
+  <h1>Suggested optional factors (dropdowns)</h1>
+  <p class="note">
+    Visual proposal only. Same layout as the approved check-in dropdowns: domain CAPITAL bold,
+    row name bold, value indented, lists A–Z. Factors stay optional provenance. They are never
+    causes, scores, or completion.
+  </p>
+  <div class="rules">
+    <strong>Suggestion</strong>
+    <ol>
+      <li>Keep one main dropdown for the activity (already implemented).</li>
+      <li>Show factor dropdowns only after that main choice is recorded — not when it is unanswered.</li>
+      <li>Split factors into two named groups, never mixed in one list:
+        <ul>
+          <li><strong>Helping factors</strong> — support / enabling conditions you noticed</li>
+          <li><strong>Distracting factors</strong> — challenges / interruptions you noticed</li>
+        </ul>
+      </li>
+      <li>Which group appears depends on the main selection (table below).</li>
+      <li>Each visible group is one A–Z dropdown, default <em>Not recorded</em> (optional, skippable).</li>
+      <li>One choice per group for now, so the screen stays uncrowded. Multiple chip-picks are not shown.</li>
+    </ol>
+    <table>
+      <thead>
+        <tr><th>Main input</th><th>Helping factors</th><th>Distracting factors</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>No answer recorded / Unanswered / Not recorded</td>
+          <td>Hidden</td>
+          <td>Hidden</td>
+        </tr>
+        <tr>
+          <td>Recorded engagement, prayed on time, congregation, performed</td>
+          <td>Shown</td>
+          <td>Hidden</td>
+        </tr>
+        <tr>
+          <td>Recorded as not done, missed, not performed, no activity</td>
+          <td>Hidden</td>
+          <td>Shown</td>
+        </tr>
+        <tr>
+          <td>Late (Salah only: prayed late, joined congregation late, made up later)</td>
+          <td>Shown</td>
+          <td>Shown</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="margin:10px 0 0">The phones below are interactive. Change Fajr / Recitation / Morning Adhkar to see the groups appear.</p>
+  </div>
+
+  <div class="phones">
+    <div class="phone">
+      <div class="appbar">Check-in · Salah</div>
+      <p class="hint">Try: unanswered → on time → late → missed.</p>
+      <div class="body">
+        <div class="card c-salah">
+          <p class="domain">Salah</p>
+          <p class="sub">Factors appear from the prayer choice. Colour is the domain, not a rank.</p>
+          <div class="row">
+            <p class="row-label">Fajr</p>
+            <select id="fajr-main" data-kind="salah">
+              <option value="none" selected>No answer recorded</option>
+              <option value="help">Prayed alone on time</option>
+              <option value="help">Prayed on time in congregation</option>
+              <option value="late">Joined congregation late</option>
+              <option value="late">Prayed late</option>
+              <option value="late">Missed then made up later</option>
+              <option value="distract">Missed</option>
+              <option value="none">Other</option>
+            </select>
+            <div id="fajr-help" class="factor-block">
+              <p class="group-label">Helping factors</p>
+              <select>
+                <option selected>Not recorded</option>
+                <option>Alarm worked</option>
+                <option>Congregation nearby</option>
+                <option>Reminder</option>
+                <option>Slept early</option>
+              </select>
+            </div>
+            <div id="fajr-distract" class="factor-block">
+              <p class="group-label">Distracting factors</p>
+              <select>
+                <option selected>Not recorded</option>
+                <option>Overslept</option>
+                <option>Tired</option>
+                <option>Travel</option>
+                <option>Work commitment</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="save" type="button">Save check-in</button>
+    </div>
+
+    <div class="phone">
+      <div class="appbar">Check-in · Qur’an</div>
+      <p class="hint">Engagement shows helping. Not done shows distracting.</p>
+      <div class="body">
+        <div class="card c-quran">
+          <p class="domain">Qur’an</p>
+          <p class="sub">Same rule for Recitation, Meaning, Memorisation, and the other rows.</p>
+          <div class="row">
+            <p class="row-label">Recitation</p>
+            <select id="quran-main" data-kind="ternary">
+              <option value="none" selected>No answer recorded</option>
+              <option value="help">Read independently</option>
+              <option value="help">Listened to recitation</option>
+              <option value="distract">No activity</option>
+              <option value="none">Other</option>
+            </select>
+            <div id="quran-help" class="factor-block">
+              <p class="group-label">Helping factors</p>
+              <select>
+                <option selected>Not recorded</option>
+                <option>Community programme</option>
+                <option>Dedicated study session</option>
+                <option>Dedicated time</option>
+                <option>Existing routine</option>
+                <option>Family participation</option>
+                <option>Friend participation</option>
+                <option>Other</option>
+                <option>Quiet space</option>
+                <option>Reminder</option>
+                <option>Study circle</option>
+                <option>Tafsir available</option>
+                <option>Teacher guidance</option>
+                <option>Time available</option>
+                <option>Translation available</option>
+                <option>Travel opportunity</option>
+              </select>
+            </div>
+            <div id="quran-distract" class="factor-block">
+              <p class="group-label">Distracting factors</p>
+              <select>
+                <option selected>Not recorded</option>
+                <option>Competing priorities</option>
+                <option>Device distraction</option>
+                <option>Family commitments</option>
+                <option>Fatigue</option>
+                <option>Health</option>
+                <option>Lack of routine</option>
+                <option>Limited time</option>
+                <option>Other</option>
+                <option>Social media distraction</option>
+                <option>Travel</option>
+                <option>Unexpected interruption</option>
+                <option>Work commitments</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="save" type="button">Save check-in</button>
+    </div>
+
+    <div class="phone">
+      <div class="appbar">Check-in · Dhikr</div>
+      <p class="hint">Home-row domains use the same two groups.</p>
+      <div class="body">
+        <div class="card c-dhikr">
+          <p class="domain">Dhikr</p>
+          <p class="sub">Independent rows. Missing is not missed. Factors are optional.</p>
+          <div class="row">
+            <p class="row-label">Morning Adhkar</p>
+            <select id="dhikr-main" data-kind="ternary">
+              <option value="none" selected>Unanswered</option>
+              <option value="help">Recorded engagement</option>
+              <option value="distract">Recorded as not done</option>
+            </select>
+            <div id="dhikr-help" class="factor-block">
+              <p class="group-label">Helping factors</p>
+              <select>
+                <option selected>Not recorded</option>
+                <option>Dedicated time</option>
+                <option>Existing routine</option>
+                <option>Other</option>
+                <option>Quiet space</option>
+                <option>Reminder</option>
+                <option>Time available</option>
+              </select>
+            </div>
+            <div id="dhikr-distract" class="factor-block">
+              <p class="group-label">Distracting factors</p>
+              <select>
+                <option selected>Not recorded</option>
+                <option>Competing priorities</option>
+                <option>Fatigue</option>
+                <option>Limited time</option>
+                <option>Other</option>
+                <option>Travel</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="save" type="button">Save check-in</button>
+    </div>
+  </div>
+
+  <p class="key">
+    File: <code>docs/visual_review/factors_dropdown_proposal.html</code>.
+    Confirm this grouping before Flutter work. Alternative if you need several factors later:
+    keep these two dropdowns as the first choice, then add a second “add another” control.
+  </p>
+  <script>
+    function syncFactors(mainId, helpId, distractId) {
+      const kind = document.getElementById(mainId).value;
+      const help = document.getElementById(helpId);
+      const distract = document.getElementById(distractId);
+      help.classList.toggle('show', kind === 'help' || kind === 'late');
+      distract.classList.toggle('show', kind === 'distract' || kind === 'late');
+    }
+    ['fajr', 'quran', 'dhikr'].forEach((id) => {
+      const main = document.getElementById(id + '-main');
+      main.addEventListener('change', () => syncFactors(id + '-main', id + '-help', id + '-distract'));
+      syncFactors(id + '-main', id + '-help', id + '-distract');
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Proposal #3 — Ummah vs Salah, Huquq, Charity, Family (visual review)</title>
+  <style>
+    :root {
+      --bg: #f4f1ea;
+      --ink: #1d2a2c;
+      --muted: #4d5c63;
+      --line: #c5d0d4;
+      --teal: #2f6f73;
+      --ummah: #dde4ea;
+      --salah: #d7eceb;
+      --huquq: #e2e8dc;
+      --charity: #f4e6c8;
+      --family: #eadff2;
+      --akhlaq: #e8e0d4;
+      --drop: #8a4a4a;
+      --keep: #2f6f73;
+      --rename: #6a5a20;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      margin: 0;
+      padding: 24px;
+    }
+    h1 { font-size: 22px; font-weight: 700; margin: 0 0 8px; }
+    h2 { font-size: 16px; margin: 28px 0 10px; }
+    .note { max-width: 1100px; color: var(--muted); line-height: 1.5; font-size: 14px; }
+    .rules {
+      max-width: 1100px;
+      margin: 16px 0;
+      padding: 12px 14px;
+      background: #fff;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 20px;
+      font-size: 13px;
+      margin: 12px 0 8px;
+    }
+    .legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .swatch {
+      width: 14px; height: 14px; border-radius: 4px; display: inline-block;
+    }
+    .pair {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      align-items: flex-start;
+      margin-top: 8px;
+    }
+    .col { width: min(390px, 100%); }
+    .col h3 {
+      margin: 0 0 8px;
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .phone {
+      width: 100%;
+      background: #fff;
+      border-radius: 28px;
+      box-shadow: 0 12px 40px rgba(0,0,0,.12);
+      overflow: hidden;
+    }
+    .appbar { padding: 14px 16px 6px; font-size: 16px; font-weight: 600; }
+    .hint { padding: 0 16px 10px; font-size: 12px; color: var(--muted); line-height: 1.4; }
+    .body { padding: 0 16px 16px; }
+    .card { border-radius: 16px; padding: 14px 12px 12px; margin-bottom: 10px; }
+    .c-ummah { background: var(--ummah); }
+    .c-salah { background: var(--salah); }
+    .c-huquq { background: var(--huquq); }
+    .c-charity { background: var(--charity); }
+    .c-family { background: var(--family); }
+    .c-akhlaq { background: var(--akhlaq); }
+    .domain {
+      margin: 0 0 4px;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+    .focus {
+      margin: 0 0 10px;
+      font-size: 12px;
+      font-style: italic;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+    .band {
+      margin: 8px 0 4px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+      font-size: 13px;
+      padding: 3px 0;
+    }
+    .mark {
+      width: 10px; height: 10px; border-radius: 50%;
+      border: 1.5px solid #2f6f73;
+      flex-shrink: 0;
+      align-self: center;
+    }
+    .mark.empty { border-style: dotted; opacity: 0.45; }
+    .drop {
+      text-decoration: line-through;
+      color: var(--drop);
+      text-decoration-thickness: 1.5px;
+    }
+    .rename { color: var(--rename); font-weight: 600; }
+    .keep { color: var(--keep); font-weight: 600; }
+    .tag {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      border-radius: 999px;
+      padding: 2px 7px;
+      white-space: nowrap;
+    }
+    .tag-drop { background: #f3dcdc; color: var(--drop); }
+    .tag-keep { background: #d7eceb; color: var(--keep); }
+    .tag-rename { background: #eee6c8; color: var(--rename); }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      max-width: 1100px;
+      margin-top: 8px;
+      font-size: 13px;
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #e4e8ea; vertical-align: top; }
+    th { color: var(--muted); font-weight: 600; background: #faf8f4; }
+    .key { max-width: 1100px; margin-top: 20px; font-size: 12px; color: var(--muted); line-height: 1.5; }
+    code { font-size: 12px; }
+  </style>
+</head>
+<body>
+  <h1>Proposal #3 — Community &amp; Ummah vs Salah, Huquq, Charity, Family</h1>
+  <p class="note">
+    Visual review only. No app code has changed. Strike-through marks the service row that would
+    leave Ummah Home, check-in, and Progress. The masjid row stays, with a clearer name so it is
+    not a second Jumu‘ah. Stored <code>ummah.communityService</code> marks would not be deleted.
+  </p>
+  <div class="rules">
+    <strong>Agreed direction</strong>
+    <ol>
+      <li><strong>Salah</strong> owns the fard: on time / late / missed, and Friday congregational Jumu‘ah.</li>
+      <li><strong>Ummah</strong> owns service beyond the household that is not a salah status and not a sadaqah channel: earth as a trust, the oppressed, unity, dua for the Ummah, da’wah by character.</li>
+      <li>Relabel masjid: <strong>Masjid class or gathering (not the fard)</strong>. Same storage key.</li>
+      <li>Hide <strong>Served beyond myself</strong> — Huquq neighbours, Charity community, and Family sick care already cover help to a person.</li>
+      <li>Keep da’wah by character, with copy that it is character, not Akhlaq’s full virtue list.</li>
+      <li>Do not auto-fill Salah, Huquq, or Charity from Ummah, or the reverse. Masjid attendance stays private, not a public check-in.</li>
+    </ol>
+  </div>
+  <div class="legend">
+    <span><i class="swatch" style="background:var(--ummah)"></i> Ummah wash</span>
+    <span><i class="swatch" style="background:var(--salah)"></i> Salah</span>
+    <span><i class="swatch" style="background:var(--huquq)"></i> Huquq</span>
+    <span><i class="swatch" style="background:var(--charity)"></i> Charity</span>
+    <span class="drop">Strike — hide from Home / check-in / Progress</span>
+    <span class="rename">Rename — same key</span>
+  </div>
+
+  <h2>Home — Ummah card</h2>
+  <div class="pair">
+    <div class="col">
+      <h3>Now</h3>
+      <div class="phone">
+        <div class="appbar">Home</div>
+        <div class="hint">“Attended the masjid” reads like Jumu‘ah. “Served beyond myself” repeats neighbours, charity, and sick care.</div>
+        <div class="body">
+          <div class="card c-ummah">
+            <p class="domain">Community &amp; Ummah</p>
+            <p class="focus">Did I serve anyone beyond myself today?</p>
+            <div class="band">Masjid</div>
+            <div class="row"><span>Attended the masjid</span><i class="mark empty"></i></div>
+            <div class="band">Service</div>
+            <div class="row"><span>Served beyond myself</span><i class="mark empty"></i></div>
+            <div class="band">Witness</div>
+            <div class="row"><span>Da’wah by character</span><i class="mark empty"></i></div>
+            <div class="band">Solidarity</div>
+            <div class="row"><span>Supported the oppressed</span><i class="mark empty"></i></div>
+            <div class="row"><span>Worked for unity</span><i class="mark empty"></i></div>
+            <div class="row"><span>Prayed for the Ummah</span><i class="mark empty"></i></div>
+            <div class="band">Earth</div>
+            <div class="row"><span>Cared for the earth</span><i class="mark empty"></i></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <h3>Proposed</h3>
+      <div class="phone">
+        <div class="appbar">Home</div>
+        <div class="hint">Ummah stays on the default preset. Service row is off this card. Masjid is not the fard.</div>
+        <div class="body">
+          <div class="card c-ummah">
+            <p class="domain">Community &amp; Ummah <span class="tag tag-keep">Keep</span></p>
+            <p class="focus">Did I serve anyone beyond myself today?</p>
+            <div class="band">Masjid</div>
+            <div class="row">
+              <span><span class="drop">Attended the masjid</span><br /><span class="rename">Masjid class or gathering (not the fard)</span></span>
+              <span class="tag tag-rename">Rename</span>
+            </div>
+            <div class="band drop">Service</div>
+            <div class="row"><span class="drop">Served beyond myself</span> <span class="tag tag-drop">Dup</span></div>
+            <div class="band">Witness</div>
+            <div class="row"><span>Da’wah by character</span><i class="mark empty"></i></div>
+            <div class="band">Solidarity</div>
+            <div class="row"><span>Supported the oppressed</span><i class="mark empty"></i></div>
+            <div class="row"><span>Worked for unity</span><i class="mark empty"></i></div>
+            <div class="row"><span>Prayed for the Ummah</span><i class="mark empty"></i></div>
+            <div class="band">Earth</div>
+            <div class="row"><span>Cared for the earth</span><i class="mark empty"></i></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>What stays on the other cards (unchanged)</h2>
+  <div class="pair">
+    <div class="col">
+      <div class="phone">
+        <div class="appbar">Same Home, other domains</div>
+        <div class="hint">These already answer the overlapping questions. Ummah does not copy them.</div>
+        <div class="body">
+          <div class="card c-salah">
+            <p class="domain">Salah &amp; Prayer Quality</p>
+            <p class="focus">The fard itself — not a masjid class.</p>
+            <div class="row"><span>Jumu‘ah (Friday congregation)</span><i class="mark empty"></i></div>
+            <div class="row"><span>Fajr–Isha on time / late / missed</span><i class="mark empty"></i></div>
+          </div>
+          <div class="card c-huquq">
+            <p class="domain">Rights of Others</p>
+            <p class="focus">A right owed to a person — not “I volunteered.”</p>
+            <div class="row"><span>Neighbours</span><i class="mark empty"></i></div>
+            <div class="row"><span>Fellow Muslims</span><i class="mark empty"></i></div>
+          </div>
+          <div class="card c-charity">
+            <p class="domain">Charity</p>
+            <p class="focus">Where giving went — no amounts.</p>
+            <div class="row"><span>Community Support</span><i class="mark empty"></i></div>
+          </div>
+          <div class="card c-family">
+            <p class="domain">Family &amp; Community Care</p>
+            <p class="focus">When shown: sick care only.</p>
+            <div class="row"><span>Sick Visit / Sick Contact</span><i class="mark empty"></i></div>
+          </div>
+          <div class="card c-akhlaq">
+            <p class="domain">Character &amp; Morals</p>
+            <p class="focus">Virtues I noticed — not a da’wah row.</p>
+            <div class="row"><span>Patience, gentleness, …</span><i class="mark empty"></i></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="phone">
+        <div class="appbar">Today’s check-in (Ummah block)</div>
+        <div class="hint">Proposed labels only. Da’wah copy: character, not argument, not Akhlaq’s list.</div>
+        <div class="body">
+          <div class="card c-ummah">
+            <p class="domain">Community &amp; Ummah</p>
+            <div class="row"><span class="drop">Attended the masjid</span></div>
+            <div class="row"><span class="rename">Masjid class or gathering (not the fard)</span></div>
+            <div class="row"><span class="drop">Served beyond myself</span></div>
+            <div class="row"><span>Da’wah by character</span></div>
+            <div class="row"><span>Supported the oppressed</span></div>
+            <div class="row"><span>Worked for unity</span></div>
+            <div class="row"><span>Prayed for the Ummah</span></div>
+            <div class="row"><span>Cared for the earth</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Row map</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Ummah row (now)</th>
+        <th>Already covered elsewhere</th>
+        <th>Proposed</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Attended the masjid</td>
+        <td>Salah Jumu‘ah and fard congregation</td>
+        <td><span class="rename">Rename</span> to “Masjid class or gathering (not the fard)”. Same key <code>ummah.masjidAttendance</code>. Private, not a public check-in.</td>
+      </tr>
+      <tr>
+        <td class="drop">Served beyond myself</td>
+        <td>Huquq neighbours; Charity community; Family sick visit/contact</td>
+        <td><span class="drop">Hide</span> from Home / check-in / Progress. Key kept for Historical Reflection.</td>
+      </tr>
+      <tr>
+        <td>Da’wah by character</td>
+        <td>Akhlaq is virtues noticed, not this row</td>
+        <td><span class="keep">Keep</span> — copy: character, not argument</td>
+      </tr>
+      <tr>
+        <td>Supported the oppressed</td>
+        <td>—</td>
+        <td><span class="keep">Keep</span></td>
+      </tr>
+      <tr>
+        <td>Worked for unity</td>
+        <td>Huquq repair is a neglected right, not ummah unity</td>
+        <td><span class="keep">Keep</span></td>
+      </tr>
+      <tr>
+        <td>Prayed for the Ummah</td>
+        <td>Huquq “fellow Muslims” is a right owed, not this dua</td>
+        <td><span class="keep">Keep</span></td>
+      </tr>
+      <tr>
+        <td>Cared for the earth</td>
+        <td>—</td>
+        <td><span class="keep">Keep</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p class="key">
+    Not in this mock: hiding the Ummah domain, auto-ticking Salah from masjid, or merging da’wah into Akhlaq.
+    Implementation would retire <code>ummah.communityService</code> the same way Family contact and Wealth giving rows were retired, and change only the masjid label.
+    File: <code>docs/visual_review/ummah_overlap_consolidate_proposal.html</code>
+  </p>
+</body>
+</html>

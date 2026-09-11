@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:muhasabah02/application/providers.dart';
 import 'package:muhasabah02/domain/date_key.dart';
 import 'package:muhasabah02/app/dimensions.dart';
 import 'package:muhasabah02/presentation/shared/progress_calendar.dart';
 import 'package:muhasabah02/presentation/shared/state_marker.dart';
 
 void main() {
-  Widget harness(Widget child) {
+  Widget harness(Widget child, {DateTime? now}) {
     return ProviderScope(
+      overrides: [if (now != null) nowProvider.overrideWithValue(now)],
       child: MaterialApp(
         locale: const Locale('en', 'US'),
         home: Scaffold(
@@ -172,43 +174,67 @@ void main() {
     expect(find.bySemanticsLabel('Outside this period'), findsNothing);
   });
 
-  testWidgets(
-    'Earlier, Middle, and Recent calendars share weekday column origin',
-    (tester) async {
-      final keys = periodDateKeys(90, now: DateTime(2026, 9, 3));
-      await tester.pumpWidget(
-        harness(
-          SizedBox(
-            width: 420,
-            child: ProgressCalendarSection(
-              dateKeys: keys,
-              periodDays: 90,
-              cellBuilder: (context, key) => RecordedStateMarker(
-                key: Key('cell-$key'),
-                color: Colors.teal,
-                kind: MarkerKind.unanswered,
-                semanticLabel: '$key unanswered',
-              ),
+  testWidgets('90-day calendar is one full-width grid with month labels', (
+    tester,
+  ) async {
+    final now = DateTime(2026, 9, 3);
+    await tester.pumpWidget(
+      harness(
+        SizedBox(
+          width: 420,
+          child: ProgressCalendarSection(
+            title: 'Fajr',
+            periodDays: 90,
+            family: Colors.teal,
+            cellBuilder: (context, key) => RecordedStateMarker(
+              key: Key('cell-$key'),
+              color: Colors.teal,
+              kind: MarkerKind.unanswered,
+              semanticLabel: '$key unanswered',
             ),
           ),
         ),
-      );
+        now: now,
+      ),
+    );
 
-      expect(find.text('Earlier 30'), findsOneWidget);
-      expect(find.text('Middle 30'), findsOneWidget);
-      expect(find.text('Recent 30'), findsOneWidget);
+    expect(find.text('Earlier 30'), findsNothing);
+    expect(find.text('Middle 30'), findsNothing);
+    expect(find.text('Recent 30'), findsNothing);
+    expect(find.byKey(const Key('calendar-chunk-0')), findsOneWidget);
+    expect(find.byKey(const Key('calendar-chunk-1')), findsNothing);
+    expect(find.text('Jun'), findsWidgets);
+    expect(find.text('Jul'), findsWidgets);
+    expect(find.text('Aug'), findsWidgets);
+    expect(find.text('(for 6 Jun 2026 – 3 Sep 2026)'), findsOneWidget);
+    expect(find.byKey(const Key('calendar-today-2026-09-03')), findsOneWidget);
+    expect(
+      tester.getSize(find.byKey(const Key('calendar-today-2026-09-03'))),
+      const Size(AppDimensions.todayMarkHalo, AppDimensions.todayMarkHalo),
+    );
+    expect(AppDimensions.todayMarkHalo, AppDimensions.progressMarker + 4);
+    expect(
+      tester.getCenter(find.byKey(const Key('calendar-today-2026-09-03'))),
+      tester.getCenter(find.byKey(const Key('cell-2026-09-03'))),
+    );
 
-      final earlier = tester.getTopLeft(
-        find.byKey(const Key('calendar-chunk-0')),
-      );
-      final middle = tester.getTopLeft(
-        find.byKey(const Key('calendar-chunk-1')),
-      );
-      final recent = tester.getTopLeft(
-        find.byKey(const Key('calendar-chunk-2')),
-      );
-      expect(middle.dx, earlier.dx);
-      expect(recent.dx, earlier.dx);
-    },
-  );
+    await tester.tap(find.byKey(const Key('calendar-prev-Fajr')));
+    await tester.pumpAndSettle();
+    expect(find.text('(for 6 Jun 2026 – 3 Sep 2026)'), findsNothing);
+    expect(find.byKey(const Key('calendar-today-2026-09-03')), findsNothing);
+
+    final next = tester.widget<IconButton>(
+      find.byKey(const Key('calendar-next-Fajr')),
+    );
+    expect(next.onPressed, isNotNull);
+    await tester.tap(find.byKey(const Key('calendar-next-Fajr')));
+    await tester.pumpAndSettle();
+    expect(find.text('(for 6 Jun 2026 – 3 Sep 2026)'), findsOneWidget);
+    expect(
+      tester
+          .widget<IconButton>(find.byKey(const Key('calendar-next-Fajr')))
+          .onPressed,
+      isNull,
+    );
+  });
 }

@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Proposal — Retire Family; Huquq hardship care; Ummah rename</title>
+  <style>
+    :root {
+      --bg: #f4f1ea;
+      --ink: #1d2a2c;
+      --muted: #4d5c63;
+      --line: #c5d0d4;
+      --teal: #2f6f73;
+      --huquq: #e2e8dc;
+      --ummah: #dde4ea;
+      --family: #eadff2;
+      --charity: #f4e6c8;
+      --drop: #8a4a4a;
+      --keep: #2f6f73;
+      --rename: #6a5a20;
+      --move: #3d5a80;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      margin: 0;
+      padding: 24px;
+    }
+    h1 { font-size: 22px; font-weight: 700; margin: 0 0 8px; }
+    h2 { font-size: 16px; margin: 28px 0 10px; }
+    .note { max-width: 1100px; color: var(--muted); line-height: 1.5; font-size: 14px; }
+    .rules {
+      max-width: 1100px;
+      margin: 16px 0;
+      padding: 12px 14px;
+      background: #fff;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 20px;
+      font-size: 13px;
+      margin: 12px 0 8px;
+    }
+    .legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .swatch {
+      width: 14px; height: 14px; border-radius: 4px; display: inline-block;
+    }
+    .pair {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      align-items: flex-start;
+      margin-top: 8px;
+    }
+    .col { width: min(390px, 100%); }
+    .col h3 {
+      margin: 0 0 8px;
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .phone {
+      width: 100%;
+      background: #fff;
+      border-radius: 28px;
+      box-shadow: 0 12px 40px rgba(0,0,0,.12);
+      overflow: hidden;
+    }
+    .appbar { padding: 14px 16px 6px; font-size: 16px; font-weight: 600; }
+    .hint { padding: 0 16px 10px; font-size: 12px; color: var(--muted); line-height: 1.4; }
+    .body { padding: 0 16px 16px; }
+    .card { border-radius: 16px; padding: 14px 12px 12px; margin-bottom: 10px; }
+    .c-huquq { background: var(--huquq); }
+    .c-ummah { background: var(--ummah); }
+    .c-family { background: var(--family); }
+    .c-charity { background: var(--charity); }
+    .ghost { opacity: 0.62; outline: 1px dashed #b89bb8; }
+    .domain {
+      margin: 0 0 4px;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+    .focus {
+      margin: 0 0 10px;
+      font-size: 12px;
+      font-style: italic;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+    .band {
+      margin: 8px 0 4px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+      font-size: 13px;
+      padding: 3px 0;
+    }
+    .mark {
+      width: 10px; height: 10px; border-radius: 50%;
+      border: 1.5px solid #2f6f73;
+      flex-shrink: 0;
+      align-self: center;
+    }
+    .mark.empty { border-style: dotted; opacity: 0.45; }
+    .drop {
+      text-decoration: line-through;
+      color: var(--drop);
+      text-decoration-thickness: 1.5px;
+    }
+    .rename { color: var(--rename); font-weight: 600; }
+    .move { color: var(--move); font-weight: 600; }
+    .keep { color: var(--keep); font-weight: 600; }
+    .tag {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      border-radius: 999px;
+      padding: 2px 7px;
+      white-space: nowrap;
+    }
+    .tag-drop { background: #f3dcdc; color: var(--drop); }
+    .tag-keep { background: #d7eceb; color: var(--keep); }
+    .tag-rename { background: #eee6c8; color: var(--rename); }
+    .tag-move { background: #d9e4f0; color: var(--move); }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      max-width: 1100px;
+      margin-top: 8px;
+      font-size: 13px;
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #e4e8ea; vertical-align: top; }
+    th { color: var(--muted); font-weight: 600; background: #faf8f4; }
+    .key { max-width: 1100px; margin-top: 20px; font-size: 12px; color: var(--muted); line-height: 1.5; }
+    code { font-size: 12px; }
+    .mosaic {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .tile {
+      border-radius: 12px;
+      padding: 10px 10px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+    }
+  </style>
+</head>
+<body>
+  <h1>Retire Family &amp; Community Care</h1>
+  <p class="note">
+    Visual review. Implemented: Family domain retired; hardship care on Huquq; Ummah renamed.
+    <code>family.*</code> keys need not be kept. Three notices remain: a right owed (Huquq),
+    wealth leaving you (Charity), belonging to the Ummah (Ummah).
+  </p>
+  <div class="rules">
+    <strong>Plan</strong>
+    <ol>
+      <li><strong>Retire</strong> Family &amp; Community Care as a domain (Home, check-in, Review, Progress, Settings → Domains, Personal mix).</li>
+      <li><strong>Move</strong> Sick Visit, Sick Contact, and Support Under Stress onto <strong>Rights of Others</strong> as a later band <em>Care in hardship</em>. Same mark language as Huquq: attended to a right / neglected a right. No helping or distracting factors. Check-in starts that band closed.</li>
+      <li><strong>Keep Charity</strong> as infaq: Giving, Care (educational / emergency / financial), Zakat status. Family Support on Charity stays a gift or extra support, not ordinary nafaqa (household rights stay on Huquq).</li>
+      <li><strong>Keep Ummah</strong>, rename the domain from Community &amp; Ummah to <strong>Ummah</strong>. Rows unchanged. Still opt-in, compact Home week. Not a public masjid check-in. Fard and Jumu‘ah stay on Salah.</li>
+      <li>Do not merge Charity with Ummah. Do not auto-fill across domains. Do not bump <code>recordableFieldCount</code>. Unanswered is not neglect.</li>
+    </ol>
+  </div>
+  <div class="legend">
+    <span><i class="swatch" style="background:var(--huquq)"></i> Huquq wash</span>
+    <span><i class="swatch" style="background:var(--charity)"></i> Charity</span>
+    <span><i class="swatch" style="background:var(--ummah)"></i> Ummah</span>
+    <span><i class="swatch" style="background:var(--family)"></i> Family (retire)</span>
+    <span class="drop">Strike — leave the app</span>
+    <span class="move">Move — onto Huquq</span>
+    <span class="rename">Rename — same rows</span>
+  </div>
+
+  <h2>Home — first look (Salah, Qur’an &amp; Akhlaq)</h2>
+  <div class="pair">
+    <div class="col">
+      <h3>Now</h3>
+      <div class="phone">
+        <div class="appbar">Home</div>
+        <div class="hint">Family is already off this preset. Huquq stops at Repair. Charity is giving, not sick care.</div>
+        <div class="body">
+          <div class="card c-huquq">
+            <p class="domain">Rights of Others</p>
+            <p class="focus">Did I fulfill, harm, or neglect anyone’s right over me?</p>
+            <div class="band">Household · Extended · Neighbours · The people · Repair</div>
+            <div class="row"><span>Parents … Turned back over a neglected right</span><i class="mark empty"></i></div>
+          </div>
+          <div class="card c-charity">
+            <p class="domain">Charity</p>
+            <div class="band">Giving</div>
+            <div class="row"><span>Voluntary Charity</span><i class="mark empty"></i></div>
+            <div class="row"><span>Family Support</span><i class="mark empty"></i></div>
+            <div class="row"><span>Community Support</span><i class="mark empty"></i></div>
+            <div class="band">Care</div>
+            <div class="row"><span>Educational · Emergency · Financial stress</span><i class="mark empty"></i></div>
+          </div>
+          <div class="card c-family ghost">
+            <p class="domain drop">Family &amp; Community Care <span class="tag tag-drop">Off preset</span></p>
+            <p class="focus">Only if turned on in Domains.</p>
+            <div class="row"><span>Sick Visit / Contact / Stress</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <h3>Proposed</h3>
+      <div class="phone">
+        <div class="appbar">Home</div>
+        <div class="hint">No Family card. Hardship care sits on Huquq. Charity Family Support is extra giving, not nafaqa.</div>
+        <div class="body">
+          <div class="card c-huquq">
+            <p class="domain">Rights of Others <span class="tag tag-keep">Keep</span></p>
+            <p class="focus">Did I fulfill, harm, or neglect anyone’s right over me?</p>
+            <div class="band">Household · Extended · Neighbours · The people · Repair</div>
+            <div class="row"><span>Unchanged</span><i class="mark empty"></i></div>
+            <div class="band move">Care in hardship</div>
+            <div class="row"><span class="move">Sick Visit</span> <span class="tag tag-move">From Family</span></div>
+            <div class="row"><span class="move">Sick Contact</span> <span class="tag tag-move">From Family</span></div>
+            <div class="row"><span class="move">Support Under Stress</span> <span class="tag tag-move">From Family</span></div>
+          </div>
+          <div class="card c-charity">
+            <p class="domain">Charity <span class="tag tag-keep">Keep</span></p>
+            <p class="focus">Infaq — no amounts. Family Support here is a gift, not household nafaqa.</p>
+            <div class="band">Giving</div>
+            <div class="row"><span>Voluntary Charity</span><i class="mark empty"></i></div>
+            <div class="row"><span>Family Support</span><i class="mark empty"></i></div>
+            <div class="row"><span>Community Support</span><i class="mark empty"></i></div>
+            <div class="band">Care</div>
+            <div class="row"><span>Educational · Emergency · Financial stress</span><i class="mark empty"></i></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Home — when Ummah is shown (opt-in)</h2>
+  <div class="pair">
+    <div class="col">
+      <h3>Now</h3>
+      <div class="phone">
+        <div class="appbar">Home</div>
+        <div class="hint">Two community titles. Family is sick care; Ummah is jama‘ah.</div>
+        <div class="body">
+          <div class="card c-family">
+            <p class="domain">Family &amp; Community Care</p>
+            <div class="row"><span>Sick Visit</span><i class="mark empty"></i></div>
+            <div class="row"><span>Sick Contact</span><i class="mark empty"></i></div>
+            <div class="row"><span>Support Under Stress</span><i class="mark empty"></i></div>
+          </div>
+          <div class="card c-ummah">
+            <p class="domain">Community &amp; Ummah</p>
+            <p class="focus">Did I serve anyone beyond myself today?</p>
+            <div class="row"><span>Masjid class or gathering (not the fard)</span><i class="mark empty"></i></div>
+            <div class="row"><span>Da’wah by character</span><i class="mark empty"></i></div>
+            <div class="row"><span>Supported the oppressed</span><i class="mark empty"></i></div>
+            <div class="row"><span>Worked for unity</span><i class="mark empty"></i></div>
+            <div class="row"><span>Prayed for the Ummah</span><i class="mark empty"></i></div>
+            <div class="row"><span>Cared for the earth</span><i class="mark empty"></i></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <h3>Proposed</h3>
+      <div class="phone">
+        <div class="appbar">Home</div>
+        <div class="hint">Family card gone. Ummah renamed. Compact week unchanged.</div>
+        <div class="body">
+          <div class="card c-family ghost">
+            <p class="domain drop">Family &amp; Community Care <span class="tag tag-drop">Retire</span></p>
+            <div class="row"><span class="drop">Sick Visit / Contact / Stress</span> → Huquq</div>
+          </div>
+          <div class="card c-ummah">
+            <p class="domain"><span class="drop">Community &amp; Ummah</span><br /><span class="rename">Ummah</span> <span class="tag tag-rename">Rename</span></p>
+            <p class="focus">Did I serve anyone beyond myself today?</p>
+            <div class="band">Masjid · Witness · Solidarity · Earth</div>
+            <div class="row"><span>Same six rows. Compact week.</span><i class="mark empty"></i></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Check-in — Huquq later band closed</h2>
+  <div class="pair">
+    <div class="col">
+      <h3>Now — Family still a block</h3>
+      <div class="phone">
+        <div class="appbar">Today’s check-in</div>
+        <div class="hint">If Family is visible, sick care is a separate card after domains.</div>
+        <div class="body">
+          <div class="card c-huquq">
+            <p class="domain">Rights of Others</p>
+            <div class="row"><span>Household … Repair (later bands start closed)</span></div>
+          </div>
+          <div class="card c-family">
+            <p class="domain">Family &amp; Community Care</p>
+            <div class="row"><span>Sick Visit</span></div>
+            <div class="row"><span>Sick Contact</span></div>
+            <div class="row"><span>Support Under Stress</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <h3>Proposed — one people card</h3>
+      <div class="phone">
+        <div class="appbar">Today’s check-in</div>
+        <div class="hint">Care in hardship is on Huquq and starts closed. No factors.</div>
+        <div class="body">
+          <div class="card c-huquq">
+            <p class="domain">Rights of Others <span class="tag tag-keep">Keep</span></p>
+            <p class="focus">I attended to a right I owe / I neglected a right I owe</p>
+            <div class="band">Household … Repair</div>
+            <div class="row"><span>Unchanged</span></div>
+            <div class="band">Care in hardship ▸</div>
+            <div class="row"><span style="color:var(--muted)">Closed until opened — Sick Visit, Sick Contact, Support Under Stress</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Review mosaic</h2>
+  <div class="pair">
+    <div class="col">
+      <h3>Now</h3>
+      <div class="phone">
+        <div class="appbar">Review</div>
+        <div class="hint">Two community-worded tiles when those domains are visible.</div>
+        <div class="body">
+          <div class="mosaic">
+            <div class="tile c-huquq">Rights of Others</div>
+            <div class="tile c-charity">Charity</div>
+            <div class="tile c-ummah">Community &amp; Ummah</div>
+            <div class="tile c-family">Family &amp; Community Care</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <h3>Proposed</h3>
+      <div class="phone">
+        <div class="appbar">Review</div>
+        <div class="hint">Family tile removed. Ummah label only. Progress for hardship care is Huquq Progress.</div>
+        <div class="body">
+          <div class="mosaic">
+            <div class="tile c-huquq">Rights of Others</div>
+            <div class="tile c-charity">Charity</div>
+            <div class="tile c-ummah">Ummah</div>
+            <div class="tile c-family ghost"><span class="drop">Family &amp; Community Care</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Where each notice lives</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Notice</th>
+        <th>Religious sense</th>
+        <th>After this change</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Parents, spouse, children, kin, neighbours</td>
+        <td>Huquq / silat / nafaqa as a claim</td>
+        <td><span class="keep">Huquq</span> — unchanged</td>
+      </tr>
+      <tr>
+        <td>Sick Visit / Sick Contact / Support Under Stress</td>
+        <td>Iyadah and relief of hardship — a right of brotherhood, not infaq</td>
+        <td><span class="move">Huquq · Care in hardship</span></td>
+      </tr>
+      <tr>
+        <td>Voluntary Charity, Community Support, Zakat</td>
+        <td>Infaq — wealth leaving you, no amounts</td>
+        <td><span class="keep">Charity</span></td>
+      </tr>
+      <tr>
+        <td>Family Support (Charity)</td>
+        <td>Gift / extra support, not ordinary maintenance</td>
+        <td><span class="keep">Charity · Giving</span> — copy only</td>
+      </tr>
+      <tr>
+        <td>Educational / Emergency / Financial stress</td>
+        <td>Care channels of giving</td>
+        <td><span class="keep">Charity · Care</span></td>
+      </tr>
+      <tr>
+        <td>Masjid class, da’wah by character, oppressed, unity, dua, earth</td>
+        <td>Jama‘ah / ummah — belonging, not a named person’s right</td>
+        <td><span class="rename">Ummah</span> — rename only</td>
+      </tr>
+      <tr>
+        <td>Family &amp; Community Care domain</td>
+        <td>No third classical bucket</td>
+        <td><span class="drop">Retire</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Surfaces to touch when implementing</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Surface</th>
+        <th>Change</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>MonitorDomain.family</code></td>
+        <td>Remove. Wash colour unused.</td>
+      </tr>
+      <tr>
+        <td>Huquq rows</td>
+        <td>Add three hardship rows; later band; no factors; full Home matrix (Huquq stays a default domain).</td>
+      </tr>
+      <tr>
+        <td>Ummah label</td>
+        <td>Community &amp; Ummah → Ummah. Storage keys unchanged.</td>
+      </tr>
+      <tr>
+        <td>Settings → Domains, FAQ, Personal mix People</td>
+        <td>Drop Family. People mix = Huquq + Ummah + Charity Care.</td>
+      </tr>
+      <tr>
+        <td>Review / Progress</td>
+        <td>No Family calendar. Hardship columns on Huquq Progress.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p class="key">
+    Not in this mock: merging Ummah into Charity, adding factors to Huquq hardship rows, or keeping a renamed Community Care card.
+    File: <code>docs/visual_review/family_retire_huquq_ummah_proposal.html</code>
+  </p>
+</body>
+</html>

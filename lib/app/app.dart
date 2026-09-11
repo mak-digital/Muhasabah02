@@ -1,10 +1,25 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../application/providers.dart';
 import '../domain/copy.dart';
 import '../presentation/home/home_screen.dart';
+import '../presentation/lock/app_lock_gate.dart';
 import 'theme.dart';
+
+class MuhasabahScrollBehavior extends MaterialScrollBehavior {
+  const MuhasabahScrollBehavior();
+
+  @override
+  Set<PointerDeviceKind> get dragDevices => {
+    PointerDeviceKind.touch,
+    PointerDeviceKind.mouse,
+    PointerDeviceKind.stylus,
+    PointerDeviceKind.trackpad,
+    PointerDeviceKind.unknown,
+  };
+}
 
 class MuhasabahApp extends ConsumerWidget {
   const MuhasabahApp({super.key});
@@ -20,10 +35,11 @@ class MuhasabahApp extends ConsumerWidget {
     return MaterialApp(
       title: Copy.appName,
       debugShowCheckedModeBanner: false,
+      scrollBehavior: const MuhasabahScrollBehavior(),
       theme: buildMuhasabahTheme(brightness: Brightness.light),
       darkTheme: buildMuhasabahTheme(brightness: Brightness.dark),
       themeMode: mode,
-      home: const AppShell(),
+      home: const AppLockGate(child: AppShell()),
       onUnknownRoute: (settings) {
         return MaterialPageRoute<void>(
           settings: settings,

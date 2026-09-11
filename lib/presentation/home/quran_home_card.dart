@@ -5,19 +5,25 @@ import '../../app/theme.dart';
 import '../../application/providers.dart';
 import '../../domain/copy.dart';
 import '../../domain/daily_check_in.dart';
+import '../../domain/date_key.dart';
 import '../../domain/first_day_of_week.dart';
-import '../../domain/personal_response.dart';
+import '../../domain/monitor_domain.dart';
 import '../../domain/quran.dart';
 import '../../domain/weekly_calendar.dart';
-import '../progress/salah_progress_screen.dart';
-import '../recorded_days/day_evidence_screen.dart';
-import '../shared/add_response_button.dart';
+import '../checkin/check_in_screen.dart';
 import '../shared/state_marker.dart';
 
 class QuranHomeCard extends ConsumerStatefulWidget {
-  const QuranHomeCard({super.key, required this.records});
+  const QuranHomeCard({
+    super.key,
+    required this.records,
+    this.compactWeek = false,
+    this.displayDimensions,
+  });
 
   final List<DailyCheckIn> records;
+  final bool compactWeek;
+  final List<QuranDimension>? displayDimensions;
 
   @override
   ConsumerState<QuranHomeCard> createState() => _QuranHomeCardState();
@@ -36,6 +42,7 @@ class _QuranHomeCardState extends ConsumerState<QuranHomeCard> {
         .sundayBasedIndex(
           MaterialLocalizations.of(context).firstDayOfWeekIndex,
         );
+    final calendar = ref.read(appPrefsProvider).displayCalendar;
     final thisWeekStart = startOfWeek(now, firstDayOfWeekIndex: firstDay);
     final weekStart = addCalendarDays(thisWeekStart, _weekOffset * 7);
     final keys = weekDateKeys(weekStart);
@@ -47,10 +54,23 @@ class _QuranHomeCardState extends ConsumerState<QuranHomeCard> {
       brightness,
     );
     final localizations = MaterialLocalizations.of(context);
+    final display = widget.displayDimensions ?? quranDailyDimensions;
+    final recitation = [
+      for (final row in recitationHomeRows)
+        if (display.contains(row)) row,
+    ];
+    final retention = [
+      for (final row in retentionHomeRows)
+        if (display.contains(row)) row,
+    ];
+    final study = [
+      for (final row in studyNoticeHomeRows)
+        if (display.contains(row)) row,
+    ];
 
     return Semantics(
       container: true,
-      label: 'Qur’an week',
+      label: '${MonitorDomain.quran.label} week',
       child: Material(
         color: wash,
         borderRadius: BorderRadius.circular(16),
@@ -68,18 +88,29 @@ class _QuranHomeCardState extends ConsumerState<QuranHomeCard> {
                   ),
                   Expanded(
                     child: InkWell(
-                      onTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute<void>(
-                            builder: (_) => const QuranProgressScreen(),
+                      onTap: () => openFocusedCheckIn(
+                        context,
+                        dateKey: dateKey(ref.read(nowProvider)),
+                        focus: CheckInFocus.quran,
+                      ),
+                      child: Column(
+                        children: [
+                          Text(
+                            MonitorDomain.quran.label,
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(fontWeight: FontWeight.w600),
                           ),
-                        );
-                      },
-                      child: Text(
-                        'Qur’an',
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(fontWeight: FontWeight.w600),
+                          if (MonitorDomain.quran.focusQuestion != null) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              MonitorDomain.quran.focusQuestion!,
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(height: 1.35),
+                            ),
+                          ],
+                        ],
                       ),
                     ),
                   ),
@@ -96,7 +127,7 @@ class _QuranHomeCardState extends ConsumerState<QuranHomeCard> {
                 children: [
                   Expanded(
                     child: Text(
-                      weekRangeLabel(weekStart),
+                      weekRangeLabel(weekStart, calendar: calendar),
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ),
@@ -111,7 +142,7 @@ class _QuranHomeCardState extends ConsumerState<QuranHomeCard> {
               const SizedBox(height: 4),
               Row(
                 children: [
-                  const SizedBox(width: 86),
+                  if (!widget.compactWeek) const SizedBox(width: 86),
                   for (var col = 0; col < kCalendarWeekdayCount; col++)
                     Expanded(
                       child: Text(
@@ -134,37 +165,87 @@ class _QuranHomeCardState extends ConsumerState<QuranHomeCard> {
                 ],
               ),
               const SizedBox(height: 6),
-              _band(
-                brightness: brightness,
-                light: MuhasabahColors.quranRecitationBand,
-                dark: MuhasabahColors.quranRecitationBandDark,
-                label: 'Recitation',
-                rows: recitationHomeRows,
-                keys: keys,
-                index: index,
-              ),
-              const SizedBox(height: 6),
-              _band(
-                brightness: brightness,
-                light: MuhasabahColors.quranRetentionBand,
-                dark: MuhasabahColors.quranRetentionBandDark,
-                label: 'Retention',
-                rows: retentionHomeRows,
-                keys: keys,
-                index: index,
-              ),
-              const SizedBox(height: 6),
-              _band(
-                brightness: brightness,
-                light: MuhasabahColors.quranStudyBand,
-                dark: MuhasabahColors.quranStudyBandDark,
-                label: 'Study & notice',
-                rows: studyNoticeHomeRows,
-                keys: keys,
-                index: index,
-              ),
+              if (widget.compactWeek)
+                _compactWeekRow(keys: keys, index: index, display: display)
+              else ...[
+                if (recitation.isNotEmpty) ...[
+                  _band(
+                    brightness: brightness,
+                    light: MuhasabahColors.quranRecitationBand,
+                    dark: MuhasabahColors.quranRecitationBandDark,
+                    label: 'Recitation',
+                    rows: recitation,
+                    keys: keys,
+                    index: index,
+                  ),
+                  const SizedBox(height: 6),
+                ],
+                if (retention.isNotEmpty) ...[
+                  _band(
+                    brightness: brightness,
+                    light: MuhasabahColors.quranRetentionBand,
+                    dark: MuhasabahColors.quranRetentionBandDark,
+                    label: 'Retention',
+                    rows: retention,
+                    keys: keys,
+                    index: index,
+                  ),
+                  const SizedBox(height: 6),
+                ],
+                if (study.isNotEmpty)
+                  _band(
+                    brightness: brightness,
+                    light: MuhasabahColors.quranStudyBand,
+                    dark: MuhasabahColors.quranStudyBandDark,
+                    label: 'Study & notice',
+                    rows: study,
+                    keys: keys,
+                    index: index,
+                  ),
+              ],
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _compactWeekRow({
+    required List<String> keys,
+    required Map<String, DailyCheckIn> index,
+    required List<QuranDimension> display,
+  }) {
+    return Row(
+      children: [
+        for (final key in keys)
+          Expanded(child: _compactCell(key, index[key], display)),
+      ],
+    );
+  }
+
+  Widget _compactCell(
+    String key,
+    DailyCheckIn? record,
+    List<QuranDimension> display,
+  ) {
+    final recorded =
+        record != null &&
+        display.any((row) => record.quranOutcome(row).isRecorded);
+    final marker = RecordedStateMarker(
+      kind: markerForRecorded(recorded: recorded, positive: recorded),
+      semanticLabel: recorded
+          ? '$key ${MonitorDomain.quran.label} recorded'
+          : '$key ${MonitorDomain.quran.label} not recorded',
+    );
+    final open =
+        dateCellKind(key, ref.read(nowProvider)) != DateCellKind.future;
+    return InkWell(
+      key: Key('home-compact-quran-$key'),
+      onTap: open ? () => _openQuranDay(key) : null,
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: open ? marker : Opacity(opacity: 0.28, child: marker),
         ),
       ),
     );
@@ -234,91 +315,26 @@ class _QuranHomeCardState extends ConsumerState<QuranHomeCard> {
       recorded: outcome.isRecorded,
       positive: outcome == TernaryOutcome.positive,
     );
+    final marker = RecordedStateMarker(
+      key: Key('quran-home-${row.name}-$key'),
+      color: MuhasabahColors.mark,
+      kind: kind,
+      semanticLabel: '$key ${row.label} ${outcome.legendLabel}',
+    );
+    final open =
+        dateCellKind(key, ref.read(nowProvider)) != DateCellKind.future;
     return ProgressDayCell(
-      onTap: () => _openCell(row, key, record),
-      marker: RecordedStateMarker(
-        key: Key('quran-home-${row.name}-$key'),
-        color: MuhasabahColors.quranFamily,
-        kind: kind,
-        semanticLabel: '$key ${row.label} ${outcome.legendLabel}',
-      ),
+      onTap: open ? () => _openQuranDay(key, band: row.homeBand) : null,
+      marker: open ? marker : Opacity(opacity: 0.28, child: marker),
     );
   }
 
-  void _openCell(QuranDimension row, String key, DailyCheckIn? record) {
-    final outcome = record?.quranOutcome(row) ?? TernaryOutcome.unanswered;
-    final polarity = outcome == TernaryOutcome.positive
-        ? 'positive'
-        : outcome == TernaryOutcome.negative
-        ? 'negative'
-        : null;
-    final factors = polarity == null ? null : record?.contextFor(row, polarity);
-    showModalBottomSheet<void>(
-      context: context,
-      showDragHandle: true,
-      builder: (context) {
-        return Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                '${row.label} · $key',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 4),
-              Text(Copy.seePonderExplore),
-              const SizedBox(height: 8),
-              Text(outcome.legendLabel),
-              if (row == QuranDimension.consciousApplication)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: Text(
-                    Copy.consciousApplicationNote,
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ),
-              if (factors != null &&
-                  (factors.factorIds.isNotEmpty ||
-                      (factors.freeText != null &&
-                          factors.freeText!.trim().isNotEmpty))) ...[
-                const SizedBox(height: 8),
-                Text(
-                  Copy.factorsYouNoticed,
-                  style: Theme.of(context).textTheme.labelLarge,
-                ),
-                Text(
-                  '${Copy.youRecorded} — never a cause.',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ],
-              const SizedBox(height: 12),
-              OutlinedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => DayEvidenceScreen(dateKey: key),
-                    ),
-                  );
-                },
-                child: const Text('Open recorded evidence'),
-              ),
-              AddResponseButton(
-                provenance: ResponseProvenance(
-                  originType: ProvenanceOrigin.progressDate,
-                  domain: 'quran',
-                  subject: row.name,
-                  dateKey: key,
-                  evidenceId: '$key:quran:${row.name}',
-                  labelSnapshot: '${row.label} on $key',
-                ),
-              ),
-            ],
-          ),
-        );
-      },
+  void _openQuranDay(String key, {String? band}) {
+    openFocusedCheckIn(
+      context,
+      dateKey: key,
+      focus: CheckInFocus.quran,
+      focusBand: band,
     );
   }
 }

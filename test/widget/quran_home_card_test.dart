@@ -4,10 +4,12 @@ import 'package:muhasabah02/data/memory_repositories.dart';
 import 'package:muhasabah02/domain/copy.dart';
 import 'package:muhasabah02/domain/daily_check_in.dart';
 import 'package:muhasabah02/domain/first_day_of_week.dart';
+import 'package:muhasabah02/domain/monitor_domain.dart';
 import 'package:muhasabah02/domain/quran.dart';
-import 'package:muhasabah02/presentation/progress/salah_progress_screen.dart';
+import 'package:muhasabah02/presentation/checkin/check_in_screen.dart';
 import 'package:muhasabah02/presentation/shared/state_marker.dart';
 
+import '../support/home_domain_stage.dart';
 import '../support/test_app.dart';
 
 void main() {
@@ -30,6 +32,7 @@ void main() {
       testApp(checkIns: checkIns, now: now, firstDayOfWeek: firstDay),
     );
     await tester.pumpAndSettle();
+    await showHomeDomain(tester, MonitorDomain.quran);
   }
 
   testWidgets('Monday first places Monday as the first Qur’an column', (
@@ -103,12 +106,77 @@ void main() {
     );
   });
 
-  testWidgets('Qur’an title opens progress', (tester) async {
+  testWidgets('Qur’an title opens Qur’an entry only', (tester) async {
     await pumpHome(tester);
-    await tester.ensureVisible(find.text('Qur’an').first);
-    await tester.tap(find.text('Qur’an').first);
+    await tester.ensureVisible(find.text(MonitorDomain.quran.label).first);
+    await tester.tap(find.text(MonitorDomain.quran.label).first);
     await tester.pumpAndSettle();
-    expect(find.byType(QuranProgressScreen), findsOneWidget);
+    expect(find.byType(CheckInScreen), findsOneWidget);
+    expect(
+      find.textContaining('${MonitorDomain.quran.label} ·'),
+      findsOneWidget,
+    );
+    expect(find.text('Did I let the Qur’an speak to me today?'), findsWidgets);
+    expect(find.text('Recitation'), findsOneWidget);
+    expect(find.text('Fajr'), findsNothing);
+    expect(find.text('Morning Adhkar'), findsNothing);
+    expect(find.text('Memorisation'), findsNothing);
+  });
+
+  testWidgets('Qur’an cell opens that day’s entry like the title', (
+    tester,
+  ) async {
+    await pumpHome(tester);
+    await tester.ensureVisible(
+      find.byKey(const Key('quran-home-reading-2026-09-03')),
+    );
+    await tester.tap(find.byKey(const Key('quran-home-reading-2026-09-03')));
+    await tester.pumpAndSettle();
+    expect(find.byType(CheckInScreen), findsOneWidget);
+    expect(
+      find.textContaining('${MonitorDomain.quran.label} · 3 Sep 2026'),
+      findsOneWidget,
+    );
+    expect(find.text('Save'), findsOneWidget);
+    expect(find.text(Copy.edit), findsNothing);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('quran-home-reading-2026-08-31')));
+    await tester.pumpAndSettle();
+    expect(
+      find.textContaining('${MonitorDomain.quran.label} · 31 Aug 2026'),
+      findsOneWidget,
+    );
+    expect(find.text(Copy.edit), findsWidgets);
+    await tester.tap(find.text(Copy.edit).last);
+    await tester.pumpAndSettle();
+    expect(find.text('Save'), findsOneWidget);
+  });
+
+  testWidgets('Qur’an Retention cell opens that band only', (tester) async {
+    await pumpHome(tester);
+    await tester.ensureVisible(
+      find.byKey(const Key('quran-home-memorisation-2026-09-03')),
+    );
+    await tester.tap(
+      find.byKey(const Key('quran-home-memorisation-2026-09-03')),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byType(CheckInScreen), findsOneWidget);
+    expect(
+      tester.widget<Text>(find.byKey(const Key('checkin-recording-date'))).data,
+      '3 Sep 2026',
+    );
+    expect(find.text('Memorisation'), findsOneWidget);
+    expect(find.text('Recitation with Meaning'), findsNothing);
+    expect(find.text('Tafsir'), findsNothing);
+  });
+
+  testWidgets('future Qur’an cell does not open entry', (tester) async {
+    await pumpHome(tester);
+    await tester.tap(find.byKey(const Key('quran-home-reading-2026-09-04')));
+    await tester.pumpAndSettle();
+    expect(find.byType(CheckInScreen), findsNothing);
   });
 
   testWidgets('Marks Guide opens without card legends', (tester) async {
@@ -123,5 +191,12 @@ void main() {
     expect(find.text('On time'), findsOneWidget);
     expect(find.text('Recorded engagement'), findsWidgets);
     expect(find.textContaining('do not measure spirituality'), findsOneWidget);
+    expect(find.text('Close'), findsWidgets);
+    final close = find.byKey(const Key('marks-guide-close'));
+    await tester.ensureVisible(close);
+    await tester.tap(close);
+    await tester.pumpAndSettle();
+    expect(find.text(Copy.marksGuideTitle), findsNothing);
+    expect(find.text(Copy.appName), findsOneWidget);
   });
 }

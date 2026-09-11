@@ -1,6 +1,159 @@
 import 'package:flutter/material.dart';
 
 import '../../domain/activities.dart';
+import '../../domain/charity_factors.dart';
+import '../../domain/context_catalog.dart';
+import '../../domain/factor_groups.dart';
+
+const checkInValueIndent = 20.0;
+const checkInNestedIndent = 40.0;
+
+enum CheckInFieldDepth { value, nested }
+
+class CheckInDomainTitle extends StatelessWidget {
+  const CheckInDomainTitle(this.text, {super.key, this.focus});
+
+  final String text;
+  final String? focus;
+
+  @override
+  Widget build(BuildContext context) {
+    final question = focus;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          text.toUpperCase(),
+          style: Theme.of(context).textTheme.titleMedium
+              ?.copyWith(fontWeight: FontWeight.w700, letterSpacing: 0.8),
+        ),
+        if (question != null && question.isNotEmpty) ...[
+          const SizedBox(height: 6),
+          Text(
+            question,
+            style: Theme.of(context).textTheme.bodyMedium
+                ?.copyWith(fontStyle: FontStyle.italic, height: 1.35),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class CheckInRowLabel extends StatelessWidget {
+  const CheckInRowLabel(this.text, {super.key, this.semanticsLabel});
+
+  final String text;
+  final String? semanticsLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      semanticsLabel: semanticsLabel,
+      style: Theme.of(context).textTheme.titleSmall
+          ?.copyWith(fontWeight: FontWeight.w700),
+    );
+  }
+}
+
+class CheckInSelectEntry<T> {
+  const CheckInSelectEntry({
+    required this.value,
+    required this.label,
+    this.itemKey,
+  });
+
+  final T value;
+  final String label;
+  final Key? itemKey;
+}
+
+class CheckInSelect<T> extends StatelessWidget {
+  const CheckInSelect({
+    super.key,
+    required this.value,
+    required this.entries,
+    required this.onChanged,
+    this.enabled = true,
+    this.dropdownKey,
+    this.depth = CheckInFieldDepth.value,
+  });
+
+  final T value;
+  final List<CheckInSelectEntry<T>> entries;
+  final ValueChanged<T> onChanged;
+  final bool enabled;
+  final Key? dropdownKey;
+  final CheckInFieldDepth depth;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final nested = depth == CheckInFieldDepth.nested;
+    final indent = nested ? checkInNestedIndent : checkInValueIndent;
+    final fill = scheme.surface.withValues(alpha: nested ? 0.52 : 0.9);
+    final ink = nested ? scheme.onSurfaceVariant : scheme.onSurface;
+    final sorted = [...entries]
+      ..sort((a, b) => a.label.toLowerCase().compareTo(b.label.toLowerCase()));
+    return Padding(
+      padding: EdgeInsets.only(left: indent),
+      child: KeyedSubtree(
+        key: dropdownKey,
+        child: Material(
+          color: fill,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+            side: BorderSide(
+              color: scheme.outlineVariant.withValues(alpha: nested ? 0.7 : 1),
+            ),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<T>(
+              key: ValueKey<T>(value),
+              isExpanded: true,
+              isDense: true,
+              value: value,
+              menuMaxHeight: 560,
+              style: Theme.of(context).textTheme.bodyMedium
+                  ?.copyWith(color: ink),
+              iconEnabledColor: scheme.onSurfaceVariant,
+              padding: const EdgeInsets.fromLTRB(12, 8, 8, 8),
+              items: [
+                for (final entry in sorted)
+                  DropdownMenuItem<T>(
+                    key: entry.itemKey,
+                    value: entry.value,
+                    child: Text(entry.label),
+                  ),
+              ],
+              selectedItemBuilder: (context) {
+                return [
+                  for (final entry in sorted)
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        entry.label,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.bodyMedium
+                            ?.copyWith(color: ink),
+                      ),
+                    ),
+                ];
+              },
+              onChanged: enabled
+                  ? (next) {
+                      if (next != null) onChanged(next);
+                    }
+                  : null,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 class ActivityPicker extends StatelessWidget {
   const ActivityPicker({
@@ -8,37 +161,40 @@ class ActivityPicker extends StatelessWidget {
     required this.options,
     required this.selectedId,
     required this.onSelected,
-    this.accent,
     this.statusKeyPrefix,
+    this.enabled = true,
   });
 
   final List<ActivityOption> options;
   final String selectedId;
   final ValueChanged<ActivityOption> onSelected;
-  final Color? accent;
   final String? statusKeyPrefix;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: [
+    final byId = {for (final option in options) option.id: option};
+    return CheckInSelect<String>(
+      dropdownKey: statusKeyPrefix == null ? null : Key(statusKeyPrefix!),
+      value: selectedId,
+      enabled: enabled,
+      entries: [
         for (final option in options)
-          ChoiceChip(
-            key: _keyFor(option),
-            selected: selectedId == option.id,
-            label: Text(option.label),
-            selectedColor: accent?.withValues(alpha: 0.22),
-            onSelected: (_) => onSelected(option),
+          CheckInSelectEntry(
+            value: option.id,
+            label: option.label,
+            itemKey: _keyFor(option),
           ),
       ],
+      onChanged: (id) {
+        final option = byId[id];
+        if (option != null) onSelected(option);
+      },
     );
   }
 
   Key? _keyFor(ActivityOption option) {
     if (statusKeyPrefix == null) return null;
-    final status = option.prayerStatus?.name;
     if (option.id == 'aloneOnTime') {
       return Key('$statusKeyPrefix-onTime');
     }
@@ -51,7 +207,139 @@ class ActivityPicker extends StatelessWidget {
     if (option.id == ActivityIds.unanswered) {
       return Key('$statusKeyPrefix-unanswered');
     }
-    if (status != null) return Key('$statusKeyPrefix-${option.id}');
     return Key('$statusKeyPrefix-${option.id}');
+  }
+}
+
+class NamedFactor {
+  const NamedFactor({required this.id, required this.label});
+
+  final String id;
+  final String label;
+
+  static List<NamedFactor> fromContext(List<ContextFactor> catalog) {
+    return [
+      for (final factor in catalog)
+        NamedFactor(id: factor.id, label: factor.label),
+    ];
+  }
+
+  static List<NamedFactor> helpingForHomeTrace(
+    String storageKey, {
+    Iterable<String> existingIds = const [],
+  }) {
+    return fromContext(
+      helpingFactorsForHomeTrace(storageKey, existingIds: existingIds),
+    );
+  }
+
+  static List<NamedFactor> distractingForHomeTrace(
+    String storageKey, {
+    Iterable<String> existingIds = const [],
+  }) {
+    return fromContext(
+      distractingFactorsForHomeTrace(storageKey, existingIds: existingIds),
+    );
+  }
+}
+
+class CheckInFactorSelects extends StatelessWidget {
+  const CheckInFactorSelects({
+    super.key,
+    required this.groups,
+    required this.helping,
+    required this.distracting,
+    required this.helpingId,
+    required this.distractingId,
+    required this.onHelpingChanged,
+    required this.onDistractingChanged,
+    this.helpingKey,
+    this.distractingKey,
+  });
+
+  final FactorGroups groups;
+  final List<NamedFactor> helping;
+  final List<NamedFactor> distracting;
+  final String helpingId;
+  final String distractingId;
+  final ValueChanged<String> onHelpingChanged;
+  final ValueChanged<String> onDistractingChanged;
+  final Key? helpingKey;
+  final Key? distractingKey;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!groups.isVisible) return const SizedBox.shrink();
+    final labelStyle = Theme.of(context).textTheme.labelSmall?.copyWith(
+      letterSpacing: 0.4,
+      fontWeight: FontWeight.w700,
+      color: Theme.of(context).colorScheme.onSurfaceVariant,
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: checkInValueIndent, top: 8),
+          child: Text(
+            'Optional. Stored. Never causes, completion, or scores.',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ),
+        if (groups.showHelping) ...[
+          Padding(
+            padding: const EdgeInsets.only(
+              left: checkInNestedIndent,
+              top: 8,
+              bottom: 6,
+            ),
+            child: Text('HELPING FACTORS', style: labelStyle),
+          ),
+          CheckInSelect<String>(
+            depth: CheckInFieldDepth.nested,
+            dropdownKey: helpingKey,
+            value: helping.any((factor) => factor.id == helpingId)
+                ? helpingId
+                : kFactorNotRecorded,
+            entries: [
+              const CheckInSelectEntry(
+                value: kFactorNotRecorded,
+                label: 'Not recorded',
+              ),
+              for (final factor in helping)
+                CheckInSelectEntry(value: factor.id, label: factor.label),
+            ],
+            onChanged: onHelpingChanged,
+          ),
+        ],
+        if (groups.showDistracting) ...[
+          Padding(
+            padding: const EdgeInsets.only(
+              left: checkInNestedIndent,
+              top: 8,
+              bottom: 6,
+            ),
+            child: Text('DISTRACTING FACTORS', style: labelStyle),
+          ),
+          CheckInSelect<String>(
+            depth: CheckInFieldDepth.nested,
+            dropdownKey: distractingKey,
+            value: distracting.any((factor) => factor.id == distractingId)
+                ? distractingId
+                : kFactorNotRecorded,
+            entries: [
+              const CheckInSelectEntry(
+                value: kFactorNotRecorded,
+                label: 'Not recorded',
+              ),
+              for (final factor in distracting)
+                CheckInSelectEntry(value: factor.id, label: factor.label),
+            ],
+            onChanged: onDistractingChanged,
+          ),
+        ],
+      ],
+    );
   }
 }

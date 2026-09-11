@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Proposal #1 — Family vs Huquq (visual review)</title>
+  <style>
+    :root {
+      --bg: #f4f1ea;
+      --ink: #1d2a2c;
+      --muted: #4d5c63;
+      --line: #c5d0d4;
+      --teal: #2f6f73;
+      --huquq: #e2e8dc;
+      --family: #eadff2;
+      --drop: #8a4a4a;
+      --keep: #2f6f73;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      margin: 0;
+      padding: 24px;
+    }
+    h1 { font-size: 22px; font-weight: 700; margin: 0 0 8px; }
+    h2 { font-size: 16px; margin: 28px 0 10px; }
+    .note { max-width: 1100px; color: var(--muted); line-height: 1.5; font-size: 14px; }
+    .rules {
+      max-width: 1100px;
+      margin: 16px 0;
+      padding: 12px 14px;
+      background: #fff;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 20px;
+      font-size: 13px;
+      margin: 12px 0 8px;
+    }
+    .legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .swatch {
+      width: 14px; height: 14px; border-radius: 4px; display: inline-block;
+    }
+    .pair {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      align-items: flex-start;
+      margin-top: 8px;
+    }
+    .col { width: min(390px, 100%); }
+    .col h3 {
+      margin: 0 0 8px;
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .phone {
+      width: 100%;
+      background: #fff;
+      border-radius: 28px;
+      box-shadow: 0 12px 40px rgba(0,0,0,.12);
+      overflow: hidden;
+    }
+    .appbar { padding: 14px 16px 6px; font-size: 16px; font-weight: 600; }
+    .hint { padding: 0 16px 10px; font-size: 12px; color: var(--muted); line-height: 1.4; }
+    .body { padding: 0 16px 16px; }
+    .card { border-radius: 16px; padding: 14px 12px 12px; margin-bottom: 10px; }
+    .c-huquq { background: var(--huquq); }
+    .c-family { background: var(--family); }
+    .ghost {
+      opacity: 0.72;
+      outline: 1px dashed #b89bb8;
+    }
+    .domain {
+      margin: 0 0 4px;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+    .focus {
+      margin: 0 0 10px;
+      font-size: 12px;
+      font-style: italic;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+    .band {
+      margin: 8px 0 4px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+      font-size: 13px;
+      padding: 3px 0;
+    }
+    .mark {
+      width: 10px; height: 10px; border-radius: 50%;
+      border: 1.5px solid #2f6f73;
+      flex-shrink: 0;
+      align-self: center;
+    }
+    .mark.empty { border-style: dotted; opacity: 0.45; }
+    .drop {
+      text-decoration: line-through;
+      color: var(--drop);
+      text-decoration-thickness: 1.5px;
+    }
+    .keep { color: var(--keep); font-weight: 600; }
+    .tag {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      border-radius: 999px;
+      padding: 2px 7px;
+      white-space: nowrap;
+    }
+    .tag-drop { background: #f3dcdc; color: var(--drop); }
+    .tag-keep { background: #d7eceb; color: var(--keep); }
+    .tag-hide { background: #eee6c8; color: #6a5a20; }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      max-width: 1100px;
+      margin-top: 8px;
+      font-size: 13px;
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #e4e8ea; vertical-align: top; }
+    th { color: var(--muted); font-weight: 600; background: #faf8f4; }
+    .key { max-width: 1100px; margin-top: 20px; font-size: 12px; color: var(--muted); line-height: 1.5; }
+    code { font-size: 12px; }
+  </style>
+</head>
+<body>
+  <h1>Proposal #1 — Family &amp; Community Care vs Rights of Others</h1>
+  <p class="note">
+    Visual review only. No app code has changed. Strike-through marks what would leave
+    Home and the default check-in. Stored <code>family.*</code> records would not be deleted.
+    Huquq stays the people card: <em>Did I fulfill, harm, or neglect anyone’s right over me?</em>
+  </p>
+  <div class="rules">
+    <strong>Agreed direction</strong>
+    <ol>
+      <li><strong>Huquq</strong> is the people card (household, relatives, neighbours, the people, repair).</li>
+      <li><strong>Family &amp; Community Care</strong> leaves the default preset (Salah, Qur’an &amp; Akhlaq). It remains in Settings → Domains for anyone who still wants the old contact/visit grid.</li>
+      <li>Parent / sibling / kinship contact and visit are the duplicates. They are not a second Huquq log.</li>
+      <li>If Family is shown again, only sick visit, sick contact, and support under stress would remain on that card (optional later slim). This mock shows that slim as strike-through on the contact/visit rows.</li>
+      <li>Do not auto-fill Huquq from Family, or the reverse.</li>
+    </ol>
+  </div>
+  <div class="legend">
+    <span><i class="swatch" style="background:var(--huquq)"></i> Huquq wash — keep</span>
+    <span><i class="swatch" style="background:var(--family)"></i> Family wash</span>
+    <span class="drop">Strike-through — hide or drop from this surface</span>
+    <span class="keep">Keep</span>
+  </div>
+
+  <h2>Home (default preset)</h2>
+  <div class="pair">
+    <div class="col">
+      <h3>Now</h3>
+      <div class="phone">
+        <div class="appbar">Home</div>
+        <div class="hint">Both cards appear on the basic preset. Same household, two questions.</div>
+        <div class="body">
+          <div class="card c-huquq">
+            <p class="domain">Rights of Others (Huquq al-Ibad)</p>
+            <p class="focus">Did I fulfill, harm, or neglect anyone’s right over me?</p>
+            <div class="band">Household</div>
+            <div class="row"><span>Parents</span><i class="mark empty"></i></div>
+            <div class="row"><span>Spouse</span><i class="mark empty"></i></div>
+            <div class="row"><span>Children</span><i class="mark empty"></i></div>
+            <div class="row"><span>Siblings</span><i class="mark empty"></i></div>
+            <div class="row"><span>Grandparents</span><i class="mark empty"></i></div>
+            <div class="band">Extended family</div>
+            <div class="row"><span>Other relatives</span><i class="mark empty"></i></div>
+            <div class="band">Neighbours &amp; work</div>
+            <div class="row"><span>Neighbours</span><i class="mark empty"></i></div>
+            <div class="row"><span>Colleagues &amp; friends</span><i class="mark empty"></i></div>
+          </div>
+          <div class="card c-family">
+            <p class="domain">Family &amp; Community Care</p>
+            <p class="focus">No focus question — contact / visit / support facts</p>
+            <div class="band">Parents</div>
+            <div class="row"><span>Parent Contact</span><i class="mark empty"></i></div>
+            <div class="row"><span>Parent Visit</span><i class="mark empty"></i></div>
+            <div class="band">Siblings</div>
+            <div class="row"><span>Sibling Contact</span><i class="mark empty"></i></div>
+            <div class="row"><span>Sibling Support</span><i class="mark empty"></i></div>
+            <div class="band">Kinship</div>
+            <div class="row"><span>Relative Contact</span><i class="mark empty"></i></div>
+            <div class="row"><span>Kinship Support</span><i class="mark empty"></i></div>
+            <div class="band">Community care</div>
+            <div class="row"><span>Sick Visit</span><i class="mark empty"></i></div>
+            <div class="row"><span>Sick Contact</span><i class="mark empty"></i></div>
+            <div class="row"><span>Support Under Stress</span><i class="mark empty"></i></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <h3>Proposed</h3>
+      <div class="phone">
+        <div class="appbar">Home</div>
+        <div class="hint">One people card. Family card is off the default preset (ghost, struck).</div>
+        <div class="body">
+          <div class="card c-huquq">
+            <p class="domain">Rights of Others (Huquq al-Ibad) <span class="tag tag-keep">Keep</span></p>
+            <p class="focus">Did I fulfill, harm, or neglect anyone’s right over me?</p>
+            <div class="band">Household</div>
+            <div class="row"><span>Parents</span><i class="mark empty"></i></div>
+            <div class="row"><span>Spouse</span><i class="mark empty"></i></div>
+            <div class="row"><span>Children</span><i class="mark empty"></i></div>
+            <div class="row"><span>Siblings</span><i class="mark empty"></i></div>
+            <div class="row"><span>Grandparents</span><i class="mark empty"></i></div>
+            <div class="band">Extended family</div>
+            <div class="row"><span>Other relatives</span><i class="mark empty"></i></div>
+            <div class="band">Neighbours &amp; work</div>
+            <div class="row"><span>Neighbours</span><i class="mark empty"></i></div>
+            <div class="row"><span>Colleagues &amp; friends</span><i class="mark empty"></i></div>
+            <div class="band">The people</div>
+            <div class="row"><span>Fellow Muslims</span><i class="mark empty"></i></div>
+            <div class="row"><span>Non-Muslims</span><i class="mark empty"></i></div>
+            <div class="band">Repair</div>
+            <div class="row"><span>A step toward reconciliation</span><i class="mark empty"></i></div>
+            <div class="row"><span>Turned back over a neglected right</span><i class="mark empty"></i></div>
+          </div>
+          <div class="card c-family ghost">
+            <p class="domain drop">Family &amp; Community Care <span class="tag tag-hide">Off default</span></p>
+            <p class="focus drop">Not on Salah, Qur’an &amp; Akhlaq Home. Still listed in Settings → Domains.</p>
+            <div class="band drop">Parents / siblings / kinship</div>
+            <div class="row"><span class="drop">Parent Contact</span></div>
+            <div class="row"><span class="drop">Parent Visit</span></div>
+            <div class="row"><span class="drop">Sibling Contact</span></div>
+            <div class="row"><span class="drop">Sibling Support</span></div>
+            <div class="row"><span class="drop">Relative Contact</span></div>
+            <div class="row"><span class="drop">Kinship Support</span></div>
+            <div class="band">Community care — only if Family is turned on later</div>
+            <div class="row"><span>Sick Visit</span><i class="mark empty"></i></div>
+            <div class="row"><span>Sick Contact</span><i class="mark empty"></i></div>
+            <div class="row"><span>Support Under Stress</span><i class="mark empty"></i></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Check-in rows (same strike)</h2>
+  <div class="pair">
+    <div class="col">
+      <h3>Now — both domains in today’s check-in</h3>
+      <div class="phone">
+        <div class="appbar">Today’s check-in</div>
+        <div class="hint">Huquq then Family. Parents appear twice.</div>
+        <div class="body">
+          <div class="card c-huquq">
+            <p class="domain">Rights of Others</p>
+            <p class="focus">I attended to a right I owe / I neglected a right I owe</p>
+            <div class="row"><span>Parents</span></div>
+            <div class="row"><span>Siblings</span></div>
+            <div class="row"><span>Other relatives</span></div>
+            <div class="row"><span>Neighbours</span></div>
+          </div>
+          <div class="card c-family">
+            <p class="domain">Family &amp; Community Care</p>
+            <div class="row"><span>Parent Contact</span></div>
+            <div class="row"><span>Parent Visit</span></div>
+            <div class="row"><span>Sibling Contact</span></div>
+            <div class="row"><span>Sibling Support</span></div>
+            <div class="row"><span>Relative Contact</span></div>
+            <div class="row"><span>Kinship Support</span></div>
+            <div class="row"><span>Sick Visit</span></div>
+            <div class="row"><span>Sick Contact</span></div>
+            <div class="row"><span>Support Under Stress</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <h3>Proposed — Huquq only on the basic preset</h3>
+      <div class="phone">
+        <div class="appbar">Today’s check-in</div>
+        <div class="hint">Family block omitted unless the domain is turned on. Contact/visit stay struck even then.</div>
+        <div class="body">
+          <div class="card c-huquq">
+            <p class="domain">Rights of Others <span class="tag tag-keep">Keep</span></p>
+            <p class="focus">I attended to a right I owe / I neglected a right I owe</p>
+            <div class="row"><span>Parents</span></div>
+            <div class="row"><span>Spouse</span></div>
+            <div class="row"><span>Children</span></div>
+            <div class="row"><span>Siblings</span></div>
+            <div class="row"><span>Grandparents</span></div>
+            <div class="row"><span>Other relatives</span></div>
+            <div class="row"><span>Neighbours</span></div>
+            <div class="row"><span>Colleagues &amp; friends</span></div>
+            <div class="row"><span>Fellow Muslims</span></div>
+            <div class="row"><span>Non-Muslims</span></div>
+            <div class="row"><span>A step toward reconciliation</span></div>
+            <div class="row"><span>Turned back over a neglected right</span></div>
+          </div>
+          <div class="card c-family ghost">
+            <p class="domain drop">Family &amp; Community Care</p>
+            <div class="row"><span class="drop">Parent Contact</span> <span class="tag tag-drop">Dup</span></div>
+            <div class="row"><span class="drop">Parent Visit</span> <span class="tag tag-drop">Dup</span></div>
+            <div class="row"><span class="drop">Sibling Contact</span> <span class="tag tag-drop">Dup</span></div>
+            <div class="row"><span class="drop">Sibling Support</span> <span class="tag tag-drop">Dup</span></div>
+            <div class="row"><span class="drop">Relative Contact</span> <span class="tag tag-drop">Dup</span></div>
+            <div class="row"><span class="drop">Kinship Support</span> <span class="tag tag-drop">Dup</span></div>
+            <div class="row"><span>Sick Visit</span> <span class="tag tag-hide">Optional slim</span></div>
+            <div class="row"><span>Sick Contact</span> <span class="tag tag-hide">Optional slim</span></div>
+            <div class="row"><span>Support Under Stress</span> <span class="tag tag-hide">Optional slim</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Row map</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Family row (now)</th>
+        <th>Huquq already covers</th>
+        <th>Proposed</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="drop">Parent Contact</td>
+        <td>Parents — attended to / neglected a right</td>
+        <td><span class="drop">Hide</span> — same afternoon as Huquq Parents</td>
+      </tr>
+      <tr>
+        <td class="drop">Parent Visit</td>
+        <td>Parents</td>
+        <td><span class="drop">Hide</span> — visit is a way of attending, not a second domain</td>
+      </tr>
+      <tr>
+        <td class="drop">Sibling Contact</td>
+        <td>Siblings</td>
+        <td><span class="drop">Hide</span></td>
+      </tr>
+      <tr>
+        <td class="drop">Sibling Support</td>
+        <td>Siblings</td>
+        <td><span class="drop">Hide</span></td>
+      </tr>
+      <tr>
+        <td class="drop">Relative Contact</td>
+        <td>Other relatives</td>
+        <td><span class="drop">Hide</span></td>
+      </tr>
+      <tr>
+        <td class="drop">Kinship Support</td>
+        <td>Other relatives</td>
+        <td><span class="drop">Hide</span></td>
+      </tr>
+      <tr>
+        <td>Sick Visit</td>
+        <td>Neighbours / fellow Muslims (obligation), not a sick-care fact</td>
+        <td>Off default Home. If Family is on: <span class="keep">keep</span> (not a Huquq duplicate)</td>
+      </tr>
+      <tr>
+        <td>Sick Contact</td>
+        <td>Same</td>
+        <td>Off default. If Family is on: <span class="keep">keep</span></td>
+      </tr>
+      <tr>
+        <td>Support Under Stress</td>
+        <td>Not a named Huquq row</td>
+        <td>Off default. If Family is on: <span class="keep">keep</span></td>
+      </tr>
+      <tr>
+        <td>—</td>
+        <td>Spouse, children, grandparents, colleagues, non-Muslims, repair</td>
+        <td><span class="keep">Huquq only</span> — Family never had these</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p class="key">
+    Not in this mock: merging storage keys, deleting Family from Settings, or writing Huquq from Family marks.
+    Implementation would only change the default visible-domain set and, later, which Family rows render.
+    File: <code>docs/visual_review/family_huquq_consolidate_proposal.html</code>
+  </p>
+</body>
+</html>

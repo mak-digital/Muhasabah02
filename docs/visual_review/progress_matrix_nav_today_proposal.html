@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Progress matrix week nav, today, future — visual review</title>
+  <style>
+    :root {
+      --bg: #f4f1ea;
+      --ink: #1d2a2c;
+      --muted: #4d5c63;
+      --line: #c5d0d4;
+      --teal: #3f7d6a;
+      --dhikr: #d9eedf;
+      --today: #fff4c4;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      margin: 0;
+      padding: 24px;
+    }
+    h1 { font-size: 22px; font-weight: 700; margin: 0 0 8px; }
+    .note, .rules, .key { max-width: 1100px; }
+    .note { color: var(--muted); line-height: 1.5; font-size: 14px; }
+    .rules {
+      margin: 16px 0;
+      padding: 12px 14px;
+      background: #fff;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+    .phones { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; }
+    .phone {
+      width: 390px;
+      background: #faf8f4;
+      border-radius: 28px;
+      box-shadow: 0 12px 40px rgba(0,0,0,.12);
+      overflow: hidden;
+      position: relative;
+    }
+    .appbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 16px 8px;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .hint { padding: 0 16px 10px; font-size: 12px; color: var(--muted); }
+    .body { padding: 0 16px 20px; }
+    .period { display: flex; gap: 6px; margin-bottom: 8px; }
+    .chip {
+      flex: 1; text-align: center; font-size: 12px;
+      padding: 8px 6px; border-radius: 20px;
+      border: 1px solid var(--line); background: #fff;
+    }
+    .chip.on { background: #d7eceb; font-weight: 700; }
+    .guard { font-size: 12px; color: var(--muted); line-height: 1.4; margin: 0 0 12px; }
+    .matrix {
+      background: var(--dhikr);
+      border-radius: 16px;
+      padding: 10px 10px 10px;
+      margin-bottom: 12px;
+    }
+    .title-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .title-row h2 {
+      flex: 1;
+      margin: 0;
+      font-size: 15px;
+      font-weight: 700;
+      text-align: center;
+    }
+    .nav {
+      width: 32px; height: 32px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; color: var(--ink);
+    }
+    .nav.off { color: #c5d0d4; background: #f3f3f3; }
+    .week-of {
+      margin: 4px 0 8px;
+      font-size: 12px;
+      color: var(--muted);
+      text-align: center;
+    }
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 2px;
+      table-layout: fixed;
+    }
+    th, td {
+      text-align: center;
+      padding: 4px 1px;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--muted);
+      vertical-align: middle;
+    }
+    th.dow, td.dow {
+      width: 22px; text-align: left; font-size: 11px;
+      color: var(--ink); font-weight: 700;
+    }
+    th.date, td.date {
+      width: 26px; text-align: right; padding-right: 6px;
+      font-size: 11px; color: var(--muted);
+    }
+    tr.today td {
+      background: var(--today);
+    }
+    tr.today td:first-child { border-radius: 8px 0 0 8px; }
+    tr.today td:last-child { border-radius: 0 8px 8px 0; }
+    .hlabel { display: block; font-size: 11px; color: var(--ink); }
+    .dot {
+      width: 16px; height: 16px; margin: 0 auto;
+      border-radius: 50%;
+      border: 1.6px dashed rgba(63,125,106,.45);
+    }
+    .dot.on { background: var(--teal); border-style: solid; border-color: var(--teal); }
+    .dot.off { background: transparent; border-style: solid; border-color: var(--teal); }
+    .dot.future {
+      opacity: 0.28;
+      pointer-events: none;
+    }
+    .dot.today-hit {
+      box-shadow: 0 0 0 3px rgba(255, 214, 70, 0.95);
+      cursor: pointer;
+    }
+    .legend {
+      display: flex; flex-wrap: wrap; gap: 10px;
+      font-size: 11px; color: var(--muted); margin-top: 8px; align-items: center;
+    }
+    .legend .dot { width: 12px; height: 12px; margin: 0 4px 0 0; display: inline-block; vertical-align: middle; }
+    .swatch {
+      display: inline-block; width: 14px; height: 14px;
+      background: var(--today); border-radius: 4px;
+      vertical-align: middle; margin-right: 4px; border: 1px solid #e6d37a;
+    }
+    .sheet {
+      position: absolute; left: 0; right: 0; bottom: 0;
+      background: #fff;
+      border-radius: 20px 20px 0 0;
+      box-shadow: 0 -8px 28px rgba(0,0,0,.16);
+      padding: 10px 16px 20px;
+    }
+    .grab {
+      width: 36px; height: 4px; border-radius: 2px;
+      background: #d0d5d8; margin: 4px auto 10px;
+    }
+    .sheet h3 { margin: 0 0 4px; font-size: 16px; }
+    .sheet p { margin: 0 0 10px; font-size: 12px; color: var(--muted); }
+    .sheet label { display: block; font-size: 13px; font-weight: 700; margin: 8px 0 4px; }
+    .sheet select, .sheet button {
+      width: 100%; border-radius: 10px; padding: 10px 12px; font-size: 14px;
+    }
+    .sheet select { border: 1px solid var(--line); background: #fff; }
+    .sheet button {
+      margin-top: 12px; border: 0; background: #2f6f73; color: #fff; font-weight: 700;
+    }
+    .key { margin-top: 18px; font-size: 13px; color: var(--muted); line-height: 1.5; }
+    code { font-size: 12px; }
+  </style>
+</head>
+<body>
+  <h1>Proposed Progress matrix — week arrows, today, future</h1>
+  <p class="note">
+    Visual proposal only. Not yet in the app. Applies to every 7-day domain matrix
+    (Salah, Qur’an, Dhikr, Fasting, Family, Charity, Hadith). 30-day and 90-day stay as they are
+    unless you say otherwise. Device local calendar decides today and future. Missing is not missed.
+    No scores.
+  </p>
+  <div class="rules">
+    <strong>Proposed behaviour</strong><br>
+    1. Each matrix has <strong>←</strong> and <strong>→</strong> beside its title. They move that domain’s
+    7-day window to the previous or next week. The subtitle follows: (for the week starting on Date).
+    Right arrow is quiet when the window already includes future days only if you prefer to lock
+    “next” when the whole week is after today — this mock still allows peeking at next week.<br>
+    2. The <strong>current local day</strong> is a light-yellow row. Marks on that row stay tappable
+    so the person can add or update that day’s record (same cell sheet as Home).<br>
+    3. <strong>Future</strong> days (after today on the local calendar) show empty marks at low contrast
+    and are not tappable. Past days and today stay active.<br>
+    4. Yellow is a calendar cue, not a rank. Colour of the filled/outline mark still identifies the domain.
+  </div>
+
+  <div class="phones">
+    <div class="phone">
+      <div class="appbar">← Dhikr Progress</div>
+      <p class="hint">Today is Friday 4 Sep 2026. Sat and Sun are future — inactive.</p>
+      <div class="body">
+        <div class="period">
+          <div class="chip on">7 days ✓</div>
+          <div class="chip">30 days</div>
+          <div class="chip">90 days</div>
+        </div>
+        <p class="guard">Colour identifies the domain, not rank. Future empty marks cannot be recorded yet.</p>
+
+        <section class="matrix">
+          <div class="title-row">
+            <div class="nav" title="Previous week">←</div>
+            <h2>Post-fard Salah Adhkar</h2>
+            <div class="nav" title="Next week">→</div>
+          </div>
+          <p class="week-of">(for the week starting on 31 Aug 2026)</p>
+          <table>
+            <thead>
+              <tr>
+                <th class="dow"></th>
+                <th class="date"></th>
+                <th><span class="hlabel">Faj</span></th>
+                <th><span class="hlabel">Dhr</span></th>
+                <th><span class="hlabel">Asr</span></th>
+                <th><span class="hlabel">Mag</span></th>
+                <th><span class="hlabel">Isa</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="dow">M</td><td class="date">31</td>
+                <td><div class="dot on"></div></td>
+                <td><div class="dot"></div></td>
+                <td><div class="dot on"></div></td>
+                <td><div class="dot on"></div></td>
+                <td><div class="dot"></div></td>
+              </tr>
+              <tr>
+                <td class="dow">T</td><td class="date">1</td>
+                <td><div class="dot"></div></td>
+                <td><div class="dot on"></div></td>
+                <td><div class="dot"></div></td>
+                <td><div class="dot on"></div></td>
+                <td><div class="dot on"></div></td>
+              </tr>
+              <tr>
+                <td class="dow">W</td><td class="date">2</td>
+                <td><div class="dot on"></div></td>
+                <td><div class="dot"></div></td>
+                <td><div class="dot"></div></td>
+                <td><div class="dot"></div></td>
+                <td><div class="dot on"></div></td>
+              </tr>
+              <tr>
+                <td class="dow">T</td><td class="date">3</td>
+                <td><div class="dot off"></div></td>
+                <td><div class="dot on"></div></td>
+                <td><div class="dot on"></div></td>
+                <td><div class="dot"></div></td>
+                <td><div class="dot"></div></td>
+              </tr>
+              <tr class="today">
+                <td class="dow">F</td><td class="date">4</td>
+                <td><div class="dot today-hit"></div></td>
+                <td><div class="dot on today-hit"></div></td>
+                <td><div class="dot today-hit"></div></td>
+                <td><div class="dot today-hit"></div></td>
+                <td><div class="dot today-hit"></div></td>
+              </tr>
+              <tr>
+                <td class="dow">S</td><td class="date">5</td>
+                <td><div class="dot future"></div></td>
+                <td><div class="dot future"></div></td>
+                <td><div class="dot future"></div></td>
+                <td><div class="dot future"></div></td>
+                <td><div class="dot future"></div></td>
+              </tr>
+              <tr>
+                <td class="dow">S</td><td class="date">6</td>
+                <td><div class="dot future"></div></td>
+                <td><div class="dot future"></div></td>
+                <td><div class="dot future"></div></td>
+                <td><div class="dot future"></div></td>
+                <td><div class="dot future"></div></td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+        <div class="legend">
+          <span><span class="swatch"></span> today (tappable)</span>
+          <span><span class="dot on"></span> engagement</span>
+          <span><span class="dot future"></span> future, inactive</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="phone">
+      <div class="appbar">← Dhikr Progress</div>
+      <p class="hint">Tap a yellow-row mark. Same add/update sheet as Home.</p>
+      <div class="body" style="opacity:.55">
+        <div class="period">
+          <div class="chip on">7 days ✓</div>
+          <div class="chip">30 days</div>
+          <div class="chip">90 days</div>
+        </div>
+        <section class="matrix">
+          <div class="title-row">
+            <div class="nav">←</div>
+            <h2>Post-fard Salah Adhkar</h2>
+            <div class="nav">→</div>
+          </div>
+          <p class="week-of">(for the week starting on 31 Aug 2026)</p>
+          <p style="font-size:12px;color:var(--muted);margin:0">Matrix stays under the sheet.</p>
+        </section>
+      </div>
+      <div class="sheet">
+        <div class="grab"></div>
+        <h3>Fajr · 4 Sep 2026</h3>
+        <p>Today. You can record or change this mark. Not a score.</p>
+        <label>Post-fard Fajr</label>
+        <select>
+          <option>Not recorded</option>
+          <option selected>Recorded engagement</option>
+          <option>Recorded as not done</option>
+        </select>
+        <button type="button">Save</button>
+      </div>
+    </div>
+
+    <div class="phone">
+      <div class="appbar">← Dhikr Progress</div>
+      <p class="hint">After → next week. All days are after today, so marks stay inactive.</p>
+      <div class="body">
+        <div class="period">
+          <div class="chip on">7 days ✓</div>
+          <div class="chip">30 days</div>
+          <div class="chip">90 days</div>
+        </div>
+        <section class="matrix">
+          <div class="title-row">
+            <div class="nav">←</div>
+            <h2>Post-fard Salah Adhkar</h2>
+            <div class="nav off" title="Already on a future week">→</div>
+          </div>
+          <p class="week-of">(for the week starting on 7 Sep 2026)</p>
+          <table>
+            <thead>
+              <tr>
+                <th class="dow"></th>
+                <th class="date"></th>
+                <th><span class="hlabel">Faj</span></th>
+                <th><span class="hlabel">Dhr</span></th>
+                <th><span class="hlabel">Asr</span></th>
+                <th><span class="hlabel">Mag</span></th>
+                <th><span class="hlabel">Isa</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td class="dow">M</td><td class="date">7</td><td><div class="dot future"></div></td><td><div class="dot future"></div></td><td><div class="dot future"></div></td><td><div class="dot future"></div></td><td><div class="dot future"></div></td></tr>
+              <tr><td class="dow">T</td><td class="date">8</td><td><div class="dot future"></div></td><td><div class="dot future"></div></td><td><div class="dot future"></div></td><td><div class="dot future"></div></td><td><div class="dot future"></div></td></tr>
+              <tr><td class="dow">W</td><td class="date">9</td><td><div class="dot future"></div></td><td><div class="dot future"></div></td><td><div class="dot future"></div></td><td><div class="dot future"></div></td><td><div class="dot future"></div></td></tr>
+              <tr><td class="dow">T</td><td class="date">10</td><td><div class="dot future"></div></td><td><div class="dot future"></div></td><td><div class="dot future"></div></td><td><div class="dot future"></div></td><td><div class="dot future"></div></td></tr>
+              <tr><td class="dow">F</td><td class="date">11</td><td><div class="dot future"></div></td><td><div class="dot future"></div></td><td><div class="dot future"></div></td><td><div class="dot future"></div></td><td><div class="dot future"></div></td></tr>
+              <tr><td class="dow">S</td><td class="date">12</td><td><div class="dot future"></div></td><td><div class="dot future"></div></td><td><div class="dot future"></div></td><td><div class="dot future"></div></td><td><div class="dot future"></div></td></tr>
+              <tr><td class="dow">S</td><td class="date">13</td><td><div class="dot future"></div></td><td><div class="dot future"></div></td><td><div class="dot future"></div></td><td><div class="dot future"></div></td><td><div class="dot future"></div></td></tr>
+            </tbody>
+          </table>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <p class="key">
+    Open this file in a browser: <code>docs/visual_review/progress_matrix_nav_today_proposal.html</code><br>
+    This HTML is not the Flutter app. Same arrows, yellow today-row, and inactive future marks would apply on every domain’s 7-day matrices.
+  </p>
+</body>
+</html>

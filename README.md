@@ -26,7 +26,7 @@ Release builds currently sign with the Android debug keystore unless you supply 
 
 See `docs/PRODUCT_SPEC.md`. Guardrails: `docs/product_guardrails.md`. Architecture: `docs/architecture.md`. Privacy: `docs/privacy.md`. Tests: `docs/testing.md`.
 
-Home is a colour-family Summary Dashboard in this order: Start today’s check-in, Reflection of the Week, Salah, Qur’an, Dhikr, Fasting, Family & Community Care, Charity + Zakat, Hadith, Review snapshot, Noticed This Week, Patterns Noticed, Recognition, PONDER, This week I noticed…, My Response. Marks Guide lives in the header. Design reference: `docs/visual_review/`.
+Home is a colour-family Summary Dashboard in this order: Start today’s check-in, Reflection of the Week, Salah & Prayer Quality, Qur’an Engagement, Hadith & Living Sunnah, Dhikr & Dua, Character & Morals (Akhlaq), Fasting, Charity + Zakat, Review snapshot, Noticed This Week, Patterns Noticed, Recognition, PONDER, This week I noticed…, My Response. Opt-in cards (Rights of Others, Ummah, and others) follow Settings → Domains. Marks Guide lives in the header. Design reference: `docs/visual_review/`.
 
 ## Known limitations
 

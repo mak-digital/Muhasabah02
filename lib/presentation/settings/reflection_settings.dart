@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../application/providers.dart';
 import '../../domain/copy.dart';
+import '../../domain/faq.dart';
 import '../../domain/ids.dart';
 import '../../domain/personal_aspiration.dart';
 import '../../domain/personal_baseline.dart';
@@ -56,12 +57,14 @@ class BaselinesSettingsScreen extends ConsumerWidget {
                     ),
                     if (baseline.manualNote != null) Text(baseline.manualNote!),
                     const SizedBox(height: 8),
-                    for (final entry in baseline.counts.entries.take(12))
-                      if (entry.value.engagementDays > 0)
-                        Text(
-                          '${entry.key}: recorded engagement on ${entry.value.engagementDays} days',
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
+                    for (final entry
+                        in baseline.counts.entries
+                            .where((item) => item.value.engagementDays > 0)
+                            .take(12))
+                      Text(
+                        '${entry.key}: recorded engagement on ${entry.value.engagementDays} days',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
                   ],
                 ),
               ),
@@ -94,9 +97,7 @@ class BaselinesSettingsScreen extends ConsumerWidget {
           content: TextField(
             controller: controller,
             maxLines: 5,
-            decoration: const InputDecoration(
-              hintText: 'Describe a pattern you want to remember. Not a target score.',
-            ),
+            decoration: InputDecoration(hintText: manualBaselineHint),
           ),
           actions: [
             TextButton(

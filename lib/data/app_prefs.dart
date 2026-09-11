@@ -1,9 +1,12 @@
 import 'dart:convert';
 
+import '../domain/display_calendar.dart';
 import '../domain/first_day_of_week.dart';
 import '../domain/home_traces.dart';
+import '../domain/monitor_domain.dart';
 import '../domain/personal_aspiration.dart';
 import '../domain/personal_baseline.dart';
+import '../domain/personal_mix.dart';
 import '../domain/quotation_cadence.dart';
 
 abstract class AppPrefs {
@@ -12,22 +15,34 @@ abstract class AppPrefs {
   bool get archivePromptDismissed;
   bool get applicationReflectionAcknowledged;
   FirstDayOfWeekPref get firstDayOfWeek;
+  DisplayCalendar get displayCalendar;
+  Set<MonitorDomain> get visibleDomains;
+  PersonalMix get personalMix;
   QuotationCadence get quotationCadence;
   List<PersonalBaseline> get baselines;
   List<PersonalAspiration> get aspirations;
   String weeklyJournal(String weekKey);
   HadithMemorisationFocus get hadithMemorisationFocus;
+  HajjStatus get hajjStatus;
+  bool get mixHiddenDomainHintShown;
+  bool get appLockEnabled;
 
   Future<void> setSampleSeeded(bool value);
   Future<void> setSampleRemovedByUser(bool value);
   Future<void> setArchivePromptDismissed(bool value);
   Future<void> setApplicationReflectionAcknowledged(bool value);
   Future<void> setFirstDayOfWeek(FirstDayOfWeekPref value);
+  Future<void> setDisplayCalendar(DisplayCalendar value);
+  Future<void> setVisibleDomains(Set<MonitorDomain> value);
+  Future<void> setPersonalMix(PersonalMix value);
   Future<void> setQuotationCadence(QuotationCadence value);
   Future<void> setBaselines(List<PersonalBaseline> value);
   Future<void> setAspirations(List<PersonalAspiration> value);
   Future<void> setWeeklyJournal(String weekKey, String text);
   Future<void> setHadithMemorisationFocus(HadithMemorisationFocus value);
+  Future<void> setHajjStatus(HajjStatus value);
+  Future<void> setMixHiddenDomainHintShown(bool value);
+  Future<void> setAppLockEnabled(bool value);
 }
 
 class MemoryAppPrefs implements AppPrefs {
@@ -37,14 +52,24 @@ class MemoryAppPrefs implements AppPrefs {
     this.archivePromptDismissed = false,
     this.applicationReflectionAcknowledged = true,
     this.firstDayOfWeek = FirstDayOfWeekPref.monday,
+    this.displayCalendar = DisplayCalendar.gregorian,
+    Set<MonitorDomain>? visibleDomains,
+    PersonalMix? personalMix,
     this.quotationCadence = QuotationCadence.weekly,
     this.hadithMemorisationFocus = HadithMemorisationFocus.unanswered,
+    this.hajjStatus = HajjStatus.unanswered,
+    this.mixHiddenDomainHintShown = false,
+    this.appLockEnabled = false,
     List<PersonalBaseline>? baselines,
     List<PersonalAspiration>? aspirations,
     Map<String, String>? weeklyJournals,
   }) : baselines = List.of(baselines ?? const []),
        aspirations = List.of(aspirations ?? const []),
-       _journals = Map.of(weeklyJournals ?? const {});
+       _journals = Map.of(weeklyJournals ?? const {}),
+       visibleDomains = Set<MonitorDomain>.from(
+         visibleDomains ?? kBasicAkhlaqVisibleDomains,
+       ),
+       personalMix = personalMix ?? PersonalMix.sameAsDomains;
 
   @override
   bool sampleSeeded;
@@ -59,10 +84,28 @@ class MemoryAppPrefs implements AppPrefs {
   FirstDayOfWeekPref firstDayOfWeek;
 
   @override
+  DisplayCalendar displayCalendar;
+
+  @override
+  Set<MonitorDomain> visibleDomains;
+
+  @override
+  PersonalMix personalMix;
+
+  @override
   QuotationCadence quotationCadence;
 
   @override
   HadithMemorisationFocus hadithMemorisationFocus;
+
+  @override
+  HajjStatus hajjStatus;
+
+  @override
+  bool mixHiddenDomainHintShown;
+
+  @override
+  bool appLockEnabled;
 
   @override
   List<PersonalBaseline> baselines;
@@ -95,6 +138,17 @@ class MemoryAppPrefs implements AppPrefs {
       firstDayOfWeek = value;
 
   @override
+  Future<void> setDisplayCalendar(DisplayCalendar value) async =>
+      displayCalendar = value;
+
+  @override
+  Future<void> setVisibleDomains(Set<MonitorDomain> value) async =>
+      visibleDomains = Set<MonitorDomain>.from(value);
+
+  @override
+  Future<void> setPersonalMix(PersonalMix value) async => personalMix = value;
+
+  @override
   Future<void> setQuotationCadence(QuotationCadence value) async =>
       quotationCadence = value;
 
@@ -120,6 +174,16 @@ class MemoryAppPrefs implements AppPrefs {
   Future<void> setHadithMemorisationFocus(
     HadithMemorisationFocus value,
   ) async => hadithMemorisationFocus = value;
+
+  @override
+  Future<void> setHajjStatus(HajjStatus value) async => hajjStatus = value;
+
+  @override
+  Future<void> setMixHiddenDomainHintShown(bool value) async =>
+      mixHiddenDomainHintShown = value;
+
+  @override
+  Future<void> setAppLockEnabled(bool value) async => appLockEnabled = value;
 }
 
 List<PersonalBaseline> decodeBaselines(String? raw) {

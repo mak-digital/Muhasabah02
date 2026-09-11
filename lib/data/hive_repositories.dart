@@ -2,10 +2,13 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 import '../data/app_prefs.dart';
 import '../domain/daily_check_in.dart';
+import '../domain/display_calendar.dart';
 import '../domain/first_day_of_week.dart';
 import '../domain/home_traces.dart';
+import '../domain/monitor_domain.dart';
 import '../domain/personal_aspiration.dart';
 import '../domain/personal_baseline.dart';
+import '../domain/personal_mix.dart';
 import '../domain/personal_response.dart';
 import '../domain/quotation_cadence.dart';
 import 'codecs.dart';
@@ -168,11 +171,17 @@ class HiveAppPrefs implements AppPrefs {
   static const _archiveDismissed = 'archive_prompt_dismissed';
   static const _applicationAck = 'application_reflection_ack';
   static const _firstDayOfWeek = 'first_day_of_week';
+  static const _displayCalendar = 'display_calendar';
+  static const _visibleDomains = 'visible_domains';
+  static const _personalMix = 'personal_mix';
   static const _quotationCadence = 'quotation_cadence';
   static const _baselines = 'personal_baselines';
   static const _aspirations = 'personal_aspirations';
   static const _weeklyJournals = 'weekly_journals';
   static const _hadithFocus = 'hadith_memorisation_focus';
+  static const _hajjStatus = 'hajj_status';
+  static const _mixHiddenHint = 'mix_hidden_domain_hint';
+  static const _appLock = 'app_lock_enabled';
 
   bool _flag(String key) => _box.get(key) == 'true';
 
@@ -196,6 +205,17 @@ class HiveAppPrefs implements AppPrefs {
       FirstDayOfWeekPrefX.fromId(_box.get(_firstDayOfWeek));
 
   @override
+  DisplayCalendar get displayCalendar =>
+      DisplayCalendarX.fromId(_box.get(_displayCalendar));
+
+  @override
+  Set<MonitorDomain> get visibleDomains =>
+      decodeVisibleDomains(_box.get(_visibleDomains));
+
+  @override
+  PersonalMix get personalMix => decodePersonalMix(_box.get(_personalMix));
+
+  @override
   Future<void> setSampleSeeded(bool value) => _setFlag(_sampleSeeded, value);
 
   @override
@@ -213,6 +233,18 @@ class HiveAppPrefs implements AppPrefs {
   @override
   Future<void> setFirstDayOfWeek(FirstDayOfWeekPref value) =>
       _box.put(_firstDayOfWeek, value.id);
+
+  @override
+  Future<void> setDisplayCalendar(DisplayCalendar value) =>
+      _box.put(_displayCalendar, value.id);
+
+  @override
+  Future<void> setVisibleDomains(Set<MonitorDomain> value) =>
+      _box.put(_visibleDomains, encodeVisibleDomains(value));
+
+  @override
+  Future<void> setPersonalMix(PersonalMix value) =>
+      _box.put(_personalMix, encodePersonalMix(value));
 
   @override
   QuotationCadence get quotationCadence =>
@@ -260,6 +292,26 @@ class HiveAppPrefs implements AppPrefs {
   @override
   Future<void> setHadithMemorisationFocus(HadithMemorisationFocus value) =>
       _box.put(_hadithFocus, value.name);
+
+  @override
+  HajjStatus get hajjStatus => HajjStatusX.fromId(_box.get(_hajjStatus));
+
+  @override
+  Future<void> setHajjStatus(HajjStatus value) =>
+      _box.put(_hajjStatus, value.name);
+
+  @override
+  bool get mixHiddenDomainHintShown => _flag(_mixHiddenHint);
+
+  @override
+  Future<void> setMixHiddenDomainHintShown(bool value) =>
+      _setFlag(_mixHiddenHint, value);
+
+  @override
+  bool get appLockEnabled => _flag(_appLock);
+
+  @override
+  Future<void> setAppLockEnabled(bool value) => _setFlag(_appLock, value);
 }
 
 Future<

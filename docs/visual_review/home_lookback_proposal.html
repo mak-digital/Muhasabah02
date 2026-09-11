@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Proposal — Home look-back (snapshot, noticed, patterns)</title>
+  <style>
+    :root {
+      --bg: #f4f1ea;
+      --ink: #1d2a2c;
+      --muted: #4d5c63;
+      --line: #c5d0d4;
+      --keep: #2f6f73;
+      --drop: #8a4a4a;
+      --salah: #d7eceb;
+      --quran: #d7e4f2;
+      --hadith: #d4e2ee;
+      --akhlaq: #e8e0d4;
+      --summary: #eef2f4;
+      --mark: #3d4a4c;
+      --halo: #fff8d6;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      margin: 0;
+      padding: 24px;
+    }
+    h1 { font-size: 22px; font-weight: 700; margin: 0 0 8px; }
+    h2 { font-size: 16px; margin: 28px 0 10px; }
+    .note { max-width: 1140px; color: var(--muted); line-height: 1.55; font-size: 14px; }
+    .rules {
+      max-width: 1140px;
+      margin: 16px 0;
+      padding: 12px 14px;
+      background: #fff;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+    .rules .no { color: var(--drop); }
+    .pair { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; }
+    .col { width: min(390px, 100%); }
+    .col h3 {
+      margin: 0 0 8px;
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .phone {
+      width: 100%;
+      background: #fff;
+      border-radius: 28px;
+      box-shadow: 0 12px 40px rgba(0,0,0,.12);
+      overflow: hidden;
+    }
+    .appbar { padding: 14px 16px 8px; font-size: 16px; font-weight: 600; }
+    .hint { padding: 0 16px 10px; font-size: 12px; color: var(--muted); line-height: 1.4; }
+    .body { padding: 0 16px 16px; }
+    .cta {
+      background: var(--keep);
+      color: #fff;
+      border: 0;
+      border-radius: 12px;
+      width: 100%;
+      padding: 10px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    .quote {
+      background: #eef2f4;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+    .week {
+      background: var(--quran);
+      border-radius: 16px;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+    .week p { margin: 0 0 6px; font-weight: 700; font-size: 14px; }
+    .card {
+      background: var(--summary);
+      border-radius: 16px;
+      padding: 12px;
+      margin-bottom: 8px;
+    }
+    .card h4 {
+      margin: 0 0 4px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .muted { font-size: 12px; color: var(--muted); line-height: 1.45; }
+    .bullet { font-size: 13px; margin: 0 0 4px; }
+    .look {
+      background: var(--summary);
+      border-radius: 16px;
+      padding: 12px 12px 8px;
+    }
+    .look > .head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .look > .head strong { font-size: 14px; }
+    .look > .head span { font-size: 11px; color: var(--muted); }
+    .mod { margin-bottom: 12px; }
+    .mod-label {
+      font-size: 10px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .snap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .snap .days {
+      display: flex;
+      gap: 5px;
+      flex: 1;
+    }
+    .dot {
+      width: 9px; height: 9px; border-radius: 50%;
+      background: var(--mark);
+    }
+    .empty {
+      width: 9px; height: 9px; border-radius: 50%;
+      border: 1.5px solid var(--mark);
+      opacity: .35;
+      background: transparent;
+    }
+    .chev { color: var(--muted); font-size: 18px; line-height: 1; }
+    .period { font-size: 12px; font-weight: 600; white-space: nowrap; }
+    .nrow {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+      padding: 5px 0;
+    }
+    .nrow .name { font-size: 13px; min-width: 0; }
+    .ticks { display: flex; gap: 4px; }
+    .tick {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--mark);
+    }
+    .tick.off {
+      background: transparent;
+      border: 1.4px solid var(--mark);
+      opacity: .32;
+    }
+    .prow {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 0;
+    }
+    .chip {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: var(--hadith);
+      white-space: nowrap;
+    }
+    .wdays {
+      display: flex;
+      gap: 3px;
+      flex: 1;
+      justify-content: flex-end;
+    }
+    .wdays i {
+      font-style: normal;
+      font-size: 9px;
+      width: 18px;
+      text-align: center;
+      color: var(--muted);
+    }
+    .wdays i.on {
+      color: var(--ink);
+      font-weight: 700;
+      background: var(--halo);
+      border-radius: 4px;
+    }
+    .bar {
+      height: 8px;
+      background: #d5dde0;
+      border-radius: 99px;
+      overflow: hidden;
+      margin: 6px 0 4px;
+    }
+    .bar > span {
+      display: block;
+      height: 100%;
+      width: 57%;
+      background: #2f9d6a;
+    }
+    .score { font-size: 22px; font-weight: 800; color: #2f9d6a; }
+    table { width: 100%; max-width: 1140px; border-collapse: collapse; font-size: 13px; }
+    th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    th { color: var(--muted); font-weight: 600; }
+  </style>
+</head>
+<body>
+  <h1>Home — look-back as presence, not paragraphs</h1>
+  <p class="note">
+    After the domain stage, Home currently stacks three similar cards: Current review
+    snapshot, Noticed This Week, and Patterns Noticed. Each leads with a caveat and
+    a sentence. The facts are already computed (days with a saved check-in; mix rows
+    with engagement this week; weekday clustering over ~90 days). This proposal
+    shows those facts in the same mark language as the week grid, so they can be
+    scanned. Copy stays for empty states and accessibility.
+  </p>
+
+  <div class="rules">
+    <strong>Keep.</strong> Domain stage remains the primary object. Look-back is
+    secondary. Engagement-day counts only. Missing / unanswered is not missed.
+    Marks share one colour. Domain wash may sit on a small chip, not on the marks.
+    Mix and Domains still decide which rows appear. Snapshot still opens Review.
+    Pattern rows still open evidence. Caveats stay in Guide and FAQ, not repeated
+    on every card.<br /><br />
+    <span class="no">Do not.</span>
+    Progress bars, 4/7 scores, completion rings, green/red, “up vs last week,”
+    streaks, or a heatmap denser than a week strip. A second colour that ranks
+    “good noticing.” Hiding check-in or the domain stage. Auto-rotating insights.
+    Turning empty weeks into a lecture.
+  </div>
+
+  <div class="pair">
+    <div class="col">
+      <h3>Today — three descriptive cards</h3>
+      <div class="phone">
+        <div class="appbar">Muhasabah</div>
+        <div class="body">
+          <button class="cta" type="button">Start today’s check-in</button>
+          <div class="quote">Reflection of the Week</div>
+          <div class="week">
+            <p>Qur’an Engagement</p>
+            <p class="muted">Domain stage stays above. Notices wait as paragraphs.</p>
+          </div>
+          <div class="card">
+            <h4>Current review snapshot</h4>
+            <p class="muted">7d · recorded 4 of 7 days · missing excluded from outcomes</p>
+          </div>
+          <div class="card">
+            <h4>Noticed This Week</h4>
+            <p class="muted" style="margin:0 0 8px">Engagement-day counts only. Not a score.</p>
+            <p class="bullet">You recorded:</p>
+            <p class="bullet">• Qur’anic Reflection on 3 days</p>
+            <p class="bullet">• Post-fard Salah Adhkar on 2 days</p>
+            <p class="bullet">• Patience on 2 days</p>
+          </div>
+          <div class="card">
+            <h4>Patterns Noticed</h4>
+            <p class="muted" style="margin:0 0 8px">Not improvement, decline, or a score.</p>
+            <p class="bullet">Hadith records appear more frequently on Fridays.</p>
+            <p class="muted">View evidence</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <h3>Rejected — scored dashboard</h3>
+      <div class="phone">
+        <div class="appbar">Muhasabah</div>
+        <div class="body">
+          <p class="hint">Looks “professional” in a fitness app. Wrong here: it grades the week.</p>
+          <div class="card">
+            <h4>Week score</h4>
+            <p class="score">57%</p>
+            <div class="bar"><span></span></div>
+            <p class="muted">4 of 7 days complete · +1 vs last week</p>
+          </div>
+          <div class="card">
+            <h4>Noticed</h4>
+            <p class="muted">Reflection ████░░ 3/7</p>
+            <p class="muted">Patience ██░░░░ 2/7</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <h3>Recommended — one look-back band</h3>
+      <div class="phone">
+        <div class="appbar">Muhasabah</div>
+        <div class="body">
+          <button class="cta" type="button">Start today’s check-in</button>
+          <div class="quote">Reflection of the Week</div>
+          <div class="week">
+            <p>Qur’an Engagement</p>
+            <p class="muted">‹ Salah · Qur’an · Hadith ›</p>
+          </div>
+          <div class="look">
+            <div class="head">
+              <strong>This week</strong>
+              <span>Presence, not a score</span>
+            </div>
+            <div class="mod">
+              <div class="mod-label">Recorded days</div>
+              <div class="snap">
+                <div class="days" aria-label="Saved check-in on four of seven days. Empty is not missed.">
+                  <span class="dot"></span>
+                  <span class="empty"></span>
+                  <span class="dot"></span>
+                  <span class="dot"></span>
+                  <span class="empty"></span>
+                  <span class="dot"></span>
+                  <span class="empty"></span>
+                </div>
+                <span class="period">7 days</span>
+                <span class="chev">›</span>
+              </div>
+            </div>
+            <div class="mod">
+              <div class="mod-label">Noticed</div>
+              <div class="nrow">
+                <span class="name">Qur’anic Reflection</span>
+                <span class="ticks" aria-label="Engagement on three days this week">
+                  <span class="tick"></span><span class="tick off"></span><span class="tick"></span>
+                  <span class="tick"></span><span class="tick off"></span><span class="tick off"></span>
+                  <span class="tick off"></span>
+                </span>
+              </div>
+              <div class="nrow">
+                <span class="name">Post-fard Salah Adhkar</span>
+                <span class="ticks">
+                  <span class="tick"></span><span class="tick off"></span><span class="tick off"></span>
+                  <span class="tick off"></span><span class="tick"></span><span class="tick off"></span>
+                  <span class="tick off"></span>
+                </span>
+              </div>
+              <div class="nrow">
+                <span class="name">Patience</span>
+                <span class="ticks">
+                  <span class="tick off"></span><span class="tick"></span><span class="tick off"></span>
+                  <span class="tick"></span><span class="tick off"></span><span class="tick off"></span>
+                  <span class="tick off"></span>
+                </span>
+              </div>
+            </div>
+            <div class="mod" style="margin-bottom:4px">
+              <div class="mod-label">Patterns</div>
+              <div class="prow">
+                <span class="chip">Hadith</span>
+                <span class="wdays" aria-label="Records appear more frequently on Fridays">
+                  <i>M</i><i>T</i><i>W</i><i>T</i><i class="on">F</i><i>S</i><i>S</i>
+                </span>
+                <span class="chev">›</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Empty week (same band)</h2>
+  <div class="pair">
+    <div class="col">
+      <h3>Recommended empty</h3>
+      <div class="phone">
+        <div class="body" style="padding-top:16px">
+          <div class="look">
+            <div class="head">
+              <strong>This week</strong>
+              <span>Presence, not a score</span>
+            </div>
+            <div class="mod">
+              <div class="mod-label">Recorded days</div>
+              <div class="snap">
+                <div class="days">
+                  <span class="empty"></span><span class="empty"></span><span class="empty"></span>
+                  <span class="empty"></span><span class="empty"></span><span class="empty"></span>
+                  <span class="empty"></span>
+                </div>
+                <span class="period">7 days</span>
+                <span class="chev">›</span>
+              </div>
+            </div>
+            <p class="muted" style="margin:0 0 8px">Nothing recorded as engagement yet. Empty days are not missed.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>How the band would behave</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Piece</th>
+        <th>Practice</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Place</td>
+        <td>One card under the domain stage, still above Recognition / Ponder / journal. Same summary wash as today’s nav cards.</td>
+      </tr>
+      <tr>
+        <td>Recorded days</td>
+        <td>Seven marks for the active Review period (first-day-of-week). Filled = a saved check-in that day. Empty = no record, not missed. Label is the period name (7 days). Whole row opens Review. No “4 of 7” on the face.</td>
+      </tr>
+      <tr>
+        <td>Noticed</td>
+        <td>Same list as today (mix rows, engagement only, up to eight, highest presence first). Each row: short label + seven ticks for this calendar week. Omit the module if the list is empty (keep the one empty line on the band).</td>
+      </tr>
+      <tr>
+        <td>Patterns</td>
+        <td>Same clustering rules as today. Subject chip (domain wash) + Mon–Sun letters with the peak day in the pale-yellow halo already used for “today” on Progress — here it means “this weekday,” not a grade. Whole row opens evidence. Omit the module when there is no cluster.</td>
+      </tr>
+      <tr>
+        <td>Copy on the face</td>
+        <td>Title <em>This week</em> (or keep three quiet module labels). One muted line: “Presence, not a score.” Full sentences remain for screen readers.</td>
+      </tr>
+      <tr>
+        <td>30 / 90</td>
+        <td>Snapshot follows the Review period already selected. Noticed stays this calendar week. Patterns stay the existing ~90-day clustering. Do not mix those windows in one strip of seven ticks.</td>
+      </tr>
+    </tbody>
+  </table>
+</body>
+</html>

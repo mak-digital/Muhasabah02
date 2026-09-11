@@ -9,6 +9,7 @@ class AppDimensions {
 
   static const double progressMarker = ProgressMarker.size;
   static const double progressMarkerGap = 4;
+  static const double todayMarkHalo = progressMarker + 4;
   static const double progressMarkerStroke = 1.5;
   static const double progressMarkerSymbol = progressMarker * 0.48;
   static const double progressMarkerStar = progressMarker * 0.65;

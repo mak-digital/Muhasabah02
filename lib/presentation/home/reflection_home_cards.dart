@@ -3,9 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../application/providers.dart';
 import '../../domain/copy.dart';
-import '../../domain/daily_check_in.dart';
 import '../../domain/first_day_of_week.dart';
-import '../../domain/noticed_this_week.dart';
 import '../../domain/patterns_noticed.dart';
 import '../../domain/personal_response.dart';
 import '../../domain/weekly_calendar.dart';
@@ -94,115 +92,6 @@ class ReflectionOfTheWeekCard extends ConsumerWidget {
   }
 }
 
-class NoticedThisWeekCard extends ConsumerWidget {
-  const NoticedThisWeekCard({super.key, required this.records});
-
-  final List<DailyCheckIn> records;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    ref.watch(prefsTickProvider);
-    final now = ref.watch(nowProvider);
-    final firstDay = ref
-        .read(appPrefsProvider)
-        .firstDayOfWeek
-        .sundayBasedIndex(
-          MaterialLocalizations.of(context).firstDayOfWeekIndex,
-        );
-    final keys = weekDateKeys(startOfWeek(now, firstDayOfWeekIndex: firstDay));
-    final lines = noticedThisWeek(records: records, weekKeys: keys);
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              Copy.noticedThisWeek,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              Copy.noticedThisWeekNote,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            const SizedBox(height: 8),
-            if (lines.isEmpty)
-              Text(
-                'Nothing recorded as engagement in this week yet. Unanswered days are not missed.',
-                style: Theme.of(context).textTheme.bodyMedium,
-              )
-            else ...[
-              const Text(Copy.youRecordedColon),
-              const SizedBox(height: 6),
-              for (final line in lines)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
-                  child: Text('• ${line.sentence}'),
-                ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class PatternsNoticedCard extends ConsumerWidget {
-  const PatternsNoticedCard({super.key, required this.records});
-
-  final List<DailyCheckIn> records;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final now = ref.watch(nowProvider);
-    final patterns = noticedPatterns(records: records, now: now);
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              Copy.patternsNoticed,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              Copy.patternsNoticedNote,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            const SizedBox(height: 8),
-            if (patterns.isEmpty)
-              Text(
-                'No weekday clustering or multi-week appearance is visible from recorded engagement yet. Missing days are not treated as missed.',
-                style: Theme.of(context).textTheme.bodyMedium,
-              )
-            else
-              for (final pattern in patterns) ...[
-                Text(pattern.sentence),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: TextButton(
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) =>
-                              PatternEvidenceScreen(pattern: pattern),
-                        ),
-                      );
-                    },
-                    child: const Text(Copy.viewEvidence),
-                  ),
-                ),
-              ],
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class PatternEvidenceScreen extends StatelessWidget {
   const PatternEvidenceScreen({super.key, required this.pattern});
 
@@ -230,7 +119,10 @@ class PatternEvidenceScreen extends StatelessWidget {
               onTap: () {
                 Navigator.of(context).push(
                   MaterialPageRoute<void>(
-                    builder: (_) => DayEvidenceScreen(dateKey: key),
+                    builder: (_) => DayEvidenceScreen(
+                      dateKey: key,
+                      limitToVisibleDomains: true,
+                    ),
                   ),
                 );
               },

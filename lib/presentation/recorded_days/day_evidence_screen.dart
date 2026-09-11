@@ -1,29 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../app/theme.dart';
 import '../../application/providers.dart';
 import '../../domain/activities.dart';
+import '../../domain/charity_factors.dart';
 import '../../domain/context_catalog.dart';
 import '../../domain/copy.dart';
 import '../../domain/daily_check_in.dart';
+import '../../domain/display_calendar.dart';
+import '../../domain/home_traces.dart';
+import '../../domain/monitor_domain.dart';
 import '../../domain/other_domains.dart';
 import '../../domain/personal_response.dart';
 import '../../domain/prayer.dart';
-import '../../domain/home_traces.dart';
 import '../../domain/quran.dart';
 import '../shared/add_response_button.dart';
 import '../shared/ui_bits.dart';
+import 'evidence_ui.dart';
 
 class DayEvidenceScreen extends ConsumerWidget {
-  const DayEvidenceScreen({super.key, required this.dateKey});
+  const DayEvidenceScreen({
+    super.key,
+    required this.dateKey,
+    this.limitToVisibleDomains = false,
+  });
 
   final String dateKey;
+  final bool limitToVisibleDomains;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(prefsTickProvider);
+    final calendar = ref.read(appPrefsProvider).displayCalendar;
     final async = ref.watch(checkInsProvider);
+    final brightness = Theme.of(context).brightness;
     return Scaffold(
-      appBar: AppBar(title: Text(dateKey)),
+      appBar: AppBar(title: Text(formatStoredDateKey(dateKey, calendar))),
       body: async.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) => const EmptyState(
@@ -42,270 +55,356 @@ class DayEvidenceScreen extends ConsumerWidget {
             );
           }
           final record = found;
+          final visible = ref.read(appPrefsProvider).visibleDomains;
+          bool show(MonitorDomain domain) =>
+              !limitToVisibleDomains || visible.contains(domain);
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              Text(
-                Copy.historicalReflectionTitle,
-                style: Theme.of(context).textTheme.titleLarge,
+              EvidenceGuard(
+                Copy.historicalReflectionGuard,
+                sample: record.synthetic,
               ),
-              const SizedBox(height: 4),
-              if (record.synthetic)
-                const Padding(
-                  padding: EdgeInsets.only(bottom: 12),
-                  child: Text('Sample/demo record'),
-                ),
-              const SizedBox(height: 12),
-              Text('Salah', style: Theme.of(context).textTheme.titleMedium),
-              for (final prayer in PrayerId.values) ...[
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(prayer.label),
-                  subtitle: Text(record.prayer(prayer).label),
-                ),
-                if (prayer == PrayerId.dhuhr && record.jumuahCongregation)
-                  const ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text('Friday congregation'),
-                    subtitle: Text('Attended'),
+              if (show(MonitorDomain.salah))
+                EvidenceBand(
+                  title: MonitorDomain.salah.label,
+                  color: MuhasabahColors.wash(
+                    MuhasabahColors.salahWash,
+                    MuhasabahColors.salahWashDark,
+                    brightness,
                   ),
-                AddResponseButton(
-                  compact: true,
-                  provenance: ResponseProvenance(
-                    originType: ProvenanceOrigin.progressDate,
-                    domain: 'salah',
-                    subject: prayer.name,
-                    dateKey: dateKey,
-                    evidenceId: '$dateKey:salah:${prayer.name}',
-                    labelSnapshot: '${prayer.label} on $dateKey',
-                  ),
+                  children: [
+                    for (final prayer in PrayerId.values)
+                      EvidenceRow(
+                        name: prayer.label,
+                        value: _prayerValue(record, prayer),
+                        quiet: !record.prayer(prayer).isRecorded,
+                      ),
+                    EvidenceRow(
+                      name: 'Jumu‘ah',
+                      value: record.jumuah.label,
+                      quiet: !record.jumuah.isRecorded,
+                    ),
+                    EvidenceRow(
+                      name: 'Tahajjud',
+                      value: _voluntary(record.tahajjud),
+                      quiet: record.tahajjud == TernaryOutcome.unanswered,
+                    ),
+                    EvidenceRow(
+                      name: 'Ishraq',
+                      value: _voluntary(record.ishraq),
+                      quiet: record.ishraq == TernaryOutcome.unanswered,
+                    ),
+                  ],
                 ),
-              ],
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Jumu‘ah'),
-                subtitle: Text(record.jumuah.label),
-              ),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Tahajjud'),
-                subtitle: Text(switch (record.tahajjud) {
-                  TernaryOutcome.positive => 'Performed',
-                  TernaryOutcome.negative => 'Not performed',
-                  TernaryOutcome.unanswered => 'Not recorded',
-                }),
-              ),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Ishraq'),
-                subtitle: Text(switch (record.ishraq) {
-                  TernaryOutcome.positive => 'Performed',
-                  TernaryOutcome.negative => 'Not performed',
-                  TernaryOutcome.unanswered => 'Not recorded',
-                }),
-              ),
-              const SizedBox(height: 8),
-              Text('Qur’an', style: Theme.of(context).textTheme.titleMedium),
-              for (final dimension in quranDailyDimensions) ...[
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(dimension.label),
-                  subtitle: Text(switch (record.quranOutcome(dimension)) {
-                    TernaryOutcome.positive => dimension.positiveLabel,
-                    TernaryOutcome.negative => dimension.negativeLabel,
-                    TernaryOutcome.unanswered => 'Not recorded',
-                  }),
-                ),
-                if (dimension == QuranDimension.consciousApplication)
-                  Text(
-                    Copy.consciousApplicationNote,
-                    style: Theme.of(context).textTheme.bodySmall,
+              if (show(MonitorDomain.quran))
+                EvidenceBand(
+                  title: MonitorDomain.quran.label,
+                  color: MuhasabahColors.wash(
+                    MuhasabahColors.quranWash,
+                    MuhasabahColors.quranWashDark,
+                    brightness,
                   ),
-                AddResponseButton(
-                  compact: true,
-                  provenance: ResponseProvenance(
-                    originType: ProvenanceOrigin.progressDate,
-                    domain: 'quran',
-                    subject: dimension.name,
-                    dateKey: dateKey,
-                    evidenceId: '$dateKey:quran:${dimension.name}',
-                    labelSnapshot: '${dimension.label} on $dateKey',
-                  ),
-                ),
-              ],
-              if (record
-                  .quranOutcome(QuranDimension.applicationReflection)
-                  .isRecorded) ...[
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: const Text('Application Reflection'),
-                  subtitle: Text(
-                    record
+                  children: [
+                    for (final dimension in quranDailyDimensions)
+                      EvidenceRow(
+                        name: dimension.label,
+                        value: switch (record.quranOutcome(dimension)) {
+                          TernaryOutcome.positive => dimension.positiveLabel,
+                          TernaryOutcome.negative => dimension.negativeLabel,
+                          TernaryOutcome.unanswered => 'Not recorded',
+                        },
+                        quiet:
+                            record.quranOutcome(dimension) ==
+                            TernaryOutcome.unanswered,
+                        note:
+                            dimension == QuranDimension.consciousApplication &&
+                                record.quranOutcome(dimension).isRecorded
+                            ? Copy.consciousApplicationNote
+                            : null,
+                      ),
+                    if (record
                         .quranOutcome(QuranDimension.applicationReflection)
-                        .legendLabel,
-                  ),
-                ),
-                Text(
-                  Copy.applicationReflectionNote,
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ],
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Dhikr / Istighfar'),
-                subtitle: Text(record.dhikr.label),
-              ),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Character / conduct'),
-                subtitle: Text(record.conduct.label),
-              ),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Gratitude'),
-                subtitle: Text(
-                  record.gratitudeStatus == EntryStatus.recorded
-                      ? 'An entry was saved'
-                      : record.gratitudeStatus.labelHint,
-                ),
-              ),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text(Copy.personalReflection),
-                subtitle: Text(
-                  record.personalReflectionStatus == EntryStatus.recorded
-                      ? 'An entry was saved'
-                      : record.personalReflectionStatus.labelHint,
-                ),
-              ),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Fasting'),
-                subtitle: Text(record.fasting.activityId),
-              ),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Financial charity'),
-                subtitle: Text(record.charity.activityId),
-              ),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Zakat'),
-                subtitle: Text(record.zakat.label),
-              ),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Family / kinship'),
-                subtitle: Text(record.family.activityId),
-              ),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Hadith engagement'),
-                subtitle: Text(record.hadith.activityId),
-              ),
-              if (record.homeTraces.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                Text(
-                  'Home traces',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                for (final entry in record.homeTraces.entries)
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(
-                      homeTraceRowByKey(entry.key)?.label ?? entry.key,
-                    ),
-                    subtitle: Text(switch (entry.value) {
-                      TernaryOutcome.positive => 'Recorded engagement',
-                      TernaryOutcome.negative => 'Recorded as not done',
-                      TernaryOutcome.unanswered => 'Not recorded',
-                    }),
-                  ),
-              ],
-              if (record.homeTraceFactors.values.any(
-                (item) => !item.isEmpty,
-              )) ...[
-                const SizedBox(height: 8),
-                Text(
-                  Copy.factorsYouNoticed,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                Text(
-                  'You recorded these factors. They are not causes.',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-                for (final entry in record.homeTraceFactors.entries)
-                  if (!entry.value.isEmpty)
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(
-                        homeTraceRowByKey(entry.key)?.label ?? entry.key,
+                        .isRecorded)
+                      EvidenceRow(
+                        name: 'Application Reflection',
+                        value: record
+                            .quranOutcome(QuranDimension.applicationReflection)
+                            .legendLabel,
+                        note: Copy.applicationReflectionNote,
                       ),
-                      subtitle: Text(
-                        [
-                          ...entry.value.supportIds.map(
-                            (id) => ContextCatalog.labelFor(id, 'positive'),
-                          ),
-                          ...entry.value.challengeIds.map(
-                            (id) => ContextCatalog.labelFor(id, 'negative'),
-                          ),
-                          if (entry.value.otherText != null &&
-                              entry.value.otherText!.trim().isNotEmpty)
-                            entry.value.otherText!.trim(),
-                        ].join(', '),
-                      ),
-                    ),
-              ],
-              if (!record.situationNotes.isEmpty) ...[
-                const SizedBox(height: 8),
-                Text(
-                  Copy.situationNotesTitle,
-                  style: Theme.of(context).textTheme.titleMedium,
+                  ],
                 ),
-                Text(
-                  Copy.situationNotesNote,
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: const Text(Copy.youRecorded),
-                  subtitle: Text(
-                    record.situationNotes.displayLabels.join(', '),
+              if (show(MonitorDomain.hadith))
+                ..._traceBand(
+                  context,
+                  title: MonitorDomain.hadith.label,
+                  color: MuhasabahColors.wash(
+                    MuhasabahColors.hadithWash,
+                    MuhasabahColors.hadithWashDark,
+                    brightness,
                   ),
+                  rows: hadithHomeRows,
+                  record: record,
+                  extraName: 'Hadith engagement',
+                  extraValue: _observationLabel(
+                    ActivityCatalog.hadith,
+                    record.hadith,
+                  ),
+                  extraQuiet: !record.hadith.isRecorded,
+                  showExtra: record.hadith.isRecorded,
                 ),
-              ],
-              if (record.contexts.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                Text(
-                  'Recorded context',
-                  style: Theme.of(context).textTheme.titleMedium,
+              if (show(MonitorDomain.dhikr))
+                ..._traceBand(
+                  context,
+                  title: MonitorDomain.dhikr.label,
+                  color: MuhasabahColors.wash(
+                    MuhasabahColors.dhikrWash,
+                    MuhasabahColors.dhikrWashDark,
+                    brightness,
+                  ),
+                  rows: dhikrHomeRows,
+                  record: record,
+                  extraName: 'Dhikr / Istighfar',
+                  extraValue: record.dhikr.label,
+                  extraQuiet: !record.dhikr.isRecorded,
+                  showExtra: record.dhikr.isRecorded,
                 ),
-                for (final ctx in record.contexts)
-                  Card(
-                    margin: const EdgeInsets.only(bottom: 8),
-                    child: ListTile(
-                      title: Text('${ctx.subject.label} · ${ctx.polarity}'),
-                      subtitle: Text(
-                        ctx.factorIds
+              if (show(MonitorDomain.akhlaq))
+                ..._traceBand(
+                  context,
+                  title: MonitorDomain.akhlaq.label,
+                  color: MuhasabahColors.wash(
+                    MuhasabahColors.akhlaqWash,
+                    MuhasabahColors.akhlaqWashDark,
+                    brightness,
+                  ),
+                  rows: akhlaqAllHomeRows,
+                  record: record,
+                  extraName: Copy.akhlaqStruggleNote,
+                  extraValue: record.akhlaqStruggleNote ?? '',
+                  extraQuiet: false,
+                  showExtra:
+                      record.akhlaqStruggleNote != null &&
+                      record.akhlaqStruggleNote!.trim().isNotEmpty,
+                ),
+              if (show(MonitorDomain.huquq))
+                ..._traceBand(
+                  context,
+                  title: MonitorDomain.huquq.label,
+                  color: MuhasabahColors.wash(
+                    MuhasabahColors.huquqWash,
+                    MuhasabahColors.huquqWashDark,
+                    brightness,
+                  ),
+                  rows: huquqHomeRows,
+                  record: record,
+                  extraName: '',
+                  extraValue: '',
+                  extraQuiet: true,
+                  showExtra: false,
+                ),
+              if (show(MonitorDomain.knowledge))
+                ..._traceBand(
+                  context,
+                  title: MonitorDomain.knowledge.label,
+                  color: MuhasabahColors.wash(
+                    MuhasabahColors.knowledgeWash,
+                    MuhasabahColors.knowledgeWashDark,
+                    brightness,
+                  ),
+                  rows: knowledgeHomeRows,
+                  record: record,
+                  extraName: '',
+                  extraValue: '',
+                  extraQuiet: true,
+                  showExtra: false,
+                ),
+              if (show(MonitorDomain.time))
+                ..._traceBand(
+                  context,
+                  title: MonitorDomain.time.label,
+                  color: MuhasabahColors.wash(
+                    MuhasabahColors.timeWash,
+                    MuhasabahColors.timeWashDark,
+                    brightness,
+                  ),
+                  rows: timeAllHomeRows,
+                  record: record,
+                  extraName: '',
+                  extraValue: '',
+                  extraQuiet: true,
+                  showExtra: false,
+                ),
+              if (show(MonitorDomain.health))
+                ..._traceBand(
+                  context,
+                  title: MonitorDomain.health.label,
+                  color: MuhasabahColors.wash(
+                    MuhasabahColors.healthWash,
+                    MuhasabahColors.healthWashDark,
+                    brightness,
+                  ),
+                  rows: healthHomeRows,
+                  record: record,
+                  extraName: '',
+                  extraValue: '',
+                  extraQuiet: true,
+                  showExtra: false,
+                ),
+              if (show(MonitorDomain.wealth))
+                ..._traceBand(
+                  context,
+                  title: MonitorDomain.wealth.label,
+                  color: MuhasabahColors.wash(
+                    MuhasabahColors.wealthWash,
+                    MuhasabahColors.wealthWashDark,
+                    brightness,
+                  ),
+                  rows: wealthAllHomeRows,
+                  record: record,
+                  extraName: '',
+                  extraValue: '',
+                  extraQuiet: true,
+                  showExtra: false,
+                ),
+              if (show(MonitorDomain.ummah))
+                ..._traceBand(
+                  context,
+                  title: MonitorDomain.ummah.label,
+                  color: MuhasabahColors.wash(
+                    MuhasabahColors.ummahWash,
+                    MuhasabahColors.ummahWashDark,
+                    brightness,
+                  ),
+                  rows: ummahAllHomeRows,
+                  record: record,
+                  extraName: '',
+                  extraValue: '',
+                  extraQuiet: true,
+                  showExtra: false,
+                ),
+              if (show(MonitorDomain.fasting))
+                ..._traceBand(
+                  context,
+                  title: 'Fasting',
+                  color: MuhasabahColors.wash(
+                    MuhasabahColors.fastingWash,
+                    MuhasabahColors.fastingWashDark,
+                    brightness,
+                  ),
+                  rows: fastingHomeRows,
+                  record: record,
+                  extraName: 'Fasting',
+                  extraValue: _observationLabel(
+                    ActivityCatalog.fasting,
+                    record.fasting,
+                  ),
+                  extraQuiet: !record.fasting.isRecorded,
+                  showExtra: record.fasting.isRecorded,
+                ),
+              if (show(MonitorDomain.hajj))
+                ..._traceBand(
+                  context,
+                  title: MonitorDomain.hajj.label,
+                  color: MuhasabahColors.wash(
+                    MuhasabahColors.hajjWash,
+                    MuhasabahColors.hajjWashDark,
+                    brightness,
+                  ),
+                  rows: hajjHomeRows,
+                  record: record,
+                  extraName: '',
+                  extraValue: '',
+                  extraQuiet: true,
+                  showExtra: false,
+                ),
+              if (show(MonitorDomain.charity))
+                ..._traceBand(
+                  context,
+                  title: 'Charity',
+                  color: MuhasabahColors.wash(
+                    MuhasabahColors.charityWash,
+                    MuhasabahColors.charityWashDark,
+                    brightness,
+                  ),
+                  rows: charityHomeRows,
+                  record: record,
+                  extraName: 'Financial charity',
+                  extraValue: _observationLabel(
+                    ActivityCatalog.charity,
+                    record.charity,
+                  ),
+                  extraQuiet: !record.charity.isRecorded,
+                  showExtra: record.charity.isRecorded,
+                  extraRows: [
+                    if (record.zakat.isRecorded)
+                      EvidenceRow(name: 'Zakat', value: record.zakat.label),
+                  ],
+                ),
+              EvidenceBand(
+                title: Copy.notesOnThisDay,
+                color: MuhasabahColors.wash(
+                  MuhasabahColors.summaryWash,
+                  MuhasabahColors.summaryWashDark,
+                  brightness,
+                ),
+                children: [
+                  EvidenceRow(
+                    name: Copy.situationNotesTitle,
+                    value: record.situationNotes.isEmpty
+                        ? Copy.reviewNoneRecorded
+                        : record.situationNotes.displayLabels.join(', '),
+                    quiet: record.situationNotes.isEmpty,
+                    note: record.situationNotes.isEmpty
+                        ? null
+                        : Copy.situationNotesNote,
+                  ),
+                  if (record.conduct.isRecorded)
+                    EvidenceRow(
+                      name: 'Character / conduct',
+                      value: record.conduct.label,
+                    ),
+                  EvidenceRow(
+                    name: 'Gratitude',
+                    value: record.gratitudeStatus == EntryStatus.recorded
+                        ? 'An entry was saved'
+                        : record.gratitudeStatus.labelHint,
+                    quiet: record.gratitudeStatus != EntryStatus.recorded,
+                  ),
+                  EvidenceRow(
+                    name: Copy.personalReflection,
+                    value:
+                        record.personalReflectionStatus == EntryStatus.recorded
+                        ? 'An entry was saved'
+                        : record.personalReflectionStatus.labelHint,
+                    quiet:
+                        record.personalReflectionStatus != EntryStatus.recorded,
+                  ),
+                  for (final ctx in record.contexts)
+                    if (show(MonitorDomain.quran))
+                      EvidenceRow(
+                        name: '${ctx.subject.label} · ${ctx.polarity}',
+                        value: ctx.factorIds
                             .map(
                               (id) => ContextCatalog.labelFor(id, ctx.polarity),
                             )
                             .join(', '),
                       ),
-                      onTap: () {},
+                ],
+              ),
+              if (record.homeTraceFactors.values.any((item) => !item.isEmpty))
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Text(
+                    Copy.factorsNotCauses,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
-                AddResponseButton(
-                  provenance: ResponseProvenance(
-                    originType: ProvenanceOrigin.recordedContext,
-                    domain: 'quran',
-                    dateKey: dateKey,
-                    evidenceId: '$dateKey:context',
-                    labelSnapshot: 'Recorded context on $dateKey',
-                  ),
                 ),
-              ],
               AddResponseButton(
+                filled: true,
                 provenance: ResponseProvenance(
                   originType: ProvenanceOrigin.historicalReflection,
                   dateKey: dateKey,
@@ -318,5 +417,86 @@ class DayEvidenceScreen extends ConsumerWidget {
         },
       ),
     );
+  }
+
+  List<Widget> _traceBand(
+    BuildContext context, {
+    required String title,
+    required Color color,
+    required List<HomeTraceRow> rows,
+    required DailyCheckIn record,
+    required String extraName,
+    required String extraValue,
+    required bool extraQuiet,
+    required bool showExtra,
+    List<Widget> extraRows = const [],
+  }) {
+    final children = <Widget>[];
+    for (final row in rows) {
+      final outcome = record.homeTrace(row.storageKey);
+      final factors = _factorLine(record, row.storageKey);
+      if (outcome == TernaryOutcome.unanswered && factors == null) continue;
+      children.add(
+        EvidenceRow(
+          name: row.label,
+          value: traceOutcomeLabel(row.storageKey, outcome),
+          quiet: outcome == TernaryOutcome.unanswered,
+          note: factors,
+        ),
+      );
+    }
+    if (showExtra) {
+      children.add(
+        EvidenceRow(name: extraName, value: extraValue, quiet: extraQuiet),
+      );
+    }
+    children.addAll(extraRows);
+    if (children.isEmpty) return const [];
+    return [EvidenceBand(title: title, color: color, children: children)];
+  }
+
+  String _prayerValue(DailyCheckIn record, PrayerId prayer) {
+    final status = record.prayer(prayer);
+    if (prayer == PrayerId.dhuhr && record.jumuahCongregation) {
+      return '${status.label} · Friday congregation';
+    }
+    return status.label;
+  }
+
+  String _voluntary(TernaryOutcome outcome) {
+    return switch (outcome) {
+      TernaryOutcome.positive => 'Performed',
+      TernaryOutcome.negative => 'Not performed',
+      TernaryOutcome.unanswered => 'Not recorded',
+    };
+  }
+
+  String _observationLabel(
+    List<ActivityOption> catalog,
+    DomainObservation observation,
+  ) {
+    if (!observation.isRecorded) return 'Not recorded';
+    final option = ActivityCatalog.find(catalog, observation.activityId);
+    final label = option?.label ?? observation.activityId;
+    final custom = observation.customText?.trim();
+    if (custom != null && custom.isNotEmpty) return '$label · $custom';
+    return label;
+  }
+
+  String? _factorLine(DailyCheckIn record, String storageKey) {
+    final factors = record.homeTraceFactors[storageKey];
+    if (factors == null || factors.isEmpty) return null;
+    final parts = [
+      ...factors.supportIds.map(
+        (id) => homeTraceFactorLabel(storageKey, id, helping: true),
+      ),
+      ...factors.challengeIds.map(
+        (id) => homeTraceFactorLabel(storageKey, id, helping: false),
+      ),
+      if (factors.otherText != null && factors.otherText!.trim().isNotEmpty)
+        factors.otherText!.trim(),
+    ];
+    if (parts.isEmpty) return null;
+    return '${Copy.factorsYouNoticed}: ${parts.join(', ')}';
   }
 }

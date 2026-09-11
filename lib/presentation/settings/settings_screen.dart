@@ -1,14 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../application/device_unlock.dart';
 import '../../application/providers.dart';
+import '../../data/privacy_log.dart';
 import '../../debug/synthetic_check_in_seeder.dart';
-import '../../debug/synthetic_check_ins.dart';
 import '../../domain/copy.dart';
+import '../../domain/display_calendar.dart';
 import '../../domain/first_day_of_week.dart';
+import '../../domain/monitor_domain.dart';
+import '../../domain/personal_mix.dart';
 import '../../domain/quotation_cadence.dart';
+import '../history/history_screen.dart';
+import '../response/response_list_screen.dart';
 import '../shared/ui_bits.dart';
 import 'application_reflection_screen.dart';
+import 'faq_screen.dart';
+import 'personal_mix_settings.dart';
 import 'reflection_settings.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -18,34 +26,87 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(prefsTickProvider);
     final prefs = ref.watch(appPrefsProvider);
-    final firstDay = prefs.firstDayOfWeek;
+    final themeIndex = ref.watch(themeModePrefProvider);
     return Scaffold(
       appBar: AppBar(title: const Text(Copy.settingsTitle)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          const SectionHeader(Copy.appearancePreferences),
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.calendar_view_week_outlined),
-              title: const Text(Copy.firstDayOfWeek),
-              subtitle: Text('${firstDay.label}\n${Copy.firstDayOfWeekNote}'),
-              isThreeLine: true,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute<void>(
-                    builder: (_) => const FirstDayOfWeekSettingsScreen(),
-                  ),
-                );
-              },
-            ),
-          ),
-          const SizedBox(height: 16),
-          const SectionHeader(Copy.reflectionPreferences),
+          const SectionHeader(Copy.applicationSection),
           Card(
             child: Column(
               children: [
+                ListTile(
+                  leading: const Icon(Icons.brightness_6_outlined),
+                  title: const Text(Copy.appearance),
+                  subtitle: Text(_themeLabel(themeIndex)),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute<void>(
+                        builder: (_) => const AppearanceSettingsScreen(),
+                      ),
+                    );
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.text_fields_outlined),
+                  title: const Text(Copy.textSize),
+                  subtitle: const Text(Copy.textSizeNote),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute<void>(
+                        builder: (_) => const TextSizeSettingsScreen(),
+                      ),
+                    );
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.calendar_view_week_outlined),
+                  title: const Text(Copy.firstDayOfWeek),
+                  subtitle: Text(prefs.firstDayOfWeek.label),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute<void>(
+                        builder: (_) => const FirstDayOfWeekSettingsScreen(),
+                      ),
+                    );
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.calendar_month_outlined),
+                  title: const Text(Copy.calendar),
+                  subtitle: Text(prefs.displayCalendar.label),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute<void>(
+                        builder: (_) => const CalendarSettingsScreen(),
+                      ),
+                    );
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.grid_view_outlined),
+                  title: const Text(Copy.visibleDomains),
+                  subtitle: Text(
+                    domainsSettingsSubtitle(
+                      prefs.visibleDomains,
+                      prefs.personalMix,
+                    ),
+                  ),
+                  isThreeLine: true,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute<void>(
+                        builder: (_) => const VisibleDomainsSettingsScreen(),
+                      ),
+                    );
+                  },
+                ),
                 ListTile(
                   leading: const Icon(Icons.timeline_outlined),
                   title: const Text(Copy.baselinesTitle),
@@ -74,24 +135,35 @@ class SettingsScreen extends ConsumerWidget {
                     );
                   },
                 ),
+                ListTile(
+                  leading: const Icon(Icons.format_quote_outlined),
+                  title: const Text(Copy.quotationCadence),
+                  subtitle: Text(prefs.quotationCadence.label),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute<void>(
+                        builder: (_) => const QuotationsSettingsScreen(),
+                      ),
+                    );
+                  },
+                ),
               ],
             ),
           ),
           const SizedBox(height: 16),
-          const SectionHeader(Copy.reflectionsQuotations),
+          const SectionHeader(Copy.privacySection),
           Card(
             child: ListTile(
-              leading: const Icon(Icons.format_quote_outlined),
-              title: const Text(Copy.quotationCadence),
-              subtitle: Text(
-                '${prefs.quotationCadence.label}\n${Copy.quotationCadenceNote}',
-              ),
+              leading: const Icon(Icons.privacy_tip_outlined),
+              title: const Text(Copy.onDeviceStorage),
+              subtitle: const Text(Copy.onDeviceStorageNote),
               isThreeLine: true,
               onTap: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute<void>(
-                    builder: (_) => const QuotationsSettingsScreen(),
+                    builder: (_) => const PrivacySettingsScreen(),
                   ),
                 );
               },
@@ -100,51 +172,224 @@ class SettingsScreen extends ConsumerWidget {
           const SizedBox(height: 16),
           const SectionHeader(Copy.aboutMuhasabah),
           Card(
-            child: ListTile(
-              leading: const Icon(Icons.info_outline),
-              title: const Text(Copy.applicationReflectionIntroTitle),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute<void>(
-                    builder: (_) => const ApplicationReflectionAboutScreen(),
-                  ),
-                );
-              },
+            child: Column(
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.info_outline),
+                  title: const Text(Copy.applicationReflectionIntroTitle),
+                  subtitle: const Text(Copy.seePonderExplore),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute<void>(
+                        builder: (_) =>
+                            const ApplicationReflectionAboutScreen(),
+                      ),
+                    );
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.help_outline),
+                  title: const Text(Copy.faqTitle),
+                  subtitle: const Text(Copy.faqSettingsNote),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute<void>(
+                        builder: (_) => const FaqScreen(),
+                      ),
+                    );
+                  },
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 16),
-          const SectionHeader(Copy.dataManagement),
+          const SectionHeader(Copy.accountAndData),
           Card(
             child: Column(
               children: [
-                const ListTile(
-                  title: Text(Copy.dataManagement),
-                  subtitle: Text(kSampleDataNotice),
+                ListTile(
+                  leading: const Icon(Icons.manage_history_outlined),
+                  title: const Text(Copy.historyTitle),
+                  subtitle: const Text(Copy.manageCheckInsNote),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute<void>(
+                        builder: (_) => const HistoryScreen(),
+                      ),
+                    );
+                  },
                 ),
                 ListTile(
+                  leading: const Icon(Icons.edit_note_outlined),
+                  title: const Text(Copy.myResponse),
+                  subtitle: const Text(Copy.myResponseSettingsNote),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute<void>(
+                        builder: (_) => const ResponseListScreen(),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          const SectionHeader(Copy.developerSampleData),
+          Card(
+            child: Column(
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.replay_outlined),
                   title: const Text('Recreate sample data'),
-                  subtitle: const Text(
-                    'Replace sample records only. Your own records are left unchanged.',
-                  ),
+                  subtitle: const Text('Sample only; personal days kept'),
                   onTap: () => _recreate(context, ref),
                 ),
                 ListTile(
+                  leading: const Icon(Icons.backspace_outlined),
                   title: const Text('Remove sample data'),
-                  subtitle: const Text(
-                    'Removes sample check-ins and sample responses. Nothing is deleted automatically later.',
-                  ),
+                  subtitle: const Text('Never automatic later'),
                   onTap: () => _remove(context, ref),
                 ),
                 ListTile(
+                  leading: const Icon(Icons.settings_backup_restore_outlined),
                   title: const Text('Restore sample data'),
-                  subtitle: const Text(
-                    'Bring the sample dataset back. Existing personal days are not overwritten.',
-                  ),
+                  subtitle: const Text('Does not overwrite personal days'),
                   onTap: () => _restore(context, ref),
                 ),
               ],
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+String _themeLabel(int index) {
+  return switch (index) {
+    1 => 'Light',
+    2 => 'Dark',
+    _ => Copy.appearanceNote,
+  };
+}
+
+class AppearanceSettingsScreen extends ConsumerWidget {
+  const AppearanceSettingsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final current = ref.watch(themeModePrefProvider);
+    return Scaffold(
+      appBar: AppBar(title: const Text(Copy.appearance)),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          Text(
+            Copy.appearanceNote,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          const SizedBox(height: 12),
+          Card(
+            child: RadioGroup<int>(
+              groupValue: current,
+              onChanged: (value) {
+                if (value == null) return;
+                ref.read(themeModePrefProvider.notifier).state = value;
+              },
+              child: const Column(
+                children: [
+                  RadioListTile<int>(title: Text('System'), value: 0),
+                  RadioListTile<int>(title: Text('Light'), value: 1),
+                  RadioListTile<int>(title: Text('Dark'), value: 2),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class TextSizeSettingsScreen extends StatelessWidget {
+  const TextSizeSettingsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text(Copy.textSize)),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          Text(
+            Copy.textSizeNote,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Muhasabah uses your device text size. Change it in the system accessibility settings. The app does not override or score how large text appears.',
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class PrivacySettingsScreen extends ConsumerWidget {
+  const PrivacySettingsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(prefsTickProvider);
+    final prefs = ref.watch(appPrefsProvider);
+    return Scaffold(
+      appBar: AppBar(title: const Text(Copy.privacySection)),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          Text(
+            Copy.onDeviceStorage,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 8),
+          const Text(Copy.onDeviceStorageNote),
+          const SizedBox(height: 16),
+          const Text(Copy.privacyBody),
+          const SizedBox(height: 16),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: const Text(Copy.appLockTitle),
+            subtitle: const Text(Copy.appLockNote),
+            value: prefs.appLockEnabled,
+            onChanged: (enabled) async {
+              final unlock = ref.read(deviceUnlockProvider);
+              if (enabled) {
+                if (!await unlock.canAuthenticate()) {
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text(Copy.appLockUnavailable)),
+                  );
+                  return;
+                }
+                final ok = await unlock.authenticate(
+                  reason: Copy.appLockReason,
+                );
+                if (!ok) return;
+                await prefs.setAppLockEnabled(true);
+                ref.read(appSessionUnlockedProvider.notifier).state = true;
+                logAppEvent('app_lock_enabled');
+              } else {
+                await prefs.setAppLockEnabled(false);
+                logAppEvent('app_lock_disabled');
+              }
+              ref.read(prefsTickProvider.notifier).state++;
+            },
           ),
         ],
       ),
@@ -192,6 +437,146 @@ class FirstDayOfWeekSettingsScreen extends ConsumerWidget {
               ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class CalendarSettingsScreen extends ConsumerWidget {
+  const CalendarSettingsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(prefsTickProvider);
+    final current = ref.watch(appPrefsProvider).displayCalendar;
+    return Scaffold(
+      appBar: AppBar(title: const Text(Copy.calendar)),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          Text(
+            Copy.calendarNote,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          const SizedBox(height: 12),
+          Card(
+            child: RadioGroup<DisplayCalendar>(
+              groupValue: current,
+              onChanged: (value) async {
+                if (value == null) return;
+                await ref.read(appPrefsProvider).setDisplayCalendar(value);
+                ref.read(prefsTickProvider.notifier).state++;
+              },
+              child: Column(
+                children: [
+                  for (final option in DisplayCalendar.values)
+                    RadioListTile<DisplayCalendar>(
+                      title: Text(
+                        option == DisplayCalendar.gregorian
+                            ? '${option.label} (default)'
+                            : option.label,
+                      ),
+                      value: option,
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class VisibleDomainsSettingsScreen extends ConsumerWidget {
+  const VisibleDomainsSettingsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(prefsTickProvider);
+    final current = ref.watch(appPrefsProvider).visibleDomains;
+    return Scaffold(
+      appBar: AppBar(title: const Text(Copy.visibleDomains)),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          Text(
+            Copy.shownDomainsNote,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              FilterChip(
+                label: const Text(Copy.selectAllDomains),
+                selected: sameVisibleDomains(
+                  current,
+                  MonitorDomain.values.toSet(),
+                ),
+                onSelected: (_) async {
+                  await ref
+                      .read(appPrefsProvider)
+                      .setVisibleDomains(MonitorDomain.values.toSet());
+                  ref.read(prefsTickProvider.notifier).state++;
+                },
+              ),
+              FilterChip(
+                label: const Text(Copy.basicAkhlaqDomains),
+                selected: sameVisibleDomains(
+                  current,
+                  kBasicAkhlaqVisibleDomains,
+                ),
+                onSelected: (_) async {
+                  await ref
+                      .read(appPrefsProvider)
+                      .setVisibleDomains(
+                        Set<MonitorDomain>.from(kBasicAkhlaqVisibleDomains),
+                      );
+                  ref.read(prefsTickProvider.notifier).state++;
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            Copy.basicAkhlaqDomainsNote,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Card(
+            child: Column(
+              children: [
+                for (final domain in MonitorDomain.values)
+                  CheckboxListTile(
+                    key: Key('domain-visible-${domain.name}'),
+                    title: Text(domain.label),
+                    value: current.contains(domain),
+                    onChanged: (checked) async {
+                      final next = Set<MonitorDomain>.from(current);
+                      if (checked == true) {
+                        next.add(domain);
+                      } else {
+                        next.remove(domain);
+                      }
+                      await ref.read(appPrefsProvider).setVisibleDomains(next);
+                      ref.read(prefsTickProvider.notifier).state++;
+                    },
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            Copy.thisSeasonsMix,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 8),
+          const PersonalMixEditor(),
         ],
       ),
     );

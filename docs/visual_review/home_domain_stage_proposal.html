@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Proposal — Home domain stage (one week at a time)</title>
+  <style>
+    :root {
+      --bg: #f4f1ea;
+      --ink: #1d2a2c;
+      --muted: #4d5c63;
+      --line: #c5d0d4;
+      --keep: #2f6f73;
+      --drop: #8a4a4a;
+      --salah: #d7eceb;
+      --quran: #d7e4f2;
+      --hadith: #d4e2ee;
+      --akhlaq: #e8e0d4;
+      --charity: #f4e6c8;
+      --mark: #3d4a4c;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      margin: 0;
+      padding: 24px;
+    }
+    h1 { font-size: 22px; font-weight: 700; margin: 0 0 8px; }
+    h2 { font-size: 16px; margin: 28px 0 10px; }
+    .note { max-width: 1100px; color: var(--muted); line-height: 1.55; font-size: 14px; }
+    .rules {
+      max-width: 1100px;
+      margin: 16px 0;
+      padding: 12px 14px;
+      background: #fff;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+    .rules .no { color: var(--drop); }
+    .pair { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; }
+    .col { width: min(390px, 100%); }
+    .col h3 {
+      margin: 0 0 8px;
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .phone {
+      width: 100%;
+      background: #fff;
+      border-radius: 28px;
+      box-shadow: 0 12px 40px rgba(0,0,0,.12);
+      overflow: hidden;
+    }
+    .appbar { padding: 14px 16px 8px; font-size: 16px; font-weight: 600; }
+    .hint { padding: 0 16px 10px; font-size: 12px; color: var(--muted); line-height: 1.4; }
+    .body { padding: 0 16px 16px; }
+    .cta {
+      background: var(--keep);
+      color: #fff;
+      border: 0;
+      border-radius: 12px;
+      width: 100%;
+      padding: 10px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    .quote {
+      background: #eef2f4;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+    .card { border-radius: 16px; padding: 12px; margin-bottom: 8px; }
+    .nav {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+    .nav button {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      color: var(--ink);
+    }
+    .nav .now {
+      flex: 1;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .pills {
+      display: flex;
+      justify-content: center;
+      gap: 5px;
+      margin: 0 0 8px;
+    }
+    .pill {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--line);
+    }
+    .pill.on { background: var(--keep); width: 16px; border-radius: 999px; }
+    .days {
+      display: grid;
+      grid-template-columns: 72px repeat(7, 1fr);
+      gap: 4px;
+      font-size: 10px;
+      color: var(--muted);
+      text-align: center;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: 72px repeat(7, 1fr);
+      gap: 4px;
+      align-items: center;
+      margin-top: 4px;
+    }
+    .lab { font-size: 11px; text-align: left; color: var(--muted); }
+    .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--mark); margin: 0 auto; }
+    .ring { width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid var(--mark); margin: 0 auto; }
+    .empty { width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid var(--mark); opacity: .35; margin: 0 auto; }
+    .tabs {
+      display: flex;
+      gap: 0;
+      overflow: hidden;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 8px;
+      font-size: 11px;
+    }
+    .tabs span {
+      padding: 8px 6px;
+      white-space: nowrap;
+      color: var(--muted);
+    }
+    .tabs .on { color: var(--ink); font-weight: 700; border-bottom: 2px solid var(--keep); }
+    .ghost { opacity: 0.45; }
+    .notice {
+      background: #faf8f4;
+      border-radius: 12px;
+      padding: 10px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    table { width: 100%; max-width: 1100px; border-collapse: collapse; font-size: 13px; }
+    th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    th { color: var(--muted); font-weight: 600; }
+  </style>
+</head>
+<body>
+  <h1>Home — one domain stage, not a stack of weeks</h1>
+  <p class="note">
+    Home currently lists every mix/visible domain as a full week card, then notices.
+    With six first-look domains (and more if Fasting or Hajj is shown), the week grids
+    push Noticed This Week, Patterns, and Ponder far down. Tabs with previous/next
+    names would shorten that. A staged pager is the friendlier form of that idea.
+  </p>
+
+  <div class="rules">
+    <strong>Keep.</strong> Vertical Home spine: check-in, Reflection of the Week,
+    <em>one</em> domain week, then Review snapshot, Noticed, Patterns, Ponder, journal.
+    Card wash still names the domain. Marks stay one colour. Mix and Domains still
+    decide <em>which</em> domains exist — this only changes <em>how many weeks are on screen at once</em>.<br /><br />
+    <span class="no">Do not.</span>
+    A second bottom navigation. A wrapping Material tab strip of 8–14 long titles.
+    Hiding check-in or notices inside the domain pager. Scoring dots. Auto-rotating
+    domains. Inferring “you should look at Charity next.”
+  </div>
+
+  <h2>Why not a classic tab bar</h2>
+  <p class="note">
+    Six or more full titles (“Character &amp; Morals (Akhlaq)”) do not fit a phone tab bar.
+    Truncated tabs hide which domain is next. A second row of tabs competes with
+    Home / Review / History. Previous/next with the <em>short name</em> of the neighbour
+    is clearer than unlabeled chevrons and clearer than a crowded tab strip.
+  </p>
+
+  <div class="pair">
+    <div class="col">
+      <h3>Today — stacked weeks</h3>
+      <div class="phone">
+        <div class="appbar">Muhasabah</div>
+        <p class="hint">Salah, then Qur’an, then Hadith… Notices wait below the fold.</p>
+        <div class="body">
+          <button class="cta" type="button">Start today’s check-in</button>
+          <div class="quote">Reflection of the Week</div>
+          <div class="card" style="background:var(--salah)">
+            <div class="days"><span></span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div>
+            <div class="row"><span class="lab">Fajr</span><span class="dot"></span><span class="empty"></span><span class="dot"></span><span class="ring"></span><span class="empty"></span><span class="empty"></span><span class="empty"></span></div>
+            <p class="hint" style="padding:8px 0 0">Salah &amp; Prayer Quality</p>
+          </div>
+          <div class="card ghost" style="background:var(--quran)">Qur’an Engagement</div>
+          <div class="card ghost" style="background:var(--hadith)">Hadith…</div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <h3>Crowded tabs — not recommended</h3>
+      <div class="phone">
+        <div class="appbar">Muhasabah</div>
+        <div class="tabs">
+          <span class="on">Salah</span>
+          <span>Qur’an</span>
+          <span>Hadith</span>
+          <span>Akhlaq</span>
+          <span>Rights</span>
+          <span>Charity</span>
+        </div>
+        <div class="body">
+          <p class="hint">Titles clip. The sixth domain is easy to miss. Competes with the app’s own tabs.</p>
+          <div class="card" style="background:var(--salah)">
+            <div class="row"><span class="lab">Fajr</span><span class="dot"></span><span class="empty"></span><span class="dot"></span><span class="ring"></span><span class="empty"></span><span class="empty"></span><span class="empty"></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <h3>Recommended — domain stage</h3>
+      <div class="phone">
+        <div class="appbar">Muhasabah</div>
+        <div class="body">
+          <button class="cta" type="button">Start today’s check-in</button>
+          <div class="quote">Reflection of the Week</div>
+          <div class="nav">
+            <button type="button">‹ Salah</button>
+            <div class="now">Qur’an</div>
+            <button type="button">Hadith ›</button>
+          </div>
+          <div class="pills">
+            <span class="pill"></span>
+            <span class="pill on"></span>
+            <span class="pill"></span>
+            <span class="pill"></span>
+            <span class="pill"></span>
+            <span class="pill"></span>
+          </div>
+          <div class="card" style="background:var(--quran)">
+            <p style="margin:0 0 6px;font-weight:700;font-size:14px">Qur’an Engagement</p>
+            <div class="days"><span></span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div>
+            <div class="row"><span class="lab">Recitation</span><span class="dot"></span><span class="dot"></span><span class="empty"></span><span class="empty"></span><span class="ring"></span><span class="empty"></span><span class="empty"></span></div>
+            <div class="row"><span class="lab">Meaning</span><span class="empty"></span><span class="dot"></span><span class="empty"></span><span class="empty"></span><span class="empty"></span><span class="empty"></span><span class="empty"></span></div>
+          </div>
+          <div class="notice">Current review snapshot, Noticed This Week, and Ponder stay on this page, below the stage.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>How the stage would behave</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Piece</th>
+        <th>Practice</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Order</td>
+        <td>Same as Home mix order today. First domain is still Salah when it is in the mix.</td>
+      </tr>
+      <tr>
+        <td>Chrome</td>
+        <td>Left control: previous short name. Centre: current short name. Right: next short name. Ends omit the missing neighbour.</td>
+      </tr>
+      <tr>
+        <td>Pills</td>
+        <td>Count of domains on Home, wash-neutral, not a score. Tappable. Not progress.</td>
+      </tr>
+      <tr>
+        <td>Swipe</td>
+        <td>Horizontal swipe on the card may change domain. Vertical scroll still moves the page (check-in, notices).</td>
+      </tr>
+      <tr>
+        <td>One domain</td>
+        <td>If mix/Domains leave a single card, hide prev/next and pills. No theatre around one week.</td>
+      </tr>
+      <tr>
+        <td>Memory</td>
+        <td>Remember the last domain in this session only. Do not persist as a spiritual “focus of the day.”</td>
+      </tr>
+      <tr>
+        <td>Short names</td>
+        <td>Salah, Qur’an, Hadith, Dhikr, Character, Rights, Knowledge, Time, Health, Wealth, Ummah, Fasting, Hajj, Charity. Full title stays on the card.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>What already helps (keep using)</h2>
+  <p class="note">
+    Settings → Domains and this season’s mix are still the main way to shorten Home.
+    Compact one-line weeks for opt-in domains stay. The stage is for when several
+    <em>full</em> matrices (Salah, Qur’an, Hadith, Akhlaq, Huquq, Charity) make the
+    page too long even with a sensible mix.
+  </p>
+</body>
+</html>

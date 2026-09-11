@@ -2,11 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muhasabah02/app/dimensions.dart';
 import 'package:muhasabah02/data/memory_repositories.dart';
+import 'package:muhasabah02/domain/copy.dart';
 import 'package:muhasabah02/domain/daily_check_in.dart';
+import 'package:muhasabah02/domain/display_calendar.dart';
 import 'package:muhasabah02/domain/first_day_of_week.dart';
+import 'package:muhasabah02/domain/monitor_domain.dart';
 import 'package:muhasabah02/domain/prayer.dart';
 import 'package:muhasabah02/domain/quran.dart';
-import 'package:muhasabah02/presentation/progress/salah_progress_screen.dart';
+import 'package:muhasabah02/domain/weekly_calendar.dart';
+import 'package:muhasabah02/presentation/checkin/check_in_screen.dart';
 import 'package:muhasabah02/presentation/shared/state_marker.dart';
 
 import '../support/test_app.dart';
@@ -18,6 +22,7 @@ void main() {
     WidgetTester tester, {
     required List<DailyCheckIn> days,
     FirstDayOfWeekPref firstDay = FirstDayOfWeekPref.monday,
+    DisplayCalendar calendar = DisplayCalendar.gregorian,
   }) async {
     tester.view.physicalSize = const Size(400, 2200);
     tester.view.devicePixelRatio = 1;
@@ -28,7 +33,12 @@ void main() {
       await checkIns.save(day);
     }
     await tester.pumpWidget(
-      testApp(checkIns: checkIns, now: now, firstDayOfWeek: firstDay),
+      testApp(
+        checkIns: checkIns,
+        now: now,
+        firstDayOfWeek: firstDay,
+        displayCalendar: calendar,
+      ),
     );
     await tester.pumpAndSettle();
   }
@@ -217,10 +227,106 @@ void main() {
     },
   );
 
-  testWidgets('Salah title still opens progress', (tester) async {
+  testWidgets('Salah title opens Salah entry only', (tester) async {
     await pumpHome(tester, days: const []);
-    await tester.tap(find.text('Salah').first);
+    await tester.tap(find.text(MonitorDomain.salah.label).first);
     await tester.pumpAndSettle();
-    expect(find.byType(SalahProgressScreen), findsOneWidget);
+    expect(find.byType(CheckInScreen), findsOneWidget);
+    expect(
+      find.textContaining('${MonitorDomain.salah.label} ·'),
+      findsOneWidget,
+    );
+    expect(
+      find.text('Was my heart present when I stood before Allah?'),
+      findsWidgets,
+    );
+    expect(find.text('Fajr'), findsOneWidget);
+    expect(find.text('Recitation'), findsNothing);
+    expect(find.text('Morning Adhkar'), findsNothing);
+  });
+
+  testWidgets('Dhuhr cell opens Obligatory Salah and Ishraq opens Voluntary', (
+    tester,
+  ) async {
+    await pumpHome(tester, days: const []);
+    await tester.tap(find.byKey(const Key('salah-home-dhuhr-2026-09-03')));
+    await tester.pumpAndSettle();
+    expect(find.byType(CheckInScreen), findsOneWidget);
+    expect(
+      find.textContaining('${MonitorDomain.salah.label} · 3 Sep 2026'),
+      findsOneWidget,
+    );
+    expect(find.text('Fajr'), findsOneWidget);
+    expect(find.text('Ishraq'), findsNothing);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('salah-home-ishraq-2026-08-31')));
+    await tester.pumpAndSettle();
+    expect(find.byType(CheckInScreen), findsOneWidget);
+    expect(
+      find.textContaining('${MonitorDomain.salah.label} · 31 Aug 2026'),
+      findsOneWidget,
+    );
+    expect(find.text('Ishraq'), findsOneWidget);
+    expect(find.text('Fajr'), findsNothing);
+  });
+
+  testWidgets('today Salah cell opens that day’s entry ready to save', (
+    tester,
+  ) async {
+    await pumpHome(tester, days: const []);
+    await tester.tap(find.byKey(const Key('salah-home-fajr-2026-09-03')));
+    await tester.pumpAndSettle();
+    expect(find.byType(CheckInScreen), findsOneWidget);
+    expect(
+      find.textContaining('${MonitorDomain.salah.label} · 3 Sep 2026'),
+      findsOneWidget,
+    );
+    expect(find.text('Save'), findsOneWidget);
+    expect(find.text(Copy.edit), findsNothing);
+  });
+
+  testWidgets('past Salah cell opens that day locked until Edit', (
+    tester,
+  ) async {
+    await pumpHome(
+      tester,
+      days: [
+        DailyCheckIn.empty('2026-08-31')
+            .withPrayer(PrayerId.fajr, PrayerStatus.onTime),
+      ],
+    );
+    await tester.tap(find.byKey(const Key('salah-home-fajr-2026-08-31')));
+    await tester.pumpAndSettle();
+    expect(find.byType(CheckInScreen), findsOneWidget);
+    expect(
+      find.textContaining('${MonitorDomain.salah.label} · 31 Aug 2026'),
+      findsOneWidget,
+    );
+    expect(find.text(Copy.edit), findsWidgets);
+    expect(find.text('Save'), findsNothing);
+    await tester.tap(find.text(Copy.edit).last);
+    await tester.pumpAndSettle();
+    expect(find.text('Save'), findsOneWidget);
+  });
+
+  testWidgets('future Salah cell does not open entry', (tester) async {
+    await pumpHome(tester, days: const []);
+    await tester.tap(find.byKey(const Key('salah-home-fajr-2026-09-04')));
+    await tester.pumpAndSettle();
+    expect(find.byType(CheckInScreen), findsNothing);
+  });
+
+  testWidgets('Islamic calendar shows Hijri dates on the Salah week range', (
+    tester,
+  ) async {
+    await pumpHome(tester, days: const [], calendar: DisplayCalendar.islamic);
+    final range = weekRangeLabel(
+      DateTime(2026, 8, 31),
+      calendar: DisplayCalendar.islamic,
+    );
+    expect(find.text(range), findsWidgets);
+    expect(find.textContaining('Aug'), findsNothing);
+    expect(find.textContaining('Sep'), findsNothing);
   });
 }
