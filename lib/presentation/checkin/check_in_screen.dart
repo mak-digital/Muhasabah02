@@ -15,7 +15,7 @@ import '../../domain/factor_groups.dart';
 import '../../domain/home_traces.dart';
 import '../../domain/monitor_domain.dart';
 import '../../domain/other_domains.dart';
-import '../../domain/personal_mix.dart';
+import '../../domain/personalisation_resolver.dart';
 import '../../domain/prayer.dart';
 import '../../domain/quran.dart';
 import '../../domain/recorded_context.dart';
@@ -200,10 +200,7 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
         ],
       ),
       body: widget.focus == CheckInFocus.full
-          ? IgnorePointer(
-              ignoring: !_editing,
-              child: _fullCheckInStage(shown),
-            )
+          ? IgnorePointer(ignoring: !_editing, child: _fullCheckInStage(shown))
           : ListView(
               primary: true,
               physics: const AlwaysScrollableScrollPhysics(),
@@ -270,16 +267,15 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
 
   Widget _fullCheckInStage(String shown) {
     final prefs = ref.read(appPrefsProvider);
-    final visible = prefs.visibleDomains;
-    final mix = prefs.personalMix;
-    final mixKeys = resolvePersonalMixKeys(mix, visible);
+    final resolver = PersonalisationResolver(
+      visibleDomains: prefs.visibleDomains,
+      mix: prefs.personalMix,
+    );
+    final mixKeys = resolver.effectiveRowIds;
     return DomainStage(
-      domains: orderedVisibleDomains(visible, mix),
-      cardFor: (domain) => _widgetForDomain(
-        domain,
-        expandFirst: true,
-        mixKeys: mixKeys,
-      ),
+      domains: resolver.reviewDomains,
+      cardFor: (domain) =>
+          _widgetForDomain(domain, expandFirst: true, mixKeys: mixKeys),
       stageProvider: checkInDomainStageProvider,
       keyPrefix: 'checkin-domain',
       pillsNote: Copy.checkInDomainPillsNote,
@@ -296,7 +292,7 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
         ],
         const SizedBox(height: 12),
         _otherCard(),
-        if (visible.contains(MonitorDomain.quran)) ...[
+        if (resolver.isDomainVisible(MonitorDomain.quran)) ...[
           const SizedBox(height: 12),
           _contextCard(),
         ],

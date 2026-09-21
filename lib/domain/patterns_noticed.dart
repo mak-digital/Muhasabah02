@@ -2,6 +2,7 @@ import 'daily_check_in.dart';
 import 'date_key.dart';
 import 'monitor_domain.dart';
 import 'personal_mix.dart';
+import 'personalisation_resolver.dart';
 import 'quran.dart';
 
 enum PatternKind { weekdayPeak, weekend, multiWeek }
@@ -44,7 +45,10 @@ List<NoticedPattern> noticedPatterns({
 }) {
   final visible =
       visibleDomains ?? Set<MonitorDomain>.from(MonitorDomain.values);
-  final mixKeys = resolvePersonalMixKeys(mix, visible);
+  final mixKeys = PersonalisationResolver(
+    visibleDomains: visible,
+    mix: mix,
+  ).effectiveRowIds;
   final periodKeys = periodDateKeys(90, now: now);
   final index = {for (final record in records) record.dateKey: record};
   final patterns = <NoticedPattern>[];

@@ -11,7 +11,7 @@ import '../../domain/display_calendar.dart';
 import '../../domain/home_traces.dart';
 import '../../domain/monitor_domain.dart';
 import '../../domain/other_domains.dart';
-import '../../domain/personal_mix.dart';
+import '../../domain/personalisation_resolver.dart';
 import '../../domain/personal_response.dart';
 import '../../domain/quran.dart';
 import '../../domain/review_period.dart';
@@ -44,6 +44,10 @@ class ReviewScreen extends ConsumerWidget {
           ref.watch(prefsTickProvider);
           final visible = ref.watch(appPrefsProvider).visibleDomains;
           final mix = ref.watch(appPrefsProvider).personalMix;
+          final resolver = PersonalisationResolver(
+            visibleDomains: visible,
+            mix: mix,
+          );
           final calendar = ref.watch(appPrefsProvider).displayCalendar;
           final brightness = Theme.of(context).brightness;
           final keys = periodDateKeys(period.days, now: now);
@@ -425,7 +429,7 @@ class ReviewScreen extends ConsumerWidget {
               ),
           ];
           final tiles = [
-            for (final domain in orderedVisibleDomains(visible, mix))
+            for (final domain in resolver.reviewDomains)
               for (final tile in builtTiles)
                 if (tile.tileKey == Key('review-domain-${domain.id}')) tile,
           ];

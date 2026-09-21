@@ -9,6 +9,7 @@ import '../../domain/daily_check_in.dart';
 import '../../domain/home_traces.dart';
 import '../../domain/monitor_domain.dart';
 import '../../domain/personal_mix.dart';
+import '../../domain/personalisation_resolver.dart';
 import '../../domain/salah_extras.dart';
 import '../../domain/sample_retirement.dart';
 import '../checkin/check_in_screen.dart';
@@ -188,9 +189,10 @@ class HomeScreen extends ConsumerWidget {
   }) {
     final visible = ref.watch(appPrefsProvider).visibleDomains;
     final mix = ref.watch(appPrefsProvider).personalMix;
-    final mixKeys = resolvePersonalMixKeys(mix, visible);
+    final resolver = PersonalisationResolver(visibleDomains: visible, mix: mix);
+    final mixKeys = resolver.effectiveRowIds;
     final season = personalMixSeasonLine(mix, visible);
-    final homeDomains = homeMixDomains(visible, mix);
+    final homeDomains = resolver.homeDomains;
     void open(Widget page) {
       Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => page));
     }

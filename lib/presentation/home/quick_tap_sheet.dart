@@ -7,7 +7,7 @@ import '../../domain/copy.dart';
 import '../../domain/daily_check_in.dart';
 import '../../domain/date_key.dart';
 import '../../domain/monitor_domain.dart';
-import '../../domain/personal_mix.dart';
+import '../../domain/personalisation_resolver.dart';
 import '../../domain/quick_tap.dart';
 import '../../domain/salah_extras.dart';
 import '../shared/state_marker.dart';
@@ -44,12 +44,12 @@ class QuickTapSheet extends ConsumerWidget {
     final now = ref.watch(nowProvider);
     final key = dateKey(now);
     final prefs = ref.watch(appPrefsProvider);
-    final mixKeys = resolvePersonalMixKeys(
-      prefs.personalMix,
-      prefs.visibleDomains,
+    final resolver = PersonalisationResolver(
+      visibleDomains: prefs.visibleDomains,
+      mix: prefs.personalMix,
     );
     final sections = quickTapSectionsFor(
-      mixKeys,
+      resolver.effectiveRowIds,
       friday: isFridayDateKey(key),
     );
     final records = ref.watch(checkInsProvider).value ?? const <DailyCheckIn>[];
