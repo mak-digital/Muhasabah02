@@ -98,9 +98,8 @@ void main() {
     await pumpHome(
       tester,
       days: [
-        DailyCheckIn.empty(
-          '2026-08-31',
-        ).withQuran(QuranDimension.meaning, TernaryOutcome.positive),
+        DailyCheckIn.empty('2026-08-31')
+            .withQuran(QuranDimension.meaning, TernaryOutcome.positive),
       ],
     );
     expect(
@@ -131,6 +130,58 @@ void main() {
           )
           .kind,
       MarkerKind.filled,
+    );
+  });
+
+  testWidgets('Home shows Applied and Engaged independently on the same day', (
+    tester,
+  ) async {
+    await pumpHome(
+      tester,
+      days: [
+        DailyCheckIn.empty('2026-08-31')
+            .withQuran(QuranDimension.reading, TernaryOutcome.positive)
+            .withQuran(
+              QuranDimension.consciousApplication,
+              TernaryOutcome.positive,
+            ),
+      ],
+    );
+    expect(
+      tester
+          .widget<QuranJourneyMarker>(
+            find.byKey(const Key('quran-home-applied-2026-08-31')),
+          )
+          .cell
+          .kind,
+      QuranJourneyCellKind.recorded,
+    );
+    expect(
+      tester
+          .widget<QuranJourneyMarker>(
+            find.byKey(const Key('quran-home-engaged-2026-08-31')),
+          )
+          .cell
+          .kind,
+      QuranJourneyCellKind.recorded,
+    );
+    expect(
+      tester
+          .widget<QuranJourneyMarker>(
+            find.byKey(const Key('quran-home-understood-2026-08-31')),
+          )
+          .cell
+          .kind,
+      QuranJourneyCellKind.unanswered,
+    );
+    expect(
+      tester
+          .widget<QuranJourneyMarker>(
+            find.byKey(const Key('quran-home-reflected-2026-08-31')),
+          )
+          .cell
+          .kind,
+      QuranJourneyCellKind.unanswered,
     );
   });
 
@@ -204,7 +255,9 @@ void main() {
     );
   });
 
-  testWidgets('Qur’an Understood cell lists only Understood L2', (tester) async {
+  testWidgets('Qur’an Understood cell lists only Understood L2', (
+    tester,
+  ) async {
     await pumpHome(tester);
     await tester.tap(find.byKey(const Key('quran-home-understood-2026-09-03')));
     await tester.pumpAndSettle();
@@ -225,9 +278,8 @@ void main() {
       tester,
       salahActivityColours: true,
       days: [
-        DailyCheckIn.empty(
-          '2026-08-31',
-        ).withQuran(QuranDimension.meaning, TernaryOutcome.positive),
+        DailyCheckIn.empty('2026-08-31')
+            .withQuran(QuranDimension.meaning, TernaryOutcome.positive),
       ],
     );
     expect(

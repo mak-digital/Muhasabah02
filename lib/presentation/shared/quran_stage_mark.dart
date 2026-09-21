@@ -11,25 +11,24 @@ abstract final class QuranStageMark {
   static const understanding = Color(0xFF66BB6A);
   static const engagement = Color(0xFFFBC02D);
 
-  static Color colourFor(QuranStage stage) {
-    return switch (stage) {
-      QuranStage.application => application,
-      QuranStage.reflection => reflection,
-      QuranStage.understanding => understanding,
-      QuranStage.engagement => engagement,
-      QuranStage.none => MuhasabahColors.mark,
+  static Color colourFor(QuranJourneyRow row) {
+    return switch (row) {
+      QuranJourneyRow.applied => application,
+      QuranJourneyRow.reflected => reflection,
+      QuranJourneyRow.understood => understanding,
+      QuranJourneyRow.engaged => engagement,
     };
   }
 
-  static Color letterColorFor(QuranStage stage, {required bool colours}) {
+  static Color letterColorFor(QuranJourneyRow row, {required bool colours}) {
     if (!colours) return Colors.white;
-    return stage == QuranStage.engagement
+    return row == QuranJourneyRow.engaged
         ? const Color(0xFF3E2723)
         : Colors.white;
   }
 
   static Color colourForCell(
-    QuranJourneyRow row,
+    QuranJourneyRow? row,
     QuranJourneyCell cell, {
     required bool colours,
   }) {
@@ -37,7 +36,8 @@ abstract final class QuranStageMark {
       return MuhasabahColors.mark;
     }
     if (!colours) return MuhasabahColors.mark;
-    return colourFor(row.stage);
+    if (row == null) return MuhasabahColors.quranFamily;
+    return colourFor(row);
   }
 
   static MarkerKind kindForCell(QuranJourneyCell cell) {
@@ -52,14 +52,14 @@ abstract final class QuranStageMark {
 class QuranJourneyMarker extends StatelessWidget {
   const QuranJourneyMarker({
     super.key,
-    required this.row,
+    this.row,
     required this.cell,
     required this.semanticLabel,
     this.colours = false,
     this.size = AppDimensions.progressMarker,
   });
 
-  final QuranJourneyRow row;
+  final QuranJourneyRow? row;
   final QuranJourneyCell cell;
   final String semanticLabel;
   final bool colours;
@@ -71,7 +71,9 @@ class QuranJourneyMarker extends StatelessWidget {
       color: QuranStageMark.colourForCell(row, cell, colours: colours),
       kind: QuranStageMark.kindForCell(cell),
       letter: cell.code,
-      symbolColor: QuranStageMark.letterColorFor(row.stage, colours: colours),
+      symbolColor: row == null
+          ? Colors.white
+          : QuranStageMark.letterColorFor(row!, colours: colours),
       size: size,
       semanticLabel: semanticLabel,
     );

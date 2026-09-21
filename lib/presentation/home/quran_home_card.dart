@@ -158,9 +158,9 @@ class _QuranHomeCardState extends ConsumerState<QuranHomeCard> {
                                           ) ==
                                           DateTime.friday
                                       ? MuhasabahColors.quranFamily
-                                      : Theme.of(
-                                          context,
-                                        ).colorScheme.onSurfaceVariant,
+                                      : Theme.of(context)
+                                            .colorScheme
+                                            .onSurfaceVariant,
                                 ),
                           ),
                           Text(
@@ -169,9 +169,9 @@ class _QuranHomeCardState extends ConsumerState<QuranHomeCard> {
                             style: Theme.of(context).textTheme.labelSmall
                                 ?.copyWith(
                                   fontWeight: FontWeight.w600,
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onSurfaceVariant,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
                                 ),
                           ),
                         ],
@@ -185,7 +185,9 @@ class _QuranHomeCardState extends ConsumerState<QuranHomeCard> {
                   children: [
                     for (final key in keys)
                       Expanded(
-                        child: Center(child: _compactCell(key, index[key], colours)),
+                        child: Center(
+                          child: _compactCell(key, index[key], colours),
+                        ),
                       ),
                   ],
                 )
@@ -210,9 +212,9 @@ class _QuranHomeCardState extends ConsumerState<QuranHomeCard> {
                               ?.copyWith(
                                 letterSpacing: 0.4,
                                 fontWeight: FontWeight.w600,
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurfaceVariant,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
                               ),
                         ),
                         const SizedBox(height: 6),
@@ -255,7 +257,9 @@ class _QuranHomeCardState extends ConsumerState<QuranHomeCard> {
             ),
           ),
           for (final key in keys)
-            Expanded(child: Center(child: _cell(row, key, index[key], colours))),
+            Expanded(
+              child: Center(child: _cell(row, key, index[key], colours)),
+            ),
         ],
       ),
     );
@@ -284,31 +288,24 @@ class _QuranHomeCardState extends ConsumerState<QuranHomeCard> {
   }
 
   Widget _compactCell(String key, DailyCheckIn? record, bool colours) {
-    final stage = quranStageFor(record, only: _display);
-    final row = stage.journeyRow ?? QuranJourneyRow.engaged;
-    final cell = stage.journeyRow == null
-        ? const QuranJourneyCell(kind: QuranJourneyCellKind.unanswered)
-        : quranJourneyCell(record, row);
+    final rows = quranJourneyRowsFor(_display);
+    final cell = quranVisibleJourneyOccupancy(record, rows);
+    final openRow = quranVisibleJourneyOpenRow(record, rows);
     final marker = QuranJourneyMarker(
-      row: row,
       cell: cell,
       colours: colours,
-      semanticLabel: '$key ${MonitorDomain.quran.label} ${row.label}',
+      semanticLabel: '$key ${MonitorDomain.quran.label} ${cell.kind.name}',
     );
     final open =
         dateCellKind(key, ref.read(nowProvider)) != DateCellKind.future;
     final body = ProgressDayCell(
-      onTap: open ? () => _openRow(key, row, record) : null,
+      onTap: open ? () => _openRow(key, openRow, record) : null,
       marker: open ? marker : Opacity(opacity: 0.28, child: marker),
     );
     return KeyedSubtree(key: Key('home-compact-quran-$key'), child: body);
   }
 
-  Future<void> _openRow(
-    String key,
-    QuranJourneyRow row,
-    DailyCheckIn? record,
-  ) {
+  Future<void> _openRow(String key, QuranJourneyRow row, DailyCheckIn? record) {
     return showQuranJourneySheet(
       context: context,
       dateKey: key,
