@@ -577,17 +577,19 @@ Display seven peer dimensions:
 - Revision
 - Tafsir
 - Reflection
-- Application Reflection
+- Practical relevance (`consciousApplication`)
+
+Application Reflection is Settings / About only. It is not a recurring Home, 7-day, 30-day, or 90-day calendar.
 
 Use stable subdued accent colours with equal semantic weight for card washes. Marks share one colour; shape encodes the recorded state.
 
 Recommended presentation:
 
-- 7D: Qur’an Journey matrix (stage rows × weekday columns); tap a cell to record that row
-- 30D: compact weekly calendar per stored dimension, titled as Home Journey stages
-- 90D: one full-width weekly calendar for the last 90 days (today’s week rightmost), with month labels, two alternating shades of the domain colour on day cells only, a pale yellow halo on today’s mark, and period arrows to move to earlier or later 90-day windows; titles match Home Journey stages
+- 7D: Qur’an Journey matrix (independent group rows × weekday columns); tap a cell to record that row
+- 30D: compact weekly calendar per stored dimension, titled as Home Journey groups
+- 90D: one full-width weekly calendar for the last 90 days (today’s week rightmost), with month labels, two alternating shades of the domain colour on day cells only, a pale yellow halo on today’s mark, and period arrows to move to earlier or later 90-day windows; titles match Home Journey groups
 
-For the six newer neutral dimensions, display factual counts such as `Recorded on X of Y days` and positive activity-day counts.
+For the neutral peer dimensions, display factual counts such as `Recorded on X of Y days` and positive activity-day counts.
 
 Do not show success/failure rate, ranking, winner/loser comparison, improvement gradient, or aggregate Qur’an score for those dimensions.
 

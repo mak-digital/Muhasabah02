@@ -16,7 +16,7 @@ Persistence:
 - Corrupt documents are isolated; healthy records remain readable
 - Failed writes restore the previous document when possible
 
-DailyCheckIn schema version: **6**. Recordable field count: **10**. Response schema version: **1**. Ontology metadata version: **2** (read-only activity and factor classification of existing persisted IDs; not a persistence schema).
+DailyCheckIn schema version: **6**. Recordable field count: **10**. Response schema version: **1**. Ontology metadata version: **2** (read-only activity and factor classification of existing persisted IDs; not a persistence schema). Raw activity IDs are catalog-local, not globally unique; the stable ontology key is `catalog:persistedId`. HomeTrace keys, including retired `family.*`, are not renamed. Zakat remains the existing DailyCheckIn standing status.
 
 Sample/demo records use `synthetic: true` on check-ins and responses. They are not written at process start. The first-look door (`FirstLookDoorScreen`) asks once: quiet week (`clearFrom` if any synthetic rows exist) or `SyntheticCheckInSeeder.generateInto`. Both paths set `sampleSeeded` so auto-seed never runs later; quiet week does not set `sampleRemovedByUser`. Completing the door sets `personalMix` to `firstLook`. Unset mix still decodes to Same as Domains. Sample days include Qur?an context clusters so 30- and 90-day Recognition can show descriptive patterns (not causes). Settings ? Developer can still recreate, remove, or restore sample data.
 
@@ -39,6 +39,8 @@ Approved Qur?an same-day dependency (the only automatic write):
 | Memorisation, Revision, Tafsir, Qur?anic Reflection, Conscious Application | Independent | Independent | Independent |
 
 While Recitation with Meaning is engagement, Recitation cannot be set to unanswered or recorded as not done. Application Reflection is not in this matrix.
+
+Recognition patterns are computed from stored Qur?an peer-dimension outcomes and optional context factors. They are not persisted. Personal Response provenance may snapshot the legacy `RecognitionPattern.identity` (`domain+subject+outcome+question+factorId`). Copy-independent definition identity is `RecognitionDefinition.stableId`: `recognition:<domain>:<subject>:<outcome>:<factorStableId>`. The 30-day / 90-day window is evaluation metadata, not part of that id. Counts and supporting dates are occurrence evidence. Reading and Application Reflection are not Recognition subjects.
 
 Marks Guide copy lives in `lib/presentation/home/marks_guide_sheet.dart`. FAQ clarifications live in `lib/domain/faq.dart`. Qur?an factor catalogs are in `lib/domain/context_catalog.dart`. Salah factor lists are prayer-relevant in `lib/domain/salah_factors.dart`.
 
