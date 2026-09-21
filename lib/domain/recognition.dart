@@ -1,8 +1,86 @@
 import 'context_catalog.dart';
 import 'daily_check_in.dart';
 import 'date_key.dart';
+import 'ontology.dart';
 import 'quran.dart';
 import 'review_period.dart';
+
+/// Read-only Recognition identity. Computed, not persisted, not a DailyCheckIn
+/// field. Independent of English question copy.
+///
+/// [stableId] names a factor-pattern definition, not an evaluation run:
+/// `recognition:<domain>:<subject>:<outcome>:<factorStableId>`.
+/// [window] is the evaluation period for this computed pattern and is not
+/// part of [stableId]. Counts and supporting dates are occurrence evidence
+/// on [RecognitionPattern], not definition identity.
+class RecognitionDefinition {
+  const RecognitionDefinition({
+    required this.stableId,
+    required this.domain,
+    required this.subjectNamespace,
+    required this.subjectPersistedId,
+    required this.conceptualDomain,
+    required this.subjectKind,
+    required this.questionKey,
+    required this.window,
+    required this.factorCatalog,
+    required this.factorPersistedId,
+    required this.factorStableId,
+    required this.factorStatus,
+    required this.factorKind,
+  });
+
+  final String stableId;
+  final String domain;
+  final String subjectNamespace;
+  final String subjectPersistedId;
+  final ConceptualDomainId conceptualDomain;
+  final OntologyConstructKind subjectKind;
+  final String questionKey;
+  final ReviewPeriod window;
+  final OntologyFactorCatalog factorCatalog;
+  final String factorPersistedId;
+  final String factorStableId;
+  final OntologyNodeStatus factorStatus;
+  final OntologyConstructKind factorKind;
+
+  factory RecognitionDefinition.fromPattern(RecognitionPattern pattern) {
+    final quran = OntologyRegistry.forQuranDimension(pattern.subject);
+    final polarity = pattern.outcome == TernaryOutcome.positive
+        ? 'positive'
+        : 'negative';
+    const catalog = OntologyFactorCatalog.quranContext;
+    final factor =
+        OntologyRegistry.forFactor(
+          catalog: catalog,
+          persistedId: pattern.factorId,
+          polarity: polarity,
+        ) ??
+        OntologyRegistry.forFactor(
+          catalog: catalog,
+          persistedId: pattern.factorId,
+        );
+    final factorStableId =
+        factor?.stableId ?? '${catalog.name}:$polarity:${pattern.factorId}';
+    return RecognitionDefinition(
+      stableId:
+          'recognition:${pattern.domain}:${pattern.subject.name}:'
+          '${pattern.outcome.name}:$factorStableId',
+      domain: pattern.domain,
+      subjectNamespace: 'quranDimension',
+      subjectPersistedId: pattern.subject.name,
+      conceptualDomain: quran.conceptualDomain,
+      subjectKind: OntologyConstructKind.practiceObservation,
+      questionKey: 'quranDimension.${pattern.subject.name}',
+      window: pattern.period,
+      factorCatalog: catalog,
+      factorPersistedId: pattern.factorId,
+      factorStableId: factorStableId,
+      factorStatus: factor?.status ?? OntologyNodeStatus.retired,
+      factorKind: OntologyConstructKind.contextProvenance,
+    );
+  }
+}
 
 class RecognitionPattern {
   const RecognitionPattern({
@@ -35,8 +113,14 @@ class RecognitionPattern {
   final ReviewPeriod period;
   final List<String> supportingDates;
 
+  /// Legacy evidence snapshot for Personal Response provenance.
+  /// Includes current English [question] text; prefer [definition] for
+  /// copy-independent identity. Do not change this string format in R7.
   String get identity =>
       '$domain+${subject.name}+${outcome.name}+$question+$factorId';
+
+  RecognitionDefinition get definition =>
+      RecognitionDefinition.fromPattern(this);
 
   String get coverageLine =>
       'Context was recorded for $contextualCount of $outcomeCount observations where you recorded ${outcome == TernaryOutcome.positive ? subject.positiveLabel.toLowerCase() : subject.negativeLabel.toLowerCase()}.';
