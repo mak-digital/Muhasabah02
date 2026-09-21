@@ -76,10 +76,7 @@ void main() {
       );
       expect(QuranDimension.reading.label, 'Recitation');
       expect(QuranDimension.meaning.label, 'Recitation with Meaning');
-      expect(
-        QuranDimension.consciousApplication.label,
-        'Conscious Application',
-      );
+      expect(QuranDimension.consciousApplication.label, 'Practical relevance');
     },
   );
 

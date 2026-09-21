@@ -175,12 +175,12 @@ class Copy {
   static const visibleDomains = 'Domains';
   static const activitiesTitle = 'Activities';
   static const activitiesNote =
-      'Salah check-in list. Shared mark colour is the default. Optional activity colours name the recorded Salah choice and the Qur’an Journey stage. Not a score.';
+      'Salah check-in list. Shared mark colour is the default. Optional activity colours name the recorded Salah choice and the Qur’an Journey group. Not a score.';
   static const salahMarkColour = 'Salah mark colour';
   static const salahMarkShared = 'Shared (current)';
   static const salahMarkActivityColours = 'Activity colours';
   static const salahMarkActivityNote =
-      'Colour names the recorded Salah choice or Qur’an Journey stage. It does not rank spirituality or tell you what to do next. Other domains keep the shared mark colour.';
+      'Colour names the recorded Salah choice or Qur’an Journey group. It does not rank spirituality or tell you what to do next. Other domains keep the shared mark colour.';
   static const visibleDomainsNote =
       'Choose which domains appear on Home, Review, and today’s check-in. This season’s mix is on the same screen. Hidden domains keep any saved records. You can show them again later. Recorded days still shows what was stored.';
   static const shownDomainsNote =
@@ -235,11 +235,11 @@ class Copy {
   static const recitationLockedByMeaning =
       'Recitation with Meaning is recorded as engagement today. Change that first to record Recitation as not done or unanswered.';
   static const quranStageNote =
-      'Colour is the journey stage when activity colours are on. The letter is the activity. Marks share one colour by default. Not a spiritual score.';
+      'Colour is the Journey group when activity colours are on. The letter is the activity. Marks share one colour by default. Not a spiritual score.';
   static const quranCheckInIntro =
-      'Record the activity for each row. Recitation with Meaning as engagement also records Recitation. Other rows stay independent. Home records the journey stage and activity on the week grid. Application Reflection is not recorded here.';
+      'Record the activity for each row. Recitation with Meaning as engagement also records Recitation. Other rows stay independent. Home records the Journey group and activity on the week grid. Application Reflection is not recorded here.';
   static const quranJourney = 'Qur’an Journey';
-  static const quranDayLevel = 'Level';
+  static const quranDayLevel = 'This group';
   static const quranDayActivity = 'Activity';
   static const quranDayNote = 'Note';
   static const quranDayNone = 'None';
@@ -247,7 +247,7 @@ class Copy {
   static const quranDayUnanswered = 'No answer recorded';
   static const personalReflection = 'Personal Reflection';
   static const consciousApplicationNote =
-      'Conscious Application records that you noticed a possible practical relevance. It is not evidence of action, implementation, obedience, or completion of a Response. It is not Application Reflection.';
+      'Practical relevance records that you noticed a possible connection to daily life. It is not evidence of action, implementation, obedience, or completion of a Response. It is not Application Reflection.';
   static const personalAspirations = 'Personal Aspirations';
   static const reflectionPreferences = 'Reflection Preferences';
   static const reflectionsQuotations = 'Reflections & Quotations';

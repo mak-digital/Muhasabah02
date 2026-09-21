@@ -22,7 +22,7 @@ const kQuranStudyBand = 'Study & notice';
 const kQuranEngagementBand = 'Engagement';
 const kQuranUnderstandingBand = 'Understanding';
 const kQuranReflectionBand = 'Reflection';
-const kQuranApplicationBand = 'Application';
+const kQuranApplicationBand = 'Practical relevance';
 
 const recitationHomeRows = [QuranDimension.reading, QuranDimension.meaning];
 
@@ -59,7 +59,7 @@ extension QuranDimensionX on QuranDimension {
     QuranDimension.revision => 'Revision',
     QuranDimension.tafsir => 'Tafsir',
     QuranDimension.reflection => 'Qur’anic Reflection',
-    QuranDimension.consciousApplication => 'Conscious Application',
+    QuranDimension.consciousApplication => 'Practical relevance',
     QuranDimension.applicationReflection => 'Application Reflection',
   };
 
@@ -70,8 +70,8 @@ extension QuranDimensionX on QuranDimension {
     QuranDimension.revision => 'Revise',
     QuranDimension.tafsir => 'Tafsir',
     QuranDimension.reflection => 'Reflect',
-    QuranDimension.consciousApplication => 'Apply',
-    QuranDimension.applicationReflection => 'Apply',
+    QuranDimension.consciousApplication => 'Relevance',
+    QuranDimension.applicationReflection => 'Relevance',
   };
 
   bool get matrixColumnVertical => true;

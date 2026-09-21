@@ -83,11 +83,13 @@ void main() {
     await pumpHome(tester);
     expect(find.text(Copy.quranJourney.toUpperCase()), findsOneWidget);
     expect(find.text(Copy.quranStageNote), findsNothing);
-    expect(find.text('Applied'), findsWidgets);
-    expect(find.text('Reflected'), findsWidgets);
-    expect(find.text('Understood'), findsWidgets);
-    expect(find.text('Engaged'), findsWidgets);
-    expect(find.text('Transformation'), findsWidgets);
+    expect(find.text('Practical relevance'), findsWidgets);
+    expect(find.text('Reflection'), findsWidgets);
+    expect(find.text('Understanding'), findsWidgets);
+    expect(find.text('Engagement'), findsWidgets);
+    expect(find.text('Transformation'), findsNothing);
+    expect(find.text('Internalization'), findsNothing);
+    expect(find.text('Comprehension'), findsNothing);
     expect(find.text('Recitation with Meaning'), findsNothing);
     expect(find.text('Application Reflection'), findsNothing);
   });
@@ -211,13 +213,13 @@ void main() {
     await tester.tap(find.byKey(const Key('quran-home-applied-2026-09-03')));
     await tester.pumpAndSettle();
     expect(find.byType(CheckInScreen), findsNothing);
-    expect(find.text('Applied'), findsWidgets);
+    expect(find.text('Practical relevance'), findsWidgets);
     expect(find.text(Copy.quranDayNone), findsOneWidget);
     expect(find.text(Copy.quranDayUnanswered), findsOneWidget);
-    expect(find.text('W = Worship'), findsNothing);
+    expect(find.text('W = Connected to worship'), findsNothing);
     await tester.tap(find.byKey(const Key('quran-journey-l1-stage')));
     await tester.pumpAndSettle();
-    expect(find.text('W = Worship'), findsOneWidget);
+    expect(find.text('W = Connected to worship'), findsOneWidget);
     expect(find.text(Copy.quranDayNoActivity), findsOneWidget);
     expect(find.text(Copy.quranDayUnanswered), findsWidgets);
     await tester.tap(find.byKey(const Key('quran-journey-l2-W')));
@@ -255,7 +257,7 @@ void main() {
     );
   });
 
-  testWidgets('Qur’an Understood cell lists only Understood L2', (
+  testWidgets('Qur’an Understanding cell lists only Understanding L2', (
     tester,
   ) async {
     await pumpHome(tester);
@@ -269,7 +271,7 @@ void main() {
     expect(find.text('F = Tafsir'), findsOneWidget);
     expect(find.text(Copy.quranDayNoActivity), findsOneWidget);
     expect(find.text(Copy.quranDayUnanswered), findsWidgets);
-    expect(find.text('W = Worship'), findsNothing);
+    expect(find.text('W = Connected to worship'), findsNothing);
     expect(find.text('R = Recitation'), findsNothing);
   });
 
@@ -386,7 +388,7 @@ void main() {
     await tester.tap(find.byKey(const Key('quran-home-applied-2026-09-04')));
     await tester.pumpAndSettle();
     expect(find.byType(CheckInScreen), findsNothing);
-    expect(find.text('W = Worship'), findsNothing);
+    expect(find.text('W = Connected to worship'), findsNothing);
   });
 
   testWidgets('Marks Guide opens without card legends', (tester) async {

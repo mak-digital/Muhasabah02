@@ -1,5 +1,7 @@
 # Qur’an card — final refinement package (review only)
 
+**Historical / proposal only.** Labels such as Applied / Transformation in this file are not current product copy. Current Journey groups are Practical relevance, Reflection, Understanding, and Engagement. See `docs/accepted_product_state.md`.
+
 **Status:** mockups and product proposals only. Application code was not changed. Dhikr, Family, Charity, Fasting, and Hadith Home cards remain out of scope.
 
 Authority read: `docs/accepted_product_state.md`, `docs/PRODUCT_SPEC.md`, `docs/product_guardrails.md`, `docs/AGENTS.md`, `docs/AUTONOMOUS_BUILD_PROMPT.md`.

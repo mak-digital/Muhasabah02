@@ -459,8 +459,8 @@ class QuranProgressScreen extends ConsumerWidget {
               const SizedBox(height: 12),
               Text(
                 period.days == 7
-                    ? 'Rows are journey stages; columns are weekdays. The card wash identifies the domain, not rank. Marks share one colour. The letter is the recorded activity.'
-                    : 'Titles match the Home Journey stages. Each calendar is still one stored row. Rows are weekdays; columns are weeks. The card wash identifies the row, not rank. Marks share one colour.',
+                    ? 'Rows are independent Journey groups; columns are weekdays. The card wash identifies the domain, not rank. Marks share one colour. The letter is the recorded activity.'
+                    : 'Titles match the Home Journey groups. Each calendar is still one stored row. Rows are weekdays; columns are weeks. The card wash identifies the row, not rank. Marks share one colour.',
                 style: Theme.of(context).textTheme.bodySmall,
               ),
               const SizedBox(height: 12),

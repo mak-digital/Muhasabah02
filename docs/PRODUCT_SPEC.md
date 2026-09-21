@@ -123,17 +123,17 @@ Provide seven independent stored dimensions (not a Home matrix of seven rows):
 4. Revision
 5. Tafsir
 6. Qur’anic Reflection
-7. Conscious Application
+7. Practical relevance (persisted as `consciousApplication`)
 
-**Home week** shows a Qur’an Journey matrix: Applied (Transformation), Reflected (Internalization), Understood (Comprehension), Engaged (Contact with Qur’an). Each day cell is independent. Colour names the L1 stage. A letter names the L2 activity. Tap a cell to record that row: L1 is that stage, None, or No answer recorded (clears every stored item in that row); L2 is the short list for that stage, plus No activity (recorded as not done) and No answer recorded (unanswered). Unanswered is empty, not missed. Duration is not stored in this version.
+**Home week** shows a Qur’an Journey matrix of independent groups: Practical relevance, Reflection, Understanding, and Engagement. Each day cell is independent. Colour names the Journey group when activity colours are on. A letter names the L2 activity. Tap a cell to record that row: L1 is that group, None, or No answer recorded (clears every stored item in that row); L2 is the short list for that group, plus No activity (recorded as not done) and No answer recorded (unanswered). Unanswered is empty, not missed. Duration is not stored in this version. Purpose copy is observational (engagement with Qur’an; activities supporting understanding; reflection on meaning; noticed in daily life). It does not certify transformation, internalization, or comprehension.
 
-**Check-in** groups the same stored rows into L2 bands: Engagement (Recitation, Listening as a Recitation activity, Memorisation, Revision), Understanding (Read Translation, Recitation with Meaning, Tafsir Study), Reflection (Brief Reflection, Deep Reflection (Tadabbur), Personal Insight), Application (Improved Worship, Character, Relationship, Avoided a Sin, Performed a Good Deed, Other Application). Listening is not a new stored dimension.
+**Check-in** groups the same stored rows into L2 bands: Engagement (Recitation, Listening as a Recitation activity, Memorisation, Revision), Understanding (Read Translation, Recitation with Meaning, Tafsir Study), Reflection (Brief Reflection, Deep Reflection (Tadabbur), Something I noticed), Practical relevance (Connected to worship, character, or relationships; Avoided something I considered wrong; Did something I considered good; Other connection). Listening is not a new stored dimension. Practical-relevance activity **ids** stay `improvedWorship`, `improvedCharacter`, `improvedRelationship`, `avoidedSin`, and `performedGoodDeed`; visible labels are user-attributed and are not app-certified improvement.
 
 Reading/listening remains the primary daily Qur’an engagement item. The other dimensions are independent observations except the approved Recitation with Meaning fill.
 
 Do not record or score whether the Qur’an “spoke” as a grade.
 
-**7-day Progress** shows one Qur’an Journey board: Applied, Reflected, Understood, and Engaged as rows and weekday letter + date as columns (same marks and cell sheet as Home). **30-day and 90-day Progress** keep seven peer calendars for the stored dimensions, titled with the same Home Journey stages (Applied, Reflected, Understood, Engaged) and purpose; stages with more than one stored row also name that row (Recitation, Meaning, Memorisation, Revision, Tafsir).
+**7-day Progress** shows one Qur’an Journey board: Practical relevance, Reflection, Understanding, and Engagement as rows and weekday letter + date as columns (same marks and cell sheet as Home). **30-day and 90-day Progress** keep seven peer calendars for the stored dimensions, titled with the same Home Journey groups and observational purpose; groups with more than one stored row also name that row (Recitation, Meaning, Memorisation, Revision, Tafsir).
 
 For optional activities, selecting the activity must not automatically mean a positive outcome. Ask for an explicit status.
 

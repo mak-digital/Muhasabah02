@@ -6,6 +6,7 @@ import '../../domain/quran_stage.dart';
 import 'state_marker.dart';
 
 abstract final class QuranStageMark {
+  /// Colour palette for independent Journey groups. Not an ordinal stage.
   static const application = Color(0xFF1565C0);
   static const reflection = Color(0xFF2E7D32);
   static const understanding = Color(0xFF66BB6A);

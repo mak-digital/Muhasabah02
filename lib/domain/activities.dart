@@ -317,7 +317,7 @@ class ActivityCatalog {
     ),
     ActivityOption(
       id: 'personalInsight',
-      label: 'Personal Insight',
+      label: 'Something I noticed',
       ternary: TernaryOutcome.positive,
     ),
     ActivityOption(
@@ -340,32 +340,32 @@ class ActivityCatalog {
   static const quranConsciousApplication = <ActivityOption>[
     ActivityOption(
       id: 'improvedWorship',
-      label: 'Improved Worship',
+      label: 'Connected to worship',
       ternary: TernaryOutcome.positive,
     ),
     ActivityOption(
       id: 'improvedCharacter',
-      label: 'Improved Character',
+      label: 'Connected to character',
       ternary: TernaryOutcome.positive,
     ),
     ActivityOption(
       id: 'improvedRelationship',
-      label: 'Improved Relationship',
+      label: 'Connected to relationships',
       ternary: TernaryOutcome.positive,
     ),
     ActivityOption(
       id: 'avoidedSin',
-      label: 'Avoided a Sin',
+      label: 'Avoided something I considered wrong',
       ternary: TernaryOutcome.positive,
     ),
     ActivityOption(
       id: 'performedGoodDeed',
-      label: 'Performed a Good Deed',
+      label: 'Did something I considered good',
       ternary: TernaryOutcome.positive,
     ),
     ActivityOption(
       id: ActivityIds.other,
-      label: 'Other Application',
+      label: 'Other connection',
       ternary: TernaryOutcome.positive,
     ),
     ActivityOption(

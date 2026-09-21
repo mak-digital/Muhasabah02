@@ -91,14 +91,16 @@ class _QuranJourneySheetState extends ConsumerState<_QuranJourneySheet> {
             style: Theme.of(context).textTheme.bodySmall,
           ),
           const SizedBox(height: 16),
-          Text(Copy.quranDayLevel, style: Theme.of(context).textTheme.labelLarge),
+          Text(
+            Copy.quranDayLevel,
+            style: Theme.of(context).textTheme.labelLarge,
+          ),
           const SizedBox(height: 8),
           _Choice(
             key: const Key('quran-journey-l1-unanswered'),
             selected: _l1 == QuranJourneyCellKind.unanswered,
-            onTap: () => _save(
-              applyQuranJourneyUnanswered(widget.record, widget.row),
-            ),
+            onTap: () =>
+                _save(applyQuranJourneyUnanswered(widget.record, widget.row)),
             child: Row(
               children: [
                 QuranJourneyMarker(
@@ -116,6 +118,7 @@ class _QuranJourneySheetState extends ConsumerState<_QuranJourneySheet> {
           ),
           const SizedBox(height: 6),
           _Choice(
+            // Historical key name; this is the recorded-group control, not an ordinal stage.
             key: const Key('quran-journey-l1-stage'),
             selected: _l1 == QuranJourneyCellKind.recorded,
             onTap: () => setState(() => _l1 = QuranJourneyCellKind.recorded),
@@ -139,7 +142,8 @@ class _QuranJourneySheetState extends ConsumerState<_QuranJourneySheet> {
           _Choice(
             key: const Key('quran-journey-l1-none'),
             selected: _l1 == QuranJourneyCellKind.none,
-            onTap: () => _save(applyQuranJourneyNone(widget.record, widget.row)),
+            onTap: () =>
+                _save(applyQuranJourneyNone(widget.record, widget.row)),
             child: Row(
               children: [
                 QuranJourneyMarker(
@@ -179,7 +183,7 @@ class _QuranJourneySheetState extends ConsumerState<_QuranJourneySheet> {
                       semanticLabel: option.label,
                     ),
                     const SizedBox(width: 12),
-                    Text('${option.code} = ${option.label}'),
+                    Expanded(child: Text('${option.code} = ${option.label}')),
                   ],
                 ),
               ),
@@ -209,9 +213,8 @@ class _QuranJourneySheetState extends ConsumerState<_QuranJourneySheet> {
             _Choice(
               key: const Key('quran-journey-l2-unanswered'),
               selected: current.kind == QuranJourneyCellKind.unanswered,
-              onTap: () => _save(
-                applyQuranJourneyUnanswered(widget.record, widget.row),
-              ),
+              onTap: () =>
+                  _save(applyQuranJourneyUnanswered(widget.record, widget.row)),
               child: Row(
                 children: [
                   QuranJourneyMarker(

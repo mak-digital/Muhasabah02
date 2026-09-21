@@ -34,18 +34,18 @@ class QuranJourneyCell {
 
 extension QuranJourneyRowX on QuranJourneyRow {
   String get label => switch (this) {
-    QuranJourneyRow.applied => 'Applied',
-    QuranJourneyRow.reflected => 'Reflected',
-    QuranJourneyRow.understood => 'Understood',
-    QuranJourneyRow.engaged => 'Engaged',
+    QuranJourneyRow.applied => 'Practical relevance',
+    QuranJourneyRow.reflected => 'Reflection',
+    QuranJourneyRow.understood => 'Understanding',
+    QuranJourneyRow.engaged => 'Engagement',
   };
 
-  /// Home / Progress purpose copy. Broader wording review is deferred to R3.
+  /// Observational description of the group. Not an attained spiritual state.
   String get purpose => switch (this) {
-    QuranJourneyRow.applied => 'Transformation',
-    QuranJourneyRow.reflected => 'Internalization',
-    QuranJourneyRow.understood => 'Comprehension',
-    QuranJourneyRow.engaged => 'Contact with Qur’an',
+    QuranJourneyRow.applied => 'Noticed in daily life',
+    QuranJourneyRow.reflected => 'Reflection on meaning',
+    QuranJourneyRow.understood => 'Activities supporting understanding',
+    QuranJourneyRow.engaged => 'Engagement with Qur’an',
   };
 
   Set<QuranConceptualGroup> get conceptualGroups => switch (this) {
@@ -76,31 +76,31 @@ extension QuranJourneyRowX on QuranJourneyRow {
     QuranJourneyRow.applied => const [
       QuranJourneyL2(
         code: 'W',
-        label: 'Worship',
+        label: 'Connected to worship',
         dimension: QuranDimension.consciousApplication,
         activityId: 'improvedWorship',
       ),
       QuranJourneyL2(
         code: 'C',
-        label: 'Character',
+        label: 'Connected to character',
         dimension: QuranDimension.consciousApplication,
         activityId: 'improvedCharacter',
       ),
       QuranJourneyL2(
         code: 'R',
-        label: 'Relationship',
+        label: 'Connected to relationships',
         dimension: QuranDimension.consciousApplication,
         activityId: 'improvedRelationship',
       ),
       QuranJourneyL2(
         code: 'S',
-        label: 'Avoided a sin',
+        label: 'Avoided something I considered wrong',
         dimension: QuranDimension.consciousApplication,
         activityId: 'avoidedSin',
       ),
       QuranJourneyL2(
         code: 'G',
-        label: 'Good deed',
+        label: 'Did something I considered good',
         dimension: QuranDimension.consciousApplication,
         activityId: 'performedGoodDeed',
       ),
@@ -120,7 +120,7 @@ extension QuranJourneyRowX on QuranJourneyRow {
       ),
       QuranJourneyL2(
         code: 'I',
-        label: 'Insight',
+        label: 'Something I noticed',
         dimension: QuranDimension.reflection,
         activityId: 'personalInsight',
       ),

@@ -30,11 +30,8 @@ void main() {
     await tester.tap(find.text(Copy.salahMarkActivityColours));
     await tester.pumpAndSettle();
     expect(find.text(Copy.salahMarkActivityNote), findsOneWidget);
-    expect(
-      find.text(ActivityCatalog.salah.first.label),
-      findsWidgets,
-    );
+    expect(find.text(ActivityCatalog.salah.first.label), findsWidgets);
     expect(find.text(Copy.quranJourney), findsOneWidget);
-    expect(find.textContaining('Applied'), findsWidgets);
+    expect(find.textContaining('Practical relevance'), findsWidgets);
   });
 }

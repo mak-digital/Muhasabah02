@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:muhasabah02/domain/activities.dart';
 import 'package:muhasabah02/domain/daily_check_in.dart';
 import 'package:muhasabah02/domain/quran.dart';
 import 'package:muhasabah02/domain/quran_stage.dart';
@@ -333,31 +334,96 @@ void main() {
   });
 
   test('30/90 Progress titles follow Home Journey groups', () {
-    expect(QuranDimension.reading.progressCalendarTitle, 'Engaged');
+    expect(QuranDimension.reading.progressCalendarTitle, 'Engagement');
     expect(
       QuranDimension.reading.progressCalendarSubtitle,
-      'Contact with Qur’an · Recitation',
+      'Engagement with Qur’an · Recitation',
     );
-    expect(QuranDimension.meaning.progressCalendarTitle, 'Understood');
+    expect(QuranDimension.meaning.progressCalendarTitle, 'Understanding');
     expect(
       QuranDimension.meaning.progressCalendarSubtitle,
-      'Comprehension · Meaning',
+      'Activities supporting understanding · Meaning',
     );
-    expect(QuranDimension.tafsir.progressCalendarTitle, 'Understood');
-    expect(QuranDimension.reflection.progressCalendarTitle, 'Reflected');
+    expect(QuranDimension.tafsir.progressCalendarTitle, 'Understanding');
+    expect(QuranDimension.reflection.progressCalendarTitle, 'Reflection');
     expect(
       QuranDimension.reflection.progressCalendarSubtitle,
-      'Internalization',
+      'Reflection on meaning',
     );
     expect(
       QuranDimension.consciousApplication.progressCalendarTitle,
-      'Applied',
+      'Practical relevance',
     );
     expect(
       QuranDimension.consciousApplication.progressCalendarSubtitle,
-      'Transformation',
+      'Noticed in daily life',
     );
-    expect(QuranDimension.memorisation.progressCalendarTitle, 'Engaged');
-    expect(QuranDimension.revision.progressCalendarTitle, 'Engaged');
+    expect(QuranDimension.memorisation.progressCalendarTitle, 'Engagement');
+    expect(QuranDimension.revision.progressCalendarTitle, 'Engagement');
+  });
+
+  test('Journey copy does not claim attained spiritual states', () {
+    for (final row in QuranJourneyRow.values) {
+      expect(row.purpose.toLowerCase(), isNot(contains('transformation')));
+      expect(row.purpose.toLowerCase(), isNot(contains('internalization')));
+      expect(row.purpose.toLowerCase(), isNot(contains('comprehension')));
+      expect(row.label, isNot(equals('Applied')));
+      expect(row.label, isNot(equals('Understood')));
+      expect(row.label, isNot(equals('Reflected')));
+      expect(row.label, isNot(equals('Engaged')));
+    }
+    expect(QuranJourneyRow.engaged.label, 'Engagement');
+    expect(QuranJourneyRow.understood.label, 'Understanding');
+    expect(QuranJourneyRow.reflected.label, 'Reflection');
+    expect(QuranJourneyRow.applied.label, 'Practical relevance');
+  });
+
+  test('conscious-application visible labels stay observational', () {
+    final byId = {
+      for (final option in ActivityCatalog.quranConsciousApplication)
+        option.id: option.label,
+    };
+    expect(byId['improvedWorship'], 'Connected to worship');
+    expect(byId['improvedCharacter'], 'Connected to character');
+    expect(byId['improvedRelationship'], 'Connected to relationships');
+    expect(byId['avoidedSin'], 'Avoided something I considered wrong');
+    expect(byId['performedGoodDeed'], 'Did something I considered good');
+    for (final label in byId.values) {
+      expect(label.toLowerCase(), isNot(contains('improved')));
+    }
+    expect(
+      QuranJourneyRow.applied.l2Options.map((option) => option.activityId),
+      [
+        'improvedWorship',
+        'improvedCharacter',
+        'improvedRelationship',
+        'avoidedSin',
+        'performedGoodDeed',
+      ],
+    );
+  });
+
+  test('persisted quran identifiers remain unchanged after copy changes', () {
+    expect(kDailyCheckInSchemaVersion, 6);
+    expect(QuranDimension.values.map((d) => d.name).toList(), [
+      'reading',
+      'meaning',
+      'memorisation',
+      'revision',
+      'tafsir',
+      'reflection',
+      'consciousApplication',
+      'applicationReflection',
+    ]);
+    expect(
+      ActivityCatalog.quranConsciousApplication.map((o) => o.id),
+      containsAll([
+        'improvedWorship',
+        'improvedCharacter',
+        'improvedRelationship',
+        'avoidedSin',
+        'performedGoodDeed',
+      ]),
+    );
   });
 }

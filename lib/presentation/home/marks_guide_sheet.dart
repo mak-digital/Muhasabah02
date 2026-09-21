@@ -514,7 +514,7 @@ Widget _quranJourney(
           code: letter,
         );
   final label = none
-      ? 'None — no activity at this stage'
+      ? 'None — no activity in this group'
       : letter == null
       ? '${row.label} — ${row.purpose}'
       : '${row.label} $letter — ${row.purpose}';

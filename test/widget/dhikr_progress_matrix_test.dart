@@ -129,7 +129,10 @@ void main() {
     expect(find.text('Truthfulness'), findsOneWidget);
     expect(find.text('Thankfulness in how I acted'), findsOneWidget);
     expect(find.text('Guarded my gaze'), findsOneWidget);
-    expect(find.text('Held back from a habit I am trying to leave'), findsOneWidget);
+    expect(
+      find.text('Held back from a habit I am trying to leave'),
+      findsOneWidget,
+    );
     expect(find.text('Truth'), findsNothing);
     expect(find.text('Thanks'), findsNothing);
     expect(find.text('Gaze'), findsNothing);
@@ -164,7 +167,12 @@ void main() {
     await tester.tap(find.byKey(const Key('review-domain-huquq')));
     await tester.pumpAndSettle();
     expect(find.byType(OptionalDomainProgressScreen), findsOneWidget);
-    expect(find.byKey(const Key('week-matrix-prev-Rights of Others (Huquq al-Ibad)')), findsOneWidget);
+    expect(
+      find.byKey(
+        const Key('week-matrix-prev-Rights of Others (Huquq al-Ibad)'),
+      ),
+      findsOneWidget,
+    );
     expect(find.text('Parents'), findsOneWidget);
     expect(find.text('Other relatives'), findsOneWidget);
     expect(find.text('Colleagues & friends'), findsOneWidget);
@@ -191,7 +199,9 @@ void main() {
     expect(find.text('Sulh'), findsNothing);
   });
 
-  testWidgets('Knowledge 7-day Progress uses item-row matrices', (tester) async {
+  testWidgets('Knowledge 7-day Progress uses item-row matrices', (
+    tester,
+  ) async {
     tester.view.physicalSize = const Size(400, 8000);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -213,7 +223,10 @@ void main() {
 
     expect(find.text('SEEKING TRUTH'), findsOneWidget);
     expect(find.text('Learned something true'), findsOneWidget);
-    expect(find.text('Beneficial reading (not Qur’an or Hadith)'), findsOneWidget);
+    expect(
+      find.text('Beneficial reading (not Qur’an or Hadith)'),
+      findsOneWidget,
+    );
     expect(find.text('Asked to remove ignorance'), findsOneWidget);
     expect(find.text('SHARING'), findsOneWidget);
     expect(find.text('Taught someone'), findsOneWidget);
@@ -291,7 +304,10 @@ void main() {
     await tester.pumpAndSettle();
 
     await openProgress(const Key('review-domain-ummah'));
-    expect(find.text('Masjid class or gathering (not the fard)'), findsOneWidget);
+    expect(
+      find.text('Masjid class or gathering (not the fard)'),
+      findsOneWidget,
+    );
     expect(find.text('Da’wah by character'), findsOneWidget);
     expect(find.text('Prayed for the Ummah'), findsOneWidget);
     expect(find.text('Oppressed'), findsNothing);
@@ -313,10 +329,8 @@ void main() {
     expect(find.text('Prep'), findsNothing);
   });
 
-  testWidgets('Salah 7-day Progress uses prayer-row matrices', (
-    tester,
-  ) async {
-        tester.view.physicalSize = const Size(400, 8000);
+  testWidgets('Salah 7-day Progress uses prayer-row matrices', (tester) async {
+    tester.view.physicalSize = const Size(400, 8000);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
@@ -369,26 +383,29 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text(Copy.quranJourney), findsOneWidget);
-    expect(find.text('Applied'), findsOneWidget);
-    expect(find.text('Reflected'), findsOneWidget);
-    expect(find.text('Understood'), findsOneWidget);
-    expect(find.text('Engaged'), findsOneWidget);
-    expect(find.text('Transformation'), findsOneWidget);
-    expect(find.text('Contact with Qur’an'), findsOneWidget);
+    expect(find.text('Practical relevance'), findsOneWidget);
+    expect(find.text('Reflection'), findsOneWidget);
+    expect(find.text('Understanding'), findsOneWidget);
+    expect(find.text('Engagement'), findsOneWidget);
+    expect(find.text('Transformation'), findsNothing);
+    expect(find.text('Engagement with Qur’an'), findsOneWidget);
     expect(find.text('Recite'), findsNothing);
     expect(find.text('Retention'), findsNothing);
     expect(find.text('Study & notice'), findsNothing);
 
     await tester.tap(find.text('30 days'));
     await tester.pumpAndSettle();
-    expect(find.text('Engaged'), findsWidgets);
-    expect(find.text('Contact with Qur’an · Recitation'), findsOneWidget);
-    expect(find.text('Comprehension · Meaning'), findsOneWidget);
+    expect(find.text('Engagement'), findsWidgets);
+    expect(find.text('Engagement with Qur’an · Recitation'), findsOneWidget);
+    expect(
+      find.text('Activities supporting understanding · Meaning'),
+      findsOneWidget,
+    );
     expect(find.text('Recitation with Meaning'), findsNothing);
-    expect(find.text('Applied'), findsOneWidget);
-    expect(find.text('Transformation'), findsOneWidget);
-    expect(find.text('Reflected'), findsOneWidget);
-    expect(find.text('Internalization'), findsOneWidget);
+    expect(find.text('Practical relevance'), findsOneWidget);
+    expect(find.text('Noticed in daily life'), findsOneWidget);
+    expect(find.text('Reflection'), findsOneWidget);
+    expect(find.text('Reflection on meaning'), findsOneWidget);
     expect(find.text('Conscious Application'), findsNothing);
     expect(find.text('Qur’anic Reflection'), findsNothing);
     expect(find.text(Copy.quranJourney), findsNothing);
@@ -432,12 +449,15 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.byType(CheckInScreen), findsNothing);
-    expect(find.text('Applied — Transformation'), findsOneWidget);
+    expect(
+      find.text('Practical relevance — Noticed in daily life'),
+      findsOneWidget,
+    );
     expect(find.text(Copy.quranDayUnanswered), findsOneWidget);
     expect(find.text('Save'), findsNothing);
     await tester.tap(find.byKey(const Key('quran-journey-l1-stage')));
     await tester.pumpAndSettle();
-    expect(find.text('W = Worship'), findsOneWidget);
+    expect(find.text('W = Connected to worship'), findsOneWidget);
   });
 
   testWidgets('7-day matrix opens focused check-in and keeps future inactive', (
@@ -498,9 +518,7 @@ void main() {
     await tester.pageBack();
     await tester.pumpAndSettle();
 
-    await tester.tap(
-      find.byKey(const Key('week-matrix-next-Dhikr & Dua')),
-    );
+    await tester.tap(find.byKey(const Key('week-matrix-next-Dhikr & Dua')));
     await tester.pumpAndSettle();
     expect(find.text('7 Sep – 13 Sep'), findsOneWidget);
 
