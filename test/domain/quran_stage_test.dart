@@ -285,6 +285,38 @@ void main() {
     );
   });
 
+  test('compact occupancy tap uses listing order, not semantic priority', () {
+    final rows = QuranJourneyRow.values;
+    expect(rows.first, QuranJourneyRow.applied);
+    expect(rows.last, QuranJourneyRow.engaged);
+
+    final appliedAndEngaged = empty()
+        .withQuran(QuranDimension.reading, TernaryOutcome.positive)
+        .withQuran(
+          QuranDimension.consciousApplication,
+          TernaryOutcome.positive,
+        );
+    expect(
+      quranVisibleJourneyOpenRow(appliedAndEngaged, rows),
+      QuranJourneyRow.applied,
+    );
+    expect(
+      quranVisibleJourneyOpenRow(appliedAndEngaged, rows),
+      isNot(QuranJourneyRow.engaged),
+    );
+
+    final engagedOnly = empty().withQuran(
+      QuranDimension.reading,
+      TernaryOutcome.positive,
+    );
+    expect(
+      quranVisibleJourneyOpenRow(engagedOnly, rows),
+      QuranJourneyRow.engaged,
+    );
+
+    expect(quranVisibleJourneyOpenRow(empty(), rows), QuranJourneyRow.applied);
+  });
+
   test('journey L2 writes one letter without a schema bump', () {
     final worship = QuranJourneyRow.applied.l2Options.first;
     final record = applyQuranJourneyL2(
