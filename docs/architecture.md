@@ -16,7 +16,7 @@ Persistence:
 - Corrupt documents are isolated; healthy records remain readable
 - Failed writes restore the previous document when possible
 
-DailyCheckIn schema version: **6**. Recordable field count: **10**. Response schema version: **1**.
+DailyCheckIn schema version: **6**. Recordable field count: **10**. Response schema version: **1**. Ontology metadata version: **2** (read-only activity and factor classification of existing persisted IDs; not a persistence schema).
 
 Sample/demo records use `synthetic: true` on check-ins and responses. They are not written at process start. The first-look door (`FirstLookDoorScreen`) asks once: quiet week (`clearFrom` if any synthetic rows exist) or `SyntheticCheckInSeeder.generateInto`. Both paths set `sampleSeeded` so auto-seed never runs later; quiet week does not set `sampleRemovedByUser`. Completing the door sets `personalMix` to `firstLook`. Unset mix still decodes to Same as Domains. Sample days include Qur?an context clusters so 30- and 90-day Recognition can show descriptive patterns (not causes). Settings ? Developer can still recreate, remove, or restore sample data.
 

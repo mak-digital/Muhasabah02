@@ -1,14 +1,18 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:muhasabah02/domain/activities.dart';
+import 'package:muhasabah02/domain/charity_factors.dart';
+import 'package:muhasabah02/domain/context_catalog.dart';
 import 'package:muhasabah02/domain/home_traces.dart';
 import 'package:muhasabah02/domain/monitor_domain.dart';
 import 'package:muhasabah02/domain/ontology.dart';
 import 'package:muhasabah02/domain/quran.dart';
+import 'package:muhasabah02/domain/salah_factors.dart';
 
 void main() {
   test(
     'ontology registry has an explicit version independent of schema v6',
     () {
-      expect(kOntologyRegistryVersion, 1);
+      expect(kOntologyRegistryVersion, 2);
       expect(OntologyRegistry.version, kOntologyRegistryVersion);
       expect(OntologyRegistry.version, isNot(6));
     },
@@ -235,6 +239,214 @@ void main() {
       }
     },
   );
+
+  test('every production activity id resolves exactly once per catalog', () {
+    for (final entry in _productionActivityCatalogs()) {
+      final seen = <String>{};
+      for (final option in entry.options) {
+        expect(seen.add(option.id), isTrue, reason: option.id);
+        final record = OntologyRegistry.forActivity(entry.catalog, option.id);
+        expect(record, isNotNull, reason: '${entry.catalog.name}:${option.id}');
+        expect(record!.persistedId, option.id);
+        expect(record.catalog, entry.catalog);
+        expect(record.status, entry.status);
+        expect(record.impliesOrdinalStage, isFalse);
+        expect(record.impliesSpiritualQuality, isFalse);
+        expect(record.impliesCertifiedMerit, isFalse);
+      }
+    }
+  });
+
+  test('retired activity catalogs remain resolvable', () {
+    expect(
+      OntologyRegistry.forActivity(
+        OntologyActivityCatalog.quranLegacy,
+        'readWithTranslation',
+      )?.status,
+      OntologyNodeStatus.retired,
+    );
+    expect(
+      OntologyRegistry.forActivity(
+        OntologyActivityCatalog.family,
+        'parentCommunication',
+      )?.status,
+      OntologyNodeStatus.retired,
+    );
+    expect(
+      OntologyRegistry.forActivity(
+        OntologyActivityCatalog.conduct,
+        'patience',
+      )?.status,
+      OntologyNodeStatus.retired,
+    );
+    expect(
+      OntologyRegistry.forActivity(
+        OntologyActivityCatalog.family,
+        'parentCommunication',
+      )?.persistedId,
+      'parentCommunication',
+    );
+  });
+
+  test('activity registry has no duplicate stable ids', () {
+    final ids = [
+      for (final record in OntologyRegistry.activities) record.stableId,
+    ];
+    expect(ids.toSet().length, ids.length);
+  });
+
+  test('activity persisted ids match production catalogs', () {
+    for (final entry in _productionActivityCatalogs()) {
+      final production = {for (final option in entry.options) option.id};
+      final registered = {
+        for (final record in OntologyRegistry.activities)
+          if (record.catalog == entry.catalog) record.persistedId,
+      };
+      expect(registered, production);
+    }
+  });
+
+  test('Salah activity metadata is not a spiritual quality rank', () {
+    for (final option in ActivityCatalog.salah) {
+      final record = OntologyRegistry.forActivity(
+        OntologyActivityCatalog.salah,
+        option.id,
+      )!;
+      expect(record.conceptualDomain, ConceptualDomainId.salahPrayerPractice);
+      expect(record.impliesSpiritualQuality, isFalse);
+      expect(record.impliesOrdinalStage, isFalse);
+      if (option.id == ActivityIds.unanswered ||
+          option.id == ActivityIds.other) {
+        expect(record.kind, OntologyConstructKind.observationState);
+      } else {
+        expect(record.kind, OntologyConstructKind.practiceObservation);
+      }
+    }
+    expect(
+      OntologyRegistry.forActivity(
+        OntologyActivityCatalog.salah,
+        'congregationOnTime',
+      )!.persistedId,
+      'congregationOnTime',
+    );
+    expect(
+      OntologyRegistry.forActivity(
+        OntologyActivityCatalog.salah,
+        'missedMadeUp',
+      )!.persistedId,
+      'missedMadeUp',
+    );
+  });
+
+  test('Qur’an activity metadata does not introduce ordinal semantics', () {
+    for (final record in OntologyRegistry.activities) {
+      if (record.conceptualDomain !=
+          ConceptualDomainId.quranRevelationEngagement) {
+        continue;
+      }
+      expect(record.impliesOrdinalStage, isFalse);
+      if (record.quranGroup != null) {
+        expect(quranGroupOrdinal(record.quranGroup!), isNull);
+      }
+    }
+    expect(
+      OntologyRegistry.forActivity(
+        OntologyActivityCatalog.quranConsciousApplication,
+        'improvedWorship',
+      )!.persistedId,
+      'improvedWorship',
+    );
+    expect(
+      OntologyRegistry.forActivity(
+        OntologyActivityCatalog.quranMeaning,
+        'recitedWithMeaning',
+      )!.quranGroup,
+      QuranConceptualGroup.understandingActivities,
+    );
+  });
+
+  test('context factors are provenance, not behavioural outcomes', () {
+    expect(OntologyRegistry.factors, isNotEmpty);
+    for (final record in OntologyRegistry.factors) {
+      expect(record.kind, OntologyConstructKind.contextProvenance);
+      expect(record.isCause, isFalse);
+      expect(record.isOutcome, isFalse);
+      expect(record.isRecommendation, isFalse);
+    }
+    expect(
+      OntologyRegistry.forFactor(
+        catalog: OntologyFactorCatalog.salah,
+        persistedId: 'salah.alarmWorked',
+        polarity: 'positive',
+      )?.isOutcome,
+      isFalse,
+    );
+    expect(
+      OntologyRegistry.forFactor(
+        catalog: OntologyFactorCatalog.quranContext,
+        persistedId: 'forgot',
+      )?.status,
+      OntologyNodeStatus.retired,
+    );
+  });
+
+  test('factor registry covers production catalogs without duplicate ids', () {
+    final ids = [
+      for (final record in OntologyRegistry.factors) record.stableId,
+    ];
+    expect(ids.toSet().length, ids.length);
+
+    for (final factor in ContextCatalog.positive) {
+      expect(
+        OntologyRegistry.forFactor(
+          catalog: OntologyFactorCatalog.quranContext,
+          persistedId: factor.id,
+          polarity: 'positive',
+        ),
+        isNotNull,
+      );
+    }
+    for (final factor in SalahFactorCatalog.support) {
+      expect(
+        OntologyRegistry.forFactor(
+          catalog: OntologyFactorCatalog.salah,
+          persistedId: factor.id,
+          polarity: 'positive',
+        )?.persistedId,
+        factor.id,
+      );
+    }
+    for (final factor in CharityFactorCatalog.challenge) {
+      expect(
+        OntologyRegistry.forFactor(
+          catalog: OntologyFactorCatalog.charity,
+          persistedId: factor.id,
+          polarity: 'negative',
+        )?.persistedId,
+        factor.id,
+      );
+    }
+  });
+
+  test('reflective content is not classified as a scored observation', () {
+    for (final record in OntologyRegistry.reflectionSubjects) {
+      expect(record.isObservationScore, isFalse);
+      expect(record.mayBeSemanticallyInterpreted, isFalse);
+    }
+    final gratitude = OntologyRegistry.forActivity(
+      OntologyActivityCatalog.gratitude,
+      'namedBlessing',
+    )!;
+    expect(gratitude.kind, OntologyConstructKind.reflectiveContent);
+    expect(
+      gratitude.conceptualDomain,
+      ConceptualDomainId.reflectionPersonalResponse,
+    );
+    expect(
+      OntologyRegistry.forActivity(OntologyActivityCatalog.zakat, 'due')!.kind,
+      OntologyConstructKind.standingStatus,
+    );
+  });
 }
 
 List<HomeTraceRow> _activeCatalogRows() {
@@ -261,5 +473,112 @@ List<HomeTraceRow> _retiredCatalogRows() {
     ...timeRetiredHomeRows,
     ...wealthRetiredHomeRows,
     ...ummahRetiredHomeRows,
+  ];
+}
+
+class _ActivityCatalogEntry {
+  const _ActivityCatalogEntry({
+    required this.catalog,
+    required this.options,
+    required this.status,
+  });
+
+  final OntologyActivityCatalog catalog;
+  final List<ActivityOption> options;
+  final OntologyNodeStatus status;
+}
+
+List<_ActivityCatalogEntry> _productionActivityCatalogs() {
+  return const [
+    _ActivityCatalogEntry(
+      catalog: OntologyActivityCatalog.salah,
+      options: ActivityCatalog.salah,
+      status: OntologyNodeStatus.active,
+    ),
+    _ActivityCatalogEntry(
+      catalog: OntologyActivityCatalog.quranReading,
+      options: ActivityCatalog.quranReading,
+      status: OntologyNodeStatus.active,
+    ),
+    _ActivityCatalogEntry(
+      catalog: OntologyActivityCatalog.quranMeaning,
+      options: ActivityCatalog.quranMeaning,
+      status: OntologyNodeStatus.active,
+    ),
+    _ActivityCatalogEntry(
+      catalog: OntologyActivityCatalog.quranMemorisation,
+      options: ActivityCatalog.quranMemorisation,
+      status: OntologyNodeStatus.active,
+    ),
+    _ActivityCatalogEntry(
+      catalog: OntologyActivityCatalog.quranRevision,
+      options: ActivityCatalog.quranRevision,
+      status: OntologyNodeStatus.active,
+    ),
+    _ActivityCatalogEntry(
+      catalog: OntologyActivityCatalog.quranTafsir,
+      options: ActivityCatalog.quranTafsir,
+      status: OntologyNodeStatus.active,
+    ),
+    _ActivityCatalogEntry(
+      catalog: OntologyActivityCatalog.quranReflection,
+      options: ActivityCatalog.quranReflection,
+      status: OntologyNodeStatus.active,
+    ),
+    _ActivityCatalogEntry(
+      catalog: OntologyActivityCatalog.quranConsciousApplication,
+      options: ActivityCatalog.quranConsciousApplication,
+      status: OntologyNodeStatus.active,
+    ),
+    _ActivityCatalogEntry(
+      catalog: OntologyActivityCatalog.quranLegacy,
+      options: ActivityCatalog.quranLegacy,
+      status: OntologyNodeStatus.retired,
+    ),
+    _ActivityCatalogEntry(
+      catalog: OntologyActivityCatalog.dhikr,
+      options: ActivityCatalog.dhikr,
+      status: OntologyNodeStatus.active,
+    ),
+    _ActivityCatalogEntry(
+      catalog: OntologyActivityCatalog.conduct,
+      options: ActivityCatalog.conduct,
+      status: OntologyNodeStatus.retired,
+    ),
+    _ActivityCatalogEntry(
+      catalog: OntologyActivityCatalog.gratitude,
+      options: ActivityCatalog.gratitude,
+      status: OntologyNodeStatus.retired,
+    ),
+    _ActivityCatalogEntry(
+      catalog: OntologyActivityCatalog.personalReflection,
+      options: ActivityCatalog.personalReflection,
+      status: OntologyNodeStatus.retired,
+    ),
+    _ActivityCatalogEntry(
+      catalog: OntologyActivityCatalog.fasting,
+      options: ActivityCatalog.fasting,
+      status: OntologyNodeStatus.active,
+    ),
+    _ActivityCatalogEntry(
+      catalog: OntologyActivityCatalog.charity,
+      options: ActivityCatalog.charity,
+      status: OntologyNodeStatus.active,
+    ),
+    _ActivityCatalogEntry(
+      catalog: OntologyActivityCatalog.zakat,
+      options: ActivityCatalog.zakat,
+      status: OntologyNodeStatus.active,
+    ),
+    _ActivityCatalogEntry(
+      catalog: OntologyActivityCatalog.family,
+      options: ActivityCatalog.family,
+      status: OntologyNodeStatus.retired,
+    ),
+    _ActivityCatalogEntry(
+      catalog: OntologyActivityCatalog.hadith,
+      options: ActivityCatalog.hadith,
+      status: OntologyNodeStatus.active,
+    ),
   ];
 }
