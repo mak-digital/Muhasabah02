@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
+import '../../domain/copy.dart';
 import '../../domain/monitor_domain.dart';
 
 class DomainStage extends ConsumerWidget {
@@ -113,6 +114,8 @@ class DomainStage extends ConsumerWidget {
     ref.read(stageProvider.notifier).state = domains[index];
   }
 
+  static const _navExtent = 40.0;
+
   Widget _chrome(
     BuildContext context,
     WidgetRef ref, {
@@ -121,53 +124,84 @@ class DomainStage extends ConsumerWidget {
     final theme = Theme.of(context);
     final previous = index > 0 ? domains[index - 1] : null;
     final next = index < domains.length - 1 ? domains[index + 1] : null;
-    return Row(
-      children: [
-        Expanded(
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: previous == null
-                ? const SizedBox.shrink()
-                : TextButton(
-                    key: Key('$keyPrefix-prev'),
-                    onPressed: () => _select(ref, index - 1),
-                    child: Text(
-                      '‹ ${previous.shortLabel}',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
+    return SizedBox(
+      height: _navExtent,
+      child: Row(
+        children: [
+          _navButton(
+            context,
+            key: Key('$keyPrefix-prev'),
+            icon: Icons.chevron_left_rounded,
+            enabled: previous != null,
+            tooltip: previous == null
+                ? Copy.noPreviousDomain
+                : Copy.previousDomain(previous.shortLabel),
+            onPressed: previous == null ? null : () => _select(ref, index - 1),
           ),
-        ),
-        Flexible(
-          child: Text(
-            domains[index].shortLabel,
-            key: Key('$keyPrefix-current'),
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w700,
+          Expanded(
+            child: Center(
+              child: Text(
+                domains[index].shortLabel,
+                key: Key('$keyPrefix-current'),
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.2,
+                ),
+              ),
             ),
           ),
-        ),
-        Expanded(
-          child: Align(
-            alignment: Alignment.centerRight,
-            child: next == null
-                ? const SizedBox.shrink()
-                : TextButton(
-                    key: Key('$keyPrefix-next'),
-                    onPressed: () => _select(ref, index + 1),
-                    child: Text(
-                      '${next.shortLabel} ›',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
+          _navButton(
+            context,
+            key: Key('$keyPrefix-next'),
+            icon: Icons.chevron_right_rounded,
+            enabled: next != null,
+            tooltip: next == null
+                ? Copy.noNextDomain
+                : Copy.nextDomain(next.shortLabel),
+            onPressed: next == null ? null : () => _select(ref, index + 1),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _navButton(
+    BuildContext context, {
+    required Key key,
+    required IconData icon,
+    required bool enabled,
+    required String tooltip,
+    required VoidCallback? onPressed,
+  }) {
+    final scheme = Theme.of(context).colorScheme;
+    return SizedBox(
+      width: _navExtent,
+      height: _navExtent,
+      child: IconButton(
+        key: key,
+        tooltip: tooltip,
+        onPressed: onPressed,
+        icon: Icon(icon, size: 22),
+        style: IconButton.styleFrom(
+          foregroundColor: scheme.onSurface,
+          disabledForegroundColor: scheme.onSurface.withValues(alpha: 0.22),
+          backgroundColor: scheme.surfaceContainerHighest.withValues(
+            alpha: enabled ? 0.9 : 0.4,
+          ),
+          disabledBackgroundColor: scheme.surfaceContainerHighest.withValues(
+            alpha: 0.4,
+          ),
+          shape: const CircleBorder(),
+          padding: EdgeInsets.zero,
+          minimumSize: const Size(_navExtent, _navExtent),
+          maximumSize: const Size(_navExtent, _navExtent),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          visualDensity: VisualDensity.compact,
         ),
-      ],
+      ),
     );
   }
 

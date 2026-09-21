@@ -7,11 +7,13 @@ import '../../domain/analytics.dart';
 import '../../domain/copy.dart';
 import '../../domain/daily_check_in.dart';
 import '../../domain/home_traces.dart';
+import '../../domain/domain_briefing.dart';
 import '../../domain/quran.dart';
 import '../../domain/review_period.dart';
 import '../checkin/check_in_screen.dart';
 import '../checkin/trace_record_sheets.dart';
 import '../shared/progress_calendar.dart';
+import '../shared/domain_briefing_note.dart';
 import '../shared/state_marker.dart';
 import '../shared/ui_bits.dart';
 import 'week_trace_matrix.dart';
@@ -30,6 +32,7 @@ class OptionalDomainProgressScreen extends ConsumerWidget {
     this.focusQuestion,
     this.note,
     this.includeStruggleNote = false,
+    this.itemRowsOn7Days = true,
   });
 
   final String title;
@@ -43,6 +46,7 @@ class OptionalDomainProgressScreen extends ConsumerWidget {
   final bool weekMatricesOn7Days;
   final bool highlightLunarWhiteDays;
   final bool includeStruggleNote;
+  final bool itemRowsOn7Days;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -92,7 +96,10 @@ class OptionalDomainProgressScreen extends ConsumerWidget {
                 'The card wash identifies the domain, not rank. Marks share one colour. Missing records are not treated as missed.',
                 style: Theme.of(context).textTheme.bodySmall,
               ),
-              if (note != null && note!.isNotEmpty) ...[
+              if (briefingForLabel(title) != null) ...[
+                const SizedBox(height: 8),
+                DomainBriefingNote(briefingForLabel(title)!, compact: true),
+              ] else if (note != null && note!.isNotEmpty) ...[
                 const SizedBox(height: 8),
                 Text(note!, style: Theme.of(context).textTheme.bodySmall),
               ],
@@ -124,8 +131,21 @@ class OptionalDomainProgressScreen extends ConsumerWidget {
               ],
               const SizedBox(height: 12),
               if (weekMatricesOn7Days && period.days == 7) ...[
-                ..._weekMatrices(index),
-                if (includeZakat) _zakatWeekMatrix(context, ref, now, index),
+                if (itemRowsOn7Days)
+                  HomeStyleWeekMatrix(
+                    navId: title,
+                    rows: rows,
+                    index: index,
+                    family: family,
+                    highlightLunarWhiteDays: highlightLunarWhiteDays,
+                    includeZakat: includeZakat,
+                    onOpenDay: _openDay,
+                  )
+                else ...[
+                  ..._weekMatrices(index),
+                  if (includeZakat)
+                    _zakatWeekMatrix(context, ref, now, index),
+                ],
               ] else ...[
                 for (final row in rows)
                   _rowCard(context, row, index, period, now),
@@ -150,6 +170,7 @@ class OptionalDomainProgressScreen extends ConsumerWidget {
           index: index,
           family: family,
           highlightLunarWhiteDays: highlightLunarWhiteDays,
+          itemAsRows: itemRowsOn7Days,
           onOpenDay: (context, key) => _openDay(context, key, band: band),
         ),
     ];
@@ -173,6 +194,7 @@ class OptionalDomainProgressScreen extends ConsumerWidget {
       rows: const [row],
       index: index,
       family: family,
+      itemAsRows: itemRowsOn7Days,
       cellBuilder: (context, key, _) {
         final status = index[key]?.zakat ?? ZakatStatus.unanswered;
         return ProgressDayCell(

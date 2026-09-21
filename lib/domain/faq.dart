@@ -94,7 +94,7 @@ const faqEntries = <FaqEntry>[
   FaqEntry(
     id: kFaqManualBaseline,
     question: 'How do I write a Manual baseline?',
-    answer: 'A Manual baseline is a short note about a pattern you already noticed. It is not counted from check-ins. It is not a score. A hope for later belongs under Personal Aspirations. A Manual baseline does not change Home, Review, Patterns Noticed, or check-in.\n\nWording that fits looks backward, without a quota: “Morning Adhkar showed up more on weekdays than on Friday last season.” “I often recorded a sick visit when a parent was ill; other Huquq rows stayed unanswered.”\n\nWording that does not fit is a percentage, a streak, a weekly quota, or “must improve.”\n\nHome → Patterns Noticed is separate. It may describe weekday clustering or appearance across weeks from engagement marks, with View evidence. It does not read a Manual baseline.',
+    answer: 'A Manual baseline is a short note about a pattern you already noticed. It is not counted from check-ins. It is not a score. A hope for later belongs under Personal Aspirations. A Manual baseline does not change Home, Review, or check-in.\n\nWording that fits looks backward, without a quota: “Morning Adhkar showed up more on weekdays than on Friday last season.” “I often recorded a sick visit when a parent was ill; other Huquq rows stayed unanswered.”\n\nWording that does not fit is a percentage, a streak, a weekly quota, or “must improve.”',
   ),
   FaqEntry(
     question: 'What do Helping and Distracting factors mean?',
@@ -117,8 +117,8 @@ const faqEntries = <FaqEntry>[
     answer: 'Reflection of the Week rotates by calendar in Settings → Application → Quotation cadence. Quotes are not chosen from your records.',
   ),
   FaqEntry(
-    question: 'What are Patterns Noticed and Recognition?',
-    answer: 'They describe what you recorded over a period, with a way to view the evidence. They do not say you improved or declined, and they do not prescribe what to do next.',
+    question: 'What is Recognition?',
+    answer: 'Recognition lives on Review. It describes what you recorded over a longer period, with a way to view the evidence. It does not say you improved or declined, and it does not prescribe what to do next.',
   ),
   FaqEntry(
     question: 'Where is the meaning of the week-grid marks?',
@@ -130,11 +130,11 @@ const faqEntries = <FaqEntry>[
   ),
   FaqEntry(
     question: 'Can I hide domains I do not want to monitor?',
-    answer: 'Settings → Application → Domains chooses which domains appear on Home, Review, and today’s check-in. The first look is Salah, Qur’an & Akhlaq (six domains). All domains remains one tap. Hidden domains keep any saved records. Showing a domain again does not rewrite those records. This season’s mix is on the same screen. Home Noticed This Week and Patterns Noticed follow Domains, and follow Personal mix when one is set. Recorded days still shows what was stored.',
+    answer: 'Settings → Application → Domains chooses which domains appear on Home, Review, and today’s check-in. The first look is Salah, Qur’an & Akhlaq (six domains). All domains remains one tap. Hidden domains keep any saved records. Showing a domain again does not rewrite those records. This season’s mix is on the same screen. Recorded days still shows what was stored.',
   ),
   FaqEntry(
     question: 'What is a Personal mix?',
-    answer: 'Settings → Application → Domains holds shown domains and this season’s mix. Mix is where you choose which domains, bands, and rows you want to notice this season. Home and today’s check-in show one mix domain at a time. Noticed This Week and Patterns Noticed follow that set. Review still shows every visible domain. It is not a score, a programme, or a second Domains list. Named starting points copy a set you can edit. Same as Domains follows whatever is already shown. The mix does not rewrite saved days. Unanswered mix rows are not missed. A mix row on a hidden domain is kept and appears on Home only when that domain is shown. That is stated on the mix list; it is not a block.',
+    answer: 'Settings → Application → Domains holds shown domains and this season’s mix. Mix is where you choose which domains, bands, and rows you want to notice this season. Home and today’s check-in show one mix domain at a time. Review still shows every visible domain. It is not a score, a programme, or a second Domains list. Named starting points copy a set you can edit. Same as Domains follows whatever is already shown. The mix does not rewrite saved days. Unanswered mix rows are not missed. A mix row on a hidden domain is kept and appears on Home only when that domain is shown. That is stated on the mix list; it is not a block.',
   ),
   FaqEntry(
     question: 'What is Manage past check-ins compared with Recorded days?',
@@ -180,6 +180,10 @@ const faqEntries = <FaqEntry>[
   FaqEntry(
     question: 'Are my records private if the phone is lost?',
     answer: 'Days stay on this device. There is no account and no cloud copy. Android backup of this app is off.\n\nThe phone lock is the main protection if the device is lost. Settings → Privacy → Unlock with this device can ask for this phone’s PIN, pattern, or biometrics before the app is shown. Muhasabah does not store a separate password.\n\nThat lock does not encrypt the files. Anyone who can open an unlocked phone can read the days if Unlock with this device is off. Removing a saved day is not forensic erasure.',
+  ),
+  FaqEntry(
+    question: 'What do Salah activity colours mean?',
+    answer: 'Settings → Application → Activities can colour Salah marks by the recorded choice. Shared colour remains the default. Colour names what was recorded. It does not rank spirituality or tell you what to do next.',
   ),
 ];
 

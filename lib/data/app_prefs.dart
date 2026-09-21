@@ -26,6 +26,7 @@ abstract class AppPrefs {
   HajjStatus get hajjStatus;
   bool get mixHiddenDomainHintShown;
   bool get appLockEnabled;
+  bool get salahActivityColours;
 
   Future<void> setSampleSeeded(bool value);
   Future<void> setSampleRemovedByUser(bool value);
@@ -43,6 +44,7 @@ abstract class AppPrefs {
   Future<void> setHajjStatus(HajjStatus value);
   Future<void> setMixHiddenDomainHintShown(bool value);
   Future<void> setAppLockEnabled(bool value);
+  Future<void> setSalahActivityColours(bool value);
 }
 
 class MemoryAppPrefs implements AppPrefs {
@@ -60,6 +62,7 @@ class MemoryAppPrefs implements AppPrefs {
     this.hajjStatus = HajjStatus.unanswered,
     this.mixHiddenDomainHintShown = false,
     this.appLockEnabled = false,
+    this.salahActivityColours = false,
     List<PersonalBaseline>? baselines,
     List<PersonalAspiration>? aspirations,
     Map<String, String>? weeklyJournals,
@@ -106,6 +109,9 @@ class MemoryAppPrefs implements AppPrefs {
 
   @override
   bool appLockEnabled;
+
+  @override
+  bool salahActivityColours;
 
   @override
   List<PersonalBaseline> baselines;
@@ -184,6 +190,10 @@ class MemoryAppPrefs implements AppPrefs {
 
   @override
   Future<void> setAppLockEnabled(bool value) async => appLockEnabled = value;
+
+  @override
+  Future<void> setSalahActivityColours(bool value) async =>
+      salahActivityColours = value;
 }
 
 List<PersonalBaseline> decodeBaselines(String? raw) {

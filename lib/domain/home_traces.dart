@@ -853,64 +853,35 @@ bool hidesHomeTraceFactors(String storageKey) =>
     isLivedSunnahTrace(storageKey) ||
     isHajjTrace(storageKey);
 
+String namedTraceOutcome(String phrase, String storageKey) {
+  final subject = homeTraceRowByKey(storageKey)?.label;
+  if (subject == null || subject.isEmpty) return phrase;
+  return '$phrase — $subject';
+}
+
 String traceOutcomeLabel(String storageKey, TernaryOutcome outcome) {
-  if (isAkhlaqTrace(storageKey)) {
-    return switch (outcome) {
-      TernaryOutcome.positive => 'I noticed this in myself',
-      TernaryOutcome.negative => 'I did not notice this today',
-      TernaryOutcome.unanswered => 'Unanswered',
-    };
-  }
   if (isHuquqTrace(storageKey)) {
-    return switch (outcome) {
+    return namedTraceOutcome(switch (outcome) {
       TernaryOutcome.positive => 'I attended to a right I owe',
       TernaryOutcome.negative => 'I neglected a right I owe',
       TernaryOutcome.unanswered => 'Unanswered',
-    };
+    }, storageKey);
   }
-  if (isKnowledgeTrace(storageKey)) {
-    return switch (outcome) {
+  if (isAkhlaqTrace(storageKey) ||
+      isKnowledgeTrace(storageKey) ||
+      isTimeTrace(storageKey) ||
+      isHealthTrace(storageKey) ||
+      isWealthTrace(storageKey) ||
+      isHajjTrace(storageKey) ||
+      isUmmahTrace(storageKey) ||
+      isLivedSunnahTrace(storageKey)) {
+    return namedTraceOutcome(switch (outcome) {
       TernaryOutcome.positive => 'I noticed this in myself',
       TernaryOutcome.negative => 'I did not notice this today',
       TernaryOutcome.unanswered => 'Unanswered',
-    };
+    }, storageKey);
   }
-  if (isTimeTrace(storageKey)) {
-    return switch (outcome) {
-      TernaryOutcome.positive => 'I noticed this in myself',
-      TernaryOutcome.negative => 'I did not notice this today',
-      TernaryOutcome.unanswered => 'Unanswered',
-    };
-  }
-  if (isHealthTrace(storageKey)) {
-    return switch (outcome) {
-      TernaryOutcome.positive => 'I noticed this in myself',
-      TernaryOutcome.negative => 'I did not notice this today',
-      TernaryOutcome.unanswered => 'Unanswered',
-    };
-  }
-  if (isWealthTrace(storageKey)) {
-    return switch (outcome) {
-      TernaryOutcome.positive => 'I noticed this in myself',
-      TernaryOutcome.negative => 'I did not notice this today',
-      TernaryOutcome.unanswered => 'Unanswered',
-    };
-  }
-  if (isHajjTrace(storageKey)) {
-    return switch (outcome) {
-      TernaryOutcome.positive => 'I noticed this in myself',
-      TernaryOutcome.negative => 'I did not notice this today',
-      TernaryOutcome.unanswered => 'Unanswered',
-    };
-  }
-  if (isUmmahTrace(storageKey) || isLivedSunnahTrace(storageKey)) {
-    return switch (outcome) {
-      TernaryOutcome.positive => 'I noticed this in myself',
-      TernaryOutcome.negative => 'I did not notice this today',
-      TernaryOutcome.unanswered => 'Unanswered',
-    };
-  }
-  return outcome.legendLabel;
+  return namedTraceOutcome(outcome.legendLabel, storageKey);
 }
 
 const allHomeTraceRows = [

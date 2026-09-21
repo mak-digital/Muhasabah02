@@ -26,17 +26,25 @@ const kBasicAkhlaqVisibleDomains = {
   MonitorDomain.charity,
 };
 
-/// Opt-in Home cards use one week row. Salah, Qur’an, Hadith, Akhlaq, Huquq, and Charity keep full matrices.
+/// Shown domain weeks use a full item×day matrix. Named mix still compact-hides domains the mix does not touch.
 bool usesCompactHomeWeek(MonitorDomain domain) {
-  return switch (domain) {
-    MonitorDomain.salah ||
-    MonitorDomain.quran ||
-    MonitorDomain.hadith ||
-    MonitorDomain.akhlaq ||
-    MonitorDomain.huquq ||
-    MonitorDomain.charity => false,
-    _ => true,
-  };
+  switch (domain) {
+    case MonitorDomain.salah:
+    case MonitorDomain.quran:
+    case MonitorDomain.hadith:
+    case MonitorDomain.dhikr:
+    case MonitorDomain.akhlaq:
+    case MonitorDomain.huquq:
+    case MonitorDomain.knowledge:
+    case MonitorDomain.time:
+    case MonitorDomain.health:
+    case MonitorDomain.wealth:
+    case MonitorDomain.ummah:
+    case MonitorDomain.fasting:
+    case MonitorDomain.hajj:
+    case MonitorDomain.charity:
+      return false;
+  }
 }
 
 const kLegacyAllDomainIds = {

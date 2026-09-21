@@ -382,10 +382,7 @@ class DailyCheckIn {
     QuranDimension dimension,
     RecordedActivity activity,
   ) {
-    final option = ActivityCatalog.find(
-      ActivityCatalog.forQuran(dimension),
-      activity.id,
-    );
+    final option = ActivityCatalog.findQuran(dimension, activity.id);
     final outcome = option?.ternary ?? TernaryOutcome.unanswered;
     if (!canSetQuranOutcome(
       quran: quran,

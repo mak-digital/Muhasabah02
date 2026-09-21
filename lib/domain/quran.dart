@@ -19,6 +19,10 @@ List<QuranDimension> get quranDailyDimensions => [
 const kQuranRecitationBand = 'Recitation';
 const kQuranRetentionBand = 'Retention';
 const kQuranStudyBand = 'Study & notice';
+const kQuranEngagementBand = 'Engagement';
+const kQuranUnderstandingBand = 'Understanding';
+const kQuranReflectionBand = 'Reflection';
+const kQuranApplicationBand = 'Application';
 
 const recitationHomeRows = [QuranDimension.reading, QuranDimension.meaning];
 
@@ -32,6 +36,18 @@ const studyNoticeHomeRows = [
   QuranDimension.reflection,
   QuranDimension.consciousApplication,
 ];
+
+const engagementHomeRows = [
+  QuranDimension.reading,
+  QuranDimension.memorisation,
+  QuranDimension.revision,
+];
+
+const understandingHomeRows = [QuranDimension.meaning, QuranDimension.tafsir];
+
+const reflectionHomeRows = [QuranDimension.reflection];
+
+const applicationHomeRows = [QuranDimension.consciousApplication];
 
 extension QuranDimensionX on QuranDimension {
   String get jsonKey => name;
@@ -61,8 +77,10 @@ extension QuranDimensionX on QuranDimension {
   bool get matrixColumnVertical => true;
 
   String get homeBand {
-    if (recitationHomeRows.contains(this)) return kQuranRecitationBand;
-    if (retentionHomeRows.contains(this)) return kQuranRetentionBand;
+    if (engagementHomeRows.contains(this)) return kQuranEngagementBand;
+    if (understandingHomeRows.contains(this)) return kQuranUnderstandingBand;
+    if (reflectionHomeRows.contains(this)) return kQuranReflectionBand;
+    if (applicationHomeRows.contains(this)) return kQuranApplicationBand;
     return kQuranStudyBand;
   }
 

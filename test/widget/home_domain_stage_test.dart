@@ -17,19 +17,52 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text(MonitorDomain.salah.label), findsWidgets);
     expect(find.text(MonitorDomain.quran.label), findsNothing);
-    expect(find.textContaining('Qur’an ›'), findsOneWidget);
-    expect(find.byKey(const Key('home-domain-prev')), findsNothing);
+    expect(find.byKey(const Key('home-domain-prev')), findsOneWidget);
+    expect(find.byKey(const Key('home-domain-next')), findsOneWidget);
+    expect(
+      tester
+          .widget<IconButton>(find.byKey(const Key('home-domain-prev')))
+          .onPressed,
+      isNull,
+    );
+    expect(find.textContaining('Qur’an ›'), findsNothing);
+
+    final prevBefore = tester.getRect(find.byKey(const Key('home-domain-prev')));
+    final nextBefore = tester.getRect(find.byKey(const Key('home-domain-next')));
+    expect(prevBefore.width, nextBefore.width);
+    expect(prevBefore.height, nextBefore.height);
+    expect(prevBefore.top, nextBefore.top);
 
     await tester.tap(find.byKey(const Key('home-domain-next')));
     await tester.pumpAndSettle();
     expect(find.text(MonitorDomain.quran.label), findsWidgets);
     expect(find.text(MonitorDomain.salah.label), findsNothing);
-    expect(find.textContaining('‹ Salah'), findsOneWidget);
-    expect(find.textContaining('Hadith ›'), findsOneWidget);
+    expect(find.text(MonitorDomain.quran.shortLabel), findsWidgets);
+    expect(find.textContaining('‹ Salah'), findsNothing);
+    expect(find.textContaining('Hadith ›'), findsNothing);
+    expect(
+      tester.getRect(find.byKey(const Key('home-domain-prev'))).left,
+      prevBefore.left,
+    );
+    expect(
+      tester.getRect(find.byKey(const Key('home-domain-next'))).right,
+      nextBefore.right,
+    );
+    expect(
+      tester
+          .widget<IconButton>(find.byKey(const Key('home-domain-prev')))
+          .onPressed,
+      isNotNull,
+    );
 
     await showHomeDomain(tester, MonitorDomain.charity);
     expect(find.text('Charity'), findsWidgets);
-    expect(find.byKey(const Key('home-domain-next')), findsNothing);
+    expect(
+      tester
+          .widget<IconButton>(find.byKey(const Key('home-domain-next')))
+          .onPressed,
+      isNull,
+    );
     expect(find.textContaining('Score'), findsNothing);
     expect(find.bySemanticsLabel(Copy.homeDomainPillsNote), findsOneWidget);
   });

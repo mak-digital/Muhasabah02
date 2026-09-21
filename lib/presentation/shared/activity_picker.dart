@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../application/providers.dart';
 import '../../domain/activities.dart';
 import '../../domain/charity_factors.dart';
 import '../../domain/context_catalog.dart';
 import '../../domain/factor_groups.dart';
+import 'salah_activity_mark.dart';
 
 const checkInValueIndent = 20.0;
 const checkInNestedIndent = 40.0;
@@ -62,11 +65,13 @@ class CheckInSelectEntry<T> {
     required this.value,
     required this.label,
     this.itemKey,
+    this.swatch,
   });
 
   final T value;
   final String label;
   final Key? itemKey;
+  final Color? swatch;
 }
 
 class CheckInSelect<T> extends StatelessWidget {
@@ -78,6 +83,7 @@ class CheckInSelect<T> extends StatelessWidget {
     this.enabled = true,
     this.dropdownKey,
     this.depth = CheckInFieldDepth.value,
+    this.sortLabels = true,
   });
 
   final T value;
@@ -86,6 +92,7 @@ class CheckInSelect<T> extends StatelessWidget {
   final bool enabled;
   final Key? dropdownKey;
   final CheckInFieldDepth depth;
+  final bool sortLabels;
 
   @override
   Widget build(BuildContext context) {
@@ -94,8 +101,33 @@ class CheckInSelect<T> extends StatelessWidget {
     final indent = nested ? checkInNestedIndent : checkInValueIndent;
     final fill = scheme.surface.withValues(alpha: nested ? 0.52 : 0.9);
     final ink = nested ? scheme.onSurfaceVariant : scheme.onSurface;
-    final sorted = [...entries]
-      ..sort((a, b) => a.label.toLowerCase().compareTo(b.label.toLowerCase()));
+    final sorted = [...entries];
+    if (sortLabels) {
+      sorted.sort(
+        (a, b) => a.label.toLowerCase().compareTo(b.label.toLowerCase()),
+      );
+    }
+    Widget labelFor(CheckInSelectEntry<T> entry) {
+      final text = Text(
+        entry.label,
+        maxLines: 3,
+        overflow: TextOverflow.ellipsis,
+        style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: ink),
+      );
+      final swatch = entry.swatch;
+      if (swatch == null) return text;
+      return Row(
+        children: [
+          Container(
+            width: 12,
+            height: 12,
+            decoration: BoxDecoration(color: swatch, shape: BoxShape.circle),
+          ),
+          const SizedBox(width: 8),
+          Expanded(child: text),
+        ],
+      );
+    }
     return Padding(
       padding: EdgeInsets.only(left: indent),
       child: KeyedSubtree(
@@ -124,7 +156,7 @@ class CheckInSelect<T> extends StatelessWidget {
                   DropdownMenuItem<T>(
                     key: entry.itemKey,
                     value: entry.value,
-                    child: Text(entry.label),
+                    child: labelFor(entry),
                   ),
               ],
               selectedItemBuilder: (context) {
@@ -132,13 +164,7 @@ class CheckInSelect<T> extends StatelessWidget {
                   for (final entry in sorted)
                     Align(
                       alignment: Alignment.centerLeft,
-                      child: Text(
-                        entry.label,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.bodyMedium
-                            ?.copyWith(color: ink),
-                      ),
+                      child: labelFor(entry),
                     ),
                 ];
               },
@@ -155,7 +181,7 @@ class CheckInSelect<T> extends StatelessWidget {
   }
 }
 
-class ActivityPicker extends StatelessWidget {
+class ActivityPicker extends ConsumerWidget {
   const ActivityPicker({
     super.key,
     required this.options,
@@ -172,18 +198,28 @@ class ActivityPicker extends StatelessWidget {
   final bool enabled;
 
   @override
-  Widget build(BuildContext context) {
-    final byId = {for (final option in options) option.id: option};
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(prefsTickProvider);
+    final salahList = identical(options, ActivityCatalog.salah);
+    final swatches =
+        salahList && ref.watch(appPrefsProvider).salahActivityColours;
+    final extra = options.any((option) => option.id == selectedId)
+        ? null
+        : ActivityCatalog.findAnyQuran(selectedId);
+    final shown = extra == null ? options : [extra, ...options];
+    final byId = {for (final option in shown) option.id: option};
     return CheckInSelect<String>(
       dropdownKey: statusKeyPrefix == null ? null : Key(statusKeyPrefix!),
       value: selectedId,
       enabled: enabled,
+      sortLabels: !ActivityCatalog.preservePickerOrder(options),
       entries: [
-        for (final option in options)
+        for (final option in shown)
           CheckInSelectEntry(
             value: option.id,
             label: option.label,
             itemKey: _keyFor(option),
+            swatch: swatches ? SalahActivityMark.colourForId(option.id) : null,
           ),
       ],
       onChanged: (id) {

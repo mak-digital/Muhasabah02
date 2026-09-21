@@ -257,6 +257,7 @@ class ProgressCalendarSection extends ConsumerStatefulWidget {
     required this.title,
     required this.periodDays,
     required this.cellBuilder,
+    this.sectionId,
     this.subtitle,
     this.belowTitle,
     this.family,
@@ -264,6 +265,7 @@ class ProgressCalendarSection extends ConsumerStatefulWidget {
   });
 
   final String title;
+  final String? sectionId;
   final String? subtitle;
   final Widget? belowTitle;
   final int periodDays;
@@ -290,6 +292,7 @@ class _ProgressCalendarSectionState
       now: now,
       periodsBack: _periodsBack,
     );
+    final navId = widget.sectionId ?? widget.title;
     final long = widget.periodDays >= 90;
     final theme = Theme.of(context);
     final range =
@@ -300,7 +303,7 @@ class _ProgressCalendarSectionState
         Row(
           children: [
             IconButton(
-              key: Key('calendar-prev-${widget.title}'),
+              key: Key('calendar-prev-$navId'),
               tooltip: 'Previous period',
               onPressed: () => setState(() => _periodsBack++),
               icon: const Icon(Icons.chevron_left),
@@ -323,7 +326,7 @@ class _ProgressCalendarSectionState
               ),
             ),
             IconButton(
-              key: Key('calendar-next-${widget.title}'),
+              key: Key('calendar-next-$navId'),
               tooltip: 'Next period',
               onPressed: _periodsBack > 0
                   ? () => setState(() => _periodsBack--)

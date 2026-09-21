@@ -45,6 +45,6 @@ void main() {
     expect(find.byType(DayEvidenceScreen), findsOneWidget);
     expect(find.text(Copy.historicalReflectionGuard), findsOneWidget);
     expect(find.text(MonitorDomain.salah.label), findsOneWidget);
-    expect(find.text('Prayed on time'), findsOneWidget);
+    expect(find.text('Prayed alone on time'), findsOneWidget);
   });
 }

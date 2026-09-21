@@ -148,6 +148,11 @@ class ActivityCatalog {
       prayerStatus: PrayerStatus.onTime,
     ),
     ActivityOption(
+      id: 'excused',
+      label: 'Excused',
+      prayerStatus: PrayerStatus.excused,
+    ),
+    ActivityOption(
       id: 'prayedLate',
       label: 'Prayed late',
       prayerStatus: PrayerStatus.late,
@@ -170,39 +175,19 @@ class ActivityCatalog {
     ActivityOption(
       id: ActivityIds.other,
       label: 'Other',
-      prayerStatus: PrayerStatus.late,
+      prayerStatus: PrayerStatus.other,
     ),
   ];
 
   static const quranReading = <ActivityOption>[
     ActivityOption(
       id: 'readIndependently',
-      label: 'Read independently',
+      label: 'Recitation',
       ternary: TernaryOutcome.positive,
     ),
     ActivityOption(
       id: 'listened',
-      label: 'Listened to recitation',
-      ternary: TernaryOutcome.positive,
-    ),
-    ActivityOption(
-      id: 'readWithTranslation',
-      label: 'Read with translation',
-      ternary: TernaryOutcome.positive,
-    ),
-    ActivityOption(
-      id: 'readWithCommentary',
-      label: 'Read with commentary',
-      ternary: TernaryOutcome.positive,
-    ),
-    ActivityOption(
-      id: 'studyCircle',
-      label: 'Study circle participation',
-      ternary: TernaryOutcome.positive,
-    ),
-    ActivityOption(
-      id: 'familyStudy',
-      label: 'Family study session',
+      label: 'Listening',
       ternary: TernaryOutcome.positive,
     ),
     ActivityOption(
@@ -224,18 +209,13 @@ class ActivityCatalog {
 
   static const quranMeaning = <ActivityOption>[
     ActivityOption(
+      id: 'recitedWithMeaning',
+      label: 'Recitation with Meaning',
+      ternary: TernaryOutcome.positive,
+    ),
+    ActivityOption(
       id: 'translation',
-      label: 'Read translation',
-      ternary: TernaryOutcome.positive,
-    ),
-    ActivityOption(
-      id: 'wordStudy',
-      label: 'Word or phrase study',
-      ternary: TernaryOutcome.positive,
-    ),
-    ActivityOption(
-      id: 'discussion',
-      label: 'Discussed meaning',
+      label: 'Read Translation',
       ternary: TernaryOutcome.positive,
     ),
     ActivityOption(
@@ -258,17 +238,7 @@ class ActivityCatalog {
   static const quranMemorisation = <ActivityOption>[
     ActivityOption(
       id: 'newPortion',
-      label: 'New portion',
-      ternary: TernaryOutcome.positive,
-    ),
-    ActivityOption(
-      id: 'repeatPortion',
-      label: 'Repeated a portion',
-      ternary: TernaryOutcome.positive,
-    ),
-    ActivityOption(
-      id: 'withTeacher',
-      label: 'With a teacher',
+      label: 'Memorisation',
       ternary: TernaryOutcome.positive,
     ),
     ActivityOption(
@@ -291,17 +261,7 @@ class ActivityCatalog {
   static const quranRevision = <ActivityOption>[
     ActivityOption(
       id: 'privateRevision',
-      label: 'Private revision',
-      ternary: TernaryOutcome.positive,
-    ),
-    ActivityOption(
-      id: 'recitedToSomeone',
-      label: 'Recited to someone',
-      ternary: TernaryOutcome.positive,
-    ),
-    ActivityOption(
-      id: 'groupRevision',
-      label: 'Group revision',
+      label: 'Revision',
       ternary: TernaryOutcome.positive,
     ),
     ActivityOption(
@@ -324,17 +284,7 @@ class ActivityCatalog {
   static const quranTafsir = <ActivityOption>[
     ActivityOption(
       id: 'readTafsir',
-      label: 'Read tafsir',
-      ternary: TernaryOutcome.positive,
-    ),
-    ActivityOption(
-      id: 'listenedTafsir',
-      label: 'Listened to explanation',
-      ternary: TernaryOutcome.positive,
-    ),
-    ActivityOption(
-      id: 'classTafsir',
-      label: 'Attended a class',
+      label: 'Tafsir Study',
       ternary: TernaryOutcome.positive,
     ),
     ActivityOption(
@@ -357,17 +307,17 @@ class ActivityCatalog {
   static const quranReflection = <ActivityOption>[
     ActivityOption(
       id: 'privateReflection',
-      label: 'Private Qur’anic Reflection',
+      label: 'Brief Reflection',
       ternary: TernaryOutcome.positive,
     ),
     ActivityOption(
-      id: 'journaledAyah',
-      label: 'Journaled about an ayah',
+      id: 'tadabbur',
+      label: 'Deep Reflection (Tadabbur)',
       ternary: TernaryOutcome.positive,
     ),
     ActivityOption(
-      id: 'sharedReflection',
-      label: 'Shared a Qur’anic Reflection',
+      id: 'personalInsight',
+      label: 'Personal Insight',
       ternary: TernaryOutcome.positive,
     ),
     ActivityOption(
@@ -389,8 +339,33 @@ class ActivityCatalog {
 
   static const quranConsciousApplication = <ActivityOption>[
     ActivityOption(
-      id: 'noticedPracticalRelevance',
-      label: 'Noticed a possible practical relevance',
+      id: 'improvedWorship',
+      label: 'Improved Worship',
+      ternary: TernaryOutcome.positive,
+    ),
+    ActivityOption(
+      id: 'improvedCharacter',
+      label: 'Improved Character',
+      ternary: TernaryOutcome.positive,
+    ),
+    ActivityOption(
+      id: 'improvedRelationship',
+      label: 'Improved Relationship',
+      ternary: TernaryOutcome.positive,
+    ),
+    ActivityOption(
+      id: 'avoidedSin',
+      label: 'Avoided a Sin',
+      ternary: TernaryOutcome.positive,
+    ),
+    ActivityOption(
+      id: 'performedGoodDeed',
+      label: 'Performed a Good Deed',
+      ternary: TernaryOutcome.positive,
+    ),
+    ActivityOption(
+      id: ActivityIds.other,
+      label: 'Other Application',
       ternary: TernaryOutcome.positive,
     ),
     ActivityOption(
@@ -403,9 +378,82 @@ class ActivityCatalog {
       label: 'Unanswered',
       ternary: TernaryOutcome.unanswered,
     ),
+  ];
+
+  static const quranLegacy = <ActivityOption>[
     ActivityOption(
-      id: ActivityIds.other,
-      label: 'Other',
+      id: 'readWithTranslation',
+      label: 'Read with translation',
+      ternary: TernaryOutcome.positive,
+    ),
+    ActivityOption(
+      id: 'readWithCommentary',
+      label: 'Read with commentary',
+      ternary: TernaryOutcome.positive,
+    ),
+    ActivityOption(
+      id: 'studyCircle',
+      label: 'Study circle participation',
+      ternary: TernaryOutcome.positive,
+    ),
+    ActivityOption(
+      id: 'familyStudy',
+      label: 'Family study session',
+      ternary: TernaryOutcome.positive,
+    ),
+    ActivityOption(
+      id: 'wordStudy',
+      label: 'Word or phrase study',
+      ternary: TernaryOutcome.positive,
+    ),
+    ActivityOption(
+      id: 'discussion',
+      label: 'Discussed meaning',
+      ternary: TernaryOutcome.positive,
+    ),
+    ActivityOption(
+      id: 'repeatPortion',
+      label: 'Repeated a portion',
+      ternary: TernaryOutcome.positive,
+    ),
+    ActivityOption(
+      id: 'withTeacher',
+      label: 'With a teacher',
+      ternary: TernaryOutcome.positive,
+    ),
+    ActivityOption(
+      id: 'recitedToSomeone',
+      label: 'Recited to someone',
+      ternary: TernaryOutcome.positive,
+    ),
+    ActivityOption(
+      id: 'groupRevision',
+      label: 'Group revision',
+      ternary: TernaryOutcome.positive,
+    ),
+    ActivityOption(
+      id: 'listenedTafsir',
+      label: 'Listened to explanation',
+      ternary: TernaryOutcome.positive,
+    ),
+    ActivityOption(
+      id: 'classTafsir',
+      label: 'Attended a class',
+      ternary: TernaryOutcome.positive,
+    ),
+    ActivityOption(
+      id: 'journaledAyah',
+      label: 'Journaled about an ayah',
+      ternary: TernaryOutcome.positive,
+    ),
+    ActivityOption(
+      id: 'sharedReflection',
+      label: 'Shared a Qur’anic Reflection',
+      ternary: TernaryOutcome.positive,
+    ),
+    ActivityOption(
+      id: 'noticedPracticalRelevance',
+      label: 'Noticed a possible practical relevance',
       ternary: TernaryOutcome.positive,
     ),
   ];
@@ -765,6 +813,26 @@ class ActivityCatalog {
     return null;
   }
 
+  static ActivityOption? findQuran(QuranDimension dimension, String id) {
+    return find(forQuran(dimension), id) ?? find(quranLegacy, id);
+  }
+
+  static ActivityOption? findAnyQuran(String id) {
+    for (final dimension in QuranDimension.values) {
+      final match = find(forQuran(dimension), id);
+      if (match != null) return match;
+    }
+    return find(quranLegacy, id);
+  }
+
+  static bool preservePickerOrder(List<ActivityOption> options) {
+    if (identical(options, salah)) return true;
+    for (final dimension in QuranDimension.values) {
+      if (identical(options, forQuran(dimension))) return true;
+    }
+    return false;
+  }
+
   static String salahKey(PrayerId id) => 'salah.${id.name}';
   static String quranKey(QuranDimension dimension) => 'quran.${dimension.name}';
   static const dhikrKey = 'dhikr';
@@ -781,6 +849,8 @@ class ActivityCatalog {
     PrayerStatus.onTime => 'aloneOnTime',
     PrayerStatus.late => 'prayedLate',
     PrayerStatus.missed => 'missed',
+    PrayerStatus.excused => 'excused',
+    PrayerStatus.other => ActivityIds.other,
     PrayerStatus.unanswered => ActivityIds.unanswered,
   };
 

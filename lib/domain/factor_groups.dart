@@ -28,6 +28,10 @@ FactorGroups factorGroupsForSalahActivity(String activityId) {
       return FactorGroups.both;
     case 'missed':
       return FactorGroups.distracting;
+    case 'excused':
+    case ActivityIds.other:
+    case ActivityIds.unanswered:
+      return FactorGroups.none;
     default:
       return FactorGroups.none;
   }
@@ -47,6 +51,8 @@ FactorGroups factorGroupsForPrayerStatus(PrayerStatus status) {
     PrayerStatus.onTime => FactorGroups.helping,
     PrayerStatus.late => FactorGroups.both,
     PrayerStatus.missed => FactorGroups.distracting,
+    PrayerStatus.excused => FactorGroups.none,
+    PrayerStatus.other => FactorGroups.none,
   };
 }
 

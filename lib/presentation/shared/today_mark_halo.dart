@@ -27,13 +27,6 @@ class TodayMarkHalo extends StatelessWidget {
                   brightness,
                 ),
                 shape: BoxShape.circle,
-                border: Border.all(
-                  color: MuhasabahColors.wash(
-                    MuhasabahColors.todayMarkRing,
-                    MuhasabahColors.todayMarkRingDark,
-                    brightness,
-                  ),
-                ),
               ),
               child: const SizedBox.expand(),
             ),

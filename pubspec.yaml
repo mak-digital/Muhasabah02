@@ -1,5 +1,5 @@
 name: muhasabah02
-description: "Private local-first Islamic self-reflection application."
+description: "Private Muhasabah — Your record, not a ruling. Notice your day to improve. Keep it yours."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -35,7 +35,7 @@ dependencies:
   flutter_riverpod: ^3.4.3
   hive: ^2.2.3
   hive_flutter: ^1.1.0
-  local_auth: ^2.3.0
+  local_auth: ^3.0.2
 
 
 dev_dependencies:

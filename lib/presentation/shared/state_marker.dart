@@ -6,7 +6,7 @@ import '../../app/dimensions.dart';
 import '../../app/theme.dart';
 import '../../domain/activities.dart';
 
-enum MarkerKind { filled, outlined, unanswered, selected, missed }
+enum MarkerKind { filled, outlined, unanswered, selected, missed, filledSquare }
 
 class RecordedStateMarker extends StatelessWidget {
   const RecordedStateMarker({
@@ -16,6 +16,8 @@ class RecordedStateMarker extends StatelessWidget {
     this.symbol,
     this.symbolColor,
     this.symbolSize,
+    this.letter,
+    this.size,
     required this.semanticLabel,
   });
 
@@ -24,27 +26,32 @@ class RecordedStateMarker extends StatelessWidget {
   final IconData? symbol;
   final Color? symbolColor;
   final double? symbolSize;
+  final String? letter;
+  final double? size;
   final String semanticLabel;
 
   @override
   Widget build(BuildContext context) {
+    final side = size ?? AppDimensions.progressMarker;
     return Semantics(
       label: semanticLabel,
       child: SizedBox(
-        width: AppDimensions.progressMarker,
-        height: AppDimensions.progressMarker,
+        width: side,
+        height: side,
         child: Stack(
           alignment: Alignment.center,
           fit: StackFit.expand,
           children: [
             CustomPaint(
-              size: const Size(
-                AppDimensions.progressMarker,
-                AppDimensions.progressMarker,
+              size: Size(side, side),
+              painter: _MarkerPainter(
+                color: color,
+                kind: kind,
+                letter: letter,
+                letterColor: symbolColor ?? Colors.white,
               ),
-              painter: _MarkerPainter(color: color, kind: kind),
             ),
-            if (symbol != null)
+            if (symbol != null && (letter == null || letter!.isEmpty))
               Icon(
                 symbol,
                 size: symbolSize ?? AppDimensions.progressMarkerSymbol,
@@ -58,10 +65,17 @@ class RecordedStateMarker extends StatelessWidget {
 }
 
 class _MarkerPainter extends CustomPainter {
-  _MarkerPainter({required this.color, required this.kind});
+  _MarkerPainter({
+    required this.color,
+    required this.kind,
+    this.letter,
+    this.letterColor,
+  });
 
   final Color color;
   final MarkerKind kind;
+  final String? letter;
+  final Color? letterColor;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -70,6 +84,16 @@ class _MarkerPainter extends CustomPainter {
     switch (kind) {
       case MarkerKind.filled:
         canvas.drawCircle(center, radius, Paint()..color = color);
+        break;
+      case MarkerKind.filledSquare:
+        final side = radius * 1.7;
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(
+            Rect.fromCenter(center: center, width: side, height: side),
+            const Radius.circular(2),
+          ),
+          Paint()..color = color,
+        );
         break;
       case MarkerKind.outlined:
         canvas.drawCircle(
@@ -122,6 +146,33 @@ class _MarkerPainter extends CustomPainter {
         );
         break;
     }
+    if (kind == MarkerKind.filled ||
+        kind == MarkerKind.filledSquare ||
+        kind == MarkerKind.selected) {
+      _drawCenteredLetter(canvas, center, radius * 2);
+    }
+  }
+
+  void _drawCenteredLetter(Canvas canvas, Offset center, double diameter) {
+    final glyph = letter;
+    if (glyph == null || glyph.isEmpty) return;
+    final painter = TextPainter(
+      text: TextSpan(
+        text: glyph,
+        style: TextStyle(
+          color: letterColor ?? Colors.white,
+          fontSize: diameter * 0.72,
+          fontWeight: FontWeight.w700,
+          height: 1,
+        ),
+      ),
+      textAlign: TextAlign.center,
+      textDirection: TextDirection.ltr,
+    )..layout();
+    painter.paint(
+      canvas,
+      Offset(center.dx - painter.width / 2, center.dy - painter.height / 2),
+    );
   }
 
   void _drawDotted(Canvas canvas, Offset center, double radius, Color color) {
@@ -148,7 +199,10 @@ class _MarkerPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _MarkerPainter oldDelegate) =>
-      oldDelegate.color != color || oldDelegate.kind != kind;
+      oldDelegate.color != color ||
+      oldDelegate.kind != kind ||
+      oldDelegate.letter != letter ||
+      oldDelegate.letterColor != letterColor;
 }
 
 class ZakatStateMarker extends StatelessWidget {

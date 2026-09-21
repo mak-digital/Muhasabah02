@@ -6,6 +6,7 @@ import '../application/providers.dart';
 import '../domain/copy.dart';
 import '../presentation/home/home_screen.dart';
 import '../presentation/lock/app_lock_gate.dart';
+import '../presentation/shared/ui_bits.dart';
 import 'theme.dart';
 
 class MuhasabahScrollBehavior extends MaterialScrollBehavior {
@@ -45,13 +46,9 @@ class MuhasabahApp extends ConsumerWidget {
           settings: settings,
           builder: (_) => Scaffold(
             appBar: AppBar(title: const Text(Copy.appName)),
-            body: const Center(
-              child: Padding(
-                padding: EdgeInsets.all(24),
-                child: Text(
-                  'This screen is not available. The rest of the app is still usable.',
-                ),
-              ),
+            body: const EmptyState(
+              title: Copy.appName,
+              message: 'This screen is not available. The rest of the app is still usable.',
             ),
           ),
         );

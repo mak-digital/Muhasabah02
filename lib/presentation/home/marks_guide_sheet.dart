@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/dimensions.dart';
+import '../../app/theme.dart';
+import '../../application/providers.dart';
 import '../../domain/activities.dart';
 import '../../domain/copy.dart';
 import '../../domain/monitor_domain.dart';
+import '../../domain/domain_briefing.dart';
+import '../../domain/quran_stage.dart';
+import '../shared/domain_briefing_note.dart';
+import '../shared/quran_stage_mark.dart';
+import '../shared/salah_activity_mark.dart';
 import '../shared/state_marker.dart';
 
 Future<void> showMarksGuide(BuildContext context) {
@@ -15,7 +23,11 @@ Future<void> showMarksGuide(BuildContext context) {
     builder: (sheetContext) {
       final maxHeight = MediaQuery.sizeOf(sheetContext).height * 0.86;
       void close() => Navigator.of(sheetContext).pop();
-      return SizedBox(
+      return Consumer(
+        builder: (context, ref, _) {
+          ref.watch(prefsTickProvider);
+          final colours = ref.watch(appPrefsProvider).salahActivityColours;
+          return SizedBox(
         height: maxHeight,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -57,14 +69,24 @@ Future<void> showMarksGuide(BuildContext context) {
                       ),
                     ],
                     const SizedBox(height: 8),
-                    _row(context, kind: MarkerKind.filled, label: 'On time'),
-                    _row(context, kind: MarkerKind.outlined, label: 'Late'),
-                    _row(context, kind: MarkerKind.missed, label: 'Missed'),
-                    _row(
-                      context,
-                      kind: MarkerKind.unanswered,
-                      label: 'Unanswered',
-                    ),
+                    if (colours)
+                      for (final option in ActivityCatalog.salah)
+                        _row(
+                          context,
+                          kind: MarkerKind.filled,
+                          color: SalahActivityMark.colourForId(option.id),
+                          label: option.label,
+                        )
+                    else ...[
+                      _row(context, kind: MarkerKind.filled, label: 'On time'),
+                      _row(context, kind: MarkerKind.outlined, label: 'Late'),
+                      _row(context, kind: MarkerKind.missed, label: 'Missed'),
+                      _row(
+                        context,
+                        kind: MarkerKind.unanswered,
+                        label: 'Unanswered',
+                      ),
+                    ],
                     _row(
                       context,
                       kind: MarkerKind.filled,
@@ -90,20 +112,25 @@ Future<void> showMarksGuide(BuildContext context) {
                       ),
                     ],
                     const SizedBox(height: 8),
-                    _row(
-                      context,
-                      kind: MarkerKind.filled,
-                      label: 'Recorded engagement',
+                    Text(
+                      Copy.quranStageNote,
+                      style: Theme.of(context).textTheme.bodySmall,
                     ),
-                    _row(
+                    const SizedBox(height: 8),
+                    _quranJourney(context, QuranJourneyRow.applied, 'W', colours),
+                    _quranJourney(context, QuranJourneyRow.reflected, 'T', colours),
+                    _quranJourney(context, QuranJourneyRow.understood, 'M', colours),
+                    _quranJourney(context, QuranJourneyRow.engaged, 'R', colours),
+                    _quranJourney(
                       context,
-                      kind: MarkerKind.outlined,
-                      label: 'Recorded as not done',
+                      QuranJourneyRow.engaged,
+                      null,
+                      colours,
+                      none: true,
                     ),
-                    _row(
-                      context,
-                      kind: MarkerKind.unanswered,
-                      label: 'Unanswered',
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Review Progress still shows each Qur’an row as recorded engagement, recorded as not done, or unanswered.',
                     ),
                     const SizedBox(height: 16),
                     Text(
@@ -121,10 +148,7 @@ Future<void> showMarksGuide(BuildContext context) {
                       ),
                     ],
                     const SizedBox(height: 8),
-                    Text(
-                      Copy.hadithObservationNote,
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
+                    DomainBriefingNote(hadithBriefing, compact: true),
                     const SizedBox(height: 8),
                     _row(
                       context,
@@ -198,10 +222,7 @@ Future<void> showMarksGuide(BuildContext context) {
                       ),
                     ],
                     const SizedBox(height: 8),
-                    Text(
-                      Copy.akhlaqObservationNote,
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
+                    DomainBriefingNote(akhlaqBriefing, compact: true),
                     const SizedBox(height: 8),
                     _row(
                       context,
@@ -234,10 +255,7 @@ Future<void> showMarksGuide(BuildContext context) {
                       ),
                     ],
                     const SizedBox(height: 8),
-                    Text(
-                      Copy.huquqObservationNote,
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
+                    DomainBriefingNote(huquqBriefing, compact: true),
                     const SizedBox(height: 8),
                     _row(
                       context,
@@ -270,10 +288,7 @@ Future<void> showMarksGuide(BuildContext context) {
                       ),
                     ],
                     const SizedBox(height: 8),
-                    Text(
-                      Copy.knowledgeObservationNote,
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
+                    DomainBriefingNote(knowledgeBriefing, compact: true),
                     const SizedBox(height: 8),
                     _row(
                       context,
@@ -306,10 +321,7 @@ Future<void> showMarksGuide(BuildContext context) {
                       ),
                     ],
                     const SizedBox(height: 8),
-                    Text(
-                      Copy.timeObservationNote,
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
+                    DomainBriefingNote(timeBriefing, compact: true),
                     const SizedBox(height: 8),
                     _row(
                       context,
@@ -342,10 +354,7 @@ Future<void> showMarksGuide(BuildContext context) {
                       ),
                     ],
                     const SizedBox(height: 8),
-                    Text(
-                      Copy.healthObservationNote,
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
+                    DomainBriefingNote(healthBriefing, compact: true),
                     const SizedBox(height: 8),
                     _row(
                       context,
@@ -378,10 +387,7 @@ Future<void> showMarksGuide(BuildContext context) {
                       ),
                     ],
                     const SizedBox(height: 8),
-                    Text(
-                      Copy.wealthObservationNote,
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
+                    DomainBriefingNote(wealthBriefing, compact: true),
                     const SizedBox(height: 8),
                     _row(
                       context,
@@ -414,10 +420,7 @@ Future<void> showMarksGuide(BuildContext context) {
                       ),
                     ],
                     const SizedBox(height: 8),
-                    Text(
-                      Copy.ummahObservationNote,
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
+                    DomainBriefingNote(ummahBriefing, compact: true),
                     const SizedBox(height: 8),
                     _row(
                       context,
@@ -474,7 +477,7 @@ Future<void> showMarksGuide(BuildContext context) {
                     ),
                     const SizedBox(height: 8),
                     const Text(
-                      'Missing records are not treated as missed. Symbols indicate recorded states only. Marks share one colour. The card wash identifies the domain and does not represent spiritual ranking. Factors you noticed are stored as provenance; they do not explain causes and do not change completion.',
+                      'Missing records are not treated as missed. Symbols indicate recorded states only. Marks share one colour unless Settings → Application → Activities uses activity colours. Colour does not rank spirituality. The card wash identifies the domain. Factors you noticed are stored as provenance; they do not explain causes and do not change completion.',
                     ),
                   ],
                 ),
@@ -490,8 +493,45 @@ Future<void> showMarksGuide(BuildContext context) {
             ),
           ],
         ),
+          );
+        },
       );
     },
+  );
+}
+
+Widget _quranJourney(
+  BuildContext context,
+  QuranJourneyRow row,
+  String? letter,
+  bool colours, {
+  bool none = false,
+}) {
+  final cell = none
+      ? const QuranJourneyCell(kind: QuranJourneyCellKind.none)
+      : QuranJourneyCell(
+          kind: QuranJourneyCellKind.recorded,
+          code: letter,
+        );
+  final label = none
+      ? 'None — no activity at this stage'
+      : letter == null
+      ? '${row.label} — ${row.purpose}'
+      : '${row.label} $letter — ${row.purpose}';
+  return Padding(
+    padding: const EdgeInsets.only(bottom: 8),
+    child: Row(
+      children: [
+        QuranJourneyMarker(
+          row: row,
+          cell: cell,
+          colours: colours,
+          semanticLabel: label,
+        ),
+        const SizedBox(width: 12),
+        Expanded(child: Text(label)),
+      ],
+    ),
   );
 }
 
@@ -501,6 +541,7 @@ Widget _row(
   required String label,
   IconData? symbol,
   Color? symbolColor,
+  Color? color,
   double? symbolSize,
 }) {
   return Padding(
@@ -509,6 +550,7 @@ Widget _row(
       children: [
         RecordedStateMarker(
           kind: kind,
+          color: color ?? MuhasabahColors.mark,
           symbol: symbol,
           symbolColor: symbolColor,
           symbolSize: symbolSize,

@@ -8,7 +8,7 @@ void main() {
     expect(factorGroupsForSalahActivity('missed'), FactorGroups.distracting);
     expect(factorGroupsForSalahActivity('prayedLate'), FactorGroups.both);
     expect(factorGroupsForSalahActivity('missedMadeUp'), FactorGroups.both);
-    expect(factorGroupsForSalahActivity('unanswered'), FactorGroups.none);
+    expect(factorGroupsForSalahActivity('excused'), FactorGroups.none);
     expect(factorGroupsForSalahActivity('other'), FactorGroups.none);
   });
 

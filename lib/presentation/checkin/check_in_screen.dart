@@ -10,6 +10,7 @@ import '../../domain/copy.dart';
 import '../../domain/daily_check_in.dart';
 import '../../domain/date_key.dart';
 import '../../domain/display_calendar.dart';
+import '../../domain/domain_briefing.dart';
 import '../../domain/factor_groups.dart';
 import '../../domain/home_traces.dart';
 import '../../domain/monitor_domain.dart';
@@ -22,6 +23,7 @@ import '../../domain/salah_extras.dart';
 import '../../domain/salah_factors.dart';
 import '../../domain/situation_notes.dart';
 import '../shared/activity_picker.dart';
+import '../shared/domain_briefing_note.dart';
 import '../shared/domain_stage.dart';
 import '../shared/ui_bits.dart';
 
@@ -619,45 +621,57 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
         children: [
           CheckInDomainTitle(title, focus: MonitorDomain.quran.focusQuestion),
           const SizedBox(height: 4),
-          const Text(
-            'Recitation is the daily item. Recitation with Meaning as engagement also records Recitation as engagement. Other Qur’an rows stay independent. Application Reflection is not recorded here.',
-          ),
+          const Text(Copy.quranCheckInIntro),
           const SizedBox(height: 12),
           _collapsibleTraceBand(
             title: title,
-            band: kQuranRecitationBand,
+            band: kQuranEngagementBand,
             initiallyExpanded: _sectionStartsOpen(
-              kQuranRecitationBand,
-              firstBand: kQuranRecitationBand,
+              kQuranEngagementBand,
+              firstBand: kQuranEngagementBand,
               expandFirst: expandFirst,
             ),
             children: [
-              for (final dimension in recitationHomeRows)
+              for (final dimension in engagementHomeRows)
                 _quranBlock(dimension),
             ],
           ),
           _collapsibleTraceBand(
             title: title,
-            band: kQuranRetentionBand,
+            band: kQuranUnderstandingBand,
             initiallyExpanded: _sectionStartsOpen(
-              kQuranRetentionBand,
-              firstBand: kQuranRecitationBand,
+              kQuranUnderstandingBand,
+              firstBand: kQuranEngagementBand,
               expandFirst: expandFirst,
             ),
             children: [
-              for (final dimension in retentionHomeRows) _quranBlock(dimension),
+              for (final dimension in understandingHomeRows)
+                _quranBlock(dimension),
             ],
           ),
           _collapsibleTraceBand(
             title: title,
-            band: kQuranStudyBand,
+            band: kQuranReflectionBand,
             initiallyExpanded: _sectionStartsOpen(
-              kQuranStudyBand,
-              firstBand: kQuranRecitationBand,
+              kQuranReflectionBand,
+              firstBand: kQuranEngagementBand,
               expandFirst: expandFirst,
             ),
             children: [
-              for (final dimension in studyNoticeHomeRows)
+              for (final dimension in reflectionHomeRows)
+                _quranBlock(dimension),
+            ],
+          ),
+          _collapsibleTraceBand(
+            title: title,
+            band: kQuranApplicationBand,
+            initiallyExpanded: _sectionStartsOpen(
+              kQuranApplicationBand,
+              firstBand: kQuranEngagementBand,
+              expandFirst: expandFirst,
+            ),
+            children: [
+              for (final dimension in applicationHomeRows)
                 _quranBlock(dimension),
             ],
           ),
@@ -760,6 +774,11 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
     return band == focus;
   }
 
+  DomainBriefing? _focusedBriefing() {
+    if (widget.includeStruggleNote) return akhlaqBriefing;
+    return briefingForLabel(widget.domainTitle);
+  }
+
   List<Widget> _tracesBody() {
     final accent = widget.familyColor ?? MuhasabahColors.dhikr;
     final hajjStatus = ref.watch(appPrefsProvider).hajjStatus;
@@ -773,9 +792,12 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
         focus: widget.domainFocus,
       ),
       const SizedBox(height: 4),
-      Text(
-        widget.includeStruggleNote ? Copy.akhlaqObservationNote : 'Only this domain is shown. Other records for the day stay unchanged.',
-      ),
+      if (_focusedBriefing() != null)
+        DomainBriefingNote(_focusedBriefing()!)
+      else
+        const Text(
+          'Only this domain is shown. Other records for the day stay unchanged.',
+        ),
       const SizedBox(height: 12),
       if (widget.includeHajjStatus) _hajjStatusEditor(),
       for (var i = 0; i < bands.length; i++)
@@ -838,6 +860,7 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
           CheckInSelect<TernaryOutcome>(
             dropdownKey: Key('trace-${row.storageKey}'),
             value: outcome,
+            sortLabels: false,
             entries: [
               for (final option in TernaryOutcome.values)
                 CheckInSelectEntry(
@@ -1331,10 +1354,13 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
         children: [
           CheckInDomainTitle(title, focus: focus),
           const SizedBox(height: 4),
-          Text(
-            extraNote ??
-                'Same rows as Home. Independent. Missing is not missed.',
-          ),
+          if (briefingForLabel(title) != null)
+            DomainBriefingNote(briefingForLabel(title)!)
+          else
+            Text(
+              extraNote ??
+                  'Same rows as Home. Independent. Missing is not missed.',
+            ),
           const SizedBox(height: 12),
           if (includeHajjStatus) _hajjStatusEditor(),
           for (var i = 0; i < bands.length; i++)

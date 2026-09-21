@@ -1,6 +1,9 @@
-# Muhasabah
+# Private Muhasabah
 
-Private, local-first Islamic self-reflection. The app helps you record practice and look at what you recorded. It does not score iman, prescribe worship, or gamify streaks.
+**Your record, not a ruling.**  
+**Notice your day to improve. Keep it yours.**
+
+Private, local-first Islamic self-reflection. The app helps you record practice and look at what you recorded. It does not score iman, prescribe worship, or gamify streaks. Display name is **Private Muhasabah** so it is distinct from other store listings titled Muhasabah.
 
 Canonical flow: **RECORD → REFLECT → REVIEW → RECOGNISE → PONDER → RESPOND**
 
@@ -26,7 +29,7 @@ Release builds currently sign with the Android debug keystore unless you supply 
 
 See `docs/PRODUCT_SPEC.md`. Guardrails: `docs/product_guardrails.md`. Architecture: `docs/architecture.md`. Privacy: `docs/privacy.md`. Tests: `docs/testing.md`.
 
-Home is a colour-family Summary Dashboard in this order: Start today’s check-in, Reflection of the Week, Salah & Prayer Quality, Qur’an Engagement, Hadith & Living Sunnah, Dhikr & Dua, Character & Morals (Akhlaq), Fasting, Charity + Zakat, Review snapshot, Noticed This Week, Patterns Noticed, Recognition, PONDER, This week I noticed…, My Response. Opt-in cards (Rights of Others, Ummah, and others) follow Settings → Domains. Marks Guide lives in the header. Design reference: `docs/visual_review/`.
+Home is a colour-family Summary Dashboard in this order: Start today’s check-in, Reflection of the Week, one mix domain week at a time, This week I noticed…, Add a response. Recognition, Ponder, Recorded days, Noticed This Week, and Patterns Noticed stay on Review or Progress. Opt-in cards follow Settings → Domains. Marks Guide lives in the header. Design reference: `docs/visual_review/`.
 
 ## Known limitations
 

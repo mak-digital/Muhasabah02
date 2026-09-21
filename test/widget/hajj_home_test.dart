@@ -29,19 +29,25 @@ void main() {
     expect(find.text(MonitorDomain.hajj.label), findsWidgets);
     expect(find.text(Copy.hajjStatusNote), findsOneWidget);
     expect(find.byKey(const Key('home-compact-hajj-2026-09-03')), findsNothing);
+    expect(
+      find.byKey(const Key('home-hajj.preparation-2026-09-03')),
+      findsNothing,
+    );
 
     await chooseCheckInOption(
       tester,
       dropdownKey: const Key('hajj-status'),
       optionLabel: 'Due',
     );
+    expect(find.byKey(const Key('home-compact-hajj-2026-09-03')), findsNothing);
     expect(
-      find.byKey(const Key('home-compact-hajj-2026-09-03')),
+      find.byKey(const Key('home-hajj.preparation-2026-09-03')),
       findsOneWidget,
     );
-    expect(find.text(Copy.hajjPonderDue), findsOneWidget);
+    expect(find.text(Copy.hajjPonderDue), findsNothing);
+    expect(find.text('Noticed preparation'), findsOneWidget);
 
-    await tester.tap(find.byKey(const Key('home-compact-hajj-2026-09-03')));
+    await tester.tap(find.byKey(const Key('home-hajj.preparation-2026-09-03')));
     await tester.pumpAndSettle();
     expect(find.text('Noticed preparation'), findsWidgets);
   });

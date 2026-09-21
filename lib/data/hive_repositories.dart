@@ -182,6 +182,7 @@ class HiveAppPrefs implements AppPrefs {
   static const _hajjStatus = 'hajj_status';
   static const _mixHiddenHint = 'mix_hidden_domain_hint';
   static const _appLock = 'app_lock_enabled';
+  static const _salahActivityColours = 'salah_activity_colours';
 
   bool _flag(String key) => _box.get(key) == 'true';
 
@@ -312,6 +313,13 @@ class HiveAppPrefs implements AppPrefs {
 
   @override
   Future<void> setAppLockEnabled(bool value) => _setFlag(_appLock, value);
+
+  @override
+  bool get salahActivityColours => _flag(_salahActivityColours);
+
+  @override
+  Future<void> setSalahActivityColours(bool value) =>
+      _setFlag(_salahActivityColours, value);
 }
 
 Future<

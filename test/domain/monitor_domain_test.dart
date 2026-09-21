@@ -51,11 +51,11 @@ void main() {
     expect(MonitorDomain.akhlaq.id, 'akhlaq');
     expect(
       traceOutcomeLabel('akhlaq.patience', TernaryOutcome.positive),
-      'I noticed this in myself',
+      'I noticed this in myself — Patience',
     );
     expect(
       traceOutcomeLabel('akhlaq.patience', TernaryOutcome.negative),
-      'I did not notice this today',
+      'I did not notice this today — Patience',
     );
     expect(akhlaqHomeRows.map((row) => row.storageKey), [
       'akhlaq.patience',
@@ -132,16 +132,21 @@ void main() {
     );
   });
 
-  test('opt-in domains use a compact Home week', () {
+  test('shown domains use a full Home week', () {
     expect(usesCompactHomeWeek(MonitorDomain.salah), isFalse);
     expect(usesCompactHomeWeek(MonitorDomain.quran), isFalse);
     expect(usesCompactHomeWeek(MonitorDomain.hadith), isFalse);
     expect(usesCompactHomeWeek(MonitorDomain.akhlaq), isFalse);
     expect(usesCompactHomeWeek(MonitorDomain.huquq), isFalse);
     expect(usesCompactHomeWeek(MonitorDomain.charity), isFalse);
-    expect(usesCompactHomeWeek(MonitorDomain.dhikr), isTrue);
-    expect(usesCompactHomeWeek(MonitorDomain.knowledge), isTrue);
-    expect(usesCompactHomeWeek(MonitorDomain.hajj), isTrue);
+    expect(usesCompactHomeWeek(MonitorDomain.dhikr), isFalse);
+    expect(usesCompactHomeWeek(MonitorDomain.knowledge), isFalse);
+    expect(usesCompactHomeWeek(MonitorDomain.time), isFalse);
+    expect(usesCompactHomeWeek(MonitorDomain.health), isFalse);
+    expect(usesCompactHomeWeek(MonitorDomain.wealth), isFalse);
+    expect(usesCompactHomeWeek(MonitorDomain.ummah), isFalse);
+    expect(usesCompactHomeWeek(MonitorDomain.fasting), isFalse);
+    expect(usesCompactHomeWeek(MonitorDomain.hajj), isFalse);
     expect(kBasicAkhlaqVisibleDomains.contains(MonitorDomain.hajj), isFalse);
     expect(MonitorDomain.salah.shortLabel, 'Salah');
     expect(MonitorDomain.quran.shortLabel, 'Qur’an');
@@ -185,11 +190,11 @@ void main() {
     expect(hidesHomeTraceFactors('hadith.reading'), isFalse);
     expect(
       traceOutcomeLabel('hadith.livedSunnah', TernaryOutcome.positive),
-      'I noticed this in myself',
+      'I noticed this in myself — Noticed a sunnah in how I lived today',
     );
     expect(
       traceOutcomeLabel('hadith.livedSunnah', TernaryOutcome.negative),
-      'I did not notice this today',
+      'I did not notice this today — Noticed a sunnah in how I lived today',
     );
   });
 
@@ -205,7 +210,7 @@ void main() {
         'knowledge.learnedSomethingTrue',
         TernaryOutcome.positive,
       ),
-      'I noticed this in myself',
+      'I noticed this in myself — Learned something true',
     );
     expect(
       homeTraceRowByKey('knowledge.beneficialReading')?.label,
@@ -323,11 +328,11 @@ void main() {
     expect(MonitorDomain.huquq.id, 'huquq');
     expect(
       traceOutcomeLabel('huquq.parents', TernaryOutcome.positive),
-      'I attended to a right I owe',
+      'I attended to a right I owe — Parents',
     );
     expect(
       traceOutcomeLabel('huquq.parents', TernaryOutcome.negative),
-      'I neglected a right I owe',
+      'I neglected a right I owe — Parents',
     );
     expect(hidesHomeTraceFactors('huquq.spouse'), isTrue);
     expect(hidesHomeTraceFactors('huquq.sickVisit'), isTrue);
@@ -388,5 +393,33 @@ void main() {
     expect(homeTraceRowByKey('family.parentsContact')?.label, 'Parent Contact');
     expect(homeTraceRowByKey('huquq.sickVisit')?.label, 'Sick Visit');
     expect(bandsFor(huquqHomeRows).last, 'Care in hardship');
+  });
+
+  test('trace dropdown names the row so a band title cannot mislead', () {
+    expect(
+      traceOutcomeLabel(
+        'akhlaq.pausedBeforeReacting',
+        TernaryOutcome.negative,
+      ),
+      'I did not notice this today — Paused before reacting',
+    );
+    for (final row in allHomeTraceRows) {
+      final positive = traceOutcomeLabel(
+        row.storageKey,
+        TernaryOutcome.positive,
+      );
+      final negative = traceOutcomeLabel(
+        row.storageKey,
+        TernaryOutcome.negative,
+      );
+      final unanswered = traceOutcomeLabel(
+        row.storageKey,
+        TernaryOutcome.unanswered,
+      );
+      expect(positive, contains(row.label));
+      expect(negative, contains(row.label));
+      expect(unanswered, contains(row.label));
+      expect(positive, isNot(equals(negative)));
+    }
   });
 }

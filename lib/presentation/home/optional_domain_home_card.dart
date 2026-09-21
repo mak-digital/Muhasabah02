@@ -35,6 +35,7 @@ class OptionalDomainHomeCard extends ConsumerStatefulWidget {
     this.includeStruggleNote = false,
     this.compactWeek = false,
     this.progressRows,
+    this.itemRowsOn7Days = true,
   });
 
   final List<DailyCheckIn> records;
@@ -51,6 +52,7 @@ class OptionalDomainHomeCard extends ConsumerStatefulWidget {
   final bool includeStruggleNote;
   final bool compactWeek;
   final List<HomeTraceRow>? progressRows;
+  final bool itemRowsOn7Days;
 
   @override
   ConsumerState<OptionalDomainHomeCard> createState() =>
@@ -168,11 +170,26 @@ class _OptionalDomainHomeCardState
                     if (!widget.compactWeek) const SizedBox(width: 86),
                     for (var col = 0; col < kCalendarWeekdayCount; col++)
                       Expanded(
-                        child: Text(
-                          localizations.narrowWeekdays[(firstDay + col) % 7],
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.labelSmall
-                              ?.copyWith(fontWeight: FontWeight.w600),
+                        child: Column(
+                          children: [
+                            Text(
+                              localizations.narrowWeekdays[(firstDay + col) % 7],
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.labelSmall
+                                  ?.copyWith(fontWeight: FontWeight.w600),
+                            ),
+                            Text(
+                              '${displayParts(parseDateKey(keys[col]), calendar).day}',
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.labelSmall
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                  ),
+                            ),
+                          ],
                         ),
                       ),
                   ],
@@ -512,6 +529,7 @@ class _OptionalDomainHomeCardState
           includeHajjStatus: widget.includeHajjStatus,
           highlightLunarWhiteDays: widget.highlightLunarWhiteDays,
           includeStruggleNote: widget.includeStruggleNote,
+          itemRowsOn7Days: widget.itemRowsOn7Days,
         ),
       ),
     );

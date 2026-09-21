@@ -212,7 +212,7 @@ void main() {
       tester.getSize(find.byKey(const Key('calendar-today-2026-09-03'))),
       const Size(AppDimensions.todayMarkHalo, AppDimensions.todayMarkHalo),
     );
-    expect(AppDimensions.todayMarkHalo, AppDimensions.progressMarker + 4);
+    expect(AppDimensions.todayMarkHalo, AppDimensions.progressMarker + AppDimensions.progressMarkerStroke * 1.5);
     expect(
       tester.getCenter(find.byKey(const Key('calendar-today-2026-09-03'))),
       tester.getCenter(find.byKey(const Key('cell-2026-09-03'))),

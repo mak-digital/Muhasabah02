@@ -194,6 +194,7 @@ class ReviewScreen extends ConsumerWidget {
                   rows: hadithHomeRows,
                   family: MuhasabahColors.hadithFamily,
                   includeHadithFocus: true,
+                  itemRowsOn7Days: true,
                 ),
               ),
             if (visible.contains(MonitorDomain.dhikr))
@@ -213,6 +214,7 @@ class ReviewScreen extends ConsumerWidget {
                   focusQuestion: MonitorDomain.dhikr.focusQuestion,
                   rows: dhikrHomeRows,
                   family: MuhasabahColors.dhikrFamily,
+                  itemRowsOn7Days: true,
                 ),
               ),
             if (visible.contains(MonitorDomain.akhlaq))
@@ -234,6 +236,7 @@ class ReviewScreen extends ConsumerWidget {
                   rows: akhlaqHomeRows,
                   family: MuhasabahColors.akhlaqFamily,
                   includeStruggleNote: true,
+                  itemRowsOn7Days: true,
                 ),
               ),
             if (visible.contains(MonitorDomain.huquq))
@@ -254,6 +257,7 @@ class ReviewScreen extends ConsumerWidget {
                   note: Copy.huquqObservationNote,
                   rows: huquqHomeRows,
                   family: MuhasabahColors.huquqFamily,
+                  itemRowsOn7Days: true,
                 ),
               ),
             if (visible.contains(MonitorDomain.knowledge))
@@ -274,6 +278,7 @@ class ReviewScreen extends ConsumerWidget {
                   note: Copy.knowledgeObservationNote,
                   rows: knowledgeHomeRows,
                   family: MuhasabahColors.knowledgeFamily,
+                  itemRowsOn7Days: true,
                 ),
               ),
             if (visible.contains(MonitorDomain.time))
@@ -536,6 +541,7 @@ class ReviewScreen extends ConsumerWidget {
     bool includeHajjStatus = false,
     bool highlightLunarWhiteDays = false,
     bool includeStruggleNote = false,
+    bool itemRowsOn7Days = true,
   }) {
     Navigator.push(
       context,
@@ -551,6 +557,7 @@ class ReviewScreen extends ConsumerWidget {
           includeHajjStatus: includeHajjStatus,
           highlightLunarWhiteDays: highlightLunarWhiteDays,
           includeStruggleNote: includeStruggleNote,
+          itemRowsOn7Days: itemRowsOn7Days,
         ),
       ),
     );

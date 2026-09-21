@@ -8,6 +8,7 @@ const kHajjMixKey = 'hajj';
 
 enum PersonalMixKind {
   sameAsDomains,
+  firstLook,
   worship,
   characterRights,
   trusts,
@@ -18,6 +19,7 @@ enum PersonalMixKind {
 extension PersonalMixKindX on PersonalMixKind {
   String get label => switch (this) {
     PersonalMixKind.sameAsDomains => 'Same as Domains',
+    PersonalMixKind.firstLook => 'First season',
     PersonalMixKind.worship => 'Worship I notice',
     PersonalMixKind.characterRights => 'Character & rights',
     PersonalMixKind.trusts => 'Trusts I notice',
@@ -103,16 +105,11 @@ List<MixItem> _buildMixCatalog() {
     );
   }
   for (final dimension in quranDailyDimensions) {
-    final band = recitationHomeRows.contains(dimension)
-        ? 'Recitation'
-        : retentionHomeRows.contains(dimension)
-        ? 'Retention'
-        : 'Study & notice';
     items.add(
       MixItem(
         id: 'quran.${dimension.name}',
         domain: MonitorDomain.quran,
-        band: band,
+        band: dimension.homeBand,
         label: dimension.label,
       ),
     );
@@ -194,8 +191,24 @@ final kPeopleMixKeys = mixKeysWhere(
       (item.domain == MonitorDomain.charity && item.band == 'Care'),
 );
 
+final kFirstLookMixKeys = mixKeysWhere(
+  (item) =>
+      (item.domain == MonitorDomain.salah && item.band == 'Obligatory Salah') ||
+      item.id == 'quran.reading' ||
+      item.id == 'quran.meaning' ||
+      item.id == 'quran.reflection' ||
+      item.id == 'quran.consciousApplication' ||
+      item.id == 'hadith.livedSunnah' ||
+      item.id == 'akhlaq.patience' ||
+      item.id == 'akhlaq.truthfulness' ||
+      item.id == 'huquq.parents' ||
+      item.id == 'charity.voluntary' ||
+      item.id == kZakatMixKey,
+);
+
 Set<String> namedMixKeys(PersonalMixKind kind) {
   return switch (kind) {
+    PersonalMixKind.firstLook => kFirstLookMixKeys,
     PersonalMixKind.worship => kWorshipMixKeys,
     PersonalMixKind.characterRights => kCharacterRightsMixKeys,
     PersonalMixKind.trusts => kTrustsMixKeys,

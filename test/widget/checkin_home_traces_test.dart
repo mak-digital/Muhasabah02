@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muhasabah02/data/memory_repositories.dart';
 import 'package:muhasabah02/domain/copy.dart';
+import 'package:muhasabah02/domain/home_traces.dart';
 import 'package:muhasabah02/domain/monitor_domain.dart';
 import 'package:muhasabah02/domain/quran.dart';
 
@@ -267,7 +268,10 @@ void main() {
     await chooseCheckInOption(
       tester,
       dropdownKey: const Key('trace-dhikr.postFardFajr'),
-      optionLabel: 'Recorded engagement',
+      optionLabel: traceOutcomeLabel(
+        'dhikr.postFardFajr',
+        TernaryOutcome.positive,
+      ),
     );
     await tester.pumpAndSettle();
     await tester.tap(find.text('Save check-in'));

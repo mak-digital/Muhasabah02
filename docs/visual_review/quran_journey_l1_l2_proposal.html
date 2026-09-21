@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Proposal — Qur’an Journey L1 matrix + L2 letter</title>
+  <style>
+    :root {
+      --bg: #f4f1ea;
+      --ink: #1d2a2c;
+      --muted: #4d5c63;
+      --line: #c5d0d4;
+      --quran: #d7e4f2;
+      --applied: #1565C0;
+      --reflected: #2E7D32;
+      --understood: #66BB6A;
+      --engaged: #FBC02D;
+      --none: #cfd8dc;
+      --mark: #2F6F73;
+      --quran-band: #cfe0ef;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      margin: 0;
+      padding: 24px;
+    }
+    h1 { font-size: 22px; font-weight: 700; margin: 0 0 8px; }
+    h2 { font-size: 16px; margin: 28px 0 10px; }
+    .note { max-width: 1100px; color: var(--muted); line-height: 1.55; font-size: 14px; }
+    .rules {
+      max-width: 1100px;
+      margin: 16px 0 8px;
+      padding: 12px 14px;
+      background: #fff;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+    .phones { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; margin-top: 16px; }
+    .phone {
+      width: 390px;
+      background: #fff;
+      border-radius: 28px;
+      box-shadow: 0 12px 40px rgba(0,0,0,.12);
+      overflow: hidden;
+      border: 1px solid var(--line);
+    }
+    .phone h3 {
+      margin: 0;
+      padding: 14px 16px 10px;
+      font-size: 13px;
+      font-weight: 700;
+      background: var(--summary, #eef2f4);
+      border-bottom: 1px solid var(--line);
+    }
+    .card {
+      margin: 12px;
+      padding: 12px;
+      background: var(--quran);
+      border-radius: 16px;
+    }
+    .title { text-align: center; font-weight: 700; font-size: 15px; }
+    .focus { text-align: center; font-size: 12px; color: var(--muted); margin: 4px 0 10px; line-height: 1.35; }
+    .grid {
+      display: grid;
+      grid-template-columns: 86px repeat(7, 1fr);
+      gap: 6px 2px;
+      align-items: center;
+    }
+    .head {
+      text-align: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+    }
+    .head.fri { color: var(--applied); }
+    .journey {
+      grid-column: 1 / -1;
+      font-size: 11px;
+      letter-spacing: .4px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      padding: 4px 6px 6px;
+    }
+    .band {
+      background: var(--quran-band);
+      border-radius: 12px;
+      padding: 8px 6px 6px;
+    }
+    .row-lab { font-size: 11px; line-height: 1.2; padding-right: 4px; }
+    .row-lab b { display: block; font-weight: 400; }
+    .row-lab span { color: var(--muted); }
+    .cell {
+      width: 24px;
+      height: 24px;
+      margin: 0 auto;
+      border: 0;
+      padding: 0;
+      background: transparent;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+    }
+    .ball {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 8px;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1;
+      text-align: center;
+    }
+    .ball.empty {
+      background: transparent;
+      border: 1.5px dotted #90a4ae;
+      color: transparent;
+    }
+    .ball.none {
+      background: transparent;
+      color: transparent;
+      border: 1.5px solid var(--mark);
+    }
+    .ball.applied,
+    .ball.reflected,
+    .ball.understood,
+    .ball.engaged { background: var(--mark); color: #fff; }
+    .colours .ball.applied { background: var(--applied); }
+    .colours .ball.reflected { background: var(--reflected); }
+    .colours .ball.understood { background: var(--understood); }
+    .colours .ball.engaged { background: var(--engaged); color: #3e2723; }
+    .tiny {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-size: 8px;
+      font-weight: 700;
+      line-height: 1;
+      flex: 0 0 auto;
+      background: var(--mark);
+    }
+    .sheet {
+      margin: 0 12px 16px;
+      padding: 12px 14px 16px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: #fafbfc;
+    }
+    .sheet h4 { margin: 0 0 4px; font-size: 15px; }
+    .sheet .sub { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+    .choice {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .choice button {
+      text-align: left;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: #fff;
+      font: inherit;
+      cursor: pointer;
+    }
+    .choice button[aria-pressed="true"] {
+      outline: 2px solid var(--applied);
+      outline-offset: 0;
+    }
+    .l2 button { display: flex; align-items: center; gap: 8px; }
+    .caption { font-size: 12px; color: var(--muted); margin: 8px 12px 16px; line-height: 1.45; }
+    table.codes {
+      border-collapse: collapse;
+      width: 100%;
+      max-width: 720px;
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      font-size: 13px;
+    }
+    table.codes th, table.codes td {
+      text-align: left;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+    }
+    table.codes th { background: #eef2f4; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <h1>Qur’an Journey — L1 rows, L2 letters (proposal)</h1>
+  <p class="note">
+    Implemented look: 14px marks (same as other domains), letter centred, no card legend,
+    Qur’an Journey as a band title. Shared mark colour is the default. Activity colours
+    (Settings → Application → Activities) apply the L1 mix. Guide holds the legend.
+  </p>
+  <div class="rules">
+    <strong>Default vs activity colours.</strong>
+    Shared (current) uses the same teal as Salah and other domains; the letter still names L2.
+    Activity colours keep the same circle size and add Applied blue, Reflected green, Understood light green, Engaged yellow.
+  </div>
+
+  <div class="phones">
+    <div class="phone">
+      <h3>1. Home — shared colour (default)</h3>
+      <div class="card">
+        <div class="title">Qur’an Engagement</div>
+        <div class="focus">Did I let the Qur’an speak to me today?</div>
+        <div class="band"><div class="grid" id="matrix"></div></div>
+      </div>
+      <p class="caption">No legend on the card. Same 14px circles as Salah. Letter sits in the centre.</p>
+    </div>
+
+    <div class="phone">
+      <h3>2. Home — activity colours</h3>
+      <div class="card colours">
+        <div class="title">Qur’an Engagement</div>
+        <div class="focus">Did I let the Qur’an speak to me today?</div>
+        <div class="band"><div class="grid" id="matrix-colours"></div></div>
+      </div>
+      <p class="caption">Same layout. Colour names L1 only when this setting is on. Not a score.</p>
+    </div>
+
+    <div class="phone">
+      <h3>2. Tap a circle — L1 then L2</h3>
+      <div class="card">
+        <div class="title">Thursday · Understood</div>
+        <div class="focus">This row can only be Understood or None.</div>
+      </div>
+      <div class="sheet">
+        <h4>L1</h4>
+        <div class="sub">Understood — Comprehension</div>
+        <div class="choice" id="l1">
+          <button type="button" aria-pressed="true">Understood</button>
+          <button type="button" aria-pressed="false">None</button>
+        </div>
+        <h4 style="margin-top:14px">L2</h4>
+        <div class="sub">Opens only after Understood is selected.</div>
+        <div class="choice l2" id="l2">
+          <button type="button"><span class="tiny" style="background:var(--understood)">T</span> Translation</button>
+          <button type="button" aria-pressed="true"><span class="tiny" style="background:var(--understood)">M</span> Meaning</button>
+          <button type="button"><span class="tiny" style="background:var(--understood)">F</span> Tafsir</button>
+        </div>
+      </div>
+      <p class="caption">L1 sets the circle colour. L2 sets the letter inside it. Nested menus are not drawn on the 14px mark itself.</p>
+    </div>
+
+    <div class="phone">
+      <h3>3. Same Thursday, Applied row</h3>
+      <div class="sheet">
+        <h4>Thursday</h4>
+        <div class="sub">Applied — Transformation</div>
+        <div class="choice">
+          <button type="button" aria-pressed="true">Applied</button>
+          <button type="button">None</button>
+        </div>
+        <h4 style="margin-top:14px">L2</h4>
+        <div class="choice l2">
+          <button type="button" aria-pressed="true"><span class="tiny" style="background:var(--applied)">W</span> Worship</button>
+          <button type="button"><span class="tiny" style="background:var(--applied)">C</span> Character</button>
+          <button type="button"><span class="tiny" style="background:var(--applied)">R</span> Relationship</button>
+          <button type="button"><span class="tiny" style="background:var(--applied)">S</span> Avoided a sin</button>
+          <button type="button"><span class="tiny" style="background:var(--applied)">G</span> Good deed</button>
+        </div>
+      </div>
+      <p class="caption">R, M, and T repeat across rows. Colour is the disambiguator. A legend stays in Guide, not as a dense table on the card.</p>
+    </div>
+  </div>
+
+  <h2>L1 × L2 codes</h2>
+  <table class="codes">
+    <thead>
+      <tr>
+        <th>Row (L1)</th>
+        <th>Colour</th>
+        <th>L1 menu</th>
+        <th>L2 letter</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Applied — Transformation</td>
+        <td>Blue circle</td>
+        <td>Applied · None</td>
+        <td>W Worship · C Character · R Relationship · S Avoided a sin · G Good deed</td>
+      </tr>
+      <tr>
+        <td>Reflected — Internalization</td>
+        <td>Green circle</td>
+        <td>Reflected · None</td>
+        <td>R Reflection · T Tadabbur · I Insight</td>
+      </tr>
+      <tr>
+        <td>Understood — Comprehension</td>
+        <td>Light green circle</td>
+        <td>Understood · None</td>
+        <td>T Translation · M Meaning · F Tafsir</td>
+      </tr>
+      <tr>
+        <td>Engaged — Contact with Qur’an</td>
+        <td>Yellow circle</td>
+        <td>Engaged · None</td>
+        <td>R Recitation · L Listening · M Memorisation · V Revision</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="rules">
+    <strong>Recommendation if we implement this.</strong>
+    <ul>
+      <li>Keep four independent rows. Do not collapse the week to “highest stage only.”</li>
+      <li>Keep row order as you listed (Applied at the top) if you want a ladder. If you want a journey, flip it so Engaged is first. Ladder vs journey is the one product choice.</li>
+      <li>Put L1 then L2 in a bottom sheet, not a dropdown clipped to the circle. Same lists can remain on the full check-in.</li>
+      <li>Unanswered stays a dotted empty mark. <em>None</em> is an explicit “not this stage today” (pale ring, no letter).</li>
+      <li>Letters inside the ball are feasible. Understanding does not need a square if the letter carries L2.</li>
+      <li>R / M / T reuse is acceptable because colour is L1. Do not put letters on unanswered marks.</li>
+      <li>Storage can still map onto the existing seven dimensions (no schema bump): Engaged R/L → recitation; M → memorisation; V → revision; Understood T/M → meaning; F → tafsir; Reflected → reflection activities; Applied → conscious application activities.</li>
+      <li>Still not a score. Applied is “I recorded this kind of application,” not proof of improvement.</li>
+    </ul>
+  </div>
+
+  <script>
+    const rows = [
+      { id: 'applied', label: 'Applied', purpose: 'Transformation' },
+      { id: 'reflected', label: 'Reflected', purpose: 'Internalization' },
+      { id: 'understood', label: 'Understood', purpose: 'Comprehension' },
+      { id: 'engaged', label: 'Engaged', purpose: 'Contact with Qur’an' },
+    ];
+    const days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+    // letter or '' unanswered, '-' none
+    const data = {
+      applied:     ['',  '',  '',  '',  'W', '',  ''],
+      reflected:   ['',  '',  '',  'T', '',  '',  ''],
+      understood:  ['',  'T', 'M', '',  'F', '',  ''],
+      engaged:     ['R', 'L', '',  '',  'R', 'V', ''],
+    };
+
+    const matrix = document.getElementById('matrix');
+    const colours = document.getElementById('matrix-colours');
+    function fill(root) {
+      if (!root) return;
+      const head = document.createElement('div');
+      head.className = 'journey';
+      head.textContent = 'Qur’an Journey';
+      root.appendChild(head);
+      root.appendChild(document.createElement('div'));
+      days.forEach((d, i) => {
+        const el = document.createElement('div');
+        el.className = 'head' + (i === 5 ? ' fri' : '');
+        el.textContent = d;
+        root.appendChild(el);
+      });
+      rows.forEach((row) => {
+        const lab = document.createElement('div');
+        lab.className = 'row-lab';
+        lab.innerHTML = '<b>' + row.label + '</b><span>' + row.purpose + '</span>';
+        root.appendChild(lab);
+        data[row.id].forEach((letter) => {
+          const btn = document.createElement('button');
+          btn.className = 'cell';
+          btn.type = 'button';
+          const ball = document.createElement('span');
+          ball.className = 'ball';
+          if (letter === '') ball.classList.add('empty');
+          else if (letter === '-') ball.classList.add('none');
+          else {
+            ball.classList.add(row.id);
+            ball.textContent = letter;
+          }
+          btn.appendChild(ball);
+          root.appendChild(btn);
+        });
+      });
+    }
+    fill(matrix);
+    fill(colours);
+  </script>
+</body>
+</html>

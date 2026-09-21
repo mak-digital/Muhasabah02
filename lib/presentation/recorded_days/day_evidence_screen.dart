@@ -456,11 +456,16 @@ class DayEvidenceScreen extends ConsumerWidget {
   }
 
   String _prayerValue(DailyCheckIn record, PrayerId prayer) {
-    final status = record.prayer(prayer);
-    if (prayer == PrayerId.dhuhr && record.jumuahCongregation) {
-      return '${status.label} · Friday congregation';
+    final activity = record.activityFor(ActivityCatalog.salahKey(prayer));
+    final option = ActivityCatalog.find(ActivityCatalog.salah, activity.id);
+    var label = option?.label ?? record.prayer(prayer).label;
+    if (activity.customText != null && activity.customText!.trim().isNotEmpty) {
+      label = '$label · ${activity.customText!.trim()}';
     }
-    return status.label;
+    if (prayer == PrayerId.dhuhr && record.jumuahCongregation) {
+      return '$label · Friday congregation';
+    }
+    return label;
   }
 
   String _voluntary(TernaryOutcome outcome) {

@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Proposal — Qur’an Progress 7-day: Journey rows × weekday columns</title>
+  <style>
+    :root {
+      --bg: #f4f1ea;
+      --ink: #1d2a2c;
+      --muted: #4d5c63;
+      --line: #c5d0d4;
+      --mark: #2F6F73;
+      --quran: #d7e4f2;
+      --band: #cfe0ef;
+      --future: #dfe6e8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      margin: 0;
+      padding: 24px;
+    }
+    h1 { font-size: 22px; font-weight: 700; margin: 0 0 8px; }
+    .note, .rules, .key { max-width: 1100px; }
+    .note { color: var(--muted); line-height: 1.55; font-size: 14px; }
+    .rules {
+      margin: 16px 0 8px;
+      padding: 12px 14px;
+      background: #fff;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+    .phones { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; margin-top: 16px; }
+    .phone {
+      width: 390px;
+      background: #faf8f4;
+      border-radius: 28px;
+      box-shadow: 0 12px 40px rgba(0,0,0,.12);
+      overflow: hidden;
+    }
+    .phone h3 {
+      margin: 0;
+      padding: 14px 16px 10px;
+      font-size: 13px;
+      font-weight: 700;
+      background: #eef2f4;
+      border-bottom: 1px solid var(--line);
+    }
+    .appbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px 6px;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .back { font-size: 20px; line-height: 1; }
+    .hint { padding: 0 16px 8px; font-size: 12px; color: var(--muted); }
+    .body { padding: 0 16px 20px; max-height: 820px; overflow: auto; }
+    .period { display: flex; gap: 6px; margin-bottom: 8px; }
+    .chip {
+      flex: 1; text-align: center; font-size: 12px;
+      padding: 8px 6px; border-radius: 20px;
+      border: 1px solid var(--line); background: #fff;
+    }
+    .chip.on { background: #d7e4f2; font-weight: 700; }
+    .guard { font-size: 12px; color: var(--muted); line-height: 1.4; margin: 0 0 12px; }
+    .matrix {
+      background: var(--quran);
+      border-radius: 16px;
+      padding: 10px 10px 12px;
+      margin-bottom: 12px;
+    }
+    .title-row { display: flex; align-items: center; gap: 4px; }
+    .title-row h2 {
+      flex: 1; margin: 0; font-size: 15px; font-weight: 700; text-align: center;
+    }
+    .chev { width: 28px; text-align: center; color: var(--muted); font-size: 20px; }
+    .week-of { margin: 2px 0 10px; font-size: 11px; color: var(--muted); text-align: center; }
+    table.current {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 2px;
+      table-layout: fixed;
+    }
+    table.current th, table.current td {
+      text-align: center; padding: 4px 1px; font-size: 10px;
+      font-weight: 600; color: var(--muted); vertical-align: middle;
+    }
+    table.current th.dow, table.current td.dow {
+      width: 22px; text-align: left; font-size: 11px; color: var(--ink); font-weight: 700;
+    }
+    table.current th.date, table.current td.date {
+      width: 26px; text-align: right; padding-right: 6px; font-size: 11px;
+    }
+    .vlabel {
+      display: inline-block;
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      font-size: 11px; font-weight: 700; color: var(--ink); white-space: nowrap;
+    }
+    .dot {
+      width: 14px; height: 14px; margin: 0 auto; border-radius: 50%;
+      border: 1.5px dashed rgba(47,111,115,.45);
+    }
+    .dot.on { background: var(--mark); border-style: solid; border-color: var(--mark); }
+    .dot.off { background: transparent; border-style: solid; border-color: var(--mark); }
+    .dot.future { border-color: var(--future); }
+    .grid {
+      display: grid;
+      grid-template-columns: 86px repeat(7, 1fr);
+      gap: 6px 2px;
+      align-items: center;
+    }
+    .head { text-align: center; font-size: 11px; font-weight: 700; color: var(--muted); }
+    .head .n { display: block; font-weight: 600; font-size: 10px; }
+    .row-lab { font-size: 11px; line-height: 1.2; padding-right: 4px; }
+    .row-lab b { display: block; font-weight: 500; }
+    .row-lab span { color: var(--muted); }
+    .cell { display: grid; place-items: center; min-height: 22px; }
+    .ball {
+      width: 14px; height: 14px; border-radius: 50%;
+      display: grid; place-items: center;
+      font-size: 8px; font-weight: 700; color: #fff; line-height: 1;
+      background: var(--mark); border: 1.5px solid var(--mark);
+    }
+    .ball.empty {
+      background: transparent; border: 1.5px dashed rgba(47,111,115,.45); color: transparent;
+    }
+    .ball.none {
+      background: transparent; border: 1.5px solid var(--mark); color: transparent;
+    }
+    .ball.future { border-color: var(--future); background: transparent; color: transparent; }
+    .halo {
+      width: 16.25px; height: 16.25px; border-radius: 50%;
+      background: #ffe082; display: grid; place-items: center;
+    }
+    .key { margin-top: 18px; font-size: 13px; color: var(--muted); line-height: 1.55; }
+  </style>
+</head>
+<body>
+  <h1>Proposed Qur’an Progress — 7-day Journey matrix</h1>
+  <p class="note">
+    Review only. Not implemented. Scope is the <strong>7-day</strong> view only.
+    Home already shows Qur’an Journey: Applied, Reflected, Understood, Engaged
+    as independent rows (letter = L2 activity). Current 7-day Progress still uses
+    Recitation / Retention / Study &amp; notice, with days as rows and short vertical
+    column names.
+  </p>
+  <div class="rules">
+    <strong>Proposed 7-day layout</strong><br>
+    1. Same content as Home: one board titled <strong>Qur’an Journey</strong>.<br>
+    2. <strong>Rows</strong> = Applied, Reflected, Understood, Engaged (purpose under the name).<br>
+    3. <strong>Columns</strong> = weekday letter + date, like Salah 7-day Progress (first-day-of-week preference).<br>
+    4. Marks match Home: filled + letter = recorded activity; pale ring = None (not this stage); dashed = not recorded. Letter is L2, not a score. Shared mark colour by default.<br>
+    5. Today halo is 1.5 mark-strokes larger than the 14px circle. No legend on the matrix (Guide already explains letters). Future days inactive. Week ← → on the board.<br>
+    6. Tap a cell still records that row only (L1 / L2 sheet). Title of Progress stays Qur’an Engagement Progress.<br>
+    7. 30-day and 90-day stay the seven stored dimensions (Recitation, Meaning, Memorisation, Revision, Tafsir, Reflection, Conscious Application) unless you say otherwise.
+  </div>
+
+  <div class="phones">
+    <div class="phone">
+      <h3>Now — 7 days: stored rows, days as rows</h3>
+      <div class="appbar"><span class="back">←</span> Qur’an Engagement</div>
+      <p class="hint">Recitation / Retention / Study &amp; notice. Vertical item names on top.</p>
+      <div class="body">
+        <div class="period">
+          <div class="chip on">7 days ✓</div>
+          <div class="chip">30 days</div>
+          <div class="chip">90 days</div>
+        </div>
+        <p class="guard">The card wash identifies the domain, not rank. Missing records are not treated as missed.</p>
+        <section class="matrix">
+          <div class="title-row">
+            <div class="chev">‹</div>
+            <h2>Recitation</h2>
+            <div class="chev">›</div>
+          </div>
+          <p class="week-of">(for the week starting on 7 Sep 2026)</p>
+          <table class="current">
+            <thead>
+              <tr>
+                <th class="dow"></th><th class="date"></th>
+                <th><span class="vlabel">Recite</span></th>
+                <th><span class="vlabel">Meaning</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td class="dow">M</td><td class="date">7</td><td><div class="dot on"></div></td><td><div class="dot on"></div></td></tr>
+              <tr><td class="dow">T</td><td class="date">8</td><td><div class="dot"></div></td><td><div class="dot"></div></td></tr>
+              <tr><td class="dow">W</td><td class="date">9</td><td><div class="dot on"></div></td><td><div class="dot off"></div></td></tr>
+              <tr><td class="dow">T</td><td class="date">10</td><td><div class="dot on"></div></td><td><div class="dot on"></div></td></tr>
+              <tr><td class="dow">F</td><td class="date">11</td><td><div class="dot on"></div></td><td><div class="dot"></div></td></tr>
+              <tr><td class="dow">S</td><td class="date">12</td><td><div class="dot"></div></td><td><div class="dot"></div></td></tr>
+              <tr><td class="dow">S</td><td class="date">13</td><td><div class="dot future"></div></td><td><div class="dot future"></div></td></tr>
+            </tbody>
+          </table>
+        </section>
+        <section class="matrix">
+          <div class="title-row">
+            <div class="chev">‹</div>
+            <h2>Retention</h2>
+            <div class="chev">›</div>
+          </div>
+          <p class="week-of">(for the week starting on 7 Sep 2026)</p>
+          <table class="current">
+            <thead>
+              <tr>
+                <th class="dow"></th><th class="date"></th>
+                <th><span class="vlabel">Memorise</span></th>
+                <th><span class="vlabel">Revise</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td class="dow">M</td><td class="date">7</td><td><div class="dot"></div></td><td><div class="dot on"></div></td></tr>
+              <tr><td class="dow">T</td><td class="date">8</td><td><div class="dot"></div></td><td><div class="dot"></div></td></tr>
+              <tr><td class="dow">W</td><td class="date">9</td><td><div class="dot on"></div></td><td><div class="dot"></div></td></tr>
+              <tr><td class="dow">T</td><td class="date">10</td><td><div class="dot"></div></td><td><div class="dot on"></div></td></tr>
+              <tr><td class="dow">F</td><td class="date">11</td><td><div class="dot"></div></td><td><div class="dot"></div></td></tr>
+              <tr><td class="dow">S</td><td class="date">12</td><td><div class="dot"></div></td><td><div class="dot"></div></td></tr>
+              <tr><td class="dow">S</td><td class="date">13</td><td><div class="dot future"></div></td><td><div class="dot future"></div></td></tr>
+            </tbody>
+          </table>
+        </section>
+      </div>
+    </div>
+
+    <div class="phone">
+      <h3>Proposed 7 days — Home Journey, Salah orientation</h3>
+      <div class="appbar"><span class="back">←</span> Qur’an Engagement</div>
+      <p class="hint">Same four rows as Home. Scan one stage across the week.</p>
+      <div class="body">
+        <div class="period">
+          <div class="chip on">7 days ✓</div>
+          <div class="chip">30 days</div>
+          <div class="chip">90 days</div>
+        </div>
+        <p class="guard">The card wash identifies the domain, not rank. Colour and letter are observation, not a spiritual score.</p>
+        <section class="matrix">
+          <div class="title-row">
+            <div class="chev">‹</div>
+            <h2>Qur’an Journey</h2>
+            <div class="chev">›</div>
+          </div>
+          <p class="week-of">(for the week starting on 7 Sep 2026)</p>
+          <div class="grid">
+            <div></div>
+            <div class="head">M<span class="n">7</span></div>
+            <div class="head">T<span class="n">8</span></div>
+            <div class="head">W<span class="n">9</span></div>
+            <div class="head">T<span class="n">10</span></div>
+            <div class="head">F<span class="n">11</span></div>
+            <div class="head">S<span class="n">12</span></div>
+            <div class="head">S<span class="n">13</span></div>
+
+            <div class="row-lab"><b>Applied</b><span>Transformation</span></div>
+            <div class="cell"><div class="ball">W</div></div>
+            <div class="cell"><div class="ball empty"></div></div>
+            <div class="cell"><div class="ball none"></div></div>
+            <div class="cell"><div class="ball">C</div></div>
+            <div class="cell"><div class="ball empty"></div></div>
+            <div class="cell"><span class="halo"><div class="ball">G</div></span></div>
+            <div class="cell"><div class="ball future"></div></div>
+
+            <div class="row-lab"><b>Reflected</b><span>Internalization</span></div>
+            <div class="cell"><div class="ball">T</div></div>
+            <div class="cell"><div class="ball empty"></div></div>
+            <div class="cell"><div class="ball">R</div></div>
+            <div class="cell"><div class="ball empty"></div></div>
+            <div class="cell"><div class="ball">I</div></div>
+            <div class="cell"><span class="halo"><div class="ball empty"></div></span></div>
+            <div class="cell"><div class="ball future"></div></div>
+
+            <div class="row-lab"><b>Understood</b><span>Comprehension</span></div>
+            <div class="cell"><div class="ball">M</div></div>
+            <div class="cell"><div class="ball">T</div></div>
+            <div class="cell"><div class="ball empty"></div></div>
+            <div class="cell"><div class="ball">F</div></div>
+            <div class="cell"><div class="ball none"></div></div>
+            <div class="cell"><span class="halo"><div class="ball empty"></div></span></div>
+            <div class="cell"><div class="ball future"></div></div>
+
+            <div class="row-lab"><b>Engaged</b><span>Contact with Qur’an</span></div>
+            <div class="cell"><div class="ball">R</div></div>
+            <div class="cell"><div class="ball">L</div></div>
+            <div class="cell"><div class="ball">M</div></div>
+            <div class="cell"><div class="ball">V</div></div>
+            <div class="cell"><div class="ball">R</div></div>
+            <div class="cell"><span class="halo"><div class="ball empty"></div></span></div>
+            <div class="cell"><div class="ball future"></div></div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <p class="key">
+    Sample week Monday 7 Sep – Sunday 13 Sep 2026; today Saturday 12 Sep.
+    Letters: Applied W/C/R/S/G, Reflected R/T/I, Understood T/M/F, Engaged R/L/M/V.
+    Storage keys stay Gregorian <code>YYYY-MM-DD</code>. No Hive schema bump.
+    Stored dimensions stay the same seven rows; Progress 7-day only changes how they are shown.
+  </p>
+</body>
+</html>

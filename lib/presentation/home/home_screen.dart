@@ -6,32 +6,26 @@ import '../../application/providers.dart';
 import '../../debug/synthetic_check_in_seeder.dart';
 import '../../domain/copy.dart';
 import '../../domain/daily_check_in.dart';
-import '../../domain/dashboard_summary.dart';
-import '../../domain/date_key.dart';
 import '../../domain/home_traces.dart';
 import '../../domain/monitor_domain.dart';
 import '../../domain/personal_mix.dart';
-import '../../domain/recognition.dart';
-import '../../domain/review_period.dart';
 import '../../domain/salah_extras.dart';
 import '../../domain/sample_retirement.dart';
 import '../checkin/check_in_screen.dart';
 import '../history/history_screen.dart';
-import '../progress/optional_domain_progress_screen.dart';
-import '../progress/salah_progress_screen.dart';
-import '../recognition/recognition_screen.dart';
+import '../review/review_screen.dart';
 import '../response/response_editor_screen.dart';
 import '../response/response_list_screen.dart';
-import '../review/review_screen.dart';
-import '../settings/application_reflection_screen.dart';
 import '../settings/settings_screen.dart';
+import 'first_look_door_screen.dart';
+import '../shared/brand_title.dart';
 import '../shared/state_marker.dart';
-import 'dashboard_cards.dart';
+import '../shared/ui_bits.dart';
 import 'home_domain_stage.dart';
-import 'home_lookback_card.dart';
 import 'marks_guide_sheet.dart';
 import 'optional_domain_home_card.dart';
 import 'quran_home_card.dart';
+import 'quick_tap_sheet.dart';
 import 'reflection_home_cards.dart';
 import 'salah_home_card.dart';
 
@@ -43,7 +37,8 @@ class HomeScreen extends ConsumerWidget {
     final checkIns = ref.watch(checkInsProvider);
     return Scaffold(
       appBar: AppBar(
-        title: const Text(Copy.appName),
+        toolbarHeight: BrandTitle.toolbarHeight,
+        title: const BrandTitle(),
         actions: [
           Tooltip(
             message: Copy.marksGuideTitle,
@@ -94,11 +89,10 @@ class HomeScreen extends ConsumerWidget {
       ),
       body: checkIns.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => const Padding(
-          padding: EdgeInsets.all(16),
-          child: Text(
-            'Saved check-ins could not be loaded. Healthy records are kept.',
-          ),
+        error: (_, _) => const EmptyState(
+          title: Copy.appName,
+          message:
+              'Saved check-ins could not be loaded. Healthy records are kept.',
         ),
         data: (records) {
           final prefs = ref.watch(appPrefsProvider);
@@ -192,45 +186,32 @@ class HomeScreen extends ConsumerWidget {
     required List<DailyCheckIn> records,
     required WidgetRef ref,
   }) {
-    final period = ref.watch(reviewPeriodProvider);
-    final now = ref.watch(nowProvider);
-    final keys = periodDateKeys(period.days, now: now);
-    final inPeriod = [
-      for (final record in records)
-        if (keys.contains(record.dateKey)) record,
-    ];
-    final recognitionCount = period == ReviewPeriod.days7
-        ? 0
-        : const RecognitionEngine()
-              .detect(records: inPeriod, period: period)
-              .length;
-    final snapshot = buildHomeDashboard(
-      records: records,
-      now: now,
-      period: period,
-      recognitionCount: recognitionCount,
-    );
     final visible = ref.watch(appPrefsProvider).visibleDomains;
     final mix = ref.watch(appPrefsProvider).personalMix;
     final mixKeys = resolvePersonalMixKeys(mix, visible);
     final season = personalMixSeasonLine(mix, visible);
     final homeDomains = homeMixDomains(visible, mix);
-    final showQuranSurfaces =
-        visible.contains(MonitorDomain.quran) &&
-        (mix.kind == PersonalMixKind.sameAsDomains ||
-            mixIncludesQuran(mixKeys));
-    final hajjStatus = ref.watch(appPrefsProvider).hajjStatus;
-    final showHajjPonder =
-        homeDomains.contains(MonitorDomain.hajj) && hajjStatus.showsPreparation;
     void open(Widget page) {
       Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => page));
     }
 
     return [
-      FilledButton.icon(
-        onPressed: () => open(const CheckInScreen()),
-        icon: const Icon(Icons.edit_calendar_outlined),
-        label: const Text(Copy.homeCheckIn),
+      SizedBox(
+        width: double.infinity,
+        child: FilledButton.icon(
+          onPressed: () => open(const CheckInScreen()),
+          icon: const Icon(Icons.edit_calendar_outlined),
+          label: const Text(Copy.homeCheckIn),
+        ),
+      ),
+      const SizedBox(height: 8),
+      SizedBox(
+        width: double.infinity,
+        child: OutlinedButton.icon(
+          onPressed: () => showQuickTapSheet(context),
+          icon: const Icon(Icons.touch_app_outlined),
+          label: const Text(Copy.quickTap),
+        ),
       ),
       const SizedBox(height: 12),
       const ReflectionOfTheWeekCard(),
@@ -252,40 +233,6 @@ class HomeScreen extends ConsumerWidget {
         ),
       ),
       if (homeDomains.isNotEmpty) const SizedBox(height: 10),
-      HomeLookbackCard(
-        records: records,
-        onOpenReview: () => _switchTab(context, 1),
-      ),
-      const SizedBox(height: 10),
-      if (showQuranSurfaces) ...[
-        DashboardNavCard(
-          title: 'Recognition',
-          body: snapshot.recognitionLine,
-          onTap: () => open(const RecognitionScreen()),
-        ),
-        const SizedBox(height: 10),
-        DashboardPonderCard(onTap: () => open(const QuranProgressScreen())),
-        const SizedBox(height: 10),
-      ],
-      if (showHajjPonder) ...[
-        DashboardNavCard(
-          title: 'PONDER',
-          body: hajjStatus == HajjStatus.preparing
-              ? Copy.hajjPonderPreparing
-              : Copy.hajjPonderDue,
-          onTap: () => open(
-            OptionalDomainProgressScreen(
-              title: MonitorDomain.hajj.label,
-              focusQuestion: MonitorDomain.hajj.focusQuestion,
-              note: Copy.hajjObservationNote,
-              rows: hajjHomeRows,
-              family: MuhasabahColors.hajjFamily,
-              includeHajjStatus: true,
-            ),
-          ),
-        ),
-        const SizedBox(height: 10),
-      ],
       const WeeklyJournalCard(),
       const SizedBox(height: 10),
       FilledButton(
@@ -337,6 +284,7 @@ class HomeScreen extends ConsumerWidget {
           family: MuhasabahColors.hadithFamily,
           includeHadithFocus: true,
           compactWeek: useCompact,
+          itemRowsOn7Days: true,
         );
       case MonitorDomain.dhikr:
         return OptionalDomainHomeCard(
@@ -349,6 +297,7 @@ class HomeScreen extends ConsumerWidget {
           washDark: MuhasabahColors.dhikrWashDark,
           family: MuhasabahColors.dhikrFamily,
           compactWeek: useCompact,
+          itemRowsOn7Days: true,
         );
       case MonitorDomain.akhlaq:
         return OptionalDomainHomeCard(
@@ -362,6 +311,7 @@ class HomeScreen extends ConsumerWidget {
           family: MuhasabahColors.akhlaqFamily,
           includeStruggleNote: true,
           compactWeek: useCompact,
+          itemRowsOn7Days: true,
         );
       case MonitorDomain.huquq:
         return OptionalDomainHomeCard(
@@ -374,6 +324,7 @@ class HomeScreen extends ConsumerWidget {
           washDark: MuhasabahColors.huquqWashDark,
           family: MuhasabahColors.huquqFamily,
           compactWeek: useCompact,
+          itemRowsOn7Days: true,
         );
       case MonitorDomain.knowledge:
         return OptionalDomainHomeCard(
@@ -386,6 +337,7 @@ class HomeScreen extends ConsumerWidget {
           washDark: MuhasabahColors.knowledgeWashDark,
           family: MuhasabahColors.knowledgeFamily,
           compactWeek: useCompact,
+          itemRowsOn7Days: true,
         );
       case MonitorDomain.time:
         return OptionalDomainHomeCard(
@@ -476,11 +428,6 @@ class HomeScreen extends ConsumerWidget {
         );
     }
   }
-
-  void _switchTab(BuildContext context, int index) {
-    final shell = context.findAncestorStateOfType<AppShellState>();
-    shell?.select(index);
-  }
 }
 
 class AppShell extends ConsumerStatefulWidget {
@@ -500,12 +447,7 @@ class AppShellState extends ConsumerState<AppShell> {
     final prefs = ref.watch(appPrefsProvider);
     ref.watch(prefsTickProvider);
     if (!prefs.applicationReflectionAcknowledged) {
-      return ApplicationReflectionIntroScreen(
-        onContinue: () async {
-          await prefs.setApplicationReflectionAcknowledged(true);
-          ref.read(prefsTickProvider.notifier).state++;
-        },
-      );
+      return const FirstLookDoorScreen();
     }
     final pages = const [
       HomeScreen(),

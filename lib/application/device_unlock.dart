@@ -28,11 +28,8 @@ class LocalAuthDeviceUnlock implements DeviceUnlock {
     try {
       return await _auth.authenticate(
         localizedReason: reason,
-        options: const AuthenticationOptions(
-          biometricOnly: false,
-          stickyAuth: true,
-          useErrorDialogs: true,
-        ),
+        biometricOnly: false,
+        persistAcrossBackgrounding: true,
       );
     } catch (_) {
       return false;

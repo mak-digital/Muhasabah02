@@ -5,14 +5,19 @@ import '../../application/device_unlock.dart';
 import '../../application/providers.dart';
 import '../../data/privacy_log.dart';
 import '../../debug/synthetic_check_in_seeder.dart';
+import '../../domain/activities.dart';
 import '../../domain/copy.dart';
 import '../../domain/display_calendar.dart';
 import '../../domain/first_day_of_week.dart';
 import '../../domain/monitor_domain.dart';
 import '../../domain/personal_mix.dart';
 import '../../domain/quotation_cadence.dart';
+import '../../domain/quran_stage.dart';
 import '../history/history_screen.dart';
 import '../response/response_list_screen.dart';
+import '../shared/quran_stage_mark.dart';
+import '../shared/salah_activity_mark.dart';
+import '../shared/state_marker.dart';
 import '../shared/ui_bits.dart';
 import 'application_reflection_screen.dart';
 import 'faq_screen.dart';
@@ -103,6 +108,23 @@ class SettingsScreen extends ConsumerWidget {
                       context,
                       MaterialPageRoute<void>(
                         builder: (_) => const VisibleDomainsSettingsScreen(),
+                      ),
+                    );
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.tune_outlined),
+                  title: const Text(Copy.activitiesTitle),
+                  subtitle: Text(
+                    prefs.salahActivityColours
+                        ? Copy.salahMarkActivityColours
+                        : Copy.salahMarkShared,
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute<void>(
+                        builder: (_) => const ActivitiesSettingsScreen(),
                       ),
                     );
                   },
@@ -276,6 +298,156 @@ String _themeLabel(int index) {
     2 => 'Dark',
     _ => Copy.appearanceNote,
   };
+}
+
+class ActivitiesSettingsScreen extends ConsumerWidget {
+  const ActivitiesSettingsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(prefsTickProvider);
+    final prefs = ref.watch(appPrefsProvider);
+    final colours = prefs.salahActivityColours;
+    return Scaffold(
+      appBar: AppBar(title: const Text(Copy.activitiesTitle)),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          Text(
+            Copy.activitiesNote,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            Copy.salahMarkColour,
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+          const SizedBox(height: 8),
+          Card(
+            child: RadioGroup<bool>(
+              groupValue: colours,
+              onChanged: (value) async {
+                if (value == null) return;
+                await prefs.setSalahActivityColours(value);
+                ref.read(prefsTickProvider.notifier).state++;
+              },
+              child: const Column(
+                children: [
+                  RadioListTile<bool>(
+                    title: Text(Copy.salahMarkShared),
+                    value: false,
+                  ),
+                  RadioListTile<bool>(
+                    title: Text(Copy.salahMarkActivityColours),
+                    value: true,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            Copy.salahMarkActivityNote,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          const SizedBox(height: 16),
+          if (colours) ...[
+            for (final option in ActivityCatalog.salah)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  children: [
+                    RecordedStateMarker(
+                      kind: MarkerKind.filled,
+                      color: SalahActivityMark.colourForId(option.id),
+                      semanticLabel: option.label,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(child: Text(option.label)),
+                  ],
+                ),
+              ),
+            const SizedBox(height: 16),
+            Text(
+              Copy.quranJourney,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+            const SizedBox(height: 8),
+            for (final row in QuranJourneyRow.values)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  children: [
+                    QuranJourneyMarker(
+                      row: row,
+                      cell: QuranJourneyCell(
+                        kind: QuranJourneyCellKind.recorded,
+                        code: switch (row) {
+                          QuranJourneyRow.applied => 'W',
+                          QuranJourneyRow.reflected => 'T',
+                          QuranJourneyRow.understood => 'M',
+                          QuranJourneyRow.engaged => 'R',
+                        },
+                      ),
+                      colours: true,
+                      semanticLabel: row.label,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text('${row.label} — ${row.purpose}'),
+                    ),
+                  ],
+                ),
+              ),
+          ] else ...[
+            const _ActivityMarkRow(
+              kind: MarkerKind.filled,
+              label: 'On time',
+            ),
+            const _ActivityMarkRow(
+              kind: MarkerKind.outlined,
+              label: 'Late',
+            ),
+            const _ActivityMarkRow(
+              kind: MarkerKind.missed,
+              label: 'Missed',
+            ),
+            const _ActivityMarkRow(
+              kind: MarkerKind.unanswered,
+              label: 'Unanswered',
+            ),
+            const SizedBox(height: 12),
+            for (final option in ActivityCatalog.salah)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 6),
+                child: Text(option.label),
+              ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _ActivityMarkRow extends StatelessWidget {
+  const _ActivityMarkRow({required this.kind, required this.label});
+
+  final MarkerKind kind;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          RecordedStateMarker(kind: kind, semanticLabel: label),
+          const SizedBox(width: 12),
+          Expanded(child: Text(label)),
+        ],
+      ),
+    );
+  }
 }
 
 class AppearanceSettingsScreen extends ConsumerWidget {

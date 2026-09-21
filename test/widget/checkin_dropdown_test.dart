@@ -10,7 +10,7 @@ import 'package:muhasabah02/presentation/checkin/check_in_screen.dart';
 import 'package:muhasabah02/presentation/shared/activity_picker.dart';
 
 void main() {
-  testWidgets('check-in uses capital domain titles and A–Z dropdowns', (
+  testWidgets('check-in uses capital domain titles and Salah catalog order', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(400, 3600);
@@ -37,7 +37,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('SALAH & PRAYER QUALITY'), findsOneWidget);
-    expect(find.textContaining('Qur’an ›'), findsOneWidget);
+    expect(find.byKey(const Key('checkin-domain-next')), findsOneWidget);
     expect(find.text('QUR’AN ENGAGEMENT'), findsNothing);
     expect(find.text('HADITH & LIVING SUNNAH'), findsNothing);
     expect(find.text('Fajr'), findsOneWidget);
@@ -56,9 +56,9 @@ void main() {
         )
         .map((item) => (item.child as Text).data)
         .toList();
-    final expected =
-        ActivityCatalog.salah.map((option) => option.label).toList()
-          ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
-    expect(labels, expected);
+    expect(
+      labels,
+      ActivityCatalog.salah.map((option) => option.label).toList(),
+    );
   });
 }

@@ -1,11 +1,11 @@
 {
-    "name": "muhasabah02",
-    "short_name": "muhasabah02",
+    "name": "Private Muhasabah",
+    "short_name": "Muhasabah",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "Private local-first Islamic self-reflection application.",
+    "background_color": "#D7ECEB",
+    "theme_color": "#2F6F73",
+    "description": "Your record, not a ruling. Notice your day to improve. Keep it yours.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

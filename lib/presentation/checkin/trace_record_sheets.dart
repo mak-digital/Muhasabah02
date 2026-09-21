@@ -104,6 +104,7 @@ Future<void> showHomeTraceRecordSheet({
                       const CheckInRowLabel('What happened?'),
                       CheckInSelect<TernaryOutcome>(
                         value: outcome,
+                        sortLabels: false,
                         entries: [
                           for (final option in TernaryOutcome.values)
                             CheckInSelectEntry(

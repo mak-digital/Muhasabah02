@@ -1,6 +1,6 @@
 enum PrayerId { fajr, dhuhr, asr, maghrib, isha }
 
-enum PrayerStatus { unanswered, onTime, late, missed }
+enum PrayerStatus { unanswered, onTime, late, missed, excused, other }
 
 extension PrayerIdX on PrayerId {
   String get jsonKey => name;
@@ -24,6 +24,8 @@ extension PrayerStatusX on PrayerStatus {
     PrayerStatus.onTime => 'Prayed on time',
     PrayerStatus.late => 'Prayed late',
     PrayerStatus.missed => 'Missed',
+    PrayerStatus.excused => 'Excused',
+    PrayerStatus.other => 'Other',
   };
 
   bool get isRecorded => this != PrayerStatus.unanswered;

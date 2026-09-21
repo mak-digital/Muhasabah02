@@ -75,11 +75,11 @@ void main() {
     await tester.tap(find.byKey(const Key('review-domain-dhikr')));
     await tester.pumpAndSettle();
     expect(find.text('${MonitorDomain.dhikr.label} Progress'), findsWidgets);
-    expect(find.text('Post-fard Salah Adhkar'), findsWidgets);
-    expect(find.text('Faj'), findsOneWidget);
-    expect(find.text('Morning & Evening Adhkar'), findsOneWidget);
-    expect(find.text('Mor-Adk'), findsOneWidget);
-    expect(find.textContaining('for the week starting on'), findsWidgets);
+    expect(find.text('POST-FARD SALAH ADHKAR'), findsOneWidget);
+    expect(find.text('Fajr'), findsOneWidget);
+    expect(find.text('MORNING & EVENING ADHKAR'), findsOneWidget);
+    expect(find.text('Morning Adhkar'), findsOneWidget);
+    expect(find.text(Copy.currentWeek), findsOneWidget);
     expect(find.textContaining('Score'), findsNothing);
     await tester.pageBack();
     await tester.pumpAndSettle();

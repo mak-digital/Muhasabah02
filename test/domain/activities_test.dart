@@ -19,6 +19,27 @@ void main() {
     expect(record.prayer(PrayerId.dhuhr), PrayerStatus.unanswered);
   });
 
+  test('excused is recorded and is never missed', () {
+    final record = DailyCheckIn.empty('2026-09-03').withSalahActivity(
+      PrayerId.fajr,
+      const RecordedActivity(id: 'excused'),
+    );
+    expect(record.prayer(PrayerId.fajr), PrayerStatus.excused);
+    expect(record.prayer(PrayerId.fajr).isRecorded, isTrue);
+    expect(record.prayer(PrayerId.fajr).isDesirable, isFalse);
+    expect(record.prayer(PrayerId.fajr), isNot(PrayerStatus.missed));
+  });
+
+  test('salah other is recorded and is not late', () {
+    final record = DailyCheckIn.empty('2026-09-03').withSalahActivity(
+      PrayerId.fajr,
+      const RecordedActivity(id: ActivityIds.other, customText: 'Travel'),
+    );
+    expect(record.prayer(PrayerId.fajr), PrayerStatus.other);
+    expect(record.prayer(PrayerId.fajr).isRecorded, isTrue);
+    expect(record.prayer(PrayerId.fajr), isNot(PrayerStatus.late));
+  });
+
   test('quran other stores custom text and remains independent', () {
     final record = DailyCheckIn.empty('2026-09-03').withQuranActivity(
       QuranDimension.reading,

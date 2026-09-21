@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../application/device_unlock.dart';
 import '../../application/providers.dart';
 import '../../domain/copy.dart';
+import '../shared/brand_mark.dart';
 
 class AppLockGate extends ConsumerStatefulWidget {
   const AppLockGate({super.key, required this.child});
@@ -78,6 +79,8 @@ class _AppLockGateState extends ConsumerState<AppLockGate>
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const Spacer(),
+              const BrandMark(size: 88),
+              const SizedBox(height: 24),
               Text(
                 Copy.appLockTitle,
                 textAlign: TextAlign.center,

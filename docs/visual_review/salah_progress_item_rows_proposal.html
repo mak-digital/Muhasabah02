@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Proposal — Salah Progress: prayer rows × weekday columns</title>
+  <style>
+    :root {
+      --bg: #f4f1ea;
+      --ink: #1d2a2c;
+      --muted: #4d5c63;
+      --line: #c5d0d4;
+      --teal: #3f7d6a;
+      --salah: #d7eceb;
+      --friday: #d8e2ee;
+      --voluntary: #e4eee8;
+      --today: #fff4c4;
+      --future: #dfe6e8;
+      --fri-ink: #3f7d6a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      margin: 0;
+      padding: 24px;
+    }
+    h1 { font-size: 22px; font-weight: 700; margin: 0 0 8px; }
+    .note, .rules, .key { max-width: 1100px; }
+    .note { color: var(--muted); line-height: 1.55; font-size: 14px; }
+    .rules {
+      margin: 16px 0 8px;
+      padding: 12px 14px;
+      background: #fff;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+    .phones { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; margin-top: 16px; }
+    .phone {
+      width: 390px;
+      background: #faf8f4;
+      border-radius: 28px;
+      box-shadow: 0 12px 40px rgba(0,0,0,.12);
+      overflow: hidden;
+    }
+    .phone h3 {
+      margin: 0;
+      padding: 14px 16px 10px;
+      font-size: 13px;
+      font-weight: 700;
+      background: #eef2f4;
+      border-bottom: 1px solid var(--line);
+    }
+    .appbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px 6px;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .back { font-size: 20px; line-height: 1; }
+    .hint { padding: 0 16px 8px; font-size: 12px; color: var(--muted); }
+    .body { padding: 0 16px 20px; max-height: 860px; overflow: auto; }
+    .period { display: flex; gap: 6px; margin-bottom: 8px; }
+    .chip {
+      flex: 1;
+      text-align: center;
+      font-size: 12px;
+      padding: 8px 6px;
+      border-radius: 20px;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+    .chip.on { background: #d7eceb; font-weight: 700; }
+    .guard { font-size: 12px; color: var(--muted); line-height: 1.4; margin: 0 0 12px; }
+    .matrix {
+      background: var(--salah);
+      border-radius: 16px;
+      padding: 10px 10px 12px;
+      margin-bottom: 12px;
+    }
+    .matrix.friday { background: var(--friday); }
+    .matrix.voluntary { background: var(--voluntary); }
+    .title-row {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .title-row h2 {
+      flex: 1;
+      margin: 0;
+      font-size: 15px;
+      font-weight: 700;
+      text-align: center;
+    }
+    .chev { width: 28px; text-align: center; color: var(--muted); font-size: 20px; }
+    .week-of {
+      margin: 2px 0 10px;
+      font-size: 11px;
+      color: var(--muted);
+      text-align: center;
+    }
+    table.current {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 2px;
+      table-layout: fixed;
+    }
+    table.current th, table.current td {
+      text-align: center;
+      padding: 4px 1px;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--muted);
+      vertical-align: middle;
+    }
+    table.current th.dow, table.current td.dow {
+      width: 22px;
+      text-align: left;
+      font-size: 11px;
+      color: var(--ink);
+      font-weight: 700;
+    }
+    table.current th.date, table.current td.date {
+      width: 26px;
+      text-align: right;
+      padding-right: 6px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 78px repeat(7, 1fr);
+      gap: 6px 2px;
+      align-items: center;
+    }
+    .head {
+      text-align: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+    }
+    .head.fri { color: var(--fri-ink); }
+    .head .n { display: block; font-weight: 600; font-size: 10px; }
+    .row-lab { font-size: 11px; line-height: 1.2; padding-right: 4px; }
+    .row-lab b { display: block; font-weight: 500; }
+    .cell {
+      display: grid;
+      place-items: center;
+      min-height: 22px;
+    }
+    .dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 1.5px dashed rgba(63,125,106,.45);
+      position: relative;
+    }
+    .dot.on {
+      background: var(--teal);
+      border-style: solid;
+      border-color: var(--teal);
+    }
+    .dot.late {
+      background: transparent;
+      border-style: solid;
+      border-color: var(--teal);
+    }
+    .dot.missed {
+      background: var(--teal);
+      border-style: solid;
+      border-color: var(--teal);
+    }
+    .dot.missed::after {
+      content: "";
+      position: absolute;
+      left: 2px;
+      right: 2px;
+      top: 5px;
+      height: 1.6px;
+      background: #fff;
+      transform: rotate(-28deg);
+    }
+    .dot.future { border-color: var(--future); }
+    .dot.na {
+      border: 0;
+      background: transparent;
+      width: 14px;
+      height: 14px;
+    }
+    .halo {
+      width: 16.25px;
+      height: 16.25px;
+      border-radius: 50%;
+      background: #ffe082;
+      display: grid;
+      place-items: center;
+    }
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 8px;
+      align-items: center;
+    }
+    .legend .dot { width: 12px; height: 12px; margin-right: 4px; display: inline-block; vertical-align: middle; }
+    .key { margin-top: 18px; font-size: 13px; color: var(--muted); line-height: 1.55; }
+  </style>
+</head>
+<body>
+  <h1>Proposed Salah Progress — prayer rows × weekday columns</h1>
+  <p class="note">
+    Implemented. 7-day Salah Progress uses three boards with prayer names as rows
+    and weekday letter + date as columns. Page legend stays above the boards.
+    Today’s halo is 1.5 mark-strokes larger than the 14px circle (no cell wash).
+  </p>
+  <div class="rules">
+    <strong>Proposed 7-day layout (Salah Progress only in this step)</strong><br>
+    1. Reverse the grid: <strong>rows</strong> = prayer names; <strong>columns</strong> = the calendar week (letter + date), following first-day-of-week preference.<br>
+    2. Three boards, matching Home: <strong>Obligatory Salah</strong> (Fajr, Dhuhr, Asr, Maghrib, Isha), <strong>Friday Prayer</strong> (Jumu‘ah), <strong>Voluntary Prayers</strong> (Tahajjud, Ishraq).<br>
+    3. Jumu‘ah is Friday-only. Other weekdays stay blank, not unanswered and not missed.<br>
+    4. Marks unchanged: filled = on time / performed, solid outline = late / not performed (voluntary), slash = missed, dashed = not recorded. Today halo is a pale disc 1.5 mark-strokes larger than the circle (no cell wash). Future days inactive. Week ← → on each band. Page legend stays above the boards, not on Voluntary Prayers.<br>
+    5. Colour names the domain (and Friday band wash). Shared mark colour by default. Not a spiritual score.<br>
+    6. 30-day and 90-day stay one calendar per obligatory prayer unless you say otherwise. Friday and voluntary would join those longer views only if you ask.<br>
+    7. Qur’an / Fasting / Charity 7-day Progress stay as they are in this step.
+  </div>
+
+  <div class="phones">
+    <div class="phone">
+      <h3>Now — days as rows, short names as columns</h3>
+      <div class="appbar"><span class="back">←</span> Salah &amp; Prayer Quality</div>
+      <p class="hint">7 days. Only obligatory. Friday and other prayers are missing.</p>
+      <div class="body">
+        <div class="period">
+          <div class="chip on">7 days ✓</div>
+          <div class="chip">30 days</div>
+          <div class="chip">90 days</div>
+        </div>
+        <p class="guard">The card wash identifies the prayer, not spiritual rank. Missing records are not treated as missed.</p>
+        <section class="matrix">
+          <div class="title-row">
+            <div class="chev">‹</div>
+            <h2>Obligatory Salah</h2>
+            <div class="chev">›</div>
+          </div>
+          <p class="week-of">(for the week starting on 7 Sep 2026)</p>
+          <table class="current">
+            <thead>
+              <tr>
+                <th class="dow"></th>
+                <th class="date"></th>
+                <th>Faj</th><th>Dhr</th><th>Asr</th><th>Mag</th><th>Isa</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td class="dow">M</td><td class="date">7</td><td><div class="dot on"></div></td><td><div class="dot late"></div></td><td><div class="dot on"></div></td><td><div class="dot on"></div></td><td><div class="dot"></div></td></tr>
+              <tr><td class="dow">T</td><td class="date">8</td><td><div class="dot"></div></td><td><div class="dot on"></div></td><td><div class="dot late"></div></td><td><div class="dot on"></div></td><td><div class="dot on"></div></td></tr>
+              <tr><td class="dow">W</td><td class="date">9</td><td><div class="dot on"></div></td><td><div class="dot"></div></td><td><div class="dot"></div></td><td><div class="dot missed"></div></td><td><div class="dot on"></div></td></tr>
+              <tr><td class="dow">T</td><td class="date">10</td><td><div class="dot late"></div></td><td><div class="dot on"></div></td><td><div class="dot on"></div></td><td><div class="dot"></div></td><td><div class="dot"></div></td></tr>
+              <tr><td class="dow">F</td><td class="date">11</td><td><div class="dot on"></div></td><td><div class="dot on"></div></td><td><div class="dot on"></div></td><td><div class="dot on"></div></td><td><div class="dot on"></div></td></tr>
+              <tr><td class="dow">S</td><td class="date">12</td><td><div class="dot on"></div></td><td><div class="dot"></div></td><td><div class="dot"></div></td><td><div class="dot on"></div></td><td><div class="dot"></div></td></tr>
+              <tr><td class="dow">S</td><td class="date">13</td><td><div class="dot future"></div></td><td><div class="dot future"></div></td><td><div class="dot future"></div></td><td><div class="dot future"></div></td><td><div class="dot future"></div></td></tr>
+            </tbody>
+          </table>
+        </section>
+      </div>
+    </div>
+
+    <div class="phone">
+      <h3>Proposed — prayer names as rows, day + date as columns</h3>
+      <div class="appbar"><span class="back">←</span> Salah &amp; Prayer Quality</div>
+      <p class="hint">Same week. Three bands like Home. Scan one prayer across the week.</p>
+      <div class="body">
+        <div class="period">
+          <div class="chip on">7 days ✓</div>
+          <div class="chip">30 days</div>
+          <div class="chip">90 days</div>
+        </div>
+        <p class="guard">The card wash identifies the band, not spiritual rank. Missing records are not treated as missed.</p>
+
+        <section class="matrix">
+          <div class="title-row">
+            <div class="chev">‹</div>
+            <h2>Obligatory Salah</h2>
+            <div class="chev">›</div>
+          </div>
+          <p class="week-of">(for the week starting on 7 Sep 2026)</p>
+          <div class="grid">
+            <div></div>
+            <div class="head">M<span class="n">7</span></div>
+            <div class="head">T<span class="n">8</span></div>
+            <div class="head">W<span class="n">9</span></div>
+            <div class="head">T<span class="n">10</span></div>
+            <div class="head fri">F<span class="n">11</span></div>
+            <div class="head">S<span class="n">12</span></div>
+            <div class="head">S<span class="n">13</span></div>
+
+            <div class="row-lab"><b>Fajr</b></div>
+            <div class="cell"><div class="dot on"></div></div>
+            <div class="cell"><div class="dot"></div></div>
+            <div class="cell"><div class="dot on"></div></div>
+            <div class="cell"><div class="dot late"></div></div>
+            <div class="cell"><div class="dot on"></div></div>
+            <div class="cell"><span class="halo"><div class="dot on"></div></span></div>
+            <div class="cell"><div class="dot future"></div></div>
+
+            <div class="row-lab"><b>Dhuhr</b></div>
+            <div class="cell"><div class="dot late"></div></div>
+            <div class="cell"><div class="dot on"></div></div>
+            <div class="cell"><div class="dot"></div></div>
+            <div class="cell"><div class="dot on"></div></div>
+            <div class="cell"><div class="dot on"></div></div>
+            <div class="cell"><span class="halo"><div class="dot"></div></span></div>
+            <div class="cell"><div class="dot future"></div></div>
+
+            <div class="row-lab"><b>Asr</b></div>
+            <div class="cell"><div class="dot on"></div></div>
+            <div class="cell"><div class="dot late"></div></div>
+            <div class="cell"><div class="dot"></div></div>
+            <div class="cell"><div class="dot on"></div></div>
+            <div class="cell"><div class="dot on"></div></div>
+            <div class="cell"><span class="halo"><div class="dot"></div></span></div>
+            <div class="cell"><div class="dot future"></div></div>
+
+            <div class="row-lab"><b>Maghrib</b></div>
+            <div class="cell"><div class="dot on"></div></div>
+            <div class="cell"><div class="dot on"></div></div>
+            <div class="cell"><div class="dot missed"></div></div>
+            <div class="cell"><div class="dot"></div></div>
+            <div class="cell"><div class="dot on"></div></div>
+            <div class="cell"><span class="halo"><div class="dot on"></div></span></div>
+            <div class="cell"><div class="dot future"></div></div>
+
+            <div class="row-lab"><b>Isha</b></div>
+            <div class="cell"><div class="dot"></div></div>
+            <div class="cell"><div class="dot on"></div></div>
+            <div class="cell"><div class="dot on"></div></div>
+            <div class="cell"><div class="dot"></div></div>
+            <div class="cell"><div class="dot on"></div></div>
+            <div class="cell"><span class="halo"><div class="dot"></div></span></div>
+            <div class="cell"><div class="dot future"></div></div>
+          </div>
+        </section>
+
+        <section class="matrix friday">
+          <div class="title-row">
+            <div class="chev">‹</div>
+            <h2>Friday Prayer</h2>
+            <div class="chev">›</div>
+          </div>
+          <p class="week-of">(for the week starting on 7 Sep 2026)</p>
+          <div class="grid">
+            <div></div>
+            <div class="head">M<span class="n">7</span></div>
+            <div class="head">T<span class="n">8</span></div>
+            <div class="head">W<span class="n">9</span></div>
+            <div class="head">T<span class="n">10</span></div>
+            <div class="head fri">F<span class="n">11</span></div>
+            <div class="head">S<span class="n">12</span></div>
+            <div class="head">S<span class="n">13</span></div>
+
+            <div class="row-lab"><b>Jumu‘ah</b></div>
+            <div class="cell"><div class="dot na"></div></div>
+            <div class="cell"><div class="dot na"></div></div>
+            <div class="cell"><div class="dot na"></div></div>
+            <div class="cell"><div class="dot na"></div></div>
+            <div class="cell"><div class="dot on"></div></div>
+            <div class="cell"><span class="halo"><div class="dot na"></div></span></div>
+            <div class="cell"><div class="dot na"></div></div>
+          </div>
+        </section>
+
+        <section class="matrix voluntary">
+          <div class="title-row">
+            <div class="chev">‹</div>
+            <h2>Voluntary Prayers</h2>
+            <div class="chev">›</div>
+          </div>
+          <p class="week-of">(for the week starting on 7 Sep 2026)</p>
+          <div class="grid">
+            <div></div>
+            <div class="head">M<span class="n">7</span></div>
+            <div class="head">T<span class="n">8</span></div>
+            <div class="head">W<span class="n">9</span></div>
+            <div class="head">T<span class="n">10</span></div>
+            <div class="head fri">F<span class="n">11</span></div>
+            <div class="head">S<span class="n">12</span></div>
+            <div class="head">S<span class="n">13</span></div>
+
+            <div class="row-lab"><b>Tahajjud</b></div>
+            <div class="cell"><div class="dot on"></div></div>
+            <div class="cell"><div class="dot"></div></div>
+            <div class="cell"><div class="dot late"></div></div>
+            <div class="cell"><div class="dot"></div></div>
+            <div class="cell"><div class="dot on"></div></div>
+            <div class="cell"><span class="halo"><div class="dot"></div></span></div>
+            <div class="cell"><div class="dot future"></div></div>
+
+            <div class="row-lab"><b>Ishraq</b></div>
+            <div class="cell"><div class="dot"></div></div>
+            <div class="cell"><div class="dot on"></div></div>
+            <div class="cell"><div class="dot"></div></div>
+            <div class="cell"><div class="dot late"></div></div>
+            <div class="cell"><div class="dot"></div></div>
+            <div class="cell"><span class="halo"><div class="dot"></div></span></div>
+            <div class="cell"><div class="dot future"></div></div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <p class="key">
+    Sample week is Monday 7 Sep – Sunday 13 Sep 2026. Friday is 11 Sep. Today is Saturday 12 Sep.
+    Storage keys stay Gregorian <code>YYYY-MM-DD</code>. No Hive schema bump.
+    Jumu‘ah blank weekdays are “not this day”, not unanswered. Voluntary outline means recorded as not performed, not missed.
+  </p>
+</body>
+</html>

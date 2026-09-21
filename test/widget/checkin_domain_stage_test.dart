@@ -23,19 +23,31 @@ void main() {
     expect(find.byType(CheckInScreen), findsOneWidget);
     expect(find.text('SALAH & PRAYER QUALITY'), findsOneWidget);
     expect(find.text('QUR’AN ENGAGEMENT'), findsNothing);
-    expect(find.textContaining('Qur’an ›'), findsOneWidget);
-    expect(find.byKey(const Key('checkin-domain-prev')), findsNothing);
+    expect(find.textContaining('Qur’an ›'), findsNothing);
+    expect(find.byKey(const Key('checkin-domain-prev')), findsOneWidget);
+    expect(find.byKey(const Key('checkin-domain-next')), findsOneWidget);
+    expect(
+      tester
+          .widget<IconButton>(find.byKey(const Key('checkin-domain-prev')))
+          .onPressed,
+      isNull,
+    );
     expect(find.text(Copy.personalMixAlsoRecorded), findsNothing);
 
     await tester.tap(find.byKey(const Key('checkin-domain-next')));
     await tester.pumpAndSettle();
     expect(find.text('QUR’AN ENGAGEMENT'), findsOneWidget);
     expect(find.text('SALAH & PRAYER QUALITY'), findsNothing);
-    expect(find.textContaining('‹ Salah'), findsOneWidget);
+    expect(find.textContaining('‹ Salah'), findsNothing);
 
     await showCheckInDomain(tester, MonitorDomain.charity);
     expect(find.text('CHARITY'), findsOneWidget);
-    expect(find.byKey(const Key('checkin-domain-next')), findsNothing);
+    expect(
+      tester
+          .widget<IconButton>(find.byKey(const Key('checkin-domain-next')))
+          .onPressed,
+      isNull,
+    );
     expect(find.textContaining('Score'), findsNothing);
     expect(
       find.bySemanticsLabel(Copy.checkInDomainPillsNote),

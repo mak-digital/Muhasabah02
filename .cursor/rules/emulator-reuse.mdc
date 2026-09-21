@@ -1,0 +1,15 @@
+---
+description: Reuse an already running emulator; prefer Medium Phone; close any emulator this session started
+alwaysApply: true
+---
+
+# Android emulator reuse
+
+When device or emulator testing is needed:
+
+1. List running emulators/devices first (`adb devices`, Flutter device list, or equivalent).
+2. If any emulator is already open, **use that instance**. Do not launch a second emulator.
+3. Preferred AVD name: **Medium Phone**. Use it when it is already running.
+4. If Medium Phone is not running and no other emulator is open, start **Medium Phone** only.
+5. If this session started the emulator, **close it when testing is finished**. Do not leave a newly launched emulator running.
+6. If the emulator was already running before this session, leave it running (do not close the user's session).

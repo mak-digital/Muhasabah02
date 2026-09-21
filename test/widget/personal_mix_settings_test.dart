@@ -89,7 +89,7 @@ void main() {
     await tester.tap(find.text(Copy.homeCheckIn));
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('checkin-domain-next')), findsOneWidget);
-    expect(find.textContaining('Qur’an ›'), findsOneWidget);
+    expect(find.textContaining('Qur’an ›'), findsNothing);
     expect(find.text(Copy.personalMixAlsoRecorded), findsNothing);
     expect(find.textContaining('Score'), findsNothing);
   });

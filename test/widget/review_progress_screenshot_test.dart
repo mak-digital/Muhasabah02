@@ -63,8 +63,8 @@ void main() {
     for (var i = 0; i < 20; i++) {
       await tester.pump(const Duration(milliseconds: 40));
     }
-    expect(find.text('Faj'), findsOneWidget);
-    expect(find.text('Post-fard Salah Adhkar'), findsWidgets);
+    expect(find.text('Fajr'), findsOneWidget);
+    expect(find.text('POST-FARD SALAH ADHKAR'), findsOneWidget);
     await _savePng(tester, 'impl-18-dhikr-progress.png');
   });
 }

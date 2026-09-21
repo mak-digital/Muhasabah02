@@ -16,7 +16,7 @@ Widget tests cover navigation, check-in persistence, History without scores, Rev
 
 Current suite size: 92 tests.
 
-First install can seed ~120 days of sample DailyCheckIn records (and sample responses) through the production repository. Settings can recreate, remove, or restore sample data without deleting personal records. After ~21 consecutive personal days, Home may offer to archive sample records; deletion is never automatic.
+The first-look door asks once whether to start blank or seed ~120 days of sample DailyCheckIn records (and sample responses). Settings can recreate, remove, or restore sample data without deleting personal records. After ~21 consecutive personal days, Home may offer to archive sample records; deletion is never automatic.
 
 
 Emulator verification is performed on a connected Android virtual device when available.

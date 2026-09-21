@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Proposal — Salah activities and optional colour legend</title>
+  <style>
+    :root {
+      --bg: #f4f1ea;
+      --ink: #1d2a2c;
+      --muted: #4d5c63;
+      --line: #c5d0d4;
+      --keep: #2f6f73;
+      --drop: #8a4a4a;
+      --salah: #d7eceb;
+      --summary: #eef2f4;
+      --c1: #1565C0;
+      --c2: #2E7D32;
+      --c3: #66BB6A;
+      --c4: #C0CA33;
+      --c5: #C0CA33;
+      --c6: #FBC02D;
+      --c7: #F57C00;
+      --c8: #D32F2F;
+      --c9: #BDBDBD;
+      --c10: #616161;
+      --mark: #2f6f73;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      margin: 0;
+      padding: 24px;
+    }
+    h1 { font-size: 22px; font-weight: 700; margin: 0 0 8px; }
+    h2 { font-size: 16px; margin: 28px 0 10px; }
+    .note { max-width: 1100px; color: var(--muted); line-height: 1.55; font-size: 14px; }
+    .rules {
+      max-width: 1100px;
+      margin: 16px 0;
+      padding: 12px 14px;
+      background: #fff;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+    .rules .no { color: var(--drop); }
+    .rules .yes { color: var(--keep); }
+    table {
+      width: min(1100px, 100%);
+      border-collapse: collapse;
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      font-size: 13px;
+    }
+    th, td {
+      text-align: left;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+    }
+    th { font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+    .pair { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; }
+    .col { width: min(390px, 100%); }
+    .col h3 {
+      margin: 0 0 8px;
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .phone {
+      width: 100%;
+      background: #fff;
+      border-radius: 28px;
+      box-shadow: 0 12px 40px rgba(0,0,0,.12);
+      overflow: hidden;
+    }
+    .appbar { padding: 14px 16px 8px; font-size: 16px; font-weight: 600; }
+    .hint { padding: 0 16px 10px; font-size: 12px; color: var(--muted); line-height: 1.4; }
+    .body { padding: 0 16px 16px; }
+    .card { border-radius: 16px; padding: 12px; margin-bottom: 8px; }
+    .c-salah { background: var(--salah); }
+    .c-sum { background: var(--summary); }
+    .row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(0,0,0,.06);
+      font-size: 13px;
+    }
+    .row:last-child { border-bottom: 0; }
+    .dot {
+      width: 14px;
+      height: 14px;
+      flex: 0 0 14px;
+      border-radius: 50%;
+    }
+    .dot.outline {
+      background: transparent;
+      box-shadow: inset 0 0 0 2px var(--mark);
+    }
+    .dot.shared { background: var(--mark); }
+    .dot.missed {
+      background: transparent;
+      box-shadow: inset 0 0 0 2px var(--mark);
+      position: relative;
+    }
+    .dot.missed::after {
+      content: "";
+      position: absolute;
+      left: 2px; right: 2px; top: 6px;
+      height: 2px;
+      background: var(--mark);
+      transform: rotate(-45deg);
+    }
+    .dot.empty {
+      background: transparent;
+      box-shadow: inset 0 0 0 1.5px #9aa7ab;
+    }
+    .seg {
+      display: flex;
+      background: #e8ecee;
+      border-radius: 10px;
+      padding: 3px;
+      margin: 8px 0 12px;
+      font-size: 12px;
+    }
+    .seg span {
+      flex: 1;
+      text-align: center;
+      padding: 7px 6px;
+      border-radius: 8px;
+      color: var(--muted);
+    }
+    .seg .on { background: #fff; color: var(--ink); font-weight: 600; }
+    .menu {
+      margin: 6px 0 0 20px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .opt {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      font-size: 13px;
+      border-bottom: 1px solid #edf1f2;
+    }
+    .opt:last-child { border-bottom: 0; }
+    .week {
+      display: grid;
+      grid-template-columns: 52px repeat(7, 1fr);
+      gap: 4px;
+      font-size: 10px;
+      text-align: center;
+      color: var(--muted);
+    }
+    .week .m { display: flex; justify-content: center; padding: 2px 0; }
+    .muted { color: var(--muted); font-size: 12px; line-height: 1.45; }
+    .tile { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #edf1f2; font-size: 14px; }
+    .tile small { display: block; color: var(--muted); font-size: 11px; font-weight: 400; }
+  </style>
+</head>
+<body>
+  <h1>Salah activities — list, optional colour legend</h1>
+  <p class="note">
+    Mock only. Current Home / Progress mark colour stays the default.
+    Optional activity colours live under Settings → Application → Activities.
+    Colour names a recorded choice. It is not a grade.
+  </p>
+
+  <div class="rules">
+    <strong>Assessment</strong>
+    <ul>
+      <li class="yes"><strong>Keep the list.</strong> Nine of the ten labels are already the Salah check-in catalog. Add <em>Excused</em> after Prayed alone on time. Keep Other last.</li>
+      <li class="yes"><strong>Optional colour legend is possible</strong> without rewriting saved days. Check-in already stores the activity id. Home and Progress today collapse those ids to on time / late / missed / unanswered and paint every mark in the shared Salah colour.</li>
+      <li class="yes"><strong>Default stays as now.</strong> Shared mark colour, filled / outline / missed / unanswered. Domain wash still names the card, not the activity.</li>
+      <li class="yes"><strong>Settings → Application → Activities</strong> is the right home for the option. Same section as appearance and Domains. Not a Home control. Not a score.</li>
+      <li class="no"><strong>Do not ship the ranking captions.</strong> “Excellent”, “Urgent Attention”, “Highest priority for corrective action”, “Preserve and maintain” prescribe and rank. Muhasabah may describe what was recorded. It does not tell the person what to do next.</li>
+      <li class="no"><strong>Do not treat colour as a spiritual scale.</strong> Blue is not better than amber. Optional colours only help tell congregation-on-time from prayed-late at a glance.</li>
+      <li>Small congregation keeps light green <strong>#66BB6A</strong> and the same round mark as every other Salah choice.</li>
+      <li>Excused must never become missed. Other should not keep mapping to late. Both stay recorded observations.</li>
+    </ul>
+  </div>
+
+  <h2>Proposed Salah list</h2>
+  <table>
+    <thead>
+      <tr>
+        <th></th>
+        <th>Label</th>
+        <th>Today</th>
+        <th>Stored coarse state</th>
+        <th>Optional colour</th>
+        <th>Attached caption — drop</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="dot" style="background:var(--c1);display:inline-block"></span></td>
+        <td>Prayed on time in congregation</td>
+        <td>Already in catalog</td>
+        <td>On time</td>
+        <td>#1565C0</td>
+        <td class="no">Excellent / preserve</td>
+      </tr>
+      <tr>
+        <td><span class="dot" style="background:var(--c2);display:inline-block"></span></td>
+        <td>Joined congregation late</td>
+        <td>Already in catalog</td>
+        <td>Late</td>
+        <td>#2E7D32</td>
+        <td class="no">Very good / arrive earlier</td>
+      </tr>
+      <tr>
+        <td><span class="dot" style="background:var(--c3);display:inline-block"></span></td>
+        <td>Prayed in small congregation</td>
+        <td>Already in catalog</td>
+        <td>On time</td>
+        <td>#66BB6A</td>
+        <td class="no">Good / keep striving</td>
+      </tr>
+      <tr>
+        <td><span class="dot" style="background:var(--c4);display:inline-block"></span></td>
+        <td>Prayed alone on time</td>
+        <td>Already in catalog</td>
+        <td>On time</td>
+        <td>#C0CA33</td>
+        <td class="no">Complete / successful</td>
+      </tr>
+      <tr>
+        <td><span class="dot" style="background:var(--c5);display:inline-block"></span></td>
+        <td>Excused</td>
+        <td><strong>Add</strong></td>
+        <td>Recorded, not missed</td>
+        <td>#C0CA33</td>
+        <td class="no">No remedial action needed</td>
+      </tr>
+      <tr>
+        <td><span class="dot" style="background:var(--c6);display:inline-block"></span></td>
+        <td>Prayed late</td>
+        <td>Already in catalog</td>
+        <td>Late</td>
+        <td>#FBC02D</td>
+        <td class="no">Needs attention</td>
+      </tr>
+      <tr>
+        <td><span class="dot" style="background:var(--c7);display:inline-block"></span></td>
+        <td>Missed then made up later</td>
+        <td>Already in catalog</td>
+        <td>Missed</td>
+        <td>#F57C00</td>
+        <td class="no">Significant improvement needed</td>
+      </tr>
+      <tr>
+        <td><span class="dot" style="background:var(--c8);display:inline-block"></span></td>
+        <td>Missed</td>
+        <td>Already in catalog</td>
+        <td>Missed</td>
+        <td>#D32F2F</td>
+        <td class="no">Urgent / corrective action</td>
+      </tr>
+      <tr>
+        <td><span class="dot" style="background:var(--c9);display:inline-block"></span></td>
+        <td>No answer recorded</td>
+        <td>Already in catalog</td>
+        <td>Unanswered</td>
+        <td>#BDBDBD</td>
+        <td>No data — factual; keep without “No Data” as a grade</td>
+      </tr>
+      <tr>
+        <td><span class="dot" style="background:var(--c10);display:inline-block"></span></td>
+        <td>Other</td>
+        <td>Already in catalog · today maps to late</td>
+        <td>Recorded other · stop mapping to late</td>
+        <td>#616161</td>
+        <td>Undefined — drop; Other is user-authored</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Settings → Application → Activities</h2>
+  <div class="pair">
+    <div class="col">
+      <h3>1 · Application list (proposed row)</h3>
+      <div class="phone">
+        <div class="appbar">← Settings</div>
+        <div class="hint">Application</div>
+        <div class="body">
+          <div class="card c-sum">
+            <div class="tile">Appearance<small>System</small></div>
+            <div class="tile">Text size<small>Does not rewrite records</small></div>
+            <div class="tile">First day of week<small>Monday</small></div>
+            <div class="tile">Calendar<small>Gregorian</small></div>
+            <div class="tile">Domains<small>Salah, Qur’an &amp; Akhlaq</small></div>
+            <div class="tile"><strong>Activities</strong><small>Salah list · shared mark colour</small></div>
+            <div class="tile">Baselines<small>Not a score</small></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <h3>2 · Default — shared colour (current)</h3>
+      <div class="phone">
+        <div class="appbar">← Activities</div>
+        <div class="hint">Salah check-in list. Colour is optional. Not a score.</div>
+        <div class="body">
+          <div class="muted">Salah mark colour</div>
+          <div class="seg">
+            <span class="on">Shared (current)</span>
+            <span>Activity colours</span>
+          </div>
+          <div class="card c-salah">
+            <div class="row"><span class="dot shared"></span> On time</div>
+            <div class="row"><span class="dot outline"></span> Late</div>
+            <div class="row"><span class="dot missed"></span> Missed</div>
+            <div class="row"><span class="dot empty"></span> Unanswered</div>
+          </div>
+          <p class="muted">Home, Progress, and Guide keep this encoding. Activity labels still appear in the check-in dropdown.</p>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <h3>3 · Optional — activity colours</h3>
+      <div class="phone">
+        <div class="appbar">← Activities</div>
+        <div class="hint">Describes the recorded choice. Does not rank it.</div>
+        <div class="body">
+          <div class="muted">Salah mark colour</div>
+          <div class="seg">
+            <span>Shared (current)</span>
+            <span class="on">Activity colours</span>
+          </div>
+          <div class="card c-sum">
+            <div class="row"><span class="dot" style="background:var(--c1)"></span> Prayed on time in congregation</div>
+            <div class="row"><span class="dot" style="background:var(--c2)"></span> Joined congregation late</div>
+            <div class="row"><span class="dot" style="background:var(--c3)"></span> Prayed in small congregation</div>
+            <div class="row"><span class="dot" style="background:var(--c4)"></span> Prayed alone on time</div>
+            <div class="row"><span class="dot" style="background:var(--c5)"></span> Excused</div>
+            <div class="row"><span class="dot" style="background:var(--c6)"></span> Prayed late</div>
+            <div class="row"><span class="dot" style="background:var(--c7)"></span> Missed then made up later</div>
+            <div class="row"><span class="dot" style="background:var(--c8)"></span> Missed</div>
+            <div class="row"><span class="dot" style="background:var(--c9)"></span> No answer recorded</div>
+            <div class="row"><span class="dot" style="background:var(--c10)"></span> Other</div>
+          </div>
+          <p class="muted">Guide would show this legend when the option is on. Qur’an and other domains keep shared mark colour.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Check-in dropdown and Home week</h2>
+  <div class="pair">
+    <div class="col">
+      <h3>Check-in · shared colour (default)</h3>
+      <div class="phone">
+        <div class="appbar">← Check-in · 3 Sep</div>
+        <div class="body">
+          <div class="card c-salah">
+            <div style="font-size:11px;letter-spacing:.06em;font-weight:700;margin-bottom:8px">SALAH &amp; PRAYER QUALITY</div>
+            <div class="row" style="font-weight:700">Fajr</div>
+            <div class="menu">
+              <div class="opt">Prayed on time in congregation</div>
+              <div class="opt">Joined congregation late</div>
+              <div class="opt">Prayed in small congregation</div>
+              <div class="opt">Prayed alone on time</div>
+              <div class="opt"><strong>Excused</strong></div>
+              <div class="opt">Prayed late</div>
+              <div class="opt">Missed then made up later</div>
+              <div class="opt">Missed</div>
+              <div class="opt">No answer recorded</div>
+              <div class="opt">Other</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <h3>Check-in · activity colours (optional)</h3>
+      <div class="phone">
+        <div class="appbar">← Check-in · 3 Sep</div>
+        <div class="body">
+          <div class="card c-salah">
+            <div style="font-size:11px;letter-spacing:.06em;font-weight:700;margin-bottom:8px">SALAH &amp; PRAYER QUALITY</div>
+            <div class="row" style="font-weight:700">Fajr</div>
+            <div class="menu">
+              <div class="opt"><span class="dot" style="background:var(--c1)"></span> Prayed on time in congregation</div>
+              <div class="opt"><span class="dot" style="background:var(--c2)"></span> Joined congregation late</div>
+              <div class="opt"><span class="dot" style="background:var(--c3)"></span> Prayed in small congregation</div>
+              <div class="opt"><span class="dot" style="background:var(--c4)"></span> Prayed alone on time</div>
+              <div class="opt"><span class="dot" style="background:var(--c5)"></span> Excused</div>
+              <div class="opt"><span class="dot" style="background:var(--c6)"></span> Prayed late</div>
+              <div class="opt"><span class="dot" style="background:var(--c7)"></span> Missed then made up later</div>
+              <div class="opt"><span class="dot" style="background:var(--c8)"></span> Missed</div>
+              <div class="opt"><span class="dot" style="background:var(--c9)"></span> No answer recorded</div>
+              <div class="opt"><span class="dot" style="background:var(--c10)"></span> Other</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <h3>Home week · default vs optional</h3>
+      <div class="phone">
+        <div class="appbar">Muhasabah</div>
+        <div class="hint">Same records. Left encoding is current. Right encoding is the optional legend.</div>
+        <div class="body">
+          <div class="card c-salah">
+            <div class="muted" style="margin-bottom:6px">Shared colour (current)</div>
+            <div class="week">
+              <div></div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div><div>S</div>
+              <div>Fajr</div>
+              <div class="m"><span class="dot shared"></span></div>
+              <div class="m"><span class="dot outline"></span></div>
+              <div class="m"><span class="dot missed"></span></div>
+              <div class="m"><span class="dot empty"></span></div>
+              <div class="m"><span class="dot shared"></span></div>
+              <div class="m"><span class="dot shared"></span></div>
+              <div class="m"><span class="dot empty"></span></div>
+            </div>
+          </div>
+          <div class="card c-salah">
+            <div class="muted" style="margin-bottom:6px">Activity colours (optional)</div>
+            <div class="week">
+              <div></div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div><div>S</div>
+              <div>Fajr</div>
+              <div class="m"><span class="dot" style="background:var(--c1)"></span></div>
+              <div class="m"><span class="dot" style="background:var(--c6)"></span></div>
+              <div class="m"><span class="dot" style="background:var(--c8)"></span></div>
+              <div class="m"><span class="dot" style="background:var(--c9)"></span></div>
+              <div class="m"><span class="dot" style="background:var(--c3)"></span></div>
+              <div class="m"><span class="dot" style="background:var(--c4)"></span></div>
+              <div class="m"><span class="dot" style="background:var(--c9)"></span></div>
+            </div>
+          </div>
+          <p class="muted">Salah card wash stays teal. Optional colour is the mark only. Missing is still not missed.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>If this is approved</h2>
+  <div class="rules">
+    <ol>
+      <li>Add <em>Excused</em> to the Salah catalog. Stop mapping Other to late.</li>
+      <li>Keep default display: shared mark colour and current Guide.</li>
+      <li>Add Settings → Application → Activities with Shared / Activity colours for Salah only.</li>
+      <li>When Activity colours is on, paint marks and dropdown swatches from the activity id. Do not add ranking copy to Guide or FAQ.</li>
+      <li>Do not bump <code>recordableFieldCount</code>. Do not rewrite stored days.</li>
+    </ol>
+  </div>
+</body>
+</html>

@@ -20,6 +20,45 @@ void main() {
     );
   });
 
+  test('first season mix is a short slice of the six-domain first look', () {
+    final mix = mixForKind(PersonalMixKind.firstLook);
+    expect(encodePersonalMix(mix), 'firstLook');
+    expect(decodePersonalMix('firstLook').keys, kFirstLookMixKeys);
+    expect(kFirstLookMixKeys, {
+      'salah.fajr',
+      'salah.dhuhr',
+      'salah.asr',
+      'salah.maghrib',
+      'salah.isha',
+      'quran.reading',
+      'quran.meaning',
+      'quran.reflection',
+      'quran.consciousApplication',
+      'hadith.livedSunnah',
+      'akhlaq.patience',
+      'akhlaq.truthfulness',
+      'huquq.parents',
+      'charity.voluntary',
+      kZakatMixKey,
+    });
+    expect(homeMixDomains(kBasicAkhlaqVisibleDomains, mix), [
+      MonitorDomain.salah,
+      MonitorDomain.quran,
+      MonitorDomain.hadith,
+      MonitorDomain.akhlaq,
+      MonitorDomain.huquq,
+      MonitorDomain.charity,
+    ]);
+    expect(
+      mixUsesCompactHomeWeek(
+        MonitorDomain.salah,
+        mix,
+        kBasicAkhlaqVisibleDomains,
+      ),
+      isFalse,
+    );
+  });
+
   test('unset mix follows visible domains and is not a score', () {
     expect(decodePersonalMix(null), PersonalMix.sameAsDomains);
     expect(
@@ -35,7 +74,15 @@ void main() {
         PersonalMix.sameAsDomains,
         allVisible(),
       ),
-      isTrue,
+      isFalse,
+    );
+    expect(
+      mixUsesCompactHomeWeek(
+        MonitorDomain.time,
+        PersonalMix.sameAsDomains,
+        allVisible(),
+      ),
+      isFalse,
     );
   });
 

@@ -21,12 +21,15 @@ Set<MonitorDomain> allVisibleDomains() =>
 Widget testApp({
   MemoryCheckInRepository? checkIns,
   MemoryResponseRepository? responses,
+  MemoryAppPrefs? prefs,
   DateTime? now,
   FirstDayOfWeekPref firstDayOfWeek = FirstDayOfWeekPref.monday,
   DisplayCalendar displayCalendar = DisplayCalendar.gregorian,
   Set<MonitorDomain>? visibleDomains,
   PersonalMix? personalMix,
+  bool applicationReflectionAcknowledged = true,
   bool appLockEnabled = false,
+  bool salahActivityColours = false,
   DeviceUnlock? deviceUnlock,
 }) {
   return ProviderScope(
@@ -41,14 +44,17 @@ Widget testApp({
         deviceUnlock ?? FakeDeviceUnlock(),
       ),
       appPrefsProvider.overrideWithValue(
-        MemoryAppPrefs(
-          applicationReflectionAcknowledged: true,
-          firstDayOfWeek: firstDayOfWeek,
-          displayCalendar: displayCalendar,
-          visibleDomains: visibleDomains,
-          personalMix: personalMix,
-          appLockEnabled: appLockEnabled,
-        ),
+        prefs ??
+            MemoryAppPrefs(
+              applicationReflectionAcknowledged:
+                  applicationReflectionAcknowledged,
+              firstDayOfWeek: firstDayOfWeek,
+              displayCalendar: displayCalendar,
+              visibleDomains: visibleDomains,
+              personalMix: personalMix,
+              appLockEnabled: appLockEnabled,
+              salahActivityColours: salahActivityColours,
+            ),
       ),
       if (now != null) nowProvider.overrideWithValue(now),
     ],

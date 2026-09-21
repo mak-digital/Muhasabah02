@@ -4,7 +4,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:muhasabah02/application/providers.dart';
 import 'package:muhasabah02/data/app_prefs.dart';
 import 'package:muhasabah02/data/memory_repositories.dart';
+import 'package:muhasabah02/domain/home_traces.dart';
 import 'package:muhasabah02/domain/monitor_domain.dart';
+import 'package:muhasabah02/domain/quran.dart';
 import 'package:muhasabah02/presentation/checkin/check_in_screen.dart';
 import 'package:muhasabah02/presentation/shared/activity_picker.dart';
 
@@ -145,7 +147,7 @@ void main() {
       await chooseCheckInOption(
         tester,
         dropdownKey: Key('trace-$storageKey'),
-        optionLabel: 'Recorded engagement',
+        optionLabel: traceOutcomeLabel(storageKey, TernaryOutcome.positive),
       );
       await tester.tap(find.byKey(Key('trace-$storageKey-helping')));
       await tester.pumpAndSettle();
@@ -165,7 +167,10 @@ void main() {
     await chooseCheckInOption(
       tester,
       dropdownKey: const Key('trace-charity.community'),
-      optionLabel: 'Recorded as not done',
+      optionLabel: traceOutcomeLabel(
+        'charity.community',
+        TernaryOutcome.negative,
+      ),
     );
     await tester.tap(
       find.byKey(const Key('trace-charity.community-distracting')),

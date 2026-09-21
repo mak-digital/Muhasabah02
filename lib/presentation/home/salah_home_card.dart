@@ -7,6 +7,7 @@ import '../../application/providers.dart';
 import '../../domain/copy.dart';
 import '../../domain/daily_check_in.dart';
 import '../../domain/date_key.dart';
+import '../../domain/display_calendar.dart';
 import '../../domain/first_day_of_week.dart';
 import '../../domain/monitor_domain.dart';
 import '../../domain/prayer.dart';
@@ -14,6 +15,7 @@ import '../../domain/quran.dart';
 import '../../domain/salah_extras.dart';
 import '../../domain/weekly_calendar.dart';
 import '../checkin/check_in_screen.dart';
+import '../shared/salah_activity_mark.dart';
 import '../shared/state_marker.dart';
 
 class SalahHomeCard extends ConsumerStatefulWidget {
@@ -145,21 +147,39 @@ class _SalahHomeCardState extends ConsumerState<SalahHomeCard> {
                   if (!widget.compactWeek) const SizedBox(width: 58),
                   for (var col = 0; col < kCalendarWeekdayCount; col++)
                     Expanded(
-                      child: Text(
-                        localizations.narrowWeekdays[(firstDay + col) % 7],
-                        key: Key('salah-home-weekday-$col'),
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color:
-                              dartWeekdayForRow(
-                                    col,
-                                    firstDayOfWeekIndex: firstDay,
-                                  ) ==
-                                  DateTime.friday
-                              ? MuhasabahColors.salahFamily
-                              : Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
+                      child: Column(
+                        children: [
+                          Text(
+                            localizations.narrowWeekdays[(firstDay + col) % 7],
+                            key: Key('salah-home-weekday-$col'),
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context).textTheme.labelSmall
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color:
+                                      dartWeekdayForRow(
+                                            col,
+                                            firstDayOfWeekIndex: firstDay,
+                                          ) ==
+                                          DateTime.friday
+                                      ? MuhasabahColors.salahFamily
+                                      : Theme.of(
+                                          context,
+                                        ).colorScheme.onSurfaceVariant,
+                                ),
+                          ),
+                          Text(
+                            '${displayParts(parseDateKey(keys[col]), calendar).day}',
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context).textTheme.labelSmall
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                                ),
+                          ),
+                        ],
                       ),
                     ),
                 ],
@@ -356,6 +376,7 @@ class _SalahHomeCardState extends ConsumerState<SalahHomeCard> {
   }
 
   Widget _marker(SalahTraceRow row, String key, DailyCheckIn? record) {
+    final colours = ref.watch(appPrefsProvider).salahActivityColours;
     final friday = isFridayDateKey(key);
     final showStar =
         row == SalahTraceRow.dhuhr &&
@@ -375,17 +396,19 @@ class _SalahHomeCardState extends ConsumerState<SalahHomeCard> {
       color = MuhasabahColors.mark;
       stateLabel = voluntarySalahLabel(outcome);
     } else {
-      final status = row == SalahTraceRow.jumuah
-          ? (record?.jumuah ?? PrayerStatus.unanswered)
-          : (record?.prayer(row.prayerId!) ?? PrayerStatus.unanswered);
-      kind = switch (status) {
-        PrayerStatus.onTime => MarkerKind.filled,
-        PrayerStatus.late => MarkerKind.outlined,
-        PrayerStatus.missed => MarkerKind.missed,
-        PrayerStatus.unanswered => MarkerKind.unanswered,
-      };
-      color = MuhasabahColors.mark;
-      stateLabel = status.label;
+      final mark = row == SalahTraceRow.jumuah
+          ? SalahActivityMark.forJumuah(
+              record: record,
+              activityColours: colours,
+            )
+          : SalahActivityMark.forPrayer(
+              record: record,
+              prayer: row.prayerId!,
+              activityColours: colours,
+            );
+      kind = mark.kind;
+      color = mark.color;
+      stateLabel = mark.label;
     }
     return RecordedStateMarker(
       key: Key('salah-home-${row.id}-$key'),
