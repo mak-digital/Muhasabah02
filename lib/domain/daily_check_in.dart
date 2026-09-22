@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'activities.dart';
 import 'home_traces.dart';
 import 'other_domains.dart';
@@ -656,4 +658,64 @@ class DailyCheckIn {
     }
     return map;
   }
+}
+
+/// Observation content equality, ignoring [DailyCheckIn.savedAt].
+bool sameCheckInContent(DailyCheckIn a, DailyCheckIn b) {
+  final left = Map<String, dynamic>.from(a.toJson())..remove('savedAt');
+  final right = Map<String, dynamic>.from(b.toJson())..remove('savedAt');
+  return jsonEncode(left) == jsonEncode(right);
+}
+
+/// Overlay fields the user already changed onto a stored baseline.
+///
+/// Unchanged empty-draft fields keep the stored values so a late hydrate
+/// cannot wipe unrelated observations or text.
+DailyCheckIn overlayCheckInUserEdits({
+  required DailyCheckIn baseline,
+  required DailyCheckIn userPending,
+  required DailyCheckIn empty,
+}) {
+  final merged = _overlayChangedJson(
+    _asStringKeyedMap(baseline.toJson()),
+    _asStringKeyedMap(userPending.toJson())..remove('savedAt'),
+    _asStringKeyedMap(empty.toJson())..remove('savedAt'),
+  );
+  return DailyCheckIn.fromJson(merged);
+}
+
+Map<String, dynamic> _asStringKeyedMap(Map<String, dynamic> json) {
+  return json.map((key, value) => MapEntry(key, value));
+}
+
+bool _jsonEqual(Object? a, Object? b) => jsonEncode(a) == jsonEncode(b);
+
+Map<String, dynamic> _overlayChangedJson(
+  Map<String, dynamic> baseline,
+  Map<String, dynamic> user,
+  Map<String, dynamic> empty,
+) {
+  final result = Map<String, dynamic>.from(baseline);
+  for (final key in user.keys) {
+    final userVal = user[key];
+    final emptyVal = empty[key];
+    if (_jsonEqual(userVal, emptyVal)) continue;
+    final baseVal = result[key];
+    if (userVal is Map && emptyVal is Map && baseVal is Map) {
+      result[key] = _overlayChangedJson(
+        Map<String, dynamic>.from(
+          baseVal.map((k, v) => MapEntry('$k', v)),
+        ),
+        Map<String, dynamic>.from(
+          userVal.map((k, v) => MapEntry('$k', v)),
+        ),
+        Map<String, dynamic>.from(
+          emptyVal.map((k, v) => MapEntry('$k', v)),
+        ),
+      );
+    } else {
+      result[key] = userVal;
+    }
+  }
+  return result;
 }

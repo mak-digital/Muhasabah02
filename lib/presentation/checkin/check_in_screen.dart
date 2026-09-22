@@ -104,8 +104,12 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
   final Map<String, TextEditingController> _custom = {};
   var _loaded = false;
   var _editing = true;
+  var _saving = false;
+  var _confirmOpen = false;
+  var _allowPop = false;
   String? _error;
   late final String _openedDateKey;
+  DailyCheckIn? _original;
 
   String get _key => _openedDateKey;
 
@@ -142,15 +146,27 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
       if (record.dateKey == _key) existing = record;
     }
     if (!mounted) return;
+    final snapshot = existing ?? DailyCheckIn.empty(_openedDateKey);
+    final empty = DailyCheckIn.empty(_openedDateKey);
+    final pending = _pendingRecord();
+    final userStarted = !sameCheckInContent(pending, empty);
     setState(() {
+      _original = snapshot;
       _loaded = true;
       _editing = !_startsLocked;
       if (existing != null) {
-        _draft = existing;
-        _gratitude.text = existing.gratitudeText ?? '';
-        _reflection.text = existing.personalReflectionText ?? '';
-        _situationCustom.text = existing.situationNotes.customText ?? '';
-        _akhlaqStruggle.text = existing.akhlaqStruggleNote ?? '';
+        final merged = userStarted
+            ? overlayCheckInUserEdits(
+                baseline: existing,
+                userPending: pending,
+                empty: empty,
+              )
+            : existing;
+        _draft = merged;
+        _gratitude.text = merged.gratitudeText ?? '';
+        _reflection.text = merged.personalReflectionText ?? '';
+        _situationCustom.text = merged.situationNotes.customText ?? '';
+        _akhlaqStruggle.text = merged.akhlaqStruggleNote ?? '';
       }
     });
   }
@@ -186,61 +202,73 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
       _key,
       ref.read(appPrefsProvider).displayCalendar,
     );
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          _appBarTitle(shown),
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
+    return PopScope(
+      canPop: _allowPop || (!_saving && !_isDirty),
+      onPopInvokedWithResult: _onPopInvoked,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            _appBarTitle(shown),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          actions: [
+            if (_startsLocked && !_editing)
+              TextButton(
+                onPressed: () => setState(() => _editing = true),
+                child: const Text(Copy.edit),
+              ),
+          ],
         ),
-        actions: [
-          if (_startsLocked && !_editing)
-            TextButton(
-              onPressed: () => setState(() => _editing = true),
-              child: const Text(Copy.edit),
-            ),
-        ],
-      ),
-      body: widget.focus == CheckInFocus.full
-          ? IgnorePointer(ignoring: !_editing, child: _fullCheckInStage(shown))
-          : ListView(
-              primary: true,
-              physics: const AlwaysScrollableScrollPhysics(),
-              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-              children: [
-                IgnorePointer(
-                  ignoring: !_editing,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      ..._checkInIntro(shown),
-                      ..._focusBody(),
-                      if (_error != null) ...[
-                        const SizedBox(height: 12),
-                        Text(
-                          _error!,
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.error,
+        body: widget.focus == CheckInFocus.full
+            ? IgnorePointer(
+                ignoring: !_editing,
+                child: _fullCheckInStage(shown),
+              )
+            : ListView(
+                primary: true,
+                physics: const AlwaysScrollableScrollPhysics(),
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                children: [
+                  IgnorePointer(
+                    ignoring: !_editing,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        ..._checkInIntro(shown),
+                        ..._focusBody(),
+                        if (_error != null) ...[
+                          const SizedBox(height: 12),
+                          Text(
+                            _error!,
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.error,
+                            ),
                           ),
-                        ),
+                        ],
                       ],
-                    ],
+                    ),
                   ),
-                ),
-              ],
-            ),
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-          child: FilledButton(
-            onPressed: _editing ? _save : () => setState(() => _editing = true),
-            child: Text(
-              !_editing
-                  ? Copy.edit
-                  : widget.focus == CheckInFocus.full
-                  ? 'Save check-in'
-                  : 'Save',
+                ],
+              ),
+        bottomNavigationBar: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+            child: FilledButton(
+              onPressed: !_editing
+                  ? () => setState(() => _editing = true)
+                  : (_saving || !_loaded)
+                  ? null
+                  : _save,
+              child: Text(
+                !_editing
+                    ? Copy.edit
+                    : widget.focus == CheckInFocus.full
+                    ? 'Save check-in'
+                    : 'Save',
+              ),
             ),
           ),
         ),
@@ -1564,6 +1592,31 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
   }
 
   Future<void> _save() async {
+    if (_saving || !_loaded) return;
+    final next = _pendingRecord();
+    if (next.dateKey != _openedDateKey) {
+      setState(() {
+        _error = 'The check-in could not be saved. Your draft is still here.';
+      });
+      return;
+    }
+    setState(() => _saving = true);
+    try {
+      await ref.read(checkInsProvider.notifier).save(next);
+      logAppEvent('checkin_saved');
+      if (!mounted) return;
+      _allowPop = true;
+      Navigator.of(context).pop();
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _saving = false;
+        _error = 'The check-in could not be saved. Your draft is still here.';
+      });
+    }
+  }
+
+  DailyCheckIn _pendingRecord() {
     var next = _draft;
     if (next.gratitudeStatus == EntryStatus.recorded) {
       next = next.copyWith(
@@ -1577,7 +1630,7 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
             : _reflection.text,
       );
     }
-    next = next.copyWith(
+    return next.copyWith(
       situationNotes: SituationNotes(
         ids: next.situationNotes.ids,
         customText: _situationCustom.text.trim().isEmpty
@@ -1589,20 +1642,65 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
           : _akhlaqStruggle.text.trim(),
       clearAkhlaqStruggleNote: _akhlaqStruggle.text.trim().isEmpty,
     );
-    if (next.dateKey != _openedDateKey) {
-      setState(() {
-        _error = 'The check-in could not be saved. Your draft is still here.';
-      });
-      return;
+  }
+
+  bool get _isDirty {
+    final pending = _pendingRecord();
+    if (!_loaded) {
+      return !sameCheckInContent(pending, DailyCheckIn.empty(_openedDateKey));
     }
-    try {
-      await ref.read(checkInsProvider.notifier).save(next);
-      logAppEvent('checkin_saved');
-      if (mounted) Navigator.of(context).pop();
-    } catch (_) {
-      setState(() {
-        _error = 'The check-in could not be saved. Your draft is still here.';
-      });
+    final original = _original ?? DailyCheckIn.empty(_openedDateKey);
+    return !sameCheckInContent(pending, original);
+  }
+
+  Future<void> _onPopInvoked(bool didPop, Object? result) async {
+    if (didPop) return;
+    if (_saving || _confirmOpen) return;
+    if (!_isDirty) return;
+    setState(() => _confirmOpen = true);
+    final calendar = ref.read(appPrefsProvider).displayCalendar;
+    final date = formatStoredDateKey(_openedDateKey, calendar);
+    final action = await showDialog<_UnsavedCheckInAction>(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) {
+        return AlertDialog(
+          key: const Key('unsaved-check-in-dialog'),
+          title: const Text(Copy.unsavedCheckInTitle),
+          content: Text(Copy.unsavedCheckInBody(date)),
+          actions: [
+            TextButton(
+              onPressed: () =>
+                  Navigator.pop(context, _UnsavedCheckInAction.discard),
+              child: const Text(Copy.unsavedCheckInDiscard),
+            ),
+            TextButton(
+              onPressed: () =>
+                  Navigator.pop(context, _UnsavedCheckInAction.continueEditing),
+              child: const Text(Copy.unsavedCheckInContinue),
+            ),
+            FilledButton(
+              onPressed: () =>
+                  Navigator.pop(context, _UnsavedCheckInAction.save),
+              child: const Text(Copy.unsavedCheckInSave),
+            ),
+          ],
+        );
+      },
+    );
+    if (!mounted) return;
+    setState(() => _confirmOpen = false);
+    switch (action) {
+      case _UnsavedCheckInAction.save:
+        await _save();
+      case _UnsavedCheckInAction.discard:
+        _allowPop = true;
+        Navigator.of(context).pop();
+      case _UnsavedCheckInAction.continueEditing:
+      case null:
+        break;
     }
   }
 }
+
+enum _UnsavedCheckInAction { save, continueEditing, discard }

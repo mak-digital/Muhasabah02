@@ -5,6 +5,7 @@ import 'package:muhasabah02/application/device_unlock.dart';
 import 'package:muhasabah02/application/providers.dart';
 import 'package:muhasabah02/data/app_prefs.dart';
 import 'package:muhasabah02/data/memory_repositories.dart';
+import 'package:muhasabah02/data/repositories.dart';
 import 'package:muhasabah02/domain/daily_check_in.dart';
 import 'package:muhasabah02/domain/display_calendar.dart';
 import 'package:muhasabah02/domain/first_day_of_week.dart';
@@ -20,6 +21,7 @@ Set<MonitorDomain> allVisibleDomains() =>
 
 Widget testApp({
   MemoryCheckInRepository? checkIns,
+  CheckInRepository? checkInRepository,
   MemoryResponseRepository? responses,
   MemoryAppPrefs? prefs,
   DateTime? now,
@@ -36,7 +38,7 @@ Widget testApp({
   return ProviderScope(
     overrides: [
       checkInRepositoryProvider.overrideWithValue(
-        checkIns ?? MemoryCheckInRepository(),
+        checkInRepository ?? checkIns ?? MemoryCheckInRepository(),
       ),
       responseRepositoryProvider.overrideWithValue(
         responses ?? MemoryResponseRepository(),

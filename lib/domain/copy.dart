@@ -36,6 +36,12 @@ class Copy {
       'This removes the app-managed record. It does not claim forensic erasure.';
   static const historyKeep = 'Keep';
   static const historyRemove = 'Remove';
+  static const unsavedCheckInTitle = 'Unsaved check-in';
+  static const unsavedCheckInSave = 'Save for this date';
+  static const unsavedCheckInContinue = 'Continue editing';
+  static const unsavedCheckInDiscard = 'Discard changes';
+  static String unsavedCheckInBody(String date) =>
+      'You have unsaved changes for $date. They have not been stored.';
   static const historyDayMenu = 'Edit or remove';
   static const historyFilterAll = 'All';
   static const historyEmptyFilter =
