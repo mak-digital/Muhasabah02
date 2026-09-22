@@ -56,6 +56,7 @@ Widget testApp({
               salahActivityColours: salahActivityColours,
             ),
       ),
+      if (now != null) nowClockProvider.overrideWithValue(() => now),
       if (now != null) nowProvider.overrideWithValue(now),
     ],
     child: const MuhasabahApp(),

@@ -6,6 +6,7 @@ import '../application/providers.dart';
 import '../domain/copy.dart';
 import '../presentation/home/home_screen.dart';
 import '../presentation/lock/app_lock_gate.dart';
+import '../presentation/shared/current_date_binder.dart';
 import '../presentation/shared/ui_bits.dart';
 import 'theme.dart';
 
@@ -40,7 +41,7 @@ class MuhasabahApp extends ConsumerWidget {
       theme: buildMuhasabahTheme(brightness: Brightness.light),
       darkTheme: buildMuhasabahTheme(brightness: Brightness.dark),
       themeMode: mode,
-      home: const AppLockGate(child: AppShell()),
+      home: const CurrentDateBinder(child: AppLockGate(child: AppShell())),
       onUnknownRoute: (settings) {
         return MaterialPageRoute<void>(
           settings: settings,
