@@ -222,6 +222,27 @@ class Copy {
   static const basicAkhlaqDomains = 'Salah, Qur’an & Akhlaq';
   static const basicAkhlaqDomainsNote =
       'Shows Salah & Prayer Quality, Qur’an Engagement, Hadith & Living Sunnah, Character & Morals (Akhlaq), Rights of Others (Huquq al-Ibad), and Charity. Knowledge & Beneficial Speech, Time & Barakah, Physical Health & Energy, Wealth & Stewardship, Ummah, Dhikr & Dua, Fasting, and Hajj stay hidden unless you add them.';
+  static const customSelectionSets = 'Custom selection sets';
+  static const customSelectionSetsNote =
+      'Save this screen’s domains and mix into Custom #1, #2 or #3. Activate a set to use it. Overlap is allowed. Saved days are not changed.';
+  static const customSlotActivate = 'Activate';
+  static const customSlotSave = 'Save current selection';
+  static const customSlotRename = 'Rename';
+  static const customSlotActive = 'Active';
+  static const customSlotModified = 'Modified';
+  static const customSlotSaved = 'Saved';
+  static const customSlotRenameTitle = 'Name this custom set';
+  static const customSlotRenameHint = 'Optional short name';
+  static const cancel = 'Cancel';
+  static const activateModifiedTitle = 'Replace current selection?';
+  static const activateModifiedBody =
+      'You have unsaved changes to the current selection. Activating this set replaces them. The saved custom sets are not deleted.';
+  static const activateModifiedAction = 'Activate';
+  static const clearAllSelections = 'Clear all selections';
+  static const clearAllSelectionsTitle = 'Clear current selections?';
+  static const clearAllSelectionsBody =
+      'This clears the domains and mix shown now, including Salah. Custom #1, #2 and #3 and all saved days stay as they are.';
+  static const clearAllSelectionsAction = 'Clear';
   static const lunarWhiteDaysNote =
       'Civil Hijri 13, 14 and 15 are highlighted so White Days are easier to locate. This does not record a fast or tell you to fast.';
   static const marksGuide = 'Guide';

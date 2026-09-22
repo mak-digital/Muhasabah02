@@ -21,6 +21,7 @@ import '../shared/state_marker.dart';
 import '../shared/ui_bits.dart';
 import 'application_reflection_screen.dart';
 import 'faq_screen.dart';
+import 'custom_selection_sets_editor.dart';
 import 'personal_mix_settings.dart';
 import 'reflection_settings.dart';
 
@@ -749,6 +750,17 @@ class VisibleDomainsSettingsScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           const PersonalMixEditor(),
+          const SizedBox(height: 24),
+          const CustomSelectionSetsEditor(),
+          const SizedBox(height: 8),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton(
+              key: const Key('clear-all-selections'),
+              onPressed: () => confirmClearWorkingSelection(context, ref),
+              child: const Text(Copy.clearAllSelections),
+            ),
+          ),
         ],
       ),
     );
