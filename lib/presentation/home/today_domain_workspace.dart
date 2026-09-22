@@ -122,29 +122,20 @@ class TodayDomainWorkspacePage extends ConsumerWidget {
                       ),
                     ),
                   )
-                : ListView.separated(
+                : ListView(
                     padding: EdgeInsets.fromLTRB(
                       16,
                       12,
                       16,
                       contentBottomInset(context),
                     ),
-                    itemCount: group.rows.length,
-                    separatorBuilder: (_, _) => const SizedBox(height: 8),
-                    itemBuilder: (context, index) {
-                      final row = group!.rows[index];
-                      return _TodayWorkspaceRow(
-                        row: row,
-                        recorded: row.hasResponse,
-                        onTap: () => showTodayRowRecordSheet(
-                          context: context,
-                          ref: ref,
-                          row: row,
-                          dateKey: key,
-                          record: todayRecord,
-                        ),
-                      );
-                    },
+                    children: _workspaceListChildren(
+                      context: context,
+                      ref: ref,
+                      group: group,
+                      dateKey: key,
+                      todayRecord: todayRecord,
+                    ),
                   ),
           ),
         ],
@@ -153,24 +144,83 @@ class TodayDomainWorkspacePage extends ConsumerWidget {
   }
 }
 
+List<Widget> _workspaceListChildren({
+  required BuildContext context,
+  required WidgetRef ref,
+  required TodayDomain group,
+  required String dateKey,
+  required DailyCheckIn? todayRecord,
+}) {
+  final noResponse = group.noResponseRows;
+  final recorded = group.recordedRows;
+  final children = <Widget>[];
+
+  void addRow(TodayRow row, {required bool compact}) {
+    children.add(
+      _TodayWorkspaceRow(
+        row: row,
+        compact: compact,
+        onTap: () => showTodayRowRecordSheet(
+          context: context,
+          ref: ref,
+          row: row,
+          dateKey: dateKey,
+          record: todayRecord,
+        ),
+      ),
+    );
+  }
+
+  for (var i = 0; i < noResponse.length; i++) {
+    if (i > 0) children.add(const SizedBox(height: 8));
+    addRow(noResponse[i], compact: false);
+  }
+
+  if (recorded.isEmpty) return children;
+
+  if (noResponse.isNotEmpty) children.add(const SizedBox(height: 16));
+  final heading = noResponse.isEmpty
+      ? Copy.todayRecordedForToday
+      : Copy.todayRecordedToday;
+  children.add(
+    Padding(
+      key: const Key('today-recorded-section'),
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Text(
+        heading,
+        key: const Key('today-recorded-heading'),
+        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    ),
+  );
+  for (var i = 0; i < recorded.length; i++) {
+    if (i > 0) children.add(const SizedBox(height: 6));
+    addRow(recorded[i], compact: true);
+  }
+  return children;
+}
+
 class _TodayWorkspaceRow extends StatelessWidget {
   const _TodayWorkspaceRow({
     required this.row,
-    required this.recorded,
+    required this.compact,
     required this.onTap,
   });
 
   final TodayRow row;
-  final bool recorded;
+  final bool compact;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final label = todayRowLabel(row);
-    final caption = recorded ? Copy.todayRecorded : Copy.todayNoResponseYet;
+    final caption = compact ? Copy.todayRecorded : Copy.todayNoResponseYet;
     final identity = domainColorIdentity(row.domain);
-    final spoken = recorded
+    final spoken = compact
         ? '$label, response recorded'
         : '$label, no response yet';
     return Semantics(
@@ -181,29 +231,43 @@ class _TodayWorkspaceRow extends StatelessWidget {
       child: Material(
         color: theme.colorScheme.surface,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(compact ? 10 : 12),
           side: BorderSide(color: theme.colorScheme.outlineVariant),
         ),
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(compact ? 10 : 12),
           child: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 56),
+            constraints: BoxConstraints(minHeight: compact ? 48 : 56),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+              padding: EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: compact ? 8 : 10,
+              ),
+              child: compact
+                  ? Row(
                       children: [
-                        Text(
-                          label,
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w600,
+                        ExcludeSemantics(
+                          child: RecordedStateMarker(
+                            key: Key('today-row-marker-${row.mixId}'),
+                            color: identity.family,
+                            kind: MarkerKind.filled,
+                            semanticLabel: caption,
+                            size: 16,
                           ),
                         ),
-                        const SizedBox(height: 2),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            label,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
                         Text(
                           caption,
                           style: theme.textTheme.bodySmall?.copyWith(
@@ -211,19 +275,40 @@ class _TodayWorkspaceRow extends StatelessWidget {
                           ),
                         ),
                       ],
+                    )
+                  : Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                label,
+                                style: theme.textTheme.titleSmall?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                caption,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        ExcludeSemantics(
+                          child: RecordedStateMarker(
+                            key: Key('today-row-marker-${row.mixId}'),
+                            color: identity.family,
+                            kind: MarkerKind.outlined,
+                            semanticLabel: caption,
+                            size: 18,
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  ExcludeSemantics(
-                    child: RecordedStateMarker(
-                      key: Key('today-row-marker-${row.mixId}'),
-                      color: identity.family,
-                      kind: recorded ? MarkerKind.filled : MarkerKind.outlined,
-                      semanticLabel: caption,
-                      size: 18,
-                    ),
-                  ),
-                ],
-              ),
             ),
           ),
         ),

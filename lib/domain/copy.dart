@@ -12,6 +12,8 @@ class Copy {
       'No rows for this domain today. Nothing was invented.';
   static const todayRecorded = 'Recorded';
   static const todayNoResponseYet = 'No response yet';
+  static const todayRecordedToday = 'Recorded today';
+  static const todayRecordedForToday = 'Recorded for today';
   static const todayZakatStatus = 'Status';
   static const quickTap = 'Quick tap';
   static const quickTapTitle = 'Quick tap';

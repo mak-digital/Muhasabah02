@@ -7,6 +7,7 @@ import 'package:muhasabah02/domain/daily_check_in.dart';
 import 'package:muhasabah02/domain/monitor_domain.dart';
 import 'package:muhasabah02/domain/personal_mix.dart';
 import 'package:muhasabah02/domain/prayer.dart';
+import 'package:muhasabah02/domain/quick_tap.dart';
 import 'package:muhasabah02/domain/quran.dart';
 import 'package:muhasabah02/domain/today_workspace.dart';
 import 'package:muhasabah02/presentation/shared/domain_visual.dart';
@@ -20,6 +21,7 @@ void main() {
   Future<void> pumpHome(
     WidgetTester tester, {
     DateTime? now,
+    DateTime Function()? clock,
     Set<MonitorDomain>? visibleDomains,
     PersonalMix? personalMix,
     MemoryCheckInRepository? checkIns,
@@ -30,7 +32,8 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
     await tester.pumpWidget(
       testApp(
-        now: now ?? DateTime(2026, 9, 22),
+        now: now ?? (clock == null ? DateTime(2026, 9, 22) : null),
+        clock: clock,
         visibleDomains: visibleDomains,
         personalMix: personalMix,
         checkIns: checkIns,
@@ -566,5 +569,317 @@ void main() {
       ),
     );
     expect(open, 316);
+  });
+
+  testWidgets('all unanswered rows stay prominent without a Recorded section', (
+    tester,
+  ) async {
+    await pumpHome(tester);
+    await openDomain(tester, 'salah');
+    expect(find.byKey(const Key('today-recorded-section')), findsNothing);
+    expect(find.text(Copy.todayRecordedToday), findsNothing);
+    expect(find.text(Copy.todayRecordedForToday), findsNothing);
+    expect(
+      tester.getTopLeft(find.byKey(const Key('today-row-salah.fajr'))).dy,
+      lessThan(
+        tester.getTopLeft(find.byKey(const Key('today-row-salah.dhuhr'))).dy,
+      ),
+    );
+    expect(
+      tester.getTopLeft(find.byKey(const Key('today-row-salah.dhuhr'))).dy,
+      lessThan(
+        tester.getTopLeft(find.byKey(const Key('today-row-salah.asr'))).dy,
+      ),
+    );
+  });
+
+  testWidgets('missed and on-time Salah compact in catalog order', (
+    tester,
+  ) async {
+    final checkIns = MemoryCheckInRepository();
+    await checkIns.save(
+      DailyCheckIn.empty('2026-09-22')
+          .withSalahActivity(
+            PrayerId.fajr,
+            const RecordedActivity(id: 'missed'),
+          )
+          .withSalahActivity(
+            PrayerId.dhuhr,
+            const RecordedActivity(id: 'aloneOnTime'),
+          ),
+    );
+    await pumpHome(tester, checkIns: checkIns);
+    await openDomain(tester, 'salah');
+    expect(find.text(Copy.todayRecordedToday), findsOneWidget);
+    expect(find.text(Copy.todayRecordedForToday), findsNothing);
+    expect(
+      tester.getTopLeft(find.byKey(const Key('today-row-salah.asr'))).dy,
+      lessThan(
+        tester.getTopLeft(find.byKey(const Key('today-row-salah.fajr'))).dy,
+      ),
+    );
+    expect(
+      tester.getTopLeft(find.byKey(const Key('today-row-salah.maghrib'))).dy,
+      lessThan(
+        tester.getTopLeft(find.byKey(const Key('today-row-salah.fajr'))).dy,
+      ),
+    );
+    expect(
+      tester.getTopLeft(find.byKey(const Key('today-row-salah.fajr'))).dy,
+      lessThan(
+        tester.getTopLeft(find.byKey(const Key('today-row-salah.dhuhr'))).dy,
+      ),
+    );
+    expect(
+      tester.getRect(find.byKey(const Key('today-row-salah.fajr'))).height,
+      lessThan(
+        tester.getRect(find.byKey(const Key('today-row-salah.asr'))).height,
+      ),
+    );
+    expect(
+      tester.getRect(find.byKey(const Key('today-row-salah.fajr'))).height,
+      greaterThanOrEqualTo(48),
+    );
+    expect(
+      tester
+          .widget<RecordedStateMarker>(
+            find.byKey(const Key('today-row-marker-salah.fajr')),
+          )
+          .kind,
+      tester
+          .widget<RecordedStateMarker>(
+            find.byKey(const Key('today-row-marker-salah.dhuhr')),
+          )
+          .kind,
+    );
+  });
+
+  testWidgets('late and excused Salah compact like any recorded row', (
+    tester,
+  ) async {
+    final checkIns = MemoryCheckInRepository();
+    await checkIns.save(
+      DailyCheckIn.empty('2026-09-22')
+          .withSalahActivity(
+            PrayerId.asr,
+            const RecordedActivity(id: 'prayedLate'),
+          )
+          .withSalahActivity(
+            PrayerId.maghrib,
+            const RecordedActivity(id: 'excused'),
+          ),
+    );
+    await pumpHome(tester, checkIns: checkIns);
+    await openDomain(tester, 'salah');
+    expect(
+      tester.getTopLeft(find.byKey(const Key('today-row-salah.fajr'))).dy,
+      lessThan(
+        tester.getTopLeft(find.byKey(const Key('today-row-salah.asr'))).dy,
+      ),
+    );
+    expect(
+      tester.getTopLeft(find.byKey(const Key('today-row-salah.asr'))).dy,
+      lessThan(
+        tester.getTopLeft(find.byKey(const Key('today-row-salah.maghrib'))).dy,
+      ),
+    );
+  });
+
+  testWidgets('recording a prominent row moves it to compact immediately', (
+    tester,
+  ) async {
+    final checkIns = MemoryCheckInRepository();
+    await pumpHome(tester, checkIns: checkIns);
+    await openDomain(tester, 'salah');
+    expect(find.byKey(const Key('today-recorded-section')), findsNothing);
+    await tester.tap(find.byKey(const Key('today-row-salah.fajr')));
+    await tester.pumpAndSettle();
+    await chooseCheckInOption(
+      tester,
+      dropdownKey: const Key('today-salah-fajr'),
+      optionLabel: 'Missed',
+    );
+    await tester.tap(find.byType(ModalBarrier).last);
+    await tester.pumpAndSettle();
+    expect(find.text(Copy.todayRecordedToday), findsOneWidget);
+    expect(
+      tester.getTopLeft(find.byKey(const Key('today-row-salah.dhuhr'))).dy,
+      lessThan(
+        tester.getTopLeft(find.byKey(const Key('today-row-salah.fajr'))).dy,
+      ),
+    );
+  });
+
+  testWidgets('editing a compact row keeps it recorded', (tester) async {
+    final checkIns = MemoryCheckInRepository();
+    await checkIns.save(
+      DailyCheckIn.empty(
+        '2026-09-22',
+      ).withSalahActivity(PrayerId.fajr, const RecordedActivity(id: 'missed')),
+    );
+    await pumpHome(tester, checkIns: checkIns);
+    await openDomain(tester, 'salah');
+    await tester.tap(find.byKey(const Key('today-row-salah.fajr')));
+    await tester.pumpAndSettle();
+    await chooseCheckInOption(
+      tester,
+      dropdownKey: const Key('today-salah-fajr'),
+      optionLabel: 'Prayed alone on time',
+    );
+    await tester.tap(find.byType(ModalBarrier).last);
+    await tester.pumpAndSettle();
+    expect(find.text(Copy.todayRecordedToday), findsOneWidget);
+    expect(
+      tester.getTopLeft(find.byKey(const Key('today-row-salah.dhuhr'))).dy,
+      lessThan(
+        tester.getTopLeft(find.byKey(const Key('today-row-salah.fajr'))).dy,
+      ),
+    );
+  });
+
+  testWidgets('resetting Salah to unanswered returns the row to prominent', (
+    tester,
+  ) async {
+    final checkIns = MemoryCheckInRepository();
+    await checkIns.save(
+      DailyCheckIn.empty(
+        '2026-09-22',
+      ).withSalahActivity(PrayerId.fajr, const RecordedActivity(id: 'missed')),
+    );
+    await pumpHome(tester, checkIns: checkIns);
+    await openDomain(tester, 'salah');
+    await tester.tap(find.byKey(const Key('today-row-salah.fajr')));
+    await tester.pumpAndSettle();
+    await chooseCheckInOption(
+      tester,
+      dropdownKey: const Key('today-salah-fajr'),
+      optionLabel: 'No answer recorded',
+    );
+    await tester.tap(find.byType(ModalBarrier).last);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('today-recorded-section')), findsNothing);
+    expect(
+      tester.getTopLeft(find.byKey(const Key('today-row-salah.fajr'))).dy,
+      lessThan(
+        tester.getTopLeft(find.byKey(const Key('today-row-salah.dhuhr'))).dy,
+      ),
+    );
+    expect(
+      tester
+          .widget<RecordedStateMarker>(
+            find.byKey(const Key('today-row-marker-salah.fajr')),
+          )
+          .kind,
+      MarkerKind.outlined,
+    );
+  });
+
+  testWidgets('all recorded Salah uses a neutral heading', (tester) async {
+    var record = DailyCheckIn.empty('2026-09-22');
+    for (final prayer in PrayerId.values) {
+      record = record.withSalahActivity(
+        prayer,
+        const RecordedActivity(id: 'missed'),
+      );
+    }
+    record = record.copyWith(
+      tahajjud: TernaryOutcome.negative,
+      ishraq: TernaryOutcome.positive,
+    );
+    final checkIns = MemoryCheckInRepository();
+    await checkIns.save(record);
+    await pumpHome(tester, checkIns: checkIns);
+    await openDomain(tester, 'salah');
+    expect(find.text(Copy.todayRecordedForToday), findsOneWidget);
+    expect(find.text(Copy.todayNoResponseYet), findsNothing);
+    expect(find.textContaining('%'), findsNothing);
+    expect(find.textContaining('complete'), findsNothing);
+    expect(find.textContaining('Perfect'), findsNothing);
+  });
+
+  testWidgets('Qur’an Meaning positive also records Recitation grouping', (
+    tester,
+  ) async {
+    final checkIns = MemoryCheckInRepository();
+    await checkIns.save(
+      DailyCheckIn.empty('2026-09-22')
+          .withQuran(QuranDimension.meaning, TernaryOutcome.positive),
+    );
+    await pumpHome(tester, checkIns: checkIns);
+    await openDomain(tester, 'quran');
+    expect(find.text(Copy.todayRecordedToday), findsOneWidget);
+    expect(
+      tester.getTopLeft(find.byKey(const Key('today-row-quran.reading'))).dy,
+      lessThan(
+        tester.getTopLeft(find.byKey(const Key('today-row-quran.meaning'))).dy,
+      ),
+    );
+  });
+
+  testWidgets('explicit Zakat status compacts as recorded', (tester) async {
+    final checkIns = MemoryCheckInRepository();
+    await checkIns.save(
+      DailyCheckIn.empty('2026-09-22').copyWith(zakat: ZakatStatus.due),
+    );
+    await pumpHome(tester, checkIns: checkIns);
+    await openDomain(tester, 'charity');
+    expect(find.text(Copy.todayRecordedToday), findsOneWidget);
+    expect(find.text(Copy.todayRecordedForToday), findsNothing);
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('today-row-zakat')),
+        matching: find.text(Copy.todayRecorded),
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('Quick Tap Fajr appears compact in the Salah workspace', (
+    tester,
+  ) async {
+    final checkIns = MemoryCheckInRepository();
+    final empty = DailyCheckIn.empty('2026-09-22');
+    final item = quickTapItemsFor({'salah.fajr'}).single;
+    final next = nextQuickTapChoice(empty, item);
+    await checkIns.save(applyQuickTapChoice(empty, item, next));
+    await pumpHome(tester, checkIns: checkIns);
+    await openDomain(tester, 'salah');
+    expect(
+      (await checkIns.getByDate('2026-09-22'))?.prayer(PrayerId.fajr),
+      isNot(PrayerStatus.unanswered),
+    );
+    expect(find.text(Copy.todayRecordedToday), findsOneWidget);
+    expect(
+      tester.getTopLeft(find.byKey(const Key('today-row-salah.dhuhr'))).dy,
+      lessThan(
+        tester.getTopLeft(find.byKey(const Key('today-row-salah.fajr'))).dy,
+      ),
+    );
+  });
+
+  testWidgets('new local date does not keep yesterday’s recorded grouping', (
+    tester,
+  ) async {
+    final checkIns = MemoryCheckInRepository();
+    await checkIns.save(
+      DailyCheckIn.empty(
+        '2026-09-22',
+      ).withSalahActivity(PrayerId.fajr, const RecordedActivity(id: 'missed')),
+    );
+    var clock = DateTime(2026, 9, 22, 23, 58);
+    await pumpHome(tester, clock: () => clock, checkIns: checkIns);
+    await openDomain(tester, 'salah');
+    expect(find.text(Copy.todayRecordedToday), findsOneWidget);
+    clock = DateTime(2026, 9, 23, 0, 3);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pump();
+    expect(find.textContaining('Wednesday'), findsWidgets);
+    expect(find.byKey(const Key('today-recorded-section')), findsNothing);
+    expect(
+      tester.getTopLeft(find.byKey(const Key('today-row-salah.fajr'))).dy,
+      lessThan(
+        tester.getTopLeft(find.byKey(const Key('today-row-salah.dhuhr'))).dy,
+      ),
+    );
   });
 }
