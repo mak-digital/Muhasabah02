@@ -8,6 +8,11 @@ class Copy {
   static const today = 'Today';
   static const todayEmpty =
       'No domains are shown for today. Choose Domains and this season’s mix in Settings.';
+  static const todayDomainEmpty =
+      'No rows for this domain today. Nothing was invented.';
+  static const todayRecorded = 'Recorded';
+  static const todayNoResponseYet = 'No response yet';
+  static const todayZakatStatus = 'Status';
   static const quickTap = 'Quick tap';
   static const quickTapTitle = 'Quick tap';
   static const quickTapNote =

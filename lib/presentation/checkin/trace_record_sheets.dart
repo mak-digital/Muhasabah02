@@ -16,6 +16,7 @@ import '../../domain/salah_factors.dart';
 import '../recorded_days/day_evidence_screen.dart';
 import '../shared/activity_picker.dart';
 import '../shared/add_response_button.dart';
+import '../shared/system_insets.dart';
 
 String _visibleDate(WidgetRef ref, String key) {
   return formatStoredDateKey(key, ref.read(appPrefsProvider).displayCalendar);
@@ -68,6 +69,7 @@ Future<void> showHomeTraceRecordSheet({
   required HomeTraceRow row,
   required String dateKey,
   required DailyCheckIn? record,
+  Key? dropdownKey,
 }) async {
   var outcome = record?.homeTrace(row.storageKey) ?? TernaryOutcome.unanswered;
   var factors =
@@ -81,15 +83,11 @@ Future<void> showHomeTraceRecordSheet({
       return StatefulBuilder(
         builder: (context, setSheet) {
           return SafeArea(
+            bottom: false,
             child: ConstrainedBox(
               constraints: BoxConstraints(maxHeight: maxHeight),
               child: Padding(
-                padding: EdgeInsets.fromLTRB(
-                  16,
-                  0,
-                  16,
-                  24 + MediaQuery.viewInsetsOf(context).bottom,
-                ),
+                padding: sheetContentPadding(context),
                 child: SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
                   child: Column(
@@ -103,6 +101,7 @@ Future<void> showHomeTraceRecordSheet({
                       const SizedBox(height: 8),
                       const CheckInRowLabel('What happened?'),
                       CheckInSelect<TernaryOutcome>(
+                        dropdownKey: dropdownKey,
                         value: outcome,
                         sortLabels: false,
                         entries: [
@@ -230,11 +229,12 @@ Future<void> showZakatRecordSheet({
   await showModalBottomSheet<void>(
     context: context,
     showDragHandle: true,
+    isScrollControlled: true,
     builder: (context) {
       return StatefulBuilder(
         builder: (context, setSheet) {
           return Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+            padding: sheetContentPadding(context),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,

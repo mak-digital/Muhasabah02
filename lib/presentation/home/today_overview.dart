@@ -12,6 +12,7 @@ import '../../domain/today_workspace.dart';
 import '../shared/domain_visual.dart';
 import '../shared/progress_calendar.dart';
 import '../shared/ui_bits.dart';
+import 'today_domain_workspace.dart';
 
 class TodayOverview extends ConsumerWidget {
   const TodayOverview({super.key, required this.records});
@@ -116,14 +117,16 @@ class _TodayDomainTile extends StatelessWidget {
     final label = todayDomainLabel(domain);
     return Semantics(
       key: Key('today-domain-${domain.id}'),
-      container: true,
+      button: true,
       label: label,
-      button: false,
       child: ExcludeSemantics(
-        child: ClipRRect(
+        child: Material(
+          color: wash,
+          clipBehavior: Clip.antiAlias,
           borderRadius: BorderRadius.circular(12),
-          child: Material(
-            color: wash,
+          child: InkWell(
+            onTap: () => openTodayDomainWorkspace(context, domain),
+            borderRadius: BorderRadius.circular(12),
             child: ConstrainedBox(
               constraints: const BoxConstraints(minHeight: 48),
               child: IntrinsicHeight(

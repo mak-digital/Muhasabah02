@@ -204,12 +204,12 @@ void main() {
     expect(find.textContaining('Tuesday'), findsNothing);
   });
 
-  testWidgets('Today tiles are not announced as buttons', (tester) async {
+  testWidgets('Today tiles are announced as buttons', (tester) async {
     await pumpHome(tester, now: DateTime(2026, 9, 22));
     final semantics = tester.getSemantics(
       find.byKey(const Key('today-domain-salah')),
     );
     expect(semantics.label, 'Salah');
-    expect(semantics.flagsCollection.isButton, isFalse);
+    expect(semantics.flagsCollection.isButton, isTrue);
   });
 }
