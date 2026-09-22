@@ -47,20 +47,24 @@ void openDayEvidence(BuildContext context, String dateKey) {
 }
 
 VoidCallback? matrixCellOnTap({
+  required WidgetRef ref,
   required String dateKey,
-  required DateTime now,
   VoidCallback? onOpen,
   VoidCallback? onPast,
   VoidCallback? onToday,
 }) {
-  switch (dateCellKind(dateKey, now)) {
-    case DateCellKind.future:
-      return null;
-    case DateCellKind.today:
-      return onToday ?? onOpen;
-    case DateCellKind.past:
-      return onPast ?? onOpen;
-  }
+  if (onOpen == null && onPast == null && onToday == null) return null;
+  return () {
+    refreshNowIfLocalDateChanged(ref);
+    switch (dateCellKind(dateKey, ref.read(nowProvider))) {
+      case DateCellKind.future:
+        return;
+      case DateCellKind.today:
+        (onToday ?? onOpen)?.call();
+      case DateCellKind.past:
+        (onPast ?? onOpen)?.call();
+    }
+  };
 }
 
 Future<void> showHomeTraceRecordSheet({

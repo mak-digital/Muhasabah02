@@ -361,7 +361,7 @@ class _WeekMatrixBoardState extends ConsumerState<WeekMatrixBoard> {
       child = TodayMarkHalo(child: child);
     }
     if (kind == DateCellKind.future) {
-      return IgnorePointer(child: Opacity(opacity: 0.28, child: child));
+      return Opacity(opacity: 0.28, child: child);
     }
     return child;
   }
@@ -423,8 +423,8 @@ class WeekTraceMatrix extends ConsumerWidget {
     return ProgressDayCell(
       key: Key('progress-cell-${row.storageKey}-$key'),
       onTap: matrixCellOnTap(
+        ref: ref,
         dateKey: key,
-        now: now,
         onOpen: onOpenDay == null ? null : () => onOpenDay!(context, key),
       ),
       marker: RecordedStateMarker(
@@ -718,8 +718,8 @@ class _HomeStyleWeekMatrixState extends ConsumerState<HomeStyleWeekMatrix> {
     return ProgressDayCell(
       key: Key('progress-cell-${row.storageKey}-$key'),
       onTap: matrixCellOnTap(
+        ref: ref,
         dateKey: key,
-        now: now,
         onOpen: () => widget.onOpenDay(context, key, band: row.band),
       ),
       marker: marker,
@@ -731,8 +731,8 @@ class _HomeStyleWeekMatrixState extends ConsumerState<HomeStyleWeekMatrix> {
     return ProgressDayCell(
       key: Key('progress-cell-zakat-$key'),
       onTap: matrixCellOnTap(
+        ref: ref,
         dateKey: key,
-        now: now,
         onOpen: () =>
             widget.onOpenDay(context, key, band: kZakatTraceBand),
       ),

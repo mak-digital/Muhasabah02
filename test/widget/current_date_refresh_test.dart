@@ -47,6 +47,22 @@ void main() {
     });
   });
 
+  group('nextLocalMidnight', () {
+    test('uses the following local calendar day, not a 24-hour offset', () {
+      final now = DateTime(2026, 9, 22, 23, 58);
+      expect(nextLocalMidnight(now), DateTime(2026, 9, 23));
+      expect(
+        delayUntilNextLocalMidnight(now),
+        const Duration(minutes: 2) + kLocalMidnightTimerMargin,
+      );
+    });
+
+    test('same-day afternoon still targets that night’s midnight', () {
+      final now = DateTime(2026, 9, 22, 15, 30);
+      expect(nextLocalMidnight(now), DateTime(2026, 9, 23));
+    });
+  });
+
   group('resume date refresh', () {
     testWidgets('same local date keeps cached now', (tester) async {
       var clock = DateTime(2026, 9, 22, 9);
@@ -148,6 +164,40 @@ void main() {
 
       expect(dateKey(probe.now!), '2026-09-23');
       expect(find.text(Copy.appLockTitle), findsOneWidget);
+    });
+  });
+
+  group('foreground midnight timer', () {
+    testWidgets('fires after local midnight without resume', (tester) async {
+      var clock = DateTime(2026, 9, 22, 23, 58);
+      final probe = _NowProbe();
+      await tester.pumpWidget(_clockApp(() => clock, probe: probe));
+      await tester.pump();
+      expect(dateKey(probe.now!), '2026-09-22');
+      final first = probe.now;
+
+      clock = DateTime(2026, 9, 23, 0, 3);
+      await tester.pump(delayUntilNextLocalMidnight(DateTime(2026, 9, 22, 23, 58)));
+      await tester.pump();
+
+      expect(dateKey(probe.now!), '2026-09-23');
+      expect(probe.now, isNot(same(first)));
+    });
+
+    testWidgets('same-date timer fire does not invalidate twice', (tester) async {
+      var clock = DateTime(2026, 9, 22, 23, 58);
+      final probe = _NowProbe();
+      await tester.pumpWidget(_clockApp(() => clock, probe: probe));
+      await tester.pump();
+
+      clock = DateTime(2026, 9, 23, 0, 3);
+      await tester.pump(delayUntilNextLocalMidnight(DateTime(2026, 9, 22, 23, 58)));
+      await tester.pump();
+      final refreshed = probe.now;
+
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pump();
+      expect(probe.now, same(refreshed));
     });
   });
 }

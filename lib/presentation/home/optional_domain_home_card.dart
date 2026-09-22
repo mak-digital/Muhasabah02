@@ -114,8 +114,10 @@ class _OptionalDomainHomeCardState
                     child: InkWell(
                       onTap: widget.compactWeek
                           ? _openProgress
-                          : () =>
-                                _openDomainDay(dateKey(ref.read(nowProvider))),
+                          : () {
+                              refreshNowIfLocalDateChanged(ref);
+                              _openDomainDay(dateKey(ref.read(nowProvider)));
+                            },
                       child: Column(
                         children: [
                           Text(
@@ -351,7 +353,11 @@ class _OptionalDomainHomeCardState
         dateCellKind(key, ref.read(nowProvider)) != DateCellKind.future;
     final mark = InkWell(
       key: Key('home-compact-$domainId-$key'),
-      onTap: open ? () => _openDomainDay(key) : null,
+      onTap: recoverableDateCellOnTap(
+        ref: ref,
+        dateKey: key,
+        onOpen: () => _openDomainDay(key),
+      ),
       child: Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 4),
@@ -446,7 +452,11 @@ class _OptionalDomainHomeCardState
         dateCellKind(key, ref.read(nowProvider)) != DateCellKind.future;
     final mark = InkWell(
       key: Key('home-${row.storageKey}-$key'),
-      onTap: open ? () => _openDomainDay(key, band: row.band) : null,
+      onTap: recoverableDateCellOnTap(
+        ref: ref,
+        dateKey: key,
+        onOpen: () => _openDomainDay(key, band: row.band),
+      ),
       child: Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 4),
@@ -509,7 +519,11 @@ class _OptionalDomainHomeCardState
         dateCellKind(key, ref.read(nowProvider)) != DateCellKind.future;
     return InkWell(
       key: Key('home-zakat-$key'),
-      onTap: open ? () => _openDomainDay(key, band: kZakatTraceBand) : null,
+      onTap: recoverableDateCellOnTap(
+        ref: ref,
+        dateKey: key,
+        onOpen: () => _openDomainDay(key, band: kZakatTraceBand),
+      ),
       child: Center(
         child: open ? marker : Opacity(opacity: 0.28, child: marker),
       ),

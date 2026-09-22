@@ -133,8 +133,6 @@ class TodayDomainWorkspacePage extends ConsumerWidget {
                       context: context,
                       ref: ref,
                       group: group,
-                      dateKey: key,
-                      todayRecord: todayRecord,
                     ),
                   ),
           ),
@@ -148,8 +146,6 @@ List<Widget> _workspaceListChildren({
   required BuildContext context,
   required WidgetRef ref,
   required TodayDomain group,
-  required String dateKey,
-  required DailyCheckIn? todayRecord,
 }) {
   final noResponse = group.noResponseRows;
   final recorded = group.recordedRows;
@@ -160,13 +156,25 @@ List<Widget> _workspaceListChildren({
       _TodayWorkspaceRow(
         row: row,
         compact: compact,
-        onTap: () => showTodayRowRecordSheet(
-          context: context,
-          ref: ref,
-          row: row,
-          dateKey: dateKey,
-          record: todayRecord,
-        ),
+        onTap: () {
+          refreshNowIfLocalDateChanged(ref);
+          final key = dateKey(ref.read(nowProvider));
+          DailyCheckIn? record;
+          for (final item
+              in ref.read(checkInsProvider).value ?? const <DailyCheckIn>[]) {
+            if (item.dateKey == key) {
+              record = item;
+              break;
+            }
+          }
+          showTodayRowRecordSheet(
+            context: context,
+            ref: ref,
+            row: row,
+            dateKey: key,
+            record: record,
+          );
+        },
       ),
     );
   }

@@ -1,3 +1,20 @@
+/// Extra delay so the midnight timer fires after the local date has changed.
+const Duration kLocalMidnightTimerMargin = Duration(milliseconds: 250);
+
+/// Next local calendar midnight after [now] (device-local, not a fixed offset).
+DateTime nextLocalMidnight(DateTime now) {
+  final local = DateTime(now.year, now.month, now.day);
+  return DateTime(local.year, local.month, local.day + 1);
+}
+
+/// Delay until [nextLocalMidnight], plus [kLocalMidnightTimerMargin].
+Duration delayUntilNextLocalMidnight(DateTime now) {
+  final delay =
+      nextLocalMidnight(now).difference(now) + kLocalMidnightTimerMargin;
+  if (delay <= Duration.zero) return kLocalMidnightTimerMargin;
+  return delay;
+}
+
 String dateKey(DateTime date) {
   final local = DateTime(date.year, date.month, date.day);
   final y = local.year.toString().padLeft(4, '0');

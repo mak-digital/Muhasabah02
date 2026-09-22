@@ -287,8 +287,8 @@ class SalahProgressScreen extends ConsumerWidget {
     return ProgressDayCell(
       key: Key('progress-cell-salah-${prayer.name}-$key'),
       onTap: matrixCellOnTap(
+        ref: ref,
         dateKey: key,
-        now: now,
         onOpen: () => openFocusedCheckIn(
           context,
           dateKey: key,
@@ -346,8 +346,8 @@ class SalahProgressScreen extends ConsumerWidget {
     return ProgressDayCell(
       key: Key('progress-cell-salah-${row.id}-$key'),
       onTap: matrixCellOnTap(
+        ref: ref,
         dateKey: key,
-        now: now,
         onOpen: () => openFocusedCheckIn(
           context,
           dateKey: key,
@@ -489,10 +489,18 @@ class QuranProgressScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 16),
               if (period.days == 7)
-                _quranJourneyMatrix(context, now, calendar, colours, index)
+                _quranJourneyMatrix(context, ref, now, calendar, colours, index)
               else
                 for (final dimension in quranDailyDimensions)
-                  _dimensionCard(context, dimension, keys, index, period, now),
+                  _dimensionCard(
+                    context,
+                    ref,
+                    dimension,
+                    keys,
+                    index,
+                    period,
+                    now,
+                  ),
             ],
           );
         },
@@ -502,6 +510,7 @@ class QuranProgressScreen extends ConsumerWidget {
 
   Widget _quranJourneyMatrix(
     BuildContext context,
+    WidgetRef ref,
     DateTime now,
     DisplayCalendar calendar,
     bool colours,
@@ -528,8 +537,8 @@ class QuranProgressScreen extends ConsumerWidget {
               return ProgressDayCell(
                 key: Key('progress-cell-quran-${row.name}-$key'),
                 onTap: matrixCellOnTap(
+                  ref: ref,
                   dateKey: key,
-                  now: now,
                   onOpen: () => showQuranJourneySheet(
                     context: context,
                     dateKey: key,
@@ -554,6 +563,7 @@ class QuranProgressScreen extends ConsumerWidget {
 
   Widget _dimensionCard(
     BuildContext context,
+    WidgetRef ref,
     QuranDimension dimension,
     List<String> keys,
     Map<String, DailyCheckIn> index,
@@ -610,8 +620,8 @@ class QuranProgressScreen extends ConsumerWidget {
                 );
                 return ProgressDayCell(
                   onTap: matrixCellOnTap(
+                    ref: ref,
                     dateKey: key,
-                    now: now,
                     onOpen: () => openFocusedCheckIn(
                       context,
                       dateKey: key,

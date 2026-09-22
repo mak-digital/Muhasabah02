@@ -204,7 +204,10 @@ class HomeScreen extends ConsumerWidget {
       SizedBox(
         width: double.infinity,
         child: FilledButton.icon(
-          onPressed: () => open(const CheckInScreen()),
+          onPressed: () {
+            refreshNowIfLocalDateChanged(ref);
+            open(CheckInScreen(date: ref.read(nowProvider)));
+          },
           icon: const Icon(Icons.edit_calendar_outlined),
           label: const Text(Copy.homeCheckIn),
         ),
@@ -213,7 +216,7 @@ class HomeScreen extends ConsumerWidget {
       SizedBox(
         width: double.infinity,
         child: OutlinedButton.icon(
-          onPressed: () => showQuickTapSheet(context),
+          onPressed: () => showQuickTapSheet(context, ref),
           icon: const Icon(Icons.touch_app_outlined),
           label: const Text(Copy.quickTap),
         ),

@@ -148,8 +148,8 @@ class OptionalDomainProgressScreen extends ConsumerWidget {
                 ],
               ] else ...[
                 for (final row in rows)
-                  _rowCard(context, row, index, period, now),
-                if (includeZakat) _zakatCard(context, index, period, now),
+                  _rowCard(context, ref, row, index, period, now),
+                if (includeZakat) _zakatCard(context, ref, index, period, now),
               ],
             ],
           );
@@ -200,8 +200,8 @@ class OptionalDomainProgressScreen extends ConsumerWidget {
         return ProgressDayCell(
           key: Key('progress-cell-zakat-$key'),
           onTap: matrixCellOnTap(
+            ref: ref,
             dateKey: key,
-            now: now,
             onOpen: () => _openDay(context, key, band: kZakatTraceBand),
           ),
           marker: ZakatStateMarker(status: status),
@@ -229,6 +229,7 @@ class OptionalDomainProgressScreen extends ConsumerWidget {
 
   Widget _rowCard(
     BuildContext context,
+    WidgetRef ref,
     HomeTraceRow row,
     Map<String, DailyCheckIn> index,
     ReviewPeriod period,
@@ -253,8 +254,8 @@ class OptionalDomainProgressScreen extends ConsumerWidget {
                 TernaryOutcome.unanswered;
             return ProgressDayCell(
               onTap: matrixCellOnTap(
+                ref: ref,
                 dateKey: key,
-                now: now,
                 onOpen: () => _openDay(context, key, band: row.band),
               ),
               marker: RecordedStateMarker(
@@ -274,6 +275,7 @@ class OptionalDomainProgressScreen extends ConsumerWidget {
 
   Widget _zakatCard(
     BuildContext context,
+    WidgetRef ref,
     Map<String, DailyCheckIn> index,
     ReviewPeriod period,
     DateTime now,
@@ -293,8 +295,8 @@ class OptionalDomainProgressScreen extends ConsumerWidget {
             final status = index[key]?.zakat ?? ZakatStatus.unanswered;
             return ProgressDayCell(
               onTap: matrixCellOnTap(
+                ref: ref,
                 dateKey: key,
-                now: now,
                 onOpen: () => _openDay(context, key, band: kZakatTraceBand),
               ),
               marker: ZakatStateMarker(status: status),

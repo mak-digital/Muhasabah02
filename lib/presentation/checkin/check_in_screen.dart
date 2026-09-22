@@ -105,8 +105,9 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
   var _loaded = false;
   var _editing = true;
   String? _error;
+  late final String _openedDateKey;
 
-  String get _key => dateKey(widget.date ?? DateTime.now());
+  String get _key => _openedDateKey;
 
   bool get _startsLocked {
     if (widget.focus == CheckInFocus.full) return false;
@@ -116,7 +117,8 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
   @override
   void initState() {
     super.initState();
-    _draft = DailyCheckIn.empty(_key);
+    _openedDateKey = dateKey(widget.date ?? ref.read(nowClockProvider)());
+    _draft = DailyCheckIn.empty(_openedDateKey);
     _gratitude = TextEditingController();
     _reflection = TextEditingController();
     _situationCustom = TextEditingController();
@@ -1587,6 +1589,12 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
           : _akhlaqStruggle.text.trim(),
       clearAkhlaqStruggleNote: _akhlaqStruggle.text.trim().isEmpty,
     );
+    if (next.dateKey != _openedDateKey) {
+      setState(() {
+        _error = 'The check-in could not be saved. Your draft is still here.';
+      });
+      return;
+    }
     try {
       await ref.read(checkInsProvider.notifier).save(next);
       logAppEvent('checkin_saved');

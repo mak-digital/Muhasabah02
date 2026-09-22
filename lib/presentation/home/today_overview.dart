@@ -93,7 +93,7 @@ class TodayOverview extends ConsumerWidget {
                   for (final item in workspace.domains)
                     SizedBox(
                       width: width,
-                      child: _TodayDomainTile(domain: item.domain),
+                      child: _TodayDomainTile(domain: item.domain, ref: ref),
                     ),
                 ],
               );
@@ -105,9 +105,10 @@ class TodayOverview extends ConsumerWidget {
 }
 
 class _TodayDomainTile extends StatelessWidget {
-  const _TodayDomainTile({required this.domain});
+  const _TodayDomainTile({required this.domain, required this.ref});
 
   final MonitorDomain domain;
+  final WidgetRef ref;
 
   @override
   Widget build(BuildContext context) {
@@ -125,7 +126,10 @@ class _TodayDomainTile extends StatelessWidget {
           clipBehavior: Clip.antiAlias,
           borderRadius: BorderRadius.circular(12),
           child: InkWell(
-            onTap: () => openTodayDomainWorkspace(context, domain),
+            onTap: () {
+              refreshNowIfLocalDateChanged(ref);
+              openTodayDomainWorkspace(context, domain);
+            },
             borderRadius: BorderRadius.circular(12),
             child: ConstrainedBox(
               constraints: const BoxConstraints(minHeight: 48),

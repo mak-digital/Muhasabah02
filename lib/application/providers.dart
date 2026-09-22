@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
@@ -42,6 +43,24 @@ bool refreshNowIfLocalDateChanged(WidgetRef ref) {
   if (!localCalendarDateChanged(cached, current)) return false;
   ref.invalidate(nowProvider);
   return true;
+}
+
+/// Tap handler that refreshes the cached date, then opens [onOpen] only when
+/// [dateKey] is today or historical. Future cells stay non-navigable.
+///
+/// Does not redirect a historical cell to today.
+VoidCallback recoverableDateCellOnTap({
+  required WidgetRef ref,
+  required String dateKey,
+  required VoidCallback onOpen,
+}) {
+  return () {
+    refreshNowIfLocalDateChanged(ref);
+    if (dateCellKind(dateKey, ref.read(nowProvider)) == DateCellKind.future) {
+      return;
+    }
+    onOpen();
+  };
 }
 
 final reviewPeriodProvider = StateProvider<ReviewPeriod>(

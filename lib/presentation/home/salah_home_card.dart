@@ -90,11 +90,14 @@ class _SalahHomeCardState extends ConsumerState<SalahHomeCard> {
                   ),
                   Expanded(
                     child: InkWell(
-                      onTap: () => openFocusedCheckIn(
-                        context,
-                        dateKey: dateKey(ref.read(nowProvider)),
-                        focus: CheckInFocus.salah,
-                      ),
+                      onTap: () {
+                        refreshNowIfLocalDateChanged(ref);
+                        openFocusedCheckIn(
+                          context,
+                          dateKey: dateKey(ref.read(nowProvider)),
+                          focus: CheckInFocus.salah,
+                        );
+                      },
                       child: Column(
                         children: [
                           Text(
@@ -259,7 +262,11 @@ class _SalahHomeCardState extends ConsumerState<SalahHomeCard> {
         dateCellKind(key, ref.read(nowProvider)) != DateCellKind.future;
     return InkWell(
       key: Key('home-compact-salah-$key'),
-      onTap: open ? () => _openSalahDay(key) : null,
+      onTap: recoverableDateCellOnTap(
+        ref: ref,
+        dateKey: key,
+        onOpen: () => _openSalahDay(key),
+      ),
       child: Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 4),
@@ -363,7 +370,11 @@ class _SalahHomeCardState extends ConsumerState<SalahHomeCard> {
     return Material(
       type: MaterialType.transparency,
       child: InkWell(
-        onTap: open ? () => _openSalahDay(key, band: salahHomeBand(row)) : null,
+        onTap: recoverableDateCellOnTap(
+          ref: ref,
+          dateKey: key,
+          onOpen: () => _openSalahDay(key, band: salahHomeBand(row)),
+        ),
         child: SizedBox(
           height: AppDimensions.progressMarker + 10,
           width: double.infinity,

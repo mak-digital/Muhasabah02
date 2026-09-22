@@ -23,26 +23,32 @@ IconData _iconFor(String name) => switch (name) {
   _ => Icons.circle_outlined,
 };
 
-Future<void> showQuickTapSheet(BuildContext context) {
+Future<void> showQuickTapSheet(BuildContext context, WidgetRef ref) {
+  refreshNowIfLocalDateChanged(ref);
+  final sessionDateKey = dateKey(ref.read(nowProvider));
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
     showDragHandle: true,
     builder: (context) {
       final height = MediaQuery.sizeOf(context).height * 0.88;
-      return SizedBox(height: height, child: const QuickTapSheet());
+      return SizedBox(
+        height: height,
+        child: QuickTapSheet(dateKey: sessionDateKey),
+      );
     },
   );
 }
 
 class QuickTapSheet extends ConsumerWidget {
-  const QuickTapSheet({super.key});
+  const QuickTapSheet({super.key, required this.dateKey});
+
+  final String dateKey;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(prefsTickProvider);
-    final now = ref.watch(nowProvider);
-    final key = dateKey(now);
+    final key = dateKey;
     final prefs = ref.watch(appPrefsProvider);
     final resolver = PersonalisationResolver(
       visibleDomains: prefs.visibleDomains,

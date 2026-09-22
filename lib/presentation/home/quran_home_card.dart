@@ -85,11 +85,14 @@ class _QuranHomeCardState extends ConsumerState<QuranHomeCard> {
                   ),
                   Expanded(
                     child: InkWell(
-                      onTap: () => openFocusedCheckIn(
-                        context,
-                        dateKey: dateKey(ref.read(nowProvider)),
-                        focus: CheckInFocus.quran,
-                      ),
+                      onTap: () {
+                        refreshNowIfLocalDateChanged(ref);
+                        openFocusedCheckIn(
+                          context,
+                          dateKey: dateKey(ref.read(nowProvider)),
+                          focus: CheckInFocus.quran,
+                        );
+                      },
                       child: Column(
                         children: [
                           Text(
@@ -282,7 +285,11 @@ class _QuranHomeCardState extends ConsumerState<QuranHomeCard> {
     final open =
         dateCellKind(key, ref.read(nowProvider)) != DateCellKind.future;
     return ProgressDayCell(
-      onTap: open ? () => _openRow(key, row, record) : null,
+      onTap: recoverableDateCellOnTap(
+        ref: ref,
+        dateKey: key,
+        onOpen: () => _openRow(key, row, record),
+      ),
       marker: open ? marker : Opacity(opacity: 0.28, child: marker),
     );
   }
@@ -299,7 +306,11 @@ class _QuranHomeCardState extends ConsumerState<QuranHomeCard> {
     final open =
         dateCellKind(key, ref.read(nowProvider)) != DateCellKind.future;
     final body = ProgressDayCell(
-      onTap: open ? () => _openRow(key, openRow, record) : null,
+      onTap: recoverableDateCellOnTap(
+        ref: ref,
+        dateKey: key,
+        onOpen: () => _openRow(key, openRow, record),
+      ),
       marker: open ? marker : Opacity(opacity: 0.28, child: marker),
     );
     return KeyedSubtree(key: Key('home-compact-quran-$key'), child: body);
