@@ -23,6 +23,7 @@ Widget testApp({
   MemoryCheckInRepository? checkIns,
   CheckInRepository? checkInRepository,
   MemoryResponseRepository? responses,
+  ResponseRepository? responseRepository,
   MemoryAppPrefs? prefs,
   DateTime? now,
   DateTime Function()? clock,
@@ -41,7 +42,7 @@ Widget testApp({
         checkInRepository ?? checkIns ?? MemoryCheckInRepository(),
       ),
       responseRepositoryProvider.overrideWithValue(
-        responses ?? MemoryResponseRepository(),
+        responseRepository ?? responses ?? MemoryResponseRepository(),
       ),
       deviceUnlockProvider.overrideWithValue(
         deviceUnlock ?? FakeDeviceUnlock(),

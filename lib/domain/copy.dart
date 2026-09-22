@@ -42,6 +42,12 @@ class Copy {
   static const unsavedCheckInDiscard = 'Discard changes';
   static String unsavedCheckInBody(String date) =>
       'You have unsaved changes for $date. They have not been stored.';
+  static const unsavedResponseTitle = 'Unsaved response';
+  static const unsavedResponseBody =
+      'You have unsaved changes. They have not been stored.';
+  static const unsavedResponseSave = 'Save this response';
+  static const unsavedResponseContinue = 'Continue editing';
+  static const unsavedResponseDiscard = 'Discard changes';
   static const historyDayMenu = 'Edit or remove';
   static const historyFilterAll = 'All';
   static const historyEmptyFilter =
