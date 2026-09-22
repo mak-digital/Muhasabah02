@@ -29,6 +29,7 @@ import 'quran_home_card.dart';
 import 'quick_tap_sheet.dart';
 import 'reflection_home_cards.dart';
 import 'salah_home_card.dart';
+import 'today_overview.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -198,6 +199,8 @@ class HomeScreen extends ConsumerWidget {
     }
 
     return [
+      TodayOverview(records: records),
+      const SizedBox(height: 16),
       SizedBox(
         width: double.infinity,
         child: FilledButton.icon(

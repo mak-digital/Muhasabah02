@@ -5,6 +5,9 @@ class Copy {
   static const appSlogan = 'Your record, not a ruling.';
   static const appNotice = 'Notice your day to improve. Keep it yours.';
   static const homeCheckIn = 'Start today’s check-in';
+  static const today = 'Today';
+  static const todayEmpty =
+      'No domains are shown for today. Choose Domains and this season’s mix in Settings.';
   static const quickTap = 'Quick tap';
   static const quickTapTitle = 'Quick tap';
   static const quickTapNote =

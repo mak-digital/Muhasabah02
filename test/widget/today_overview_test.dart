@@ -1,0 +1,215 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:muhasabah02/app/theme.dart';
+import 'package:muhasabah02/data/memory_repositories.dart';
+import 'package:muhasabah02/domain/copy.dart';
+import 'package:muhasabah02/domain/monitor_domain.dart';
+import 'package:muhasabah02/domain/personal_mix.dart';
+import 'package:muhasabah02/presentation/shared/domain_visual.dart';
+
+import '../support/test_app.dart';
+
+void main() {
+  Future<void> pumpHome(
+    WidgetTester tester, {
+    DateTime? now,
+    DateTime Function()? clock,
+    Set<MonitorDomain>? visibleDomains,
+    PersonalMix? personalMix,
+    MemoryCheckInRepository? checkIns,
+  }) async {
+    tester.view.physicalSize = const Size(400, 5000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(
+      testApp(
+        now: now,
+        clock: clock,
+        visibleDomains: visibleDomains,
+        personalMix: personalMix,
+        checkIns: checkIns,
+      ),
+    );
+    await tester.pumpAndSettle();
+  }
+
+  test('Today tiles reuse domain family colors, not status colors', () {
+    expect(
+      domainColorIdentity(MonitorDomain.salah).family,
+      MuhasabahColors.salahFamily,
+    );
+    expect(
+      domainColorIdentity(MonitorDomain.quran).family,
+      MuhasabahColors.quranFamily,
+    );
+    expect(
+      domainColorIdentity(MonitorDomain.dhikr).family,
+      MuhasabahColors.dhikrFamily,
+    );
+    expect(
+      domainColorIdentity(MonitorDomain.salah).family,
+      isNot(MuhasabahColors.missedEarth),
+    );
+  });
+
+  test('Today tile names use Akhlaq and Huquq, not Character or Rights', () {
+    expect(todayDomainLabel(MonitorDomain.akhlaq), 'Akhlaq');
+    expect(todayDomainLabel(MonitorDomain.huquq), 'Huquq');
+    expect(todayDomainLabel(MonitorDomain.salah), 'Salah');
+    expect(todayDomainLabel(MonitorDomain.quran), 'Qur’an');
+    expect(todayDomainLabel(MonitorDomain.akhlaq), isNot('Character'));
+    expect(todayDomainLabel(MonitorDomain.huquq), isNot('Rights'));
+  });
+
+  testWidgets('Today heading, weekday, and date are visible', (tester) async {
+    await pumpHome(tester, now: DateTime(2026, 9, 22));
+    expect(find.byKey(const Key('today-overview')), findsOneWidget);
+    expect(find.text(Copy.today), findsOneWidget);
+    expect(find.textContaining('Tuesday'), findsOneWidget);
+    expect(find.textContaining('22 Sep 2026'), findsOneWidget);
+  });
+
+  testWidgets('Today shows only derived selected domains in model order', (
+    tester,
+  ) async {
+    await pumpHome(
+      tester,
+      now: DateTime(2026, 9, 22),
+      visibleDomains: {
+        MonitorDomain.salah,
+        MonitorDomain.quran,
+        MonitorDomain.dhikr,
+        MonitorDomain.akhlaq,
+      },
+    );
+    expect(find.byKey(const Key('today-domain-salah')), findsOneWidget);
+    expect(find.byKey(const Key('today-domain-quran')), findsOneWidget);
+    expect(find.byKey(const Key('today-domain-dhikr')), findsOneWidget);
+    expect(find.byKey(const Key('today-domain-akhlaq')), findsOneWidget);
+    expect(find.byKey(const Key('today-domain-hadith')), findsNothing);
+    expect(find.byKey(const Key('today-domain-huquq')), findsNothing);
+
+    final salah = tester.getTopLeft(
+      find.byKey(const Key('today-domain-salah')),
+    );
+    final quran = tester.getTopLeft(
+      find.byKey(const Key('today-domain-quran')),
+    );
+    final dhikr = tester.getTopLeft(
+      find.byKey(const Key('today-domain-dhikr')),
+    );
+    final akhlaq = tester.getTopLeft(
+      find.byKey(const Key('today-domain-akhlaq')),
+    );
+    expect(salah.dy, lessThanOrEqualTo(quran.dy));
+    expect(salah.dx, lessThan(quran.dx));
+    expect(dhikr.dy, greaterThan(salah.dy));
+    expect(akhlaq.dx, greaterThan(dhikr.dx));
+  });
+
+  testWidgets('Today tiles show Akhlaq and Huquq, not Character or Rights', (
+    tester,
+  ) async {
+    await pumpHome(tester, now: DateTime(2026, 9, 22));
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('today-domain-akhlaq')),
+        matching: find.text('Akhlaq'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('today-domain-huquq')),
+        matching: find.text('Huquq'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('today-domain-akhlaq')),
+        matching: find.text('Character'),
+      ),
+      findsNothing,
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('today-domain-huquq')),
+        matching: find.text('Rights'),
+      ),
+      findsNothing,
+    );
+    expect(find.byKey(const Key('today-domain-salah')), findsOneWidget);
+    expect(find.byKey(const Key('today-domain-quran')), findsOneWidget);
+    expect(find.byKey(const Key('today-domain-hadith')), findsOneWidget);
+    expect(find.byKey(const Key('today-domain-charity')), findsOneWidget);
+    expect(find.textContaining('%'), findsNothing);
+    expect(find.textContaining('Score'), findsNothing);
+  });
+
+  testWidgets('hidden domain is absent from Today', (tester) async {
+    await pumpHome(tester, now: DateTime(2026, 9, 22));
+    expect(find.byKey(const Key('today-domain-salah')), findsOneWidget);
+    expect(find.byKey(const Key('today-domain-dhikr')), findsNothing);
+    expect(find.byKey(const Key('today-domain-hajj')), findsNothing);
+  });
+
+  testWidgets('Today has no percentage or progress-score copy', (tester) async {
+    await pumpHome(tester, now: DateTime(2026, 9, 22));
+    expect(find.textContaining('%'), findsNothing);
+    expect(find.textContaining('progress'), findsNothing);
+    expect(find.textContaining('Score'), findsNothing);
+    expect(find.textContaining('streak'), findsNothing);
+    expect(find.textContaining('incomplete'), findsNothing);
+    expect(find.textContaining('0 percent'), findsNothing);
+  });
+
+  testWidgets('empty Today workspace is a neutral Settings pointer', (
+    tester,
+  ) async {
+    await pumpHome(
+      tester,
+      now: DateTime(2026, 9, 22),
+      visibleDomains: <MonitorDomain>{},
+    );
+    expect(find.text(Copy.today), findsOneWidget);
+    expect(find.text(Copy.todayEmpty), findsOneWidget);
+    expect(find.byKey(const Key('today-domain-salah')), findsNothing);
+    expect(find.textContaining('error'), findsNothing);
+    expect(find.textContaining('failed'), findsNothing);
+  });
+
+  testWidgets('opening Today does not create a DailyCheckIn', (tester) async {
+    final checkIns = MemoryCheckInRepository();
+    await pumpHome(tester, now: DateTime(2026, 9, 22), checkIns: checkIns);
+    expect(find.byKey(const Key('today-overview')), findsOneWidget);
+    expect(await checkIns.allHealthy(), isEmpty);
+  });
+
+  testWidgets('date provider update shows the new weekday and date', (
+    tester,
+  ) async {
+    var clock = DateTime(2026, 9, 22, 23, 58);
+    await pumpHome(tester, clock: () => clock);
+    expect(find.textContaining('Tuesday'), findsOneWidget);
+    expect(find.textContaining('22 Sep 2026'), findsOneWidget);
+
+    clock = DateTime(2026, 9, 23, 0, 3);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pump();
+
+    expect(find.textContaining('Wednesday'), findsOneWidget);
+    expect(find.textContaining('23 Sep 2026'), findsOneWidget);
+    expect(find.textContaining('Tuesday'), findsNothing);
+  });
+
+  testWidgets('Today tiles are not announced as buttons', (tester) async {
+    await pumpHome(tester, now: DateTime(2026, 9, 22));
+    final semantics = tester.getSemantics(
+      find.byKey(const Key('today-domain-salah')),
+    );
+    expect(semantics.label, 'Salah');
+    expect(semantics.flagsCollection.isButton, isFalse);
+  });
+}
