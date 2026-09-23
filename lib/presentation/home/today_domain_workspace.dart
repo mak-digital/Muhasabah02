@@ -9,6 +9,7 @@ import '../../domain/display_calendar.dart';
 import '../../domain/monitor_domain.dart';
 import '../../domain/personalisation_resolver.dart';
 import '../../domain/today_workspace.dart';
+import '../shared/domain_action_frame.dart';
 import '../shared/domain_visual.dart';
 import '../shared/progress_calendar.dart';
 import '../shared/state_marker.dart';
@@ -231,51 +232,62 @@ class _TodayWorkspaceRow extends StatelessWidget {
     final spoken = compact
         ? '$label, response recorded'
         : '$label, no response yet';
-    return Semantics(
+    return DomainActionFrame(
       key: Key('today-row-${row.mixId}'),
-      button: true,
-      label: spoken,
-      excludeSemantics: true,
-      child: Material(
-        color: theme.colorScheme.surface,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(compact ? 10 : 12),
-          side: BorderSide(color: theme.colorScheme.outlineVariant),
+      semanticLabel: spoken,
+      excludeChildSemantics: true,
+      color: theme.colorScheme.surface,
+      outlined: true,
+      minHeight: compact ? 48 : 56,
+      onTap: onTap,
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: compact ? 8 : 10,
         ),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(compact ? 10 : 12),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(minHeight: compact ? 48 : 56),
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: compact ? 8 : 10,
-              ),
-              child: compact
-                  ? Row(
+        child: compact
+            ? Row(
+                children: [
+                  RecordedStateMarker(
+                    key: Key('today-row-marker-${row.mixId}'),
+                    color: identity.family,
+                    kind: MarkerKind.filled,
+                    semanticLabel: caption,
+                    size: 18,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    caption,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              )
+            : Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        ExcludeSemantics(
-                          child: RecordedStateMarker(
-                            key: Key('today-row-marker-${row.mixId}'),
-                            color: identity.family,
-                            kind: MarkerKind.filled,
-                            semanticLabel: caption,
-                            size: 16,
+                        Text(
+                          label,
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            label,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
+                        const SizedBox(height: 2),
                         Text(
                           caption,
                           style: theme.textTheme.bodySmall?.copyWith(
@@ -283,43 +295,17 @@ class _TodayWorkspaceRow extends StatelessWidget {
                           ),
                         ),
                       ],
-                    )
-                  : Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                label,
-                                style: theme.textTheme.titleSmall?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                caption,
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.onSurfaceVariant,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        ExcludeSemantics(
-                          child: RecordedStateMarker(
-                            key: Key('today-row-marker-${row.mixId}'),
-                            color: identity.family,
-                            kind: MarkerKind.outlined,
-                            semanticLabel: caption,
-                            size: 18,
-                          ),
-                        ),
-                      ],
                     ),
-            ),
-          ),
-        ),
+                  ),
+                  RecordedStateMarker(
+                    key: Key('today-row-marker-${row.mixId}'),
+                    color: identity.family,
+                    kind: MarkerKind.outlined,
+                    semanticLabel: caption,
+                    size: 18,
+                  ),
+                ],
+              ),
       ),
     );
   }

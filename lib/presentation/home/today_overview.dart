@@ -9,6 +9,7 @@ import '../../domain/display_calendar.dart';
 import '../../domain/monitor_domain.dart';
 import '../../domain/personalisation_resolver.dart';
 import '../../domain/today_workspace.dart';
+import '../shared/domain_action_frame.dart';
 import '../shared/domain_visual.dart';
 import '../shared/progress_calendar.dart';
 import '../shared/ui_bits.dart';
@@ -116,50 +117,26 @@ class _TodayDomainTile extends StatelessWidget {
     final brightness = Theme.of(context).brightness;
     final wash = identity.washFor(brightness);
     final label = todayDomainLabel(domain);
-    return Semantics(
+    return DomainActionFrame(
       key: Key('today-domain-${domain.id}'),
-      button: true,
-      label: label,
-      child: ExcludeSemantics(
-        child: Material(
-          color: wash,
-          clipBehavior: Clip.antiAlias,
-          borderRadius: BorderRadius.circular(12),
-          child: InkWell(
-            onTap: () {
-              refreshNowIfLocalDateChanged(ref);
-              openTodayDomainWorkspace(context, domain);
-            },
-            borderRadius: BorderRadius.circular(12),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: 48),
-              child: IntrinsicHeight(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    ColoredBox(
-                      color: identity.family,
-                      child: const SizedBox(width: 4),
-                    ),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            label,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context).textTheme.titleSmall
-                                ?.copyWith(fontWeight: FontWeight.w600),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+      semanticLabel: label,
+      excludeChildSemantics: true,
+      color: wash,
+      railColor: identity.family,
+      onTap: () {
+        refreshNowIfLocalDateChanged(ref);
+        openTodayDomainWorkspace(context, domain);
+      },
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: Text(
+            label,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.titleSmall
+                ?.copyWith(fontWeight: FontWeight.w600),
           ),
         ),
       ),

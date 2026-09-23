@@ -10,6 +10,8 @@ import '../../domain/monitor_domain.dart';
 import '../../domain/personalisation_resolver.dart';
 import '../../domain/quick_tap.dart';
 import '../../domain/salah_extras.dart';
+import '../shared/domain_action_frame.dart';
+import '../shared/domain_visual.dart';
 import '../shared/state_marker.dart';
 
 IconData _iconFor(String name) => switch (name) {
@@ -181,15 +183,12 @@ class _QuickTapTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final identity = domainColorIdentity(item.domain);
     final (kind, fill) = switch (choice.mark) {
       QuickTapMark.unanswered => (MarkerKind.unanswered, scheme.surface),
       QuickTapMark.noticed => (
         MarkerKind.filled,
-        MuhasabahColors.wash(
-          MuhasabahColors.salahWash,
-          MuhasabahColors.salahWashDark,
-          theme.brightness,
-        ),
+        identity.washFor(theme.brightness),
       ),
       QuickTapMark.slip => (
         MarkerKind.missed,
@@ -199,70 +198,81 @@ class _QuickTapTile extends StatelessWidget {
     final unanswered = choice.mark == QuickTapMark.unanswered;
     final caption = unanswered ? 'Not recorded' : choice.label;
     final oftenHint = often;
-    return Semantics(
-      button: true,
-      label: '${item.label}. $caption',
-      child: Material(
-        key: Key('quick-tap-${item.id}'),
-        color: fill,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(18),
-          side: BorderSide(color: scheme.outlineVariant),
-        ),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(18),
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    return DomainActionFrame(
+      key: Key('quick-tap-${item.id}'),
+      semanticLabel: '${item.label}. $caption',
+      excludeChildSemantics: true,
+      color: fill,
+      radius: 18,
+      outlined: true,
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
               children: [
-                Row(
-                  children: [
-                    Icon(_iconFor(item.iconName), color: scheme.primary),
-                    const Spacer(),
-                    RecordedStateMarker(
-                      kind: kind,
-                      semanticLabel: caption,
-                      size: 18,
-                    ),
-                  ],
-                ),
+                Icon(_iconFor(item.iconName), color: scheme.primary),
                 const Spacer(),
-                Text(item.label, style: theme.textTheme.titleSmall),
-                const SizedBox(height: 2),
-                Text(
-                  caption,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: scheme.onSurfaceVariant,
-                  ),
+                RecordedStateMarker(
+                  color: identity.family,
+                  kind: kind,
+                  semanticLabel: caption,
+                  size: 18,
                 ),
-                if (oftenHint != null) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    oftenHint,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: scheme.onSurfaceVariant,
-                    ),
-                  ),
-                ] else if (item.hint != null) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    item.hint!,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: scheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
               ],
             ),
-          ),
+            Expanded(
+              child: Align(
+                alignment: Alignment.bottomLeft,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.label,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      caption,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
+                    ),
+                    if (oftenHint != null) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        oftenHint,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ] else if (item.hint != null) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        item.hint!,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

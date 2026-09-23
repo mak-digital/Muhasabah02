@@ -6,6 +6,7 @@ import 'package:muhasabah02/domain/copy.dart';
 import 'package:muhasabah02/domain/monitor_domain.dart';
 import 'package:muhasabah02/domain/personal_mix.dart';
 import 'package:muhasabah02/presentation/shared/domain_visual.dart';
+import 'package:muhasabah02/presentation/shared/state_marker.dart';
 
 import '../support/test_app.dart';
 
@@ -211,5 +212,45 @@ void main() {
     );
     expect(semantics.label, 'Salah');
     expect(semantics.flagsCollection.isButton, isTrue);
+  });
+
+  testWidgets('Today tiles use compact 12px domain-wash action frames', (
+    tester,
+  ) async {
+    await pumpHome(tester, now: DateTime(2026, 9, 22));
+    final salah = tester.widget<Material>(
+      find.descendant(
+        of: find.byKey(const Key('today-domain-salah')),
+        matching: find.byType(Material),
+      ),
+    );
+    final quran = tester.widget<Material>(
+      find.descendant(
+        of: find.byKey(const Key('today-domain-quran')),
+        matching: find.byType(Material),
+      ),
+    );
+    final salahShape = salah.shape! as RoundedRectangleBorder;
+    expect(salahShape.borderRadius, BorderRadius.circular(12));
+    expect(
+      salah.color,
+      domainColorIdentity(MonitorDomain.salah).washFor(Brightness.light),
+    );
+    expect(
+      quran.color,
+      domainColorIdentity(MonitorDomain.quran).washFor(Brightness.light),
+    );
+    expect(quran.color, isNot(salah.color));
+    expect(
+      tester.getRect(find.byKey(const Key('today-domain-salah'))).height,
+      greaterThanOrEqualTo(48),
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('today-domain-salah')),
+        matching: find.byType(RecordedStateMarker),
+      ),
+      findsNothing,
+    );
   });
 }

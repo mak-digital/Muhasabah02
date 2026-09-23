@@ -351,6 +351,18 @@ void main() {
       find.byKey(const Key('today-row-marker-salah.fajr')),
     );
     expect(marker.kind, MarkerKind.outlined);
+    expect(marker.size, 18);
+    final unansweredShape =
+        tester
+                .widget<Material>(
+                  find.descendant(
+                    of: find.byKey(const Key('today-row-salah.fajr')),
+                    matching: find.byType(Material),
+                  ),
+                )
+                .shape!
+            as RoundedRectangleBorder;
+    expect(unansweredShape.borderRadius, BorderRadius.circular(12));
     expect(
       tester.getSemantics(find.byKey(const Key('today-row-salah.fajr'))).label,
       'Fajr, no response yet',
@@ -405,6 +417,25 @@ void main() {
             .kind,
         MarkerKind.filled,
       );
+      expect(
+        tester
+            .widget<RecordedStateMarker>(
+              find.byKey(const Key('today-row-marker-salah.fajr')),
+            )
+            .size,
+        18,
+      );
+      final recordedShape =
+          tester
+                  .widget<Material>(
+                    find.descendant(
+                      of: find.byKey(const Key('today-row-salah.fajr')),
+                      matching: find.byType(Material),
+                    ),
+                  )
+                  .shape!
+              as RoundedRectangleBorder;
+      expect(recordedShape.borderRadius, BorderRadius.circular(12));
       expect(
         tester
             .widget<RecordedStateMarker>(
