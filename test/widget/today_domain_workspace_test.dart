@@ -1,20 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:muhasabah02/application/device_unlock.dart';
+import 'package:muhasabah02/application/providers.dart';
+import 'package:muhasabah02/data/app_prefs.dart';
 import 'package:muhasabah02/data/memory_repositories.dart';
 import 'package:muhasabah02/domain/activities.dart';
 import 'package:muhasabah02/domain/copy.dart';
 import 'package:muhasabah02/domain/daily_check_in.dart';
+import 'package:muhasabah02/domain/date_key.dart';
 import 'package:muhasabah02/domain/monitor_domain.dart';
 import 'package:muhasabah02/domain/personal_mix.dart';
 import 'package:muhasabah02/domain/prayer.dart';
 import 'package:muhasabah02/domain/quick_tap.dart';
 import 'package:muhasabah02/domain/quran.dart';
 import 'package:muhasabah02/domain/today_workspace.dart';
+import 'package:muhasabah02/presentation/home/today_row_record.dart';
 import 'package:muhasabah02/presentation/shared/domain_visual.dart';
 import 'package:muhasabah02/presentation/shared/state_marker.dart';
 import 'package:muhasabah02/presentation/shared/system_insets.dart';
 
 import '../support/check_in_select.dart';
+import '../support/fake_device_unlock.dart';
 import '../support/test_app.dart';
 
 void main() {
@@ -600,6 +607,165 @@ void main() {
       ),
     );
     expect(open, 316);
+  });
+
+  Future<void> openConsumedTodaySheet(
+    WidgetTester tester, {
+    required TodayRow row,
+    required Key control,
+    DateTime? now,
+    double keyboard = 0,
+  }) async {
+    final date = now ?? DateTime(2026, 9, 22);
+    tester.view.physicalSize = const Size(400, 1200);
+    tester.view.devicePixelRatio = 1;
+    tester.view.padding = const FakeViewPadding(bottom: 48);
+    tester.view.viewPadding = const FakeViewPadding(bottom: 48);
+    if (keyboard > 0) {
+      tester.view.viewInsets = FakeViewPadding(bottom: keyboard);
+    }
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.resetPadding);
+    addTearDown(tester.view.resetViewPadding);
+    if (keyboard > 0) addTearDown(tester.view.resetViewInsets);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          checkInRepositoryProvider.overrideWithValue(
+            MemoryCheckInRepository(),
+          ),
+          responseRepositoryProvider.overrideWithValue(
+            MemoryResponseRepository(),
+          ),
+          deviceUnlockProvider.overrideWithValue(FakeDeviceUnlock()),
+          appPrefsProvider.overrideWithValue(
+            MemoryAppPrefs(
+              applicationReflectionAcknowledged: true,
+              visibleDomains: allVisibleDomains(),
+            ),
+          ),
+          nowClockProvider.overrideWithValue(() => date),
+          nowProvider.overrideWithValue(date),
+        ],
+        child: MaterialApp(
+          home: MediaQuery(
+            data: MediaQueryData(
+              size: const Size(400, 1200),
+              devicePixelRatio: 1,
+              viewInsets: keyboard > 0
+                  ? EdgeInsets.only(bottom: keyboard)
+                  : EdgeInsets.zero,
+            ),
+            child: Scaffold(
+              body: Consumer(
+                builder: (context, ref, _) {
+                  return TextButton(
+                    key: const Key('open-today-sheet'),
+                    onPressed: () {
+                      showTodayRowRecordSheet(
+                        context: context,
+                        ref: ref,
+                        row: row,
+                        dateKey: dateKey(date),
+                        record: null,
+                      );
+                    },
+                    child: const Text('Open'),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('open-today-sheet')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(control), findsOneWidget);
+    final ceiling = 1200 - (keyboard > 0 ? keyboard : 48);
+    expect(
+      tester.getRect(find.byKey(control)).bottom,
+      lessThanOrEqualTo(ceiling),
+    );
+  }
+
+  testWidgets('Dhuhr sheet clears a consumed 48dp system inset', (tester) async {
+    await openConsumedTodaySheet(
+      tester,
+      row: const TodayRow(
+        mixId: 'salah.dhuhr',
+        domain: MonitorDomain.salah,
+        kind: TodayRowKind.salah,
+        recordedState: TodayRecordedState.noResponse,
+      ),
+      control: const Key('today-salah-dhuhr'),
+    );
+  });
+
+  testWidgets('Qur’an sheet clears a consumed 48dp system inset', (
+    tester,
+  ) async {
+    await openConsumedTodaySheet(
+      tester,
+      row: const TodayRow(
+        mixId: 'quran.reading',
+        domain: MonitorDomain.quran,
+        kind: TodayRowKind.quran,
+        recordedState: TodayRecordedState.noResponse,
+      ),
+      control: const Key('today-quran-reading'),
+    );
+  });
+
+  testWidgets('Jumu‘ah sheet clears a consumed 48dp system inset on Friday', (
+    tester,
+  ) async {
+    await openConsumedTodaySheet(
+      tester,
+      now: DateTime(2026, 9, 18),
+      row: const TodayRow(
+        mixId: 'salah.jumuah',
+        domain: MonitorDomain.salah,
+        kind: TodayRowKind.salah,
+        recordedState: TodayRecordedState.noResponse,
+      ),
+      control: const Key('today-salah-jumuah'),
+    );
+  });
+
+  testWidgets('Ishraq sheet clears a consumed 48dp system inset', (
+    tester,
+  ) async {
+    await openConsumedTodaySheet(
+      tester,
+      row: const TodayRow(
+        mixId: 'salah.ishraq',
+        domain: MonitorDomain.salah,
+        kind: TodayRowKind.salah,
+        recordedState: TodayRecordedState.noResponse,
+      ),
+      control: const Key('today-salah-ishraq'),
+    );
+  });
+
+  testWidgets('Jumu‘ah sheet uses keyboard inset instead of stacking it', (
+    tester,
+  ) async {
+    await openConsumedTodaySheet(
+      tester,
+      now: DateTime(2026, 9, 18),
+      keyboard: 280,
+      row: const TodayRow(
+        mixId: 'salah.jumuah',
+        domain: MonitorDomain.salah,
+        kind: TodayRowKind.salah,
+        recordedState: TodayRecordedState.noResponse,
+      ),
+      control: const Key('today-salah-jumuah'),
+    );
   });
 
   testWidgets('all unanswered rows stay prominent without a Recorded section', (

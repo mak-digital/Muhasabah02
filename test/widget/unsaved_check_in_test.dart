@@ -346,6 +346,64 @@ void main() {
     );
   });
 
+  Future<void> enterCustomNote(WidgetTester tester, String text) async {
+    final field = find.byKey(const Key('checkin-situation-custom'));
+    await tester.scrollUntilVisible(
+      field,
+      400,
+      scrollable: find
+          .descendant(
+            of: find.byType(CheckInScreen),
+            matching: find.byType(Scrollable),
+          )
+          .first,
+    );
+    await tester.enterText(field, text);
+    await tester.pump();
+  }
+
+  testWidgets('custom notes alone activate draft protection', (tester) async {
+    await pumpHome(tester);
+    await openFull(tester);
+    await enterCustomNote(tester, 'only notes');
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(find.text(Copy.unsavedCheckInTitle), findsOneWidget);
+    expect(find.byType(CheckInScreen), findsOneWidget);
+  });
+
+  testWidgets('reverting custom notes restores a clean Back', (tester) async {
+    await pumpHome(tester);
+    await openFull(tester);
+    await enterCustomNote(tester, 'only notes');
+    await enterCustomNote(tester, '');
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(find.byType(CheckInScreen), findsNothing);
+    expect(find.text(Copy.unsavedCheckInTitle), findsNothing);
+  });
+
+  testWidgets(
+    'IME dismiss then Back still protects a custom-note draft',
+    (tester) async {
+      await pumpHome(tester);
+      await openFull(tester);
+      await enterCustomNote(tester, 'only notes');
+      expect(
+        tester.testTextInput.hasAnyClients,
+        isTrue,
+      );
+      tester.testTextInput.hide();
+      FocusManager.instance.primaryFocus?.unfocus();
+      await tester.pump();
+      expect(find.text(Copy.unsavedCheckInTitle), findsNothing);
+      expect(find.byType(CheckInScreen), findsOneWidget);
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      expect(find.text(Copy.unsavedCheckInTitle), findsOneWidget);
+    },
+  );
+
   testWidgets('situation note and draft dialog stay above keyboard inset', (
     tester,
   ) async {

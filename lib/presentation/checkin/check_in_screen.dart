@@ -1579,12 +1579,14 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
                 hintText: 'Custom note (optional)',
               ),
               onChanged: (value) {
-                _draft = _draft.copyWith(
-                  situationNotes: SituationNotes(
-                    ids: _draft.situationNotes.ids,
-                    customText: value.trim().isEmpty ? null : value.trim(),
-                  ),
-                );
+                setState(() {
+                  _draft = _draft.copyWith(
+                    situationNotes: SituationNotes(
+                      ids: _draft.situationNotes.ids,
+                      customText: value.trim().isEmpty ? null : value.trim(),
+                    ),
+                  );
+                });
               },
             ),
           ],

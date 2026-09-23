@@ -112,6 +112,7 @@ Future<void> _showSalahActivitySheet({
   required DailyCheckIn? record,
 }) {
   final key = ActivityCatalog.salahKey(prayer);
+  final systemBottom = presentingSystemBottom(context);
   return showModalBottomSheet<void>(
     context: context,
     showDragHandle: true,
@@ -122,7 +123,7 @@ Future<void> _showSalahActivitySheet({
           final current = _baseRecord(ref, dateKey, record);
           final selected = current.activityFor(key);
           return Padding(
-            padding: sheetContentPadding(context),
+            padding: sheetContentPadding(context, systemBottom: systemBottom),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -169,6 +170,7 @@ Future<void> _showQuranActivitySheet({
 }) {
   final key = ActivityCatalog.quranKey(dimension);
   final options = ActivityCatalog.forQuran(dimension);
+  final systemBottom = presentingSystemBottom(context);
   return showModalBottomSheet<void>(
     context: context,
     showDragHandle: true,
@@ -179,7 +181,7 @@ Future<void> _showQuranActivitySheet({
           final current = _baseRecord(ref, dateKey, record);
           final selected = current.activityFor(key);
           return Padding(
-            padding: sheetContentPadding(context),
+            padding: sheetContentPadding(context, systemBottom: systemBottom),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -218,6 +220,7 @@ Future<void> _showJumuahSheet({
   required String dateKey,
   required DailyCheckIn? record,
 }) {
+  final systemBottom = presentingSystemBottom(context);
   return showModalBottomSheet<void>(
     context: context,
     showDragHandle: true,
@@ -227,7 +230,7 @@ Future<void> _showJumuahSheet({
         builder: (context, setSheet) {
           final current = _baseRecord(ref, dateKey, record);
           return Padding(
-            padding: sheetContentPadding(context),
+            padding: sheetContentPadding(context, systemBottom: systemBottom),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -264,6 +267,7 @@ Future<void> _showVoluntarySalahSheet({
   required String dateKey,
   required DailyCheckIn? record,
 }) {
+  final systemBottom = presentingSystemBottom(context);
   return showModalBottomSheet<void>(
     context: context,
     showDragHandle: true,
@@ -276,7 +280,7 @@ Future<void> _showVoluntarySalahSheet({
               ? current.tahajjud
               : current.ishraq;
           return Padding(
-            padding: sheetContentPadding(context),
+            padding: sheetContentPadding(context, systemBottom: systemBottom),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
