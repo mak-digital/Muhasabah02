@@ -33,9 +33,7 @@ void main() {
     ResponseProvenance? noteProvenance,
   }) {
     return ProviderScope(
-      overrides: [
-        responseRepositoryProvider.overrideWithValue(responses),
-      ],
+      overrides: [responseRepositoryProvider.overrideWithValue(responses)],
       child: MaterialApp(
         home: Builder(
           builder: (context) {
@@ -87,9 +85,7 @@ void main() {
   testWidgets('unchanged quote prefill closes without warning', (tester) async {
     final repo = ControllableResponseRepository();
     const quote = 'Establish prayer.\n\n— Qur’an 29:45';
-    await tester.pumpWidget(
-      editorApp(responses: repo, initialText: quote),
-    );
+    await tester.pumpWidget(editorApp(responses: repo, initialText: quote));
     await tester.pumpAndSettle();
     await openEditor(tester);
     await tester.tap(find.byType(BackButton));
@@ -161,7 +157,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(ResponseEditorScreen), findsNothing);
     expect(dialogRepo.saveCount, 1);
-    expect((await dialogRepo.inner.allHealthy()).single.text, 'Saved from dialog');
+    expect(
+      (await dialogRepo.inner.allHealthy()).single.text,
+      'Saved from dialog',
+    );
 
     final ordinary = ControllableResponseRepository();
     await tester.pumpWidget(editorApp(responses: ordinary));
@@ -172,10 +171,15 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(ResponseEditorScreen), findsNothing);
     expect(ordinary.saveCount, 1);
-    expect((await ordinary.inner.allHealthy()).single.text, 'Saved from button');
+    expect(
+      (await ordinary.inner.allHealthy()).single.text,
+      'Saved from button',
+    );
   });
 
-  testWidgets('failed dialog Save keeps draft and allows retry', (tester) async {
+  testWidgets('failed dialog Save keeps draft and allows retry', (
+    tester,
+  ) async {
     final repo = ControllableResponseRepository()..throwOnSave = true;
     await tester.pumpWidget(editorApp(responses: repo));
     await tester.pumpAndSettle();
@@ -259,22 +263,23 @@ void main() {
     expect((await repo.inner.getById('resp-1'))!.text, 'Kept note');
   });
 
-  testWidgets('modified existing response warns and Discard keeps stored text', (
-    tester,
-  ) async {
-    final repo = ControllableResponseRepository();
-    await repo.inner.save(existing);
-    await tester.pumpWidget(editorApp(responses: repo, current: existing));
-    await tester.pumpAndSettle();
-    await openEditor(tester);
-    await typeDraft(tester, 'Changed note');
-    await tester.pageBack();
-    await tester.pumpAndSettle();
-    expect(find.text(Copy.unsavedResponseTitle), findsOneWidget);
-    await tester.tap(find.text(Copy.unsavedResponseDiscard));
-    await tester.pumpAndSettle();
-    expect((await repo.inner.getById('resp-1'))!.text, 'Kept note');
-  });
+  testWidgets(
+    'modified existing response warns and Discard keeps stored text',
+    (tester) async {
+      final repo = ControllableResponseRepository();
+      await repo.inner.save(existing);
+      await tester.pumpWidget(editorApp(responses: repo, current: existing));
+      await tester.pumpAndSettle();
+      await openEditor(tester);
+      await typeDraft(tester, 'Changed note');
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      expect(find.text(Copy.unsavedResponseTitle), findsOneWidget);
+      await tester.tap(find.text(Copy.unsavedResponseDiscard));
+      await tester.pumpAndSettle();
+      expect((await repo.inner.getById('resp-1'))!.text, 'Kept note');
+    },
+  );
 
   testWidgets('editing existing response retains id createdAt and provenance', (
     tester,
@@ -362,5 +367,70 @@ void main() {
     await tester.tap(find.byType(BackButton));
     await tester.pumpAndSettle();
     expect(find.byType(ResponseEditorScreen), findsNothing);
+  });
+
+  void applySystemBottom(WidgetTester tester, double bottom) {
+    tester.view.physicalSize = const Size(400, 800);
+    tester.view.devicePixelRatio = 1;
+    tester.view.padding = FakeViewPadding(bottom: bottom);
+    tester.view.viewPadding = FakeViewPadding(bottom: bottom);
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.resetPadding);
+    addTearDown(tester.view.resetViewPadding);
+  }
+
+  testWidgets('Save stays above a 48dp system inset', (tester) async {
+    applySystemBottom(tester, 48);
+    final repo = ControllableResponseRepository();
+    await tester.pumpWidget(editorApp(responses: repo));
+    await tester.pumpAndSettle();
+    await openEditor(tester);
+    expect(
+      tester.getRect(find.byKey(const Key('response-save'))).bottom,
+      lessThanOrEqualTo(800 - 48),
+    );
+  });
+
+  testWidgets('Save stays above a 280dp keyboard inset', (tester) async {
+    tester.view.physicalSize = const Size(400, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final repo = ControllableResponseRepository();
+    await tester.pumpWidget(editorApp(responses: repo));
+    await tester.pumpAndSettle();
+    await openEditor(tester);
+    tester.view.viewInsets = const FakeViewPadding(bottom: 280);
+    addTearDown(tester.view.resetViewInsets);
+    await tester.pumpAndSettle();
+    expect(
+      tester.getRect(find.byKey(const Key('response-save'))).bottom,
+      lessThanOrEqualTo(800 - 280),
+    );
+  });
+
+  testWidgets('unsaved dialog stays usable with keyboard inset', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(400, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final repo = ControllableResponseRepository();
+    await tester.pumpWidget(editorApp(responses: repo));
+    await tester.pumpAndSettle();
+    await openEditor(tester);
+    await typeDraft(tester, 'Draft note');
+    tester.view.viewInsets = const FakeViewPadding(bottom: 280);
+    addTearDown(tester.view.resetViewInsets);
+    await tester.pumpAndSettle();
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('unsaved-response-dialog')), findsOneWidget);
+    expect(
+      tester.getRect(find.text(Copy.unsavedResponseContinue)).bottom,
+      lessThanOrEqualTo(800 - 280),
+    );
   });
 }

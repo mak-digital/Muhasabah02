@@ -12,6 +12,7 @@ import 'package:muhasabah02/domain/quran.dart';
 import 'package:muhasabah02/presentation/home/quick_tap_sheet.dart';
 import 'package:muhasabah02/presentation/shared/domain_visual.dart';
 import 'package:muhasabah02/presentation/shared/state_marker.dart';
+import 'package:muhasabah02/presentation/shared/system_insets.dart';
 
 import '../support/test_app.dart';
 
@@ -23,11 +24,18 @@ void main() {
     Set<MonitorDomain>? visibleDomains,
     DateTime? now,
     double textScale = 1,
+    double systemBottom = 0,
   }) async {
     tester.view.physicalSize = const Size(400, 1200);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
+    if (systemBottom > 0) {
+      tester.view.padding = FakeViewPadding(bottom: systemBottom);
+      tester.view.viewPadding = FakeViewPadding(bottom: systemBottom);
+      addTearDown(tester.view.resetPadding);
+      addTearDown(tester.view.resetViewPadding);
+    }
     tester.platformDispatcher.textScaleFactorTestValue = textScale;
     addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
     await tester.pumpWidget(
@@ -185,6 +193,114 @@ void main() {
     expect(recorded.label, 'Fajr. Prayed on time in congregation');
     expect(recorded.flagsCollection.isButton, isTrue);
     expect(recorded.label.contains('Not recorded'), isFalse);
+  });
+
+  testWidgets('contentBottomInset keeps an intentional MediaQuery zero inset', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(400, 800);
+    tester.view.devicePixelRatio = 1;
+    tester.view.padding = const FakeViewPadding(bottom: 48);
+    tester.view.viewPadding = const FakeViewPadding(bottom: 48);
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.resetPadding);
+    addTearDown(tester.view.resetViewPadding);
+    late double inset;
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          viewPadding: EdgeInsets.zero,
+          viewInsets: EdgeInsets.zero,
+        ),
+        child: Builder(
+          builder: (context) {
+            inset = contentBottomInset(context);
+            return const SizedBox.shrink();
+          },
+        ),
+      ),
+    );
+    expect(inset, 16);
+  });
+
+  testWidgets(
+    'presentingSystemBottom recovers View inset after MediaQuery is consumed',
+    (tester) async {
+      tester.view.physicalSize = const Size(400, 800);
+      tester.view.devicePixelRatio = 1;
+      tester.view.padding = const FakeViewPadding(bottom: 48);
+      tester.view.viewPadding = const FakeViewPadding(bottom: 48);
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.view.resetPadding);
+      addTearDown(tester.view.resetViewPadding);
+      late double mediaInset;
+      late double presenting;
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(
+            viewPadding: EdgeInsets.zero,
+            viewInsets: EdgeInsets.zero,
+          ),
+          child: Builder(
+            builder: (context) {
+              mediaInset = contentBottomInset(context);
+              presenting = contentBottomInset(
+                context,
+                systemBottom: presentingSystemBottom(context),
+              );
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
+      );
+      expect(mediaInset, 16);
+      expect(presenting, 64);
+    },
+  );
+
+  testWidgets('contentBottomInset does not stack keyboard and system inset', (
+    tester,
+  ) async {
+    late double inset;
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          viewPadding: EdgeInsets.only(bottom: 48),
+          viewInsets: EdgeInsets.only(bottom: 280),
+        ),
+        child: Builder(
+          builder: (context) {
+            inset = contentBottomInset(context, systemBottom: 48);
+            return const SizedBox.shrink();
+          },
+        ),
+      ),
+    );
+    expect(inset, 296);
+  });
+
+  testWidgets('Quick Tap last row stays above a 48dp system inset', (
+    tester,
+  ) async {
+    await pumpQuickTap(tester, systemBottom: 48);
+    final scrollable = find.descendant(
+      of: find.byType(QuickTapSheet),
+      matching: find.byType(Scrollable),
+    );
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('quick-tap-zakat')),
+      300,
+      scrollable: scrollable,
+    );
+    await tester.ensureVisible(find.byKey(const Key('quick-tap-zakat')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('quick-tap-zakat')), findsOneWidget);
+    expect(
+      tester.getRect(find.byKey(const Key('quick-tap-zakat'))).bottom,
+      lessThanOrEqualTo(1200 - 48),
+    );
   });
 
   testWidgets('Quick Tap renders at 1.5 text scale without exceptions', (

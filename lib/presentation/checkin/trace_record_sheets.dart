@@ -78,6 +78,7 @@ Future<void> showHomeTraceRecordSheet({
   var outcome = record?.homeTrace(row.storageKey) ?? TernaryOutcome.unanswered;
   var factors =
       record?.homeTraceFactors[row.storageKey] ?? const SalahFactorCapture();
+  final systemBottom = presentingSystemBottom(context);
   await showModalBottomSheet<void>(
     context: context,
     showDragHandle: true,
@@ -91,7 +92,10 @@ Future<void> showHomeTraceRecordSheet({
             child: ConstrainedBox(
               constraints: BoxConstraints(maxHeight: maxHeight),
               child: Padding(
-                padding: sheetContentPadding(context),
+                padding: sheetContentPadding(
+                  context,
+                  systemBottom: systemBottom,
+                ),
                 child: SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
                   child: Column(
@@ -230,6 +234,7 @@ Future<void> showZakatRecordSheet({
   required DailyCheckIn? record,
 }) async {
   var status = record?.zakat ?? ZakatStatus.unanswered;
+  final systemBottom = presentingSystemBottom(context);
   await showModalBottomSheet<void>(
     context: context,
     showDragHandle: true,
@@ -238,7 +243,7 @@ Future<void> showZakatRecordSheet({
       return StatefulBuilder(
         builder: (context, setSheet) {
           return Padding(
-            padding: sheetContentPadding(context),
+            padding: sheetContentPadding(context, systemBottom: systemBottom),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -279,6 +284,7 @@ Future<void> showPrayerRecordSheet({
   required DailyCheckIn? record,
 }) async {
   var status = record?.prayer(prayer) ?? PrayerStatus.unanswered;
+  final systemBottom = presentingSystemBottom(context);
   await showModalBottomSheet<void>(
     context: context,
     showDragHandle: true,
@@ -286,7 +292,7 @@ Future<void> showPrayerRecordSheet({
       return StatefulBuilder(
         builder: (context, setSheet) {
           return Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+            padding: sheetContentPadding(context, systemBottom: systemBottom),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -341,6 +347,7 @@ Future<void> showQuranDimensionRecordSheet({
   required DailyCheckIn? record,
 }) async {
   var outcome = record?.quranOutcome(dimension) ?? TernaryOutcome.unanswered;
+  final systemBottom = presentingSystemBottom(context);
   await showModalBottomSheet<void>(
     context: context,
     showDragHandle: true,
@@ -348,7 +355,7 @@ Future<void> showQuranDimensionRecordSheet({
       return StatefulBuilder(
         builder: (context, setSheet) {
           return Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+            padding: sheetContentPadding(context, systemBottom: systemBottom),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,

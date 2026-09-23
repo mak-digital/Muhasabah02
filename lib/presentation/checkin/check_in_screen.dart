@@ -257,6 +257,7 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
             child: FilledButton(
+              key: const Key('checkin-save'),
               onPressed: !_editing
                   ? () => setState(() => _editing = true)
                   : (_saving || !_loaded)
@@ -1571,6 +1572,7 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
             ),
             const SizedBox(height: 8),
             TextField(
+              key: const Key('checkin-situation-custom'),
               controller: _situationCustom,
               maxLines: 2,
               decoration: const InputDecoration(
@@ -1657,6 +1659,7 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
     if (didPop) return;
     if (_saving || _confirmOpen) return;
     if (!_isDirty) return;
+    FocusManager.instance.primaryFocus?.unfocus();
     setState(() => _confirmOpen = true);
     final calendar = ref.read(appPrefsProvider).displayCalendar;
     final date = formatStoredDateKey(_openedDateKey, calendar);

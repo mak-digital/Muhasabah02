@@ -13,6 +13,7 @@ import '../../domain/salah_extras.dart';
 import '../shared/domain_action_frame.dart';
 import '../shared/domain_visual.dart';
 import '../shared/state_marker.dart';
+import '../shared/system_insets.dart';
 
 IconData _iconFor(String name) => switch (name) {
   'wb_twilight' => Icons.wb_twilight,
@@ -28,6 +29,7 @@ IconData _iconFor(String name) => switch (name) {
 Future<void> showQuickTapSheet(BuildContext context, WidgetRef ref) {
   refreshNowIfLocalDateChanged(ref);
   final sessionDateKey = dateKey(ref.read(nowProvider));
+  final systemBottom = presentingSystemBottom(context);
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
@@ -36,16 +38,24 @@ Future<void> showQuickTapSheet(BuildContext context, WidgetRef ref) {
       final height = MediaQuery.sizeOf(context).height * 0.88;
       return SizedBox(
         height: height,
-        child: QuickTapSheet(dateKey: sessionDateKey),
+        child: QuickTapSheet(
+          dateKey: sessionDateKey,
+          systemBottom: systemBottom,
+        ),
       );
     },
   );
 }
 
 class QuickTapSheet extends ConsumerWidget {
-  const QuickTapSheet({super.key, required this.dateKey});
+  const QuickTapSheet({
+    super.key,
+    required this.dateKey,
+    this.systemBottom = 0,
+  });
 
   final String dateKey;
+  final double systemBottom;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -70,7 +80,7 @@ class QuickTapSheet extends ConsumerWidget {
     }
     final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      padding: sheetContentPadding(context, systemBottom: systemBottom),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

@@ -325,4 +325,64 @@ void main() {
       expect(stored.personalReflectionText, 'Kept reflection');
     },
   );
+
+  testWidgets('Save stays above a 48dp system inset', (tester) async {
+    tester.view.physicalSize = const Size(400, 900);
+    tester.view.devicePixelRatio = 1;
+    tester.view.padding = const FakeViewPadding(bottom: 48);
+    tester.view.viewPadding = const FakeViewPadding(bottom: 48);
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.resetPadding);
+    addTearDown(tester.view.resetViewPadding);
+    await tester.pumpWidget(
+      testApp(now: DateTime(2026, 9, 3), visibleDomains: allVisibleDomains()),
+    );
+    await tester.pumpAndSettle();
+    await openFull(tester);
+    expect(
+      tester.getRect(find.byKey(const Key('checkin-save'))).bottom,
+      lessThanOrEqualTo(900 - 48),
+    );
+  });
+
+  testWidgets('situation note and draft dialog stay above keyboard inset', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(400, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(
+      testApp(now: DateTime(2026, 9, 3), visibleDomains: allVisibleDomains()),
+    );
+    await tester.pumpAndSettle();
+    await openFull(tester);
+    await dirtyFajr(tester);
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('checkin-situation-custom')),
+      400,
+      scrollable: find
+          .descendant(
+            of: find.byType(CheckInScreen),
+            matching: find.byType(Scrollable),
+          )
+          .first,
+    );
+    expect(find.byKey(const Key('checkin-situation-custom')), findsOneWidget);
+    tester.view.padding = const FakeViewPadding(bottom: 48);
+    tester.view.viewPadding = const FakeViewPadding(bottom: 48);
+    tester.view.viewInsets = const FakeViewPadding(bottom: 280);
+    addTearDown(tester.view.resetPadding);
+    addTearDown(tester.view.resetViewPadding);
+    addTearDown(tester.view.resetViewInsets);
+    await tester.pumpAndSettle();
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('unsaved-check-in-dialog')), findsOneWidget);
+    expect(
+      tester.getRect(find.text(Copy.unsavedCheckInContinue)).bottom,
+      lessThanOrEqualTo(900 - 280),
+    );
+  });
 }

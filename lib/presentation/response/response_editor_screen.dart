@@ -90,7 +90,8 @@ class _ResponseEditorScreenState extends ConsumerState<ResponseEditorScreen> {
                   enabled: !_saving,
                   textAlignVertical: TextAlignVertical.top,
                   decoration: const InputDecoration(
-                    hintText: 'Write in any language. This stays on the device.',
+                    hintText:
+                        'Write in any language. This stays on the device.',
                   ),
                 ),
               ),
@@ -99,15 +100,23 @@ class _ResponseEditorScreenState extends ConsumerState<ResponseEditorScreen> {
                   padding: const EdgeInsets.only(top: 8),
                   child: Text(
                     _error!,
-                    style: TextStyle(color: Theme.of(context).colorScheme.error),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
                   ),
                 ),
               const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton(
-                  onPressed: _saving ? null : _save,
-                  child: const Text(Copy.saveResponse),
+              SafeArea(
+                top: false,
+                left: false,
+                right: false,
+                child: SizedBox(
+                  width: double.infinity,
+                  child: FilledButton(
+                    key: const Key('response-save'),
+                    onPressed: _saving ? null : _save,
+                    child: const Text(Copy.saveResponse),
+                  ),
                 ),
               ),
             ],
@@ -160,6 +169,7 @@ class _ResponseEditorScreenState extends ConsumerState<ResponseEditorScreen> {
     if (didPop) return;
     if (_saving || _confirmOpen) return;
     if (!_isDirty) return;
+    FocusManager.instance.primaryFocus?.unfocus();
     setState(() => _confirmOpen = true);
     final action = await showDialog<_UnsavedResponseAction>(
       context: context,
@@ -176,8 +186,10 @@ class _ResponseEditorScreenState extends ConsumerState<ResponseEditorScreen> {
               child: const Text(Copy.unsavedResponseDiscard),
             ),
             TextButton(
-              onPressed: () =>
-                  Navigator.pop(context, _UnsavedResponseAction.continueEditing),
+              onPressed: () => Navigator.pop(
+                context,
+                _UnsavedResponseAction.continueEditing,
+              ),
               child: const Text(Copy.unsavedResponseContinue),
             ),
             FilledButton(

@@ -18,6 +18,7 @@ import '../response/response_list_screen.dart';
 import '../shared/quran_stage_mark.dart';
 import '../shared/salah_activity_mark.dart';
 import '../shared/state_marker.dart';
+import '../shared/system_insets.dart';
 import '../shared/ui_bits.dart';
 import 'application_reflection_screen.dart';
 import 'faq_screen.dart';
@@ -36,7 +37,7 @@ class SettingsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text(Copy.settingsTitle)),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: pageListPadding(context),
         children: [
           const SectionHeader(Copy.applicationSection),
           Card(
@@ -672,7 +673,7 @@ class VisibleDomainsSettingsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text(Copy.visibleDomains)),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: pageListPadding(context),
         children: [
           Text(
             Copy.shownDomainsNote,
