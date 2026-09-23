@@ -129,18 +129,54 @@ class RecognitionPattern {
       'Among those $contextualCount observations, “$factorLabel” appeared on $factorCount.';
 }
 
+class RecognitionWindowCoverage {
+  const RecognitionWindowCoverage({
+    required this.windowDays,
+    required this.savedDays,
+  });
+
+  final int windowDays;
+  final int savedDays;
+}
+
 class RecognitionEngine {
   const RecognitionEngine();
+
+  RecognitionWindowCoverage coverage({
+    required List<DailyCheckIn> records,
+    required ReviewPeriod period,
+    required DateTime now,
+  }) {
+    final keys = periodDateKeys(period.days, now: now);
+    final saved = {
+      for (final record in records)
+        if (keys.contains(record.dateKey)) record.dateKey,
+    };
+    return RecognitionWindowCoverage(
+      windowDays: keys.length,
+      savedDays: saved.length,
+    );
+  }
 
   List<RecognitionPattern> detect({
     required List<DailyCheckIn> records,
     required ReviewPeriod period,
+    required DateTime now,
+    Iterable<QuranDimension>? subjects,
   }) {
     if (period == ReviewPeriod.days7) return const [];
+    final keys = periodDateKeys(period.days, now: now).toSet();
+    final inPeriod = [
+      for (final record in records)
+        if (keys.contains(record.dateKey)) record,
+    ];
+    final eligible = [
+      for (final subject in subjects ?? QuranDimension.values)
+        if (subject.isNeutralPeerDimension) subject,
+    ];
     final patterns = <RecognitionPattern>[];
     const domain = 'quran';
-    for (final subject in QuranDimension.values) {
-      if (!subject.isNeutralPeerDimension) continue;
+    for (final subject in eligible) {
       for (final outcome in [
         TernaryOutcome.positive,
         TernaryOutcome.negative,
@@ -150,7 +186,7 @@ class RecognitionEngine {
             ? 'positive'
             : 'negative';
         final matching = <DailyCheckIn>[];
-        for (final record in records) {
+        for (final record in inPeriod) {
           if (record.quranOutcome(subject) == outcome) matching.add(record);
         }
         final t = matching.length;

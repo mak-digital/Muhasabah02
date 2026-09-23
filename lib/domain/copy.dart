@@ -102,6 +102,19 @@ class Copy {
   static const reviewYouAlsoRecorded = 'You also recorded';
   static const reviewRecognitionBody =
       'Descriptive context patterns in 30- and 90-day views';
+  static const recognitionTitle = 'Recognition';
+  static const recognitionSevenDay =
+      'Recognition is available for 30-day and 90-day views. It describes recorded context; it does not explain causes.';
+  static const recognitionGuard =
+      'These lines describe what appeared in your recorded context. They do not say that a factor caused an outcome.';
+  static const recognitionNoPatternsTitle = 'No descriptive patterns yet';
+  static const recognitionNoPatternsBody =
+      'Patterns appear only when enough optional context is recorded across distinct dates.';
+  static const recognitionNoEligibleTitle = 'No included Qur’an practices';
+  static const recognitionNoEligibleBody =
+      'This mix does not include Qur’an practices that Recognition can describe. Stored rows stay unchanged. Unanswered is not missed.';
+  static String recognitionCoverage(int savedDays, int windowDays) =>
+      'This $windowDays-day window: $savedDays of $windowDays days have a saved check-in. Unanswered rows are not missed.';
   static const edit = 'Edit';
   static String get akhlaqObservationNote => akhlaqBriefing.plainText;
   static const akhlaqStruggleNote = 'Struggle note';

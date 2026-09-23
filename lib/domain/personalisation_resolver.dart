@@ -77,6 +77,16 @@ class PersonalisationResolver {
   List<QuranDimension> get includedQuranDimensions =>
       mixQuranDimensions(effectiveRowIds);
 
+  /// Qur’an peer dimensions included in the current mix. Recitation and
+  /// Application Reflection stay out. Hidden Qur’an yields an empty list.
+  List<QuranDimension> get eligibleRecognitionSubjects {
+    if (!isDomainVisible(MonitorDomain.quran)) return const [];
+    return [
+      for (final dimension in includedQuranDimensions)
+        if (dimension.isNeutralPeerDimension) dimension,
+    ];
+  }
+
   bool get includesApplicationReflection =>
       isRowIncluded('quran.applicationReflection');
 }

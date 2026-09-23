@@ -78,10 +78,12 @@ void main() {
     final patterns30 = const RecognitionEngine().detect(
       records: in30,
       period: ReviewPeriod.days30,
+      now: now,
     );
     final patterns90 = const RecognitionEngine().detect(
       records: in90,
       period: ReviewPeriod.days90,
+      now: now,
     );
     expect(patterns30, isNotEmpty);
     expect(
