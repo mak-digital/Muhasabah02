@@ -9,6 +9,7 @@ import 'package:muhasabah02/domain/activities.dart';
 import 'package:muhasabah02/domain/copy.dart';
 import 'package:muhasabah02/domain/daily_check_in.dart';
 import 'package:muhasabah02/domain/date_key.dart';
+import 'package:muhasabah02/domain/home_traces.dart';
 import 'package:muhasabah02/domain/monitor_domain.dart';
 import 'package:muhasabah02/domain/personal_mix.dart';
 import 'package:muhasabah02/domain/prayer.dart';
@@ -132,20 +133,21 @@ void main() {
     expect(find.text('Application Reflection'), findsNothing);
   });
 
-  testWidgets('tapping Akhlaq and Huquq keeps Today identities', (
-    tester,
-  ) async {
+  testWidgets('tapping Dhikr and Huquq keeps Today identities', (tester) async {
     await pumpHome(tester);
-    await openDomain(tester, 'akhlaq');
-    expect(find.byKey(const Key('today-workspace-akhlaq')), findsOneWidget);
+    await openDomain(tester, 'dhikr');
+    expect(find.byKey(const Key('today-workspace-dhikr')), findsOneWidget);
     expect(
       find.descendant(
-        of: find.byKey(const Key('today-workspace-akhlaq')),
-        matching: find.text('Akhlaq'),
+        of: find.byKey(const Key('today-workspace-dhikr')),
+        matching: find.text('Dhikr'),
       ),
       findsOneWidget,
     );
-    expect(find.byKey(const Key('today-row-akhlaq.patience')), findsOneWidget);
+    expect(
+      find.byKey(const Key('today-row-dhikr.morningAdhkar')),
+      findsOneWidget,
+    );
     await tester.pageBack();
     await tester.pumpAndSettle();
     await openDomain(tester, 'huquq');
@@ -173,7 +175,7 @@ void main() {
 
   testWidgets('hidden domains remain unavailable from Today', (tester) async {
     await pumpHome(tester);
-    expect(find.byKey(const Key('today-domain-dhikr')), findsNothing);
+    expect(find.byKey(const Key('today-domain-akhlaq')), findsNothing);
     expect(find.byKey(const Key('today-domain-hajj')), findsNothing);
   });
 
@@ -305,37 +307,45 @@ void main() {
     );
   });
 
-  testWidgets('Akhlaq negative observation is recorded and editable', (
+  testWidgets('Dhikr negative observation is recorded and editable', (
     tester,
   ) async {
     final checkIns = MemoryCheckInRepository();
     await pumpHome(tester, checkIns: checkIns);
-    await openDomain(tester, 'akhlaq');
-    await tester.tap(find.byKey(const Key('today-row-akhlaq.patience')));
+    await openDomain(tester, 'dhikr');
+    await tester.tap(find.byKey(const Key('today-row-dhikr.morningAdhkar')));
     await tester.pumpAndSettle();
     await chooseCheckInOption(
       tester,
-      dropdownKey: const Key('today-trace-akhlaq.patience'),
-      optionLabel: 'I did not notice this today — Patience',
+      dropdownKey: const Key('today-trace-dhikr.morningAdhkar'),
+      optionLabel: traceOutcomeLabel(
+        'dhikr.morningAdhkar',
+        TernaryOutcome.negative,
+      ),
     );
     expect(
-      (await checkIns.getByDate('2026-09-22'))?.homeTrace('akhlaq.patience'),
+      (await checkIns.getByDate('2026-09-22'))
+          ?.homeTrace('dhikr.morningAdhkar'),
       TernaryOutcome.negative,
     );
     await chooseCheckInOption(
       tester,
-      dropdownKey: const Key('today-trace-akhlaq.patience'),
-      optionLabel: 'I noticed this in myself — Patience',
+      dropdownKey: const Key('today-trace-dhikr.morningAdhkar'),
+      optionLabel: traceOutcomeLabel(
+        'dhikr.morningAdhkar',
+        TernaryOutcome.positive,
+      ),
     );
     expect(
-      (await checkIns.getByDate('2026-09-22'))?.homeTrace('akhlaq.patience'),
+      (await checkIns.getByDate('2026-09-22'))
+          ?.homeTrace('dhikr.morningAdhkar'),
       TernaryOutcome.positive,
     );
     await tester.tap(find.byType(ModalBarrier).last);
     await tester.pumpAndSettle();
     expect(
       find.descendant(
-        of: find.byKey(const Key('today-row-akhlaq.patience')),
+        of: find.byKey(const Key('today-row-dhikr.morningAdhkar')),
         matching: find.text(Copy.todayRecorded),
       ),
       findsOneWidget,
@@ -474,17 +484,17 @@ void main() {
     },
   );
 
-  testWidgets('Akhlaq explicit negative remains Recorded', (tester) async {
+  testWidgets('Dhikr explicit negative remains Recorded', (tester) async {
     final checkIns = MemoryCheckInRepository();
     await checkIns.save(
       DailyCheckIn.empty('2026-09-22')
-          .withHomeTrace('akhlaq.patience', TernaryOutcome.negative),
+          .withHomeTrace('dhikr.morningAdhkar', TernaryOutcome.negative),
     );
     await pumpHome(tester, checkIns: checkIns);
-    await openDomain(tester, 'akhlaq');
+    await openDomain(tester, 'dhikr');
     expect(
       find.descendant(
-        of: find.byKey(const Key('today-row-akhlaq.patience')),
+        of: find.byKey(const Key('today-row-dhikr.morningAdhkar')),
         matching: find.text(Copy.todayRecorded),
       ),
       findsOneWidget,
@@ -492,7 +502,7 @@ void main() {
     expect(
       tester
           .widget<RecordedStateMarker>(
-            find.byKey(const Key('today-row-marker-akhlaq.patience')),
+            find.byKey(const Key('today-row-marker-dhikr.morningAdhkar')),
           )
           .kind,
       MarkerKind.filled,
@@ -692,7 +702,9 @@ void main() {
     );
   }
 
-  testWidgets('Dhuhr sheet clears a consumed 48dp system inset', (tester) async {
+  testWidgets('Dhuhr sheet clears a consumed 48dp system inset', (
+    tester,
+  ) async {
     await openConsumedTodaySheet(
       tester,
       row: const TodayRow(

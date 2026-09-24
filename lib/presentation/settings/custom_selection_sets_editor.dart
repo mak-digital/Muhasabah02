@@ -23,9 +23,8 @@ class CustomSelectionSetsEditor extends ConsumerWidget {
         const SizedBox(height: 8),
         Text(
           Copy.customSelectionSetsNote,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
+          style: Theme.of(context).textTheme.bodySmall
+              ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
         const SizedBox(height: 8),
         for (final slot in record.slots)
@@ -83,6 +82,12 @@ class _CustomSlotTile extends ConsumerWidget {
             Wrap(
               spacing: 8,
               children: [
+                TextButton(
+                  key: Key('custom-slot-clear-${slot.id}'),
+                  onPressed: () =>
+                      confirmClearCustomSlot(context, ref, slot.id),
+                  child: const Text(Copy.clearAllSelections),
+                ),
                 TextButton(
                   key: Key('custom-slot-activate-${slot.id}'),
                   onPressed: () => _activate(context, ref),
@@ -165,7 +170,8 @@ class _RenameCustomSlotDialog extends StatefulWidget {
   final String initial;
 
   @override
-  State<_RenameCustomSlotDialog> createState() => _RenameCustomSlotDialogState();
+  State<_RenameCustomSlotDialog> createState() =>
+      _RenameCustomSlotDialogState();
 }
 
 class _RenameCustomSlotDialogState extends State<_RenameCustomSlotDialog> {
@@ -234,6 +240,37 @@ Future<void> confirmClearWorkingSelection(
   );
   if (ok != true) return;
   await ref.read(appPrefsProvider).clearWorkingSelection();
+  if (!context.mounted) return;
+  ref.read(prefsTickProvider.notifier).state++;
+}
+
+Future<void> confirmClearCustomSlot(
+  BuildContext context,
+  WidgetRef ref,
+  int slotId,
+) async {
+  final ok = await showDialog<bool>(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        key: Key('clear-custom-slot-dialog-$slotId'),
+        title: const Text(Copy.clearCustomSlotTitle),
+        content: const Text(Copy.clearCustomSlotBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text(Copy.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text(Copy.clearAllSelectionsAction),
+          ),
+        ],
+      );
+    },
+  );
+  if (ok != true) return;
+  await ref.read(appPrefsProvider).clearCustomSlot(slotId);
   if (!context.mounted) return;
   ref.read(prefsTickProvider.notifier).state++;
 }

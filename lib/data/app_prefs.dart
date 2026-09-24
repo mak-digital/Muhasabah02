@@ -48,6 +48,7 @@ abstract class AppPrefs {
   Future<void> saveWorkingToCustomSlot(int id);
   Future<void> renameCustomSlot(int id, String name);
   Future<void> clearWorkingSelection();
+  Future<void> clearCustomSlot(int id);
   Future<void> setQuotationCadence(QuotationCadence value);
   Future<void> setBaselines(List<PersonalBaseline> value);
   Future<void> setAspirations(List<PersonalAspiration> value);
@@ -83,7 +84,7 @@ class MemoryAppPrefs implements AppPrefs {
        aspirations = List.of(aspirations ?? const []),
        _journals = Map.of(weeklyJournals ?? const {}),
        visibleDomains = Set<MonitorDomain>.from(
-         visibleDomains ?? kBasicAkhlaqVisibleDomains,
+         visibleDomains ?? kBasicDhikrVisibleDomains,
        ),
        personalMix = personalMix ?? PersonalMix.sameAsDomains,
        customSelectionSets =
@@ -270,6 +271,28 @@ class MemoryAppPrefs implements AppPrefs {
         slots: customSelectionSets.slots,
       ),
     );
+  }
+
+  @override
+  Future<void> clearCustomSlot(int id) async {
+    final slotId = normalizeCustomSlotId(id);
+    if (slotId == null) return;
+    final current = customSelectionSets.slotById(slotId);
+    final nextSets = customSelectionSets.replacingSlot(
+      current.copyWith(
+        domains: <MonitorDomain>{},
+        mix: PersonalMix.sameAsDomains,
+      ),
+    );
+    if (customSelectionSets.activeSlotId == slotId) {
+      await applyWorkingSelection(
+        domains: <MonitorDomain>{},
+        mix: PersonalMix.sameAsDomains,
+        sets: nextSets,
+      );
+    } else {
+      await setCustomSelectionSets(nextSets);
+    }
   }
 
   @override

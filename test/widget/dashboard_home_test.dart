@@ -98,7 +98,8 @@ void main() {
     expect(find.byKey(const Key('home-domain-pill-salah')), findsOneWidget);
     expect(find.byKey(const Key('home-domain-pill-hadith')), findsOneWidget);
     expect(find.byKey(const Key('home-domain-pill-charity')), findsOneWidget);
-    expect(find.byKey(const Key('home-domain-pill-dhikr')), findsNothing);
+    expect(find.byKey(const Key('home-domain-pill-dhikr')), findsOneWidget);
+    expect(find.byKey(const Key('home-domain-pill-akhlaq')), findsNothing);
     expect(find.text(MonitorDomain.hadith.label), findsNothing);
     expect(find.text(MonitorDomain.akhlaq.label), findsNothing);
     expect(find.text(MonitorDomain.dhikr.label), findsNothing);

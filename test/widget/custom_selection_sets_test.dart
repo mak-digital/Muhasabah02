@@ -230,6 +230,59 @@ void main() {
     expect(find.text(Copy.todayEmpty), findsOneWidget);
   });
 
+  testWidgets('clear all on a custom slot keeps other slots and names', (
+    tester,
+  ) async {
+    final prefs = MemoryAppPrefs(
+      visibleDomains: {MonitorDomain.salah, MonitorDomain.fasting},
+      customSelectionSets: CustomSelectionSetsRecord(
+        activeSlotId: 2,
+        slots: [
+          const CustomSelectionSet(id: 1, name: 'Kept'),
+          const CustomSelectionSet(
+            id: 2,
+            name: 'Fast',
+            domains: {MonitorDomain.salah, MonitorDomain.fasting},
+          ),
+          const CustomSelectionSet(
+            id: 3,
+            name: 'Night',
+            domains: {MonitorDomain.quran},
+          ),
+        ],
+      ),
+    );
+    await pumpLarge(
+      tester,
+      app: testApp(now: DateTime(2026, 9, 22), prefs: prefs),
+    );
+    await openDomains(tester);
+    await showSlot(tester, 2);
+    await tester.tap(find.byKey(const Key('custom-slot-clear-2')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('clear-custom-slot-dialog-2')), findsOneWidget);
+    await tester.tap(find.text(Copy.cancel));
+    await tester.pumpAndSettle();
+    expect(prefs.customSelectionSets.slotById(2).domains, {
+      MonitorDomain.salah,
+      MonitorDomain.fasting,
+    });
+
+    await tester.tap(find.byKey(const Key('custom-slot-clear-2')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(Copy.clearAllSelectionsAction));
+    await tester.pumpAndSettle();
+    expect(prefs.customSelectionSets.slotById(2).name, 'Fast');
+    expect(prefs.customSelectionSets.slotById(2).domains, isEmpty);
+    expect(prefs.visibleDomains, isEmpty);
+    expect(prefs.customSelectionSets.activeSlotId, 2);
+    expect(prefs.customSelectionSets.slotById(1).name, 'Kept');
+    expect(prefs.customSelectionSets.slotById(3).name, 'Night');
+    expect(prefs.customSelectionSets.slotById(3).domains, {
+      MonitorDomain.quran,
+    });
+  });
+
   testWidgets('activating a saved slot refreshes Today', (tester) async {
     final prefs = MemoryAppPrefs(
       visibleDomains: <MonitorDomain>{},
@@ -264,7 +317,7 @@ void main() {
     'activating an empty slot clears Today without restoring defaults',
     (tester) async {
       final prefs = MemoryAppPrefs(
-        visibleDomains: kBasicAkhlaqVisibleDomains,
+        visibleDomains: kBasicDhikrVisibleDomains,
         customSelectionSets: CustomSelectionSetsRecord.empty(),
       );
       await pumpLarge(
@@ -303,28 +356,21 @@ void main() {
     await tester.pumpWidget(testApp(now: DateTime(2026, 9, 22)));
     await tester.pumpAndSettle();
     await openDomains(tester);
+    final clearAll = find.byKey(const Key('clear-all-selections'));
+    expect(clearAll, findsOneWidget);
+    expect(tester.getRect(clearAll).bottom, lessThanOrEqualTo(1200 - 48));
     await showSlot(tester, 3);
     final domainsScroll = find.descendant(
       of: find.byType(VisibleDomainsSettingsScreen),
       matching: find.byType(Scrollable),
     );
     final slot3 = find.byKey(const Key('custom-slot-3'), skipOffstage: false);
-    final clearAll = find.byKey(
-      const Key('clear-all-selections'),
-      skipOffstage: false,
-    );
     for (var i = 0; i < 40; i++) {
       if (tester.getRect(slot3).bottom <= 1200 - 48) break;
       await tester.drag(domainsScroll, const Offset(0, -240));
       await tester.pumpAndSettle();
     }
     expect(tester.getRect(slot3).bottom, lessThanOrEqualTo(1200 - 48));
-    for (var i = 0; i < 20; i++) {
-      if (tester.getRect(clearAll).bottom <= 1200 - 48) break;
-      await tester.drag(domainsScroll, const Offset(0, -240));
-      await tester.pumpAndSettle();
-    }
-    expect(tester.getRect(clearAll).bottom, lessThanOrEqualTo(1200 - 48));
   });
 
   testWidgets('Rename dialog stays usable with a 280dp keyboard inset', (

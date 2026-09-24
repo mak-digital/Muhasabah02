@@ -191,6 +191,8 @@ final kPeopleMixKeys = mixKeysWhere(
       (item.domain == MonitorDomain.charity && item.band == 'Care'),
 );
 
+/// First-season mix for the Salah, Qur’an & Dhikr look: obligatory Salah,
+/// selected Qur’an Journey rows, lived Sunnah, two Dhikr rows, Parents, giving, and Zakat.
 final kFirstLookMixKeys = mixKeysWhere(
   (item) =>
       (item.domain == MonitorDomain.salah && item.band == 'Obligatory Salah') ||
@@ -199,8 +201,8 @@ final kFirstLookMixKeys = mixKeysWhere(
       item.id == 'quran.reflection' ||
       item.id == 'quran.consciousApplication' ||
       item.id == 'hadith.livedSunnah' ||
-      item.id == 'akhlaq.patience' ||
-      item.id == 'akhlaq.truthfulness' ||
+      item.id == 'dhikr.postFardFajr' ||
+      item.id == 'dhikr.morningAdhkar' ||
       item.id == 'huquq.parents' ||
       item.id == 'charity.voluntary' ||
       item.id == kZakatMixKey,

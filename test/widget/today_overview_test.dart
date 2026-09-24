@@ -109,14 +109,14 @@ void main() {
     expect(akhlaq.dx, greaterThan(dhikr.dx));
   });
 
-  testWidgets('Today tiles show Akhlaq and Huquq, not Character or Rights', (
+  testWidgets('Today tiles show Dhikr and Huquq, not Character or Rights', (
     tester,
   ) async {
     await pumpHome(tester, now: DateTime(2026, 9, 22));
     expect(
       find.descendant(
-        of: find.byKey(const Key('today-domain-akhlaq')),
-        matching: find.text('Akhlaq'),
+        of: find.byKey(const Key('today-domain-dhikr')),
+        matching: find.text('Dhikr'),
       ),
       findsOneWidget,
     );
@@ -129,7 +129,7 @@ void main() {
     );
     expect(
       find.descendant(
-        of: find.byKey(const Key('today-domain-akhlaq')),
+        of: find.byKey(const Key('today-domain-dhikr')),
         matching: find.text('Character'),
       ),
       findsNothing,
@@ -152,7 +152,7 @@ void main() {
   testWidgets('hidden domain is absent from Today', (tester) async {
     await pumpHome(tester, now: DateTime(2026, 9, 22));
     expect(find.byKey(const Key('today-domain-salah')), findsOneWidget);
-    expect(find.byKey(const Key('today-domain-dhikr')), findsNothing);
+    expect(find.byKey(const Key('today-domain-akhlaq')), findsNothing);
     expect(find.byKey(const Key('today-domain-hajj')), findsNothing);
   });
 

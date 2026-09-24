@@ -90,7 +90,7 @@ void main() {
             const RecordedActivity(id: 'congregationOnTime'),
           )
           .withQuran(QuranDimension.reading, TernaryOutcome.positive)
-          .withHomeTrace('akhlaq.patience', TernaryOutcome.positive),
+          .withHomeTrace('dhikr.morningAdhkar', TernaryOutcome.positive),
     );
     await pumpQuickTap(tester, checkIns: checkIns);
     expect(find.text(Copy.quickTapNote), findsOneWidget);
@@ -99,7 +99,7 @@ void main() {
         .washFor(Brightness.light);
     final quranWash = domainColorIdentity(MonitorDomain.quran)
         .washFor(Brightness.light);
-    final akhlaqWash = domainColorIdentity(MonitorDomain.akhlaq)
+    final dhikrWash = domainColorIdentity(MonitorDomain.dhikr)
         .washFor(Brightness.light);
     expect(tileFill(tester, 'salah.fajr').color, salahWash);
     final scrollable = find.descendant(
@@ -116,15 +116,15 @@ void main() {
         tileFill(tester, 'quran.reading').shape! as RoundedRectangleBorder;
     expect(quranShape.borderRadius, BorderRadius.circular(18));
     await tester.scrollUntilVisible(
-      find.byKey(const Key('quick-tap-akhlaq.patience')),
+      find.byKey(const Key('quick-tap-dhikr.morningAdhkar')),
       300,
       scrollable: scrollable,
     );
-    expect(tileFill(tester, 'akhlaq.patience').color, akhlaqWash);
+    expect(tileFill(tester, 'dhikr.morningAdhkar').color, dhikrWash);
     expect(quranWash, isNot(salahWash));
-    expect(akhlaqWash, isNot(salahWash));
+    expect(dhikrWash, isNot(salahWash));
     expect(quranWash, isNot(MuhasabahColors.salahWash));
-    expect(akhlaqWash, isNot(MuhasabahColors.salahWash));
+    expect(dhikrWash, isNot(MuhasabahColors.salahWash));
     expect(find.textContaining('%'), findsNothing);
     expect(find.textContaining('Score'), findsNothing);
     expect(find.textContaining('complete'), findsNothing);

@@ -16,7 +16,7 @@ void main() {
   test('quick tap lists mix rows on shown domains, not a fixed seven', () {
     final mix = mixForKind(PersonalMixKind.firstLook);
     final keys = PersonalisationResolver(
-      visibleDomains: kBasicAkhlaqVisibleDomains,
+      visibleDomains: kBasicDhikrVisibleDomains,
       mix: mix,
     ).effectiveRowIds;
     final items = quickTapItemsFor(keys, friday: false);
@@ -31,8 +31,8 @@ void main() {
       'quran.reflection',
       'quran.consciousApplication',
       'hadith.livedSunnah',
-      'akhlaq.patience',
-      'akhlaq.truthfulness',
+      'dhikr.postFardFajr',
+      'dhikr.morningAdhkar',
       'huquq.parents',
       'charity.voluntary',
       kZakatMixKey,
@@ -151,7 +151,7 @@ void main() {
   test('quick tap cannot restore mix-excluded rows', () {
     final mix = mixForKind(PersonalMixKind.firstLook);
     final resolver = PersonalisationResolver(
-      visibleDomains: kBasicAkhlaqVisibleDomains,
+      visibleDomains: kBasicDhikrVisibleDomains,
       mix: mix,
     );
     expect(resolver.isRowIncluded('quran.tafsir'), isFalse);
@@ -165,7 +165,7 @@ void main() {
 
   test('quick tap keeps Jumu‘ah Friday-only after mix resolution', () {
     final keys = PersonalisationResolver(
-      visibleDomains: kBasicAkhlaqVisibleDomains,
+      visibleDomains: kBasicDhikrVisibleDomains,
       mix: PersonalMix.sameAsDomains,
     ).effectiveRowIds;
     expect(keys.contains('salah.jumuah'), isTrue);

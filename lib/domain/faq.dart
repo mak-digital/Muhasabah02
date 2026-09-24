@@ -130,7 +130,7 @@ const faqEntries = <FaqEntry>[
   ),
   FaqEntry(
     question: 'Can I hide domains I do not want to monitor?',
-    answer: 'Settings → Application → Domains chooses which domains appear on Home, Review, and today’s check-in. The first look is Salah, Qur’an & Akhlaq (six domains). All domains remains one tap. Hidden domains keep any saved records. Showing a domain again does not rewrite those records. This season’s mix is on the same screen. Recorded days still shows what was stored.',
+    answer: 'Settings → Application → Domains chooses which domains appear on Home, Review, and today’s check-in. The first look is Salah, Qur’an & Dhikr (six domains). All domains remains one tap. Hidden domains keep any saved records. Showing a domain again does not rewrite those records. This season’s mix is on the same screen. Recorded days still shows what was stored.',
   ),
   FaqEntry(
     question: 'What is a Personal mix?',

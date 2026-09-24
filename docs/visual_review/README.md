@@ -61,7 +61,7 @@ Mockups remain reference: `home_symbols.html`, `quran_card.html`, `salah_card.ht
 - Character & Morals 7-day Progress: Home item rows × weekday columns (implemented; 30/90 stay one calendar per Home row)
 - Rights of Others 7-day Progress: Home item rows × weekday columns (implemented; 30/90 stay one calendar per Home row; Care in hardship stays on this domain)
 - Knowledge & Beneficial Speech 7-day Progress: Home item rows × weekday columns (implemented; 30/90 stay one calendar per Home row)
-- Knowledge Home uses the same full item×day week as Akhlaq when the domain is shown (still opt-in; not on the Salah, Qur’an & Akhlaq preset)
+- Knowledge Home uses the same full item×day week as Akhlaq when the domain is shown (still opt-in; not on the Salah, Qur’an & Dhikr preset)
 - Time, Health, Wealth, Ummah, Fasting, and Hajj Home weeks use the same full item×day matrix when shown (Hajj preparation only while due or preparing)
 - Time through Hajj 7-day Progress from Review uses the same stacked Home week (item rows × weekday columns, day-of-month under the weekday letter; 30/90 stay one calendar per Home row)
 

@@ -19,7 +19,7 @@ void main() {
     PersonalMix? mix,
   }) {
     return PersonalisationResolver(
-      visibleDomains: visible ?? kBasicAkhlaqVisibleDomains,
+      visibleDomains: visible ?? kBasicDhikrVisibleDomains,
       mix: mix ?? PersonalMix.sameAsDomains,
     );
   }
@@ -63,7 +63,7 @@ void main() {
       MonitorDomain.salah,
       MonitorDomain.quran,
       MonitorDomain.hadith,
-      MonitorDomain.akhlaq,
+      MonitorDomain.dhikr,
       MonitorDomain.huquq,
       MonitorDomain.charity,
     ]);
@@ -158,7 +158,7 @@ void main() {
 
   test('hidden domain is absent even when mix names its rows', () {
     final mix = mixForKind(PersonalMixKind.firstLook);
-    final visible = {...kBasicAkhlaqVisibleDomains}
+    final visible = {...kBasicDhikrVisibleDomains}
       ..remove(MonitorDomain.quran);
     final subject = workspace(visible: visible, mix: mix);
     expect(
@@ -247,22 +247,22 @@ void main() {
 
   test('home-trace positive and negative are recorded; unanswered is not', () {
     var record = DailyCheckIn.empty(tuesday)
-        .withHomeTrace('akhlaq.patience', TernaryOutcome.positive);
+        .withHomeTrace('dhikr.morningAdhkar', TernaryOutcome.positive);
     record = record.withHomeTrace(
-      'akhlaq.truthfulness',
+      'dhikr.postFardFajr',
       TernaryOutcome.negative,
     );
     final subject = workspace(
       mix: mixForKind(PersonalMixKind.firstLook),
       record: record,
     );
-    expect(rowOf(subject, 'akhlaq.patience')?.kind, TodayRowKind.homeTrace);
+    expect(rowOf(subject, 'dhikr.morningAdhkar')?.kind, TodayRowKind.homeTrace);
     expect(
-      rowOf(subject, 'akhlaq.patience')?.recordedState,
+      rowOf(subject, 'dhikr.morningAdhkar')?.recordedState,
       TodayRecordedState.recorded,
     );
     expect(
-      rowOf(subject, 'akhlaq.truthfulness')?.recordedState,
+      rowOf(subject, 'dhikr.postFardFajr')?.recordedState,
       TodayRecordedState.recorded,
     );
     expect(

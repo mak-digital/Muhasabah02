@@ -11,13 +11,13 @@ void main() {
     PersonalMix? mix,
   }) {
     return PersonalisationResolver(
-      visibleDomains: visible ?? kBasicAkhlaqVisibleDomains,
+      visibleDomains: visible ?? kBasicDhikrVisibleDomains,
       mix: mix ?? PersonalMix.sameAsDomains,
     );
   }
 
   test('explicit hidden domain stays hidden', () {
-    final visible = {...kBasicAkhlaqVisibleDomains}
+    final visible = {...kBasicDhikrVisibleDomains}
       ..remove(MonitorDomain.charity);
     final subject = resolver(visible: visible);
     expect(subject.isDomainVisible(MonitorDomain.charity), isFalse);
@@ -81,10 +81,10 @@ void main() {
 
   test('resolver inputs are visibility and mix only', () {
     const subject = PersonalisationResolver(
-      visibleDomains: kBasicAkhlaqVisibleDomains,
+      visibleDomains: kBasicDhikrVisibleDomains,
       mix: PersonalMix.sameAsDomains,
     );
-    expect(subject.visibleDomains, kBasicAkhlaqVisibleDomains);
+    expect(subject.visibleDomains, kBasicDhikrVisibleDomains);
     expect(subject.mix.kind, PersonalMixKind.sameAsDomains);
     expect(subject.effectiveRowIds, isNotEmpty);
   });
@@ -132,7 +132,7 @@ void main() {
 
   test('same-as-domains default matches current mix resolution', () {
     const mix = PersonalMix.sameAsDomains;
-    final visible = kBasicAkhlaqVisibleDomains;
+    final visible = kBasicDhikrVisibleDomains;
     final subject = resolver(visible: visible, mix: mix);
     expect(subject.effectiveRowIds, resolvePersonalMixKeys(mix, visible));
     expect(subject.homeDomains, homeMixDomains(visible, mix));
@@ -147,7 +147,7 @@ void main() {
 
   test('hidden domain wins over mix keys for that domain', () {
     final mix = mixForKind(PersonalMixKind.firstLook);
-    final visible = {...kBasicAkhlaqVisibleDomains}
+    final visible = {...kBasicDhikrVisibleDomains}
       ..remove(MonitorDomain.quran);
     final subject = resolver(visible: visible, mix: mix);
     expect(subject.isRowIncluded('quran.reading'), isFalse);

@@ -15,9 +15,21 @@ enum MonitorDomain {
   charity,
 }
 
-/// Salah, Qur’an, Hadith & Living Sunnah, Character & Morals, Rights of Others, and Charity.
-/// Knowledge, Time, Health, Wealth, Ummah, Dhikr, Fasting, and Hajj stay available in Settings → Domains.
-const kBasicAkhlaqVisibleDomains = {
+/// Salah, Qur’an, Hadith & Living Sunnah, Dhikr & Dua, Rights of Others, and Charity.
+/// Knowledge, Time, Health, Wealth, Ummah, Character & Morals, Fasting, and Hajj stay available in Settings → Domains.
+const kBasicDhikrVisibleDomains = {
+  MonitorDomain.salah,
+  MonitorDomain.quran,
+  MonitorDomain.hadith,
+  MonitorDomain.dhikr,
+  MonitorDomain.huquq,
+  MonitorDomain.charity,
+};
+
+/// Exact six-domain set stored by the previous named preset.
+/// Working prefs that still hold this set are read as [kBasicDhikrVisibleDomains].
+/// Saved custom slots keep the stored set.
+const kLegacyBasicAkhlaqVisibleDomains = {
   MonitorDomain.salah,
   MonitorDomain.quran,
   MonitorDomain.hadith,
@@ -120,9 +132,12 @@ extension MonitorDomainX on MonitorDomain {
   };
 }
 
-Set<MonitorDomain> decodeVisibleDomains(String? raw) {
+Set<MonitorDomain> decodeVisibleDomains(
+  String? raw, {
+  bool migrateNamedPreset = false,
+}) {
   if (raw == null) {
-    return Set<MonitorDomain>.from(kBasicAkhlaqVisibleDomains);
+    return Set<MonitorDomain>.from(kBasicDhikrVisibleDomains);
   }
   if (raw.isEmpty) return <MonitorDomain>{};
   final stored = <String>{};
@@ -139,6 +154,10 @@ Set<MonitorDomain> decodeVisibleDomains(String? raw) {
       stored.every(kLegacyAllDomainIds.contains)) {
     return Set<MonitorDomain>.from(MonitorDomain.values);
   }
+  if (migrateNamedPreset &&
+      sameVisibleDomains(next, kLegacyBasicAkhlaqVisibleDomains)) {
+    return Set<MonitorDomain>.from(kBasicDhikrVisibleDomains);
+  }
   return next;
 }
 
@@ -152,8 +171,8 @@ String encodeVisibleDomains(Set<MonitorDomain> value) {
 String visibleDomainsSummary(Set<MonitorDomain> value) {
   if (value.length == MonitorDomain.values.length) return 'All domains';
   if (value.isEmpty) return 'None shown';
-  if (sameVisibleDomains(value, kBasicAkhlaqVisibleDomains)) {
-    return 'Salah, Qur’an & Akhlaq';
+  if (sameVisibleDomains(value, kBasicDhikrVisibleDomains)) {
+    return 'Salah, Qur’an & Dhikr';
   }
   return [
     for (final domain in MonitorDomain.values)

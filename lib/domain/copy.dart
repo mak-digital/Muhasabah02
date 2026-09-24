@@ -160,7 +160,7 @@ class Copy {
   static const firstLookDoorEmpty =
       'An empty mark is not missed. You can save a day with unanswered rows.';
   static const firstLookDoorSeason =
-      'Home shows Salah, Qur’an, Hadith, Character, Rights, and Charity. This season starts with a short list; the rest stays in collapsed bands and Settings.';
+      'Home shows Salah, Qur’an, Hadith, Dhikr, Rights, and Charity. This season starts with a short list; the rest stays in collapsed bands and Settings.';
   static const firstLookStartBlank = 'Start with a quiet week';
   static const firstLookShowSample = 'Show sample days';
   static const seePonderExplore = 'SEE → PONDER → EXPLORE';
@@ -238,9 +238,9 @@ class Copy {
   static const personalMixShortListNote =
       'A short list is easier to notice. This is not a score.';
   static const selectAllDomains = 'All domains';
-  static const basicAkhlaqDomains = 'Salah, Qur’an & Akhlaq';
-  static const basicAkhlaqDomainsNote =
-      'Shows Salah & Prayer Quality, Qur’an Engagement, Hadith & Living Sunnah, Character & Morals (Akhlaq), Rights of Others (Huquq al-Ibad), and Charity. Knowledge & Beneficial Speech, Time & Barakah, Physical Health & Energy, Wealth & Stewardship, Ummah, Dhikr & Dua, Fasting, and Hajj stay hidden unless you add them.';
+  static const basicDhikrDomains = 'Salah, Qur’an & Dhikr';
+  static const basicDhikrDomainsNote =
+      'Shows Salah & Prayer Quality, Qur’an Engagement, Hadith & Living Sunnah, Dhikr & Dua, Rights of Others (Huquq al-Ibad), and Charity. Knowledge & Beneficial Speech, Time & Barakah, Physical Health & Energy, Wealth & Stewardship, Ummah, Character & Morals (Akhlaq), Fasting, and Hajj stay hidden unless you add them.';
   static const customSelectionSets = 'Custom selection sets';
   static const customSelectionSetsNote =
       'Save this screen’s domains and mix into Custom #1, #2 or #3. Activate a set to use it. Overlap is allowed. Saved days are not changed.';
@@ -257,11 +257,14 @@ class Copy {
   static const activateModifiedBody =
       'You have unsaved changes to the current selection. Activating this set replaces them. The saved custom sets are not deleted.';
   static const activateModifiedAction = 'Activate';
-  static const clearAllSelections = 'Clear all selections';
+  static const clearAllSelections = 'Clear All';
   static const clearAllSelectionsTitle = 'Clear current selections?';
   static const clearAllSelectionsBody =
       'This clears the domains and mix shown now, including Salah. Custom #1, #2 and #3 and all saved days stay as they are.';
   static const clearAllSelectionsAction = 'Clear';
+  static const clearCustomSlotTitle = 'Clear this custom set?';
+  static const clearCustomSlotBody =
+      'This clears the saved domains and mix in this custom set. Saved days stay as they are.';
   static const lunarWhiteDaysNote =
       'Civil Hijri 13, 14 and 15 are highlighted so White Days are easier to locate. This does not record a fast or tell you to fast.';
   static const marksGuide = 'Guide';

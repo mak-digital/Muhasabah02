@@ -213,7 +213,7 @@ class HiveAppPrefs implements AppPrefs {
 
   @override
   Set<MonitorDomain> get visibleDomains =>
-      decodeVisibleDomains(_box.get(_visibleDomains));
+      decodeVisibleDomains(_box.get(_visibleDomains), migrateNamedPreset: true);
 
   @override
   PersonalMix get personalMix => decodePersonalMix(_box.get(_personalMix));
@@ -341,6 +341,28 @@ class HiveAppPrefs implements AppPrefs {
         slots: customSelectionSets.slots,
       ),
     );
+  }
+
+  @override
+  Future<void> clearCustomSlot(int id) async {
+    final slotId = normalizeCustomSlotId(id);
+    if (slotId == null) return;
+    final current = customSelectionSets.slotById(slotId);
+    final nextSets = customSelectionSets.replacingSlot(
+      current.copyWith(
+        domains: <MonitorDomain>{},
+        mix: PersonalMix.sameAsDomains,
+      ),
+    );
+    if (customSelectionSets.activeSlotId == slotId) {
+      await applyWorkingSelection(
+        domains: <MonitorDomain>{},
+        mix: PersonalMix.sameAsDomains,
+        sets: nextSets,
+      );
+    } else {
+      await setCustomSelectionSets(nextSets);
+    }
   }
 
   @override

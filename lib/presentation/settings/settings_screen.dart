@@ -395,25 +395,14 @@ class ActivitiesSettingsScreen extends ConsumerWidget {
                       semanticLabel: row.label,
                     ),
                     const SizedBox(width: 12),
-                    Expanded(
-                      child: Text('${row.label} — ${row.purpose}'),
-                    ),
+                    Expanded(child: Text('${row.label} — ${row.purpose}')),
                   ],
                 ),
               ),
           ] else ...[
-            const _ActivityMarkRow(
-              kind: MarkerKind.filled,
-              label: 'On time',
-            ),
-            const _ActivityMarkRow(
-              kind: MarkerKind.outlined,
-              label: 'Late',
-            ),
-            const _ActivityMarkRow(
-              kind: MarkerKind.missed,
-              label: 'Missed',
-            ),
+            const _ActivityMarkRow(kind: MarkerKind.filled, label: 'On time'),
+            const _ActivityMarkRow(kind: MarkerKind.outlined, label: 'Late'),
+            const _ActivityMarkRow(kind: MarkerKind.missed, label: 'Missed'),
             const _ActivityMarkRow(
               kind: MarkerKind.unanswered,
               label: 'Unanswered',
@@ -679,7 +668,16 @@ class VisibleDomainsSettingsScreen extends ConsumerWidget {
             Copy.shownDomainsNote,
             style: Theme.of(context).textTheme.bodyMedium,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton(
+              key: const Key('clear-all-selections'),
+              onPressed: () => confirmClearWorkingSelection(context, ref),
+              child: const Text(Copy.clearAllSelections),
+            ),
+          ),
+          const SizedBox(height: 8),
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -698,16 +696,16 @@ class VisibleDomainsSettingsScreen extends ConsumerWidget {
                 },
               ),
               FilterChip(
-                label: const Text(Copy.basicAkhlaqDomains),
+                label: const Text(Copy.basicDhikrDomains),
                 selected: sameVisibleDomains(
                   current,
-                  kBasicAkhlaqVisibleDomains,
+                  kBasicDhikrVisibleDomains,
                 ),
                 onSelected: (_) async {
                   await ref
                       .read(appPrefsProvider)
                       .setVisibleDomains(
-                        Set<MonitorDomain>.from(kBasicAkhlaqVisibleDomains),
+                        Set<MonitorDomain>.from(kBasicDhikrVisibleDomains),
                       );
                   ref.read(prefsTickProvider.notifier).state++;
                 },
@@ -716,7 +714,7 @@ class VisibleDomainsSettingsScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            Copy.basicAkhlaqDomainsNote,
+            Copy.basicDhikrDomainsNote,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
@@ -753,15 +751,6 @@ class VisibleDomainsSettingsScreen extends ConsumerWidget {
           const PersonalMixEditor(),
           const SizedBox(height: 24),
           const CustomSelectionSetsEditor(),
-          const SizedBox(height: 8),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton(
-              key: const Key('clear-all-selections'),
-              onPressed: () => confirmClearWorkingSelection(context, ref),
-              child: const Text(Copy.clearAllSelections),
-            ),
-          ),
         ],
       ),
     );
