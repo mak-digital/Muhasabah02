@@ -63,7 +63,9 @@ class _QuranHomeCardState extends ConsumerState<QuranHomeCard> {
       brightness,
     );
     final localizations = MaterialLocalizations.of(context);
-    final bands = quranHomeBandsFor(_display);
+    final rows = [
+      for (final band in quranHomeBandsFor(_display)) ...band.$2,
+    ];
 
     return Semantics(
       container: true,
@@ -152,72 +154,10 @@ class _QuranHomeCardState extends ConsumerState<QuranHomeCard> {
                   ],
                 )
               else
-                for (final band in bands) ...[
-                  _band(
-                    brightness: brightness,
-                    band: band.$1,
-                    rows: band.$2,
-                    keys: keys,
-                    index: index,
-                    colours: colours,
-                  ),
-                  const SizedBox(height: 6),
-                ],
+                for (final dimension in rows)
+                  _row(dimension, keys, index, colours),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _band({
-    required Brightness brightness,
-    required String band,
-    required List<QuranDimension> rows,
-    required List<String> keys,
-    required Map<String, DailyCheckIn> index,
-    required bool colours,
-  }) {
-    final (light, dark) = switch (band) {
-      kQuranEngagementBand => (
-        MuhasabahColors.quranRecitationBand,
-        MuhasabahColors.quranRecitationBandDark,
-      ),
-      kQuranUnderstandingBand => (
-        MuhasabahColors.quranRetentionBand,
-        MuhasabahColors.quranRetentionBandDark,
-      ),
-      kQuranReflectionBand => (
-        MuhasabahColors.quranStudyBand,
-        MuhasabahColors.quranStudyBandDark,
-      ),
-      _ => (
-        MuhasabahColors.quranRecitationBand,
-        MuhasabahColors.quranRecitationBandDark,
-      ),
-    };
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: MuhasabahColors.wash(light, dark, brightness),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(6, 8, 6, 6),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              band.toUpperCase(),
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                letterSpacing: 0.4,
-                fontWeight: FontWeight.w600,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 6),
-            for (final dimension in rows)
-              _row(dimension, keys, index, colours),
-          ],
         ),
       ),
     );

@@ -95,10 +95,10 @@ void main() {
     await pumpHome(tester);
     expect(find.text(Copy.quranJourney.toUpperCase()), findsNothing);
     expect(find.text(Copy.quranStageNote), findsNothing);
-    expect(find.text('ENGAGEMENT'), findsOneWidget);
-    expect(find.text('UNDERSTANDING & REFLECTION'), findsOneWidget);
+    expect(find.text('ENGAGEMENT'), findsNothing);
+    expect(find.text('UNDERSTANDING & REFLECTION'), findsNothing);
     expect(find.text('REFLECTION'), findsNothing);
-    expect(find.text('PRACTICAL RELEVANCE'), findsOneWidget);
+    expect(find.text('PRACTICAL RELEVANCE'), findsNothing);
     expect(find.text('Practical relevance'), findsWidgets);
     expect(find.text('Qur’anic Reflection'), findsNothing);
     expect(find.text('Engagement'), findsWidgets);

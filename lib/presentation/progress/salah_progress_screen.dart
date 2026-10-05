@@ -540,79 +540,65 @@ class QuranProgressScreen extends ConsumerWidget {
     Map<String, DailyCheckIn> index,
     List<QuranDimension> dimensions,
   ) {
+    final rows = [
+      for (final band in quranHomeBandsFor(dimensions)) ...band.$2,
+    ];
+    if (rows.isEmpty) return const [];
     final brightness = Theme.of(context).brightness;
-    final boards = <Widget>[];
-    for (final band in quranHomeBandsFor(dimensions)) {
-      final (light, dark) = switch (band.$1) {
-        kQuranEngagementBand => (
-          MuhasabahColors.quranRecitationBand,
-          MuhasabahColors.quranRecitationBandDark,
+    return [
+      WeekMatrixBoard(
+        title: MonitorDomain.quran.label,
+        family: MuhasabahColors.quranFamily,
+        itemAsRows: true,
+        wash: MuhasabahColors.wash(
+          MuhasabahColors.quranWash,
+          MuhasabahColors.quranWashDark,
+          brightness,
         ),
-        kQuranUnderstandingBand => (
-          MuhasabahColors.quranRetentionBand,
-          MuhasabahColors.quranRetentionBandDark,
-        ),
-        kQuranReflectionBand => (
-          MuhasabahColors.quranStudyBand,
-          MuhasabahColors.quranStudyBandDark,
-        ),
-        _ => (
-          MuhasabahColors.quranRecitationBand,
-          MuhasabahColors.quranRecitationBandDark,
-        ),
-      };
-      boards.add(
-        WeekMatrixBoard(
-          title: band.$1,
-          family: MuhasabahColors.quranFamily,
-          itemAsRows: true,
-          wash: MuhasabahColors.wash(light, dark, brightness),
-          columns: [
-            for (final dimension in band.$2)
-              WeekMatrixColumn(
-                header: dimension.label,
-                cell: (context, key) {
-                  final record = index[key];
-                  final outcome = record == null
-                      ? TernaryOutcome.unanswered
-                      : record.quranOutcome(dimension);
-                  final id =
-                      record?.activityFor(
-                        ActivityCatalog.quranKey(dimension),
-                      ).id ??
-                      ActivityIds.unanswered;
-                  return ProgressDayCell(
-                    key: Key(
-                      'progress-cell-quran-${dimension.name}-$key',
-                    ),
-                    onTap: matrixCellOnTap(
-                      ref: ref,
+        columns: [
+          for (final dimension in rows)
+            WeekMatrixColumn(
+              header: dimension.label,
+              cell: (context, key) {
+                final record = index[key];
+                final outcome = record == null
+                    ? TernaryOutcome.unanswered
+                    : record.quranOutcome(dimension);
+                final id =
+                    record?.activityFor(
+                      ActivityCatalog.quranKey(dimension),
+                    ).id ??
+                    ActivityIds.unanswered;
+                return ProgressDayCell(
+                  key: Key(
+                    'progress-cell-quran-${dimension.name}-$key',
+                  ),
+                  onTap: matrixCellOnTap(
+                    ref: ref,
+                    dateKey: key,
+                    onOpen: () => openFocusedCheckIn(
+                      context,
                       dateKey: key,
-                      onOpen: () => openFocusedCheckIn(
-                        context,
-                        dateKey: key,
-                        focus: CheckInFocus.quran,
-                        focusBand: dimension.homeBand,
-                        focusRowId: 'quran.${dimension.name}',
-                      ),
+                      focus: CheckInFocus.quran,
+                      focusBand: dimension.homeBand,
+                      focusRowId: 'quran.${dimension.name}',
                     ),
-                    marker: RecordedStateMarker(
-                      kind: SalahActivityMark.quranDurationKind(id),
-                      color: SalahActivityMark.quranDurationColour(
-                        id,
-                        colours: colours,
-                      ),
-                      semanticLabel:
-                          '$key ${weekdayNameForDate(key)} ${dimension.label} ${outcome.legendLabel}',
+                  ),
+                  marker: RecordedStateMarker(
+                    kind: SalahActivityMark.quranDurationKind(id),
+                    color: SalahActivityMark.quranDurationColour(
+                      id,
+                      colours: colours,
                     ),
-                  );
-                },
-              ),
-          ],
-        ),
-      );
-    }
-    return boards;
+                    semanticLabel:
+                        '$key ${weekdayNameForDate(key)} ${dimension.label} ${outcome.legendLabel}',
+                  ),
+                );
+              },
+            ),
+        ],
+      ),
+    ];
   }
 
   Widget _dimensionCard(
