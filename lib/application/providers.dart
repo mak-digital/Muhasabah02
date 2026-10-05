@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
@@ -5,6 +6,7 @@ import '../data/app_prefs.dart';
 import '../data/memory_repositories.dart';
 import '../data/repositories.dart';
 import '../domain/daily_check_in.dart';
+import '../domain/date_key.dart';
 import '../domain/monitor_domain.dart';
 import '../domain/personal_response.dart';
 import '../domain/review_period.dart';
@@ -19,7 +21,47 @@ final responseRepositoryProvider = Provider<ResponseRepository>(
   (ref) => MemoryResponseRepository(),
 );
 
-final nowProvider = Provider<DateTime>((ref) => DateTime.now());
+/// Source of "now". Tests override this (or [nowProvider]) for a fixed clock.
+typedef NowClock = DateTime Function();
+
+final nowClockProvider = Provider<NowClock>((ref) => DateTime.now);
+
+final nowProvider = Provider<DateTime>((ref) => ref.watch(nowClockProvider)());
+
+/// True when [cached] and [current] fall on different local Gregorian dates.
+bool localCalendarDateChanged(DateTime cached, DateTime current) {
+  return dateKey(cached) != dateKey(current);
+}
+
+/// Invalidates [nowProvider] when the local calendar date has moved.
+///
+/// Same-date resumes leave the cached value in place. Returns whether
+/// [nowProvider] was invalidated. Does not create or save a check-in.
+bool refreshNowIfLocalDateChanged(WidgetRef ref) {
+  final current = ref.read(nowClockProvider)();
+  final cached = ref.read(nowProvider);
+  if (!localCalendarDateChanged(cached, current)) return false;
+  ref.invalidate(nowProvider);
+  return true;
+}
+
+/// Tap handler that refreshes the cached date, then opens [onOpen] only when
+/// [dateKey] is today or historical. Future cells stay non-navigable.
+///
+/// Does not redirect a historical cell to today.
+VoidCallback recoverableDateCellOnTap({
+  required WidgetRef ref,
+  required String dateKey,
+  required VoidCallback onOpen,
+}) {
+  return () {
+    refreshNowIfLocalDateChanged(ref);
+    if (dateCellKind(dateKey, ref.read(nowProvider)) == DateCellKind.future) {
+      return;
+    }
+    onOpen();
+  };
+}
 
 final reviewPeriodProvider = StateProvider<ReviewPeriod>(
   (ref) => ReviewPeriod.days7,

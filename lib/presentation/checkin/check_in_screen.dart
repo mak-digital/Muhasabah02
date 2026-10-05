@@ -16,6 +16,7 @@ import '../../domain/home_traces.dart';
 import '../../domain/monitor_domain.dart';
 import '../../domain/other_domains.dart';
 import '../../domain/personal_mix.dart';
+import '../../domain/personalisation_resolver.dart';
 import '../../domain/prayer.dart';
 import '../../domain/quran.dart';
 import '../../domain/recorded_context.dart';
@@ -36,6 +37,7 @@ void openFocusedCheckIn(
   String? domainTitle,
   String? domainFocus,
   String? focusBand,
+  String? focusRowId,
   List<HomeTraceRow> traceRows = const [],
   bool includeZakat = false,
   bool includeHadithFocus = false,
@@ -51,6 +53,7 @@ void openFocusedCheckIn(
         domainTitle: domainTitle,
         domainFocus: domainFocus,
         focusBand: focusBand,
+        focusRowId: focusRowId,
         traceRows: traceRows,
         includeZakat: includeZakat,
         includeHadithFocus: includeHadithFocus,
@@ -70,6 +73,7 @@ class CheckInScreen extends ConsumerStatefulWidget {
     this.domainTitle,
     this.domainFocus,
     this.focusBand,
+    this.focusRowId,
     this.traceRows = const [],
     this.includeZakat = false,
     this.includeHadithFocus = false,
@@ -83,6 +87,7 @@ class CheckInScreen extends ConsumerStatefulWidget {
   final String? domainTitle;
   final String? domainFocus;
   final String? focusBand;
+  final String? focusRowId;
   final List<HomeTraceRow> traceRows;
   final bool includeZakat;
   final bool includeHadithFocus;
@@ -104,9 +109,17 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
   final Map<String, TextEditingController> _custom = {};
   var _loaded = false;
   var _editing = true;
+  var _saving = false;
+  var _confirmOpen = false;
+  var _allowPop = false;
   String? _error;
+  late final String _openedDateKey;
+  DailyCheckIn? _original;
+  final _focusAnchor = GlobalKey(debugLabel: 'checkin-focus-anchor');
+  final _focusListController = ScrollController();
+  var _focusScrollAttempts = 0;
 
-  String get _key => dateKey(widget.date ?? DateTime.now());
+  String get _key => _openedDateKey;
 
   bool get _startsLocked {
     if (widget.focus == CheckInFocus.full) return false;
@@ -116,12 +129,16 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
   @override
   void initState() {
     super.initState();
-    _draft = DailyCheckIn.empty(_key);
+    _openedDateKey = dateKey(widget.date ?? ref.read(nowClockProvider)());
+    _draft = DailyCheckIn.empty(_openedDateKey);
     _gratitude = TextEditingController();
     _reflection = TextEditingController();
     _situationCustom = TextEditingController();
     _akhlaqStruggle = TextEditingController();
     Future<void>.microtask(_hydrate);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _scrollToFocusedRow();
+    });
   }
 
   @override
@@ -140,16 +157,31 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
       if (record.dateKey == _key) existing = record;
     }
     if (!mounted) return;
+    final snapshot = existing ?? DailyCheckIn.empty(_openedDateKey);
+    final empty = DailyCheckIn.empty(_openedDateKey);
+    final pending = _pendingRecord();
+    final userStarted = !sameCheckInContent(pending, empty);
     setState(() {
+      _original = snapshot;
       _loaded = true;
       _editing = !_startsLocked;
       if (existing != null) {
-        _draft = existing;
-        _gratitude.text = existing.gratitudeText ?? '';
-        _reflection.text = existing.personalReflectionText ?? '';
-        _situationCustom.text = existing.situationNotes.customText ?? '';
-        _akhlaqStruggle.text = existing.akhlaqStruggleNote ?? '';
+        final merged = userStarted
+            ? overlayCheckInUserEdits(
+                baseline: existing,
+                userPending: pending,
+                empty: empty,
+              )
+            : existing;
+        _draft = merged;
+        _gratitude.text = merged.gratitudeText ?? '';
+        _reflection.text = merged.personalReflectionText ?? '';
+        _situationCustom.text = merged.situationNotes.customText ?? '';
+        _akhlaqStruggle.text = merged.akhlaqStruggleNote ?? '';
       }
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _scrollToFocusedRow();
     });
   }
 
@@ -159,6 +191,7 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
     _reflection.dispose();
     _situationCustom.dispose();
     _akhlaqStruggle.dispose();
+    _focusListController.dispose();
     for (final c in _contextNotes.values) {
       c.dispose();
     }
@@ -177,6 +210,41 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
     };
   }
 
+  Set<String> _mixKeysForCards() {
+    final prefs = ref.read(appPrefsProvider);
+    return PersonalisationResolver(
+      visibleDomains: prefs.visibleDomains,
+      mix: prefs.personalMix,
+    ).effectiveRowIds;
+  }
+
+  Widget _anchorIfFocused(String id, Widget child) {
+    if (widget.focusRowId != id) return child;
+    return KeyedSubtree(key: _focusAnchor, child: child);
+  }
+
+  void _scrollToFocusedRow() {
+    if (widget.focusRowId == null || widget.focusRowId!.isEmpty) return;
+    final target = _focusAnchor.currentContext;
+    if (target != null && _focusListController.hasClients) {
+      final box = target.findRenderObject();
+      if (box is RenderBox && box.hasSize) {
+        final offset =
+            _focusListController.offset +
+            box.localToGlobal(Offset.zero).dy -
+            120;
+        final max = _focusListController.position.maxScrollExtent;
+        _focusListController.jumpTo(offset.clamp(0, max));
+        return;
+      }
+    }
+    if (_focusScrollAttempts >= 8) return;
+    _focusScrollAttempts++;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _scrollToFocusedRow();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     ref.watch(prefsTickProvider);
@@ -184,64 +252,75 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
       _key,
       ref.read(appPrefsProvider).displayCalendar,
     );
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          _appBarTitle(shown),
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
+    return PopScope(
+      canPop: _allowPop || (!_saving && !_isDirty),
+      onPopInvokedWithResult: _onPopInvoked,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            _appBarTitle(shown),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          actions: [
+            if (_startsLocked && !_editing)
+              TextButton(
+                onPressed: () => setState(() => _editing = true),
+                child: const Text(Copy.edit),
+              ),
+          ],
         ),
-        actions: [
-          if (_startsLocked && !_editing)
-            TextButton(
-              onPressed: () => setState(() => _editing = true),
-              child: const Text(Copy.edit),
-            ),
-        ],
-      ),
-      body: widget.focus == CheckInFocus.full
-          ? IgnorePointer(
-              ignoring: !_editing,
-              child: _fullCheckInStage(shown),
-            )
-          : ListView(
-              primary: true,
-              physics: const AlwaysScrollableScrollPhysics(),
-              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-              children: [
-                IgnorePointer(
-                  ignoring: !_editing,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      ..._checkInIntro(shown),
-                      ..._focusBody(),
-                      if (_error != null) ...[
-                        const SizedBox(height: 12),
-                        Text(
-                          _error!,
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.error,
+        body: widget.focus == CheckInFocus.full
+            ? IgnorePointer(
+                ignoring: !_editing,
+                child: _fullCheckInStage(shown),
+              )
+            : ListView(
+                controller: _focusListController,
+                primary: false,
+                physics: const AlwaysScrollableScrollPhysics(),
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                children: [
+                  IgnorePointer(
+                    ignoring: !_editing,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        ..._checkInIntro(shown),
+                        ..._focusBody(),
+                        if (_error != null) ...[
+                          const SizedBox(height: 12),
+                          Text(
+                            _error!,
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.error,
+                            ),
                           ),
-                        ),
+                        ],
                       ],
-                    ],
+                    ),
                   ),
-                ),
-              ],
-            ),
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-          child: FilledButton(
-            onPressed: _editing ? _save : () => setState(() => _editing = true),
-            child: Text(
-              !_editing
-                  ? Copy.edit
-                  : widget.focus == CheckInFocus.full
-                  ? 'Save check-in'
-                  : 'Save',
+                ],
+              ),
+        bottomNavigationBar: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+            child: FilledButton(
+              key: const Key('checkin-save'),
+              onPressed: !_editing
+                  ? () => setState(() => _editing = true)
+                  : (_saving || !_loaded)
+                  ? null
+                  : _save,
+              child: Text(
+                !_editing
+                    ? Copy.edit
+                    : widget.focus == CheckInFocus.full
+                    ? 'Save check-in'
+                    : 'Save',
+              ),
             ),
           ),
         ),
@@ -270,16 +349,15 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
 
   Widget _fullCheckInStage(String shown) {
     final prefs = ref.read(appPrefsProvider);
-    final visible = prefs.visibleDomains;
-    final mix = prefs.personalMix;
-    final mixKeys = resolvePersonalMixKeys(mix, visible);
+    final resolver = PersonalisationResolver(
+      visibleDomains: prefs.visibleDomains,
+      mix: prefs.personalMix,
+    );
+    final mixKeys = resolver.effectiveRowIds;
     return DomainStage(
-      domains: orderedVisibleDomains(visible, mix),
-      cardFor: (domain) => _widgetForDomain(
-        domain,
-        expandFirst: true,
-        mixKeys: mixKeys,
-      ),
+      domains: resolver.homeDomains,
+      cardFor: (domain) =>
+          _widgetForDomain(domain, expandFirst: true, mixKeys: mixKeys),
       stageProvider: checkInDomainStageProvider,
       keyPrefix: 'checkin-domain',
       pillsNote: Copy.checkInDomainPillsNote,
@@ -296,7 +374,7 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
         ],
         const SizedBox(height: 12),
         _otherCard(),
-        if (visible.contains(MonitorDomain.quran)) ...[
+        if (mixIncludesQuran(mixKeys)) ...[
           const SizedBox(height: 12),
           _contextCard(),
         ],
@@ -307,16 +385,34 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
   }
 
   List<Widget> _focusBody() {
+    final mixKeys = _mixKeysForCards();
     switch (widget.focus) {
       case CheckInFocus.salah:
-        return [_salahCard()];
+        return [_salahCard(mixKeys: mixKeys)];
       case CheckInFocus.quran:
-        return [_quranCard(), const SizedBox(height: 12), _contextCard()];
+        return [
+          _quranCard(mixKeys: mixKeys),
+          const SizedBox(height: 12),
+          _contextCard(),
+        ];
       case CheckInFocus.traces:
-        return _tracesBody();
+        return _tracesBody(mixKeys);
       case CheckInFocus.full:
         return const [];
     }
+  }
+
+  String? get _effectiveFocusBand {
+    if (widget.focusBand != null && widget.focusBand!.isNotEmpty) {
+      return widget.focusBand;
+    }
+    final id = widget.focusRowId;
+    if (id == null || id.isEmpty) return null;
+    if (id == kZakatMixKey) return kZakatTraceBand;
+    for (final row in widget.traceRows) {
+      if (row.storageKey == id) return row.band;
+    }
+    return mixItemById[id]?.band;
   }
 
   bool _sectionStartsOpen(
@@ -327,13 +423,31 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
     if (widget.focus == CheckInFocus.full) {
       return expandFirst && band == firstBand;
     }
-    final focus = widget.focusBand;
+    final focus = _effectiveFocusBand;
     if (focus == null || focus.isEmpty) return band == firstBand;
     return band == focus;
   }
 
-  Widget _salahCard({bool expandFirst = true}) {
+  bool _mixAllows(Set<String> mixKeys, String id) {
+    if (mixKeys.isEmpty) return true;
+    return mixKeys.contains(id);
+  }
+
+  Widget _salahCard({bool expandFirst = true, Set<String> mixKeys = const {}}) {
     final title = MonitorDomain.salah.label;
+    final obligatory = [
+      for (final id in PrayerId.values)
+        if (_mixAllows(mixKeys, 'salah.${id.name}')) id,
+    ];
+    final showJumuah = _mixAllows(mixKeys, 'salah.jumuah');
+    final showTahajjud = _mixAllows(mixKeys, 'salah.tahajjud');
+    final showIshraq = _mixAllows(mixKeys, 'salah.ishraq');
+    final showVoluntary = showTahajjud || showIshraq;
+    final firstBand = obligatory.isNotEmpty
+        ? kSalahObligatoryBand
+        : showJumuah
+        ? kSalahFridayBand
+        : kSalahVoluntaryBand;
     return WashPanel(
       color: MuhasabahColors.wash(
         MuhasabahColors.salahWash,
@@ -349,83 +463,75 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
             'Each prayer is recorded independently. Absence is not missed.',
           ),
           const SizedBox(height: 12),
-          _collapsibleTraceBand(
-            title: title,
-            band: kSalahObligatoryBand,
-            initiallyExpanded: _sectionStartsOpen(
-              kSalahObligatoryBand,
-              firstBand: kSalahObligatoryBand,
-              expandFirst: expandFirst,
-            ),
-            children: [for (final id in PrayerId.values) _prayerRow(id)],
-          ),
-          _collapsibleTraceBand(
-            title: title,
-            band: kSalahFridayBand,
-            initiallyExpanded: _sectionStartsOpen(
-              kSalahFridayBand,
-              firstBand: kSalahObligatoryBand,
-              expandFirst: expandFirst,
-            ),
-            children: [
-              const Text(
-                'These stay off the recordable-field count. Unanswered is not missed.',
+          if (obligatory.isNotEmpty)
+            _collapsibleTraceBand(
+              title: title,
+              band: kSalahObligatoryBand,
+              initiallyExpanded: _sectionStartsOpen(
+                kSalahObligatoryBand,
+                firstBand: firstBand,
+                expandFirst: expandFirst,
               ),
-              const SizedBox(height: 8),
-              if (parseDateKey(_key).weekday == DateTime.friday) ...[
-                const CheckInRowLabel('Friday congregation'),
-                CheckInSelect<bool>(
-                  dropdownKey: const Key('salah-jumuah-congregation'),
-                  value: _draft.jumuahCongregation,
-                  entries: const [
-                    CheckInSelectEntry(value: true, label: 'Attended'),
-                    CheckInSelectEntry(value: false, label: 'Not marked'),
-                  ],
-                  onChanged: (selected) => setState(() {
-                    _draft = _draft.copyWith(jumuahCongregation: selected);
-                  }),
+              children: [
+                for (final id in obligatory)
+                  _anchorIfFocused('salah.${id.name}', _prayerRow(id)),
+              ],
+            ),
+          if (showJumuah)
+            _collapsibleTraceBand(
+              title: title,
+              band: kSalahFridayBand,
+              initiallyExpanded: _sectionStartsOpen(
+                kSalahFridayBand,
+                firstBand: firstBand,
+                expandFirst: expandFirst,
+              ),
+              children: [
+                const Text(
+                  'These stay off the recordable-field count. Unanswered is not missed.',
                 ),
                 const SizedBox(height: 8),
+                _anchorIfFocused('salah.jumuah', _jumuahRow()),
               ],
-              _extraPrayerStatus(
-                label: 'Jumu‘ah',
-                enabled: parseDateKey(_key).weekday == DateTime.friday,
-                status: _draft.jumuah,
-                onChanged: (status) => setState(() {
-                  _draft = _draft.copyWith(jumuah: status);
-                }),
-              ),
-            ],
-          ),
-          _collapsibleTraceBand(
-            title: title,
-            band: kSalahVoluntaryBand,
-            initiallyExpanded: _sectionStartsOpen(
-              kSalahVoluntaryBand,
-              firstBand: kSalahObligatoryBand,
-              expandFirst: expandFirst,
             ),
-            children: [
-              const Text(
-                'These stay off the recordable-field count. Unanswered is not missed.',
+          if (showVoluntary)
+            _collapsibleTraceBand(
+              title: title,
+              band: kSalahVoluntaryBand,
+              initiallyExpanded: _sectionStartsOpen(
+                kSalahVoluntaryBand,
+                firstBand: firstBand,
+                expandFirst: expandFirst,
               ),
-              const SizedBox(height: 8),
-              _voluntaryRow(
-                label: 'Tahajjud',
-                outcome: _draft.tahajjud,
-                onChanged: (outcome) => setState(() {
-                  _draft = _draft.copyWith(tahajjud: outcome);
-                }),
-              ),
-              _voluntaryRow(
-                label: 'Ishraq',
-                outcome: _draft.ishraq,
-                onChanged: (outcome) => setState(() {
-                  _draft = _draft.copyWith(ishraq: outcome);
-                }),
-              ),
-            ],
-          ),
+              children: [
+                const Text(
+                  'These stay off the recordable-field count. Unanswered is not missed.',
+                ),
+                const SizedBox(height: 8),
+                if (showTahajjud)
+                  _anchorIfFocused(
+                    'salah.tahajjud',
+                    _voluntaryRow(
+                      label: 'Tahajjud',
+                      outcome: _draft.tahajjud,
+                      onChanged: (outcome) => setState(() {
+                        _draft = _draft.copyWith(tahajjud: outcome);
+                      }),
+                    ),
+                  ),
+                if (showIshraq)
+                  _anchorIfFocused(
+                    'salah.ishraq',
+                    _voluntaryRow(
+                      label: 'Ishraq',
+                      outcome: _draft.ishraq,
+                      onChanged: (outcome) => setState(() {
+                        _draft = _draft.copyWith(ishraq: outcome);
+                      }),
+                    ),
+                  ),
+              ],
+            ),
         ],
       ),
     );
@@ -490,40 +596,79 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
               ),
             ),
           if (factorGroupsForSalahActivity(selected.id).isVisible)
-            _salahFactors(id.name, factorGroupsForSalahActivity(selected.id)),
+            _salahFactors(id.name, factorGroupsForSalahActivity(selected.id)          ),
         ],
       ),
     );
   }
 
-  Widget _extraPrayerStatus({
-    required String label,
-    required bool enabled,
-    required PrayerStatus status,
-    required ValueChanged<PrayerStatus> onChanged,
-  }) {
+  Widget _jumuahRow() {
+    const key = ActivityCatalog.jumuahKey;
+    final selected = _draft.activityFor(key);
+    final friday = parseDateKey(_key).weekday == DateTime.friday;
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CheckInRowLabel(label),
-          if (!enabled)
+          CheckInRowLabel(
+            'Jumu‘ah',
+            semanticsLabel: 'Jumu‘ah, currently ${selected.id}',
+          ),
+          if (!friday)
             const Padding(
               padding: EdgeInsets.only(top: 4, bottom: 4),
               child: Text(
                 'Friday only. Other days stay blank, not unanswered.',
               ),
             ),
-          CheckInSelect<PrayerStatus>(
-            value: status,
-            enabled: enabled,
-            entries: [
-              for (final option in PrayerStatus.values)
-                CheckInSelectEntry(value: option, label: option.label),
-            ],
-            onChanged: onChanged,
+          const SizedBox(height: 6),
+          ActivityPicker(
+            options: ActivityCatalog.jumuah,
+            selectedId: selected.id,
+            statusKeyPrefix: 'salah-jumuah',
+            enabled: friday,
+            onSelected: (option) => setState(() {
+              var next = _draft.withJumuahActivity(
+                RecordedActivity(
+                  id: option.id,
+                  customText: option.isOther ? _note(key).text : null,
+                ),
+              );
+              final groups = factorGroupsForSalahActivity(option.id);
+              final existing =
+                  next.salahFactors['jumuah'] ?? const SalahFactorCapture();
+              _draft = next.withSalahFactors(
+                'jumuah',
+                SalahFactorCapture(
+                  supportIds: groups.showHelping
+                      ? existing.supportIds.take(1).toList()
+                      : const [],
+                  challengeIds: groups.showDistracting
+                      ? existing.challengeIds.take(1).toList()
+                      : const [],
+                  otherText: existing.otherText,
+                ),
+              );
+            }),
           ),
+          if (selected.id == ActivityIds.other)
+            Padding(
+              padding: const EdgeInsets.only(top: 8, left: checkInValueIndent),
+              child: TextField(
+                controller: _note(key, selected.customText),
+                decoration: const InputDecoration(
+                  hintText: 'Describe the other activity',
+                ),
+                onChanged: (value) {
+                  _draft = _draft.withJumuahActivity(
+                    RecordedActivity(id: ActivityIds.other, customText: value),
+                  );
+                },
+              ),
+            ),
+          if (factorGroupsForSalahActivity(selected.id).isVisible)
+            _salahFactors('jumuah', factorGroupsForSalahActivity(selected.id)),
         ],
       ),
     );
@@ -608,8 +753,23 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
     );
   }
 
-  Widget _quranCard({bool expandFirst = true}) {
+  Widget _quranCard({bool expandFirst = true, Set<String> mixKeys = const {}}) {
     final title = MonitorDomain.quran.label;
+    List<QuranDimension> shown(List<QuranDimension> rows) => [
+      for (final dimension in rows)
+        if (_mixAllows(mixKeys, 'quran.${dimension.name}')) dimension,
+    ];
+    final engagement = shown(engagementHomeRows);
+    final understanding = shown(understandingHomeRows);
+    final reflection = shown(reflectionHomeRows);
+    final application = shown(applicationHomeRows);
+    final firstBand = engagement.isNotEmpty
+        ? kQuranEngagementBand
+        : understanding.isNotEmpty
+        ? kQuranUnderstandingBand
+        : reflection.isNotEmpty
+        ? kQuranReflectionBand
+        : kQuranApplicationBand;
     return WashPanel(
       color: MuhasabahColors.wash(
         MuhasabahColors.quranWash,
@@ -623,58 +783,74 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
           const SizedBox(height: 4),
           const Text(Copy.quranCheckInIntro),
           const SizedBox(height: 12),
-          _collapsibleTraceBand(
-            title: title,
-            band: kQuranEngagementBand,
-            initiallyExpanded: _sectionStartsOpen(
-              kQuranEngagementBand,
-              firstBand: kQuranEngagementBand,
-              expandFirst: expandFirst,
+          if (engagement.isNotEmpty)
+            _collapsibleTraceBand(
+              title: title,
+              band: kQuranEngagementBand,
+              initiallyExpanded: _sectionStartsOpen(
+                kQuranEngagementBand,
+                firstBand: firstBand,
+                expandFirst: expandFirst,
+              ),
+              children: [
+                for (final dimension in engagement)
+                  _anchorIfFocused(
+                    'quran.${dimension.name}',
+                    _quranBlock(dimension),
+                  ),
+              ],
             ),
-            children: [
-              for (final dimension in engagementHomeRows)
-                _quranBlock(dimension),
-            ],
-          ),
-          _collapsibleTraceBand(
-            title: title,
-            band: kQuranUnderstandingBand,
-            initiallyExpanded: _sectionStartsOpen(
-              kQuranUnderstandingBand,
-              firstBand: kQuranEngagementBand,
-              expandFirst: expandFirst,
+          if (understanding.isNotEmpty)
+            _collapsibleTraceBand(
+              title: title,
+              band: kQuranUnderstandingBand,
+              initiallyExpanded: _sectionStartsOpen(
+                kQuranUnderstandingBand,
+                firstBand: firstBand,
+                expandFirst: expandFirst,
+              ),
+              children: [
+                for (final dimension in understanding)
+                  _anchorIfFocused(
+                    'quran.${dimension.name}',
+                    _quranBlock(dimension),
+                  ),
+              ],
             ),
-            children: [
-              for (final dimension in understandingHomeRows)
-                _quranBlock(dimension),
-            ],
-          ),
-          _collapsibleTraceBand(
-            title: title,
-            band: kQuranReflectionBand,
-            initiallyExpanded: _sectionStartsOpen(
-              kQuranReflectionBand,
-              firstBand: kQuranEngagementBand,
-              expandFirst: expandFirst,
+          if (reflection.isNotEmpty)
+            _collapsibleTraceBand(
+              title: title,
+              band: kQuranReflectionBand,
+              initiallyExpanded: _sectionStartsOpen(
+                kQuranReflectionBand,
+                firstBand: firstBand,
+                expandFirst: expandFirst,
+              ),
+              children: [
+                for (final dimension in reflection)
+                  _anchorIfFocused(
+                    'quran.${dimension.name}',
+                    _quranBlock(dimension),
+                  ),
+              ],
             ),
-            children: [
-              for (final dimension in reflectionHomeRows)
-                _quranBlock(dimension),
-            ],
-          ),
-          _collapsibleTraceBand(
-            title: title,
-            band: kQuranApplicationBand,
-            initiallyExpanded: _sectionStartsOpen(
-              kQuranApplicationBand,
-              firstBand: kQuranEngagementBand,
-              expandFirst: expandFirst,
+          if (application.isNotEmpty)
+            _collapsibleTraceBand(
+              title: title,
+              band: kQuranApplicationBand,
+              initiallyExpanded: _sectionStartsOpen(
+                kQuranApplicationBand,
+                firstBand: firstBand,
+                expandFirst: expandFirst,
+              ),
+              children: [
+                for (final dimension in application)
+                  _anchorIfFocused(
+                    'quran.${dimension.name}',
+                    _quranBlock(dimension),
+                  ),
+              ],
             ),
-            children: [
-              for (final dimension in applicationHomeRows)
-                _quranBlock(dimension),
-            ],
-          ),
         ],
       ),
     );
@@ -691,43 +867,12 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
           CheckInRowLabel(dimension.label),
           const SizedBox(height: 4),
           Text(dimension.question),
-          if (dimension == QuranDimension.meaning)
-            Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: Text(
-                Copy.meaningFillsRecitation,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ),
-          if (dimension == QuranDimension.reading &&
-              readingLockedByMeaning(_draft.quran))
-            Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: Text(
-                Copy.recitationLockedByMeaning,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ),
           const SizedBox(height: 8),
           ActivityPicker(
             options: ActivityCatalog.forQuran(dimension),
             selectedId: selected.id,
             statusKeyPrefix: 'quran-${dimension.name}',
-            enabled:
-                dimension != QuranDimension.reading ||
-                !readingLockedByMeaning(_draft.quran),
             onSelected: (option) => setState(() {
-              final outcome = option.ternary ?? TernaryOutcome.unanswered;
-              if (!canSetQuranOutcome(
-                quran: _draft.quran,
-                dimension: dimension,
-                outcome: outcome,
-              )) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text(Copy.recitationLockedByMeaning)),
-                );
-                return;
-              }
               _draft = _draft.withQuranActivity(
                 dimension,
                 RecordedActivity(
@@ -766,7 +911,7 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
   }
 
   bool _traceBandStartsOpen(String band) {
-    final focus = widget.focusBand;
+    final focus = _effectiveFocusBand;
     if (focus == null || focus.isEmpty) {
       final bands = bandsFor(widget.traceRows);
       return bands.isNotEmpty && band == bands.first;
@@ -779,13 +924,20 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
     return briefingForLabel(widget.domainTitle);
   }
 
-  List<Widget> _tracesBody() {
+  List<Widget> _tracesBody(Set<String> mixKeys) {
     final accent = widget.familyColor ?? MuhasabahColors.dhikr;
     final hajjStatus = ref.watch(appPrefsProvider).hajjStatus;
-    final rows = widget.includeHajjStatus
+    final visible = widget.includeHajjStatus
         ? hajjRowsForStatus(widget.traceRows, hajjStatus)
         : widget.traceRows;
+    final rows = [
+      for (final row in visible)
+        if (mixKeys.isEmpty || mixKeys.contains(row.storageKey)) row,
+    ];
     final bands = bandsFor(rows);
+    final includeZakat =
+        widget.includeZakat &&
+        (mixKeys.isEmpty || mixKeys.contains(kZakatMixKey));
     return [
       CheckInDomainTitle(
         widget.domainTitle ?? 'Record',
@@ -815,16 +967,16 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
                       accent.withValues(alpha: 0.16),
                       Theme.of(context).colorScheme.surface,
                     ),
-                    child: _traceEditor(row),
+                    child: _anchorIfFocused(row.storageKey, _traceEditor(row)),
                   ),
                 ),
           ],
         ),
-      if (widget.includeZakat)
+      if (includeZakat)
         _collapsibleTraceBand(
           title: widget.domainTitle ?? 'Record',
           band: kZakatTraceBand,
-          initiallyExpanded: widget.focusBand == kZakatTraceBand,
+          initiallyExpanded: _effectiveFocusBand == kZakatTraceBand,
           children: [
             Padding(
               padding: const EdgeInsets.only(bottom: 12),
@@ -833,7 +985,7 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
                   accent.withValues(alpha: 0.16),
                   Theme.of(context).colorScheme.surface,
                 ),
-                child: _zakatEditor(),
+                child: _anchorIfFocused(kZakatMixKey, _zakatEditor()),
               ),
             ),
           ],
@@ -1165,8 +1317,14 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
     required Set<String> mixKeys,
   }) {
     return switch (domain) {
-      MonitorDomain.salah => _salahCard(expandFirst: expandFirst),
-      MonitorDomain.quran => _quranCard(expandFirst: expandFirst),
+      MonitorDomain.salah => _salahCard(
+        expandFirst: expandFirst,
+        mixKeys: mixKeys,
+      ),
+      MonitorDomain.quran => _quranCard(
+        expandFirst: expandFirst,
+        mixKeys: mixKeys,
+      ),
       MonitorDomain.hadith => _homeTraceDomainCard(
         title: MonitorDomain.hadith.label,
         focus: MonitorDomain.hadith.focusQuestion,
@@ -1282,7 +1440,7 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
         rows: charityHomeRows,
         washLight: MuhasabahColors.charityWash,
         washDark: MuhasabahColors.charityWashDark,
-        includeZakat: true,
+        includeZakat: mixKeys.isEmpty || mixIncludesZakat(mixKeys),
         expandFirst: expandFirst,
         mixKeys: mixKeys,
       ),
@@ -1330,19 +1488,11 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
     final visibleRows = includeHajjStatus
         ? hajjRowsForStatus(rows, status)
         : rows;
-    final natural = bandsFor(visibleRows);
-    final mixBands = [
-      for (final band in natural)
-        if (visibleRows.any(
-          (row) => row.band == band && mixKeys.contains(row.storageKey),
-        ))
-          band,
+    final mixVisible = [
+      for (final row in visibleRows)
+        if (mixKeys.isEmpty || mixKeys.contains(row.storageKey)) row,
     ];
-    final rest = [
-      for (final band in natural)
-        if (!mixBands.contains(band)) band,
-    ];
-    final bands = mixBands.isEmpty ? natural : [...mixBands, ...rest];
+    final bands = bandsFor(mixVisible);
     return WashPanel(
       color: MuhasabahColors.wash(
         washLight,
@@ -1369,7 +1519,7 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
               band: bands[i],
               initiallyExpanded: expandFirst && i == 0,
               children: [
-                for (final row in visibleRows)
+                for (final row in mixVisible)
                   if (row.band == bands[i]) _traceEditor(row),
               ],
             ),
@@ -1545,18 +1695,21 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
             ),
             const SizedBox(height: 8),
             TextField(
+              key: const Key('checkin-situation-custom'),
               controller: _situationCustom,
               maxLines: 2,
               decoration: const InputDecoration(
                 hintText: 'Custom note (optional)',
               ),
               onChanged: (value) {
-                _draft = _draft.copyWith(
-                  situationNotes: SituationNotes(
-                    ids: _draft.situationNotes.ids,
-                    customText: value.trim().isEmpty ? null : value.trim(),
-                  ),
-                );
+                setState(() {
+                  _draft = _draft.copyWith(
+                    situationNotes: SituationNotes(
+                      ids: _draft.situationNotes.ids,
+                      customText: value.trim().isEmpty ? null : value.trim(),
+                    ),
+                  );
+                });
               },
             ),
           ],
@@ -1566,6 +1719,31 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
   }
 
   Future<void> _save() async {
+    if (_saving || !_loaded) return;
+    final next = _pendingRecord();
+    if (next.dateKey != _openedDateKey) {
+      setState(() {
+        _error = 'The check-in could not be saved. Your draft is still here.';
+      });
+      return;
+    }
+    setState(() => _saving = true);
+    try {
+      await ref.read(checkInsProvider.notifier).save(next);
+      logAppEvent('checkin_saved');
+      if (!mounted) return;
+      _allowPop = true;
+      Navigator.of(context).pop();
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _saving = false;
+        _error = 'The check-in could not be saved. Your draft is still here.';
+      });
+    }
+  }
+
+  DailyCheckIn _pendingRecord() {
     var next = _draft;
     if (next.gratitudeStatus == EntryStatus.recorded) {
       next = next.copyWith(
@@ -1579,7 +1757,7 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
             : _reflection.text,
       );
     }
-    next = next.copyWith(
+    return next.copyWith(
       situationNotes: SituationNotes(
         ids: next.situationNotes.ids,
         customText: _situationCustom.text.trim().isEmpty
@@ -1591,14 +1769,66 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
           : _akhlaqStruggle.text.trim(),
       clearAkhlaqStruggleNote: _akhlaqStruggle.text.trim().isEmpty,
     );
-    try {
-      await ref.read(checkInsProvider.notifier).save(next);
-      logAppEvent('checkin_saved');
-      if (mounted) Navigator.of(context).pop();
-    } catch (_) {
-      setState(() {
-        _error = 'The check-in could not be saved. Your draft is still here.';
-      });
+  }
+
+  bool get _isDirty {
+    final pending = _pendingRecord();
+    if (!_loaded) {
+      return !sameCheckInContent(pending, DailyCheckIn.empty(_openedDateKey));
+    }
+    final original = _original ?? DailyCheckIn.empty(_openedDateKey);
+    return !sameCheckInContent(pending, original);
+  }
+
+  Future<void> _onPopInvoked(bool didPop, Object? result) async {
+    if (didPop) return;
+    if (_saving || _confirmOpen) return;
+    if (!_isDirty) return;
+    FocusManager.instance.primaryFocus?.unfocus();
+    setState(() => _confirmOpen = true);
+    final calendar = ref.read(appPrefsProvider).displayCalendar;
+    final date = formatStoredDateKey(_openedDateKey, calendar);
+    final action = await showDialog<_UnsavedCheckInAction>(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) {
+        return AlertDialog(
+          key: const Key('unsaved-check-in-dialog'),
+          title: const Text(Copy.unsavedCheckInTitle),
+          content: Text(Copy.unsavedCheckInBody(date)),
+          actions: [
+            TextButton(
+              onPressed: () =>
+                  Navigator.pop(context, _UnsavedCheckInAction.discard),
+              child: const Text(Copy.unsavedCheckInDiscard),
+            ),
+            TextButton(
+              onPressed: () =>
+                  Navigator.pop(context, _UnsavedCheckInAction.continueEditing),
+              child: const Text(Copy.unsavedCheckInContinue),
+            ),
+            FilledButton(
+              onPressed: () =>
+                  Navigator.pop(context, _UnsavedCheckInAction.save),
+              child: const Text(Copy.unsavedCheckInSave),
+            ),
+          ],
+        );
+      },
+    );
+    if (!mounted) return;
+    setState(() => _confirmOpen = false);
+    switch (action) {
+      case _UnsavedCheckInAction.save:
+        await _save();
+      case _UnsavedCheckInAction.discard:
+        _allowPop = true;
+        Navigator.of(context).pop();
+      case _UnsavedCheckInAction.continueEditing:
+      case null:
+        break;
     }
   }
 }
+
+enum _UnsavedCheckInAction { save, continueEditing, discard }

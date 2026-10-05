@@ -17,7 +17,7 @@ Mockups remain reference: `home_symbols.html`, `quran_card.html`, `salah_card.ht
 - `docs/visual_review/renders/impl-09-settings-reflection.png` — Baselines, Aspirations, quotation cadence
 - `docs/visual_review/renders/impl-11-home-order.png` — approved Home order through Hadith
 - `docs/visual_review/renders/impl-13-settings-approved.png` — approved Settings sections
-- `docs/visual_review/renders/impl-14-settings-application.png` — Application (Appearance, first day of week, reflection)
+- `docs/visual_review/renders/impl-14-settings-application.png` — Preferences (Appearance, first day of week, reflection)
 - `docs/visual_review/renders/impl-15-checkin-dhikr.png` — full check-in Dhikr Home rows
 - `docs/visual_review/renders/impl-16-checkin-family.png` — full check-in Family rows
 - `docs/visual_review/checkin_dropdown_proposal.html` — check-in data entry: capital domain titles, bold row names, indented A–Z dropdowns
@@ -52,16 +52,16 @@ Mockups remain reference: `home_symbols.html`, `quran_card.html`, `salah_card.ht
 - `docs/visual_review/renders/impl-50-dhikr-progress-today-sheet.png` — tap today’s mark to add/update
 - `docs/visual_review/home_domain_stage_proposal.html` — Home one-domain stage (implemented: fixed prev/next chevrons, session-only, pills not a score). Today’s full check-in uses the same stage.
 - `docs/visual_review/home_lookback_proposal.html` — Home look-back band (not implemented on Home: Recorded days, Noticed, Patterns, Recognition, and Ponder stay on Review or Progress)
-- `docs/visual_review/salah_activity_colours_proposal.html` — Salah list + optional activity colours under Settings → Application → Activities (implemented: default shared mark colour; round marks; Excused added; Other is not late)
+- `docs/visual_review/salah_activity_colours_proposal.html` — Salah list + optional activity colours under Settings → Preferences → Activities & legend (implemented: default shared mark colour; round marks; Excused added; Other is not late)
 - `docs/visual_review/quran_recitation_activities_proposal.html` — Recitation dropdown order and optional colours (proposal only; not a spiritual rank)
 - `docs/visual_review/dhikr_progress_item_rows_proposal.html` — Dhikr 7-day Progress transpose: item rows × weekday columns (implemented; Home Dhikr uses the same full-domain week as Akhlaq)
 - `docs/visual_review/salah_progress_item_rows_proposal.html` — Salah 7-day Progress transpose: prayer rows × weekday columns, plus Friday and voluntary bands (implemented; no legend on the voluntary board; today halo is 1.5 mark-strokes larger than the circle). 30/90 include Jumu‘ah, Tahajjud, and Ishraq calendars.
-- `docs/visual_review/quran_progress_journey_7day_proposal.html` — Qur’an 7-day Progress: Home Journey rows × weekday columns (implemented; 30/90 stay seven stored-dimension calendars; cell tap opens the Journey sheet)
+- `docs/visual_review/quran_progress_journey_7day_proposal.html` — historical proposal for a Qur’an Journey 7-day board. Runtime 7-day Progress now matches Home: mix-filtered stored-dimension rows in check-in bands; cell tap opens focused check-in. 30/90 stay seven stored-dimension calendars.
 - Hadith & Living Sunnah 7-day Progress: Home item rows × weekday columns (implemented; 30/90 stay one calendar per row; cell tap still opens focused check-in)
 - Character & Morals 7-day Progress: Home item rows × weekday columns (implemented; 30/90 stay one calendar per Home row)
 - Rights of Others 7-day Progress: Home item rows × weekday columns (implemented; 30/90 stay one calendar per Home row; Care in hardship stays on this domain)
 - Knowledge & Beneficial Speech 7-day Progress: Home item rows × weekday columns (implemented; 30/90 stay one calendar per Home row)
-- Knowledge Home uses the same full item×day week as Akhlaq when the domain is shown (still opt-in; not on the Salah, Qur’an & Akhlaq preset)
+- Knowledge Home uses the same full item×day week as Akhlaq when the domain is shown (still opt-in; not on the Salah, Qur’an & Dhikr preset)
 - Time, Health, Wealth, Ummah, Fasting, and Hajj Home weeks use the same full item×day matrix when shown (Hajj preparation only while due or preparing)
 - Time through Hajj 7-day Progress from Review uses the same stacked Home week (item rows × weekday columns, day-of-month under the weekday letter; 30/90 stay one calendar per Home row)
 

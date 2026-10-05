@@ -42,9 +42,10 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
               message: 'No saved check-ins yet. You can start today’s check-in from Home.',
               action: FilledButton(
                 onPressed: () {
+                  refreshNowIfLocalDateChanged(ref);
                   Navigator.of(context).push(
                     MaterialPageRoute<void>(
-                      builder: (_) => const CheckInScreen(),
+                      builder: (_) => CheckInScreen(date: ref.read(nowProvider)),
                     ),
                   );
                 },

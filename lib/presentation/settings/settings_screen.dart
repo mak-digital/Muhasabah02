@@ -18,9 +18,11 @@ import '../response/response_list_screen.dart';
 import '../shared/quran_stage_mark.dart';
 import '../shared/salah_activity_mark.dart';
 import '../shared/state_marker.dart';
+import '../shared/system_insets.dart';
 import '../shared/ui_bits.dart';
 import 'application_reflection_screen.dart';
 import 'faq_screen.dart';
+import 'custom_selection_sets_editor.dart';
 import 'personal_mix_settings.dart';
 import 'reflection_settings.dart';
 
@@ -35,7 +37,7 @@ class SettingsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text(Copy.settingsTitle)),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: pageListPadding(context),
         children: [
           const SectionHeader(Copy.applicationSection),
           Card(
@@ -369,7 +371,7 @@ class ActivitiesSettingsScreen extends ConsumerWidget {
               ),
             const SizedBox(height: 16),
             Text(
-              Copy.quranJourney,
+              MonitorDomain.quran.label,
               style: Theme.of(context).textTheme.titleSmall,
             ),
             const SizedBox(height: 8),
@@ -378,40 +380,20 @@ class ActivitiesSettingsScreen extends ConsumerWidget {
                 padding: const EdgeInsets.only(bottom: 8),
                 child: Row(
                   children: [
-                    QuranJourneyMarker(
-                      row: row,
-                      cell: QuranJourneyCell(
-                        kind: QuranJourneyCellKind.recorded,
-                        code: switch (row) {
-                          QuranJourneyRow.applied => 'W',
-                          QuranJourneyRow.reflected => 'T',
-                          QuranJourneyRow.understood => 'M',
-                          QuranJourneyRow.engaged => 'R',
-                        },
-                      ),
-                      colours: true,
+                    RecordedStateMarker(
+                      kind: MarkerKind.filled,
+                      color: QuranStageMark.colourFor(row),
                       semanticLabel: row.label,
                     ),
                     const SizedBox(width: 12),
-                    Expanded(
-                      child: Text('${row.label} — ${row.purpose}'),
-                    ),
+                    Expanded(child: Text('${row.label} — ${row.purpose}')),
                   ],
                 ),
               ),
           ] else ...[
-            const _ActivityMarkRow(
-              kind: MarkerKind.filled,
-              label: 'On time',
-            ),
-            const _ActivityMarkRow(
-              kind: MarkerKind.outlined,
-              label: 'Late',
-            ),
-            const _ActivityMarkRow(
-              kind: MarkerKind.missed,
-              label: 'Missed',
-            ),
+            const _ActivityMarkRow(kind: MarkerKind.filled, label: 'On time'),
+            const _ActivityMarkRow(kind: MarkerKind.outlined, label: 'Late'),
+            const _ActivityMarkRow(kind: MarkerKind.missed, label: 'Missed'),
             const _ActivityMarkRow(
               kind: MarkerKind.unanswered,
               label: 'Unanswered',
@@ -671,17 +653,23 @@ class VisibleDomainsSettingsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text(Copy.visibleDomains)),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: pageListPadding(context),
         children: [
           Text(
             Copy.shownDomainsNote,
             style: Theme.of(context).textTheme.bodyMedium,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           Wrap(
             spacing: 8,
             runSpacing: 8,
             children: [
+              FilterChip(
+                key: const Key('clear-all-selections'),
+                label: const Text(Copy.clearAllSelections),
+                selected: current.isEmpty,
+                onSelected: (_) => confirmClearWorkingSelection(context, ref),
+              ),
               FilterChip(
                 label: const Text(Copy.selectAllDomains),
                 selected: sameVisibleDomains(
@@ -696,16 +684,16 @@ class VisibleDomainsSettingsScreen extends ConsumerWidget {
                 },
               ),
               FilterChip(
-                label: const Text(Copy.basicAkhlaqDomains),
+                label: const Text(Copy.basicDhikrDomains),
                 selected: sameVisibleDomains(
                   current,
-                  kBasicAkhlaqVisibleDomains,
+                  kBasicDhikrVisibleDomains,
                 ),
                 onSelected: (_) async {
                   await ref
                       .read(appPrefsProvider)
                       .setVisibleDomains(
-                        Set<MonitorDomain>.from(kBasicAkhlaqVisibleDomains),
+                        Set<MonitorDomain>.from(kBasicDhikrVisibleDomains),
                       );
                   ref.read(prefsTickProvider.notifier).state++;
                 },
@@ -714,7 +702,7 @@ class VisibleDomainsSettingsScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            Copy.basicAkhlaqDomainsNote,
+            Copy.basicDhikrDomainsNote,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
@@ -749,6 +737,8 @@ class VisibleDomainsSettingsScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           const PersonalMixEditor(),
+          const SizedBox(height: 24),
+          const CustomSelectionSetsEditor(),
         ],
       ),
     );

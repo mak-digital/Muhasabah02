@@ -11,6 +11,7 @@ import '../../domain/personal_response.dart';
 import '../../domain/review_period.dart';
 import '../../domain/weekly_calendar.dart';
 import '../shared/add_response_button.dart';
+import '../shared/system_insets.dart';
 import '../shared/ui_bits.dart';
 import 'day_evidence_screen.dart';
 import 'evidence_ui.dart';
@@ -43,7 +44,7 @@ class RecordedDaysScreen extends ConsumerWidget {
               );
           final calendar = ref.read(appPrefsProvider).displayCalendar;
           return ListView(
-            padding: const EdgeInsets.all(16),
+            padding: pageListPadding(context, recoverSystemBottom: true),
             children: [
               const EvidenceGuard(Copy.recordedDaysGuard),
               PeriodSelector(

@@ -20,7 +20,7 @@ void main() {
     );
   });
 
-  test('first season mix is a short slice of the six-domain first look', () {
+  test('first season mix is a short slice of Salah, Qur’an and Dhikr', () {
     final mix = mixForKind(PersonalMixKind.firstLook);
     expect(encodePersonalMix(mix), 'firstLook');
     expect(decodePersonalMix('firstLook').keys, kFirstLookMixKeys);
@@ -32,28 +32,20 @@ void main() {
       'salah.isha',
       'quran.reading',
       'quran.meaning',
-      'quran.reflection',
       'quran.consciousApplication',
-      'hadith.livedSunnah',
-      'akhlaq.patience',
-      'akhlaq.truthfulness',
-      'huquq.parents',
-      'charity.voluntary',
-      kZakatMixKey,
+      'dhikr.postFardFajr',
+      'dhikr.morningAdhkar',
     });
-    expect(homeMixDomains(kBasicAkhlaqVisibleDomains, mix), [
+    expect(homeMixDomains(kBasicDhikrVisibleDomains, mix), [
       MonitorDomain.salah,
       MonitorDomain.quran,
-      MonitorDomain.hadith,
-      MonitorDomain.akhlaq,
-      MonitorDomain.huquq,
-      MonitorDomain.charity,
+      MonitorDomain.dhikr,
     ]);
     expect(
       mixUsesCompactHomeWeek(
         MonitorDomain.salah,
         mix,
-        kBasicAkhlaqVisibleDomains,
+        kBasicDhikrVisibleDomains,
       ),
       isFalse,
     );
@@ -64,8 +56,15 @@ void main() {
     expect(
       resolvePersonalMixKeys(
         PersonalMix.sameAsDomains,
-        kBasicAkhlaqVisibleDomains,
+        kBasicDhikrVisibleDomains,
       ).any((id) => mixItemById[id]?.domain == MonitorDomain.dhikr),
+      isTrue,
+    );
+    expect(
+      resolvePersonalMixKeys(
+        PersonalMix.sameAsDomains,
+        kBasicDhikrVisibleDomains,
+      ).any((id) => mixItemById[id]?.domain == MonitorDomain.akhlaq),
       isFalse,
     );
     expect(
@@ -113,11 +112,11 @@ void main() {
 
   test('worship mix Home omits domains outside the mix', () {
     final mix = mixForKind(PersonalMixKind.worship);
-    final home = homeMixDomains(kBasicAkhlaqVisibleDomains, mix);
+    final home = homeMixDomains(kBasicDhikrVisibleDomains, mix);
     expect(home, [
       MonitorDomain.salah,
       MonitorDomain.quran,
-      MonitorDomain.hadith,
+      MonitorDomain.dhikr,
     ]);
     expect(home, isNot(contains(MonitorDomain.akhlaq)));
     expect(home, isNot(contains(MonitorDomain.charity)));
@@ -126,15 +125,15 @@ void main() {
   test('hidden mix domains stay listed until the domain is shown', () {
     final hidden = hiddenDomainsInMix(
       mixForKind(PersonalMixKind.worship),
-      kBasicAkhlaqVisibleDomains,
+      kBasicDhikrVisibleDomains,
     );
-    expect(hidden, {MonitorDomain.dhikr, MonitorDomain.hajj});
+    expect(hidden, {MonitorDomain.hadith, MonitorDomain.hajj});
     expect(
       domainsSettingsSubtitle(
-        kBasicAkhlaqVisibleDomains,
+        kBasicDhikrVisibleDomains,
         mixForKind(PersonalMixKind.worship),
       ),
-      'Salah, Qur’an & Akhlaq · Mix: Worship I notice',
+      'Salah, Qur’an & Dhikr · Mix: Worship I notice',
     );
   });
 

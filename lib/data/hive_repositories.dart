@@ -1,6 +1,7 @@
 import 'package:hive_flutter/hive_flutter.dart';
 
 import '../data/app_prefs.dart';
+import '../domain/custom_selection_set.dart';
 import '../domain/daily_check_in.dart';
 import '../domain/display_calendar.dart';
 import '../domain/first_day_of_week.dart';
@@ -174,6 +175,7 @@ class HiveAppPrefs implements AppPrefs {
   static const _displayCalendar = 'display_calendar';
   static const _visibleDomains = 'visible_domains';
   static const _personalMix = 'personal_mix';
+  static const _customSelectionSets = 'custom_selection_sets';
   static const _quotationCadence = 'quotation_cadence';
   static const _baselines = 'personal_baselines';
   static const _aspirations = 'personal_aspirations';
@@ -211,10 +213,14 @@ class HiveAppPrefs implements AppPrefs {
 
   @override
   Set<MonitorDomain> get visibleDomains =>
-      decodeVisibleDomains(_box.get(_visibleDomains));
+      decodeVisibleDomains(_box.get(_visibleDomains), migrateNamedPreset: true);
 
   @override
   PersonalMix get personalMix => decodePersonalMix(_box.get(_personalMix));
+
+  @override
+  CustomSelectionSetsRecord get customSelectionSets =>
+      decodeCustomSelectionSets(_box.get(_customSelectionSets));
 
   @override
   Future<void> setSampleSeeded(bool value) => _setFlag(_sampleSeeded, value);
@@ -246,6 +252,118 @@ class HiveAppPrefs implements AppPrefs {
   @override
   Future<void> setPersonalMix(PersonalMix value) =>
       _box.put(_personalMix, encodePersonalMix(value));
+
+  @override
+  Future<void> setCustomSelectionSets(CustomSelectionSetsRecord value) =>
+      _box.put(_customSelectionSets, encodeCustomSelectionSets(value));
+
+  @override
+  Future<void> applyWorkingSelection({
+    required Set<MonitorDomain> domains,
+    required PersonalMix mix,
+    required CustomSelectionSetsRecord sets,
+  }) async {
+    final previousDomains = _box.get(_visibleDomains);
+    final previousMix = _box.get(_personalMix);
+    final previousSets = _box.get(_customSelectionSets);
+    try {
+      await _box.putAll({
+        _visibleDomains: encodeVisibleDomains(domains),
+        _personalMix: encodePersonalMix(mix),
+        _customSelectionSets: encodeCustomSelectionSets(sets),
+      });
+    } catch (_) {
+      await _restorePref(_visibleDomains, previousDomains);
+      await _restorePref(_personalMix, previousMix);
+      await _restorePref(_customSelectionSets, previousSets);
+      rethrow;
+    }
+  }
+
+  Future<void> _restorePref(String key, String? previous) {
+    if (previous == null) return _box.delete(key);
+    return _box.put(key, previous);
+  }
+
+  @override
+  Future<void> activateCustomSlot(int id) async {
+    final slotId = normalizeCustomSlotId(id);
+    if (slotId == null) return;
+    final record = customSelectionSets;
+    final slot = record.slotById(slotId);
+    await applyWorkingSelection(
+      domains: slot.domains,
+      mix: slot.mix,
+      sets: CustomSelectionSetsRecord(
+        activeSlotId: slotId,
+        slots: record.slots,
+      ),
+    );
+  }
+
+  @override
+  Future<void> saveWorkingToCustomSlot(int id) async {
+    final slotId = normalizeCustomSlotId(id);
+    if (slotId == null) return;
+    final record = customSelectionSets;
+    final current = record.slotById(slotId);
+    await setCustomSelectionSets(
+      record
+          .replacingSlot(
+            current.copyWith(
+              domains: Set<MonitorDomain>.from(visibleDomains),
+              mix: personalMix,
+            ),
+          )
+          .copyWithActive(slotId),
+    );
+  }
+
+  @override
+  Future<void> renameCustomSlot(int id, String name) async {
+    final slotId = normalizeCustomSlotId(id);
+    if (slotId == null) return;
+    final record = customSelectionSets;
+    await setCustomSelectionSets(
+      record.replacingSlot(
+        record.slotById(slotId).copyWith(name: sanitizeCustomSlotName(name)),
+      ),
+    );
+  }
+
+  @override
+  Future<void> clearWorkingSelection() {
+    return applyWorkingSelection(
+      domains: <MonitorDomain>{},
+      mix: PersonalMix.sameAsDomains,
+      sets: CustomSelectionSetsRecord(
+        activeSlotId: null,
+        slots: customSelectionSets.slots,
+      ),
+    );
+  }
+
+  @override
+  Future<void> clearCustomSlot(int id) async {
+    final slotId = normalizeCustomSlotId(id);
+    if (slotId == null) return;
+    final current = customSelectionSets.slotById(slotId);
+    final nextSets = customSelectionSets.replacingSlot(
+      current.copyWith(
+        domains: <MonitorDomain>{},
+        mix: PersonalMix.sameAsDomains,
+      ),
+    );
+    if (customSelectionSets.activeSlotId == slotId) {
+      await applyWorkingSelection(
+        domains: <MonitorDomain>{},
+        mix: PersonalMix.sameAsDomains,
+        sets: nextSets,
+      );
+    } else {
+      await setCustomSelectionSets(nextSets);
+    }
+  }
 
   @override
   QuotationCadence get quotationCadence =>

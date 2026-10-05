@@ -84,7 +84,7 @@ void main() {
     expect(find.text('Recitation'), findsNothing);
   });
 
-  testWidgets('first look Home shows the six-domain preset', (tester) async {
+  testWidgets('first look Home shows Salah, Qur’an and Dhikr', (tester) async {
     tester.view.physicalSize = const Size(400, 8000);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -96,9 +96,11 @@ void main() {
     expect(find.byKey(const Key('home-domain-next')), findsOneWidget);
     expect(find.textContaining('Qur’an ›'), findsNothing);
     expect(find.byKey(const Key('home-domain-pill-salah')), findsOneWidget);
-    expect(find.byKey(const Key('home-domain-pill-hadith')), findsOneWidget);
-    expect(find.byKey(const Key('home-domain-pill-charity')), findsOneWidget);
-    expect(find.byKey(const Key('home-domain-pill-dhikr')), findsNothing);
+    expect(find.byKey(const Key('home-domain-pill-quran')), findsOneWidget);
+    expect(find.byKey(const Key('home-domain-pill-dhikr')), findsOneWidget);
+    expect(find.byKey(const Key('home-domain-pill-hadith')), findsNothing);
+    expect(find.byKey(const Key('home-domain-pill-charity')), findsNothing);
+    expect(find.byKey(const Key('home-domain-pill-akhlaq')), findsNothing);
     expect(find.text(MonitorDomain.hadith.label), findsNothing);
     expect(find.text(MonitorDomain.akhlaq.label), findsNothing);
     expect(find.text(MonitorDomain.dhikr.label), findsNothing);

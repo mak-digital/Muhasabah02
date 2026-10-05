@@ -29,7 +29,7 @@ Release builds currently sign with the Android debug keystore unless you supply 
 
 See `docs/PRODUCT_SPEC.md`. Guardrails: `docs/product_guardrails.md`. Architecture: `docs/architecture.md`. Privacy: `docs/privacy.md`. Tests: `docs/testing.md`.
 
-Home is a colour-family Summary Dashboard in this order: Start today’s check-in, Reflection of the Week, one mix domain week at a time, This week I noticed…, Add a response. Recognition, Ponder, Recorded days, Noticed This Week, and Patterns Noticed stay on Review or Progress. Opt-in cards follow Settings → Domains. Marks Guide lives in the header. Design reference: `docs/visual_review/`.
+Home is a colour-family Summary Dashboard in this order: Start today’s check-in, Reflection of the Week, one mix domain week at a time, This week I noticed…, Add a response. Recognition, Ponder, Recorded days, Noticed This Week, and Patterns Noticed stay on Review or Progress. Opt-in cards follow Settings → Preferences → Domains in Focus. Marks Guide lives in the header. Design reference: `docs/visual_review/`.
 
 ## Known limitations
 

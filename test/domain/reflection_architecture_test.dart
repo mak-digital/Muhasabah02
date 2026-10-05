@@ -45,6 +45,26 @@ void main() {
     expect(quoteFor(now: now, cadence: QuotationCadence.hidden), isNull);
   });
 
+  test('daily cadence uses a new bucket each local day', () {
+    final thursday = DateTime(2026, 9, 3);
+    final friday = DateTime(2026, 9, 4);
+    final weeklyThursday = quoteFor(
+      now: thursday,
+      cadence: QuotationCadence.weekly,
+    );
+    final weeklyFriday = quoteFor(
+      now: friday,
+      cadence: QuotationCadence.weekly,
+    );
+    final dailyThursday = quoteFor(
+      now: thursday,
+      cadence: QuotationCadence.daily,
+    );
+    final dailyFriday = quoteFor(now: friday, cadence: QuotationCadence.daily);
+    expect(weeklyThursday?.text, weeklyFriday?.text);
+    expect(dailyThursday?.text, isNot(dailyFriday?.text));
+  });
+
   test('baselines store day counts not percentages', () {
     final records = [
       DailyCheckIn.empty('2026-09-01')

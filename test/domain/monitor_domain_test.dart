@@ -4,11 +4,11 @@ import 'package:muhasabah02/domain/monitor_domain.dart';
 import 'package:muhasabah02/domain/quran.dart';
 
 void main() {
-  test('unset stored domains use the Salah, Qur’an & Akhlaq preset', () {
-    expect(decodeVisibleDomains(null), kBasicAkhlaqVisibleDomains);
+  test('unset stored domains use the Salah, Qur’an & Dhikr preset', () {
+    expect(decodeVisibleDomains(null), kBasicDhikrVisibleDomains);
     expect(
       visibleDomainsSummary(decodeVisibleDomains(null)),
-      'Salah, Qur’an & Akhlaq',
+      'Salah, Qur’an & Dhikr',
     );
   });
 
@@ -16,6 +16,28 @@ void main() {
     expect(decodeVisibleDomains(''), isEmpty);
     expect(visibleDomainsSummary(const {}), 'None shown');
   });
+
+  test(
+    'working prefs migrate the previous named preset; custom decode does not',
+    () {
+      const previous = 'salah,quran,hadith,akhlaq,huquq,charity';
+      expect(decodeVisibleDomains(previous), kLegacyBasicAkhlaqVisibleDomains);
+      expect(
+        decodeVisibleDomains(previous, migrateNamedPreset: true),
+        kBasicDhikrVisibleDomains,
+      );
+      expect(
+        decodeVisibleDomains(
+          'salah,quran,hadith,dhikr,huquq,charity',
+          migrateNamedPreset: true,
+        ),
+        kBasicDhikrVisibleDomains,
+      );
+      expect(kBasicDhikrVisibleDomains.contains(MonitorDomain.hadith), isFalse);
+      expect(kBasicDhikrVisibleDomains.contains(MonitorDomain.huquq), isFalse);
+      expect(kBasicDhikrVisibleDomains.contains(MonitorDomain.charity), isFalse);
+    },
+  );
 
   test('stored ids round-trip in canonical order', () {
     final stored = encodeVisibleDomains({
@@ -104,28 +126,29 @@ void main() {
     );
   });
 
-  test('basic Akhlaq preset includes Hadith after Qur’an', () {
+  test('basic Dhikr preset is Salah, Qur’an and Dhikr only', () {
     expect(
-      visibleDomainsSummary(kBasicAkhlaqVisibleDomains),
-      'Salah, Qur’an & Akhlaq',
+      visibleDomainsSummary(kBasicDhikrVisibleDomains),
+      'Salah, Qur’an & Dhikr',
     );
-    expect(kBasicAkhlaqVisibleDomains, {
+    expect(kBasicDhikrVisibleDomains, {
       MonitorDomain.salah,
       MonitorDomain.quran,
-      MonitorDomain.hadith,
-      MonitorDomain.akhlaq,
-      MonitorDomain.huquq,
-      MonitorDomain.charity,
+      MonitorDomain.dhikr,
     });
-    expect(kBasicAkhlaqVisibleDomains.contains(MonitorDomain.dhikr), isFalse);
+    expect(kBasicDhikrVisibleDomains.contains(MonitorDomain.hadith), isFalse);
+    expect(kBasicDhikrVisibleDomains.contains(MonitorDomain.akhlaq), isFalse);
+    expect(kBasicDhikrVisibleDomains.contains(MonitorDomain.huquq), isFalse);
+    expect(kBasicDhikrVisibleDomains.contains(MonitorDomain.charity), isFalse);
+    expect(kBasicDhikrVisibleDomains.contains(MonitorDomain.dhikr), isTrue);
     expect(
-      kBasicAkhlaqVisibleDomains.contains(MonitorDomain.knowledge),
+      kBasicDhikrVisibleDomains.contains(MonitorDomain.knowledge),
       isFalse,
     );
-    expect(kBasicAkhlaqVisibleDomains.contains(MonitorDomain.time), isFalse);
-    expect(kBasicAkhlaqVisibleDomains.contains(MonitorDomain.health), isFalse);
-    expect(kBasicAkhlaqVisibleDomains.contains(MonitorDomain.wealth), isFalse);
-    expect(kBasicAkhlaqVisibleDomains.contains(MonitorDomain.ummah), isFalse);
+    expect(kBasicDhikrVisibleDomains.contains(MonitorDomain.time), isFalse);
+    expect(kBasicDhikrVisibleDomains.contains(MonitorDomain.health), isFalse);
+    expect(kBasicDhikrVisibleDomains.contains(MonitorDomain.wealth), isFalse);
+    expect(kBasicDhikrVisibleDomains.contains(MonitorDomain.ummah), isFalse);
     expect(
       MonitorDomain.values.indexOf(MonitorDomain.hadith),
       MonitorDomain.values.indexOf(MonitorDomain.quran) + 1,
@@ -147,7 +170,7 @@ void main() {
     expect(usesCompactHomeWeek(MonitorDomain.ummah), isFalse);
     expect(usesCompactHomeWeek(MonitorDomain.fasting), isFalse);
     expect(usesCompactHomeWeek(MonitorDomain.hajj), isFalse);
-    expect(kBasicAkhlaqVisibleDomains.contains(MonitorDomain.hajj), isFalse);
+    expect(kBasicDhikrVisibleDomains.contains(MonitorDomain.hajj), isFalse);
     expect(MonitorDomain.salah.shortLabel, 'Salah');
     expect(MonitorDomain.quran.shortLabel, 'Qur’an');
     expect(MonitorDomain.akhlaq.shortLabel, 'Character');
@@ -397,10 +420,7 @@ void main() {
 
   test('trace dropdown names the row so a band title cannot mislead', () {
     expect(
-      traceOutcomeLabel(
-        'akhlaq.pausedBeforeReacting',
-        TernaryOutcome.negative,
-      ),
+      traceOutcomeLabel('akhlaq.pausedBeforeReacting', TernaryOutcome.negative),
       'I did not notice this today — Paused before reacting',
     );
     for (final row in allHomeTraceRows) {

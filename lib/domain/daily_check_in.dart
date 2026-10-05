@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'activities.dart';
 import 'home_traces.dart';
 import 'other_domains.dart';
@@ -122,11 +124,26 @@ class DailyCheckIn {
   TernaryOutcome quranOutcome(QuranDimension dimension) =>
       quran[dimension] ?? TernaryOutcome.unanswered;
 
+  String get jumuahActivityId {
+    final stored = activities[ActivityCatalog.jumuahKey];
+    if (stored != null) return stored.id;
+    if (jumuahCongregation && jumuah == PrayerStatus.late) {
+      return 'joinedCongregationLate';
+    }
+    if (jumuahCongregation && jumuah == PrayerStatus.onTime) {
+      return 'congregationOnTime';
+    }
+    return ActivityCatalog.canonicalSalahId(jumuah);
+  }
+
   RecordedActivity activityFor(String key) {
     final stored = activities[key];
     if (stored != null) return stored;
     if (key.startsWith('salah.')) {
       final name = key.substring(6);
+      if (name == 'jumuah') {
+        return RecordedActivity(id: jumuahActivityId);
+      }
       final id = PrayerId.values.where((item) => item.name == name);
       if (id.isNotEmpty) {
         return RecordedActivity(
@@ -335,6 +352,19 @@ class DailyCheckIn {
     );
   }
 
+  DailyCheckIn withJumuahActivity(RecordedActivity activity) {
+    final option =
+        ActivityCatalog.find(ActivityCatalog.jumuah, activity.id) ??
+        ActivityCatalog.find(ActivityCatalog.salah, activity.id);
+    return copyWith(
+      jumuah: option?.prayerStatus ?? PrayerStatus.unanswered,
+      jumuahCongregation: ActivityCatalog.jumuahActivityMeansCongregation(
+        activity.id,
+      ),
+      activities: {...activities, ActivityCatalog.jumuahKey: activity},
+    );
+  }
+
   DailyCheckIn withQuran(QuranDimension dimension, TernaryOutcome outcome) {
     if (!canSetQuranOutcome(
       quran: quran,
@@ -344,10 +374,6 @@ class DailyCheckIn {
       return this;
     }
     var nextQuran = {...quran, dimension: outcome};
-    if (dimension == QuranDimension.meaning &&
-        outcome == TernaryOutcome.positive) {
-      nextQuran[QuranDimension.reading] = TernaryOutcome.positive;
-    }
     final nextContexts = contexts.where((c) {
       final current = nextQuran[c.subject] ?? TernaryOutcome.unanswered;
       if (!contextAllowed(c.subject, current)) return false;
@@ -367,10 +393,6 @@ class DailyCheckIn {
     }
 
     writeActivity(dimension, outcome);
-    if (dimension == QuranDimension.meaning &&
-        outcome == TernaryOutcome.positive) {
-      writeActivity(QuranDimension.reading, TernaryOutcome.positive);
-    }
     return copyWith(
       quran: nextQuran,
       contexts: nextContexts,
@@ -656,4 +678,64 @@ class DailyCheckIn {
     }
     return map;
   }
+}
+
+/// Observation content equality, ignoring [DailyCheckIn.savedAt].
+bool sameCheckInContent(DailyCheckIn a, DailyCheckIn b) {
+  final left = Map<String, dynamic>.from(a.toJson())..remove('savedAt');
+  final right = Map<String, dynamic>.from(b.toJson())..remove('savedAt');
+  return jsonEncode(left) == jsonEncode(right);
+}
+
+/// Overlay fields the user already changed onto a stored baseline.
+///
+/// Unchanged empty-draft fields keep the stored values so a late hydrate
+/// cannot wipe unrelated observations or text.
+DailyCheckIn overlayCheckInUserEdits({
+  required DailyCheckIn baseline,
+  required DailyCheckIn userPending,
+  required DailyCheckIn empty,
+}) {
+  final merged = _overlayChangedJson(
+    _asStringKeyedMap(baseline.toJson()),
+    _asStringKeyedMap(userPending.toJson())..remove('savedAt'),
+    _asStringKeyedMap(empty.toJson())..remove('savedAt'),
+  );
+  return DailyCheckIn.fromJson(merged);
+}
+
+Map<String, dynamic> _asStringKeyedMap(Map<String, dynamic> json) {
+  return json.map((key, value) => MapEntry(key, value));
+}
+
+bool _jsonEqual(Object? a, Object? b) => jsonEncode(a) == jsonEncode(b);
+
+Map<String, dynamic> _overlayChangedJson(
+  Map<String, dynamic> baseline,
+  Map<String, dynamic> user,
+  Map<String, dynamic> empty,
+) {
+  final result = Map<String, dynamic>.from(baseline);
+  for (final key in user.keys) {
+    final userVal = user[key];
+    final emptyVal = empty[key];
+    if (_jsonEqual(userVal, emptyVal)) continue;
+    final baseVal = result[key];
+    if (userVal is Map && emptyVal is Map && baseVal is Map) {
+      result[key] = _overlayChangedJson(
+        Map<String, dynamic>.from(
+          baseVal.map((k, v) => MapEntry('$k', v)),
+        ),
+        Map<String, dynamic>.from(
+          userVal.map((k, v) => MapEntry('$k', v)),
+        ),
+        Map<String, dynamic>.from(
+          emptyVal.map((k, v) => MapEntry('$k', v)),
+        ),
+      );
+    } else {
+      result[key] = userVal;
+    }
+  }
+  return result;
 }

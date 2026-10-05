@@ -75,5 +75,48 @@ void main() {
     await tester.pageBack();
     await tester.pumpAndSettle();
     expect(find.text(Copy.reflectionOfTheWeek), findsNothing);
+    expect(find.text(Copy.reflectionOfTheDay), findsNothing);
+  });
+
+  testWidgets('daily cadence retitles Home to Reflection of the Day', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(400, 2800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(testApp(now: DateTime(2026, 9, 3)));
+    await tester.pumpAndSettle();
+    expect(find.text(Copy.reflectionOfTheWeek), findsOneWidget);
+    expect(find.text(Copy.reflectionOfTheDay), findsNothing);
+
+    await tester.tap(find.byTooltip('Settings'));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text(Copy.quotationCadence));
+    await tester.tap(find.text(Copy.quotationCadence));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Daily'));
+    await tester.pumpAndSettle();
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(find.text(Copy.reflectionOfTheDay), findsOneWidget);
+    expect(find.text(Copy.reflectionOfTheWeek), findsNothing);
+
+    await tester.tap(find.byTooltip('Settings'));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text(Copy.quotationCadence));
+    await tester.tap(find.text(Copy.quotationCadence));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Weekly (default)'));
+    await tester.pumpAndSettle();
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(find.text(Copy.reflectionOfTheWeek), findsOneWidget);
+    expect(find.text(Copy.reflectionOfTheDay), findsNothing);
   });
 }

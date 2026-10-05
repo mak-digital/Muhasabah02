@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import '../domain/custom_selection_set.dart';
 import '../domain/display_calendar.dart';
 import '../domain/first_day_of_week.dart';
 import '../domain/home_traces.dart';
@@ -18,6 +19,7 @@ abstract class AppPrefs {
   DisplayCalendar get displayCalendar;
   Set<MonitorDomain> get visibleDomains;
   PersonalMix get personalMix;
+  CustomSelectionSetsRecord get customSelectionSets;
   QuotationCadence get quotationCadence;
   List<PersonalBaseline> get baselines;
   List<PersonalAspiration> get aspirations;
@@ -36,6 +38,17 @@ abstract class AppPrefs {
   Future<void> setDisplayCalendar(DisplayCalendar value);
   Future<void> setVisibleDomains(Set<MonitorDomain> value);
   Future<void> setPersonalMix(PersonalMix value);
+  Future<void> setCustomSelectionSets(CustomSelectionSetsRecord value);
+  Future<void> applyWorkingSelection({
+    required Set<MonitorDomain> domains,
+    required PersonalMix mix,
+    required CustomSelectionSetsRecord sets,
+  });
+  Future<void> activateCustomSlot(int id);
+  Future<void> saveWorkingToCustomSlot(int id);
+  Future<void> renameCustomSlot(int id, String name);
+  Future<void> clearWorkingSelection();
+  Future<void> clearCustomSlot(int id);
   Future<void> setQuotationCadence(QuotationCadence value);
   Future<void> setBaselines(List<PersonalBaseline> value);
   Future<void> setAspirations(List<PersonalAspiration> value);
@@ -57,6 +70,7 @@ class MemoryAppPrefs implements AppPrefs {
     this.displayCalendar = DisplayCalendar.gregorian,
     Set<MonitorDomain>? visibleDomains,
     PersonalMix? personalMix,
+    CustomSelectionSetsRecord? customSelectionSets,
     this.quotationCadence = QuotationCadence.weekly,
     this.hadithMemorisationFocus = HadithMemorisationFocus.unanswered,
     this.hajjStatus = HajjStatus.unanswered,
@@ -70,9 +84,11 @@ class MemoryAppPrefs implements AppPrefs {
        aspirations = List.of(aspirations ?? const []),
        _journals = Map.of(weeklyJournals ?? const {}),
        visibleDomains = Set<MonitorDomain>.from(
-         visibleDomains ?? kBasicAkhlaqVisibleDomains,
+         visibleDomains ?? kBasicDhikrVisibleDomains,
        ),
-       personalMix = personalMix ?? PersonalMix.sameAsDomains;
+       personalMix = personalMix ?? PersonalMix.sameAsDomains,
+       customSelectionSets =
+           customSelectionSets ?? CustomSelectionSetsRecord.empty();
 
   @override
   bool sampleSeeded;
@@ -94,6 +110,12 @@ class MemoryAppPrefs implements AppPrefs {
 
   @override
   PersonalMix personalMix;
+
+  @override
+  CustomSelectionSetsRecord customSelectionSets;
+
+  int mutationCount = 0;
+  bool throwOnApplyWorkingSelection = false;
 
   @override
   QuotationCadence quotationCadence;
@@ -148,11 +170,130 @@ class MemoryAppPrefs implements AppPrefs {
       displayCalendar = value;
 
   @override
-  Future<void> setVisibleDomains(Set<MonitorDomain> value) async =>
-      visibleDomains = Set<MonitorDomain>.from(value);
+  Future<void> setVisibleDomains(Set<MonitorDomain> value) async {
+    visibleDomains = Set<MonitorDomain>.from(value);
+    mutationCount++;
+  }
 
   @override
-  Future<void> setPersonalMix(PersonalMix value) async => personalMix = value;
+  Future<void> setPersonalMix(PersonalMix value) async {
+    personalMix = value;
+    mutationCount++;
+  }
+
+  @override
+  Future<void> setCustomSelectionSets(CustomSelectionSetsRecord value) async {
+    customSelectionSets = CustomSelectionSetsRecord(
+      activeSlotId: value.activeSlotId,
+      slots: List.of(value.slots),
+    );
+    mutationCount++;
+  }
+
+  @override
+  Future<void> applyWorkingSelection({
+    required Set<MonitorDomain> domains,
+    required PersonalMix mix,
+    required CustomSelectionSetsRecord sets,
+  }) async {
+    final previousDomains = Set<MonitorDomain>.from(visibleDomains);
+    final previousMix = personalMix;
+    final previousSets = CustomSelectionSetsRecord(
+      activeSlotId: customSelectionSets.activeSlotId,
+      slots: List.of(customSelectionSets.slots),
+    );
+    visibleDomains = Set<MonitorDomain>.from(domains);
+    personalMix = mix;
+    customSelectionSets = CustomSelectionSetsRecord(
+      activeSlotId: sets.activeSlotId,
+      slots: List.of(sets.slots),
+    );
+    if (throwOnApplyWorkingSelection) {
+      visibleDomains = previousDomains;
+      personalMix = previousMix;
+      customSelectionSets = previousSets;
+      throw StateError('prefs write failed');
+    }
+    mutationCount++;
+  }
+
+  @override
+  Future<void> activateCustomSlot(int id) async {
+    final slotId = normalizeCustomSlotId(id);
+    if (slotId == null) return;
+    final slot = customSelectionSets.slotById(slotId);
+    await applyWorkingSelection(
+      domains: slot.domains,
+      mix: slot.mix,
+      sets: CustomSelectionSetsRecord(
+        activeSlotId: slotId,
+        slots: customSelectionSets.slots,
+      ),
+    );
+  }
+
+  @override
+  Future<void> saveWorkingToCustomSlot(int id) async {
+    final slotId = normalizeCustomSlotId(id);
+    if (slotId == null) return;
+    final current = customSelectionSets.slotById(slotId);
+    await setCustomSelectionSets(
+      customSelectionSets
+          .replacingSlot(
+            current.copyWith(
+              domains: Set<MonitorDomain>.from(visibleDomains),
+              mix: personalMix,
+            ),
+          )
+          .copyWithActive(slotId),
+    );
+  }
+
+  @override
+  Future<void> renameCustomSlot(int id, String name) async {
+    final slotId = normalizeCustomSlotId(id);
+    if (slotId == null) return;
+    final current = customSelectionSets.slotById(slotId);
+    await setCustomSelectionSets(
+      customSelectionSets.replacingSlot(
+        current.copyWith(name: sanitizeCustomSlotName(name)),
+      ),
+    );
+  }
+
+  @override
+  Future<void> clearWorkingSelection() async {
+    await applyWorkingSelection(
+      domains: <MonitorDomain>{},
+      mix: PersonalMix.sameAsDomains,
+      sets: CustomSelectionSetsRecord(
+        activeSlotId: null,
+        slots: customSelectionSets.slots,
+      ),
+    );
+  }
+
+  @override
+  Future<void> clearCustomSlot(int id) async {
+    final slotId = normalizeCustomSlotId(id);
+    if (slotId == null) return;
+    final current = customSelectionSets.slotById(slotId);
+    final nextSets = customSelectionSets.replacingSlot(
+      current.copyWith(
+        domains: <MonitorDomain>{},
+        mix: PersonalMix.sameAsDomains,
+      ),
+    );
+    if (customSelectionSets.activeSlotId == slotId) {
+      await applyWorkingSelection(
+        domains: <MonitorDomain>{},
+        mix: PersonalMix.sameAsDomains,
+        sets: nextSets,
+      );
+    } else {
+      await setCustomSelectionSets(nextSets);
+    }
+  }
 
   @override
   Future<void> setQuotationCadence(QuotationCadence value) async =>

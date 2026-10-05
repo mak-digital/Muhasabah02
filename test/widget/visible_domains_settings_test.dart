@@ -28,7 +28,7 @@ void main() {
       expect(find.text(Copy.shownDomainsNote), findsOneWidget);
       expect(find.text(Copy.thisSeasonsMix), findsOneWidget);
       expect(find.text(Copy.mixNotShownInDomains), findsOneWidget);
-      expect(find.text(Copy.basicAkhlaqDomains), findsOneWidget);
+      expect(find.text(Copy.basicDhikrDomains), findsOneWidget);
       expect(find.text('Fasting'), findsWidgets);
       final fastingTile = tester.widget<CheckboxListTile>(
         find.byKey(const Key('domain-visible-fasting')),
@@ -41,11 +41,11 @@ void main() {
       final akhlaqTile = tester.widget<CheckboxListTile>(
         find.byKey(const Key('domain-visible-akhlaq')),
       );
-      expect(akhlaqTile.value, isTrue);
+      expect(akhlaqTile.value, isFalse);
       final huquqTile = tester.widget<CheckboxListTile>(
         find.byKey(const Key('domain-visible-huquq')),
       );
-      expect(huquqTile.value, isTrue);
+      expect(huquqTile.value, isFalse);
       final knowledgeTile = tester.widget<CheckboxListTile>(
         find.byKey(const Key('domain-visible-knowledge')),
       );
@@ -70,15 +70,15 @@ void main() {
       final hadithTile = tester.widget<CheckboxListTile>(
         find.byKey(const Key('domain-visible-hadith')),
       );
-      expect(hadithTile.value, isTrue);
+      expect(hadithTile.value, isFalse);
       final charityTile = tester.widget<CheckboxListTile>(
         find.byKey(const Key('domain-visible-charity')),
       );
-      expect(charityTile.value, isTrue);
+      expect(charityTile.value, isFalse);
       final dhikrTile = tester.widget<CheckboxListTile>(
         find.byKey(const Key('domain-visible-dhikr')),
       );
-      expect(dhikrTile.value, isFalse);
+      expect(dhikrTile.value, isTrue);
       final hajjTile = tester.widget<CheckboxListTile>(
         find.byKey(const Key('domain-visible-hajj')),
       );

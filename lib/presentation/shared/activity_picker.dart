@@ -200,9 +200,13 @@ class ActivityPicker extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(prefsTickProvider);
-    final salahList = identical(options, ActivityCatalog.salah);
+    final salahList =
+        identical(options, ActivityCatalog.salah) ||
+        identical(options, ActivityCatalog.jumuah);
+    final durationList = ActivityCatalog.isQuranDurationCatalog(options);
     final swatches =
-        salahList && ref.watch(appPrefsProvider).salahActivityColours;
+        (salahList || durationList) &&
+        ref.watch(appPrefsProvider).salahActivityColours;
     final extra = options.any((option) => option.id == selectedId)
         ? null
         : ActivityCatalog.findAnyQuran(selectedId);

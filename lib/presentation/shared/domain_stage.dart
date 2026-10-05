@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/legacy.dart';
 
 import '../../domain/copy.dart';
 import '../../domain/monitor_domain.dart';
+import 'domain_visual.dart';
+import 'week_nav_strip.dart';
 
 class DomainStage extends ConsumerWidget {
   const DomainStage({
@@ -114,94 +116,36 @@ class DomainStage extends ConsumerWidget {
     ref.read(stageProvider.notifier).state = domains[index];
   }
 
-  static const _navExtent = 40.0;
-
   Widget _chrome(
     BuildContext context,
     WidgetRef ref, {
     required int index,
   }) {
-    final theme = Theme.of(context);
     final previous = index > 0 ? domains[index - 1] : null;
     final next = index < domains.length - 1 ? domains[index + 1] : null;
-    return SizedBox(
-      height: _navExtent,
-      child: Row(
-        children: [
-          _navButton(
-            context,
-            key: Key('$keyPrefix-prev'),
-            icon: Icons.chevron_left_rounded,
-            enabled: previous != null,
-            tooltip: previous == null
-                ? Copy.noPreviousDomain
-                : Copy.previousDomain(previous.shortLabel),
-            onPressed: previous == null ? null : () => _select(ref, index - 1),
-          ),
-          Expanded(
-            child: Center(
-              child: Text(
-                domains[index].shortLabel,
-                key: Key('$keyPrefix-current'),
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0.2,
-                ),
-              ),
-            ),
-          ),
-          _navButton(
-            context,
-            key: Key('$keyPrefix-next'),
-            icon: Icons.chevron_right_rounded,
-            enabled: next != null,
-            tooltip: next == null
-                ? Copy.noNextDomain
-                : Copy.nextDomain(next.shortLabel),
-            onPressed: next == null ? null : () => _select(ref, index + 1),
-          ),
-        ],
+    final identity = domainColorIdentity(domains[index]);
+    final theme = Theme.of(context);
+    return WeekNavStrip(
+      label: domains[index].shortLabel,
+      prominentLabel: true,
+      labelKey: Key('$keyPrefix-current'),
+      family: identity.family,
+      wash: weekNavStripWash(
+        identity.family,
+        identity.washFor(theme.brightness),
       ),
-    );
-  }
-
-  Widget _navButton(
-    BuildContext context, {
-    required Key key,
-    required IconData icon,
-    required bool enabled,
-    required String tooltip,
-    required VoidCallback? onPressed,
-  }) {
-    final scheme = Theme.of(context).colorScheme;
-    return SizedBox(
-      width: _navExtent,
-      height: _navExtent,
-      child: IconButton(
-        key: key,
-        tooltip: tooltip,
-        onPressed: onPressed,
-        icon: Icon(icon, size: 22),
-        style: IconButton.styleFrom(
-          foregroundColor: scheme.onSurface,
-          disabledForegroundColor: scheme.onSurface.withValues(alpha: 0.22),
-          backgroundColor: scheme.surfaceContainerHighest.withValues(
-            alpha: enabled ? 0.9 : 0.4,
-          ),
-          disabledBackgroundColor: scheme.surfaceContainerHighest.withValues(
-            alpha: 0.4,
-          ),
-          shape: const CircleBorder(),
-          padding: EdgeInsets.zero,
-          minimumSize: const Size(_navExtent, _navExtent),
-          maximumSize: const Size(_navExtent, _navExtent),
-          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          visualDensity: VisualDensity.compact,
-        ),
-      ),
+      previousKey: Key('$keyPrefix-prev'),
+      nextKey: Key('$keyPrefix-next'),
+      previousEnabled: previous != null,
+      nextEnabled: next != null,
+      previousTooltip: previous == null
+          ? Copy.noPreviousDomain
+          : Copy.previousDomain(previous.shortLabel),
+      nextTooltip: next == null
+          ? Copy.noNextDomain
+          : Copy.nextDomain(next.shortLabel),
+      onPrevious: () => _select(ref, index - 1),
+      onNext: () => _select(ref, index + 1),
     );
   }
 

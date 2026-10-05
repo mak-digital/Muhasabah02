@@ -10,13 +10,15 @@ import '../../domain/date_key.dart';
 import '../../domain/display_calendar.dart';
 import '../../domain/first_day_of_week.dart';
 import '../../domain/home_traces.dart';
+import '../../domain/personal_mix.dart';
 import '../../domain/quran.dart';
 import '../../domain/weekly_calendar.dart';
 import '../checkin/check_in_screen.dart';
 import '../progress/optional_domain_progress_screen.dart';
 import '../shared/activity_picker.dart';
-import '../shared/lunar_white_day_highlight.dart';
 import '../shared/state_marker.dart';
+import '../shared/today_mark_halo.dart';
+import '../shared/week_nav_strip.dart';
 
 class OptionalDomainHomeCard extends ConsumerStatefulWidget {
   const OptionalDomainHomeCard({
@@ -103,64 +105,23 @@ class _OptionalDomainHomeCardState
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Row(
-                children: [
-                  IconButton(
-                    tooltip: 'Previous week',
-                    onPressed: () => setState(() => _weekOffset--),
-                    icon: const Icon(Icons.chevron_left),
-                  ),
-                  Expanded(
-                    child: InkWell(
-                      onTap: widget.compactWeek
-                          ? _openProgress
-                          : () =>
-                                _openDomainDay(dateKey(ref.read(nowProvider))),
-                      child: Column(
-                        children: [
-                          Text(
-                            widget.title,
-                            textAlign: TextAlign.center,
-                            style: Theme.of(context).textTheme.titleMedium
-                                ?.copyWith(fontWeight: FontWeight.w600),
-                          ),
-                          if (question != null && question.isNotEmpty) ...[
-                            const SizedBox(height: 4),
-                            Text(
-                              question,
-                              textAlign: TextAlign.center,
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(height: 1.35),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    tooltip: 'Next week',
-                    onPressed: _weekOffset >= 0
-                        ? null
-                        : () => setState(() => _weekOffset++),
-                    icon: const Icon(Icons.chevron_right),
-                  ),
-                ],
-              ),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      weekRangeLabel(weekStart, calendar: calendar),
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: _weekOffset == 0
-                        ? null
-                        : () => setState(() => _weekOffset = 0),
-                    child: const Text(Copy.currentWeek),
-                  ),
-                ],
+              HomeWeekChrome(
+                title: widget.title,
+                question: question,
+                family: widget.family,
+                cardWash: wash,
+                weekLabel: weekRangeLabel(weekStart, calendar: calendar),
+                onPreviousWeek: () => setState(() => _weekOffset--),
+                onNextWeek: () => setState(() => _weekOffset++),
+                nextWeekEnabled: _weekOffset < 0,
+                showCurrentWeek: _weekOffset != 0,
+                onCurrentWeek: () => setState(() => _weekOffset = 0),
+                onTitleTap: widget.compactWeek
+                    ? _openProgress
+                    : () {
+                        refreshNowIfLocalDateChanged(ref);
+                        _openDomainDay(dateKey(ref.read(nowProvider)));
+                      },
               ),
               const SizedBox(height: 4),
               if (widget.includeHajjStatus) _hajjStatus(),
@@ -173,7 +134,8 @@ class _OptionalDomainHomeCardState
                         child: Column(
                           children: [
                             Text(
-                              localizations.narrowWeekdays[(firstDay + col) % 7],
+                              localizations.narrowWeekdays[(firstDay + col) %
+                                  7],
                               textAlign: TextAlign.center,
                               style: Theme.of(context).textTheme.labelSmall
                                   ?.copyWith(fontWeight: FontWeight.w600),
@@ -341,29 +303,30 @@ class _OptionalDomainHomeCardState
           includeStruggleNote: widget.includeStruggleNote,
         ) ??
         false;
+    final kind = dateCellKind(key, ref.read(nowProvider));
     final marker = RecordedStateMarker(
       kind: markerForRecorded(recorded: recorded, positive: recorded),
       semanticLabel: recorded
           ? '$key ${widget.title} recorded'
           : '$key ${widget.title} not recorded',
     );
-    final open =
-        dateCellKind(key, ref.read(nowProvider)) != DateCellKind.future;
-    final mark = InkWell(
+    return InkWell(
       key: Key('home-compact-$domainId-$key'),
-      onTap: open ? () => _openDomainDay(key) : null,
+      onTap: recoverableDateCellOnTap(
+        ref: ref,
+        dateKey: key,
+        onOpen: () => _openDomainDay(key),
+      ),
+      customBorder: const CircleBorder(),
       child: Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4),
-          child: open ? marker : Opacity(opacity: 0.28, child: marker),
+        child: decorateWeekMark(
+          marker: marker,
+          kind: kind,
+          lunarWhiteDay: whiteDay,
+          todayKey: Key('home-today-$domainId-$key'),
+          lunarKey: Key('home-lunar-white-$domainId-$key'),
         ),
       ),
-    );
-    if (!whiteDay) return mark;
-    return LunarWhiteDayHighlight(
-      key: Key('home-lunar-white-$domainId-$key'),
-      dense: true,
-      child: mark,
     );
   }
 
@@ -435,6 +398,7 @@ class _OptionalDomainHomeCardState
     final whiteDay = widget.highlightLunarWhiteDays && isLunarWhiteDayKey(key);
     final outcome =
         index[key]?.homeTrace(row.storageKey) ?? TernaryOutcome.unanswered;
+    final kind = dateCellKind(key, ref.read(nowProvider));
     final marker = RecordedStateMarker(
       kind: markerForRecorded(
         recorded: outcome.isRecorded,
@@ -442,23 +406,24 @@ class _OptionalDomainHomeCardState
       ),
       semanticLabel: '$key ${row.label} ${outcome.legendLabel}',
     );
-    final open =
-        dateCellKind(key, ref.read(nowProvider)) != DateCellKind.future;
-    final mark = InkWell(
+    return InkWell(
       key: Key('home-${row.storageKey}-$key'),
-      onTap: open ? () => _openDomainDay(key, band: row.band) : null,
+      onTap: recoverableDateCellOnTap(
+        ref: ref,
+        dateKey: key,
+        onOpen: () =>
+            _openDomainDay(key, band: row.band, rowId: row.storageKey),
+      ),
+      customBorder: const CircleBorder(),
       child: Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4),
-          child: open ? marker : Opacity(opacity: 0.28, child: marker),
+        child: decorateWeekMark(
+          marker: marker,
+          kind: kind,
+          lunarWhiteDay: whiteDay,
+          todayKey: Key('home-today-${row.storageKey}-$key'),
+          lunarKey: Key('home-lunar-white-${row.storageKey}-$key'),
         ),
       ),
-    );
-    if (!whiteDay) return mark;
-    return LunarWhiteDayHighlight(
-      key: Key('home-lunar-white-${row.storageKey}-$key'),
-      dense: true,
-      child: mark,
     );
   }
 
@@ -505,13 +470,18 @@ class _OptionalDomainHomeCardState
     final marker = ZakatStateMarker(
       status: record?.zakat ?? ZakatStatus.unanswered,
     );
-    final open =
-        dateCellKind(key, ref.read(nowProvider)) != DateCellKind.future;
+    final kind = dateCellKind(key, ref.read(nowProvider));
     return InkWell(
       key: Key('home-zakat-$key'),
-      onTap: open ? () => _openDomainDay(key, band: kZakatTraceBand) : null,
+      onTap: recoverableDateCellOnTap(
+        ref: ref,
+        dateKey: key,
+        onOpen: () =>
+            _openDomainDay(key, band: kZakatTraceBand, rowId: kZakatMixKey),
+      ),
+      customBorder: const CircleBorder(),
       child: Center(
-        child: open ? marker : Opacity(opacity: 0.28, child: marker),
+        child: decorateWeekMark(marker: marker, kind: kind),
       ),
     );
   }
@@ -535,7 +505,7 @@ class _OptionalDomainHomeCardState
     );
   }
 
-  void _openDomainDay(String key, {String? band}) {
+  void _openDomainDay(String key, {String? band, String? rowId}) {
     openFocusedCheckIn(
       context,
       dateKey: key,
@@ -543,7 +513,8 @@ class _OptionalDomainHomeCardState
       domainTitle: widget.title,
       domainFocus: widget.focus,
       focusBand: band,
-      traceRows: widget.progressRows ?? widget.rows,
+      focusRowId: rowId,
+      traceRows: widget.rows,
       includeZakat: widget.includeZakat,
       includeHadithFocus: widget.includeHadithFocus,
       includeHajjStatus: widget.includeHajjStatus,

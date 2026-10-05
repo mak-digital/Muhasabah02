@@ -12,6 +12,7 @@ import 'package:muhasabah02/presentation/shared/activity_picker.dart';
 
 import '../support/check_in_select.dart';
 import '../support/home_domain_stage.dart';
+import '../support/test_app.dart';
 
 void main() {
   testWidgets('salah factors appear by group from the prayer choice', (
@@ -127,7 +128,9 @@ void main() {
           checkInRepositoryProvider.overrideWithValue(
             MemoryCheckInRepository(),
           ),
-          appPrefsProvider.overrideWithValue(MemoryAppPrefs()),
+          appPrefsProvider.overrideWithValue(
+            MemoryAppPrefs(visibleDomains: allVisibleDomains()),
+          ),
           nowProvider.overrideWithValue(DateTime(2026, 9, 3)),
         ],
         child: MaterialApp(home: CheckInScreen(date: DateTime(2026, 9, 3))),

@@ -859,13 +859,13 @@ String namedTraceOutcome(String phrase, String storageKey) {
   return '$phrase — $subject';
 }
 
-String traceOutcomeLabel(String storageKey, TernaryOutcome outcome) {
+String traceOutcomePhrase(String storageKey, TernaryOutcome outcome) {
   if (isHuquqTrace(storageKey)) {
-    return namedTraceOutcome(switch (outcome) {
+    return switch (outcome) {
       TernaryOutcome.positive => 'I attended to a right I owe',
       TernaryOutcome.negative => 'I neglected a right I owe',
       TernaryOutcome.unanswered => 'Unanswered',
-    }, storageKey);
+    };
   }
   if (isAkhlaqTrace(storageKey) ||
       isKnowledgeTrace(storageKey) ||
@@ -875,13 +875,23 @@ String traceOutcomeLabel(String storageKey, TernaryOutcome outcome) {
       isHajjTrace(storageKey) ||
       isUmmahTrace(storageKey) ||
       isLivedSunnahTrace(storageKey)) {
-    return namedTraceOutcome(switch (outcome) {
+    return switch (outcome) {
       TernaryOutcome.positive => 'I noticed this in myself',
       TernaryOutcome.negative => 'I did not notice this today',
       TernaryOutcome.unanswered => 'Unanswered',
-    }, storageKey);
+    };
   }
-  return namedTraceOutcome(outcome.legendLabel, storageKey);
+  return outcome.legendLabel;
+}
+
+String traceOutcomeLabel(
+  String storageKey,
+  TernaryOutcome outcome, {
+  bool includeSubject = true,
+}) {
+  final phrase = traceOutcomePhrase(storageKey, outcome);
+  if (!includeSubject) return phrase;
+  return namedTraceOutcome(phrase, storageKey);
 }
 
 const allHomeTraceRows = [

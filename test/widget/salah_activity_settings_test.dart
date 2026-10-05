@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muhasabah02/domain/activities.dart';
 import 'package:muhasabah02/domain/copy.dart';
+import 'package:muhasabah02/domain/monitor_domain.dart';
 
 import '../support/test_app.dart';
 
@@ -30,11 +31,8 @@ void main() {
     await tester.tap(find.text(Copy.salahMarkActivityColours));
     await tester.pumpAndSettle();
     expect(find.text(Copy.salahMarkActivityNote), findsOneWidget);
-    expect(
-      find.text(ActivityCatalog.salah.first.label),
-      findsWidgets,
-    );
-    expect(find.text(Copy.quranJourney), findsOneWidget);
-    expect(find.textContaining('Applied'), findsWidgets);
+    expect(find.text(ActivityCatalog.salah.first.label), findsWidgets);
+    expect(find.text(MonitorDomain.quran.label), findsOneWidget);
+    expect(find.textContaining('Practical relevance'), findsWidgets);
   });
 }

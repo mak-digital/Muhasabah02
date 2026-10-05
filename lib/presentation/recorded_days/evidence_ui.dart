@@ -18,23 +18,37 @@ class EvidenceBand extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (children.isEmpty) return const SizedBox.shrink();
+    final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: 12),
       child: Material(
         color: color,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
         clipBehavior: Clip.antiAlias,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(10, 10, 10, 6),
+          padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                title,
-                style: Theme.of(context).textTheme.labelSmall
-                    ?.copyWith(letterSpacing: 0.5, fontWeight: FontWeight.w700),
+                title.toUpperCase(),
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.6,
+                  height: 1.25,
+                ),
               ),
-              ...children,
+              const SizedBox(height: 8),
+              for (var i = 0; i < children.length; i++) ...[
+                if (i > 0)
+                  Divider(
+                    height: 20,
+                    color: theme.colorScheme.outlineVariant.withValues(
+                      alpha: 0.45,
+                    ),
+                  ),
+                children[i],
+              ],
             ],
           ),
         ),
@@ -60,48 +74,40 @@ class EvidenceRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final color = quiet
+    final titleColor = quiet
         ? theme.colorScheme.onSurfaceVariant
         : theme.colorScheme.onSurface;
-    return Padding(
-      padding: const EdgeInsets.only(top: 6),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Text(
-                  name,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: quiet ? FontWeight.w400 : FontWeight.w600,
-                    color: color,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Flexible(
-                child: Text(
-                  value,
-                  textAlign: TextAlign.right,
-                  style: theme.textTheme.bodySmall?.copyWith(color: color),
-                ),
-              ),
-            ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          name,
+          style: theme.textTheme.titleSmall?.copyWith(
+            fontWeight: quiet ? FontWeight.w600 : FontWeight.w700,
+            color: titleColor,
+            height: 1.25,
           ),
-          if (note != null && note!.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 2),
-              child: Text(
-                note!,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+            height: 1.4,
+          ),
+        ),
+        if (note != null && note!.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 6),
+            child: Text(
+              note!,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+                height: 1.4,
               ),
             ),
-        ],
-      ),
+          ),
+      ],
     );
   }
 }
@@ -114,21 +120,26 @@ class EvidenceGuard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.only(bottom: 14),
       child: Wrap(
         crossAxisAlignment: WrapCrossAlignment.center,
         spacing: 8,
+        runSpacing: 6,
         children: [
           Text(
             text,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.3,
+              height: 1.35,
             ),
           ),
           if (sample)
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
               decoration: BoxDecoration(
                 color: MuhasabahColors.wash(
                   MuhasabahColors.sampleBannerWash,
@@ -139,8 +150,10 @@ class EvidenceGuard extends StatelessWidget {
               ),
               child: Text(
                 Copy.sampleRecordPill,
-                style: Theme.of(context).textTheme.labelSmall
-                    ?.copyWith(fontWeight: FontWeight.w700, letterSpacing: 0.3),
+                style: theme.textTheme.labelSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.3,
+                ),
               ),
             ),
         ],

@@ -9,9 +9,9 @@ import '../../domain/daily_check_in.dart';
 import '../../domain/home_traces.dart';
 import '../../domain/monitor_domain.dart';
 import '../../domain/personal_mix.dart';
+import '../../domain/personalisation_resolver.dart';
 import '../../domain/salah_extras.dart';
 import '../../domain/sample_retirement.dart';
-import '../checkin/check_in_screen.dart';
 import '../history/history_screen.dart';
 import '../review/review_screen.dart';
 import '../response/response_editor_screen.dart';
@@ -25,9 +25,9 @@ import 'home_domain_stage.dart';
 import 'marks_guide_sheet.dart';
 import 'optional_domain_home_card.dart';
 import 'quran_home_card.dart';
-import 'quick_tap_sheet.dart';
 import 'reflection_home_cards.dart';
 import 'salah_home_card.dart';
+import 'today_overview.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -188,31 +188,16 @@ class HomeScreen extends ConsumerWidget {
   }) {
     final visible = ref.watch(appPrefsProvider).visibleDomains;
     final mix = ref.watch(appPrefsProvider).personalMix;
-    final mixKeys = resolvePersonalMixKeys(mix, visible);
+    final resolver = PersonalisationResolver(visibleDomains: visible, mix: mix);
+    final mixKeys = resolver.effectiveRowIds;
     final season = personalMixSeasonLine(mix, visible);
-    final homeDomains = homeMixDomains(visible, mix);
+    final homeDomains = resolver.homeDomains;
     void open(Widget page) {
       Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => page));
     }
 
     return [
-      SizedBox(
-        width: double.infinity,
-        child: FilledButton.icon(
-          onPressed: () => open(const CheckInScreen()),
-          icon: const Icon(Icons.edit_calendar_outlined),
-          label: const Text(Copy.homeCheckIn),
-        ),
-      ),
-      const SizedBox(height: 8),
-      SizedBox(
-        width: double.infinity,
-        child: OutlinedButton.icon(
-          onPressed: () => showQuickTapSheet(context),
-          icon: const Icon(Icons.touch_app_outlined),
-          label: const Text(Copy.quickTap),
-        ),
-      ),
+      TodayOverview(records: records),
       const SizedBox(height: 12),
       const ReflectionOfTheWeekCard(),
       const SizedBox(height: 12),

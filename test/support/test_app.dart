@@ -5,6 +5,7 @@ import 'package:muhasabah02/application/device_unlock.dart';
 import 'package:muhasabah02/application/providers.dart';
 import 'package:muhasabah02/data/app_prefs.dart';
 import 'package:muhasabah02/data/memory_repositories.dart';
+import 'package:muhasabah02/data/repositories.dart';
 import 'package:muhasabah02/domain/daily_check_in.dart';
 import 'package:muhasabah02/domain/display_calendar.dart';
 import 'package:muhasabah02/domain/first_day_of_week.dart';
@@ -20,9 +21,12 @@ Set<MonitorDomain> allVisibleDomains() =>
 
 Widget testApp({
   MemoryCheckInRepository? checkIns,
+  CheckInRepository? checkInRepository,
   MemoryResponseRepository? responses,
+  ResponseRepository? responseRepository,
   MemoryAppPrefs? prefs,
   DateTime? now,
+  DateTime Function()? clock,
   FirstDayOfWeekPref firstDayOfWeek = FirstDayOfWeekPref.monday,
   DisplayCalendar displayCalendar = DisplayCalendar.gregorian,
   Set<MonitorDomain>? visibleDomains,
@@ -35,10 +39,10 @@ Widget testApp({
   return ProviderScope(
     overrides: [
       checkInRepositoryProvider.overrideWithValue(
-        checkIns ?? MemoryCheckInRepository(),
+        checkInRepository ?? checkIns ?? MemoryCheckInRepository(),
       ),
       responseRepositoryProvider.overrideWithValue(
-        responses ?? MemoryResponseRepository(),
+        responseRepository ?? responses ?? MemoryResponseRepository(),
       ),
       deviceUnlockProvider.overrideWithValue(
         deviceUnlock ?? FakeDeviceUnlock(),
@@ -56,6 +60,8 @@ Widget testApp({
               salahActivityColours: salahActivityColours,
             ),
       ),
+      if (clock != null) nowClockProvider.overrideWithValue(clock),
+      if (now != null) nowClockProvider.overrideWithValue(() => now),
       if (now != null) nowProvider.overrideWithValue(now),
     ],
     child: const MuhasabahApp(),

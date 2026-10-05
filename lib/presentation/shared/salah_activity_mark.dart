@@ -4,6 +4,7 @@ import '../../app/theme.dart';
 import '../../domain/activities.dart';
 import '../../domain/daily_check_in.dart';
 import '../../domain/prayer.dart';
+import '../../domain/quran_duration.dart';
 import 'state_marker.dart';
 
 class SalahActivityMark {
@@ -38,6 +39,12 @@ class SalahActivityMark {
       'prayedLate' => prayedLate,
       'missedMadeUp' => missedMadeUp,
       'missed' => missed,
+      QuranDurationIds.over20 => congregationOnTime,
+      QuranDurationIds.min15to20 => joinedCongregationLate,
+      QuranDurationIds.min10to15 => smallCongregation,
+      QuranDurationIds.min5to10 => aloneOnTime,
+      QuranDurationIds.min3to5 => prayedLate,
+      QuranDurationIds.notNoticed => prayedLate,
       ActivityIds.unanswered => unanswered,
       ActivityIds.other => other,
       _ => MuhasabahColors.mark,
@@ -63,8 +70,9 @@ class SalahActivityMark {
     required PrayerStatus status,
     required String activityId,
     required bool activityColours,
+    List<ActivityOption> catalog = ActivityCatalog.salah,
   }) {
-    final option = ActivityCatalog.find(ActivityCatalog.salah, activityId);
+    final option = ActivityCatalog.find(catalog, activityId);
     return SalahActivityMark(
       kind: kindForStatus(status, activityColours: activityColours),
       color: activityColours
@@ -97,8 +105,27 @@ class SalahActivityMark {
     final status = record?.jumuah ?? PrayerStatus.unanswered;
     return resolve(
       status: status,
-      activityId: ActivityCatalog.canonicalSalahId(status),
+      activityId: record?.jumuahActivityId ?? ActivityIds.unanswered,
       activityColours: activityColours,
+      catalog: ActivityCatalog.jumuah,
     );
+  }
+
+  static MarkerKind quranDurationKind(String activityId) {
+    if (activityId == ActivityIds.unanswered || activityId.isEmpty) {
+      return MarkerKind.unanswered;
+    }
+    if (activityId == QuranDurationIds.notNoticed) {
+      return MarkerKind.outlined;
+    }
+    return MarkerKind.filled;
+  }
+
+  static Color quranDurationColour(
+    String activityId, {
+    required bool colours,
+  }) {
+    if (!colours) return MuhasabahColors.mark;
+    return colourForId(activityId);
   }
 }
