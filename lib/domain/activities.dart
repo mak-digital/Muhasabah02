@@ -1,6 +1,7 @@
 import 'other_domains.dart';
 import 'prayer.dart';
 import 'quran.dart';
+import 'quran_duration.dart';
 
 class ActivityIds {
   static const unanswered = 'unanswered';
@@ -178,6 +179,121 @@ class ActivityCatalog {
       prayerStatus: PrayerStatus.other,
     ),
   ];
+
+  /// Same recorded choices as obligatory Salah, with Friday wording.
+  static const jumuah = <ActivityOption>[
+    ActivityOption(
+      id: 'congregationOnTime',
+      label: 'Prayed on time in congregation',
+      prayerStatus: PrayerStatus.onTime,
+    ),
+    ActivityOption(
+      id: 'joinedCongregationLate',
+      label: 'Joined congregation late',
+      prayerStatus: PrayerStatus.late,
+    ),
+    ActivityOption(
+      id: 'smallCongregation',
+      label: 'Prayed in small congregation',
+      prayerStatus: PrayerStatus.onTime,
+    ),
+    ActivityOption(
+      id: 'aloneOnTime',
+      label: 'Prayed alone on time',
+      prayerStatus: PrayerStatus.onTime,
+    ),
+    ActivityOption(
+      id: 'excused',
+      label: 'Excused',
+      prayerStatus: PrayerStatus.excused,
+    ),
+    ActivityOption(
+      id: 'prayedLate',
+      label: 'Prayed late (alone)',
+      prayerStatus: PrayerStatus.late,
+    ),
+    ActivityOption(
+      id: 'missedMadeUp',
+      label: 'Missed then made up later',
+      prayerStatus: PrayerStatus.missed,
+    ),
+    ActivityOption(
+      id: 'missed',
+      label: 'Missed',
+      prayerStatus: PrayerStatus.missed,
+    ),
+    ActivityOption(
+      id: ActivityIds.unanswered,
+      label: 'No answer recorded',
+      prayerStatus: PrayerStatus.unanswered,
+    ),
+    ActivityOption(
+      id: ActivityIds.other,
+      label: 'Other',
+      prayerStatus: PrayerStatus.other,
+    ),
+  ];
+
+  static List<ActivityOption> quranDuration({
+    required String verb,
+    required String rowName,
+  }) {
+    return [
+      ActivityOption(
+        id: QuranDurationIds.over20,
+        label: '$verb more than 20 minutes — $rowName',
+        ternary: TernaryOutcome.positive,
+      ),
+      ActivityOption(
+        id: QuranDurationIds.min15to20,
+        label: '$verb 15–20 minutes — $rowName',
+        ternary: TernaryOutcome.positive,
+      ),
+      ActivityOption(
+        id: QuranDurationIds.min10to15,
+        label: '$verb 10–15 minutes — $rowName',
+        ternary: TernaryOutcome.positive,
+      ),
+      ActivityOption(
+        id: QuranDurationIds.min5to10,
+        label: '$verb 5–10 minutes — $rowName',
+        ternary: TernaryOutcome.positive,
+      ),
+      ActivityOption(
+        id: QuranDurationIds.min3to5,
+        label: '$verb 3–5 minutes — $rowName',
+        ternary: TernaryOutcome.positive,
+      ),
+      ActivityOption(
+        id: QuranDurationIds.notNoticed,
+        label: 'I did not notice this today — $rowName',
+        ternary: TernaryOutcome.negative,
+      ),
+      ActivityOption(
+        id: ActivityIds.unanswered,
+        label: 'No answer recorded — $rowName',
+        ternary: TernaryOutcome.unanswered,
+      ),
+      ActivityOption(
+        id: ActivityIds.other,
+        label: 'Other — $rowName',
+        ternary: TernaryOutcome.positive,
+      ),
+    ];
+  }
+
+  static final quranEngagementDuration = quranDuration(
+    verb: 'Engaged',
+    rowName: 'Engagement',
+  );
+  static final quranUnderstandingDuration = quranDuration(
+    verb: 'Involved',
+    rowName: 'Understanding & reflection',
+  );
+  static final quranRelevanceDuration = quranDuration(
+    verb: 'Involved',
+    rowName: 'Practical relevance',
+  );
 
   static const quranReading = <ActivityOption>[
     ActivityOption(
@@ -795,6 +911,38 @@ class ActivityCatalog {
 
   static List<ActivityOption> forQuran(QuranDimension dimension) {
     return switch (dimension) {
+      QuranDimension.reading => quranEngagementDuration,
+      QuranDimension.meaning => quranUnderstandingDuration,
+      QuranDimension.consciousApplication => quranRelevanceDuration,
+      QuranDimension.memorisation => quranMemorisation,
+      QuranDimension.revision => quranRevision,
+      QuranDimension.tafsir => quranTafsir,
+      QuranDimension.reflection => quranReflection,
+      QuranDimension.applicationReflection => const [],
+    };
+  }
+
+  static bool isQuranDurationCatalog(List<ActivityOption> options) {
+    return identical(options, quranEngagementDuration) ||
+        identical(options, quranUnderstandingDuration) ||
+        identical(options, quranRelevanceDuration);
+  }
+
+  static ActivityOption? find(List<ActivityOption> catalog, String id) {
+    for (final option in catalog) {
+      if (option.id == id) return option;
+    }
+    return null;
+  }
+
+  static ActivityOption? findQuran(QuranDimension dimension, String id) {
+    return find(forQuran(dimension), id) ??
+        find(_quranStoredCatalog(dimension), id) ??
+        find(quranLegacy, id);
+  }
+
+  static List<ActivityOption> _quranStoredCatalog(QuranDimension dimension) {
+    return switch (dimension) {
       QuranDimension.reading => quranReading,
       QuranDimension.meaning => quranMeaning,
       QuranDimension.memorisation => quranMemorisation,
@@ -806,27 +954,16 @@ class ActivityCatalog {
     };
   }
 
-  static ActivityOption? find(List<ActivityOption> catalog, String id) {
-    for (final option in catalog) {
-      if (option.id == id) return option;
+  static ActivityOption? findAnyQuran(String id) {
+    for (final dimension in QuranDimension.values) {
+      final match = findQuran(dimension, id);
+      if (match != null) return match;
     }
     return null;
   }
 
-  static ActivityOption? findQuran(QuranDimension dimension, String id) {
-    return find(forQuran(dimension), id) ?? find(quranLegacy, id);
-  }
-
-  static ActivityOption? findAnyQuran(String id) {
-    for (final dimension in QuranDimension.values) {
-      final match = find(forQuran(dimension), id);
-      if (match != null) return match;
-    }
-    return find(quranLegacy, id);
-  }
-
   static bool preservePickerOrder(List<ActivityOption> options) {
-    if (identical(options, salah)) return true;
+    if (identical(options, salah) || identical(options, jumuah)) return true;
     for (final dimension in QuranDimension.values) {
       if (identical(options, forQuran(dimension))) return true;
     }
@@ -834,6 +971,7 @@ class ActivityCatalog {
   }
 
   static String salahKey(PrayerId id) => 'salah.${id.name}';
+  static const jumuahKey = 'salah.jumuah';
   static String quranKey(QuranDimension dimension) => 'quran.${dimension.name}';
   static const dhikrKey = 'dhikr';
   static const conductKey = 'conduct';
@@ -854,18 +992,25 @@ class ActivityCatalog {
     PrayerStatus.unanswered => ActivityIds.unanswered,
   };
 
+  static bool jumuahActivityMeansCongregation(String activityId) {
+    return activityId == 'congregationOnTime' ||
+        activityId == 'joinedCongregationLate' ||
+        activityId == 'smallCongregation';
+  }
+
   static String canonicalTernaryId(
     TernaryOutcome outcome,
     List<ActivityOption> catalog,
   ) {
-    if (outcome == TernaryOutcome.unanswered) return ActivityIds.unanswered;
-    if (outcome == TernaryOutcome.negative) return ActivityIds.noActivity;
+    if (outcome == TernaryOutcome.unanswered) {
+      return ActivityIds.unanswered;
+    }
     for (final option in catalog) {
-      if (option.ternary == TernaryOutcome.positive &&
-          option.id != ActivityIds.other) {
+      if (option.ternary == outcome && option.id != ActivityIds.other) {
         return option.id;
       }
     }
+    if (outcome == TernaryOutcome.negative) return ActivityIds.noActivity;
     return ActivityIds.other;
   }
 }

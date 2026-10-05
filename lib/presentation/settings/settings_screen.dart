@@ -371,7 +371,7 @@ class ActivitiesSettingsScreen extends ConsumerWidget {
               ),
             const SizedBox(height: 16),
             Text(
-              Copy.quranJourney,
+              MonitorDomain.quran.label,
               style: Theme.of(context).textTheme.titleSmall,
             ),
             const SizedBox(height: 8),
@@ -380,18 +380,9 @@ class ActivitiesSettingsScreen extends ConsumerWidget {
                 padding: const EdgeInsets.only(bottom: 8),
                 child: Row(
                   children: [
-                    QuranJourneyMarker(
-                      row: row,
-                      cell: QuranJourneyCell(
-                        kind: QuranJourneyCellKind.recorded,
-                        code: switch (row) {
-                          QuranJourneyRow.applied => 'W',
-                          QuranJourneyRow.reflected => 'T',
-                          QuranJourneyRow.understood => 'M',
-                          QuranJourneyRow.engaged => 'R',
-                        },
-                      ),
-                      colours: true,
+                    RecordedStateMarker(
+                      kind: MarkerKind.filled,
+                      color: QuranStageMark.colourFor(row),
                       semanticLabel: row.label,
                     ),
                     const SizedBox(width: 12),
@@ -669,19 +660,16 @@ class VisibleDomainsSettingsScreen extends ConsumerWidget {
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           const SizedBox(height: 8),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton(
-              key: const Key('clear-all-selections'),
-              onPressed: () => confirmClearWorkingSelection(context, ref),
-              child: const Text(Copy.clearAllSelections),
-            ),
-          ),
-          const SizedBox(height: 8),
           Wrap(
             spacing: 8,
             runSpacing: 8,
             children: [
+              FilterChip(
+                key: const Key('clear-all-selections'),
+                label: const Text(Copy.clearAllSelections),
+                selected: current.isEmpty,
+                onSelected: (_) => confirmClearWorkingSelection(context, ref),
+              ),
               FilterChip(
                 label: const Text(Copy.selectAllDomains),
                 selected: sameVisibleDomains(

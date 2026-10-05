@@ -225,8 +225,8 @@ void main() {
     () {
       expect(TernaryOutcome.unanswered.isRecorded, isFalse);
       expect(TernaryOutcome.negative.isRecorded, isTrue);
-      expect(TernaryOutcome.positive.legendLabel, 'Recorded engagement');
-      expect(TernaryOutcome.negative.legendLabel, 'Recorded as not done');
+      expect(TernaryOutcome.positive.legendLabel, 'Recorded sitting');
+      expect(TernaryOutcome.negative.legendLabel, 'I did not notice this today');
       expect(TernaryOutcome.unanswered.legendLabel, 'Unanswered');
 
       for (final record in OntologyRegistry.reflectionSubjects) {

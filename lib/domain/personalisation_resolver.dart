@@ -33,12 +33,21 @@ class PersonalisationResolver {
 
   bool isRowIncluded(String rowId) => effectiveRowIds.contains(rowId);
 
-  /// Home weeks follow the mix. Hidden domains stay out.
+  /// Whether this mix currently focuses on [rowId] in recording and Progress.
+  /// Same as Domains, or a mix that resolved to no keys, shows every row of
+  /// a focused domain. Named and custom mixes hide unselected rows.
+  bool mixFocusAllows(String rowId) {
+    if (mix.kind == PersonalMixKind.sameAsDomains) return true;
+    final keys = effectiveRowIds;
+    if (keys.isEmpty) return true;
+    return keys.contains(rowId);
+  }
+
+  /// Home, Review, and today’s check-in follow the mix. Hidden domains stay out.
   List<MonitorDomain> get homeDomains => homeMixDomains(visibleDomains, mix);
 
-  /// Review lists every visible domain; mix-touched domains come first.
-  List<MonitorDomain> get reviewDomains =>
-      orderedVisibleDomains(visibleDomains, mix);
+  /// Same mix-focused domains as Home. Saved records are not rewritten.
+  List<MonitorDomain> get reviewDomains => homeDomains;
 
   PersonalisationReason domainReason(MonitorDomain domain) {
     if (!isDomainVisible(domain)) return PersonalisationReason.hiddenDomain;

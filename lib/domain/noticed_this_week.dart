@@ -46,11 +46,11 @@ List<NoticedLine> noticedThisWeek({
     }
   }
 
-  if (mixKeys.contains('quran.reflection')) {
+  if (mixKeys.contains('quran.meaning')) {
     add(
-      'Qur’anic Reflection',
+      'Understanding & reflection',
       (record) =>
-          record?.quranOutcome(QuranDimension.reflection) ??
+          record?.quranOutcome(QuranDimension.meaning) ??
           TernaryOutcome.unanswered,
     );
   }

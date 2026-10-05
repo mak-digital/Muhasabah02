@@ -11,16 +11,17 @@ enum QuranDimension {
 
 enum TernaryOutcome { unanswered, positive, negative }
 
-List<QuranDimension> get quranDailyDimensions => [
-  for (final dimension in QuranDimension.values)
-    if (dimension != QuranDimension.applicationReflection) dimension,
+List<QuranDimension> get quranDailyDimensions => const [
+  QuranDimension.reading,
+  QuranDimension.meaning,
+  QuranDimension.consciousApplication,
 ];
 
 const kQuranRecitationBand = 'Recitation';
 const kQuranRetentionBand = 'Retention';
 const kQuranStudyBand = 'Study & notice';
 const kQuranEngagementBand = 'Engagement';
-const kQuranUnderstandingBand = 'Understanding';
+const kQuranUnderstandingBand = 'Understanding & reflection';
 const kQuranReflectionBand = 'Reflection';
 const kQuranApplicationBand = 'Practical relevance';
 
@@ -37,24 +38,47 @@ const studyNoticeHomeRows = [
   QuranDimension.consciousApplication,
 ];
 
-const engagementHomeRows = [
-  QuranDimension.reading,
-  QuranDimension.memorisation,
-  QuranDimension.revision,
-];
+const engagementHomeRows = [QuranDimension.reading];
 
-const understandingHomeRows = [QuranDimension.meaning, QuranDimension.tafsir];
+const understandingHomeRows = [QuranDimension.meaning];
 
-const reflectionHomeRows = [QuranDimension.reflection];
+const reflectionHomeRows = <QuranDimension>[];
 
 const applicationHomeRows = [QuranDimension.consciousApplication];
+
+/// Mix-filtered Home / 7-day bands in check-in order.
+List<(String band, List<QuranDimension> rows)> quranHomeBandsFor(
+  Iterable<QuranDimension> display,
+) {
+  final shown = display.toSet();
+  const catalog = <(String, List<QuranDimension>)>[
+    (kQuranEngagementBand, engagementHomeRows),
+    (kQuranUnderstandingBand, understandingHomeRows),
+    (kQuranReflectionBand, reflectionHomeRows),
+    (kQuranApplicationBand, applicationHomeRows),
+  ];
+  return [
+    for (final entry in catalog)
+      if ([
+        for (final dimension in entry.$2)
+          if (shown.contains(dimension)) dimension,
+      ].isNotEmpty)
+        (
+          entry.$1,
+          [
+            for (final dimension in entry.$2)
+              if (shown.contains(dimension)) dimension,
+          ],
+        ),
+  ];
+}
 
 extension QuranDimensionX on QuranDimension {
   String get jsonKey => name;
 
   String get label => switch (this) {
-    QuranDimension.reading => 'Recitation',
-    QuranDimension.meaning => 'Recitation with Meaning',
+    QuranDimension.reading => 'Engagement',
+    QuranDimension.meaning => 'Understanding & reflection',
     QuranDimension.memorisation => 'Memorisation',
     QuranDimension.revision => 'Revision',
     QuranDimension.tafsir => 'Tafsir',
@@ -64,8 +88,8 @@ extension QuranDimensionX on QuranDimension {
   };
 
   String get matrixColumn => switch (this) {
-    QuranDimension.reading => 'Recite',
-    QuranDimension.meaning => 'Meaning',
+    QuranDimension.reading => 'Engage',
+    QuranDimension.meaning => 'Understand',
     QuranDimension.memorisation => 'Memorise',
     QuranDimension.revision => 'Revise',
     QuranDimension.tafsir => 'Tafsir',
@@ -86,9 +110,9 @@ extension QuranDimensionX on QuranDimension {
 
   String get question => switch (this) {
     QuranDimension.reading =>
-      'Did you spend time reciting or listening to Qur’an today?',
+      'Did you spend time with recitation, memorisation, and/or revision today?',
     QuranDimension.meaning =>
-      'Did you spend time reciting with meaning or translation today?',
+      'Did you spend time with meaning and/or tafsir, plus pondering, today?',
     QuranDimension.memorisation =>
       'Did you spend time memorising Qur’an today?',
     QuranDimension.revision =>
@@ -96,30 +120,30 @@ extension QuranDimensionX on QuranDimension {
     QuranDimension.tafsir => 'Did you spend time studying tafsir or an explanation of an ayah or passage today?',
     QuranDimension.reflection => 'Did you spend time in Qur’anic Reflection — on verses, meanings, tafsir, or lessons noticed — today?',
     QuranDimension.consciousApplication =>
-      'Did you notice a possible practical relevance from the Qur’an today?',
+      'Did you notice a possible practical relevance from learnt verses today?',
     QuranDimension.applicationReflection => 'Did you spend time reflecting on how something from the Qur’an might relate to your daily life?',
   };
 
   String get positiveLabel => switch (this) {
-    QuranDimension.reading => 'Recorded engagement',
-    QuranDimension.meaning => 'Recorded engagement',
+    QuranDimension.reading => 'Recorded sitting',
+    QuranDimension.meaning => 'Recorded sitting',
     QuranDimension.memorisation => 'Recorded engagement',
     QuranDimension.revision => 'Recorded engagement',
     QuranDimension.tafsir => 'Recorded engagement',
     QuranDimension.reflection => 'Recorded engagement',
-    QuranDimension.consciousApplication => 'Recorded engagement',
+    QuranDimension.consciousApplication => 'Recorded sitting',
     QuranDimension.applicationReflection =>
       'Reflected on possible practical relevance',
   };
 
   String get negativeLabel => switch (this) {
-    QuranDimension.reading => 'Recorded as not done',
-    QuranDimension.meaning => 'Recorded as not done',
+    QuranDimension.reading => 'I did not notice this today',
+    QuranDimension.meaning => 'I did not notice this today',
     QuranDimension.memorisation => 'Recorded as not done',
     QuranDimension.revision => 'Recorded as not done',
     QuranDimension.tafsir => 'Recorded as not done',
     QuranDimension.reflection => 'Recorded as not done',
-    QuranDimension.consciousApplication => 'Recorded as not done',
+    QuranDimension.consciousApplication => 'I did not notice this today',
     QuranDimension.applicationReflection =>
       'Did not reflect on practical relevance',
   };
@@ -152,8 +176,8 @@ extension TernaryOutcomeX on TernaryOutcome {
   bool get isRecorded => this != TernaryOutcome.unanswered;
 
   String get legendLabel => switch (this) {
-    TernaryOutcome.positive => 'Recorded engagement',
-    TernaryOutcome.negative => 'Recorded as not done',
+    TernaryOutcome.positive => 'Recorded sitting',
+    TernaryOutcome.negative => 'I did not notice this today',
     TernaryOutcome.unanswered => 'Unanswered',
   };
 }
@@ -187,9 +211,8 @@ String ternaryToJson(QuranDimension dimension, TernaryOutcome outcome) {
   };
 }
 
-bool readingLockedByMeaning(Map<QuranDimension, TernaryOutcome> quran) {
-  return (quran[QuranDimension.meaning] ?? TernaryOutcome.unanswered) ==
-      TernaryOutcome.positive;
+bool readingLockedByMeaning(Map<QuranDimension, TernaryOutcome> _) {
+  return false;
 }
 
 bool canSetQuranOutcome({

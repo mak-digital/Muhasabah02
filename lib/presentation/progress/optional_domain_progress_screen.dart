@@ -15,6 +15,7 @@ import '../checkin/trace_record_sheets.dart';
 import '../shared/progress_calendar.dart';
 import '../shared/domain_briefing_note.dart';
 import '../shared/state_marker.dart';
+import '../shared/system_insets.dart';
 import '../shared/ui_bits.dart';
 import 'week_trace_matrix.dart';
 
@@ -69,7 +70,7 @@ class OptionalDomainProgressScreen extends ConsumerWidget {
           final hajjStatus = ref.watch(appPrefsProvider).hajjStatus;
           final question = focusQuestion;
           return ListView(
-            padding: const EdgeInsets.all(16),
+            padding: pageListPadding(context, recoverSystemBottom: true),
             children: [
               if (question != null && question.isNotEmpty) ...[
                 Text(
@@ -143,8 +144,7 @@ class OptionalDomainProgressScreen extends ConsumerWidget {
                   )
                 else ...[
                   ..._weekMatrices(index),
-                  if (includeZakat)
-                    _zakatWeekMatrix(context, ref, now, index),
+                  if (includeZakat) _zakatWeekMatrix(context, ref, now, index),
                 ],
               ] else ...[
                 for (final row in rows)
@@ -202,7 +202,8 @@ class OptionalDomainProgressScreen extends ConsumerWidget {
           onTap: matrixCellOnTap(
             ref: ref,
             dateKey: key,
-            onOpen: () => _openDay(context, key, band: kZakatTraceBand),
+            onOpen: () =>
+                _openDay(context, key, band: kZakatTraceBand, rowId: 'zakat'),
           ),
           marker: ZakatStateMarker(status: status),
         );
@@ -210,7 +211,12 @@ class OptionalDomainProgressScreen extends ConsumerWidget {
     );
   }
 
-  void _openDay(BuildContext context, String dateKey, {String? band}) {
+  void _openDay(
+    BuildContext context,
+    String dateKey, {
+    String? band,
+    String? rowId,
+  }) {
     openFocusedCheckIn(
       context,
       dateKey: dateKey,
@@ -218,6 +224,7 @@ class OptionalDomainProgressScreen extends ConsumerWidget {
       domainTitle: title,
       domainFocus: focusQuestion,
       focusBand: band,
+      focusRowId: rowId,
       traceRows: rows,
       includeZakat: includeZakat,
       includeHadithFocus: includeHadithFocus,
@@ -256,7 +263,12 @@ class OptionalDomainProgressScreen extends ConsumerWidget {
               onTap: matrixCellOnTap(
                 ref: ref,
                 dateKey: key,
-                onOpen: () => _openDay(context, key, band: row.band),
+                onOpen: () => _openDay(
+                  context,
+                  key,
+                  band: row.band,
+                  rowId: row.storageKey,
+                ),
               ),
               marker: RecordedStateMarker(
                 kind: markerForRecorded(
@@ -297,7 +309,12 @@ class OptionalDomainProgressScreen extends ConsumerWidget {
               onTap: matrixCellOnTap(
                 ref: ref,
                 dateKey: key,
-                onOpen: () => _openDay(context, key, band: kZakatTraceBand),
+                onOpen: () => _openDay(
+                  context,
+                  key,
+                  band: kZakatTraceBand,
+                  rowId: 'zakat',
+                ),
               ),
               marker: ZakatStateMarker(status: status),
             );

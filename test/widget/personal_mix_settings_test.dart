@@ -38,10 +38,7 @@ void main() {
     await tester.ensureVisible(find.text(PersonalMixKind.worship.label));
     await tester.tap(find.text(PersonalMixKind.worship.label));
     await tester.pump();
-    expect(
-      find.text(Copy.mixKeptUntilDomainShown(MonitorDomain.hajj.label)),
-      findsOneWidget,
-    );
+    expect(find.text(Copy.mixKeptUntilDomainsShown), findsOneWidget);
     ScaffoldMessenger.of(
       tester.element(find.byType(VisibleDomainsSettingsScreen)),
     ).hideCurrentSnackBar();

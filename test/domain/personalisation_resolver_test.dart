@@ -47,7 +47,7 @@ void main() {
     expect(subject.isRowIncluded('quran.tafsir'), isFalse);
     expect(
       subject.rowReason('quran.tafsir'),
-      PersonalisationReason.excludedByMix,
+      PersonalisationReason.unknownOrRetired,
     );
     expect(
       subject.includedQuranDimensions,
@@ -104,12 +104,12 @@ void main() {
       containsAll([
         QuranDimension.reading,
         QuranDimension.meaning,
-        QuranDimension.memorisation,
-        QuranDimension.revision,
-        QuranDimension.tafsir,
-        QuranDimension.reflection,
         QuranDimension.consciousApplication,
       ]),
+    );
+    expect(
+      same.includedQuranDimensions,
+      isNot(contains(QuranDimension.memorisation)),
     );
     expect(
       same.includedQuranDimensions,
@@ -136,7 +136,7 @@ void main() {
     final subject = resolver(visible: visible, mix: mix);
     expect(subject.effectiveRowIds, resolvePersonalMixKeys(mix, visible));
     expect(subject.homeDomains, homeMixDomains(visible, mix));
-    expect(subject.reviewDomains, orderedVisibleDomains(visible, mix));
+    expect(subject.reviewDomains, subject.homeDomains);
     expect(subject.homeDomains, orderedVisibleDomains(visible, mix));
     expect(subject.isRowIncluded('salah.fajr'), isTrue);
     expect(
@@ -147,8 +147,7 @@ void main() {
 
   test('hidden domain wins over mix keys for that domain', () {
     final mix = mixForKind(PersonalMixKind.firstLook);
-    final visible = {...kBasicDhikrVisibleDomains}
-      ..remove(MonitorDomain.quran);
+    final visible = {...kBasicDhikrVisibleDomains}..remove(MonitorDomain.quran);
     final subject = resolver(visible: visible, mix: mix);
     expect(subject.isRowIncluded('quran.reading'), isFalse);
     expect(
@@ -170,8 +169,38 @@ void main() {
   });
 
   test('Zakat mix key stays on Charity and is not a Wealth merge', () {
-    final subject = resolver();
+    final subject = resolver(visible: {MonitorDomain.charity});
     expect(mixItemById[kZakatMixKey]?.domain, MonitorDomain.charity);
     expect(subject.isRowIncluded(kZakatMixKey), isTrue);
   });
+
+  test('named mix Review matches Home and omits unused shown domains', () {
+    final mix = mixForKind(PersonalMixKind.worship);
+    final visible = Set<MonitorDomain>.from(MonitorDomain.values);
+    final subject = resolver(visible: visible, mix: mix);
+    expect(subject.reviewDomains, subject.homeDomains);
+    expect(subject.reviewDomains, isNot(contains(MonitorDomain.charity)));
+    expect(subject.reviewDomains, isNot(contains(MonitorDomain.akhlaq)));
+    expect(subject.homeDomains, contains(MonitorDomain.salah));
+  });
+
+  test(
+    'first-look mix omits Rights and Charity even when those domains are shown',
+    () {
+      final mix = mixForKind(PersonalMixKind.firstLook);
+      final visible = Set<MonitorDomain>.from(MonitorDomain.values);
+      final subject = resolver(visible: visible, mix: mix);
+      expect(subject.homeDomains, [
+        MonitorDomain.salah,
+        MonitorDomain.quran,
+        MonitorDomain.dhikr,
+      ]);
+      expect(subject.reviewDomains, subject.homeDomains);
+      expect(subject.mixFocusAllows('salah.fajr'), isTrue);
+      expect(subject.mixFocusAllows('salah.tahajjud'), isFalse);
+      expect(subject.mixFocusAllows('quran.tafsir'), isFalse);
+      expect(subject.mixFocusAllows('huquq.parents'), isFalse);
+      expect(subject.mixFocusAllows(kZakatMixKey), isFalse);
+    },
+  );
 }

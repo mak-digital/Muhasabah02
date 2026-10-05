@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:muhasabah02/app/dimensions.dart';
 import 'package:muhasabah02/data/memory_repositories.dart';
 import 'package:muhasabah02/domain/copy.dart';
 import 'package:muhasabah02/domain/monitor_domain.dart';
@@ -108,6 +109,25 @@ void main() {
       compactKey: 'home-compact-fasting-2026-09-03',
       cellKey: 'home-fasting.weeklySunnah-2026-09-03',
     );
+  });
+
+  testWidgets('today mark halo is circular and only a little larger than the mark', (
+    tester,
+  ) async {
+    await pumpHome(tester, domain: MonitorDomain.fasting);
+    final halo = find.byKey(
+      const Key('home-today-fasting.weeklySunnah-2026-09-03'),
+    );
+    expect(halo, findsOneWidget);
+    expect(
+      tester.getSize(halo),
+      const Size(AppDimensions.todayMarkHalo, AppDimensions.todayMarkHalo),
+    );
+    final cell = tester.getSize(
+      find.byKey(const Key('home-fasting.weeklySunnah-2026-09-03')),
+    );
+    expect(cell.height, greaterThan(AppDimensions.todayMarkHalo));
+    expect(cell.width, greaterThan(AppDimensions.todayMarkHalo));
   });
 
   testWidgets('Dhikr Home cell opens that day’s entry ready to save', (

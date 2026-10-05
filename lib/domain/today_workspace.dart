@@ -57,6 +57,9 @@ class TodayDomain {
     for (final row in rows)
       if (!row.hasResponse) row,
   ];
+
+  int get mixRowCount => rows.length;
+  int get recordedMixCount => recordedRows.length;
 }
 
 /// Derived daily workspace. Not persisted.
@@ -65,6 +68,16 @@ class TodayWorkspace {
 
   final String dateKey;
   final List<TodayDomain> domains;
+
+  int get mixRowCount => [
+    for (final domain in domains) ...domain.rows,
+  ].length;
+
+  int get recordedMixCount => [
+    for (final domain in domains)
+      for (final row in domain.rows)
+        if (row.hasResponse) row,
+  ].length;
 }
 
 /// Pure derivation of Today's domains and rows.

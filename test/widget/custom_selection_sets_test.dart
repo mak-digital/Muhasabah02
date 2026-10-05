@@ -10,6 +10,7 @@ import 'package:muhasabah02/domain/personal_mix.dart';
 import 'package:muhasabah02/domain/personal_response.dart';
 import 'package:muhasabah02/presentation/settings/settings_screen.dart';
 
+import '../support/home_domain_stage.dart';
 import '../support/test_app.dart';
 
 void main() {
@@ -309,8 +310,9 @@ void main() {
     await tester.pumpAndSettle();
     Navigator.of(tester.element(find.text(Copy.settingsTitle))).pop();
     await tester.pumpAndSettle();
-    expect(find.byKey(const Key('today-domain-salah')), findsOneWidget);
     expect(find.text(Copy.todayEmpty), findsNothing);
+    await expandActiveDomainMix(tester);
+    expect(find.byKey(const Key('today-domain-salah')), findsOneWidget);
   });
 
   testWidgets(
@@ -324,6 +326,7 @@ void main() {
         tester,
         app: testApp(now: DateTime(2026, 9, 22), prefs: prefs),
       );
+      await expandActiveDomainMix(tester);
       expect(find.byKey(const Key('today-domain-salah')), findsOneWidget);
       await openDomains(tester);
       await showSlot(tester, 3);

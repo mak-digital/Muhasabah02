@@ -12,7 +12,6 @@ import '../../domain/personal_mix.dart';
 import '../../domain/personalisation_resolver.dart';
 import '../../domain/salah_extras.dart';
 import '../../domain/sample_retirement.dart';
-import '../checkin/check_in_screen.dart';
 import '../history/history_screen.dart';
 import '../review/review_screen.dart';
 import '../response/response_editor_screen.dart';
@@ -26,7 +25,6 @@ import 'home_domain_stage.dart';
 import 'marks_guide_sheet.dart';
 import 'optional_domain_home_card.dart';
 import 'quran_home_card.dart';
-import 'quick_tap_sheet.dart';
 import 'reflection_home_cards.dart';
 import 'salah_home_card.dart';
 import 'today_overview.dart';
@@ -200,27 +198,6 @@ class HomeScreen extends ConsumerWidget {
 
     return [
       TodayOverview(records: records),
-      const SizedBox(height: 16),
-      SizedBox(
-        width: double.infinity,
-        child: FilledButton.icon(
-          onPressed: () {
-            refreshNowIfLocalDateChanged(ref);
-            open(CheckInScreen(date: ref.read(nowProvider)));
-          },
-          icon: const Icon(Icons.edit_calendar_outlined),
-          label: const Text(Copy.homeCheckIn),
-        ),
-      ),
-      const SizedBox(height: 8),
-      SizedBox(
-        width: double.infinity,
-        child: OutlinedButton.icon(
-          onPressed: () => showQuickTapSheet(context, ref),
-          icon: const Icon(Icons.touch_app_outlined),
-          label: const Text(Copy.quickTap),
-        ),
-      ),
       const SizedBox(height: 12),
       const ReflectionOfTheWeekCard(),
       const SizedBox(height: 12),

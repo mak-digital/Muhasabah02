@@ -40,8 +40,8 @@ void main() {
     expect(find.text('SALAH & PRAYER QUALITY'), findsNothing);
     expect(find.textContaining('‹ Salah'), findsNothing);
 
-    await showCheckInDomain(tester, MonitorDomain.charity);
-    expect(find.text('CHARITY'), findsOneWidget);
+    await showCheckInDomain(tester, MonitorDomain.dhikr);
+    expect(find.text('DHIKR & DUA'), findsOneWidget);
     expect(
       tester
           .widget<IconButton>(find.byKey(const Key('checkin-domain-next')))
@@ -49,10 +49,7 @@ void main() {
       isNull,
     );
     expect(find.textContaining('Score'), findsNothing);
-    expect(
-      find.bySemanticsLabel(Copy.checkInDomainPillsNote),
-      findsOneWidget,
-    );
+    expect(find.bySemanticsLabel(Copy.checkInDomainPillsNote), findsOneWidget);
   });
 
   testWidgets('full check-in hides chrome when only one domain is shown', (
@@ -64,10 +61,7 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
 
     await tester.pumpWidget(
-      testApp(
-        now: DateTime(2026, 9, 3),
-        visibleDomains: {MonitorDomain.salah},
-      ),
+      testApp(now: DateTime(2026, 9, 3), visibleDomains: {MonitorDomain.salah}),
     );
     await tester.pumpAndSettle();
     await tester.tap(find.text(Copy.homeCheckIn));

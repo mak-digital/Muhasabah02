@@ -124,11 +124,26 @@ class DailyCheckIn {
   TernaryOutcome quranOutcome(QuranDimension dimension) =>
       quran[dimension] ?? TernaryOutcome.unanswered;
 
+  String get jumuahActivityId {
+    final stored = activities[ActivityCatalog.jumuahKey];
+    if (stored != null) return stored.id;
+    if (jumuahCongregation && jumuah == PrayerStatus.late) {
+      return 'joinedCongregationLate';
+    }
+    if (jumuahCongregation && jumuah == PrayerStatus.onTime) {
+      return 'congregationOnTime';
+    }
+    return ActivityCatalog.canonicalSalahId(jumuah);
+  }
+
   RecordedActivity activityFor(String key) {
     final stored = activities[key];
     if (stored != null) return stored;
     if (key.startsWith('salah.')) {
       final name = key.substring(6);
+      if (name == 'jumuah') {
+        return RecordedActivity(id: jumuahActivityId);
+      }
       final id = PrayerId.values.where((item) => item.name == name);
       if (id.isNotEmpty) {
         return RecordedActivity(
@@ -337,6 +352,19 @@ class DailyCheckIn {
     );
   }
 
+  DailyCheckIn withJumuahActivity(RecordedActivity activity) {
+    final option =
+        ActivityCatalog.find(ActivityCatalog.jumuah, activity.id) ??
+        ActivityCatalog.find(ActivityCatalog.salah, activity.id);
+    return copyWith(
+      jumuah: option?.prayerStatus ?? PrayerStatus.unanswered,
+      jumuahCongregation: ActivityCatalog.jumuahActivityMeansCongregation(
+        activity.id,
+      ),
+      activities: {...activities, ActivityCatalog.jumuahKey: activity},
+    );
+  }
+
   DailyCheckIn withQuran(QuranDimension dimension, TernaryOutcome outcome) {
     if (!canSetQuranOutcome(
       quran: quran,
@@ -346,10 +374,6 @@ class DailyCheckIn {
       return this;
     }
     var nextQuran = {...quran, dimension: outcome};
-    if (dimension == QuranDimension.meaning &&
-        outcome == TernaryOutcome.positive) {
-      nextQuran[QuranDimension.reading] = TernaryOutcome.positive;
-    }
     final nextContexts = contexts.where((c) {
       final current = nextQuran[c.subject] ?? TernaryOutcome.unanswered;
       if (!contextAllowed(c.subject, current)) return false;
@@ -369,10 +393,6 @@ class DailyCheckIn {
     }
 
     writeActivity(dimension, outcome);
-    if (dimension == QuranDimension.meaning &&
-        outcome == TernaryOutcome.positive) {
-      writeActivity(QuranDimension.reading, TernaryOutcome.positive);
-    }
     return copyWith(
       quran: nextQuran,
       contexts: nextContexts,

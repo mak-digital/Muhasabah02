@@ -125,12 +125,12 @@ List<NoticedPattern> noticedPatterns({
     }
   }
 
-  if (mixKeys.contains('quran.reflection')) {
+  if (mixKeys.contains('quran.meaning')) {
     consider(
-      'Qur’anic Reflection',
+      'Understanding & reflection',
       MonitorDomain.quran,
       (record) =>
-          record?.quranOutcome(QuranDimension.reflection) ??
+          record?.quranOutcome(QuranDimension.meaning) ??
           TernaryOutcome.unanswered,
     );
   }

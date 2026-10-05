@@ -3,19 +3,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/theme.dart';
 import '../../application/providers.dart';
-import '../../domain/copy.dart';
+import '../../domain/activities.dart';
 import '../../domain/daily_check_in.dart';
 import '../../domain/date_key.dart';
 import '../../domain/display_calendar.dart';
 import '../../domain/first_day_of_week.dart';
 import '../../domain/monitor_domain.dart';
 import '../../domain/quran.dart';
-import '../../domain/quran_stage.dart';
 import '../../domain/weekly_calendar.dart';
 import '../checkin/check_in_screen.dart';
-import '../shared/quran_stage_mark.dart';
+import '../shared/salah_activity_mark.dart';
 import '../shared/state_marker.dart';
-import 'quran_day_sheet.dart';
+import '../shared/today_mark_halo.dart';
+import '../shared/week_nav_strip.dart';
 
 class QuranHomeCard extends ConsumerStatefulWidget {
   const QuranHomeCard({
@@ -63,7 +63,7 @@ class _QuranHomeCardState extends ConsumerState<QuranHomeCard> {
       brightness,
     );
     final localizations = MaterialLocalizations.of(context);
-    final rows = quranJourneyRowsFor(_display);
+    final bands = quranHomeBandsFor(_display);
 
     return Semantics(
       container: true,
@@ -76,73 +76,30 @@ class _QuranHomeCardState extends ConsumerState<QuranHomeCard> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Row(
-                children: [
-                  IconButton(
-                    tooltip: 'Previous week',
-                    onPressed: () => setState(() => _weekOffset--),
-                    icon: const Icon(Icons.chevron_left),
-                  ),
-                  Expanded(
-                    child: InkWell(
-                      onTap: () {
-                        refreshNowIfLocalDateChanged(ref);
-                        openFocusedCheckIn(
-                          context,
-                          dateKey: dateKey(ref.read(nowProvider)),
-                          focus: CheckInFocus.quran,
-                        );
-                      },
-                      child: Column(
-                        children: [
-                          Text(
-                            MonitorDomain.quran.label,
-                            textAlign: TextAlign.center,
-                            style: Theme.of(context).textTheme.titleMedium
-                                ?.copyWith(fontWeight: FontWeight.w600),
-                          ),
-                          if (MonitorDomain.quran.focusQuestion != null) ...[
-                            const SizedBox(height: 4),
-                            Text(
-                              MonitorDomain.quran.focusQuestion!,
-                              textAlign: TextAlign.center,
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(height: 1.35),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    tooltip: 'Next week',
-                    onPressed: _weekOffset >= 0
-                        ? null
-                        : () => setState(() => _weekOffset++),
-                    icon: const Icon(Icons.chevron_right),
-                  ),
-                ],
-              ),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      weekRangeLabel(weekStart, calendar: calendar),
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: _weekOffset == 0
-                        ? null
-                        : () => setState(() => _weekOffset = 0),
-                    child: const Text(Copy.currentWeek),
-                  ),
-                ],
+              HomeWeekChrome(
+                title: MonitorDomain.quran.label,
+                question: MonitorDomain.quran.focusQuestion,
+                family: MuhasabahColors.quranFamily,
+                cardWash: wash,
+                weekLabel: weekRangeLabel(weekStart, calendar: calendar),
+                onPreviousWeek: () => setState(() => _weekOffset--),
+                onNextWeek: () => setState(() => _weekOffset++),
+                nextWeekEnabled: _weekOffset < 0,
+                showCurrentWeek: _weekOffset != 0,
+                onCurrentWeek: () => setState(() => _weekOffset = 0),
+                onTitleTap: () {
+                  refreshNowIfLocalDateChanged(ref);
+                  openFocusedCheckIn(
+                    context,
+                    dateKey: dateKey(ref.read(nowProvider)),
+                    focus: CheckInFocus.quran,
+                  );
+                },
               ),
               const SizedBox(height: 4),
               Row(
                 children: [
-                  if (!widget.compactWeek) const SizedBox(width: 86),
+                  if (!widget.compactWeek) const SizedBox(width: 92),
                   for (var col = 0; col < kCalendarWeekdayCount; col++)
                     Expanded(
                       child: Column(
@@ -189,44 +146,23 @@ class _QuranHomeCardState extends ConsumerState<QuranHomeCard> {
                     for (final key in keys)
                       Expanded(
                         child: Center(
-                          child: _compactCell(key, index[key], colours),
+                          child: _compactCell(key, index[key]),
                         ),
                       ),
                   ],
                 )
               else
-                DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: MuhasabahColors.wash(
-                      MuhasabahColors.quranRecitationBand,
-                      MuhasabahColors.quranRecitationBandDark,
-                      brightness,
-                    ),
-                    borderRadius: BorderRadius.circular(12),
+                for (final band in bands) ...[
+                  _band(
+                    brightness: brightness,
+                    band: band.$1,
+                    rows: band.$2,
+                    keys: keys,
+                    index: index,
+                    colours: colours,
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(6, 8, 6, 6),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          Copy.quranJourney.toUpperCase(),
-                          style: Theme.of(context).textTheme.labelSmall
-                              ?.copyWith(
-                                letterSpacing: 0.4,
-                                fontWeight: FontWeight.w600,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurfaceVariant,
-                              ),
-                        ),
-                        const SizedBox(height: 6),
-                        for (final row in rows)
-                          _journeyRow(row, keys, index, colours),
-                      ],
-                    ),
-                  ),
-                ),
+                  const SizedBox(height: 6),
+                ],
             ],
           ),
         ),
@@ -234,8 +170,61 @@ class _QuranHomeCardState extends ConsumerState<QuranHomeCard> {
     );
   }
 
-  Widget _journeyRow(
-    QuranJourneyRow row,
+  Widget _band({
+    required Brightness brightness,
+    required String band,
+    required List<QuranDimension> rows,
+    required List<String> keys,
+    required Map<String, DailyCheckIn> index,
+    required bool colours,
+  }) {
+    final (light, dark) = switch (band) {
+      kQuranEngagementBand => (
+        MuhasabahColors.quranRecitationBand,
+        MuhasabahColors.quranRecitationBandDark,
+      ),
+      kQuranUnderstandingBand => (
+        MuhasabahColors.quranRetentionBand,
+        MuhasabahColors.quranRetentionBandDark,
+      ),
+      kQuranReflectionBand => (
+        MuhasabahColors.quranStudyBand,
+        MuhasabahColors.quranStudyBandDark,
+      ),
+      _ => (
+        MuhasabahColors.quranRecitationBand,
+        MuhasabahColors.quranRecitationBandDark,
+      ),
+    };
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: MuhasabahColors.wash(light, dark, brightness),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(6, 8, 6, 6),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              band.toUpperCase(),
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                letterSpacing: 0.4,
+                fontWeight: FontWeight.w600,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 6),
+            for (final dimension in rows)
+              _row(dimension, keys, index, colours),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _row(
+    QuranDimension dimension,
     List<String> keys,
     Map<String, DailyCheckIn> index,
     bool colours,
@@ -245,23 +234,17 @@ class _QuranHomeCardState extends ConsumerState<QuranHomeCard> {
       child: Row(
         children: [
           SizedBox(
-            width: 86,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(row.label, style: Theme.of(context).textTheme.labelSmall),
-                Text(
-                  row.purpose,
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
+            width: 92,
+            child: Text(
+              dimension.label,
+              style: Theme.of(context).textTheme.labelSmall,
             ),
           ),
           for (final key in keys)
             Expanded(
-              child: Center(child: _cell(row, key, index[key], colours)),
+              child: Center(
+                child: _cell(dimension, key, index[key], colours),
+              ),
             ),
         ],
       ),
@@ -269,60 +252,84 @@ class _QuranHomeCardState extends ConsumerState<QuranHomeCard> {
   }
 
   Widget _cell(
-    QuranJourneyRow row,
+    QuranDimension dimension,
     String key,
     DailyCheckIn? record,
     bool colours,
   ) {
-    final cell = quranJourneyCell(record, row);
-    final marker = QuranJourneyMarker(
-      key: Key('quran-home-${row.name}-$key'),
-      row: row,
-      cell: cell,
-      colours: colours,
-      semanticLabel: '$key ${row.label} ${cell.code ?? cell.kind.name}',
-    );
-    final open =
-        dateCellKind(key, ref.read(nowProvider)) != DateCellKind.future;
+    final marker = _marker(dimension, key, record, colours);
+    final kind = dateCellKind(key, ref.read(nowProvider));
     return ProgressDayCell(
       onTap: recoverableDateCellOnTap(
         ref: ref,
         dateKey: key,
-        onOpen: () => _openRow(key, row, record),
+        onOpen: () => _openDay(
+          key,
+          band: dimension.homeBand,
+          rowId: 'quran.${dimension.name}',
+        ),
       ),
-      marker: open ? marker : Opacity(opacity: 0.28, child: marker),
+      marker: decorateWeekMark(
+        marker: marker,
+        kind: kind,
+        todayKey: Key('home-today-quran-${dimension.name}-$key'),
+      ),
     );
   }
 
-  Widget _compactCell(String key, DailyCheckIn? record, bool colours) {
-    final rows = quranJourneyRowsFor(_display);
-    final cell = quranVisibleJourneyOccupancy(record, rows);
-    final openRow = quranVisibleJourneyOpenRow(record, rows);
-    final marker = QuranJourneyMarker(
-      cell: cell,
-      colours: colours,
-      semanticLabel: '$key ${MonitorDomain.quran.label} ${cell.kind.name}',
+  Widget _compactCell(String key, DailyCheckIn? record) {
+    var recorded = false;
+    for (final dimension in _display) {
+      if (record != null && record.quranOutcome(dimension).isRecorded) {
+        recorded = true;
+        break;
+      }
+    }
+    final marker = RecordedStateMarker(
+      kind: markerForRecorded(recorded: recorded, positive: recorded),
+      semanticLabel: recorded
+          ? '$key ${MonitorDomain.quran.label} recorded'
+          : '$key ${MonitorDomain.quran.label} not recorded',
     );
-    final open =
-        dateCellKind(key, ref.read(nowProvider)) != DateCellKind.future;
+    final kind = dateCellKind(key, ref.read(nowProvider));
     final body = ProgressDayCell(
       onTap: recoverableDateCellOnTap(
         ref: ref,
         dateKey: key,
-        onOpen: () => _openRow(key, openRow, record),
+        onOpen: () => _openDay(key),
       ),
-      marker: open ? marker : Opacity(opacity: 0.28, child: marker),
+      marker: decorateWeekMark(marker: marker, kind: kind),
     );
     return KeyedSubtree(key: Key('home-compact-quran-$key'), child: body);
   }
 
-  Future<void> _openRow(String key, QuranJourneyRow row, DailyCheckIn? record) {
-    return showQuranJourneySheet(
-      context: context,
+  Widget _marker(
+    QuranDimension dimension,
+    String key,
+    DailyCheckIn? record,
+    bool colours,
+  ) {
+    final outcome = record == null
+        ? TernaryOutcome.unanswered
+        : record.quranOutcome(dimension);
+    final id =
+        record?.activityFor(ActivityCatalog.quranKey(dimension)).id ??
+        ActivityIds.unanswered;
+    return RecordedStateMarker(
+      key: Key('quran-home-${dimension.name}-$key'),
+      kind: SalahActivityMark.quranDurationKind(id),
+      color: SalahActivityMark.quranDurationColour(id, colours: colours),
+      semanticLabel: '$key ${dimension.label} ${outcome.legendLabel}',
+    );
+  }
+
+  void _openDay(String key, {String? band, String? rowId}) {
+    openFocusedCheckIn(
+      context,
       dateKey: key,
-      calendar: ref.read(appPrefsProvider).displayCalendar,
-      row: row,
-      record: record,
+      focus: CheckInFocus.quran,
+      focusBand: band,
+      focusRowId: rowId,
     );
   }
 }

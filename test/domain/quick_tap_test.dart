@@ -6,6 +6,7 @@ import 'package:muhasabah02/domain/personal_mix.dart';
 import 'package:muhasabah02/domain/personalisation_resolver.dart';
 import 'package:muhasabah02/domain/prayer.dart';
 import 'package:muhasabah02/domain/quran.dart';
+import 'package:muhasabah02/domain/quran_duration.dart';
 import 'package:muhasabah02/domain/quick_tap.dart';
 
 void main() {
@@ -28,14 +29,9 @@ void main() {
       'salah.isha',
       'quran.reading',
       'quran.meaning',
-      'quran.reflection',
       'quran.consciousApplication',
-      'hadith.livedSunnah',
       'dhikr.postFardFajr',
       'dhikr.morningAdhkar',
-      'huquq.parents',
-      'charity.voluntary',
-      kZakatMixKey,
     ]);
     expect(items.any((item) => item.id == 'dhikr.generalDhikr'), isFalse);
     expect(
@@ -136,7 +132,7 @@ void main() {
     );
     expect(
       record.activityFor(ActivityCatalog.quranKey(QuranDimension.reading)).id,
-      'readIndependently',
+      QuranDurationIds.over20,
     );
     expect(
       record.homeTrace('akhlaq.pausedBeforeReacting'),

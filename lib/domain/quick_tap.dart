@@ -177,8 +177,8 @@ List<QuickTapChoice> quickTapCatalog(QuickTapItem item) {
       ];
     case QuickTapKind.jumuah:
       return [
-        for (final status in PrayerStatus.values)
-          if (status != PrayerStatus.other) _fromPrayerStatus(status),
+        for (final option in ActivityCatalog.jumuah)
+          if (!option.isOther) _fromActivity(option),
       ];
     case QuickTapKind.voluntarySalah:
       return [
@@ -260,7 +260,7 @@ String readQuickTapChoiceId(DailyCheckIn record, QuickTapItem item) {
     case QuickTapKind.salah:
       return record.activityFor(ActivityCatalog.salahKey(item.prayerId!)).id;
     case QuickTapKind.jumuah:
-      return record.jumuah.name;
+      return record.jumuahActivityId;
     case QuickTapKind.voluntarySalah:
       if (item.id == 'salah.tahajjud') return record.tahajjud.name;
       return record.ishraq.name;
@@ -337,11 +337,7 @@ DailyCheckIn applyQuickTapChoice(
         RecordedActivity(id: choice.id),
       );
     case QuickTapKind.jumuah:
-      final status = PrayerStatus.values.firstWhere(
-        (value) => value.name == choice.id,
-        orElse: () => PrayerStatus.unanswered,
-      );
-      return record.copyWith(jumuah: status);
+      return record.withJumuahActivity(RecordedActivity(id: choice.id));
     case QuickTapKind.voluntarySalah:
       final outcome = TernaryOutcome.values.firstWhere(
         (value) => value.name == choice.id,
@@ -376,18 +372,6 @@ QuickTapChoice _fromActivity(ActivityOption option) {
     id: option.id,
     label: option.label,
     mark: _markFor(option),
-  );
-}
-
-QuickTapChoice _fromPrayerStatus(PrayerStatus status) {
-  return QuickTapChoice(
-    id: status.name,
-    label: status.label,
-    mark: switch (status) {
-      PrayerStatus.unanswered => QuickTapMark.unanswered,
-      PrayerStatus.missed => QuickTapMark.slip,
-      _ => QuickTapMark.noticed,
-    },
   );
 }
 

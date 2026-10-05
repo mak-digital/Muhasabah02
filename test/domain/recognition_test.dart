@@ -406,7 +406,11 @@ void main() {
     );
     expect(
       worship.eligibleRecognitionSubjects,
-      containsAll([QuranDimension.meaning, QuranDimension.reflection]),
+      contains(QuranDimension.meaning),
+    );
+    expect(
+      worship.eligibleRecognitionSubjects,
+      isNot(contains(QuranDimension.reflection)),
     );
     expect(
       worship.eligibleRecognitionSubjects,
@@ -425,10 +429,6 @@ void main() {
       sameAsDomains.eligibleRecognitionSubjects.toSet(),
       {
         QuranDimension.meaning,
-        QuranDimension.memorisation,
-        QuranDimension.revision,
-        QuranDimension.tafsir,
-        QuranDimension.reflection,
         QuranDimension.consciousApplication,
       },
     );

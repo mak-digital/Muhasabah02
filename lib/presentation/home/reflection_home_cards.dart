@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../application/providers.dart';
 import '../../domain/copy.dart';
 import '../../domain/first_day_of_week.dart';
+import '../../domain/quotation_cadence.dart';
 import '../../domain/patterns_noticed.dart';
 import '../../domain/personal_response.dart';
 import '../../domain/weekly_calendar.dart';
@@ -27,7 +28,9 @@ class ReflectionOfTheWeekCard extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              Copy.reflectionOfTheWeek,
+              cadence == QuotationCadence.daily
+                  ? Copy.reflectionOfTheDay
+                  : Copy.reflectionOfTheWeek,
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 4),
@@ -75,7 +78,7 @@ class ReflectionOfTheWeekCard extends ConsumerWidget {
                             originType: ProvenanceOrigin.weeklyReflectionQuote,
                             domain: quote.domain.name,
                             labelSnapshot:
-                                '${Copy.reflectionOfTheWeek} · ${quote.source}',
+                                '${cadence == QuotationCadence.daily ? Copy.reflectionOfTheDay : Copy.reflectionOfTheWeek} · ${quote.source}',
                           ),
                         ),
                       ),
@@ -121,7 +124,6 @@ class PatternEvidenceScreen extends StatelessWidget {
                   MaterialPageRoute<void>(
                     builder: (_) => DayEvidenceScreen(
                       dateKey: key,
-                      limitToVisibleDomains: true,
                     ),
                   ),
                 );

@@ -144,7 +144,7 @@ void main() {
     );
   });
 
-  test('recitation with meaning still writes recitation for the same date', () {
+  test('understanding sitting does not write engagement', () {
     final record = empty().withQuran(
       QuranDimension.meaning,
       TernaryOutcome.positive,
@@ -155,7 +155,7 @@ void main() {
     );
     expect(
       record.quranOutcome(QuranDimension.reading),
-      TernaryOutcome.positive,
+      TernaryOutcome.unanswered,
     );
     expect(
       kind(record, QuranJourneyRow.understood),
@@ -163,7 +163,7 @@ void main() {
     );
     expect(
       kind(record, QuranJourneyRow.engaged),
-      QuranJourneyCellKind.recorded,
+      QuranJourneyCellKind.unanswered,
     );
   });
 
@@ -359,28 +359,34 @@ void main() {
   });
 
   test('Home Journey dimensions follow the R1 ontology groups', () {
-    expect(QuranJourneyRow.engaged.dimensions, engagementHomeRows);
-    expect(QuranJourneyRow.understood.dimensions, understandingHomeRows);
-    expect(QuranJourneyRow.reflected.dimensions, reflectionHomeRows);
+    expect(QuranJourneyRow.engaged.dimensions, [
+      QuranDimension.reading,
+      QuranDimension.memorisation,
+      QuranDimension.revision,
+    ]);
+    expect(QuranJourneyRow.understood.dimensions, [
+      QuranDimension.meaning,
+      QuranDimension.tafsir,
+    ]);
+    expect(QuranJourneyRow.reflected.dimensions, [
+      QuranDimension.reflection,
+    ]);
     expect(QuranJourneyRow.applied.dimensions, applicationHomeRows);
   });
 
-  test('30/90 Progress titles follow Home Journey groups', () {
+  test('30/90 Progress titles follow daily duration rows', () {
     expect(QuranDimension.reading.progressCalendarTitle, 'Engagement');
     expect(
       QuranDimension.reading.progressCalendarSubtitle,
-      'Engagement with Qur’an · Recitation',
+      'Recitation, memorisation and/or revision sitting',
     );
-    expect(QuranDimension.meaning.progressCalendarTitle, 'Understanding');
+    expect(
+      QuranDimension.meaning.progressCalendarTitle,
+      'Understanding & reflection',
+    );
     expect(
       QuranDimension.meaning.progressCalendarSubtitle,
-      'Activities supporting understanding · Meaning',
-    );
-    expect(QuranDimension.tafsir.progressCalendarTitle, 'Understanding');
-    expect(QuranDimension.reflection.progressCalendarTitle, 'Reflection');
-    expect(
-      QuranDimension.reflection.progressCalendarSubtitle,
-      'Reflection on meaning',
+      'Meaning and/or tafsir plus pondering',
     );
     expect(
       QuranDimension.consciousApplication.progressCalendarTitle,
@@ -388,10 +394,8 @@ void main() {
     );
     expect(
       QuranDimension.consciousApplication.progressCalendarSubtitle,
-      'Noticed in daily life',
+      'Noticed implications or use of learnt verses',
     );
-    expect(QuranDimension.memorisation.progressCalendarTitle, 'Engagement');
-    expect(QuranDimension.revision.progressCalendarTitle, 'Engagement');
   });
 
   test('Journey copy does not claim attained spiritual states', () {

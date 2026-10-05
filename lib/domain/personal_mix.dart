@@ -157,7 +157,6 @@ final kWorshipMixKeys = mixKeysWhere(
       (item.domain == MonitorDomain.salah && item.band == 'Obligatory Salah') ||
       item.id == 'quran.reading' ||
       item.id == 'quran.meaning' ||
-      item.id == 'quran.reflection' ||
       (item.domain == MonitorDomain.hadith &&
           (item.band == 'Encounter' || item.id == 'hadith.livedSunnah')) ||
       (item.domain == MonitorDomain.dhikr &&
@@ -191,21 +190,16 @@ final kPeopleMixKeys = mixKeysWhere(
       (item.domain == MonitorDomain.charity && item.band == 'Care'),
 );
 
-/// First-season mix for the Salah, Qur’an & Dhikr look: obligatory Salah,
-/// selected Qur’an Journey rows, lived Sunnah, two Dhikr rows, Parents, giving, and Zakat.
+/// First-season mix for Salah, Qur’an & Dhikr: obligatory Salah,
+/// selected Qur’an stored rows, and two Dhikr rows.
 final kFirstLookMixKeys = mixKeysWhere(
   (item) =>
       (item.domain == MonitorDomain.salah && item.band == 'Obligatory Salah') ||
       item.id == 'quran.reading' ||
       item.id == 'quran.meaning' ||
-      item.id == 'quran.reflection' ||
       item.id == 'quran.consciousApplication' ||
-      item.id == 'hadith.livedSunnah' ||
       item.id == 'dhikr.postFardFajr' ||
-      item.id == 'dhikr.morningAdhkar' ||
-      item.id == 'huquq.parents' ||
-      item.id == 'charity.voluntary' ||
-      item.id == kZakatMixKey,
+      item.id == 'dhikr.morningAdhkar',
 );
 
 Set<String> namedMixKeys(PersonalMixKind kind) {
@@ -301,7 +295,7 @@ List<MonitorDomain> orderedVisibleDomains(
   return [...mixFirst, ...rest];
 }
 
-/// Home week grids follow the mix. Review still uses [orderedVisibleDomains].
+/// Home, Review, and today’s check-in follow the mix among shown domains.
 List<MonitorDomain> homeMixDomains(
   Set<MonitorDomain> visible,
   PersonalMix mix,

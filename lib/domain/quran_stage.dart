@@ -353,23 +353,20 @@ extension QuranDimensionJourneyX on QuranDimension {
     };
   }
 
-  /// 30/90 Progress title — same L1 name as Home / 7-day.
-  String get progressCalendarTitle => journeyRow.label;
+  /// 30/90 Progress title — same check-in band as Home / 7-day.
+  String get progressCalendarTitle => homeBand;
 
-  /// Purpose, plus the Home L2 name when one group has several stored rows.
-  String get progressCalendarSubtitle {
-    final detail = switch (this) {
-      QuranDimension.reading => 'Recitation',
-      QuranDimension.meaning => 'Meaning',
-      QuranDimension.memorisation => 'Memorisation',
-      QuranDimension.revision => 'Revision',
-      QuranDimension.tafsir => 'Tafsir',
-      QuranDimension.reflection ||
-      QuranDimension.consciousApplication ||
-      QuranDimension.applicationReflection => null,
-    };
-    final purpose = journeyRow.purpose;
-    if (detail == null) return purpose;
-    return '$purpose · $detail';
-  }
+  /// Observational purpose. Duration is not a khushu’ score.
+  String get progressCalendarSubtitle => switch (this) {
+    QuranDimension.reading =>
+      'Recitation, memorisation and/or revision sitting',
+    QuranDimension.meaning => 'Meaning and/or tafsir plus pondering',
+    QuranDimension.consciousApplication =>
+      'Noticed implications or use of learnt verses',
+    QuranDimension.memorisation => 'Memorisation',
+    QuranDimension.revision => 'Revision',
+    QuranDimension.tafsir => 'Tafsir',
+    QuranDimension.reflection => 'Reflection on meaning',
+    QuranDimension.applicationReflection => 'Noticed in daily life',
+  };
 }

@@ -10,6 +10,7 @@ import '../../domain/recognition.dart';
 import '../../domain/review_period.dart';
 import '../recorded_days/day_evidence_screen.dart';
 import '../shared/add_response_button.dart';
+import '../shared/system_insets.dart';
 import '../shared/ui_bits.dart';
 
 class RecognitionScreen extends ConsumerWidget {
@@ -38,7 +39,7 @@ class RecognitionScreen extends ConsumerWidget {
         data: (records) {
           if (period == ReviewPeriod.days7) {
             return ListView(
-              padding: const EdgeInsets.all(16),
+              padding: pageListPadding(context, recoverSystemBottom: true),
               children: [
                 PeriodSelector(
                   days: period.days,
@@ -66,7 +67,7 @@ class RecognitionScreen extends ConsumerWidget {
             subjects: subjects,
           );
           return ListView(
-            padding: const EdgeInsets.all(16),
+            padding: pageListPadding(context, recoverSystemBottom: true),
             children: [
               PeriodSelector(
                 days: period.days,
@@ -135,10 +136,9 @@ class RecognitionScreen extends ConsumerWidget {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute<void>(
-                                      builder: (_) => DayEvidenceScreen(
-                                        dateKey: date,
-                                        limitToVisibleDomains: true,
-                                      ),
+                                    builder: (_) => DayEvidenceScreen(
+                                      dateKey: date,
+                                    ),
                                     ),
                                   );
                                 },

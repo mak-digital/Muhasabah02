@@ -164,11 +164,11 @@ void main() {
       checkIns: checkIns,
       personalMix: mixForKind(
         PersonalMixKind.custom,
-        customKeys: {'quran.revision', 'salah.fajr'},
+        customKeys: {'quran.reading', 'salah.fajr'},
       ),
     );
     await openRecognition(tester, periodDays: 30);
     expect(find.text(QuranDimension.meaning.label), findsNothing);
-    expect(find.byKey(const Key('recognition-no-patterns')), findsOneWidget);
+    expect(find.byKey(const Key('recognition-no-eligible')), findsOneWidget);
   });
 }

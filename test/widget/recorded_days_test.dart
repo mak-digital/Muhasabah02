@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muhasabah02/data/memory_repositories.dart';
+import 'package:muhasabah02/domain/activities.dart';
 import 'package:muhasabah02/domain/copy.dart';
 import 'package:muhasabah02/domain/monitor_domain.dart';
+import 'package:muhasabah02/domain/personal_mix.dart';
+import 'package:muhasabah02/domain/quran.dart';
 import 'package:muhasabah02/presentation/recorded_days/day_evidence_screen.dart';
 
 import '../support/test_app.dart';
@@ -44,7 +47,73 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(DayEvidenceScreen), findsOneWidget);
     expect(find.text(Copy.historicalReflectionGuard), findsOneWidget);
-    expect(find.text(MonitorDomain.salah.label), findsOneWidget);
+    expect(find.text(MonitorDomain.salah.label.toUpperCase()), findsOneWidget);
     expect(find.text('Prayed alone on time'), findsOneWidget);
   });
+
+  testWidgets(
+    'Recorded day view follows Domains in Focus and this season’s mix',
+    (tester) async {
+      tester.view.physicalSize = const Size(400, 2400);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final checkIns = MemoryCheckInRepository();
+      await checkIns.save(
+        sampleDay('2026-09-03')
+            .withHomeTrace('charity.voluntary', TernaryOutcome.positive)
+            .withHomeTrace('charity.educational', TernaryOutcome.positive)
+            .withHomeTrace('charity.emergency', TernaryOutcome.positive)
+            .copyWith(zakat: ZakatStatus.due),
+      );
+      await tester.pumpWidget(
+        testApp(
+          checkIns: checkIns,
+          now: DateTime(2026, 9, 6),
+          visibleDomains: {
+            MonitorDomain.salah,
+            MonitorDomain.quran,
+            MonitorDomain.charity,
+          },
+          personalMix: mixForKind(
+            PersonalMixKind.custom,
+            customKeys: {
+              'salah.fajr',
+              'quran.reading',
+              'charity.voluntary',
+              kZakatMixKey,
+            },
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Review'));
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.text(Copy.recordedDaysTitle),
+        180,
+        scrollable: find.byType(Scrollable).last,
+      );
+      await tester.tap(find.text(Copy.recordedDaysTitle));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('recorded-day-2026-09-03')));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(DayEvidenceScreen), findsOneWidget);
+      expect(find.text('Fajr'), findsOneWidget);
+      expect(find.text('Dhuhr'), findsNothing);
+      expect(find.text('Asr'), findsNothing);
+      expect(find.text('Engagement'), findsWidgets);
+      expect(find.text('Memorisation'), findsNothing);
+      expect(find.text('Voluntary Charity'), findsOneWidget);
+      expect(find.text('Recorded sitting'), findsWidgets);
+      expect(find.textContaining('Recorded sitting —'), findsNothing);
+      expect(find.text('Zakat'), findsOneWidget);
+      expect(find.text('Educational Support'), findsNothing);
+      expect(find.text('Emergency Support'), findsNothing);
+      expect(find.text('Family Support'), findsNothing);
+      expect(find.text('Dhikr / Istighfar'), findsNothing);
+    },
+  );
 }

@@ -38,8 +38,8 @@ Requirements:
 - Full offline usability.
 - No telemetry, ads, cloud AI, or remote analytics in core functionality.
 - Preserve a sound existing architecture when working in an established repository.
-- Date keys remain Gregorian `YYYY-MM-DD`. Settings → Application → Calendar may show Gregorian or civil Islamic (Hijri) dates without rewriting records.
-- Settings → Application → **Domains** may hide domains from Home, Review, and today’s check-in without deleting stored records. The first look is **Salah, Qur’an & Dhikr**: Salah & Prayer Quality, Qur’an Engagement, Hadith & Living Sunnah, Dhikr & Dua, Rights of Others (Huquq al-Ibad), and Charity. Knowledge & Beneficial Speech, Time & Barakah, Physical Health & Energy, Wealth & Stewardship, Ummah, Character & Morals (Akhlaq), Fasting, and Hajj stay available in Domains; they are not on that preset. Stored All or custom sets are not rewritten. Sick visit, sick contact, and support under stress sit on Rights of Others as Care in hardship. Opt-in domains stay off that preset. When shown, they use the same full week matrices as the other domains (Hajj preparation only while due or preparing). Check-in later bands start closed. The same screen holds **this season’s mix**: one saved set of domains, bands, and rows to notice. It is not a score, a programme, or a second hide-list. Named starting points copy a set; Custom is the same mix after editing; Same as Domains follows visibility. Completing the first door sets **First season** (obligatory Salah, Qur’an Journey dimensions, one Hadith row, two Dhikr rows, Parents, Zakat, and one giving row). Unset stored mix remains Same as Domains. Mix rows on a hidden domain are kept and appear on Home only when that domain is shown. The mix does not rewrite records. Unanswered mix rows are not missed. The first screen is a three-sentence door (private recorder; empty is not missed; short first season). Application Reflection stays in Settings → About. Sample days are not auto-seeded; the door asks once (quiet week or sample days).
+- Date keys remain Gregorian `YYYY-MM-DD`. Settings → Preferences → Calendar may show Gregorian or civil Islamic (Hijri) dates without rewriting records.
+- Settings → Preferences → **Domains in Focus** may hide domains from Home, Review, and today’s check-in without deleting stored records. The first look is **Salah, Qur’an & Dhikr**: Salah & Prayer Quality, Qur’an Engagement, and Dhikr & Dua. Hadith & Living Sunnah, Character & Morals (Akhlaq), Rights of Others (Huquq al-Ibad), Charity, Knowledge & Beneficial Speech, Time & Barakah, Physical Health & Energy, Wealth & Stewardship, Ummah, Fasting, and Hajj stay available there; they are not on that preset. Stored All or custom sets are not rewritten. Sick visit, sick contact, and support under stress sit on Rights of Others as Care in hardship. Opt-in domains stay off that preset. When shown, they use the same full week matrices as the other domains (Hajj preparation only while due or preparing). Check-in later bands start closed. The same screen holds **this season’s mix**: one saved set of domains, bands, and rows to notice. The mix is a subset of the domains shown on that screen (bands and rows). A domain or row that does not apply can stay unselected; saved records are not rewritten. It is not a score, a programme, or a second hide-list. Named starting points copy a set; Custom is the same mix after editing; Same as Domains follows visibility. Completing the first door sets **First season** (obligatory Salah, selected Qur’an Journey dimensions, and two Dhikr rows). Unset stored mix remains Same as Domains. Mix rows on a hidden domain are kept and appear on Home, Review, Progress, check-in, and Quick Tap only when that domain is shown. The mix does not rewrite records. Unanswered mix rows are not missed. The first screen is a three-sentence door (private recorder; empty is not missed; short first season). Application Reflection stays in Settings → About. Sample days are not auto-seeded; the door asks once (quiet week or sample days).
 - Prefer feature-oriented layers such as `domain/`, `data/`, `application/`, `presentation/` when compatible with the codebase.
 - Avoid new dependencies unless they materially reduce risk or complexity.
 
@@ -70,7 +70,7 @@ REVIEW
 
 Evidence exploration may lead to Recorded Context, Recognition, supporting dates, Historical Reflection, and optional Response creation.
 
-Home should remain simple. Do not turn it into a dense analytics dashboard. Home shows one domain week at a time (fixed previous/next chevrons, current short name centred); check-in, **Quick tap** (busy-day tiles for this season’s mix on shown domains; each tap steps the same check-in dropdown for that row, skipping Other; Jumu‘ah is Friday only; Hajj standing status stays in Settings; tiles start unanswered and are never inferred; after unanswered the person’s most recorded choice is next; not a dhikr target or khushu’ score), Reflection of the Week, the week card, the weekly journal, and Add a response stay on the same page. Recognition, Ponder, Recorded days, Noticed This Week, and Patterns Noticed live on Review or Progress. Today’s full check-in shows one domain form at a time the same way; Other and context notes stay on that page.
+Home should remain simple. Do not turn it into a dense analytics dashboard. Home shows one domain week at a time (fixed previous/next chevrons, current short name centred); check-in, **Quick tap** (busy-day tiles for this season’s mix on shown domains; weekday with Gregorian and civil Hijri dates in a full-width wash with Quick tap at the top left and the busy-day note collapsed until opened; previous/next day arrows that do not enter the local future; each mix domain shows wash and title, with cards collapsed until opened, or open if only one mix domain is shown; each tap steps the same check-in dropdown for that row, skipping Other; Jumu‘ah is Friday only; Hajj standing status stays in Settings; tiles start unanswered and are never inferred; after unanswered the person’s most recorded choice is next; not a dhikr target or khushu’ score), Reflection of the Week, the week card, the weekly journal, and Add a response stay on the same page. Recognition, Ponder, Recorded days, Noticed This Week, and Patterns Noticed live on Review or Progress. Today’s full check-in shows one domain form at a time the same way; Other and context notes stay on that page.
 
 ---
 
@@ -101,7 +101,7 @@ At minimum distinguish:
 
 Never infer `missed` from absence.
 
-Salah check-in uses a fixed activity list (congregation on time, joined congregation late, small congregation, alone on time, excused, prayed late, missed then made up, missed, no answer recorded, other). Settings → Application → **Activities** may colour Salah marks by that recorded choice. Shared mark colour remains the default. Colour names the choice; it does not rank spirituality or prescribe a next step.
+Salah check-in uses a fixed activity list (congregation on time, joined congregation late, small congregation, alone on time, excused, prayed late, missed then made up, missed, no answer recorded, other). **Friday Prayer** is one Jumu‘ah row with that same list and Friday wording (for example prayed late (alone)); it is not a second “Friday congregation” field. Settings → Preferences → **Activities & legend** may colour Salah and Jumu‘ah marks by that recorded choice. Shared mark colour remains the default. Colour names the choice; it does not rank spirituality or prescribe a next step.
 
 Do not record or score presence of heart as a grade.
 
@@ -115,83 +115,31 @@ Core question (orientation only; not scored and not a spiritual grade):
 
 **Did I let the Qur’an speak to me today?**
 
-Provide seven independent stored dimensions (not a Home matrix of seven rows):
+Daily check-in, Home, Quick tap, and Progress use **three independent notice-rows**, not seven yes/not-done dimensions. Unanswered is never inferred as not engaged. Duration is observational: not a khushu’ score, streak, percentage, complete, or spiritual grade. 3–5 minutes is still a recorded sitting. There is no live timer. Older seven-row days are not migrated.
 
-1. Recitation (reading/listening)
-2. Recitation with Meaning
-3. Memorisation
-4. Revision
-5. Tafsir
-6. Qur’anic Reflection
-7. Practical relevance (persisted as `consciousApplication`)
+Stored keys stay `quran.reading`, `quran.meaning`, and `quran.consciousApplication`:
 
-**Home week** shows a Qur’an Journey matrix of independent groups: Practical relevance, Reflection, Understanding, and Engagement. Each day cell is independent. Colour names the Journey group when activity colours are on. A letter names the L2 activity. Tap a cell to record that row: L1 is that group, None, or No answer recorded (clears every stored item in that row); L2 is the short list for that group, plus No activity (recorded as not done) and No answer recorded (unanswered). Unanswered is empty, not missed. Duration is not stored in this version. Purpose copy is observational (engagement with Qur’an; activities supporting understanding; reflection on meaning; noticed in daily life). It does not certify transformation, internalization, or comprehension.
+1. **Engagement** (`reading`) — recitation, memorisation and/or revision
+2. **Understanding & reflection** (`meaning`) — meaning and/or tafsir plus pondering
+3. **Practical relevance** (`consciousApplication`) — identifying implications and/or use of learnt verses in daily life (not a deed-score)
 
-**Check-in** groups the same stored rows into L2 bands: Engagement (Recitation, Listening as a Recitation activity, Memorisation, Revision), Understanding (Read Translation, Recitation with Meaning, Tafsir Study), Reflection (Brief Reflection, Deep Reflection (Tadabbur), Something I noticed), Practical relevance (Connected to worship, character, or relationships; Avoided something I considered wrong; Did something I considered good; Other connection). Listening is not a new stored dimension. Practical-relevance activity **ids** stay `improvedWorship`, `improvedCharacter`, `improvedRelationship`, `avoidedSin`, and `performedGoodDeed`; visible labels are user-attributed and are not app-certified improvement.
+Each row shares the same duration list. The closed dropdown names the row. Verbs: Engagement uses “Engaged”; the other two use “Involved”.
 
-Reading/listening remains the primary daily Qur’an engagement item. The other dimensions are independent observations except the approved Recitation with Meaning fill.
+- (a) more than 20 minutes — Salah `congregationOnTime` `#1565C0`
+- (b) 15–20 minutes — `joinedCongregationLate` `#2E7D32`
+- (c) 10–15 minutes — `smallCongregation` `#66BB6A`
+- (d) 5–10 minutes — `aloneOnTime` `#C0CA33`
+- (e) 3–5 minutes — `prayedLate` `#FBC02D` filled
+- (f) I did not notice this today — {row} — `prayedLate` `#FBC02D` outlined
+- (g) no answer recorded — unanswered `#BDBDBD` dotted empty
+
+Do not use Missed or Missed-then-made-up colours: these rows are not fard. Rows stay independent (no Meaning → Recitation auto-fill). Application Reflection remains Settings → About only.
 
 Do not record or score whether the Qur’an “spoke” as a grade.
 
-**7-day Progress** shows one Qur’an Journey board: Practical relevance, Reflection, Understanding, and Engagement as rows and weekday letter + date as columns (same marks and cell sheet as Home). **30-day and 90-day Progress** keep seven peer calendars for the stored dimensions, titled with the same Home Journey groups and observational purpose; groups with more than one stored row also name that row (Recitation, Meaning, Memorisation, Revision, Tafsir).
+**Home week** and **7-day Progress** show the same mix-filtered duration rows as check-in. Marks share one colour by default; Settings → Preferences → Activities & legend may colour the duration step with those Salah twins. Tap a cell to open that day’s focused Qur’an check-in, scrolled to that row.
 
-For optional activities, selecting the activity must not automatically mean a positive outcome. Ask for an explicit status.
-
-Approved wording:
-
-**Meaning**
-
-Question: `Did you spend time engaging with the meaning or translation of Qur'an today?`
-
-Answers:
-
-- `Engaged with meaning/translation`
-- `Did not engage with meaning/translation`
-
-**Memorisation**
-
-Question: `Did you spend time memorising Qur'an today?`
-
-Answers:
-
-- `Practised memorisation`
-- `Did not practise`
-
-**Revision**
-
-Question: `Did you spend time revising memorised Qur'an today?`
-
-Answers:
-
-- `Practised revision`
-- `Did not practise`
-
-**Tafsir**
-
-Question: `Did you spend time studying tafsir or an explanation of an ayah or passage today?`
-
-Answers:
-
-- `Studied tafsir/explanation`
-- `Did not study tafsir/explanation`
-
-**Reflection**
-
-Question: `Did you spend time reflecting on the meaning of an ayah or passage today?`
-
-Answers:
-
-- `Spent time reflecting`
-- `Did not spend time reflecting`
-
-**Application Reflection**
-
-Question: `Did you spend time reflecting on how something from the Qur’an might relate to your daily life?`
-
-Answers:
-
-- `Reflected on possible practical relevance`
-- `Did not reflect on practical relevance`
+**30-day and 90-day Progress** keep one calendar per daily duration row, titled with the same bands and observational purpose.
 
 Application Reflection records reflection on possible practical relevance only. It is not evidence of action, implementation, obedience, compliance, successful application, or completion of a Response.
 
@@ -500,7 +448,7 @@ Keep these concepts distinct when both exist:
 ### Recorded days / Historical Reflection
 
 - compact week grid of saved vs empty days; empty days are visible and not treated as missed
-- tapping a saved day opens a compact, read-only day view grouped by domain washes
+- tapping a saved day opens a compact, read-only day view grouped by domain washes for the domains and mix currently in focus; unselected mix rows stay stored and can still be edited in Manage past check-ins
 - one Add a response control per page, not per field
 
 The navigation and wording must make the difference obvious.
@@ -585,9 +533,9 @@ Use stable subdued accent colours with equal semantic weight for card washes. Ma
 
 Recommended presentation:
 
-- 7D: Qur’an Journey matrix (independent group rows × weekday columns); tap a cell to record that row
-- 30D: compact weekly calendar per stored dimension, titled as Home Journey groups
-- 90D: one full-width weekly calendar for the last 90 days (today’s week rightmost), with month labels, two alternating shades of the domain colour on day cells only, a pale yellow halo on today’s mark, and period arrows to move to earlier or later 90-day windows; titles match Home Journey groups
+- 7D: mix-filtered stored-dimension week (same bands and rows as Home); tap a cell to open that row’s check-in
+- 30D: compact weekly calendar per stored dimension, titled as check-in bands
+- 90D: one full-width weekly calendar for the last 90 days (today’s week rightmost), with month labels, two alternating shades of the domain colour on day cells only, a pale yellow halo on today’s mark, and period arrows to move to earlier or later 90-day windows; titles match check-in bands
 
 For the neutral peer dimensions, display factual counts such as `Recorded on X of Y days` and positive activity-day counts.
 

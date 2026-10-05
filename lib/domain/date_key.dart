@@ -35,6 +35,11 @@ DateTime parseDateKey(String key) {
   );
 }
 
+String shiftDateKey(String key, int days) {
+  final date = parseDateKey(key);
+  return dateKey(DateTime(date.year, date.month, date.day + days));
+}
+
 int daysInclusiveSpan(String startKey, String endKey) {
   final start = parseDateKey(startKey);
   final end = parseDateKey(endKey);

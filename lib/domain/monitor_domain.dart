@@ -15,18 +15,15 @@ enum MonitorDomain {
   charity,
 }
 
-/// Salah, Qur’an, Hadith & Living Sunnah, Dhikr & Dua, Rights of Others, and Charity.
-/// Knowledge, Time, Health, Wealth, Ummah, Character & Morals, Fasting, and Hajj stay available in Settings → Domains.
+/// Salah, Qur’an, and Dhikr & Dua.
+/// Other domains stay available in Settings → Domains.
 const kBasicDhikrVisibleDomains = {
   MonitorDomain.salah,
   MonitorDomain.quran,
-  MonitorDomain.hadith,
   MonitorDomain.dhikr,
-  MonitorDomain.huquq,
-  MonitorDomain.charity,
 };
 
-/// Exact six-domain set stored by the previous named preset.
+/// Exact six-domain set stored by the previous named preset (Akhlaq on).
 /// Working prefs that still hold this set are read as [kBasicDhikrVisibleDomains].
 /// Saved custom slots keep the stored set.
 const kLegacyBasicAkhlaqVisibleDomains = {
@@ -34,6 +31,16 @@ const kLegacyBasicAkhlaqVisibleDomains = {
   MonitorDomain.quran,
   MonitorDomain.hadith,
   MonitorDomain.akhlaq,
+  MonitorDomain.huquq,
+  MonitorDomain.charity,
+};
+
+/// Exact six-domain set stored after the named chip first became Dhikr.
+const kLegacySixDomainDhikrPreset = {
+  MonitorDomain.salah,
+  MonitorDomain.quran,
+  MonitorDomain.hadith,
+  MonitorDomain.dhikr,
   MonitorDomain.huquq,
   MonitorDomain.charity,
 };
@@ -155,7 +162,8 @@ Set<MonitorDomain> decodeVisibleDomains(
     return Set<MonitorDomain>.from(MonitorDomain.values);
   }
   if (migrateNamedPreset &&
-      sameVisibleDomains(next, kLegacyBasicAkhlaqVisibleDomains)) {
+      (sameVisibleDomains(next, kLegacyBasicAkhlaqVisibleDomains) ||
+          sameVisibleDomains(next, kLegacySixDomainDhikrPreset))) {
     return Set<MonitorDomain>.from(kBasicDhikrVisibleDomains);
   }
   return next;

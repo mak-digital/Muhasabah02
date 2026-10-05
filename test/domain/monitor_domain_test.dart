@@ -26,8 +26,16 @@ void main() {
         decodeVisibleDomains(previous, migrateNamedPreset: true),
         kBasicDhikrVisibleDomains,
       );
-      expect(kBasicDhikrVisibleDomains.contains(MonitorDomain.akhlaq), isFalse);
-      expect(kBasicDhikrVisibleDomains.contains(MonitorDomain.dhikr), isTrue);
+      expect(
+        decodeVisibleDomains(
+          'salah,quran,hadith,dhikr,huquq,charity',
+          migrateNamedPreset: true,
+        ),
+        kBasicDhikrVisibleDomains,
+      );
+      expect(kBasicDhikrVisibleDomains.contains(MonitorDomain.hadith), isFalse);
+      expect(kBasicDhikrVisibleDomains.contains(MonitorDomain.huquq), isFalse);
+      expect(kBasicDhikrVisibleDomains.contains(MonitorDomain.charity), isFalse);
     },
   );
 
@@ -118,7 +126,7 @@ void main() {
     );
   });
 
-  test('basic Dhikr preset includes Hadith after Qur’an', () {
+  test('basic Dhikr preset is Salah, Qur’an and Dhikr only', () {
     expect(
       visibleDomainsSummary(kBasicDhikrVisibleDomains),
       'Salah, Qur’an & Dhikr',
@@ -126,12 +134,12 @@ void main() {
     expect(kBasicDhikrVisibleDomains, {
       MonitorDomain.salah,
       MonitorDomain.quran,
-      MonitorDomain.hadith,
       MonitorDomain.dhikr,
-      MonitorDomain.huquq,
-      MonitorDomain.charity,
     });
+    expect(kBasicDhikrVisibleDomains.contains(MonitorDomain.hadith), isFalse);
     expect(kBasicDhikrVisibleDomains.contains(MonitorDomain.akhlaq), isFalse);
+    expect(kBasicDhikrVisibleDomains.contains(MonitorDomain.huquq), isFalse);
+    expect(kBasicDhikrVisibleDomains.contains(MonitorDomain.charity), isFalse);
     expect(kBasicDhikrVisibleDomains.contains(MonitorDomain.dhikr), isTrue);
     expect(
       kBasicDhikrVisibleDomains.contains(MonitorDomain.knowledge),

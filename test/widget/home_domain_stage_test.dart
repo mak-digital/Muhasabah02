@@ -55,8 +55,8 @@ void main() {
       isNotNull,
     );
 
-    await showHomeDomain(tester, MonitorDomain.charity);
-    expect(find.text('Charity'), findsWidgets);
+    await showHomeDomain(tester, MonitorDomain.dhikr);
+    expect(find.text(MonitorDomain.dhikr.label), findsWidgets);
     expect(
       tester
           .widget<IconButton>(find.byKey(const Key('home-domain-next')))

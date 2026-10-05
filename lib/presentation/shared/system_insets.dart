@@ -48,12 +48,23 @@ EdgeInsets sheetContentPadding(
 /// Padding for pushed full-screen lists without a sticky bottom bar.
 ///
 /// Bottom uses [contentBottomInset]. Do not wrap the same list in SafeArea
-/// bottom padding.
-EdgeInsets pageListPadding(BuildContext context, {double spacing = 16}) {
+/// bottom padding. Set [recoverSystemBottom] on pushed routes whose Scaffold
+/// has already consumed [MediaQuery.viewPadding].
+EdgeInsets pageListPadding(
+  BuildContext context, {
+  double spacing = 16,
+  bool recoverSystemBottom = false,
+}) {
   return EdgeInsets.fromLTRB(
     spacing,
     spacing,
     spacing,
-    contentBottomInset(context, spacing: spacing),
+    contentBottomInset(
+      context,
+      spacing: spacing,
+      systemBottom: recoverSystemBottom
+          ? presentingSystemBottom(context)
+          : null,
+    ),
   );
 }

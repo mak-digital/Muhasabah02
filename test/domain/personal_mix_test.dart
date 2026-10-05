@@ -20,7 +20,7 @@ void main() {
     );
   });
 
-  test('first season mix is a short slice of the six-domain first look', () {
+  test('first season mix is a short slice of Salah, Qur’an and Dhikr', () {
     final mix = mixForKind(PersonalMixKind.firstLook);
     expect(encodePersonalMix(mix), 'firstLook');
     expect(decodePersonalMix('firstLook').keys, kFirstLookMixKeys);
@@ -32,22 +32,14 @@ void main() {
       'salah.isha',
       'quran.reading',
       'quran.meaning',
-      'quran.reflection',
       'quran.consciousApplication',
-      'hadith.livedSunnah',
       'dhikr.postFardFajr',
       'dhikr.morningAdhkar',
-      'huquq.parents',
-      'charity.voluntary',
-      kZakatMixKey,
     });
     expect(homeMixDomains(kBasicDhikrVisibleDomains, mix), [
       MonitorDomain.salah,
       MonitorDomain.quran,
-      MonitorDomain.hadith,
       MonitorDomain.dhikr,
-      MonitorDomain.huquq,
-      MonitorDomain.charity,
     ]);
     expect(
       mixUsesCompactHomeWeek(
@@ -124,7 +116,6 @@ void main() {
     expect(home, [
       MonitorDomain.salah,
       MonitorDomain.quran,
-      MonitorDomain.hadith,
       MonitorDomain.dhikr,
     ]);
     expect(home, isNot(contains(MonitorDomain.akhlaq)));
@@ -136,7 +127,7 @@ void main() {
       mixForKind(PersonalMixKind.worship),
       kBasicDhikrVisibleDomains,
     );
-    expect(hidden, {MonitorDomain.hajj});
+    expect(hidden, {MonitorDomain.hadith, MonitorDomain.hajj});
     expect(
       domainsSettingsSubtitle(
         kBasicDhikrVisibleDomains,

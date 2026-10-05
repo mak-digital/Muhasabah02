@@ -5,12 +5,14 @@ import 'package:muhasabah02/domain/copy.dart';
 import 'package:muhasabah02/domain/daily_check_in.dart';
 import 'package:muhasabah02/domain/activities.dart';
 import 'package:muhasabah02/domain/date_key.dart';
+import 'package:muhasabah02/domain/monitor_domain.dart';
 import 'package:muhasabah02/domain/personal_mix.dart';
 import 'package:muhasabah02/domain/prayer.dart';
 import 'package:muhasabah02/presentation/checkin/check_in_screen.dart';
 import 'package:muhasabah02/presentation/shared/state_marker.dart';
 
 import '../support/check_in_select.dart';
+import '../support/home_domain_stage.dart';
 import '../support/test_app.dart';
 
 void main() {
@@ -129,6 +131,7 @@ void main() {
     );
     var clock = DateTime(2026, 9, 22, 23, 58);
     await pumpClock(tester, () => clock, checkIns: checkIns);
+    await expandActiveDomainMix(tester);
     await tester.tap(find.byKey(const Key('today-domain-salah')));
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('today-recorded-section')), findsOneWidget);
@@ -225,6 +228,8 @@ void main() {
 
     await tester.tap(find.text(Copy.quickTap));
     await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('quick-tap-domain-toggle-salah')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('quick-tap-salah.fajr')));
     await tester.pumpAndSettle();
     expect(await checkIns.getByDate('2026-09-23'), isNotNull);
@@ -249,6 +254,8 @@ void main() {
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     await tester.pumpAndSettle();
 
+    await tester.tap(find.byKey(const Key('quick-tap-domain-toggle-salah')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('quick-tap-salah.fajr')));
     await tester.pumpAndSettle();
     expect(await checkIns.getByDate('2026-09-22'), isNotNull);

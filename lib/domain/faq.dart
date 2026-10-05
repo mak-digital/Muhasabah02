@@ -102,11 +102,11 @@ const faqEntries = <FaqEntry>[
   ),
   FaqEntry(
     question: 'What kinds of reflection does Muhasabah use?',
-    answer: 'Qur’anic Reflection is the daily verse, meaning, tafsir, or lessons observation on Home and check-in.\n\nPersonal Reflection is an optional private note on a check-in.\n\nApplication Reflection is first-install framing and Settings → About. It is not a daily field, a Home row, or evidence of action.',
+    answer: 'Qur’an check-in has three duration rows: Engagement (recitation, memorisation and/or revision), Understanding & reflection (meaning and/or tafsir plus pondering), and Practical relevance (noticing implications or use of learnt verses). Those rows are not a khushu’ score.\n\nPersonal Reflection is an optional private note on a check-in.\n\nApplication Reflection is first-install framing and Settings → About. It is not a daily field, a Home row, or evidence of action.',
   ),
   FaqEntry(
     question: 'Why do the colours differ?',
-    answer: 'The background colour of a card identifies a domain, such as Salah & Prayer Quality or Qur’an Engagement. Marks share one colour. Colour does not rank spirituality, success, or worth.',
+    answer: 'The background colour of a card identifies a domain, such as Salah & Prayer Quality or Qur’an Engagement. Marks share one colour by default. Settings → Preferences → Activities & legend may colour Salah and Qur’an duration marks with the same activity colours. Colour names the recorded choice. It does not rank spirituality, success, or worth.',
   ),
   FaqEntry(
     question: 'Does the app score me or keep streaks?',
@@ -114,7 +114,7 @@ const faqEntries = <FaqEntry>[
   ),
   FaqEntry(
     question: 'Where do Home quotes come from?',
-    answer: 'Reflection of the Week rotates by calendar in Settings → Application → Quotation cadence. Quotes are not chosen from your records.',
+    answer: 'Home quotations rotate by calendar in Settings → Preferences → Quotation cadence. Weekly keeps one quote for the week (Reflection of the Week). Daily uses a new quote each local day (Reflection of the Day). Hidden removes the card. Quotes are not chosen from your records.',
   ),
   FaqEntry(
     question: 'What is Recognition?',
@@ -126,15 +126,15 @@ const faqEntries = <FaqEntry>[
   ),
   FaqEntry(
     question: 'Can I show Islamic dates?',
-    answer: 'Settings → Application → Calendar can show Gregorian or Islamic (Hijri) dates. This only changes how dates are displayed. Saved days stay on the civil calendar day they were stored. The Islamic option uses the civil (tabular) Hijri calendar; moon sighting may differ by a day.\n\nFasting Progress also highlights civil Hijri 13, 14 and 15 so White Days are easier to locate. That highlight is orientation only. It does not record a fast or tell you to fast.',
+    answer: 'Settings → Preferences → Calendar can show Gregorian or Islamic (Hijri) dates. This only changes how dates are displayed. Saved days stay on the civil calendar day they were stored. The Islamic option uses the civil (tabular) Hijri calendar; moon sighting may differ by a day.\n\nFasting Progress also highlights civil Hijri 13, 14 and 15 so White Days are easier to locate. That highlight is orientation only. It does not record a fast or tell you to fast.',
   ),
   FaqEntry(
     question: 'Can I hide domains I do not want to monitor?',
-    answer: 'Settings → Application → Domains chooses which domains appear on Home, Review, and today’s check-in. The first look is Salah, Qur’an & Dhikr (six domains). All domains remains one tap. Hidden domains keep any saved records. Showing a domain again does not rewrite those records. This season’s mix is on the same screen. Recorded days still shows what was stored.',
+    answer: 'Settings → Preferences → Domains in Focus chooses which domains belong in this profile. The mix on the same screen is a subset: which bands and rows to notice. You can show every domain and every row, or keep a domain or row unselected if it does not apply. The first look is Salah, Qur’an & Dhikr (those three domains). All domains remains one tap. Hidden domains and unselected mix rows keep any saved records. Showing them again does not rewrite those records. Home, Review, Progress, check-in, Quick Tap, and Recorded days follow the mix among shown domains. Manage past check-ins still opens the saved day to edit.',
   ),
   FaqEntry(
     question: 'What is a Personal mix?',
-    answer: 'Settings → Application → Domains holds shown domains and this season’s mix. Mix is where you choose which domains, bands, and rows you want to notice this season. Home and today’s check-in show one mix domain at a time. Review still shows every visible domain. It is not a score, a programme, or a second Domains list. Named starting points copy a set you can edit. Same as Domains follows whatever is already shown. The mix does not rewrite saved days. Unanswered mix rows are not missed. A mix row on a hidden domain is kept and appears on Home only when that domain is shown. That is stated on the mix list; it is not a block.',
+    answer: 'Settings → Preferences → Domains in Focus holds shown domains and this season’s mix. The mix is a subset of those domains: which bands and rows you want to notice. Leave a domain or row unselected if it does not apply to your circumstances. Home, Review, Progress, today’s check-in, and Quick Tap follow that mix among domains that are shown. It is not a score, a programme, or a second hide-list. Named starting points copy a set you can edit. Same as Domains follows whatever is already shown. The mix does not rewrite saved days. Unanswered mix rows are not missed. A mix row on a hidden domain is kept and appears only when that domain is shown. That is stated on the mix list; it is not a block.',
   ),
   FaqEntry(
     question: 'What is Manage past check-ins compared with Recorded days?',
@@ -183,7 +183,7 @@ const faqEntries = <FaqEntry>[
   ),
   FaqEntry(
     question: 'What do Salah activity colours mean?',
-    answer: 'Settings → Application → Activities can colour Salah marks by the recorded choice. Shared colour remains the default. Colour names what was recorded. It does not rank spirituality or tell you what to do next.',
+    answer: 'Settings → Preferences → Activities & legend can colour Salah marks by the recorded choice. Shared colour remains the default. Colour names what was recorded. It does not rank spirituality or tell you what to do next.',
   ),
 ];
 

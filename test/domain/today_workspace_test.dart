@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muhasabah02/domain/activities.dart';
+import 'package:muhasabah02/domain/copy.dart';
 import 'package:muhasabah02/domain/daily_check_in.dart';
 import 'package:muhasabah02/domain/home_traces.dart';
 import 'package:muhasabah02/domain/monitor_domain.dart';
@@ -62,10 +63,7 @@ void main() {
     expect(subject.domains.map((group) => group.domain), [
       MonitorDomain.salah,
       MonitorDomain.quran,
-      MonitorDomain.hadith,
       MonitorDomain.dhikr,
-      MonitorDomain.huquq,
-      MonitorDomain.charity,
     ]);
     expect(subject.domains.every((group) => group.rows.isNotEmpty), isTrue);
     expect(
@@ -78,6 +76,34 @@ void main() {
       ),
       isTrue,
     );
+    expect(subject.recordedMixCount, 0);
+    expect(subject.mixRowCount, greaterThan(0));
+  });
+
+  test('mix recorded counts follow mix rows, not the full catalog', () {
+    final mix = PersonalMix(
+      kind: PersonalMixKind.custom,
+      keys: {'salah.fajr', 'salah.dhuhr', 'quran.reading'},
+    );
+    var record = DailyCheckIn.empty(tuesday)
+        .withPrayer(PrayerId.fajr, PrayerStatus.onTime);
+    record = record.withPrayer(PrayerId.isha, PrayerStatus.missed);
+    final subject = workspace(mix: mix, record: record);
+    final salah = subject.domains.singleWhere(
+      (group) => group.domain == MonitorDomain.salah,
+    );
+    final quran = subject.domains.singleWhere(
+      (group) => group.domain == MonitorDomain.quran,
+    );
+    expect(salah.mixRowCount, 2);
+    expect(salah.recordedMixCount, 1);
+    expect(quran.mixRowCount, 1);
+    expect(quran.recordedMixCount, 0);
+    expect(subject.mixRowCount, 3);
+    expect(subject.recordedMixCount, 1);
+    expect(Copy.mixRowsRecorded(1, 2), '1 of 2 recorded');
+    expect(Copy.mixRowsRecorded(0, 1), 'None of 1 recorded');
+    expect(Copy.mixRowsRecorded(3, 3), 'All 3 recorded');
   });
 
   test('record for another date is ignored and does not mark recorded', () {
@@ -204,7 +230,7 @@ void main() {
   test('selected quran dimension appears; negative is recorded', () {
     final mix = PersonalMix(
       kind: PersonalMixKind.custom,
-      keys: {'quran.reading', 'quran.tafsir'},
+      keys: {'quran.reading', 'quran.meaning'},
     );
     final record = DailyCheckIn.empty(tuesday)
         .withQuran(QuranDimension.reading, TernaryOutcome.negative);
@@ -215,10 +241,10 @@ void main() {
       TodayRecordedState.recorded,
     );
     expect(
-      rowOf(subject, 'quran.tafsir')?.recordedState,
+      rowOf(subject, 'quran.meaning')?.recordedState,
       TodayRecordedState.noResponse,
     );
-    expect(rowOf(subject, 'quran.meaning'), isNull);
+    expect(rowOf(subject, 'quran.tafsir'), isNull);
   });
 
   test('Application Reflection is not a Today row', () {
@@ -237,10 +263,6 @@ void main() {
     expect(ids, [
       'quran.reading',
       'quran.meaning',
-      'quran.memorisation',
-      'quran.revision',
-      'quran.tafsir',
-      'quran.reflection',
       'quran.consciousApplication',
     ]);
   });
@@ -265,10 +287,7 @@ void main() {
       rowOf(subject, 'dhikr.postFardFajr')?.recordedState,
       TodayRecordedState.recorded,
     );
-    expect(
-      rowOf(subject, 'huquq.parents')?.recordedState,
-      TodayRecordedState.noResponse,
-    );
+    expect(rowOf(subject, 'huquq.parents'), isNull);
   });
 
   test('Hajj standing mix id is not a daily row', () {

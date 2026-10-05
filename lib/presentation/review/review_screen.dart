@@ -11,6 +11,7 @@ import '../../domain/display_calendar.dart';
 import '../../domain/home_traces.dart';
 import '../../domain/monitor_domain.dart';
 import '../../domain/other_domains.dart';
+import '../../domain/personal_mix.dart';
 import '../../domain/personalisation_resolver.dart';
 import '../../domain/personal_response.dart';
 import '../../domain/quran.dart';
@@ -20,6 +21,7 @@ import '../progress/salah_progress_screen.dart';
 import '../recognition/recognition_screen.dart';
 import '../recorded_days/recorded_days_screen.dart';
 import '../shared/add_response_button.dart';
+import '../shared/system_insets.dart';
 import '../shared/ui_bits.dart';
 
 class ReviewScreen extends ConsumerWidget {
@@ -42,10 +44,9 @@ class ReviewScreen extends ConsumerWidget {
         ),
         data: (records) {
           ref.watch(prefsTickProvider);
-          final visible = ref.watch(appPrefsProvider).visibleDomains;
           final mix = ref.watch(appPrefsProvider).personalMix;
           final resolver = PersonalisationResolver(
-            visibleDomains: visible,
+            visibleDomains: ref.watch(appPrefsProvider).visibleDomains,
             mix: mix,
           );
           final calendar = ref.watch(appPrefsProvider).displayCalendar;
@@ -140,8 +141,19 @@ class ReviewScreen extends ConsumerWidget {
           for (final record in inPeriod) {
             situationLabels.addAll(record.situationNotes.displayLabels);
           }
+          final mixKeys = resolver.effectiveRowIds;
+          List<HomeTraceRow> rowsFor(
+            MonitorDomain domain,
+            List<HomeTraceRow> all,
+          ) {
+            if (mix.kind == PersonalMixKind.sameAsDomains) return all;
+            return mixTraceRows(domain, mixKeys);
+          }
+
+          bool shows(MonitorDomain domain) =>
+              resolver.reviewDomains.contains(domain);
           final builtTiles = <_ReviewDomainTile>[
-            if (visible.contains(MonitorDomain.salah))
+            if (shows(MonitorDomain.salah))
               _ReviewDomainTile(
                 tileKey: const Key('review-domain-salah'),
                 title: MonitorDomain.salah.label,
@@ -160,7 +172,7 @@ class ReviewScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-            if (visible.contains(MonitorDomain.quran))
+            if (shows(MonitorDomain.quran))
               _ReviewDomainTile(
                 tileKey: const Key('review-domain-quran'),
                 title: MonitorDomain.quran.label,
@@ -179,7 +191,7 @@ class ReviewScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-            if (visible.contains(MonitorDomain.hadith))
+            if (shows(MonitorDomain.hadith))
               _ReviewDomainTile(
                 tileKey: const Key('review-domain-hadith'),
                 title: MonitorDomain.hadith.label,
@@ -195,13 +207,13 @@ class ReviewScreen extends ConsumerWidget {
                   title: MonitorDomain.hadith.label,
                   focusQuestion: MonitorDomain.hadith.focusQuestion,
                   note: Copy.hadithObservationNote,
-                  rows: hadithHomeRows,
+                  rows: rowsFor(MonitorDomain.hadith, hadithHomeRows),
                   family: MuhasabahColors.hadithFamily,
                   includeHadithFocus: true,
                   itemRowsOn7Days: true,
                 ),
               ),
-            if (visible.contains(MonitorDomain.dhikr))
+            if (shows(MonitorDomain.dhikr))
               _ReviewDomainTile(
                 tileKey: const Key('review-domain-dhikr'),
                 title: MonitorDomain.dhikr.label,
@@ -216,12 +228,12 @@ class ReviewScreen extends ConsumerWidget {
                   context,
                   title: MonitorDomain.dhikr.label,
                   focusQuestion: MonitorDomain.dhikr.focusQuestion,
-                  rows: dhikrHomeRows,
+                  rows: rowsFor(MonitorDomain.dhikr, dhikrHomeRows),
                   family: MuhasabahColors.dhikrFamily,
                   itemRowsOn7Days: true,
                 ),
               ),
-            if (visible.contains(MonitorDomain.akhlaq))
+            if (shows(MonitorDomain.akhlaq))
               _ReviewDomainTile(
                 tileKey: const Key('review-domain-akhlaq'),
                 title: MonitorDomain.akhlaq.label,
@@ -237,13 +249,13 @@ class ReviewScreen extends ConsumerWidget {
                   title: MonitorDomain.akhlaq.label,
                   focusQuestion: MonitorDomain.akhlaq.focusQuestion,
                   note: Copy.akhlaqObservationNote,
-                  rows: akhlaqHomeRows,
+                  rows: rowsFor(MonitorDomain.akhlaq, akhlaqHomeRows),
                   family: MuhasabahColors.akhlaqFamily,
                   includeStruggleNote: true,
                   itemRowsOn7Days: true,
                 ),
               ),
-            if (visible.contains(MonitorDomain.huquq))
+            if (shows(MonitorDomain.huquq))
               _ReviewDomainTile(
                 tileKey: const Key('review-domain-huquq'),
                 title: MonitorDomain.huquq.label,
@@ -259,12 +271,12 @@ class ReviewScreen extends ConsumerWidget {
                   title: MonitorDomain.huquq.label,
                   focusQuestion: MonitorDomain.huquq.focusQuestion,
                   note: Copy.huquqObservationNote,
-                  rows: huquqHomeRows,
+                  rows: rowsFor(MonitorDomain.huquq, huquqHomeRows),
                   family: MuhasabahColors.huquqFamily,
                   itemRowsOn7Days: true,
                 ),
               ),
-            if (visible.contains(MonitorDomain.knowledge))
+            if (shows(MonitorDomain.knowledge))
               _ReviewDomainTile(
                 tileKey: const Key('review-domain-knowledge'),
                 title: MonitorDomain.knowledge.label,
@@ -280,12 +292,12 @@ class ReviewScreen extends ConsumerWidget {
                   title: MonitorDomain.knowledge.label,
                   focusQuestion: MonitorDomain.knowledge.focusQuestion,
                   note: Copy.knowledgeObservationNote,
-                  rows: knowledgeHomeRows,
+                  rows: rowsFor(MonitorDomain.knowledge, knowledgeHomeRows),
                   family: MuhasabahColors.knowledgeFamily,
                   itemRowsOn7Days: true,
                 ),
               ),
-            if (visible.contains(MonitorDomain.time))
+            if (shows(MonitorDomain.time))
               _ReviewDomainTile(
                 tileKey: const Key('review-domain-time'),
                 title: MonitorDomain.time.label,
@@ -301,11 +313,11 @@ class ReviewScreen extends ConsumerWidget {
                   title: MonitorDomain.time.label,
                   focusQuestion: MonitorDomain.time.focusQuestion,
                   note: Copy.timeObservationNote,
-                  rows: timeHomeRows,
+                  rows: rowsFor(MonitorDomain.time, timeHomeRows),
                   family: MuhasabahColors.timeFamily,
                 ),
               ),
-            if (visible.contains(MonitorDomain.health))
+            if (shows(MonitorDomain.health))
               _ReviewDomainTile(
                 tileKey: const Key('review-domain-health'),
                 title: MonitorDomain.health.label,
@@ -321,11 +333,11 @@ class ReviewScreen extends ConsumerWidget {
                   title: MonitorDomain.health.label,
                   focusQuestion: MonitorDomain.health.focusQuestion,
                   note: Copy.healthObservationNote,
-                  rows: healthHomeRows,
+                  rows: rowsFor(MonitorDomain.health, healthHomeRows),
                   family: MuhasabahColors.healthFamily,
                 ),
               ),
-            if (visible.contains(MonitorDomain.wealth))
+            if (shows(MonitorDomain.wealth))
               _ReviewDomainTile(
                 tileKey: const Key('review-domain-wealth'),
                 title: MonitorDomain.wealth.label,
@@ -341,11 +353,11 @@ class ReviewScreen extends ConsumerWidget {
                   title: MonitorDomain.wealth.label,
                   focusQuestion: MonitorDomain.wealth.focusQuestion,
                   note: Copy.wealthObservationNote,
-                  rows: wealthHomeRows,
+                  rows: rowsFor(MonitorDomain.wealth, wealthHomeRows),
                   family: MuhasabahColors.wealthFamily,
                 ),
               ),
-            if (visible.contains(MonitorDomain.ummah))
+            if (shows(MonitorDomain.ummah))
               _ReviewDomainTile(
                 tileKey: const Key('review-domain-ummah'),
                 title: MonitorDomain.ummah.label,
@@ -361,11 +373,11 @@ class ReviewScreen extends ConsumerWidget {
                   title: MonitorDomain.ummah.label,
                   focusQuestion: MonitorDomain.ummah.focusQuestion,
                   note: Copy.ummahObservationNote,
-                  rows: ummahHomeRows,
+                  rows: rowsFor(MonitorDomain.ummah, ummahHomeRows),
                   family: MuhasabahColors.ummahFamily,
                 ),
               ),
-            if (visible.contains(MonitorDomain.fasting))
+            if (shows(MonitorDomain.fasting))
               _ReviewDomainTile(
                 tileKey: const Key('review-domain-fasting'),
                 title: 'Fasting',
@@ -380,12 +392,12 @@ class ReviewScreen extends ConsumerWidget {
                 onTap: () => _openTraceProgress(
                   context,
                   title: 'Fasting',
-                  rows: fastingHomeRows,
+                  rows: rowsFor(MonitorDomain.fasting, fastingHomeRows),
                   family: MuhasabahColors.fastingFamily,
                   highlightLunarWhiteDays: true,
                 ),
               ),
-            if (visible.contains(MonitorDomain.hajj))
+            if (shows(MonitorDomain.hajj))
               _ReviewDomainTile(
                 tileKey: const Key('review-domain-hajj'),
                 title: MonitorDomain.hajj.label,
@@ -402,12 +414,12 @@ class ReviewScreen extends ConsumerWidget {
                   title: MonitorDomain.hajj.label,
                   focusQuestion: MonitorDomain.hajj.focusQuestion,
                   note: Copy.hajjObservationNote,
-                  rows: hajjHomeRows,
+                  rows: rowsFor(MonitorDomain.hajj, hajjHomeRows),
                   family: MuhasabahColors.hajjFamily,
                   includeHajjStatus: true,
                 ),
               ),
-            if (visible.contains(MonitorDomain.charity))
+            if (shows(MonitorDomain.charity))
               _ReviewDomainTile(
                 tileKey: const Key('review-domain-charity'),
                 title: 'Charity',
@@ -422,9 +434,11 @@ class ReviewScreen extends ConsumerWidget {
                 onTap: () => _openTraceProgress(
                   context,
                   title: 'Charity',
-                  rows: charityHomeRows,
+                  rows: rowsFor(MonitorDomain.charity, charityHomeRows),
                   family: MuhasabahColors.charityFamily,
-                  includeZakat: true,
+                  includeZakat:
+                      mix.kind == PersonalMixKind.sameAsDomains ||
+                      mixIncludesZakat(mixKeys),
                 ),
               ),
           ];
@@ -436,7 +450,7 @@ class ReviewScreen extends ConsumerWidget {
           return ListView(
             primary: false,
             physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.all(16),
+            padding: pageListPadding(context),
             children: [
               PeriodSelector(
                 days: period.days,
@@ -490,7 +504,7 @@ class ReviewScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 8),
-              if (visible.contains(MonitorDomain.quran))
+              if (shows(MonitorDomain.quran))
                 _LookCloserCard(
                   icon: Icons.pattern_outlined,
                   title: 'Recognition',
@@ -504,7 +518,7 @@ class ReviewScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
-              if (visible.contains(MonitorDomain.salah)) ...[
+              if (shows(MonitorDomain.salah)) ...[
                 const _ReviewSectionLabel(Copy.reviewPonder),
                 _PonderCard(text: narrativeCopy(narrative)),
               ],

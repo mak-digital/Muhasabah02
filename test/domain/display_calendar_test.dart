@@ -25,6 +25,15 @@ void main() {
     expect(RegExp(r'\d+ .+ \d{4}').hasMatch(shown), isTrue);
   });
 
+  test('Gregorian and Hijri format names both calendars', () {
+    final shown = formatGregorianAndHijri(DateTime(2026, 9, 14));
+    expect(shown.contains('14 Sep 2026'), isTrue);
+    expect(shown.contains(' · '), isTrue);
+    expect(shown.contains('Sep'), isTrue);
+    expect(RegExp(r'14 Sep 2026 · \d+ .+ \d{4}').hasMatch(shown), isTrue);
+    expect(shown.contains('2026 ·'), isTrue);
+  });
+
   test('civil Islamic parts stay in calendar bounds', () {
     for (var i = 0; i < 400; i++) {
       final date = DateTime(2025, 1, 1).add(Duration(days: i));

@@ -239,15 +239,17 @@ Future<void> _showJumuahSheet({
                   'Jumu‘ah · ${formatStoredDateKey(dateKey, ref.read(appPrefsProvider).displayCalendar)}',
                 ),
                 const SizedBox(height: 8),
-                CheckInSelect<PrayerStatus>(
-                  dropdownKey: const Key('today-salah-jumuah'),
-                  value: current.jumuah,
-                  entries: [
-                    for (final option in PrayerStatus.values)
-                      CheckInSelectEntry(value: option, label: option.label),
-                  ],
-                  onChanged: (option) async {
-                    await _save(ref, current.copyWith(jumuah: option));
+                ActivityPicker(
+                  options: ActivityCatalog.jumuah,
+                  selectedId: current.jumuahActivityId,
+                  statusKeyPrefix: 'today-salah-jumuah',
+                  onSelected: (option) async {
+                    await _save(
+                      ref,
+                      current.withJumuahActivity(
+                        RecordedActivity(id: option.id),
+                      ),
+                    );
                     setSheet(() {});
                   },
                 ),

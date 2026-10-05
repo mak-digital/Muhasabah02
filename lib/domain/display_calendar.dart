@@ -114,6 +114,10 @@ String formatDayMonthYear(DateTime date, DisplayCalendar calendar) {
   return '${parts.day} $month ${parts.year}';
 }
 
+String formatGregorianAndHijri(DateTime date) {
+  return '${formatDayMonthYear(date, DisplayCalendar.gregorian)} · ${formatDayMonthYear(date, DisplayCalendar.islamic)}';
+}
+
 String formatStoredDateKey(String key, DisplayCalendar calendar) {
   return formatDayMonthYear(parseDateKey(key), calendar);
 }

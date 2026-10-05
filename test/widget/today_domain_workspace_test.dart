@@ -23,6 +23,7 @@ import 'package:muhasabah02/presentation/shared/system_insets.dart';
 
 import '../support/check_in_select.dart';
 import '../support/fake_device_unlock.dart';
+import '../support/home_domain_stage.dart';
 import '../support/test_app.dart';
 
 void main() {
@@ -51,6 +52,7 @@ void main() {
   }
 
   Future<void> openDomain(WidgetTester tester, String id) async {
+    await expandActiveDomainMix(tester);
     await tester.ensureVisible(find.byKey(Key('today-domain-$id')));
     await tester.tap(find.byKey(Key('today-domain-$id')));
     await tester.pumpAndSettle();
@@ -133,7 +135,7 @@ void main() {
     expect(find.text('Application Reflection'), findsNothing);
   });
 
-  testWidgets('tapping Dhikr and Huquq keeps Today identities', (tester) async {
+  testWidgets('tapping Dhikr keeps Today identity', (tester) async {
     await pumpHome(tester);
     await openDomain(tester, 'dhikr');
     expect(find.byKey(const Key('today-workspace-dhikr')), findsOneWidget);
@@ -148,18 +150,6 @@ void main() {
       find.byKey(const Key('today-row-dhikr.morningAdhkar')),
       findsOneWidget,
     );
-    await tester.pageBack();
-    await tester.pumpAndSettle();
-    await openDomain(tester, 'huquq');
-    expect(find.byKey(const Key('today-workspace-huquq')), findsOneWidget);
-    expect(
-      find.descendant(
-        of: find.byKey(const Key('today-workspace-huquq')),
-        matching: find.text('Huquq'),
-      ),
-      findsOneWidget,
-    );
-    expect(find.byKey(const Key('today-row-huquq.parents')), findsOneWidget);
   });
 
   testWidgets('back from a domain workspace returns to Home', (tester) async {
@@ -214,7 +204,7 @@ void main() {
   testWidgets('Charity presents Zakat as status, not a daily task', (
     tester,
   ) async {
-    await pumpHome(tester);
+    await pumpHome(tester, visibleDomains: allVisibleDomains());
     await openDomain(tester, 'charity');
     expect(find.byKey(const Key('today-row-zakat')), findsOneWidget);
     expect(
@@ -286,7 +276,7 @@ void main() {
     await chooseCheckInOption(
       tester,
       dropdownKey: const Key('today-quran-reading'),
-      optionLabel: 'Listening',
+      optionLabel: 'Engaged more than 20 minutes — Engagement',
     );
     await tester.pumpAndSettle();
     expect(
@@ -297,7 +287,7 @@ void main() {
     await chooseCheckInOption(
       tester,
       dropdownKey: const Key('today-quran-reading'),
-      optionLabel: 'No activity',
+      optionLabel: 'I did not notice this today — Engagement',
     );
     await tester.pumpAndSettle();
     expect(
@@ -1006,12 +996,13 @@ void main() {
     expect(find.textContaining('Perfect'), findsNothing);
   });
 
-  testWidgets('Qur’an Meaning positive also records Recitation grouping', (
+  testWidgets('Qur’an duration rows stay independent in Today', (
     tester,
   ) async {
     final checkIns = MemoryCheckInRepository();
     await checkIns.save(
       DailyCheckIn.empty('2026-09-22')
+          .withQuran(QuranDimension.reading, TernaryOutcome.positive)
           .withQuran(QuranDimension.meaning, TernaryOutcome.positive),
     );
     await pumpHome(tester, checkIns: checkIns);
@@ -1030,7 +1021,11 @@ void main() {
     await checkIns.save(
       DailyCheckIn.empty('2026-09-22').copyWith(zakat: ZakatStatus.due),
     );
-    await pumpHome(tester, checkIns: checkIns);
+    await pumpHome(
+      tester,
+      checkIns: checkIns,
+      visibleDomains: allVisibleDomains(),
+    );
     await openDomain(tester, 'charity');
     expect(find.text(Copy.todayRecordedToday), findsOneWidget);
     expect(find.text(Copy.todayRecordedForToday), findsNothing);
