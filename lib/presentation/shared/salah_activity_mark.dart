@@ -215,9 +215,6 @@ class SalahActivityMark {
         activityId == HuquqObservationIds.neglectRecognised) {
       return MarkerKind.outlined;
     }
-    if (activityId == AkhlaqObservationIds.noSituation) {
-      return MarkerKind.filledSquare;
-    }
     return MarkerKind.filled;
   }
 

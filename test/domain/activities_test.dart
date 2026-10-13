@@ -282,6 +282,14 @@ void main() {
       SalahActivityMark.colourForId(AkhlaqObservationIds.lapseRecognised),
       SalahActivityMark.prayedLate,
     );
+    expect(
+      SalahActivityMark.kindForAkhlaq(AkhlaqObservationIds.noSituation),
+      MarkerKind.filled,
+    );
+    expect(
+      SalahActivityMark.kindForAkhlaq(AkhlaqObservationIds.lapseRecognised),
+      MarkerKind.outlined,
+    );
     var record = DailyCheckIn.empty('2026-09-03').withHomeTraceActivity(
       'akhlaq.patience',
       const RecordedActivity(id: AkhlaqObservationIds.practised),
@@ -361,6 +369,10 @@ void main() {
     expect(
       SalahActivityMark.colourForId(HuquqObservationIds.neglectRecognised),
       SalahActivityMark.prayedLate,
+    );
+    expect(
+      SalahActivityMark.kindForAkhlaq(HuquqObservationIds.noSituation),
+      MarkerKind.filled,
     );
     var record = DailyCheckIn.empty('2026-09-03');
     expect(
