@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:muhasabah02/domain/activities.dart';
 import 'package:muhasabah02/domain/home_traces.dart';
 import 'package:muhasabah02/domain/monitor_domain.dart';
 import 'package:muhasabah02/domain/quran.dart';
@@ -35,7 +36,10 @@ void main() {
       );
       expect(kBasicDhikrVisibleDomains.contains(MonitorDomain.hadith), isFalse);
       expect(kBasicDhikrVisibleDomains.contains(MonitorDomain.huquq), isFalse);
-      expect(kBasicDhikrVisibleDomains.contains(MonitorDomain.charity), isFalse);
+      expect(
+        kBasicDhikrVisibleDomains.contains(MonitorDomain.charity),
+        isFalse,
+      );
     },
   );
 
@@ -71,6 +75,8 @@ void main() {
       'Did my behavior today invite people toward goodness?',
     );
     expect(MonitorDomain.akhlaq.id, 'akhlaq');
+    expect(MonitorDomain.akhlaq.showsHomeActionFollowOn, isTrue);
+    expect(MonitorDomain.huquq.showsHomeActionFollowOn, isTrue);
     expect(
       traceOutcomeLabel('akhlaq.patience', TernaryOutcome.positive),
       'I noticed this in myself — Patience',
@@ -104,6 +110,11 @@ void main() {
       homeTraceRowByKey('akhlaq.modestSpeech')?.label,
       'Guarded how I spoke (tone)',
     );
+    expect(
+      ActivityCatalog.forHomeTrace('akhlaq.patience').first.label,
+      'Remained patient when tested',
+    );
+    expect(hidesHomeTraceFactors('akhlaq.patience'), isTrue);
     expect(homeTraceRowByKey('akhlaq.modestGaze')?.label, 'Guarded my gaze');
     expect(
       homeTraceRowByKey('akhlaq.heldBackFromAHabit')?.label,
@@ -195,30 +206,56 @@ void main() {
       'Did a teaching of the Prophet ﷺ reach my day?',
     );
     expect(MonitorDomain.hadith.id, 'hadith');
+    expect(MonitorDomain.hadith.showsHomeActionFollowOn, isTrue);
+    expect(MonitorDomain.dhikr.showsHomeActionFollowOn, isTrue);
     expect(hadithHomeRows.map((row) => row.storageKey), [
-      'hadith.reading',
-      'hadith.listening',
-      'hadith.memorisation',
-      'hadith.revision',
-      'hadith.studyCircle',
-      'hadith.teachingDiscussion',
-      'hadith.reflection',
-      'hadith.livedSunnah',
+      hadithEncounterKey,
+      hadithRetentionKey,
+      hadithLearningKey,
+      hadithLivedNoticedKey,
     ]);
+    expect(hadithHomeRows.map((row) => row.band).toSet(), {kHadithEngagedBand});
+    expect(homeTraceRowByKey(hadithEncounterKey)?.band, kHadithEngagedBand);
+    expect(
+      homeTraceRowByKey(hadithEncounterKey)?.label,
+      'Read and/or Listened',
+    );
+    expect(
+      homeTraceRowByKey(hadithRetentionKey)?.label,
+      'Memorization/Revision',
+    );
+    expect(
+      homeTraceRowByKey(hadithLearningKey)?.label,
+      'Study Circle/Discussion',
+    );
+    expect(
+      homeTraceRowByKey(hadithLivedNoticedKey)?.label,
+      'Lived /Noticed others',
+    );
+    expect(hidesHomeTraceFactors(hadithLivedNoticedKey), isTrue);
+    expect(
+      ActivityCatalog.forHomeTrace('dhikr.postFardFajr').first.id,
+      ActivityCatalog.dhikrWithAction,
+    );
+    expect(hidesHomeTraceFactors('dhikr.postFardFajr'), isFalse);
+    expect(hidesHomeTraceFactors(hadithEncounterKey), isFalse);
     expect(
       homeTraceRowByKey('hadith.livedSunnah')?.label,
       'Noticed a sunnah in how I lived today',
     );
     expect(hidesHomeTraceFactors('hadith.livedSunnah'), isTrue);
-    expect(hidesHomeTraceFactors('hadith.reading'), isFalse);
     expect(
-      traceOutcomeLabel('hadith.livedSunnah', TernaryOutcome.positive),
-      'I noticed this in myself — Noticed a sunnah in how I lived today',
+      ActivityCatalog.forHomeTrace(hadithEncounterKey).first.label,
+      'Engaged more than 20 minutes — Read and/or Listened',
     );
-    expect(
-      traceOutcomeLabel('hadith.livedSunnah', TernaryOutcome.negative),
-      'I did not notice this today — Noticed a sunnah in how I lived today',
-    );
+    expect(ActivityCatalog.hadithLivedNoticed.map((option) => option.label), [
+      'Started living a new Hadith',
+      'Introduced living a hadith in family',
+      'Corrected a practice as per hadith',
+      'Observed living a hadith by other',
+      'Recorded as not engaged',
+      'Not answered',
+    ]);
   });
 
   test('Knowledge domain is observational and not a learnedness grade', () {
@@ -228,6 +265,7 @@ void main() {
       'Did I learn something true, and did I speak only what was beneficial?',
     );
     expect(MonitorDomain.knowledge.id, 'knowledge');
+    expect(MonitorDomain.knowledge.showsHomeActionFollowOn, isTrue);
     expect(
       traceOutcomeLabel(
         'knowledge.learnedSomethingTrue',
@@ -252,25 +290,31 @@ void main() {
       'Did I treat my time as a trust from Allah?',
     );
     expect(MonitorDomain.time.id, 'time');
-    expect(hidesHomeTraceFactors('time.presentInWhatIWasDoing'), isTrue);
-    expect(
-      monitorDomainForStorageKey('time.didWhatIDelayed'),
-      MonitorDomain.time,
-    );
+    expect(MonitorDomain.time.showsHomeActionFollowOn, isTrue);
+    expect(hidesHomeTraceFactors('time.t01'), isTrue);
+    expect(monitorDomainForStorageKey('time.t04'), MonitorDomain.time);
     expect(timeHomeRows.map((row) => row.storageKey), [
-      'time.presentInWhatIWasDoing',
-      'time.didWhatIDelayed',
-      'time.steppedAwayFromIdleTime',
-      'time.restedAsNeeded',
-      'time.beganWithIntention',
+      'time.t01',
+      'time.t02',
+      'time.t03',
+      'time.t04',
+      'time.t05',
+      'time.t06',
+      'time.t07',
+      'time.t08',
     ]);
-    expect(
-      homeTraceRowByKey('time.restedAsNeeded')?.label,
-      'Rested from work as needed',
-    );
+    expect(homeTraceRowByKey('time.t08')?.label, 'Took needed rest');
+    expect(homeTraceRowByKey('time.t01')?.band, 'Intention & Priority');
+    expect(homeTraceRowByKey('time.t03')?.band, 'Attention & Presence');
+    expect(homeTraceRowByKey('time.t05')?.band, 'Responsibility & Action');
+    expect(homeTraceRowByKey('time.t07')?.band, 'Balance & Renewal');
     expect(
       timeHomeRows.map((row) => row.storageKey),
       isNot(contains('time.guardedPrayerWindow')),
+    );
+    expect(
+      timeHomeRows.map((row) => row.storageKey),
+      isNot(contains('time.presentInWhatIWasDoing')),
     );
     expect(
       homeTraceRowByKey('time.guardedPrayerWindow')?.label,
@@ -285,6 +329,7 @@ void main() {
       'Did I care for the body Allah entrusted to me?',
     );
     expect(MonitorDomain.health.id, 'health');
+    expect(MonitorDomain.health.showsHomeActionFollowOn, isTrue);
     expect(hidesHomeTraceFactors('health.sleepQuality'), isTrue);
     expect(
       monitorDomainForStorageKey('health.illnessCare'),
@@ -299,6 +344,7 @@ void main() {
       'Did my spending and earning please Allah?',
     );
     expect(MonitorDomain.wealth.id, 'wealth');
+    expect(MonitorDomain.wealth.showsHomeActionFollowOn, isTrue);
     expect(hidesHomeTraceFactors('wealth.gaveSadaqah'), isTrue);
     expect(
       monitorDomainForStorageKey('wealth.avoidedRiba'),
@@ -319,6 +365,7 @@ void main() {
       'Did I serve anyone beyond myself today?',
     );
     expect(MonitorDomain.ummah.id, 'ummah');
+    expect(MonitorDomain.ummah.showsHomeActionFollowOn, isTrue);
     expect(hidesHomeTraceFactors('ummah.masjidAttendance'), isTrue);
     expect(
       monitorDomainForStorageKey('ummah.prayedForUmmah'),
@@ -370,6 +417,11 @@ void main() {
       monitorDomainForStorageKey('huquq.otherRelatives'),
       MonitorDomain.huquq,
     );
+    expect(
+      ActivityCatalog.forHomeTrace('huquq.parents').first.label,
+      'Honoured my parents through care, respect, contact or du‘a',
+    );
+    expect(hidesHomeTraceFactors('huquq.parents'), isTrue);
   });
 
   test('trace keys map to monitor domains', () {
@@ -386,6 +438,7 @@ void main() {
   test('Hajj is observational standing status and not a due-date engine', () {
     expect(MonitorDomain.hajj.label, 'Hajj');
     expect(MonitorDomain.hajj.id, 'hajj');
+    expect(MonitorDomain.hajj.showsHomeActionFollowOn, isTrue);
     expect(
       MonitorDomain.hajj.focusQuestion,
       'Have I named how Hajj stands with me — as I see it, not as the app decides?',
@@ -396,6 +449,8 @@ void main() {
     expect(HajjStatus.preparing.showsPreparation, isTrue);
     expect(HajjStatus.performed.showsPreparation, isFalse);
     expect(hidesHomeTraceFactors(kHajjPreparationKey), isTrue);
+    expect(MonitorDomain.fasting.showsHomeActionFollowOn, isTrue);
+    expect(MonitorDomain.charity.showsHomeActionFollowOn, isTrue);
   });
 
   test('Huquq hardship care replaced the Family domain', () {

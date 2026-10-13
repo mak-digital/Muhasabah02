@@ -36,6 +36,23 @@ void main() {
     ]);
   });
 
+  test('each domain has Qur’an verses and authentic hadith for reflection', () {
+    for (final domain in MonitorDomain.values) {
+      final pool = [
+        for (final quote in kReflectionQuotes)
+          if (quote.domain == domain) quote,
+      ];
+      final verses = pool.where((quote) => quote.isQuran).length;
+      final hadith = pool.where((quote) => !quote.isQuran).length;
+      expect(verses, inInclusiveRange(5, 10), reason: domain.label);
+      expect(hadith, 10, reason: domain.label);
+    }
+    expect(
+      kReflectionQuotes.map((quote) => '${quote.source}|${quote.text}').toSet(),
+      hasLength(kReflectionQuotes.length),
+    );
+  });
+
   test('quote rotation ignores recorded activity', () {
     final now = DateTime(2026, 9, 3);
     final withRecords = quoteFor(now: now, cadence: QuotationCadence.weekly);
@@ -63,6 +80,53 @@ void main() {
     final dailyFriday = quoteFor(now: friday, cadence: QuotationCadence.daily);
     expect(weeklyThursday?.text, weeklyFriday?.text);
     expect(dailyThursday?.text, isNot(dailyFriday?.text));
+  });
+
+  test('held quote stays for the same day or week until the period rolls', () {
+    final thursday = DateTime(2026, 10, 8);
+    final friday = DateTime(2026, 10, 9);
+    final calendar = quoteFor(now: thursday, cadence: QuotationCadence.weekly)!;
+    final heldIndex = stepReflectionCatalog(
+      reflectionCatalogIndex(calendar),
+      1,
+    );
+    final held = kReflectionQuotes[heldIndex];
+    expect(
+      quoteFor(
+        now: thursday,
+        cadence: QuotationCadence.weekly,
+        holdPeriod: reflectionPeriodKey(thursday, QuotationCadence.weekly),
+        holdIndex: heldIndex,
+      )?.text,
+      held.text,
+    );
+    expect(
+      quoteFor(
+        now: friday,
+        cadence: QuotationCadence.weekly,
+        holdPeriod: reflectionPeriodKey(thursday, QuotationCadence.weekly),
+        holdIndex: heldIndex,
+      )?.text,
+      held.text,
+    );
+    expect(
+      quoteFor(
+        now: friday,
+        cadence: QuotationCadence.daily,
+        holdPeriod: reflectionPeriodKey(thursday, QuotationCadence.daily),
+        holdIndex: heldIndex,
+      )?.text,
+      quoteFor(now: friday, cadence: QuotationCadence.daily)?.text,
+    );
+    expect(
+      quoteFor(
+        now: thursday,
+        cadence: QuotationCadence.daily,
+        holdPeriod: reflectionPeriodKey(thursday, QuotationCadence.daily),
+        holdIndex: heldIndex,
+      )?.text,
+      held.text,
+    );
   });
 
   test('baselines store day counts not percentages', () {

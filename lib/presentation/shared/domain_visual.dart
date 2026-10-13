@@ -21,6 +21,12 @@ class DomainColorIdentity {
 
   Color washFor(Brightness brightness) =>
       MuhasabahColors.wash(washLight, washDark, brightness);
+
+  /// Slightly cooler mix so developer notes are not the same wash as actions.
+  Color notesWashFor(Brightness brightness) => Color.alphaBlend(
+    MuhasabahColors.journal.withValues(alpha: 0.28),
+    washFor(brightness),
+  );
 }
 
 /// Today overview tile name. Presentation-only; not [MonitorDomain.shortLabel].

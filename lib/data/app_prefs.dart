@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import '../domain/arabic_script.dart';
 import '../domain/custom_selection_set.dart';
 import '../domain/display_calendar.dart';
 import '../domain/first_day_of_week.dart';
@@ -21,14 +22,20 @@ abstract class AppPrefs {
   PersonalMix get personalMix;
   CustomSelectionSetsRecord get customSelectionSets;
   QuotationCadence get quotationCadence;
+  String? get reflectionHoldPeriod;
+  int? get reflectionHoldIndex;
   List<PersonalBaseline> get baselines;
   List<PersonalAspiration> get aspirations;
   String weeklyJournal(String weekKey);
   HadithMemorisationFocus get hadithMemorisationFocus;
+  int get practiceHadithBrowseIndex;
+  int get practiceQuranBrowseIndex;
   HajjStatus get hajjStatus;
   bool get mixHiddenDomainHintShown;
   bool get appLockEnabled;
   bool get salahActivityColours;
+  ArabicScriptFace get arabicScriptFace;
+  double get arabicScriptSize;
 
   Future<void> setSampleSeeded(bool value);
   Future<void> setSampleRemovedByUser(bool value);
@@ -50,14 +57,19 @@ abstract class AppPrefs {
   Future<void> clearWorkingSelection();
   Future<void> clearCustomSlot(int id);
   Future<void> setQuotationCadence(QuotationCadence value);
+  Future<void> setReflectionHold({required String period, required int index});
   Future<void> setBaselines(List<PersonalBaseline> value);
   Future<void> setAspirations(List<PersonalAspiration> value);
   Future<void> setWeeklyJournal(String weekKey, String text);
   Future<void> setHadithMemorisationFocus(HadithMemorisationFocus value);
+  Future<void> setPracticeHadithBrowseIndex(int value);
+  Future<void> setPracticeQuranBrowseIndex(int value);
   Future<void> setHajjStatus(HajjStatus value);
   Future<void> setMixHiddenDomainHintShown(bool value);
   Future<void> setAppLockEnabled(bool value);
   Future<void> setSalahActivityColours(bool value);
+  Future<void> setArabicScriptFace(ArabicScriptFace value);
+  Future<void> setArabicScriptSize(double value);
 }
 
 class MemoryAppPrefs implements AppPrefs {
@@ -72,11 +84,17 @@ class MemoryAppPrefs implements AppPrefs {
     PersonalMix? personalMix,
     CustomSelectionSetsRecord? customSelectionSets,
     this.quotationCadence = QuotationCadence.weekly,
+    this.reflectionHoldPeriod,
+    this.reflectionHoldIndex,
     this.hadithMemorisationFocus = HadithMemorisationFocus.unanswered,
+    this.practiceHadithBrowseIndex = 0,
+    this.practiceQuranBrowseIndex = 0,
     this.hajjStatus = HajjStatus.unanswered,
     this.mixHiddenDomainHintShown = false,
     this.appLockEnabled = false,
     this.salahActivityColours = false,
+    this.arabicScriptFace = ArabicScriptFace.uthmani,
+    this.arabicScriptSize = kDefaultArabicScriptSize,
     List<PersonalBaseline>? baselines,
     List<PersonalAspiration>? aspirations,
     Map<String, String>? weeklyJournals,
@@ -121,7 +139,19 @@ class MemoryAppPrefs implements AppPrefs {
   QuotationCadence quotationCadence;
 
   @override
+  String? reflectionHoldPeriod;
+
+  @override
+  int? reflectionHoldIndex;
+
+  @override
   HadithMemorisationFocus hadithMemorisationFocus;
+
+  @override
+  int practiceHadithBrowseIndex;
+
+  @override
+  int practiceQuranBrowseIndex;
 
   @override
   HajjStatus hajjStatus;
@@ -134,6 +164,12 @@ class MemoryAppPrefs implements AppPrefs {
 
   @override
   bool salahActivityColours;
+
+  @override
+  ArabicScriptFace arabicScriptFace;
+
+  @override
+  double arabicScriptSize;
 
   @override
   List<PersonalBaseline> baselines;
@@ -300,6 +336,15 @@ class MemoryAppPrefs implements AppPrefs {
       quotationCadence = value;
 
   @override
+  Future<void> setReflectionHold({
+    required String period,
+    required int index,
+  }) async {
+    reflectionHoldPeriod = period;
+    reflectionHoldIndex = index;
+  }
+
+  @override
   Future<void> setBaselines(List<PersonalBaseline> value) async =>
       baselines = List.of(value);
 
@@ -323,6 +368,14 @@ class MemoryAppPrefs implements AppPrefs {
   ) async => hadithMemorisationFocus = value;
 
   @override
+  Future<void> setPracticeHadithBrowseIndex(int value) async =>
+      practiceHadithBrowseIndex = value;
+
+  @override
+  Future<void> setPracticeQuranBrowseIndex(int value) async =>
+      practiceQuranBrowseIndex = value;
+
+  @override
   Future<void> setHajjStatus(HajjStatus value) async => hajjStatus = value;
 
   @override
@@ -335,6 +388,14 @@ class MemoryAppPrefs implements AppPrefs {
   @override
   Future<void> setSalahActivityColours(bool value) async =>
       salahActivityColours = value;
+
+  @override
+  Future<void> setArabicScriptFace(ArabicScriptFace value) async =>
+      arabicScriptFace = value;
+
+  @override
+  Future<void> setArabicScriptSize(double value) async =>
+      arabicScriptSize = clampArabicScriptSize(value);
 }
 
 List<PersonalBaseline> decodeBaselines(String? raw) {

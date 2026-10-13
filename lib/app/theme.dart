@@ -30,6 +30,8 @@ class MuhasabahColors {
 
   static const salahFamily = Color(0xFF2F6F73);
   static const mark = salahFamily;
+  /// Readable ink for recorded choice labels. Activity colour stays on the mark.
+  static const recordedLabel = Color(0xFF1565C0);
   static const missedEarth = Color(0xFF8A6A62);
   static const salahObligatoryBand = Color(0xFFD2E8E6);
   static const salahFridayBand = Color(0xFFD8E2EE);

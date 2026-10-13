@@ -12,23 +12,13 @@ import '../../domain/personalisation_resolver.dart';
 import '../../domain/quick_tap.dart';
 import '../../domain/salah_extras.dart';
 import '../shared/domain_action_frame.dart';
+import '../shared/domain_line_icon.dart';
 import '../shared/domain_visual.dart';
 import '../shared/progress_calendar.dart';
 import '../shared/salah_activity_mark.dart';
 import '../shared/state_marker.dart';
 import '../shared/system_insets.dart';
 import '../shared/week_nav_strip.dart';
-
-IconData _iconFor(String name) => switch (name) {
-  'wb_twilight' => Icons.wb_twilight,
-  'menu_book' => Icons.menu_book_outlined,
-  'self_improvement' => Icons.self_improvement,
-  'call' => Icons.call_outlined,
-  'volunteer_activism' => Icons.volunteer_activism_outlined,
-  'favorite_outline' => Icons.favorite_border,
-  'record_voice_over' => Icons.record_voice_over_outlined,
-  _ => Icons.circle_outlined,
-};
 
 Future<void> showQuickTapSheet(BuildContext context, WidgetRef ref) {
   refreshNowIfLocalDateChanged(ref);
@@ -153,30 +143,36 @@ class _QuickTapSheetState extends ConsumerState<QuickTapSheet> {
                           ),
                         ),
                       ),
-                      InkWell(
-                        key: const Key('quick-tap-note-toggle'),
-                        onTap: () => setState(() => _noteOpen = !_noteOpen),
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(4, 2, 4, 2),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                Copy.quickTapNoteTitle,
-                                style: theme.textTheme.labelSmall?.copyWith(
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: 0.2,
+                      Flexible(
+                        child: InkWell(
+                          key: const Key('quick-tap-note-toggle'),
+                          onTap: () => setState(() => _noteOpen = !_noteOpen),
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(4, 2, 4, 2),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    Copy.quickTapNoteTitle,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: theme.textTheme.labelSmall?.copyWith(
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: 0.2,
+                                      color: family,
+                                    ),
+                                  ),
+                                ),
+                                Icon(
+                                  _noteOpen
+                                      ? Icons.expand_less
+                                      : Icons.expand_more,
+                                  size: 18,
                                   color: family,
                                 ),
-                              ),
-                              Icon(
-                                _noteOpen
-                                    ? Icons.expand_less
-                                    : Icons.expand_more,
-                                size: 18,
-                                color: family,
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -254,9 +250,9 @@ class _QuickTapSheetState extends ConsumerState<QuickTapSheet> {
                                 item,
                                 history: records,
                               );
-                              await ref.read(checkInsProvider.notifier).save(
-                                applyQuickTapChoice(day, item, next),
-                              );
+                              await ref
+                                  .read(checkInsProvider.notifier)
+                                  .save(applyQuickTapChoice(day, item, next));
                             },
                           ),
                         ),
@@ -327,6 +323,8 @@ class _QuickTapDomainPanel extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
                 child: Row(
                   children: [
+                    DomainLineIcon(domain, size: 16, color: identity.family),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         domain.shortLabel.toUpperCase(),
@@ -338,9 +336,7 @@ class _QuickTapDomainPanel extends StatelessWidget {
                       ),
                     ),
                     Icon(
-                      expanded
-                          ? Icons.expand_less
-                          : Icons.expand_more,
+                      expanded ? Icons.expand_less : Icons.expand_more,
                       color: identity.family,
                     ),
                   ],
@@ -354,16 +350,18 @@ class _QuickTapDomainPanel extends StatelessWidget {
                   builder: (context, constraints) {
                     const gap = 8.0;
                     final width = (constraints.maxWidth - gap) / 2;
-                    final height = width * 0.78;
                     return Wrap(
                       key: Key('quick-tap-domain-tiles-${domain.id}'),
                       spacing: gap,
                       runSpacing: gap,
                       children: [
                         for (final item in items)
-                          SizedBox(
-                            width: width,
-                            height: height,
+                          ConstrainedBox(
+                            constraints: BoxConstraints(
+                              minWidth: width,
+                              maxWidth: width,
+                              minHeight: width * 0.78,
+                            ),
                             child: _QuickTapTile(
                               item: item,
                               choice: readQuickTapChoice(
@@ -430,11 +428,12 @@ class _QuickTapTile extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.fromLTRB(8, 6, 8, 6),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Row(
               children: [
-                Icon(_iconFor(item.iconName), size: 16, color: identity.family),
+                DomainLineIcon(item.domain, size: 16, color: identity.family),
                 const Spacer(),
                 RecordedStateMarker(
                   color: markColor,
@@ -444,26 +443,26 @@ class _QuickTapTile extends StatelessWidget {
                 ),
               ],
             ),
-            const Spacer(),
+            const SizedBox(height: 8),
             Text(
               item.label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+              softWrap: true,
               style: theme.textTheme.titleSmall?.copyWith(
                 fontWeight: FontWeight.w800,
-                height: 1.1,
+                height: 1.2,
                 color: identity.family,
               ),
             ),
             const SizedBox(height: 1),
             Text(
               caption,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+              softWrap: true,
               style: theme.textTheme.bodySmall?.copyWith(
                 fontWeight: FontWeight.w700,
-                height: 1.15,
-                color: unanswered ? scheme.onSurfaceVariant : markColor,
+                height: 1.2,
+                color: unanswered
+                    ? scheme.onSurfaceVariant
+                    : MuhasabahColors.recordedLabel,
               ),
             ),
             if (oftenHint != null) ...[
@@ -511,7 +510,10 @@ class _QuickTapTile extends StatelessWidget {
             ? MuhasabahColors.quran(item.dimension!)
             : SalahActivityMark.colourForId(choice.id);
       case QuickTapKind.voluntarySalah:
+        return SalahActivityMark.colourForId(choice.id);
       case QuickTapKind.trace:
+        final colour = SalahActivityMark.colourForId(choice.id);
+        if (colour != MuhasabahColors.mark) return colour;
         return choice.mark == QuickTapMark.slip
             ? MuhasabahColors.missedEarth
             : identity.family;

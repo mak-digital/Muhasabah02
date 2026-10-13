@@ -21,6 +21,8 @@ import '../progress/salah_progress_screen.dart';
 import '../recognition/recognition_screen.dart';
 import '../recorded_days/recorded_days_screen.dart';
 import '../shared/add_response_button.dart';
+import '../shared/domain_line_icon.dart';
+import '../shared/domain_visual.dart';
 import '../shared/system_insets.dart';
 import '../shared/ui_bits.dart';
 
@@ -91,7 +93,7 @@ class ReviewScreen extends ConsumerWidget {
             if (_hasRecordedTrace(record, knowledgeHomeRows)) {
               knowledgeDays++;
             }
-            if (_hasRecordedTrace(record, timeAllHomeRows)) {
+            if (_hasRecordedTrace(record, timeHomeRows)) {
               timeDays++;
             }
             if (_hasRecordedTrace(record, healthHomeRows)) {
@@ -209,7 +211,6 @@ class ReviewScreen extends ConsumerWidget {
                   note: Copy.hadithObservationNote,
                   rows: rowsFor(MonitorDomain.hadith, hadithHomeRows),
                   family: MuhasabahColors.hadithFamily,
-                  includeHadithFocus: true,
                   itemRowsOn7Days: true,
                 ),
               ),
@@ -735,6 +736,7 @@ class _ReviewDomainTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final domain = domainForTitle(title);
     return Semantics(
       button: true,
       label: progressLabel,
@@ -752,12 +754,27 @@ class _ReviewDomainTile extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.titleSmall
-                        ?.copyWith(fontWeight: FontWeight.w700),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (domain != null) ...[
+                        DomainLineIcon(
+                          domain,
+                          size: 18,
+                          color: domainColorIdentity(domain).family,
+                        ),
+                        const SizedBox(width: 6),
+                      ],
+                      Expanded(
+                        child: Text(
+                          title,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(fontWeight: FontWeight.w700),
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 4),
                   Expanded(

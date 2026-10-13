@@ -106,7 +106,9 @@ void main() {
     await tester.ensureVisible(find.byKey(const Key('review-domain-quran')));
     await tester.tap(find.byKey(const Key('review-domain-quran')));
     await tester.pumpAndSettle();
-    expect(find.text(Copy.ponderPrompt), findsWidgets);
+    expect(find.text(Copy.ponderPrompt), findsNothing);
+    expect(find.text('PONDER'), findsNothing);
+    expect(find.text(Copy.addAResponse), findsNothing);
     await tester.pageBack();
     await tester.pumpAndSettle();
     await tester.tap(find.text(Copy.myResponse));

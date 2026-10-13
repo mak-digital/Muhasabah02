@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/legacy.dart';
 
 import '../../domain/copy.dart';
 import '../../domain/monitor_domain.dart';
+import 'domain_line_icon.dart';
 import 'domain_visual.dart';
 import 'week_nav_strip.dart';
 
@@ -128,6 +129,9 @@ class DomainStage extends ConsumerWidget {
     return WeekNavStrip(
       label: domains[index].shortLabel,
       prominentLabel: true,
+      compact: true,
+      maxLines: 1,
+      leading: DomainLineIcon(domains[index], size: 22, color: identity.family),
       labelKey: Key('$keyPrefix-current'),
       family: identity.family,
       wash: weekNavStripWash(
@@ -170,7 +174,10 @@ class DomainStage extends ConsumerWidget {
                 customBorder: const StadiumBorder(),
                 onTap: () => _select(ref, i),
                 child: Padding(
-                  padding: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 4,
+                  ),
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 180),
                     width: i == index ? 16 : 7,

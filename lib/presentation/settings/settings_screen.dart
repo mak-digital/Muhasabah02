@@ -5,7 +5,10 @@ import '../../application/device_unlock.dart';
 import '../../application/providers.dart';
 import '../../data/privacy_log.dart';
 import '../../debug/synthetic_check_in_seeder.dart';
+import '../../domain/arabic_script.dart';
 import '../../domain/activities.dart';
+import '../../domain/akhlaq_practices.dart';
+import '../../domain/huquq_practices.dart';
 import '../../domain/copy.dart';
 import '../../domain/display_calendar.dart';
 import '../../domain/first_day_of_week.dart';
@@ -15,6 +18,8 @@ import '../../domain/quotation_cadence.dart';
 import '../../domain/quran_stage.dart';
 import '../history/history_screen.dart';
 import '../response/response_list_screen.dart';
+import '../shared/domain_line_icon.dart';
+import '../shared/domain_visual.dart';
 import '../shared/quran_stage_mark.dart';
 import '../shared/salah_activity_mark.dart';
 import '../shared/state_marker.dart';
@@ -65,6 +70,21 @@ class SettingsScreen extends ConsumerWidget {
                       context,
                       MaterialPageRoute<void>(
                         builder: (_) => const TextSizeSettingsScreen(),
+                      ),
+                    );
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.font_download_outlined),
+                  title: const Text(Copy.arabicScript),
+                  subtitle: Text(
+                    '${prefs.arabicScriptFace.label} · ${prefs.arabicScriptSize.round()}',
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute<void>(
+                        builder: (_) => const ArabicScriptSettingsScreen(),
                       ),
                     );
                   },
@@ -390,6 +410,84 @@ class ActivitiesSettingsScreen extends ConsumerWidget {
                   ],
                 ),
               ),
+            const SizedBox(height: 16),
+            Text(
+              MonitorDomain.dhikr.label,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              Copy.dhikrPostFardNote,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 8),
+            for (final option in ActivityCatalog.dhikrPostFard)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  children: [
+                    RecordedStateMarker(
+                      kind: SalahActivityMark.kindForHadithLived(option.id),
+                      color: SalahActivityMark.colourForId(option.id),
+                      semanticLabel: option.label,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(child: Text(option.label)),
+                  ],
+                ),
+              ),
+            const SizedBox(height: 16),
+            Text(
+              MonitorDomain.akhlaq.label,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              Copy.akhlaqCheckInNote,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 8),
+            for (final option in akhlaqLegendCatalog)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  children: [
+                    RecordedStateMarker(
+                      kind: SalahActivityMark.kindForAkhlaq(option.id),
+                      color: SalahActivityMark.colourForId(option.id),
+                      semanticLabel: option.label,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(child: Text(option.label)),
+                  ],
+                ),
+              ),
+            const SizedBox(height: 16),
+            Text(
+              MonitorDomain.huquq.label,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              Copy.huquqCheckInNote,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 8),
+            for (final option in huquqLegendCatalog)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  children: [
+                    RecordedStateMarker(
+                      kind: SalahActivityMark.kindForAkhlaq(option.id),
+                      color: SalahActivityMark.colourForId(option.id),
+                      semanticLabel: option.label,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(child: Text(option.label)),
+                  ],
+                ),
+              ),
           ] else ...[
             const _ActivityMarkRow(kind: MarkerKind.filled, label: 'On time'),
             const _ActivityMarkRow(kind: MarkerKind.outlined, label: 'Late'),
@@ -488,6 +586,79 @@ class TextSizeSettingsScreen extends StatelessWidget {
           Text(
             'Muhasabah uses your device text size. Change it in the system accessibility settings. The app does not override or score how large text appears.',
             style: Theme.of(context).textTheme.bodyMedium,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class ArabicScriptSettingsScreen extends ConsumerWidget {
+  const ArabicScriptSettingsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(prefsTickProvider);
+    final prefs = ref.watch(appPrefsProvider);
+    final size = clampArabicScriptSize(prefs.arabicScriptSize);
+    return Scaffold(
+      appBar: AppBar(title: const Text(Copy.arabicScript)),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          Text(
+            Copy.arabicScriptNote,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          const SizedBox(height: 12),
+          Card(
+            child: RadioGroup<ArabicScriptFace>(
+              groupValue: prefs.arabicScriptFace,
+              onChanged: (value) async {
+                if (value == null) return;
+                await prefs.setArabicScriptFace(value);
+                ref.read(prefsTickProvider.notifier).state++;
+              },
+              child: Column(
+                children: [
+                  for (final face in ArabicScriptFace.values)
+                    RadioListTile<ArabicScriptFace>(
+                      key: Key('arabic-script-pref-${face.id}'),
+                      title: Text(face.label),
+                      value: face,
+                    ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            Copy.textSize,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          Slider(
+            key: const Key('arabic-script-size'),
+            min: 0,
+            max: (kArabicScriptSizes.length - 1).toDouble(),
+            divisions: kArabicScriptSizes.length - 1,
+            value: kArabicScriptSizes.indexOf(size).toDouble(),
+            label: '${size.round()}',
+            onChanged: (value) async {
+              await prefs.setArabicScriptSize(
+                kArabicScriptSizes[value.round()],
+              );
+              ref.read(prefsTickProvider.notifier).state++;
+            },
+          ),
+          Text(
+            'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ',
+            textAlign: TextAlign.right,
+            textDirection: TextDirection.rtl,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontFamily: prefs.arabicScriptFace.family,
+              fontSize: size,
+              height: 1.85,
+            ),
           ),
         ],
       ),
@@ -714,7 +885,17 @@ class VisibleDomainsSettingsScreen extends ConsumerWidget {
                 for (final domain in MonitorDomain.values)
                   CheckboxListTile(
                     key: Key('domain-visible-${domain.name}'),
-                    title: Text(domain.label),
+                    title: Row(
+                      children: [
+                        DomainLineIcon(
+                          domain,
+                          size: 20,
+                          color: domainColorIdentity(domain).family,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(child: Text(domain.label)),
+                      ],
+                    ),
                     value: current.contains(domain),
                     onChanged: (checked) async {
                       final next = Set<MonitorDomain>.from(current);

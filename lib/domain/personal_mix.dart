@@ -158,7 +158,8 @@ final kWorshipMixKeys = mixKeysWhere(
       item.id == 'quran.reading' ||
       item.id == 'quran.meaning' ||
       (item.domain == MonitorDomain.hadith &&
-          (item.band == 'Encounter' || item.id == 'hadith.livedSunnah')) ||
+          (item.id == hadithEncounterKey ||
+              item.id == hadithLivedNoticedKey)) ||
       (item.domain == MonitorDomain.dhikr &&
           item.band == 'Post-fard Salah Adhkar') ||
       item.id == kHajjMixKey ||

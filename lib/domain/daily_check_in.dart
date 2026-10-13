@@ -1,11 +1,14 @@
 import 'dart:convert';
 
 import 'activities.dart';
+import 'akhlaq_practices.dart';
 import 'home_traces.dart';
+import 'huquq_practices.dart';
 import 'other_domains.dart';
 import 'prayer.dart';
 import 'quran.dart';
 import 'recorded_context.dart';
+import 'salah_extras.dart';
 import 'salah_factors.dart';
 import 'situation_notes.dart';
 
@@ -144,6 +147,22 @@ class DailyCheckIn {
       if (name == 'jumuah') {
         return RecordedActivity(id: jumuahActivityId);
       }
+      if (name == 'tahajjud') {
+        return RecordedActivity(
+          id: ActivityCatalog.canonicalVoluntarySalahId(
+            tahajjud,
+            SalahTraceRow.tahajjud,
+          ),
+        );
+      }
+      if (name == 'ishraq') {
+        return RecordedActivity(
+          id: ActivityCatalog.canonicalVoluntarySalahId(
+            ishraq,
+            SalahTraceRow.ishraq,
+          ),
+        );
+      }
       final id = PrayerId.values.where((item) => item.name == name);
       if (id.isNotEmpty) {
         return RecordedActivity(
@@ -199,6 +218,18 @@ class DailyCheckIn {
           EntryStatus.noneToday => ActivityIds.noActivity,
           EntryStatus.recorded => 'privateNote',
         },
+      );
+    }
+    final catalog = ActivityCatalog.forHomeTrace(key);
+    if (catalog.isNotEmpty) {
+      if (isAkhlaqTrace(key)) {
+        return RecordedActivity(id: canonicalAkhlaqId(homeTrace(key)));
+      }
+      if (isHuquqTrace(key)) {
+        return RecordedActivity(id: canonicalHuquqId(homeTrace(key)));
+      }
+      return RecordedActivity(
+        id: ActivityCatalog.canonicalTernaryId(homeTrace(key), catalog),
       );
     }
     return const RecordedActivity(id: ActivityIds.unanswered);
@@ -352,6 +383,26 @@ class DailyCheckIn {
     );
   }
 
+  DailyCheckIn withVoluntarySalahActivity(
+    SalahTraceRow row,
+    RecordedActivity activity,
+  ) {
+    final catalog = ActivityCatalog.forVoluntarySalah(row);
+    final option = ActivityCatalog.find(catalog, activity.id);
+    final outcome = option?.ternary ?? TernaryOutcome.unanswered;
+    final key = ActivityCatalog.voluntarySalahKey(row);
+    if (row == SalahTraceRow.tahajjud) {
+      return copyWith(
+        tahajjud: outcome,
+        activities: {...activities, key: activity},
+      );
+    }
+    return copyWith(
+      ishraq: outcome,
+      activities: {...activities, key: activity},
+    );
+  }
+
   DailyCheckIn withJumuahActivity(RecordedActivity activity) {
     final option =
         ActivityCatalog.find(ActivityCatalog.jumuah, activity.id) ??
@@ -427,6 +478,16 @@ class DailyCheckIn {
       next[subject] = capture;
     }
     return copyWith(salahFactors: next);
+  }
+
+  DailyCheckIn withHomeTraceActivity(
+    String storageKey,
+    RecordedActivity activity,
+  ) {
+    final catalog = ActivityCatalog.forHomeTrace(storageKey);
+    final option = ActivityCatalog.find(catalog, activity.id);
+    final outcome = option?.ternary ?? TernaryOutcome.unanswered;
+    return withHomeTrace(storageKey, outcome).withActivity(storageKey, activity);
   }
 
   DailyCheckIn withHomeTrace(String storageKey, TernaryOutcome outcome) {

@@ -5,8 +5,10 @@ class Copy {
   static const appSlogan = 'Your record, not a ruling.';
   static const appNotice = 'Notice your day to improve. Keep it yours.';
   static const homeCheckIn = 'Start today’s check-in';
-  static const today = 'Today';
-  static const activeDomainAndMix = 'Active Domain & Mix';
+  static const today = 'TODAY';
+  static String todayHeading(String weekday, String dateLine) =>
+      'TODAY : $weekday, $dateLine';
+  static const activeDomainAndMix = 'ACTIVE DOMAIN & MIX';
   static String mixRowsRecorded(int recorded, int total) {
     if (total <= 0) return 'No mix rows';
     if (recorded <= 0) return 'None of $total recorded';
@@ -18,6 +20,7 @@ class Copy {
     if (total <= 0) return '0 of 0';
     return '$recorded of $total';
   }
+
   static const todayEmpty =
       'No domains are shown for today. Choose Domains and this season’s mix in Settings.';
   static const todayDomainEmpty =
@@ -73,6 +76,75 @@ class Copy {
   static const myResponseDescription =
       'A private, optional place to write a note, question, or something you want to keep in mind.';
   static const addAResponse = 'Add a response';
+  static String domainActionsTitle(String domain) =>
+      '$domain actions you listed';
+  static const washAboutTitle = 'About this list';
+  static const aboutThisDomain = 'About this domain';
+  static const progressMarksTitle = 'About these marks';
+  static const domainActionsNote =
+      'Your list. Not a score, reminder, or prescription. Stored on this device.';
+  static const openActionRegister = 'Open Action Register';
+  static const closeActionRegister = 'Close';
+  static String actionRegisterTitle(String domain) => '$domain action register';
+  static const actionRegisterNote =
+      'Active actions stay at the top. Closed and deleted actions remain here until you select them and delete them from this register.';
+  static const actionSelectAll = 'Select all';
+  static const actionDeleteSelected = 'Delete';
+  static const actionRegisterEmpty = 'No actions in the register.';
+  static const actionNothingSelected = 'Select an action first.';
+  static const actionConfirmPermanentDelete =
+      'Remove the selected actions from this device? This cannot be undone.';
+  static const actionConfirmPermanentDeleteAction = 'Remove';
+  static const addAction = '+ add Action';
+  static const saveListedAction = 'Save action';
+  static const actionField = 'Action';
+  static const actionTargetDate = 'Target date';
+  static const actionPriority = 'Priority';
+  static const actionPrioritySoon = 'High';
+  static const actionPriorityWeek = 'Medium';
+  static const actionPriorityLater = 'Low';
+  static const actionActive = 'Active';
+  static const actionClosed = 'Closed';
+  static const actionDeleted = 'Deleted';
+  static const actionStatusColumn = 'Active / Closed / Deleted';
+  static const parkSettledAction = 'Move off this list';
+  static const actionEmpty = 'No active actions listed.';
+  static const actionNeedsText = 'Write the action before adding it.';
+  static const actionLimitReached =
+      'Close or delete an active action before listing another. At most five stay listed.';
+  static const closeListedAction = 'Close action';
+  static const reopenAction = 'Reopen';
+  static const deleteAction = 'Delete';
+  static const actionCircleMenu = 'Action options';
+  static const actionCompletedClosed = 'Completed / Closed';
+  static const actionInProgressActive = 'In progress / Active';
+  static const actionEdit = 'Edit';
+  static const saveEditedAction = 'Save changes';
+  static const moveActionUp = 'Move up';
+  static const moveActionDown = 'Move down';
+  static const addDeveloperNote = '+ add Note';
+  static const developerNotesTitle = 'Note to the developer';
+  static const developerNotesNote =
+      'About this domain. Stored locally with a serial number. The app does not send mail. Open the register to edit, delete, or download.';
+  static const openNotesRegister = 'Open Note Register';
+  static const notesRegisterTitle = 'Notes to the developer';
+  static const notesRegisterNote =
+      'Edit a note if you need to change it. Select notes and delete them before download if they should not be shared.';
+  static const notesRegisterEmpty = 'No notes in the register.';
+  static const notesConfirmPermanentDelete =
+      'Remove the selected notes from this device? They will not be in the download. This cannot be undone.';
+  static const notesConfirmPermanentDeleteAction = 'Remove';
+  static const editDeveloperNote = 'Edit';
+  static const developerNotesPrompt = 'What should we know?';
+  static const saveDeveloperNote = 'Save note';
+  static const downloadDeveloperNotes = 'Download all notes';
+  static const copyDeveloperNotes = 'Copy all notes';
+  static const developerNoteNeedsText = 'Write the note before saving.';
+  static const noDeveloperNotes =
+      'No notes saved yet. Write one above, then save.';
+  static const developerNotesCopied = 'Copied. Paste into mail if you wish.';
+  static String developerNoteSaved(String serial, String domain, String date) =>
+      'Saved as $serial · $domain · $date.';
   static const creationPrompt =
       'What, if anything, would you like to note or keep in mind?';
   static const emptyResponses =
@@ -135,11 +207,32 @@ class Copy {
   static const akhlaqStruggleNote = 'Struggle note';
   static const akhlaqStruggleHint =
       'Optional, about yourself only. Not a score. Example: I was impatient today, but I caught myself. Or: I reached for it, then I stopped.';
+  static const akhlaqStruggleFieldHint =
+      'About yourself only. Not a score.';
+  static const akhlaqFollowUpNote =
+      'Optional. Stored. Never causes, completion, or scores. Not a character grade.';
+  static const akhlaqWhereDidItHappen = 'Where did it happen?';
+  static const akhlaqWhatHelped = 'What helped or could help next time?';
+  static const akhlaqPrivateStruggleNote = 'Private struggle note';
+  static const akhlaqCheckInNote =
+      'Each row stores one observation: virtue demonstrated, struggled, shortcoming recognised, corrective action, or no relevant situation. Corrective action is not the same as avoiding the original lapse. Colour names the recorded choice when activity colours are on. Unanswered is empty, not a relapse.';
   static const akhlaqNoticed = 'I noticed this in myself';
   static const akhlaqNotToday = 'I did not notice this today';
   static String get huquqObservationNote => huquqBriefing.plainText;
   static const huquqAttended = 'I attended to a right I owe';
   static const huquqNeglected = 'I neglected a right I owe';
+  static const huquqFollowUpNote =
+      'Optional. Stored. Never scores, ranks, or classifies a shortcoming as a religious violation. Lack of daily contact is not neglect. Reconciliation is never required where it would be unsafe.';
+  static const huquqNatureOfEngagement = 'Nature of engagement';
+  static const huquqOutcomeObserved = 'Outcome observed';
+  static const huquqOptionalQuantity = 'Optional quantity';
+  static const huquqOccasionsHint = 'Number of occasions';
+  static const huquqTimeSpentHint = 'Approximate time spent, if relevant';
+  static const huquqPrivateReflection = 'Private reflection';
+  static const huquqReflectionHint =
+      'About your own conduct only. No names or identifying details required.';
+  static const huquqCheckInNote =
+      'Each row stores one observation: a positive action, partial effort, a recognised shortcoming, a corrective step, or no applicable situation. Colour names the recorded choice when activity colours are on. Unanswered is empty, not neglect. Optional follow-ups are provenance, not a relationship score.';
   static String get knowledgeObservationNote => knowledgeBriefing.plainText;
   static const knowledgeNoticed = 'I noticed this in myself';
   static const knowledgeNotToday = 'I did not notice this today';
@@ -158,6 +251,8 @@ class Copy {
   static String get hadithObservationNote => hadithBriefing.plainText;
   static const hadithNoticed = 'I noticed this in myself';
   static const hadithNotToday = 'I did not notice this today';
+  static const hadithDurationNote =
+      'ENGAGED with Hadith holds four rows: read and/or listened, memorization or revision, study circle or discussion, and lived or noticed in others. The first three use the same duration steps as Qur’an Engagement. Lived /Noticed others is how a teaching reached life today — not a revival score.';
   static String get hajjObservationNote => hajjBriefing.plainText;
   static const hajjStatusLabel = 'Hajj';
   static const hajjStatusNote =
@@ -199,6 +294,11 @@ class Copy {
   static const appearanceNote = 'System, light, dark';
   static const textSize = 'Text size';
   static const textSizeNote = 'Follows device scale';
+  static const arabicScript = 'Arabic script';
+  static const arabicScriptNote =
+      'Face and size for Arabic in Learn & Practice. Uthmani is the mushaf-style face for the Qur’an list. Not a recitation score, and not a device-wide text size.';
+  static const arabicScriptSmaller = 'Smaller Arabic';
+  static const arabicScriptLarger = 'Larger Arabic';
   static const onDeviceStorage = 'On-device storage';
   static const onDeviceStorageNote =
       'Days stay on this phone. No account, no telemetry, and no cloud copy. Android backup of this app is off. Delete is not forensic erasure.';
@@ -225,12 +325,15 @@ class Copy {
   static const visibleDomains = 'Domains in Focus';
   static const activitiesTitle = 'Activities & legend';
   static const activitiesNote =
-      'Salah check-in list. Shared mark colour is the default. Optional activity colours name the recorded Salah choice and the Qur’an check-in band. Not a score.';
+      'Salah check-in list. Shared mark colour is the default. Optional activity colours name the recorded Salah choice, the Qur’an duration step, post-fard Dhikr remembrance, and Character & Morals observations. Not a score.';
   static const salahMarkColour = 'Salah mark colour';
   static const salahMarkShared = 'Shared (current)';
   static const salahMarkActivityColours = 'Activity colours';
   static const salahMarkActivityNote =
-      'Colour names the recorded Salah choice or Qur’an check-in band. It does not rank spirituality or tell you what to do next. Other domains keep the shared mark colour.';
+      'Colour names the recorded Salah choice, Qur’an duration step, post-fard Dhikr remembrance, or Character & Morals observation. It does not rank spirituality or tell you what to do next. Other domains keep the shared mark colour.';
+  static const howAttentiveWasI = 'How attentive was I';
+  static const dhikrPostFardNote =
+      'Post-fard Salah Adhkar records remembrance after each fard prayer. Remembrance with action uses the same blue as congregation on time. The other steps twin the remaining Salah activity colours. How attentive was I is optional provenance, not a khushu’ score.';
   static const visibleDomainsNote =
       'Choose which domains belong in this profile. This season’s mix, on the same screen, is a subset of those domains: bands and rows to notice. Leave a domain or row unselected if it does not apply. Home, Review, Progress, check-in, Quick Tap, and Recorded days follow the mix among the domains shown. Hidden domains keep any saved records.';
   static const shownDomainsNote =
@@ -302,6 +405,264 @@ class Copy {
   static const situationNotesNote =
       'Optional. You authored these. They are not causes and are not interpreted automatically.';
   static const hadithMemorisationFocus = 'Current Memorisation Focus';
+  static String practiceLearnTitle(String domainShort) =>
+      'LEARN & PRACTICE ($domainShort)';
+  static String get practiceSalahTitle => practiceLearnTitle('Salah');
+  static const practiceSalahNote =
+      'Qur’an verses and authentic hadith that encourage the prayers on this card, grouped as on Home. Presence of heart is not scored. Add one if you want to learn it and bring it into practice. This is not a khushu’ score, congregation requirement, or daily grade.';
+  static const addPracticeSalah = '+ add reminder';
+  static String get openPracticeSalahRegister =>
+      openPracticeLearnRegister('Salah');
+  static String get practiceSalahRegisterTitle =>
+      practiceLearnRegisterTitle('Salah');
+  static const practiceSalahRegisterNote =
+      'Your list. Date added, source, content, prayer, and whether you are learning it, have learnt it, are practicing it, or it has become a habit. Select and delete if it should not stay here. This is not a khushu’ score.';
+  static const practiceSalahRegisterEmpty = 'No reminders in the register.';
+  static const practiceSalahConfirmDelete =
+      'Remove the selected reminders from this device? This cannot be undone.';
+  static String get practiceQuranTitle => practiceLearnTitle('Qur’an');
+  static const practiceQuranNote =
+      'A repository of widely used verses for daily reading and memorization — Al-Fātiḥah, openings of often-recited surahs, Āyat al-Kursī, the close of Al-Baqarah, short prayer surahs, and duas said in worship. Skim with the arrows and add one if you want to learn it. This is not a khushu’ score, recitation streak, or Knowledge’s residual.';
+  static const addPracticeQuran = '+ add verse';
+  static String get openPracticeQuranRegister =>
+      openPracticeLearnRegister('Qur’an');
+  static String get practiceQuranRegisterTitle =>
+      practiceLearnRegisterTitle('Qur’an');
+  static const practiceQuranRegisterNote =
+      'Your list. Date added, source, content, topic, and whether you are learning it, have learnt it, are practicing it, or it has become a habit. Select and delete if it should not stay here. This is not a khushu’ score.';
+  static const practiceQuranRegisterEmpty = 'No verses in the register.';
+  static const practiceQuranConfirmDelete =
+      'Remove the selected verses from this device? This cannot be undone.';
+  static const practiceQuranAlreadyAdded = 'Already in your register';
+  static const practiceQuranAdded = 'Added to your register.';
+  static const practiceQuranNothingSelected = 'Select a verse first.';
+  static const bringQuranVerse = 'Bring a verse';
+  static const bringQuranVerseTitle = 'Bring a verse into Learn';
+  static const bringQuranSearchHint =
+      'Search by topic or a few words — for example kursi, parents, ease.';
+  static const bringQuranSearchEmpty =
+      'No matching verse in this list. Try other words, or use a chapter and verse if you have it.';
+  static const bringQuranOrReference = 'Or if you have the exact reference';
+  static const bringQuranVerseHint =
+      'Surah and verse, or a short range — for example 2:255 or 2:255–257.';
+  static const bringQuranUrlHint =
+      'Or paste a quran.com link, for example quran.com/2/255.';
+  static const bringQuranLookUp = 'Look up';
+  static const bringQuranSave = 'Save to Learn';
+  static const bringQuranSaveReferenceOnly = 'Save the reference only';
+  static const bringQuranCouldNotFetch =
+      'Could not load the Arabic and English while you are offline. Save the reference only, or try again when you are online.';
+  static const bringQuranInvalid =
+      'Enter a chapter and verse, a short range, or a quran.com link.';
+  static const bringQuranTooLong =
+      'Bring a short passage — up to 7 verses at a time.';
+  static const bringQuranAlreadyOnLearn =
+      'That verse is already on your Learn list.';
+  static const bringQuranAlreadyOnLearnCheck =
+      'This verse is already on your Learn list. Check the words below if you want to compare, then choose whether to save.';
+  static const bringQuranDontSave = 'Don’t save';
+  static const bringQuranSaveAnyway = 'Save anyway';
+  static const bringQuranKeptOnLearn =
+      'Already on your Learn list. Nothing extra was added.';
+  static const bringQuranSaved = 'Added to your Learn list.';
+  static const bringQuranReferenceSaved =
+      'Reference saved. Words will fill when you look it up online.';
+  static const bringThisVerseIntoLearn = 'Bring this verse into Learn';
+  static String get practiceHadithTitle => practiceLearnTitle('Hadith');
+  static const practiceHadithNote =
+      'A built-in list of daily-practice hadith and related supplications, with Arabic, transliteration, and translation. Add one if you want to learn it and bring it into practice. This is not a checklist, score, or revival programme.';
+  static const addPracticeHadith = '+ add Hadith';
+  static String openPracticeLearnRegister(String domainShort) =>
+      'Learn & Practice ($domainShort) Register';
+  static String get openPracticeHadithRegister =>
+      openPracticeLearnRegister('Hadith');
+  static String practiceLearnRegisterTitle(String domainShort) =>
+      'Learn & Practice ($domainShort) Register';
+  static String get practiceHadithRegisterTitle =>
+      practiceLearnRegisterTitle('Hadith');
+  static const practiceHadithRegisterNote =
+      'Your list. Date added, source, content, topic, and whether you are learning it, have learnt it, are practicing it, or living it. Select and delete if it should not stay here. This does not fill Living Sunnah.';
+  static const practiceHadithRegisterEmpty = 'No hadith in the register.';
+  static const practiceHadithAlreadyAdded = 'Already in your register';
+  static const bringHadith = 'Bring a hadith';
+  static const bringHadithTitle = 'Bring a hadith into Learn';
+  static const bringHadithSearchHint =
+      'Search by topic or a few words — for example intention, mother, anger.';
+  static const bringHadithSearchEmpty =
+      'No matching hadith in this list. Try other words, or use a collection and number if you have it.';
+  static const bringHadithOrReference = 'Or if you have the exact reference';
+  static const bringHadithHint =
+      'Collection and number — for example Bukhari 6312 or Muslim 234.';
+  static const bringHadithUrlHint =
+      'Or paste a sunnah.com link, for example sunnah.com/bukhari:6312.';
+  static const bringHadithInvalid =
+      'Enter a collection and number, or a sunnah.com link.';
+  static const bringHadithAlreadyOnLearn =
+      'That hadith is already on your Learn list.';
+  static const bringHadithAlreadyOnLearnCheck =
+      'This hadith is already on your Learn list. Check the words below if you want to compare, then choose whether to save.';
+  static const bringHadithDontSave = 'Don’t save';
+  static const bringHadithSaveAnyway = 'Save anyway';
+  static const bringHadithKeptOnLearn =
+      'Already on your Learn list. Nothing extra was added.';
+  static const bringHadithSaved = 'Added to your Learn list.';
+  static const bringHadithCouldNotFetch =
+      'Could not load the Arabic and English while you are offline. Save the reference only, or try again when you are online.';
+  static const bringHadithReferenceSaved =
+      'Reference saved. Words will fill when you look it up online.';
+  static const bringThisHadithIntoLearn = 'Bring this hadith into Learn';
+  static const practiceHadithAdded = 'Added to your register.';
+  static const practiceStatusLearning = 'Learning';
+  static const practiceStatusLearnt = 'Learnt';
+  static const practiceStatusPracticing = 'Practicing';
+  static const practiceHadithStatusHabit = 'Living it';
+  static const practiceDhikrStatusHabit = 'Habit';
+  static const practiceHadithConfirmDelete =
+      'Remove the selected hadith from this device? This cannot be undone.';
+  static const practiceHadithNothingSelected = 'Select a hadith first.';
+  static String get practiceDhikrTitle => practiceLearnTitle('Dhikr');
+  static const practiceDhikrNote =
+      'Widely used authentic dhikr and dua, grouped by occasion. Highly recommended post-prayer, morning, and evening sets are listed together first. Add one if you want to learn it and bring it into practice. This is not a target, score, or prescription.';
+  static const addPracticeDhikr = '+ add Dhikr';
+  static String get openPracticeDhikrRegister =>
+      openPracticeLearnRegister('Dhikr');
+  static String get practiceDhikrRegisterTitle =>
+      practiceLearnRegisterTitle('Dhikr');
+  static const practiceDhikrRegisterNote =
+      'Your list. Date added, source, content, occasion, and whether you are learning it, have learnt it, are practicing it, or it has become a habit. Select and delete if it should not stay here. This is not a dhikr target.';
+  static const practiceDhikrRegisterEmpty = 'No dhikr in the register.';
+  static const practiceDhikrConfirmDelete =
+      'Remove the selected dhikr from this device? This cannot be undone.';
+  static String get practiceAkhlaqTitle => practiceLearnTitle('Character');
+  static const practiceAkhlaqNote =
+      'Qur’an verses and authentic hadith that encourage the behaviours on this card, grouped as on Home. Highly recommended reminders sit together first. Add one if you want to learn it and bring it into practice. This is not a character grade, score, or prescription.';
+  static const addPracticeAkhlaq = '+ add reminder';
+  static String get openPracticeAkhlaqRegister =>
+      openPracticeLearnRegister('Character');
+  static String get practiceAkhlaqRegisterTitle =>
+      practiceLearnRegisterTitle('Character');
+  static const practiceAkhlaqRegisterNote =
+      'Your list. Date added, source, content, behaviour, and whether you are learning it, have learnt it, are practicing it, or it has become a habit. Select and delete if it should not stay here. This is not a character grade.';
+  static const practiceAkhlaqRegisterEmpty = 'No reminders in the register.';
+  static const practiceAkhlaqConfirmDelete =
+      'Remove the selected reminders from this device? This cannot be undone.';
+  static String get practiceHuquqTitle => practiceLearnTitle('Rights');
+  static const practiceHuquqNote =
+      'Qur’an verses and authentic hadith that encourage the rights on this card, grouped as on Home. Highly recommended reminders sit together first. Add one if you want to learn it and bring it into practice. This is not a relationship score, chore list, or prescription.';
+  static const addPracticeHuquq = '+ add reminder';
+  static String get openPracticeHuquqRegister =>
+      openPracticeLearnRegister('Rights');
+  static String get practiceHuquqRegisterTitle =>
+      practiceLearnRegisterTitle('Rights');
+  static const practiceHuquqRegisterNote =
+      'Your list. Date added, source, content, right, and whether you are learning it, have learnt it, are practicing it, or it has become a habit. Select and delete if it should not stay here. This is not a relationship score.';
+  static const practiceHuquqRegisterEmpty = 'No reminders in the register.';
+  static const practiceHuquqConfirmDelete =
+      'Remove the selected reminders from this device? This cannot be undone.';
+  static String get practiceKnowledgeTitle => practiceLearnTitle('Knowledge');
+  static const practiceKnowledgeNote =
+      'Qur’an verses and authentic hadith that encourage the rows on this card, grouped as on Home. This is other learning and speech — not Qur’an, Hadith, or Character’s tone. A single fact is enough. Add one if you want to learn it and bring it into practice. This is not a learnedness grade, study-hour badge, or prescription.';
+  static const addPracticeKnowledge = '+ add reminder';
+  static String get openPracticeKnowledgeRegister =>
+      openPracticeLearnRegister('Knowledge');
+  static String get practiceKnowledgeRegisterTitle =>
+      practiceLearnRegisterTitle('Knowledge');
+  static const practiceKnowledgeRegisterNote =
+      'Your list. Date added, source, content, row, and whether you are learning it, have learnt it, are practicing it, or it has become a habit. Select and delete if it should not stay here. This is not a learnedness grade.';
+  static const practiceKnowledgeRegisterEmpty = 'No reminders in the register.';
+  static const practiceKnowledgeConfirmDelete =
+      'Remove the selected reminders from this device? This cannot be undone.';
+  static String get practiceTimeTitle => practiceLearnTitle('Time');
+  static const practiceTimeNote =
+      'Qur’an verses and authentic hadith that encourage the eight observations on this card, grouped as on Home. They are independent reminders, not eight daily achievements. Add one if you want to learn it and bring it into practice. This is not a productivity score, schedule, streak, or estimate of barakah.';
+  static const addPracticeTime = '+ add reminder';
+  static String get openPracticeTimeRegister =>
+      openPracticeLearnRegister('Time');
+  static String get practiceTimeRegisterTitle =>
+      practiceLearnRegisterTitle('Time');
+  static const practiceTimeRegisterNote =
+      'Your list. Date added, source, content, practice, and whether you are learning it, have learnt it, are practicing it, or it has become a habit. Select and delete if it should not stay here. This is not a productivity score.';
+  static const practiceTimeRegisterEmpty = 'No reminders in the register.';
+  static const practiceTimeConfirmDelete =
+      'Remove the selected reminders from this device? This cannot be undone.';
+  static String get practiceHealthTitle => practiceLearnTitle('Health');
+  static const practiceHealthNote =
+      'Qur’an verses and authentic hadith that encourage the rows on this card, grouped as on Home. Each row skims a few well-known reminders (direct or indirect). Care of the body as a trust — not fitness, calories, or Time’s rest. Add one if you want to learn it and bring it into practice. This is not a body grade, hour badge, or prescription.';
+  static const addPracticeHealth = '+ add reminder';
+  static String get openPracticeHealthRegister =>
+      openPracticeLearnRegister('Health');
+  static String get practiceHealthRegisterTitle =>
+      practiceLearnRegisterTitle('Health');
+  static const practiceHealthRegisterNote =
+      'Your list. Date added, source, content, row, and whether you are learning it, have learnt it, are practicing it, or it has become a habit. Select and delete if it should not stay here. This is not a fitness grade.';
+  static const practiceHealthRegisterEmpty = 'No reminders in the register.';
+  static const practiceHealthConfirmDelete =
+      'Remove the selected reminders from this device? This cannot be undone.';
+  static String get practiceWealthTitle => practiceLearnTitle('Wealth');
+  static const practiceWealthNote =
+      'Qur’an verses and authentic hadith that encourage the rows on this card, grouped as on Home. Earning as a trust — not net worth or giving. Giving and zakat stay on Charity. Add one if you want to learn it and bring it into practice. This is not a money score, zakat calculator, or prescription.';
+  static const addPracticeWealth = '+ add reminder';
+  static String get openPracticeWealthRegister =>
+      openPracticeLearnRegister('Wealth');
+  static String get practiceWealthRegisterTitle =>
+      practiceLearnRegisterTitle('Wealth');
+  static const practiceWealthRegisterNote =
+      'Your list. Date added, source, content, row, and whether you are learning it, have learnt it, are practicing it, or it has become a habit. Select and delete if it should not stay here. This is not a money score.';
+  static const practiceWealthRegisterEmpty = 'No reminders in the register.';
+  static const practiceWealthConfirmDelete =
+      'Remove the selected reminders from this device? This cannot be undone.';
+  static String get practiceUmmahTitle => practiceLearnTitle('Ummah');
+  static const practiceUmmahNote =
+      'Qur’an verses and authentic hadith that encourage the rows on this card, grouped as on Home. Belonging beyond the household — not the fard, not Charity giving, and not a public check-in. Add one if you want to learn it and bring it into practice. This is not a social grade, political log, or ethnic list.';
+  static const addPracticeUmmah = '+ add reminder';
+  static String get openPracticeUmmahRegister =>
+      openPracticeLearnRegister('Ummah');
+  static String get practiceUmmahRegisterTitle =>
+      practiceLearnRegisterTitle('Ummah');
+  static const practiceUmmahRegisterNote =
+      'Your list. Date added, source, content, row, and whether you are learning it, have learnt it, are practicing it, or it has become a habit. Select and delete if it should not stay here. This is not a social grade.';
+  static const practiceUmmahRegisterEmpty = 'No reminders in the register.';
+  static const practiceUmmahConfirmDelete =
+      'Remove the selected reminders from this device? This cannot be undone.';
+  static String get practiceFastingTitle => practiceLearnTitle('Fasting');
+  static const practiceFastingNote =
+      'Qur’an verses and authentic hadith that encourage the rows on this card, grouped as on Home. Voluntary and make-up noticing — not a Ramadan fard tracker. Add one if you want to learn it and bring it into practice. This is not a sawm score, countdown, or prescription to fast.';
+  static const addPracticeFasting = '+ add reminder';
+  static String get openPracticeFastingRegister =>
+      openPracticeLearnRegister('Fasting');
+  static String get practiceFastingRegisterTitle =>
+      practiceLearnRegisterTitle('Fasting');
+  static const practiceFastingRegisterNote =
+      'Your list. Date added, source, content, row, and whether you are learning it, have learnt it, are practicing it, or it has become a habit. Select and delete if it should not stay here. This is not a fasting score.';
+  static const practiceFastingRegisterEmpty = 'No reminders in the register.';
+  static const practiceFastingConfirmDelete =
+      'Remove the selected reminders from this device? This cannot be undone.';
+  static String get practiceHajjTitle => practiceLearnTitle('Hajj');
+  static const practiceHajjNote =
+      'Qur’an verses and authentic hadith that encourage the preparation row on this card. Standing status stays in Settings. Add one if you want to learn it and bring it into practice. This is not a due-date, ability calculator, countdown, or trophy.';
+  static const addPracticeHajj = '+ add reminder';
+  static String get openPracticeHajjRegister =>
+      openPracticeLearnRegister('Hajj');
+  static String get practiceHajjRegisterTitle =>
+      practiceLearnRegisterTitle('Hajj');
+  static const practiceHajjRegisterNote =
+      'Your list. Date added, source, content, row, and whether you are learning it, have learnt it, are practicing it, or it has become a habit. Select and delete if it should not stay here. This is not a Hajj score.';
+  static const practiceHajjRegisterEmpty = 'No reminders in the register.';
+  static const practiceHajjConfirmDelete =
+      'Remove the selected reminders from this device? This cannot be undone.';
+  static String get practiceCharityTitle => practiceLearnTitle('Charity');
+  static const practiceCharityNote =
+      'Qur’an verses and authentic hadith that encourage the rows on this card, grouped as on Home. Giving and care — a smile is sadaqah. Amounts are not recorded. Add one if you want to learn it and bring it into practice. This is not a generosity score, leaderboard, or zakat calculator.';
+  static const addPracticeCharity = '+ add reminder';
+  static String get openPracticeCharityRegister =>
+      openPracticeLearnRegister('Charity');
+  static String get practiceCharityRegisterTitle =>
+      practiceLearnRegisterTitle('Charity');
+  static const practiceCharityRegisterNote =
+      'Your list. Date added, source, content, row, and whether you are learning it, have learnt it, are practicing it, or it has become a habit. Select and delete if it should not stay here. This is not a generosity score.';
+  static const practiceCharityRegisterEmpty = 'No reminders in the register.';
+  static const practiceCharityConfirmDelete =
+      'Remove the selected reminders from this device? This cannot be undone.';
   static const factorsYouNoticed = 'Factors you noticed';
   static const recordedFactors = 'Recorded factors';
   static const meaningFillsRecitation =
@@ -309,9 +670,12 @@ class Copy {
   static const recitationLockedByMeaning =
       'Recitation with Meaning is recorded as engagement today. Change that first to record Recitation as not done or unanswered.';
   static const quranStageNote =
-      'Each duration step reuses a Salah activity colour. 3–5 minutes is still a recorded sitting. Unanswered is never inferred as not engaged. Duration is not a khushu’ score, streak, or spiritual grade. Missed colours are not used here because these rows are not fard.';
+      'Each duration step reuses a Salah activity colour. 3–5 minutes is still a recorded sitting (same light green as 5–10, empty circle). Unanswered is never inferred as not engaged. Duration is not a khushu’ score, streak, or spiritual grade. Missed colours are not used here because these rows are not fard.';
+  static const quranCheckInIntroTitle = 'About these rows';
   static const quranCheckInIntro =
       'Three independent notice-rows share one duration list. Engagement is recitation, memorisation and/or revision. Understanding & reflection is meaning and/or tafsir plus pondering. Practical relevance is noticing implications or use of learnt verses — not a deed score. Unanswered is empty, not “not engaged”.';
+  static const quranCheckInFactorsIntro =
+      'Factors you noticed (optional). They are things you noticed — not causes. Skipping changes nothing.';
   static const quranJourney = 'Qur’an Journey';
   static const quranDayLevel = 'This group';
   static const quranDayActivity = 'Activity';
@@ -332,9 +696,11 @@ class Copy {
       'Aspirations are yours. They are optional. They are never scored, graded, or marked achieved or failed.';
   static const quotationCadence = 'Quotation cadence';
   static const quotationCadenceNote =
-      'Quotes rotate by calendar. Daily uses a new quote each local day. Weekly keeps one quote for the week. Hidden removes the card. They are not chosen from your records. The Home heading follows this choice.';
+      'Quotes rotate by calendar. Daily uses a new quote each local day. Weekly keeps one quote for the week. Hidden removes the card. You can step to another quote; the one you stop on stays as that day’s or week’s reflection. They are not chosen from your records. The Home heading follows this choice.';
   static const reflectionOfTheWeek = 'Reflection of the Week';
   static const reflectionOfTheDay = 'Reflection of the Day';
+  static const previousReflection = 'Previous reflection';
+  static const nextReflection = 'Next reflection';
   static const noticedThisWeek = 'Noticed This Week';
   static const noticedThisWeekNote =
       'Observation only. Not a comparison, trend, or judgment. Follows Domains and Personal mix on Home.';
@@ -342,6 +708,24 @@ class Copy {
   static const weeklyJournalNote =
       'Optional. Stored on this device. Not analysed and not scored.';
   static const viewSource = 'View source';
+  static const openReflectionSource = 'Open citation';
+  static const shareCitation = 'Share';
+  static const citationClose = 'Close';
+  static const openCitationInBrowser = 'Open in browser';
+  static const previousCitationPage = 'Previous source';
+  static const nextCitationPage = 'Next source';
+  static String citationPageIndex(int page, int of) => '$page of $of';
+  static const playRecitation = 'Play recitation';
+  static const pauseRecitation = 'Pause recitation';
+  static const recitationCouldNotStart =
+      'Recitation could not start. Open in browser to use the site’s own player.';
+  static const recitationBarNote =
+      'Plays a public recitation in this app so the sound stays clear. The page is for reading. This is not a recitation score.';
+  static const reflectionSourceNote =
+      'Opens in this app with Close and Share. If the citation names more than one source, each has its own page — use Next or Previous. For Qur’an, Play recitation uses a public audio file in this app so playback stays clear; the page is for reading. Open in browser if you want the site’s own player. Close or Back returns here. This app does not send your records. Citation only — not a ruling.';
+  static const reflectionSourceReturn = 'Close, or use Back, to return here.';
+  static const reflectionSourceCouldNotOpen =
+      'Nothing on this device could open that citation. The reference stays here.';
   static const saveQuoteToResponse = 'Save to my response';
   static const youRecordedColon = 'You recorded:';
 }

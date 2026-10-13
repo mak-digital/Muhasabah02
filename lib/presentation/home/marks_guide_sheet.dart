@@ -5,6 +5,9 @@ import '../../app/dimensions.dart';
 import '../../app/theme.dart';
 import '../../application/providers.dart';
 import '../../domain/activities.dart';
+import '../../domain/akhlaq_practices.dart';
+import '../../domain/huquq_practices.dart';
+import '../../domain/quran.dart';
 import '../../domain/copy.dart';
 import '../../domain/monitor_domain.dart';
 import '../../domain/domain_briefing.dart';
@@ -94,6 +97,40 @@ Future<void> showMarksGuide(BuildContext context) {
                       label:
                           'Friday congregational Jumu‘ah (inside Friday Dhuhr)',
                     ),
+                    if (colours) ...[
+                      const SizedBox(height: 12),
+                      Text(
+                        'Tahajjud',
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                      const SizedBox(height: 8),
+                      for (final option in ActivityCatalog.tahajjud)
+                        _row(
+                          context,
+                          kind: SalahActivityMark.kindForVoluntaryId(
+                            option.id,
+                            option.ternary ?? TernaryOutcome.unanswered,
+                          ),
+                          color: SalahActivityMark.colourForId(option.id),
+                          label: option.label,
+                        ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Ishraq',
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                      const SizedBox(height: 8),
+                      for (final option in ActivityCatalog.ishraq)
+                        _row(
+                          context,
+                          kind: SalahActivityMark.kindForVoluntaryId(
+                            option.id,
+                            option.ternary ?? TernaryOutcome.unanswered,
+                          ),
+                          color: SalahActivityMark.colourForId(option.id),
+                          label: option.label,
+                        ),
+                    ],
                     const SizedBox(height: 16),
                     Text(
                       MonitorDomain.quran.label,
@@ -119,7 +156,10 @@ Future<void> showMarksGuide(BuildContext context) {
                       for (final option in ActivityCatalog.quranEngagementDuration)
                         _row(
                           context,
-                          kind: SalahActivityMark.quranDurationKind(option.id),
+                          kind: SalahActivityMark.quranDurationKind(
+                            option.id,
+                            activityColours: true,
+                          ),
                           color: SalahActivityMark.colourForId(option.id),
                           label: option.label,
                         )
@@ -158,31 +198,57 @@ Future<void> showMarksGuide(BuildContext context) {
                     const SizedBox(height: 8),
                     DomainBriefingNote(hadithBriefing, compact: true),
                     const SizedBox(height: 8),
-                    _row(
-                      context,
-                      kind: MarkerKind.filled,
-                      label: 'Recorded engagement',
+                    Text(
+                      Copy.hadithDurationNote,
+                      style: Theme.of(context).textTheme.bodySmall,
                     ),
-                    _row(
-                      context,
-                      kind: MarkerKind.outlined,
-                      label: 'Recorded as not done',
-                    ),
-                    _row(
-                      context,
-                      kind: MarkerKind.filled,
-                      label: Copy.hadithNoticed,
-                    ),
-                    _row(
-                      context,
-                      kind: MarkerKind.outlined,
-                      label: Copy.hadithNotToday,
-                    ),
-                    _row(
-                      context,
-                      kind: MarkerKind.unanswered,
-                      label: 'Unanswered',
-                    ),
+                    const SizedBox(height: 8),
+                    if (colours) ...[
+                      for (final option in ActivityCatalog.hadithEncounterDuration)
+                        _row(
+                          context,
+                          kind: SalahActivityMark.quranDurationKind(
+                            option.id,
+                            activityColours: true,
+                          ),
+                          color: SalahActivityMark.colourForId(option.id),
+                          label: option.label,
+                        ),
+                      const SizedBox(height: 8),
+                      for (final option in ActivityCatalog.hadithLivedNoticed)
+                        _row(
+                          context,
+                          kind: SalahActivityMark.kindForHadithLived(option.id),
+                          color: SalahActivityMark.colourForId(option.id),
+                          label: option.label,
+                        ),
+                    ] else ...[
+                      _row(
+                        context,
+                        kind: MarkerKind.filled,
+                        label: 'Recorded sitting (duration)',
+                      ),
+                      _row(
+                        context,
+                        kind: MarkerKind.outlined,
+                        label: 'I did not notice this today',
+                      ),
+                      _row(
+                        context,
+                        kind: MarkerKind.filled,
+                        label: 'Started / introduced / corrected / observed',
+                      ),
+                      _row(
+                        context,
+                        kind: MarkerKind.outlined,
+                        label: 'Recorded as not engaged',
+                      ),
+                      _row(
+                        context,
+                        kind: MarkerKind.unanswered,
+                        label: 'Unanswered',
+                      ),
+                    ],
                     const SizedBox(height: 16),
                     Text(
                       MonitorDomain.dhikr.label,
@@ -199,21 +265,36 @@ Future<void> showMarksGuide(BuildContext context) {
                       ),
                     ],
                     const SizedBox(height: 8),
-                    _row(
-                      context,
-                      kind: MarkerKind.filled,
-                      label: 'Recorded engagement',
+                    Text(
+                      Copy.dhikrPostFardNote,
+                      style: Theme.of(context).textTheme.bodySmall,
                     ),
-                    _row(
-                      context,
-                      kind: MarkerKind.outlined,
-                      label: 'Recorded as not done',
-                    ),
-                    _row(
-                      context,
-                      kind: MarkerKind.unanswered,
-                      label: 'Unanswered',
-                    ),
+                    const SizedBox(height: 8),
+                    if (colours)
+                      for (final option in ActivityCatalog.dhikrPostFard)
+                        _row(
+                          context,
+                          kind: SalahActivityMark.kindForHadithLived(option.id),
+                          color: SalahActivityMark.colourForId(option.id),
+                          label: option.label,
+                        )
+                    else ...[
+                      _row(
+                        context,
+                        kind: MarkerKind.filled,
+                        label: 'Recorded remembrance',
+                      ),
+                      _row(
+                        context,
+                        kind: MarkerKind.outlined,
+                        label: 'Not today',
+                      ),
+                      _row(
+                        context,
+                        kind: MarkerKind.unanswered,
+                        label: 'Unanswered',
+                      ),
+                    ],
                     const SizedBox(height: 16),
                     Text(
                       MonitorDomain.akhlaq.label,
@@ -232,21 +313,36 @@ Future<void> showMarksGuide(BuildContext context) {
                     const SizedBox(height: 8),
                     DomainBriefingNote(akhlaqBriefing, compact: true),
                     const SizedBox(height: 8),
-                    _row(
-                      context,
-                      kind: MarkerKind.filled,
-                      label: Copy.akhlaqNoticed,
+                    Text(
+                      Copy.akhlaqCheckInNote,
+                      style: Theme.of(context).textTheme.bodySmall,
                     ),
-                    _row(
-                      context,
-                      kind: MarkerKind.outlined,
-                      label: Copy.akhlaqNotToday,
-                    ),
-                    _row(
-                      context,
-                      kind: MarkerKind.unanswered,
-                      label: 'Unanswered',
-                    ),
+                    const SizedBox(height: 8),
+                    if (colours)
+                      for (final option in akhlaqLegendCatalog)
+                        _row(
+                          context,
+                          kind: SalahActivityMark.kindForAkhlaq(option.id),
+                          color: SalahActivityMark.colourForId(option.id),
+                          label: option.label,
+                        )
+                    else ...[
+                      _row(
+                        context,
+                        kind: MarkerKind.filled,
+                        label: Copy.akhlaqNoticed,
+                      ),
+                      _row(
+                        context,
+                        kind: MarkerKind.outlined,
+                        label: Copy.akhlaqNotToday,
+                      ),
+                      _row(
+                        context,
+                        kind: MarkerKind.unanswered,
+                        label: 'Unanswered',
+                      ),
+                    ],
                     const SizedBox(height: 16),
                     Text(
                       MonitorDomain.huquq.label,
@@ -265,21 +361,36 @@ Future<void> showMarksGuide(BuildContext context) {
                     const SizedBox(height: 8),
                     DomainBriefingNote(huquqBriefing, compact: true),
                     const SizedBox(height: 8),
-                    _row(
-                      context,
-                      kind: MarkerKind.filled,
-                      label: Copy.huquqAttended,
+                    Text(
+                      Copy.huquqCheckInNote,
+                      style: Theme.of(context).textTheme.bodySmall,
                     ),
-                    _row(
-                      context,
-                      kind: MarkerKind.outlined,
-                      label: Copy.huquqNeglected,
-                    ),
-                    _row(
-                      context,
-                      kind: MarkerKind.unanswered,
-                      label: 'Unanswered',
-                    ),
+                    const SizedBox(height: 8),
+                    if (colours)
+                      for (final option in huquqLegendCatalog)
+                        _row(
+                          context,
+                          kind: SalahActivityMark.kindForAkhlaq(option.id),
+                          color: SalahActivityMark.colourForId(option.id),
+                          label: option.label,
+                        )
+                    else ...[
+                      _row(
+                        context,
+                        kind: MarkerKind.filled,
+                        label: Copy.huquqAttended,
+                      ),
+                      _row(
+                        context,
+                        kind: MarkerKind.outlined,
+                        label: Copy.huquqNeglected,
+                      ),
+                      _row(
+                        context,
+                        kind: MarkerKind.unanswered,
+                        label: 'Unanswered',
+                      ),
+                    ],
                     const SizedBox(height: 16),
                     Text(
                       MonitorDomain.knowledge.label,

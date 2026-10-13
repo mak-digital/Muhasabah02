@@ -26,4 +26,23 @@ void main() {
       FactorGroups.distracting,
     );
   });
+
+  test('post-fard dhikr shows attentiveness after any recorded choice', () {
+    expect(
+      factorGroupsForHomeTrace('dhikr.postFardFajr', TernaryOutcome.unanswered),
+      FactorGroups.none,
+    );
+    expect(
+      factorGroupsForHomeTrace('dhikr.postFardFajr', TernaryOutcome.positive),
+      FactorGroups.helping,
+    );
+    expect(
+      factorGroupsForHomeTrace('dhikr.postFardFajr', TernaryOutcome.negative),
+      FactorGroups.helping,
+    );
+    expect(
+      factorGroupsForHomeTrace('dhikr.morningAdhkar', TernaryOutcome.negative),
+      FactorGroups.distracting,
+    );
+  });
 }

@@ -81,17 +81,20 @@ void main() {
     await tester.tap(find.byKey(const Key('review-domain-hadith')));
     await tester.pumpAndSettle();
 
-    expect(find.text('ENCOUNTER'), findsOneWidget);
-    expect(find.text('Reading'), findsOneWidget);
-    expect(find.text('Listening'), findsOneWidget);
-    expect(find.text('RETENTION'), findsOneWidget);
-    expect(find.text('Memorisation'), findsOneWidget);
-    expect(find.text('Revision'), findsOneWidget);
-    expect(find.text('LEARNING'), findsOneWidget);
-    expect(find.text('Study Circle'), findsOneWidget);
-    expect(find.text('Teaching / Discussion'), findsOneWidget);
-    expect(find.text('Hadith Reflection'), findsOneWidget);
-    expect(find.text('Noticed a sunnah in how I lived today'), findsOneWidget);
+    expect(find.text('ENGAGED WITH HADITH'), findsOneWidget);
+    expect(find.text('Read and/or Listened'), findsWidgets);
+    expect(find.text('ENCOUNTER'), findsNothing);
+    expect(find.text('Encounter'), findsNothing);
+    expect(find.text('Reading'), findsNothing);
+    expect(find.text('Listening'), findsNothing);
+    expect(find.text('RETENTION'), findsNothing);
+    expect(find.text('Memorization/Revision'), findsWidgets);
+    expect(find.text('LEARNING'), findsNothing);
+    expect(find.text('Study Circle/Discussion'), findsWidgets);
+    expect(find.text('LIVED / NOTICED'), findsNothing);
+    expect(find.text('Lived /Noticed others'), findsWidgets);
+    expect(find.text('Hadith Reflection'), findsNothing);
+    expect(find.text('Noticed a sunnah in how I lived today'), findsNothing);
     expect(find.text('Read'), findsNothing);
     expect(find.text('Listen'), findsNothing);
     expect(find.text('Memorise'), findsNothing);
@@ -100,7 +103,7 @@ void main() {
 
     await tester.tap(find.text('30 days'));
     await tester.pumpAndSettle();
-    expect(find.text('Reading'), findsOneWidget);
+    expect(find.text('Read and/or Listened'), findsWidgets);
     expect(find.text('Read'), findsNothing);
   });
 
@@ -142,7 +145,7 @@ void main() {
     await tester.tap(find.text('30 days'));
     await tester.pumpAndSettle();
     expect(find.text('Patience'), findsOneWidget);
-    expect(find.text('Virtues I noticed'), findsWidgets);
+    expect(find.text('VIRTUES I NOTICED'), findsWidgets);
     expect(find.text('Truth'), findsNothing);
     expect(find.text('Thanks'), findsNothing);
   });
@@ -194,7 +197,7 @@ void main() {
     await tester.tap(find.text('30 days'));
     await tester.pumpAndSettle();
     expect(find.text('Parents'), findsOneWidget);
-    expect(find.text('Household'), findsWidgets);
+    expect(find.text('HOUSEHOLD'), findsWidgets);
     expect(find.text('Relatives'), findsNothing);
     expect(find.text('Sulh'), findsNothing);
   });
@@ -246,7 +249,7 @@ void main() {
     await tester.tap(find.text('30 days'));
     await tester.pumpAndSettle();
     expect(find.text('Learned something true'), findsOneWidget);
-    expect(find.text('Seeking truth'), findsWidgets);
+    expect(find.text('SEEKING TRUTH'), findsWidgets);
     expect(find.text('Learned'), findsNothing);
     expect(find.text('Created'), findsNothing);
   });
@@ -278,12 +281,12 @@ void main() {
 
     await openProgress(const Key('review-domain-time'));
     expect(find.text(_homeWeekRange), findsOneWidget);
-    expect(find.text('Present in what I was doing'), findsOneWidget);
-    expect(find.text('Did something I had delayed'), findsOneWidget);
-    expect(find.text('Began with intention'), findsOneWidget);
-    expect(find.text('Present'), findsNothing);
-    expect(find.text('Delayed'), findsNothing);
+    expect(find.text('Began with a worthwhile intention'), findsOneWidget);
+    expect(find.text('Put aside a digital distraction'), findsOneWidget);
+    expect(find.text('Took needed rest'), findsOneWidget);
+    expect(find.text('Present in what I was doing'), findsNothing);
     expect(find.text('Intention'), findsNothing);
+    expect(find.text('Digital'), findsNothing);
     await tester.pageBack();
     await tester.pumpAndSettle();
 
@@ -344,14 +347,14 @@ void main() {
     await tester.tap(find.byKey(const Key('review-domain-salah')));
     await tester.pumpAndSettle();
 
-    expect(find.text('Obligatory Salah'), findsOneWidget);
+    expect(find.text('OBLIGATORY SALAH'), findsOneWidget);
     expect(find.text('Fajr'), findsOneWidget);
     expect(find.text('Isha'), findsOneWidget);
     expect(find.text('Faj'), findsNothing);
     expect(find.text('Isa'), findsNothing);
-    expect(find.text('Friday Prayer'), findsOneWidget);
+    expect(find.text('FRIDAY PRAYER'), findsOneWidget);
     expect(find.text('Jumu‘ah'), findsOneWidget);
-    expect(find.text('Voluntary Prayers'), findsOneWidget);
+    expect(find.text('VOLUNTARY PRAYERS'), findsOneWidget);
     expect(find.text('Tahajjud'), findsOneWidget);
     expect(find.text('Ishraq'), findsOneWidget);
     expect(find.text('(for the week starting on 31 Aug 2026)'), findsWidgets);
@@ -363,8 +366,8 @@ void main() {
     expect(find.text('Jumu‘ah'), findsOneWidget);
     expect(find.text('Tahajjud'), findsOneWidget);
     expect(find.text('Ishraq'), findsOneWidget);
-    expect(find.text('Friday Prayer'), findsOneWidget);
-    expect(find.text('Voluntary Prayers'), findsNWidgets(2));
+    expect(find.text('FRIDAY PRAYER'), findsOneWidget);
+    expect(find.text('VOLUNTARY PRAYERS'), findsNWidgets(2));
   });
 
   testWidgets('Qur’an 7-day Progress uses Home item rows', (tester) async {
@@ -383,6 +386,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text(Copy.quranJourney), findsNothing);
+    expect(find.text('ENGAGEMENT WITH QUR’AN'), findsWidgets);
+    expect(find.text('UNDERSTANDING & REFLECTION'), findsNothing);
+    expect(find.text('PRACTICAL RELEVANCE'), findsNothing);
     expect(find.text('Practical relevance'), findsWidgets);
     expect(find.text('Understanding & reflection'), findsWidgets);
     expect(find.text('Engagement'), findsWidgets);
@@ -396,14 +402,14 @@ void main() {
 
     await tester.tap(find.text('30 days'));
     await tester.pumpAndSettle();
-    expect(find.text('Engagement'), findsWidgets);
+    expect(find.text('ENGAGEMENT'), findsWidgets);
     expect(
       find.text('Recitation, memorisation and/or revision sitting'),
       findsOneWidget,
     );
     expect(find.text('Meaning and/or tafsir plus pondering'), findsOneWidget);
     expect(find.text('Recitation with Meaning'), findsNothing);
-    expect(find.text('Practical relevance'), findsOneWidget);
+    expect(find.text('PRACTICAL RELEVANCE'), findsOneWidget);
     expect(
       find.text('Noticed implications or use of learnt verses'),
       findsOneWidget,
@@ -447,7 +453,9 @@ void main() {
     await tester.tap(find.byKey(const Key('review-domain-quran')));
     await tester.pumpAndSettle();
     await tester.tap(
-      find.byKey(const Key('progress-cell-quran-consciousApplication-2026-09-06')),
+      find.byKey(
+        const Key('progress-cell-quran-consciousApplication-2026-09-06'),
+      ),
     );
     await tester.pumpAndSettle();
     expect(find.byType(CheckInScreen), findsOneWidget);

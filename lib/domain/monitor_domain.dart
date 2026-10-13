@@ -118,6 +118,25 @@ extension MonitorDomainX on MonitorDomain {
     MonitorDomain.charity => 'Charity',
   };
 
+  /// Every shown domain Home lists actions and notes. Learn & Practice catalogs
+  /// sit on Salah through Charity.
+  bool get showsHomeActionFollowOn => switch (this) {
+    MonitorDomain.salah ||
+    MonitorDomain.quran ||
+    MonitorDomain.hadith ||
+    MonitorDomain.dhikr ||
+    MonitorDomain.akhlaq ||
+    MonitorDomain.huquq ||
+    MonitorDomain.knowledge ||
+    MonitorDomain.time ||
+    MonitorDomain.health ||
+    MonitorDomain.wealth ||
+    MonitorDomain.ummah ||
+    MonitorDomain.fasting ||
+    MonitorDomain.hajj ||
+    MonitorDomain.charity => true,
+  };
+
   /// Orientation only. Not a scored field and not a spiritual grade.
   String? get focusQuestion => switch (this) {
     MonitorDomain.salah => 'Was my heart present when I stood before Allah?',

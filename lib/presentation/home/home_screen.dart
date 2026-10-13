@@ -27,6 +27,7 @@ import 'optional_domain_home_card.dart';
 import 'quran_home_card.dart';
 import 'reflection_home_cards.dart';
 import 'salah_home_card.dart';
+import 'salah_home_follow_on.dart';
 import 'today_overview.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -105,27 +106,9 @@ class HomeScreen extends ConsumerWidget {
           return ListView(
             primary: false,
             physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.all(16),
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
             children: [
-              if (records.any((record) => record.synthetic))
-                Material(
-                  color: MuhasabahColors.wash(
-                    MuhasabahColors.sampleBannerWash,
-                    MuhasabahColors.sampleBannerWashDark,
-                    Theme.of(context).brightness,
-                  ),
-                  borderRadius: BorderRadius.circular(12),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 10,
-                    ),
-                    child: Text(
-                      Copy.sampleDataNotice,
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ),
-                ),
               if (offerArchive) ...[
                 const SizedBox(height: 8),
                 Card(
@@ -218,6 +201,27 @@ class HomeScreen extends ConsumerWidget {
         ),
       ),
       if (homeDomains.isNotEmpty) const SizedBox(height: 10),
+      ..._followOn(context, ref: ref, homeDomains: homeDomains, open: open),
+    ];
+  }
+
+  List<Widget> _followOn(
+    BuildContext context, {
+    required WidgetRef ref,
+    required List<MonitorDomain> homeDomains,
+    required void Function(Widget page) open,
+  }) {
+    if (homeDomains.isNotEmpty) {
+      final shown =
+          homeDomains[homeDomainStageIndex(
+            homeDomains,
+            ref.watch(homeDomainStageProvider),
+          )];
+      if (shown.showsHomeActionFollowOn) {
+        return [DomainHomeFollowOn(domain: shown)];
+      }
+    }
+    return [
       const WeeklyJournalCard(),
       const SizedBox(height: 10),
       FilledButton(
@@ -267,7 +271,6 @@ class HomeScreen extends ConsumerWidget {
           washLight: MuhasabahColors.hadithWash,
           washDark: MuhasabahColors.hadithWashDark,
           family: MuhasabahColors.hadithFamily,
-          includeHadithFocus: true,
           compactWeek: useCompact,
           itemRowsOn7Days: true,
         );

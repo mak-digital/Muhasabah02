@@ -1,0 +1,472 @@
+import 'monitor_domain.dart';
+import 'practice_dhikr_catalog.dart';
+import 'practice_hadith.dart';
+
+const kHealthGroupSleep = 'Sleep';
+const kHealthGroupStrength = 'Strength';
+const kHealthGroupSustenance = 'Sustenance';
+const kHealthGroupIllness = 'Illness & harm';
+
+const kPracticeHealthGroups = [
+  kHealthGroupSleep,
+  kHealthGroupStrength,
+  kHealthGroupSustenance,
+  kHealthGroupIllness,
+];
+
+/// Qur’an and authentic hadith that encourage Health Home rows.
+/// Care of the body as a trust — not fitness, calories, or a body grade.
+final List<PracticeDhikrItem> kPracticeHealthCatalog = [
+  _item(
+    id: 'hl.sleep.quality',
+    group: kHealthGroupSleep,
+    topic: 'Sleep quality',
+    text: 'Allah made sleep a rest:',
+    arabic: 'وَجَعَلْنَا نَوْمَكُمْ سُبَاتًا',
+    transliteration: 'Wa-jaʿalnā nawmakum subātā.',
+    translation: 'And We made your sleep a rest.',
+    source: 'Qur’an 78:9',
+    detail: 'Quality you noticed, not an hour badge. Not Time & Barakah’s needed rest.',
+  ),
+  _item(
+    id: 'hl.sleep.quality.30_23',
+    group: kHealthGroupSleep,
+    topic: 'Sleep quality',
+    text: 'Sleep itself is named among His signs:',
+    arabic:
+        'وَمِنْ آيَاتِهِ مَنَامُكُم بِاللَّيْلِ وَالنَّهَارِ وَابْتِغَاؤُكُم مِّن فَضْلِهِ',
+    transliteration:
+        'Wa-min āyātihi manāmukum bi-l-layli wa-n-nahāri wa-btighāʾukum min faḍlih.',
+    translation:
+        'And of His signs is your sleep by night and day, and your seeking of His bounty.',
+    source: 'Qur’an 30:23',
+    detail: 'A sign, not a sleep-score. Indirect to how the rest felt.',
+  ),
+  _item(
+    id: 'hl.sleep.quality.3_154',
+    group: kHealthGroupSleep,
+    topic: 'Sleep quality',
+    text: 'Slumber sent as security after distress:',
+    arabic: 'ثُمَّ أَنزَلَ عَلَيْكُم مِّن بَعْدِ الْغَمِّ أَمَنَةً نُّعَاسًا',
+    transliteration:
+        'Thumma anzala ʿalaykum min baʿdi l-ghammi amanatan nuʿāsā.',
+    translation:
+        'Then He sent down upon you, after the distress, security — a slumber.',
+    source: 'Qur’an 3:154',
+    detail: 'Indirect: calm rest as a mercy. Not a grade of how deeply you slept.',
+  ),
+  _item(
+    id: 'hl.sleep.quality.8_11',
+    group: kHealthGroupSleep,
+    topic: 'Sleep quality',
+    text: 'Slumber as security from Him:',
+    arabic: 'إِذْ يُغَشِّيكُمُ النُّعَاسَ أَمَنَةً مِّنْهُ',
+    transliteration: 'Idh yughashshīkumu n-nuʿāsa amanatan minhu.',
+    translation: 'When He covered you with slumber as security from Him.',
+    source: 'Qur’an 8:11',
+    detail: 'Indirect: rest that settles fear. Not a sleep-hygiene programme.',
+  ),
+  _item(
+    id: 'hl.sleep.quality.bukhari_6314',
+    group: kHealthGroupSleep,
+    topic: 'Sleep quality',
+    text: 'When you go to your bed, lie on your right side and say:',
+    arabic: 'بِاسْمِكَ رَبِّي وَضَعْتُ جَنْبِي، وَبِكَ أَرْفَعُهُ',
+    transliteration: 'Bismika rabbī waḍaʿtu janbī, wa-bika arfaʿuh.',
+    translation:
+        'In Your name, my Lord, I lay my side down, and by You I raise it.',
+    source: 'Ṣaḥīḥ al-Bukhārī 6314',
+    detail: 'A known bedtime wording. Adding it is a reminder, not a nightly score.',
+  ),
+  _item(
+    id: 'hl.sleep.amount',
+    group: kHealthGroupSleep,
+    topic: 'Sleep amount',
+    text: 'Night as a covering, and sleep as rest:',
+    arabic:
+        'وَهُوَ الَّذِي جَعَلَ لَكُمُ اللَّيْلَ لِبَاسًا وَالنَّوْمَ سُبَاتًا',
+    transliteration:
+        'Wa-huwa lladhī jaʿala lakumu l-layla libāsan wa-n-nawma subātā.',
+    translation:
+        'It is He who made the night a covering for you, and sleep a rest.',
+    source: 'Qur’an 25:47',
+    detail: 'Amount as an observation, not a sleep-hour score. The app does not fill this from Time.',
+  ),
+  _item(
+    id: 'hl.sleep.amount.28_73',
+    group: kHealthGroupSleep,
+    topic: 'Sleep amount',
+    text: 'Night and day made so you may rest therein:',
+    arabic:
+        'وَمِن رَّحْمَتِهِ جَعَلَ لَكُمُ اللَّيْلَ وَالنَّهَارَ لِتَسْكُنُوا فِيهِ',
+    transliteration:
+        'Wa-min raḥmatihi jaʿala lakumu l-layla wa-n-nahāra li-taskunū fīh.',
+    translation:
+        'And of His mercy He made for you the night and the day, that you may rest therein.',
+    source: 'Qur’an 28:73',
+    detail: 'Indirect: rest has a share of the day. Not a timetable.',
+  ),
+  _item(
+    id: 'hl.sleep.amount.40_61',
+    group: kHealthGroupSleep,
+    topic: 'Sleep amount',
+    text: 'The night made so you may rest in it:',
+    arabic: 'اللَّهُ الَّذِي جَعَلَ لَكُمُ اللَّيْلَ لِتَسْكُنُوا فِيهِ',
+    transliteration: 'Allāhu lladhī jaʿala lakumu l-layla li-taskunū fīh.',
+    translation: 'Allah is He who made for you the night that you may rest therein.',
+    source: 'Qur’an 40:61',
+    detail: 'Rest in the night, not an hour badge.',
+  ),
+  _item(
+    id: 'hl.sleep.amount.10_67',
+    group: kHealthGroupSleep,
+    topic: 'Sleep amount',
+    text: 'Night for rest, day for seeing:',
+    arabic:
+        'هُوَ الَّذِي جَعَلَ لَكُمُ اللَّيْلَ لِتَسْكُنُوا فِيهِ وَالنَّهَارَ مُبْصِرًا',
+    transliteration:
+        'Huwa lladhī jaʿala lakumu l-layla li-taskunū fīhi wa-n-nahāra mubṣirā.',
+    translation:
+        'He is the One who made the night for you to rest in, and the day sight-giving.',
+    source: 'Qur’an 10:67',
+    detail: 'Indirect balance of rest and work. Not Time & Barakah’s needed rest row.',
+  ),
+  _item(
+    id: 'hl.sleep.amount.bukhari_1975',
+    group: kHealthGroupSleep,
+    topic: 'Sleep amount',
+    text: 'The Messenger of Allah ﷺ said:',
+    arabic: 'إِنَّ لِجَسَدِكَ عَلَيْكَ حَقًّا',
+    transliteration: 'Inna li-jasadika ʿalayka ḥaqqā.',
+    translation: 'Your body has a right over you.',
+    source: 'Ṣaḥīḥ al-Bukhārī 1975',
+    detail: 'A right of rest, not a sleep-hour target or a failing of the body.',
+  ),
+  _item(
+    id: 'hl.strength.movement',
+    group: kHealthGroupStrength,
+    topic: 'Movement for worship and service',
+    text: 'The Messenger of Allah ﷺ said:',
+    arabic: 'الْمُؤْمِنُ الْقَوِيُّ خَيْرٌ وَأَحَبُّ إِلَى اللَّهِ مِنَ الْمُؤْمِنِ الضَّعِيفِ',
+    transliteration: 'Al-muʾminu l-qawiyyu khayrun wa-aḥabbu ilā llāhi mina l-muʾmini ḍ-ḍaʿīf.',
+    translation: 'The strong believer is better and more beloved to Allah than the weak believer.',
+    source: 'Ṣaḥīḥ Muslim 2664',
+    detail: 'Strength to worship and serve, not aesthetics or “gains”. Illness is not a failing.',
+  ),
+  _item(
+    id: 'hl.strength.movement.22_77',
+    group: kHealthGroupStrength,
+    topic: 'Movement for worship and service',
+    text: 'Bow, prostrate, worship, and do good:',
+    arabic:
+        'يَا أَيُّهَا الَّذِينَ آمَنُوا ارْكَعُوا وَاسْجُدُوا وَاعْبُدُوا رَبَّكُمْ وَافْعَلُوا الْخَيْرَ',
+    transliteration:
+        'Yā ayyuhā lladhīna āmanū rkaʿū wa-sjudū wa-ʿbudū rabbakum wa-fʿalū l-khayr.',
+    translation:
+        'O you who believe, bow and prostrate and worship your Lord, and do good.',
+    source: 'Qur’an 22:77',
+    detail: 'Movement in worship and service. Not a gym score.',
+  ),
+  _item(
+    id: 'hl.strength.movement.bukhari_662',
+    group: kHealthGroupStrength,
+    topic: 'Movement for worship and service',
+    text: 'The Messenger of Allah ﷺ said:',
+    arabic:
+        'مَنْ غَدَا إِلَى الْمَسْجِدِ أَوْ رَاحَ، أَعَدَّ اللَّهُ لَهُ نُزُلَهُ مِنَ الْجَنَّةِ كُلَّمَا غَدَا أَوْ رَاحَ',
+    transliteration:
+        'Man ghadā ilā l-masjidi aw rāḥa, aʿadda Allāhu lahu nuzulahu mina l-jannati kullamā ghadā aw rāḥ.',
+    translation:
+        'Whoever goes to the mosque in the morning or the evening, Allah prepares for him a lodging in Paradise whenever he goes.',
+    source: 'Ṣaḥīḥ al-Bukhārī 662',
+    detail: 'Indirect: walking as worship. Not a step-count.',
+  ),
+  _item(
+    id: 'hl.strength.movement.2_148',
+    group: kHealthGroupStrength,
+    topic: 'Movement for worship and service',
+    text: 'Race toward good works:',
+    arabic: 'فَاسْتَبِقُوا الْخَيْرَاتِ',
+    transliteration: 'Fa-stabiqū l-khayrāt.',
+    translation: 'So race toward good works.',
+    source: 'Qur’an 2:148',
+    detail: 'Indirect: going toward good. Not a performance rank.',
+  ),
+  _item(
+    id: 'hl.strength.energy',
+    group: kHealthGroupStrength,
+    topic: 'Energy for ibadah',
+    text: 'Pray according to what you can:',
+    arabic: 'صَلِّ قَائِمًا، فَإِنْ لَمْ تَسْتَطِعْ فَقَاعِدًا، فَإِنْ لَمْ تَسْتَطِعْ فَعَلَى جَنْبٍ',
+    transliteration: 'Ṣalli qāʾiman, fa-in lam tastaṭiʿ fa-qāʿidan, fa-in lam tastaṭiʿ fa-ʿalā janb.',
+    translation: 'Pray standing; if you cannot, then sitting; if you cannot, then on your side.',
+    source: 'Ṣaḥīḥ al-Bukhārī 1117',
+    detail: 'Whether the body supported worship today. Sitting or lying is not a spiritual rank.',
+  ),
+  _item(
+    id: 'hl.strength.energy.2_286',
+    group: kHealthGroupStrength,
+    topic: 'Energy for ibadah',
+    text: 'Allah does not burden a soul beyond its capacity:',
+    arabic: 'لَا يُكَلِّفُ اللَّهُ نَفْسًا إِلَّا وُسْعَهَا',
+    transliteration: 'Lā yukallifu Allāhu nafsan illā wusʿahā.',
+    translation: 'Allah does not charge a soul except within its capacity.',
+    source: 'Qur’an 2:286',
+    detail: 'Capacity, not a failing of the body. Illness is not a rank.',
+  ),
+  _item(
+    id: 'hl.strength.energy.bukhari_6463',
+    group: kHealthGroupStrength,
+    topic: 'Energy for ibadah',
+    text: 'The Messenger of Allah ﷺ said:',
+    arabic:
+        'أَحَبُّ الْأَعْمَالِ إِلَى اللَّهِ أَدْوَمُهَا وَإِنْ قَلَّ',
+    transliteration: 'Aḥabbu l-aʿmāli ilā Allāhi adwamuhā wa-in qall.',
+    translation:
+        'The most beloved of deeds to Allah are the most regular, even if they are few.',
+    source: 'Ṣaḥīḥ al-Bukhārī 6465',
+    detail: 'Steady capacity, not a burst of energy as a score.',
+  ),
+  _item(
+    id: 'hl.strength.energy.64_16',
+    group: kHealthGroupStrength,
+    topic: 'Energy for ibadah',
+    text: 'Be mindful of Allah as much as you are able:',
+    arabic: 'فَاتَّقُوا اللَّهَ مَا اسْتَطَعْتُمْ',
+    transliteration: 'Fa-ttaqū Allāha mā staṭaʿtum.',
+    translation: 'So be mindful of Allah as much as you are able.',
+    source: 'Qur’an 64:16',
+    detail: 'What you were able to give today. Not a khushu’ grade.',
+  ),
+  _item(
+    id: 'hl.sustenance.nutrition',
+    group: kHealthGroupSustenance,
+    topic: 'Nutrition',
+    text: 'Eat of what is lawful and good:',
+    arabic:
+        'يَا أَيُّهَا النَّاسُ كُلُوا مِمَّا فِي الْأَرْضِ حَلَالًا طَيِّبًا',
+    transliteration: 'Yā ayyuhā n-nāsu kulū mimmā fī l-arḍi ḥalālan ṭayyibā.',
+    translation: 'O people, eat of what is on the earth lawful and good.',
+    source: 'Qur’an 2:168',
+    detail: 'Halal, healthy, and in moderation. Not calorie counting, weight, or a diet grade.',
+  ),
+  _item(
+    id: 'hl.sustenance.nutrition.7_31',
+    group: kHealthGroupSustenance,
+    topic: 'Nutrition',
+    text: 'Eat and drink, and do not waste:',
+    arabic: 'وَكُلُوا وَاشْرَبُوا وَلَا تُسْرِفُوا',
+    transliteration: 'Wa-kulū wa-shrabū wa-lā tusrifū.',
+    translation: 'And eat and drink, and do not be wasteful.',
+    source: 'Qur’an 7:31',
+    detail: 'Moderation, not calorie counting or a body grade.',
+  ),
+  _item(
+    id: 'hl.sustenance.nutrition.5_88',
+    group: kHealthGroupSustenance,
+    topic: 'Nutrition',
+    text: 'Eat of the lawful and good He has provided:',
+    arabic: 'وَكُلُوا مِمَّا رَزَقَكُمُ اللَّهُ حَلَالًا طَيِّبًا',
+    transliteration: 'Wa-kulū mimmā razaqakumu Allāhu ḥalālan ṭayyibā.',
+    translation: 'And eat of what Allah has provided you, lawful and good.',
+    source: 'Qur’an 5:88',
+    detail: 'Halal and good provision. Not a diet programme.',
+  ),
+  _item(
+    id: 'hl.sustenance.nutrition.tirmidhi_2380',
+    group: kHealthGroupSustenance,
+    topic: 'Nutrition',
+    text: 'The Messenger of Allah ﷺ said:',
+    arabic:
+        'مَا مَلَأَ آدَمِيٌّ وِعَاءً شَرًّا مِنْ بَطْنٍ',
+    transliteration: 'Mā malaʾa ādamiyyun wiʿāʾan sharran min baṭn.',
+    translation: 'A human being does not fill any vessel worse than the stomach.',
+    source: 'Sunan al-Tirmidhī 2380',
+    detail: 'Enough to stand, not a weight or calorie log.',
+  ),
+  _item(
+    id: 'hl.sustenance.hydration',
+    group: kHealthGroupSustenance,
+    topic: 'Hydration',
+    text: 'Every living thing is from water:',
+    arabic: 'وَجَعَلْنَا مِنَ الْمَاءِ كُلَّ شَيْءٍ حَيٍّ',
+    transliteration: 'Wa-jaʿalnā mina l-māʾi kulla shayʾin ḥayy.',
+    translation: 'And We made from water every living thing.',
+    source: 'Qur’an 21:30',
+    detail: 'Simple hydration you noticed. Not an obsessive intake log.',
+  ),
+  _item(
+    id: 'hl.sustenance.hydration.16_10',
+    group: kHealthGroupSustenance,
+    topic: 'Hydration',
+    text: 'Water from the sky for you to drink:',
+    arabic:
+        'هُوَ الَّذِي أَنزَلَ مِنَ السَّمَاءِ مَاءً لَّكُم مِّنْهُ شَرَابٌ',
+    transliteration:
+        'Huwa lladhī anzala mina s-samāʾi māʾan lakum minhu sharāb.',
+    translation:
+        'It is He who sent down from the sky water; from it you have drink.',
+    source: 'Qur’an 16:10',
+    detail: 'A drink you noticed. Not an intake target.',
+  ),
+  _item(
+    id: 'hl.sustenance.hydration.23_18',
+    group: kHealthGroupSustenance,
+    topic: 'Hydration',
+    text: 'Water sent down in measure:',
+    arabic: 'وَأَنزَلْنَا مِنَ السَّمَاءِ مَاءً بِقَدَرٍ',
+    transliteration: 'Wa-anzalnā mina s-samāʾi māʾan bi-qadar.',
+    translation: 'And We sent down from the sky water in measure.',
+    source: 'Qur’an 23:18',
+    detail: 'Indirect: enough, not excess. Not an obsessive log.',
+  ),
+  _item(
+    id: 'hl.sustenance.hydration.56_68',
+    group: kHealthGroupSustenance,
+    topic: 'Hydration',
+    text: 'Have you seen the water you drink:',
+    arabic: 'أَفَرَأَيْتُمُ الْمَاءَ الَّذِي تَشْرَبُونَ',
+    transliteration: 'A-fa-raʾaytumu l-māʾa lladhī tashrabūn.',
+    translation: 'Have you seen the water that you drink?',
+    source: 'Qur’an 56:68',
+    detail: 'Noticing a drink. Not a hydration score.',
+  ),
+  _item(
+    id: 'hl.illness.care',
+    group: kHealthGroupIllness,
+    topic: 'Sought care in illness',
+    text: 'The Messenger of Allah ﷺ said:',
+    arabic: 'تَدَاوَوْا، فَإِنَّ اللَّهَ عَزَّ وَجَلَّ لَمْ يَضَعْ دَاءً إِلَّا وَضَعَ لَهُ دَوَاءً',
+    transliteration: 'Tadāwaw, fa-inna Allāha ʿazza wa-jalla lam yaḍaʿ dāʾan illā waḍaʿa lahu dawāʾ.',
+    translation: 'Seek treatment, for Allah has not placed a disease without placing a remedy for it.',
+    source: 'Sunan Abī Dāwūd 3855',
+    detail: 'Seeking care, patience, or gratitude may all be care. Illness and disability are not failings.',
+  ),
+  _item(
+    id: 'hl.illness.care.26_80',
+    group: kHealthGroupIllness,
+    topic: 'Sought care in illness',
+    text: 'And when I am ill, it is He who cures me:',
+    arabic: 'وَإِذَا مَرِضْتُ فَهُوَ يَشْفِينِ',
+    transliteration: 'Wa-idhā mariḍtu fa-huwa yashfīn.',
+    translation: 'And when I am ill, it is He who heals me.',
+    source: 'Qur’an 26:80',
+    detail: 'Seeking care sits with trust. Illness is not a failing.',
+  ),
+  _item(
+    id: 'hl.illness.care.bukhari_5678',
+    group: kHealthGroupIllness,
+    topic: 'Sought care in illness',
+    text: 'The Messenger of Allah ﷺ said:',
+    arabic:
+        'مَا أَنزَلَ اللَّهُ دَاءً إِلَّا أَنزَلَ لَهُ شِفَاءً',
+    transliteration: 'Mā anzala Allāhu dāʾan illā anzala lahu shifāʾ.',
+    translation: 'Allah has not sent down a disease except that He has also sent down its cure.',
+    source: 'Ṣaḥīḥ al-Bukhārī 5678',
+    detail: 'A reason to seek care. Not a demand to be well.',
+  ),
+  _item(
+    id: 'hl.illness.care.94_6',
+    group: kHealthGroupIllness,
+    topic: 'Sought care in illness',
+    text: 'With hardship comes ease:',
+    arabic: 'إِنَّ مَعَ الْعُسْرِ يُسْرًا',
+    transliteration: 'Inna maʿa l-ʿusri yusrā.',
+    translation: 'Indeed, with hardship comes ease.',
+    source: 'Qur’an 94:6',
+    detail: 'Indirect: patience in illness. Not a recovery streak.',
+  ),
+  _item(
+    id: 'hl.illness.harm',
+    group: kHealthGroupIllness,
+    topic: 'Avoided a harm to the body',
+    text: 'Do not throw yourselves into destruction:',
+    arabic: 'وَلَا تُلْقُوا بِأَيْدِيكُمْ إِلَى التَّهْلُكَةِ',
+    transliteration: 'Wa-lā tulqū bi-aydīkum ilā t-tahlukah.',
+    translation: 'And do not throw yourselves into destruction.',
+    source: 'Qur’an 2:195',
+    detail: 'A harm you avoided. Not a safety score, and not shame of a body.',
+  ),
+  _item(
+    id: 'hl.illness.harm.4_29',
+    group: kHealthGroupIllness,
+    topic: 'Avoided a harm to the body',
+    text: 'Do not kill yourselves:',
+    arabic: 'وَلَا تَقْتُلُوا أَنفُسَكُمْ',
+    transliteration: 'Wa-lā taqtulū anfusakum.',
+    translation: 'And do not kill yourselves.',
+    source: 'Qur’an 4:29',
+    detail: 'Avoiding harm. Not shame of a body, and not a safety score.',
+  ),
+  _item(
+    id: 'hl.illness.harm.ibnmajah_2340',
+    group: kHealthGroupIllness,
+    topic: 'Avoided a harm to the body',
+    text: 'The Messenger of Allah ﷺ said:',
+    arabic: 'لَا ضَرَرَ وَلَا ضِرَارَ',
+    transliteration: 'Lā ḍarara wa-lā ḍirār.',
+    translation: 'There should be neither harming nor reciprocating harm.',
+    source: 'Sunan Ibn Mājah 2340',
+    detail: 'A harm you avoided. Not a guilt mark.',
+  ),
+  _item(
+    id: 'hl.illness.harm.5_90',
+    group: kHealthGroupIllness,
+    topic: 'Avoided a harm to the body',
+    text: 'Intoxicants and gambling are defilement:',
+    arabic:
+        'إِنَّمَا الْخَمْرُ وَالْمَيْسِرُ وَالْأَنصَابُ وَالْأَزْلَامُ رِجْسٌ مِّنْ عَمَلِ الشَّيْطَانِ فَاجْتَنِبُوهُ',
+    transliteration:
+        'Innamā l-khamru wa-l-maysiru wa-l-anṣābu wa-l-azlāmu rijsun min ʿamali sh-shayṭāni fa-jtanibūh.',
+    translation:
+        'Intoxicants, gambling, stone altars, and divining arrows are defilement from the work of Satan, so avoid them.',
+    source: 'Qur’an 5:90',
+    detail: 'Indirect: a harm you kept from the body. Not a public confession.',
+  ),
+];
+
+PracticeDhikrItem _item({
+  required String id,
+  required String group,
+  required String topic,
+  required String text,
+  required String arabic,
+  required String transliteration,
+  required String translation,
+  required String source,
+  required String detail,
+}) {
+  return PracticeDhikrItem(
+    id: id,
+    group: group,
+    subgroup: '',
+    topic: topic,
+    text: text,
+    arabic: arabic,
+    transliteration: transliteration,
+    translation: translation,
+    source: source,
+    sourceDetail: detail,
+  );
+}
+
+PracticeHadithRecord recordFromHealthCatalog({
+  required PracticeDhikrItem item,
+  required String id,
+  required String addedDateKey,
+}) {
+  return PracticeHadithRecord(
+    id: id,
+    catalogId: item.id,
+    addedDateKey: addedDateKey,
+    topic: item.topic,
+    content: item.text,
+    source: item.source,
+    arabic: item.arabic,
+    transliteration: item.transliteration,
+    translation: item.translation,
+    domain: MonitorDomain.health,
+    group: item.group,
+    status: PracticeHadithStatus.learning,
+  );
+}

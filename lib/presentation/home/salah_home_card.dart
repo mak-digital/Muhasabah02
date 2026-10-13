@@ -17,6 +17,7 @@ import '../checkin/check_in_screen.dart';
 import '../shared/salah_activity_mark.dart';
 import '../shared/state_marker.dart';
 import '../shared/today_mark_halo.dart';
+import '../shared/home_band_heading.dart';
 import '../shared/week_nav_strip.dart';
 
 class SalahHomeCard extends ConsumerStatefulWidget {
@@ -91,8 +92,6 @@ class _SalahHomeCardState extends ConsumerState<SalahHomeCard> {
                 onPreviousWeek: () => setState(() => _weekOffset--),
                 onNextWeek: () => setState(() => _weekOffset++),
                 nextWeekEnabled: _weekOffset < 0,
-                showCurrentWeek: _weekOffset != 0,
-                onCurrentWeek: () => setState(() => _weekOffset = 0),
                 onTitleTap: () {
                   refreshNowIfLocalDateChanged(ref);
                   openFocusedCheckIn(
@@ -105,7 +104,14 @@ class _SalahHomeCardState extends ConsumerState<SalahHomeCard> {
               const SizedBox(height: 4),
               Row(
                 children: [
-                  if (!widget.compactWeek) const SizedBox(width: 58),
+                  if (!widget.compactWeek)
+                    CurrentWeekGutter(
+                      width: 58,
+                      family: MuhasabahColors.salahFamily,
+                      cardWash: wash,
+                      enabled: _weekOffset != 0,
+                      onPressed: () => setState(() => _weekOffset = 0),
+                    ),
                   for (var col = 0; col < kCalendarWeekdayCount; col++)
                     Expanded(
                       child: Column(
@@ -114,6 +120,8 @@ class _SalahHomeCardState extends ConsumerState<SalahHomeCard> {
                             localizations.narrowWeekdays[(firstDay + col) % 7],
                             key: Key('salah-home-weekday-$col'),
                             textAlign: TextAlign.center,
+                            overflow: TextOverflow.ellipsis,
+                            textScaler: TextScaler.noScaling,
                             style: Theme.of(context).textTheme.labelSmall
                                 ?.copyWith(
                                   fontWeight: FontWeight.w600,
@@ -125,13 +133,15 @@ class _SalahHomeCardState extends ConsumerState<SalahHomeCard> {
                                           DateTime.friday
                                       ? MuhasabahColors.salahFamily
                                       : Theme.of(context)
-                                            .colorScheme
-                                            .onSurfaceVariant,
+                                          .colorScheme
+                                          .onSurfaceVariant,
                                 ),
                           ),
                           Text(
                             '${displayParts(parseDateKey(keys[col]), calendar).day}',
                             textAlign: TextAlign.center,
+                            overflow: TextOverflow.ellipsis,
+                            textScaler: TextScaler.noScaling,
                             style: Theme.of(context).textTheme.labelSmall
                                 ?.copyWith(
                                   fontWeight: FontWeight.w600,
@@ -265,23 +275,21 @@ class _SalahHomeCardState extends ConsumerState<SalahHomeCard> {
     required List<String> keys,
     required Map<String, DailyCheckIn> index,
   }) {
+    final bandWash = MuhasabahColors.wash(light, dark, brightness);
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: MuhasabahColors.wash(light, dark, brightness),
+        color: bandWash,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(6, 8, 6, 6),
+        padding: const EdgeInsets.fromLTRB(6, 6, 6, 6),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              label.toUpperCase(),
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                letterSpacing: 0.4,
-                fontWeight: FontWeight.w600,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+            HomeBandHeading(
+              band: label,
+              family: MuhasabahColors.salahFamily,
+              baseWash: bandWash,
             ),
             const SizedBox(height: 6),
             for (final row in rows) _row(row, keys, index),
@@ -363,15 +371,14 @@ class _SalahHomeCardState extends ConsumerState<SalahHomeCard> {
     late final Color color;
     late final String stateLabel;
     if (row.isVoluntary) {
-      final outcome = row == SalahTraceRow.tahajjud
-          ? (record?.tahajjud ?? TernaryOutcome.unanswered)
-          : (record?.ishraq ?? TernaryOutcome.unanswered);
-      kind = markerForRecorded(
-        recorded: outcome.isRecorded,
-        positive: outcome == TernaryOutcome.positive,
+      final mark = SalahActivityMark.forVoluntary(
+        record: record,
+        row: row,
+        activityColours: colours,
       );
-      color = MuhasabahColors.mark;
-      stateLabel = voluntarySalahLabel(outcome);
+      kind = mark.kind;
+      color = mark.color;
+      stateLabel = mark.label;
     } else {
       final mark = row == SalahTraceRow.jumuah
           ? SalahActivityMark.forJumuah(

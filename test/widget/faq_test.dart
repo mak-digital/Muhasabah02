@@ -28,7 +28,15 @@ void main() {
     expect(blob, contains('not a revival programme'));
     expect(blob, contains('failed revival'));
     expect(blob, contains('not a relapse'));
-    expect(blob, contains('resting from work as needed'));
+    expect(blob, contains('sleep stays on physical health'));
+    expect(blob, contains('physical health & energy learn & practice'));
+    expect(blob, contains('wealth & stewardship learn & practice'));
+    expect(blob, contains('ummah learn & practice'));
+    expect(blob, contains('qur’an to learn & practice'));
+    expect(blob, contains('salah & prayer quality learn & practice'));
+    expect(blob, contains('fasting learn & practice'));
+    expect(blob, contains('charity learn & practice'));
+    expect(blob, contains('hajj learn & practice'));
     expect(blob, contains('personal mix'));
     expect(blob, contains('manual baseline'));
     expect(blob, contains('not counted from check-ins'));
@@ -135,17 +143,29 @@ void main() {
       findsOneWidget,
     );
     await tester.ensureVisible(
-      find.textContaining('23. Does Hajj tell me I must go this year?'),
+      find.textContaining('23. Does Fasting score my sawm?'),
     );
     expect(
-      find.textContaining('23. Does Hajj tell me I must go this year?'),
+      find.textContaining('23. Does Fasting score my sawm?'),
+      findsOneWidget,
+    );
+    expect(
+      find.textContaining('24. Does Charity score my giving?'),
+      findsOneWidget,
+    );
+    expect(
+      find.textContaining('25. Does Dhikr & Dua score my remembrance?'),
+      findsOneWidget,
+    );
+    expect(
+      find.textContaining('26. Does Hajj tell me I must go this year?'),
       findsOneWidget,
     );
     await tester.ensureVisible(
-      find.textContaining('24. Are my records private if the phone is lost?'),
+      find.textContaining('27. Are my records private if the phone is lost?'),
     );
     expect(
-      find.textContaining('24. Are my records private if the phone is lost?'),
+      find.textContaining('27. Are my records private if the phone is lost?'),
       findsOneWidget,
     );
   });

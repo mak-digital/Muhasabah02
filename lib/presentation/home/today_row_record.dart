@@ -278,9 +278,9 @@ Future<void> _showVoluntarySalahSheet({
       return StatefulBuilder(
         builder: (context, setSheet) {
           final current = _baseRecord(ref, dateKey, record);
-          final outcome = row == SalahTraceRow.tahajjud
-              ? current.tahajjud
-              : current.ishraq;
+          final selected = current.activityFor(
+            ActivityCatalog.voluntarySalahKey(row),
+          );
           return Padding(
             padding: sheetContentPadding(context, systemBottom: systemBottom),
             child: Column(
@@ -291,22 +291,18 @@ Future<void> _showVoluntarySalahSheet({
                   '${row.label} · ${formatStoredDateKey(dateKey, ref.read(appPrefsProvider).displayCalendar)}',
                 ),
                 const SizedBox(height: 8),
-                CheckInSelect<TernaryOutcome>(
-                  dropdownKey: Key('today-salah-${row.name}'),
-                  value: outcome,
-                  sortLabels: false,
-                  entries: [
-                    for (final option in TernaryOutcome.values)
-                      CheckInSelectEntry(
-                        value: option,
-                        label: voluntarySalahLabel(option),
+                ActivityPicker(
+                  options: ActivityCatalog.forVoluntarySalah(row),
+                  selectedId: selected.id,
+                  statusKeyPrefix: 'today-salah-${row.name}',
+                  onSelected: (option) async {
+                    await _save(
+                      ref,
+                      current.withVoluntarySalahActivity(
+                        row,
+                        RecordedActivity(id: option.id),
                       ),
-                  ],
-                  onChanged: (option) async {
-                    final next = row == SalahTraceRow.tahajjud
-                        ? current.copyWith(tahajjud: option)
-                        : current.copyWith(ishraq: option);
-                    await _save(ref, next);
+                    );
                     setSheet(() {});
                   },
                 ),

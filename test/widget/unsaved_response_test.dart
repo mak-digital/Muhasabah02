@@ -360,6 +360,8 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
     await tester.pumpWidget(testApp(now: DateTime(2026, 9, 22)));
     await tester.pumpAndSettle();
+    await tester.tap(find.text(Copy.myResponse));
+    await tester.pumpAndSettle();
     await tester.ensureVisible(find.text(Copy.addAResponse).first);
     await tester.tap(find.text(Copy.addAResponse).first);
     await tester.pumpAndSettle();

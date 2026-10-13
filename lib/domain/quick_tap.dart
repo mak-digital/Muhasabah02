@@ -3,6 +3,8 @@ import 'copy.dart';
 import 'daily_check_in.dart';
 import 'home_traces.dart';
 import 'monitor_domain.dart';
+import 'huquq_practices.dart';
+import 'time_practices.dart';
 import 'other_domains.dart';
 import 'personal_mix.dart';
 import 'prayer.dart';
@@ -52,10 +54,7 @@ class QuickTapItem {
 /// Busy-day tiles for mix rows on shown domains. Hajj standing status is
 /// Settings, not a daily tap. Jumu‘ah is Friday only. Other (free text) is
 /// skipped. Unticked stays unanswered.
-List<QuickTapItem> quickTapItemsFor(
-  Set<String> mixKeys, {
-  bool friday = true,
-}) {
+List<QuickTapItem> quickTapItemsFor(Set<String> mixKeys, {bool friday = true}) {
   return [
     for (final mix in mixCatalog)
       if (mixKeys.contains(mix.id)) ?_itemForMix(mix, friday: friday),
@@ -181,24 +180,23 @@ List<QuickTapChoice> quickTapCatalog(QuickTapItem item) {
           if (!option.isOther) _fromActivity(option),
       ];
     case QuickTapKind.voluntarySalah:
-      return [
-        for (final outcome in TernaryOutcome.values)
-          QuickTapChoice(
-            id: outcome.name,
-            label: voluntarySalahLabel(outcome),
-            mark: switch (outcome) {
-              TernaryOutcome.unanswered => QuickTapMark.unanswered,
-              TernaryOutcome.positive => QuickTapMark.noticed,
-              TernaryOutcome.negative => QuickTapMark.slip,
-            },
-          ),
-      ];
+      final catalog = item.id == ActivityCatalog.tahajjudKey
+          ? ActivityCatalog.tahajjud
+          : ActivityCatalog.ishraq;
+      return [for (final option in catalog) _fromActivity(option)];
     case QuickTapKind.quran:
       return [
         for (final option in ActivityCatalog.forQuran(item.dimension!))
           if (!option.isOther) _fromActivity(option),
       ];
     case QuickTapKind.trace:
+      final catalog = ActivityCatalog.forHomeTrace(item.traceKey!);
+      if (catalog.isNotEmpty) {
+        return [
+          for (final option in catalog)
+            if (!option.isOther) _fromActivity(option),
+        ];
+      }
       return [
         for (final outcome in TernaryOutcome.values)
           QuickTapChoice(
@@ -262,11 +260,13 @@ String readQuickTapChoiceId(DailyCheckIn record, QuickTapItem item) {
     case QuickTapKind.jumuah:
       return record.jumuahActivityId;
     case QuickTapKind.voluntarySalah:
-      if (item.id == 'salah.tahajjud') return record.tahajjud.name;
-      return record.ishraq.name;
+      return record.activityFor(item.id).id;
     case QuickTapKind.quran:
       return record.activityFor(ActivityCatalog.quranKey(item.dimension!)).id;
     case QuickTapKind.trace:
+      if (ActivityCatalog.forHomeTrace(item.traceKey!).isNotEmpty) {
+        return record.activityFor(item.traceKey!).id;
+      }
       return record.homeTrace(item.traceKey!).name;
     case QuickTapKind.zakat:
       return record.zakat.name;
@@ -339,20 +339,60 @@ DailyCheckIn applyQuickTapChoice(
     case QuickTapKind.jumuah:
       return record.withJumuahActivity(RecordedActivity(id: choice.id));
     case QuickTapKind.voluntarySalah:
-      final outcome = TernaryOutcome.values.firstWhere(
-        (value) => value.name == choice.id,
-        orElse: () => TernaryOutcome.unanswered,
+      final row = item.id == ActivityCatalog.tahajjudKey
+          ? SalahTraceRow.tahajjud
+          : SalahTraceRow.ishraq;
+      return record.withVoluntarySalahActivity(
+        row,
+        RecordedActivity(id: choice.id),
       );
-      if (item.id == 'salah.tahajjud') {
-        return record.copyWith(tahajjud: outcome);
-      }
-      return record.copyWith(ishraq: outcome);
     case QuickTapKind.quran:
       return record.withQuranActivity(
         item.dimension!,
         RecordedActivity(id: choice.id),
       );
     case QuickTapKind.trace:
+      if (ActivityCatalog.forHomeTrace(item.traceKey!).isNotEmpty) {
+        if (isTimeTrace(item.traceKey!)) {
+          if (choice.id == ActivityIds.unanswered) {
+            return writeTimePractice(
+              record,
+              item.traceKey!,
+              const TimePracticeCapture(),
+            );
+          }
+          final existing = readTimePractice(record, item.traceKey!);
+          return writeTimePractice(
+            record,
+            item.traceKey!,
+            TimePracticeCapture(
+              primaryId: choice.id,
+              contextId: existing.contextId,
+              outcomeId: existing.outcomeId,
+              note: existing.note,
+            ),
+          );
+        }
+        if (isHuquqTrace(item.traceKey!)) {
+          if (choice.id == ActivityIds.unanswered) {
+            return writeHuquqFollowUp(
+              record,
+              item.traceKey!,
+              const HuquqFollowUpCapture(),
+            );
+          }
+          final existing = readHuquqFollowUp(record, item.traceKey!);
+          return writeHuquqFollowUp(
+            record,
+            item.traceKey!,
+            existing.copyWith(primaryId: choice.id),
+          );
+        }
+        return record.withHomeTraceActivity(
+          item.traceKey!,
+          RecordedActivity(id: choice.id),
+        );
+      }
       final outcome = TernaryOutcome.values.firstWhere(
         (value) => value.name == choice.id,
         orElse: () => TernaryOutcome.unanswered,
@@ -377,6 +417,7 @@ QuickTapChoice _fromActivity(ActivityOption option) {
 
 QuickTapMark _markFor(ActivityOption option) {
   if (option.isUnanswered) return QuickTapMark.unanswered;
+  if (option.id == ActivityIds.noSituation) return QuickTapMark.noticed;
   if (option.prayerStatus == PrayerStatus.missed) return QuickTapMark.slip;
   if (option.ternary == TernaryOutcome.negative) return QuickTapMark.slip;
   if (option.dhikr == DhikrStatus.didNot) return QuickTapMark.slip;

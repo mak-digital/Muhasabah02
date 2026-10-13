@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:muhasabah02/domain/copy.dart';
 import 'package:muhasabah02/domain/domain_briefing.dart';
 import 'package:muhasabah02/domain/monitor_domain.dart';
 import 'package:muhasabah02/presentation/checkin/check_in_screen.dart';
@@ -13,8 +14,9 @@ void main() {
     expect(huquqBriefing.groups.map((group) => group.title).toList(), [
       'Household',
       'Extended family',
-      'Neighbours and work',
+      'Neighbours & work',
       'The people',
+      'Repair',
       'Care in hardship',
     ]);
     expect(
@@ -25,6 +27,8 @@ void main() {
       huquqBriefing.plainText,
       contains('Safety and justice come first'),
     );
+    expect(huquqBriefing.plainText, contains('A step toward reconciliation'));
+    expect(huquqBriefing.lead.last, contains('Learn & Practice'));
     expect(briefingForDomain(MonitorDomain.huquq), same(huquqBriefing));
   });
 
@@ -42,7 +46,9 @@ void main() {
     await tester.pumpAndSettle();
     await showCheckInDomain(tester, MonitorDomain.huquq);
 
+    expect(find.text(Copy.aboutThisDomain), findsOneWidget);
     expect(find.text('Attending can look like'), findsOneWidget);
+    expect(find.text('Repair'), findsOneWidget);
     expect(
       find.text('Parents — kind speech, presence, service, dua'),
       findsOneWidget,
@@ -54,5 +60,9 @@ void main() {
       findsOneWidget,
     );
     expect(find.byType(CheckInScreen), findsOneWidget);
+
+    await tester.tap(find.text(Copy.aboutThisDomain));
+    await tester.pumpAndSettle();
+    expect(find.text('Attending can look like'), findsNothing);
   });
 }

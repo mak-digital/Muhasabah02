@@ -3,10 +3,16 @@ import 'package:flutter/material.dart';
 import 'brand_mark.dart';
 
 class WashPanel extends StatelessWidget {
-  const WashPanel({super.key, required this.color, required this.child});
+  const WashPanel({
+    super.key,
+    required this.color,
+    required this.child,
+    this.padding = const EdgeInsets.all(18),
+  });
 
   final Color color;
   final Widget child;
+  final EdgeInsetsGeometry padding;
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +20,7 @@ class WashPanel extends StatelessWidget {
       color: color,
       borderRadius: BorderRadius.circular(18),
       clipBehavior: Clip.antiAlias,
-      child: Padding(padding: const EdgeInsets.all(18), child: child),
+      child: Padding(padding: padding, child: child),
     );
   }
 }
@@ -96,6 +102,71 @@ class SectionHeader extends StatelessWidget {
                 ),
               ),
             ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Intro copy on a Home wash. Starts open; the parent collapses it after input.
+class CollapsingIntroNote extends StatelessWidget {
+  const CollapsingIntroNote({
+    super.key,
+    required this.title,
+    required this.note,
+    required this.expanded,
+    required this.onExpansionChanged,
+  });
+
+  final String title;
+  final String note;
+  final bool expanded;
+  final ValueChanged<bool> onExpansionChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return CollapsingNoteTile(
+      title: title,
+      expanded: expanded,
+      onExpansionChanged: onExpansionChanged,
+      child: Text(note, style: Theme.of(context).textTheme.bodySmall),
+    );
+  }
+}
+
+class CollapsingNoteTile extends StatelessWidget {
+  const CollapsingNoteTile({
+    super.key,
+    required this.title,
+    required this.expanded,
+    required this.onExpansionChanged,
+    required this.child,
+  });
+
+  final String title;
+  final bool expanded;
+  final ValueChanged<bool> onExpansionChanged;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Theme(
+      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+      child: ExpansionTile(
+        key: ValueKey<bool>(expanded),
+        initiallyExpanded: expanded,
+        dense: true,
+        visualDensity: VisualDensity.compact,
+        tilePadding: EdgeInsets.zero,
+        childrenPadding: const EdgeInsets.only(bottom: 4),
+        onExpansionChanged: onExpansionChanged,
+        title: Text(
+          title,
+          style: Theme.of(context).textTheme.labelSmall
+              ?.copyWith(fontWeight: FontWeight.w700, letterSpacing: 0.3),
+        ),
+        children: [
+          Align(alignment: Alignment.centerLeft, child: child),
         ],
       ),
     );

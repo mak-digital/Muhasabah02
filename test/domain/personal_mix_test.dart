@@ -91,6 +91,9 @@ void main() {
     expect(kWorshipMixKeys.contains('dhikr.postFardFajr'), isTrue);
     expect(kWorshipMixKeys.contains(kHajjMixKey), isTrue);
     expect(kWorshipMixKeys.contains(kHajjPreparationKey), isTrue);
+    expect(kWorshipMixKeys.contains(hadithEncounterKey), isTrue);
+    expect(kWorshipMixKeys.contains(hadithLivedNoticedKey), isTrue);
+    expect(kWorshipMixKeys.contains('hadith.reading'), isFalse);
     expect(kWorshipMixKeys.contains('akhlaq.patience'), isFalse);
     final mix = mixForKind(PersonalMixKind.worship);
     expect(encodePersonalMix(mix), 'worship');

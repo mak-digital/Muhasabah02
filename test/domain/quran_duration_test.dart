@@ -25,7 +25,7 @@ void main() {
     );
     expect(
       SalahActivityMark.colourForId(QuranDurationIds.min3to5),
-      SalahActivityMark.prayedLate,
+      SalahActivityMark.aloneOnTime,
     );
     expect(
       SalahActivityMark.colourForId(QuranDurationIds.notNoticed),
@@ -37,7 +37,11 @@ void main() {
     );
     expect(
       SalahActivityMark.colourForId(QuranDurationIds.min3to5),
-      isNot(SalahActivityMark.excused),
+      SalahActivityMark.colourForId(QuranDurationIds.min5to10),
+    );
+    expect(
+      SalahActivityMark.colourForId(QuranDurationIds.min3to5),
+      isNot(SalahActivityMark.prayedLate),
     );
     expect(
       SalahActivityMark.colourForId(QuranDurationIds.notNoticed),
@@ -53,6 +57,13 @@ void main() {
     expect(
       SalahActivityMark.quranDurationKind(QuranDurationIds.min3to5),
       MarkerKind.filled,
+    );
+    expect(
+      SalahActivityMark.quranDurationKind(
+        QuranDurationIds.min3to5,
+        activityColours: true,
+      ),
+      MarkerKind.outlined,
     );
     expect(
       SalahActivityMark.quranDurationKind(QuranDurationIds.notNoticed),

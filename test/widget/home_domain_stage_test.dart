@@ -31,6 +31,7 @@ void main() {
     final nextBefore = tester.getRect(find.byKey(const Key('home-domain-next')));
     expect(prevBefore.width, nextBefore.width);
     expect(prevBefore.height, nextBefore.height);
+    expect(prevBefore.height, lessThanOrEqualTo(36));
     expect(prevBefore.top, nextBefore.top);
 
     await tester.tap(find.byKey(const Key('home-domain-next')));

@@ -2,9 +2,14 @@ import 'package:flutter/material.dart';
 
 import '../../app/theme.dart';
 import '../../domain/activities.dart';
+import '../../domain/akhlaq_practices.dart';
+import '../../domain/huquq_practices.dart';
 import '../../domain/daily_check_in.dart';
+import '../../domain/home_traces.dart';
 import '../../domain/prayer.dart';
+import '../../domain/quran.dart';
 import '../../domain/quran_duration.dart';
+import '../../domain/salah_extras.dart';
 import 'state_marker.dart';
 
 class SalahActivityMark {
@@ -43,8 +48,33 @@ class SalahActivityMark {
       QuranDurationIds.min15to20 => joinedCongregationLate,
       QuranDurationIds.min10to15 => smallCongregation,
       QuranDurationIds.min5to10 => aloneOnTime,
-      QuranDurationIds.min3to5 => prayedLate,
+      QuranDurationIds.min3to5 => aloneOnTime,
       QuranDurationIds.notNoticed => prayedLate,
+      ActivityCatalog.tahajjudEarlyMidAndLate ||
+      ActivityCatalog.ishraqFollowingFajr => congregationOnTime,
+      ActivityCatalog.tahajjudLaterPart ||
+      ActivityCatalog.ishraqLaterMorning => joinedCongregationLate,
+      ActivityCatalog.tahajjudEarlyMid ||
+      ActivityCatalog.ishraqPrayed => smallCongregation,
+      ActivityCatalog.tahajjudNotPrayed ||
+      ActivityCatalog.ishraqNotPrayed => aloneOnTime,
+      ActivityCatalog.hadithLivedStartedNew => congregationOnTime,
+      ActivityCatalog.hadithLivedIntroducedFamily => joinedCongregationLate,
+      ActivityCatalog.hadithLivedCorrectedPractice => smallCongregation,
+      ActivityCatalog.hadithLivedObservedOther => aloneOnTime,
+      ActivityCatalog.dhikrWithAction => congregationOnTime,
+      ActivityCatalog.dhikrAttentive => joinedCongregationLate,
+      ActivityCatalog.dhikrIntentional => smallCongregation,
+      ActivityCatalog.dhikrBrief => aloneOnTime,
+      AkhlaqObservationIds.practised => congregationOnTime,
+      AkhlaqObservationIds.struggled => joinedCongregationLate,
+      AkhlaqObservationIds.corrected => smallCongregation,
+      AkhlaqObservationIds.noSituation => aloneOnTime,
+      AkhlaqObservationIds.lapseRecognised => prayedLate,
+      HuquqObservationIds.partialEffort => joinedCongregationLate,
+      HuquqObservationIds.correctiveAction => smallCongregation,
+      HuquqObservationIds.neglectRecognised => prayedLate,
+      ActivityIds.noActivity => prayedLate,
       ActivityIds.unanswered => unanswered,
       ActivityIds.other => other,
       _ => MuhasabahColors.mark,
@@ -75,9 +105,7 @@ class SalahActivityMark {
     final option = ActivityCatalog.find(catalog, activityId);
     return SalahActivityMark(
       kind: kindForStatus(status, activityColours: activityColours),
-      color: activityColours
-          ? colourForId(activityId)
-          : MuhasabahColors.mark,
+      color: activityColours ? colourForId(activityId) : MuhasabahColors.mark,
       label: option?.label ?? status.label,
     );
   }
@@ -111,21 +139,176 @@ class SalahActivityMark {
     );
   }
 
-  static MarkerKind quranDurationKind(String activityId) {
+  static SalahActivityMark forVoluntary({
+    required DailyCheckIn? record,
+    required SalahTraceRow row,
+    required bool activityColours,
+  }) {
+    final activity = record?.activityFor(
+      ActivityCatalog.voluntarySalahKey(row),
+    );
+    final id = activity?.id ?? ActivityIds.unanswered;
+    final catalog = ActivityCatalog.forVoluntarySalah(row);
+    final option = ActivityCatalog.find(catalog, id);
+    final outcome =
+        option?.ternary ??
+        (row == SalahTraceRow.tahajjud
+            ? (record?.tahajjud ?? TernaryOutcome.unanswered)
+            : (record?.ishraq ?? TernaryOutcome.unanswered));
+    return SalahActivityMark(
+      kind: kindForVoluntaryId(id, outcome),
+      color: activityColours ? colourForId(id) : MuhasabahColors.mark,
+      label: option?.label ?? voluntarySalahLabel(outcome),
+    );
+  }
+
+  static MarkerKind kindForVoluntaryId(
+    String activityId,
+    TernaryOutcome outcome,
+  ) {
+    if (activityId == ActivityIds.unanswered ||
+        outcome == TernaryOutcome.unanswered) {
+      return MarkerKind.unanswered;
+    }
+    if (activityId == ActivityCatalog.tahajjudNotPrayed ||
+        activityId == ActivityCatalog.ishraqNotPrayed ||
+        outcome == TernaryOutcome.negative) {
+      return MarkerKind.outlined;
+    }
+    return MarkerKind.filled;
+  }
+
+  static MarkerKind quranDurationKind(
+    String activityId, {
+    bool activityColours = false,
+  }) {
     if (activityId == ActivityIds.unanswered || activityId.isEmpty) {
       return MarkerKind.unanswered;
     }
     if (activityId == QuranDurationIds.notNoticed) {
       return MarkerKind.outlined;
     }
+    if (activityColours && activityId == QuranDurationIds.min3to5) {
+      return MarkerKind.outlined;
+    }
     return MarkerKind.filled;
   }
 
-  static Color quranDurationColour(
-    String activityId, {
-    required bool colours,
-  }) {
+  static Color quranDurationColour(String activityId, {required bool colours}) {
     if (!colours) return MuhasabahColors.mark;
     return colourForId(activityId);
+  }
+
+  static MarkerKind kindForHadithLived(String activityId) {
+    if (activityId == ActivityIds.unanswered || activityId.isEmpty) {
+      return MarkerKind.unanswered;
+    }
+    if (activityId == ActivityIds.noActivity) return MarkerKind.outlined;
+    return MarkerKind.filled;
+  }
+
+  static MarkerKind kindForAkhlaq(String activityId) {
+    if (activityId == ActivityIds.unanswered || activityId.isEmpty) {
+      return MarkerKind.unanswered;
+    }
+    if (activityId == AkhlaqObservationIds.lapseRecognised ||
+        activityId == HuquqObservationIds.neglectRecognised) {
+      return MarkerKind.outlined;
+    }
+    if (activityId == AkhlaqObservationIds.noSituation) {
+      return MarkerKind.filledSquare;
+    }
+    return MarkerKind.filled;
+  }
+
+  static RecordedStateMarker recordedMarkerForTrace({
+    required HomeTraceRow row,
+    required DailyCheckIn? record,
+    required bool activityColours,
+    required String semanticLabel,
+  }) {
+    if (ActivityCatalog.forHomeTrace(row.storageKey).isNotEmpty) {
+      final mark = forHadithTrace(
+        record: record,
+        row: row,
+        activityColours: activityColours,
+      );
+      return RecordedStateMarker(
+        kind: mark.kind,
+        color: mark.color,
+        semanticLabel: semanticLabel,
+      );
+    }
+    final outcome =
+        record?.homeTrace(row.storageKey) ?? TernaryOutcome.unanswered;
+    return RecordedStateMarker(
+      kind: markerForRecorded(
+        recorded: outcome.isRecorded,
+        positive: outcome == TernaryOutcome.positive,
+      ),
+      semanticLabel: semanticLabel,
+    );
+  }
+
+  static SalahActivityMark forHadithTrace({
+    required DailyCheckIn? record,
+    required HomeTraceRow row,
+    required bool activityColours,
+  }) {
+    final id = record?.activityFor(row.storageKey).id ?? ActivityIds.unanswered;
+    final option = ActivityCatalog.find(
+      ActivityCatalog.forHomeTrace(row.storageKey),
+      id,
+    );
+    final outcome =
+        record?.homeTrace(row.storageKey) ?? TernaryOutcome.unanswered;
+    if (isTimeTrace(row.storageKey)) {
+      return SalahActivityMark(
+        kind: switch (id) {
+          ActivityIds.acted => MarkerKind.filled,
+          ActivityIds.noticedNotActed => MarkerKind.outlined,
+          ActivityIds.noSituation => MarkerKind.filledSquare,
+          _ => MarkerKind.unanswered,
+        },
+        color: MuhasabahColors.mark,
+        label: option?.label ?? row.label,
+      );
+    }
+    if (isHadithDurationTrace(row.storageKey)) {
+      return SalahActivityMark(
+        kind: quranDurationKind(id, activityColours: activityColours),
+        color: quranDurationColour(id, colours: activityColours),
+        label: option?.label ?? row.label,
+      );
+    }
+    if (isHadithLivedTrace(row.storageKey)) {
+      return SalahActivityMark(
+        kind: kindForHadithLived(id),
+        color: activityColours ? colourForId(id) : MuhasabahColors.mark,
+        label: option?.label ?? row.label,
+      );
+    }
+    if (isDhikrPostFardTrace(row.storageKey)) {
+      return SalahActivityMark(
+        kind: kindForHadithLived(id),
+        color: activityColours ? colourForId(id) : MuhasabahColors.mark,
+        label: option?.label ?? row.label,
+      );
+    }
+    if (isAkhlaqTrace(row.storageKey) || isHuquqTrace(row.storageKey)) {
+      return SalahActivityMark(
+        kind: kindForAkhlaq(id),
+        color: activityColours ? colourForId(id) : MuhasabahColors.mark,
+        label: option?.label ?? row.label,
+      );
+    }
+    return SalahActivityMark(
+      kind: markerForRecorded(
+        recorded: outcome.isRecorded,
+        positive: outcome == TernaryOutcome.positive,
+      ),
+      color: MuhasabahColors.mark,
+      label: option?.label ?? row.label,
+    );
   }
 }

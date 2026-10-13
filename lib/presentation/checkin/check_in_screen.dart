@@ -5,6 +5,8 @@ import '../../app/theme.dart';
 import '../../application/providers.dart';
 import '../../data/privacy_log.dart';
 import '../../domain/activities.dart';
+import '../../domain/akhlaq_practices.dart';
+import '../../domain/huquq_practices.dart';
 import '../../domain/context_catalog.dart';
 import '../../domain/copy.dart';
 import '../../domain/daily_check_in.dart';
@@ -23,9 +25,15 @@ import '../../domain/recorded_context.dart';
 import '../../domain/salah_extras.dart';
 import '../../domain/salah_factors.dart';
 import '../../domain/situation_notes.dart';
+import '../../domain/time_practices.dart';
 import '../shared/activity_picker.dart';
+import '../shared/akhlaq_follow_up_fields.dart';
+import '../shared/huquq_follow_up_fields.dart';
+import '../shared/time_practice_fields.dart';
 import '../shared/domain_briefing_note.dart';
 import '../shared/domain_stage.dart';
+import '../shared/domain_visual.dart';
+import '../shared/home_band_heading.dart';
 import '../shared/ui_bits.dart';
 
 enum CheckInFocus { full, salah, quran, traces }
@@ -105,7 +113,6 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
   late final TextEditingController _reflection;
   late final TextEditingController _situationCustom;
   late final TextEditingController _akhlaqStruggle;
-  final Map<String, TextEditingController> _contextNotes = {};
   final Map<String, TextEditingController> _custom = {};
   var _loaded = false;
   var _editing = true;
@@ -118,6 +125,7 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
   final _focusAnchor = GlobalKey(debugLabel: 'checkin-focus-anchor');
   final _focusListController = ScrollController();
   var _focusScrollAttempts = 0;
+  late bool _briefingOpen;
 
   String get _key => _openedDateKey;
 
@@ -135,6 +143,8 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
     _reflection = TextEditingController();
     _situationCustom = TextEditingController();
     _akhlaqStruggle = TextEditingController();
+    _briefingOpen =
+        widget.focusBand == null && widget.focusRowId == null;
     Future<void>.microtask(_hydrate);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _scrollToFocusedRow();
@@ -192,9 +202,6 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
     _situationCustom.dispose();
     _akhlaqStruggle.dispose();
     _focusListController.dispose();
-    for (final c in _contextNotes.values) {
-      c.dispose();
-    }
     for (final c in _custom.values) {
       c.dispose();
     }
@@ -374,10 +381,6 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
         ],
         const SizedBox(height: 12),
         _otherCard(),
-        if (mixIncludesQuran(mixKeys)) ...[
-          const SizedBox(height: 12),
-          _contextCard(),
-        ],
         const SizedBox(height: 12),
         _situationNotesCard(),
       ],
@@ -390,11 +393,7 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
       case CheckInFocus.salah:
         return [_salahCard(mixKeys: mixKeys)];
       case CheckInFocus.quran:
-        return [
-          _quranCard(mixKeys: mixKeys),
-          const SizedBox(height: 12),
-          _contextCard(),
-        ];
+        return [_quranCard(mixKeys: mixKeys)];
       case CheckInFocus.traces:
         return _tracesBody(mixKeys);
       case CheckInFocus.full:
@@ -467,6 +466,7 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
             _collapsibleTraceBand(
               title: title,
               band: kSalahObligatoryBand,
+              family: MuhasabahColors.salahFamily,
               initiallyExpanded: _sectionStartsOpen(
                 kSalahObligatoryBand,
                 firstBand: firstBand,
@@ -481,6 +481,7 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
             _collapsibleTraceBand(
               title: title,
               band: kSalahFridayBand,
+              family: MuhasabahColors.salahFamily,
               initiallyExpanded: _sectionStartsOpen(
                 kSalahFridayBand,
                 firstBand: firstBand,
@@ -498,6 +499,7 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
             _collapsibleTraceBand(
               title: title,
               band: kSalahVoluntaryBand,
+              family: MuhasabahColors.salahFamily,
               initiallyExpanded: _sectionStartsOpen(
                 kSalahVoluntaryBand,
                 firstBand: firstBand,
@@ -511,24 +513,12 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
                 if (showTahajjud)
                   _anchorIfFocused(
                     'salah.tahajjud',
-                    _voluntaryRow(
-                      label: 'Tahajjud',
-                      outcome: _draft.tahajjud,
-                      onChanged: (outcome) => setState(() {
-                        _draft = _draft.copyWith(tahajjud: outcome);
-                      }),
-                    ),
+                    _voluntaryRow(SalahTraceRow.tahajjud),
                   ),
                 if (showIshraq)
                   _anchorIfFocused(
                     'salah.ishraq',
-                    _voluntaryRow(
-                      label: 'Ishraq',
-                      outcome: _draft.ishraq,
-                      onChanged: (outcome) => setState(() {
-                        _draft = _draft.copyWith(ishraq: outcome);
-                      }),
-                    ),
+                    _voluntaryRow(SalahTraceRow.ishraq),
                   ),
               ],
             ),
@@ -596,7 +586,7 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
               ),
             ),
           if (factorGroupsForSalahActivity(selected.id).isVisible)
-            _salahFactors(id.name, factorGroupsForSalahActivity(selected.id)          ),
+            _salahFactors(id.name, factorGroupsForSalahActivity(selected.id)),
         ],
       ),
     );
@@ -674,34 +664,26 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
     );
   }
 
-  Widget _voluntaryRow({
-    required String label,
-    required TernaryOutcome outcome,
-    required ValueChanged<TernaryOutcome> onChanged,
-  }) {
+  Widget _voluntaryRow(SalahTraceRow row) {
+    final key = ActivityCatalog.voluntarySalahKey(row);
+    final selected = _draft.activityFor(key);
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CheckInRowLabel(label),
-          CheckInSelect<TernaryOutcome>(
-            value: outcome,
-            entries: const [
-              CheckInSelectEntry(
-                value: TernaryOutcome.positive,
-                label: 'Performed',
-              ),
-              CheckInSelectEntry(
-                value: TernaryOutcome.negative,
-                label: 'Not performed',
-              ),
-              CheckInSelectEntry(
-                value: TernaryOutcome.unanswered,
-                label: 'Not recorded',
-              ),
-            ],
-            onChanged: onChanged,
+          CheckInRowLabel(row.label),
+          const SizedBox(height: 6),
+          ActivityPicker(
+            options: ActivityCatalog.forVoluntarySalah(row),
+            selectedId: selected.id,
+            statusKeyPrefix: 'salah-${row.name}',
+            onSelected: (option) => setState(() {
+              _draft = _draft.withVoluntarySalahActivity(
+                row,
+                RecordedActivity(id: option.id),
+              );
+            }),
           ),
         ],
       ),
@@ -755,21 +737,6 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
 
   Widget _quranCard({bool expandFirst = true, Set<String> mixKeys = const {}}) {
     final title = MonitorDomain.quran.label;
-    List<QuranDimension> shown(List<QuranDimension> rows) => [
-      for (final dimension in rows)
-        if (_mixAllows(mixKeys, 'quran.${dimension.name}')) dimension,
-    ];
-    final engagement = shown(engagementHomeRows);
-    final understanding = shown(understandingHomeRows);
-    final reflection = shown(reflectionHomeRows);
-    final application = shown(applicationHomeRows);
-    final firstBand = engagement.isNotEmpty
-        ? kQuranEngagementBand
-        : understanding.isNotEmpty
-        ? kQuranUnderstandingBand
-        : reflection.isNotEmpty
-        ? kQuranReflectionBand
-        : kQuranApplicationBand;
     return WashPanel(
       color: MuhasabahColors.wash(
         MuhasabahColors.quranWash,
@@ -780,77 +747,54 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           CheckInDomainTitle(title, focus: MonitorDomain.quran.focusQuestion),
+          Theme(
+            data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+            child: ExpansionTile(
+              key: const Key('quran-checkin-intro'),
+              initiallyExpanded: false,
+              tilePadding: EdgeInsets.zero,
+              childrenPadding: const EdgeInsets.only(bottom: 8),
+              title: Text(
+                Copy.quranCheckInIntroTitle,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+              children: const [
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(Copy.quranCheckInIntro),
+                ),
+                SizedBox(height: 8),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(Copy.quranCheckInFactorsIntro),
+                ),
+              ],
+            ),
+          ),
           const SizedBox(height: 4),
-          const Text(Copy.quranCheckInIntro),
-          const SizedBox(height: 12),
-          if (engagement.isNotEmpty)
-            _collapsibleTraceBand(
-              title: title,
-              band: kQuranEngagementBand,
-              initiallyExpanded: _sectionStartsOpen(
-                kQuranEngagementBand,
-                firstBand: firstBand,
-                expandFirst: expandFirst,
+          for (final entry in quranHomeBandsFor([
+            for (final dimension in quranDailyDimensions)
+              if (_mixAllows(mixKeys, 'quran.${dimension.name}')) dimension,
+          ])) ...[
+            HomeBandHeading(
+              band: entry.$1,
+              family: MuhasabahColors.quranFamily,
+              baseWash: MuhasabahColors.wash(
+                MuhasabahColors.quranWash,
+                MuhasabahColors.quranWashDark,
+                Theme.of(context).brightness,
               ),
-              children: [
-                for (final dimension in engagement)
-                  _anchorIfFocused(
-                    'quran.${dimension.name}',
-                    _quranBlock(dimension),
-                  ),
-              ],
             ),
-          if (understanding.isNotEmpty)
-            _collapsibleTraceBand(
-              title: title,
-              band: kQuranUnderstandingBand,
-              initiallyExpanded: _sectionStartsOpen(
-                kQuranUnderstandingBand,
-                firstBand: firstBand,
-                expandFirst: expandFirst,
+            const SizedBox(height: 8),
+            for (final dimension in entry.$2)
+              _anchorIfFocused(
+                'quran.${dimension.name}',
+                _quranBlock(dimension),
               ),
-              children: [
-                for (final dimension in understanding)
-                  _anchorIfFocused(
-                    'quran.${dimension.name}',
-                    _quranBlock(dimension),
-                  ),
-              ],
-            ),
-          if (reflection.isNotEmpty)
-            _collapsibleTraceBand(
-              title: title,
-              band: kQuranReflectionBand,
-              initiallyExpanded: _sectionStartsOpen(
-                kQuranReflectionBand,
-                firstBand: firstBand,
-                expandFirst: expandFirst,
-              ),
-              children: [
-                for (final dimension in reflection)
-                  _anchorIfFocused(
-                    'quran.${dimension.name}',
-                    _quranBlock(dimension),
-                  ),
-              ],
-            ),
-          if (application.isNotEmpty)
-            _collapsibleTraceBand(
-              title: title,
-              band: kQuranApplicationBand,
-              initiallyExpanded: _sectionStartsOpen(
-                kQuranApplicationBand,
-                firstBand: firstBand,
-                expandFirst: expandFirst,
-              ),
-              children: [
-                for (final dimension in application)
-                  _anchorIfFocused(
-                    'quran.${dimension.name}',
-                    _quranBlock(dimension),
-                  ),
-              ],
-            ),
+          ],
         ],
       ),
     );
@@ -898,8 +842,68 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
                 },
               ),
             ),
+          if (_quranFactorGroups(dimension).isVisible) _quranFactors(dimension),
         ],
       ),
+    );
+  }
+
+  FactorGroups _quranFactorGroups(QuranDimension dimension) {
+    final selected = _draft.activityFor(ActivityCatalog.quranKey(dimension));
+    if (selected.id == ActivityIds.other ||
+        selected.id == ActivityIds.unanswered) {
+      return FactorGroups.none;
+    }
+    return factorGroupsForTernary(_draft.quranOutcome(dimension));
+  }
+
+  Widget _quranFactors(QuranDimension dimension) {
+    final groups = _quranFactorGroups(dimension);
+    final outcome = _draft.quranOutcome(dimension);
+    final polarity = outcome == TernaryOutcome.positive
+        ? 'positive'
+        : 'negative';
+    final existing = _draft.contextFor(dimension, polarity);
+    return CheckInFactorSelects(
+      groups: groups,
+      helping: [
+        for (final factor in ContextCatalog.positive)
+          NamedFactor(id: factor.id, label: factor.label),
+      ],
+      distracting: [
+        for (final factor in ContextCatalog.negative)
+          NamedFactor(id: factor.id, label: factor.label),
+      ],
+      helpingId: safeFactorId(
+        selectedFactorId(existing?.factorIds ?? const []),
+        ContextCatalog.positive.map((factor) => factor.id),
+      ),
+      distractingId: safeFactorId(
+        selectedFactorId(existing?.factorIds ?? const []),
+        ContextCatalog.negative.map((factor) => factor.id),
+      ),
+      helpingKey: Key('quran-${dimension.name}-helping'),
+      distractingKey: Key('quran-${dimension.name}-distracting'),
+      onHelpingChanged: (id) => setState(() {
+        _draft = _draft.withContext(
+          RecordedContext(
+            subject: dimension,
+            polarity: polarity,
+            factorIds: idsFromFactorChoice(id),
+            freeText: existing?.freeText,
+          ),
+        );
+      }),
+      onDistractingChanged: (id) => setState(() {
+        _draft = _draft.withContext(
+          RecordedContext(
+            subject: dimension,
+            polarity: polarity,
+            factorIds: idsFromFactorChoice(id),
+            freeText: existing?.freeText,
+          ),
+        );
+      }),
     );
   }
 
@@ -908,6 +912,11 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
       key,
       () => TextEditingController(text: seed ?? ''),
     );
+  }
+
+  void _collapseBriefing() {
+    if (!_briefingOpen) return;
+    setState(() => _briefingOpen = false);
   }
 
   bool _traceBandStartsOpen(String band) {
@@ -945,7 +954,14 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
       ),
       const SizedBox(height: 4),
       if (_focusedBriefing() != null)
-        DomainBriefingNote(_focusedBriefing()!)
+        CollapsingDomainBriefingNote(
+          _focusedBriefing()!,
+          expanded: _briefingOpen,
+          onExpansionChanged: (open) {
+            if (open == _briefingOpen) return;
+            setState(() => _briefingOpen = open);
+          },
+        )
       else
         const Text(
           'Only this domain is shown. Other records for the day stay unchanged.',
@@ -956,6 +972,7 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
         _collapsibleTraceBand(
           title: widget.domainTitle ?? 'Record',
           band: bands[i],
+          family: accent,
           initiallyExpanded: _traceBandStartsOpen(bands[i]),
           children: [
             for (final row in rows)
@@ -976,6 +993,7 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
         _collapsibleTraceBand(
           title: widget.domainTitle ?? 'Record',
           band: kZakatTraceBand,
+          family: accent,
           initiallyExpanded: _effectiveFocusBand == kZakatTraceBand,
           children: [
             Padding(
@@ -999,6 +1017,10 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
   }
 
   Widget _traceEditor(HomeTraceRow row, {bool includeFactors = true}) {
+    final catalog = ActivityCatalog.forHomeTrace(row.storageKey);
+    if (catalog.isNotEmpty) {
+      return _activityTraceEditor(row, catalog, includeFactors: includeFactors);
+    }
     final outcome = _draft.homeTrace(row.storageKey);
     final factors =
         _draft.homeTraceFactors[row.storageKey] ?? const SalahFactorCapture();
@@ -1024,17 +1046,12 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
             onChanged: (option) => setState(() {
               var next = _draft.withHomeTrace(row.storageKey, option);
               if (!hidesHomeTraceFactors(row.storageKey)) {
-                final groups = factorGroupsForTernary(option);
                 next = next.withHomeTraceFactors(
                   row.storageKey,
-                  SalahFactorCapture(
-                    supportIds: groups.showHelping
-                        ? factors.supportIds.take(1).toList()
-                        : const [],
-                    challengeIds: groups.showDistracting
-                        ? factors.challengeIds.take(1).toList()
-                        : const [],
-                    otherText: factors.otherText,
+                  nextHomeTraceFactors(
+                    storageKey: row.storageKey,
+                    outcome: option,
+                    existing: factors,
                   ),
                 );
               }
@@ -1042,18 +1059,10 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
             }),
           ),
           if (includeFactors && !hidesHomeTraceFactors(row.storageKey))
-            CheckInFactorSelects(
-              groups: factorGroupsForTernary(outcome),
-              helping: NamedFactor.helpingForHomeTrace(
-                row.storageKey,
-                existingIds: factors.supportIds,
-              ),
-              distracting: NamedFactor.distractingForHomeTrace(
-                row.storageKey,
-                existingIds: factors.challengeIds,
-              ),
-              helpingId: selectedFactorId(factors.supportIds),
-              distractingId: selectedFactorId(factors.challengeIds),
+            CheckInFactorSelects.forHomeTrace(
+              storageKey: row.storageKey,
+              outcome: outcome,
+              factors: factors,
               helpingKey: Key('trace-${row.storageKey}-helping'),
               distractingKey: Key('trace-${row.storageKey}-distracting'),
               onHelpingChanged: (id) => setState(() {
@@ -1069,6 +1078,329 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
               onDistractingChanged: (id) => setState(() {
                 _draft = _draft.withHomeTraceFactors(
                   row.storageKey,
+                  SalahFactorCapture(
+                    supportIds: factors.supportIds.take(1).toList(),
+                    challengeIds: idsFromFactorChoice(id),
+                    otherText: factors.otherText,
+                  ),
+                );
+              }),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _activityTraceEditor(
+    HomeTraceRow row,
+    List<ActivityOption> catalog, {
+    required bool includeFactors,
+  }) {
+    final key = row.storageKey;
+    final selected = _draft.activityFor(key);
+    final outcome = _draft.homeTrace(key);
+    final factors = _draft.homeTraceFactors[key] ?? const SalahFactorCapture();
+    final timePractice = timePracticeByKey(key);
+    final timeCapture = isTimeTrace(key)
+        ? readTimePractice(_draft, key)
+        : const TimePracticeCapture();
+    final akhlaqCapture = isAkhlaqTrace(key)
+        ? readAkhlaqFollowUp(_draft, key)
+        : const AkhlaqFollowUpCapture();
+    final huquqCapture = isHuquqTrace(key)
+        ? readHuquqFollowUp(_draft, key)
+        : const HuquqFollowUpCapture();
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CheckInRowLabel(row.label),
+          const SizedBox(height: 6),
+          ActivityPicker(
+            options: catalog,
+            selectedId: selected.id,
+            statusKeyPrefix: 'trace-$key',
+            namedSubject:
+                isDhikrPostFardTrace(key) ||
+                    isAkhlaqTrace(key) ||
+                    isHuquqTrace(key)
+                ? row.label
+                : null,
+            onSelected: (option) => setState(() {
+              if (isTimeTrace(key)) {
+                if (option.id == ActivityIds.unanswered) {
+                  _draft = writeTimePractice(
+                    _draft,
+                    key,
+                    const TimePracticeCapture(),
+                  );
+                  return;
+                }
+                final existing = readTimePractice(_draft, key);
+                _draft = writeTimePractice(
+                  _draft,
+                  key,
+                  TimePracticeCapture(
+                    primaryId: option.id,
+                    contextId: existing.contextId,
+                    outcomeId: existing.outcomeId,
+                    note: existing.note,
+                  ),
+                );
+                return;
+              }
+              if (isAkhlaqTrace(key)) {
+                if (option.id == ActivityIds.unanswered) {
+                  _draft = writeAkhlaqFollowUp(
+                    _draft,
+                    key,
+                    const AkhlaqFollowUpCapture(),
+                  );
+                  return;
+                }
+                final existing = readAkhlaqFollowUp(_draft, key);
+                _draft = writeAkhlaqFollowUp(
+                  _draft,
+                  key,
+                  AkhlaqFollowUpCapture(
+                    primaryId: option.id,
+                    contextId: existing.contextId,
+                    helpId: existing.helpId,
+                    note: existing.note,
+                  ),
+                );
+                return;
+              }
+              if (isHuquqTrace(key)) {
+                if (option.id == ActivityIds.unanswered) {
+                  _draft = writeHuquqFollowUp(
+                    _draft,
+                    key,
+                    const HuquqFollowUpCapture(),
+                  );
+                  return;
+                }
+                final existing = readHuquqFollowUp(_draft, key);
+                _draft = writeHuquqFollowUp(
+                  _draft,
+                  key,
+                  existing.copyWith(primaryId: option.id),
+                );
+                return;
+              }
+              var next = _draft.withHomeTraceActivity(
+                key,
+                RecordedActivity(
+                  id: option.id,
+                  customText: option.isOther ? _note(key).text : null,
+                ),
+              );
+              if (!hidesHomeTraceFactors(key)) {
+                next = next.withHomeTraceFactors(
+                  key,
+                  nextHomeTraceFactors(
+                    storageKey: key,
+                    outcome: option.ternary ?? TernaryOutcome.unanswered,
+                    existing: factors,
+                  ),
+                );
+              }
+              _draft = next;
+            }),
+          ),
+          if (timePractice != null) ...[
+            Padding(
+              padding: const EdgeInsets.only(top: 6, left: checkInValueIndent),
+              child: Text(
+                timePractice.detail,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ),
+            if (selected.id != ActivityIds.unanswered)
+              TimePracticeFields(
+                practice: timePractice,
+                contextId: timeCapture.contextId,
+                outcomeId: timeCapture.outcomeId,
+                note: timeCapture.note,
+                noteController: _note('$key-time-note', timeCapture.note),
+                onContextChanged: (id) => setState(() {
+                  _draft = writeTimePractice(
+                    _draft,
+                    key,
+                    TimePracticeCapture(
+                      primaryId: selected.id,
+                      contextId: id,
+                      outcomeId: timeCapture.outcomeId,
+                      note: timeCapture.note,
+                    ),
+                  );
+                }),
+                onOutcomeChanged: (id) => setState(() {
+                  _draft = writeTimePractice(
+                    _draft,
+                    key,
+                    TimePracticeCapture(
+                      primaryId: selected.id,
+                      contextId: timeCapture.contextId,
+                      outcomeId: id,
+                      note: timeCapture.note,
+                    ),
+                  );
+                }),
+                onNoteChanged: (value) {
+                  _draft = writeTimePractice(
+                    _draft,
+                    key,
+                    TimePracticeCapture(
+                      primaryId: selected.id,
+                      contextId: timeCapture.contextId,
+                      outcomeId: timeCapture.outcomeId,
+                      note: value,
+                    ),
+                  );
+                },
+              ),
+          ],
+          if (isHuquqTrace(key) && selected.id != ActivityIds.unanswered)
+            HuquqFollowUpFields(
+              storageKey: key,
+              engagementId: huquqCapture.engagementId,
+              outcomeId: huquqCapture.outcomeId,
+              occasions: huquqCapture.occasions,
+              timeSpent: huquqCapture.timeSpent,
+              note: huquqCapture.note,
+              occasionsController: _note(
+                '$key-huquq-occasions',
+                huquqCapture.occasions,
+              ),
+              timeSpentController: _note(
+                '$key-huquq-time',
+                huquqCapture.timeSpent,
+              ),
+              noteController: _note('$key-huquq-note', huquqCapture.note),
+              onEngagementChanged: (id) => setState(() {
+                _draft = writeHuquqFollowUp(
+                  _draft,
+                  key,
+                  huquqCapture.copyWith(primaryId: selected.id, engagementId: id),
+                );
+              }),
+              onOutcomeChanged: (id) => setState(() {
+                _draft = writeHuquqFollowUp(
+                  _draft,
+                  key,
+                  huquqCapture.copyWith(primaryId: selected.id, outcomeId: id),
+                );
+              }),
+              onOccasionsChanged: (value) {
+                _draft = writeHuquqFollowUp(
+                  _draft,
+                  key,
+                  huquqCapture.copyWith(
+                    primaryId: selected.id,
+                    occasions: value,
+                  ),
+                );
+              },
+              onTimeSpentChanged: (value) {
+                _draft = writeHuquqFollowUp(
+                  _draft,
+                  key,
+                  huquqCapture.copyWith(
+                    primaryId: selected.id,
+                    timeSpent: value,
+                  ),
+                );
+              },
+              onNoteChanged: (value) {
+                _draft = writeHuquqFollowUp(
+                  _draft,
+                  key,
+                  huquqCapture.copyWith(primaryId: selected.id, note: value),
+                );
+              },
+            ),
+          if (isAkhlaqTrace(key) && selected.id != ActivityIds.unanswered)
+            AkhlaqFollowUpFields(
+              storageKey: key,
+              contextId: akhlaqCapture.contextId,
+              helpId: akhlaqCapture.helpId,
+              note: akhlaqCapture.note,
+              noteController: _note('$key-akhlaq-note', akhlaqCapture.note),
+              onContextChanged: (id) => setState(() {
+                _draft = writeAkhlaqFollowUp(
+                  _draft,
+                  key,
+                  AkhlaqFollowUpCapture(
+                    primaryId: selected.id,
+                    contextId: id,
+                    helpId: akhlaqCapture.helpId,
+                    note: akhlaqCapture.note,
+                  ),
+                );
+              }),
+              onHelpChanged: (id) => setState(() {
+                _draft = writeAkhlaqFollowUp(
+                  _draft,
+                  key,
+                  AkhlaqFollowUpCapture(
+                    primaryId: selected.id,
+                    contextId: akhlaqCapture.contextId,
+                    helpId: id,
+                    note: akhlaqCapture.note,
+                  ),
+                );
+              }),
+              onNoteChanged: (value) {
+                _draft = writeAkhlaqFollowUp(
+                  _draft,
+                  key,
+                  AkhlaqFollowUpCapture(
+                    primaryId: selected.id,
+                    contextId: akhlaqCapture.contextId,
+                    helpId: akhlaqCapture.helpId,
+                    note: value,
+                  ),
+                );
+              },
+            ),
+          if (selected.id == ActivityIds.other)
+            Padding(
+              padding: const EdgeInsets.only(top: 8, left: checkInValueIndent),
+              child: TextField(
+                controller: _note(key, selected.customText),
+                decoration: const InputDecoration(
+                  hintText: 'Describe the other activity',
+                ),
+                onChanged: (value) {
+                  _draft = _draft.withHomeTraceActivity(
+                    key,
+                    RecordedActivity(id: ActivityIds.other, customText: value),
+                  );
+                },
+              ),
+            ),
+          if (includeFactors && !hidesHomeTraceFactors(key))
+            CheckInFactorSelects.forHomeTrace(
+              storageKey: key,
+              outcome: outcome,
+              factors: factors,
+              helpingKey: Key('trace-$key-helping'),
+              distractingKey: Key('trace-$key-distracting'),
+              onHelpingChanged: (id) => setState(() {
+                _draft = _draft.withHomeTraceFactors(
+                  key,
+                  SalahFactorCapture(
+                    supportIds: idsFromFactorChoice(id),
+                    challengeIds: factors.challengeIds.take(1).toList(),
+                    otherText: factors.otherText,
+                  ),
+                );
+              }),
+              onDistractingChanged: (id) => setState(() {
+                _draft = _draft.withHomeTraceFactors(
+                  key,
                   SalahFactorCapture(
                     supportIds: factors.supportIds.take(1).toList(),
                     challengeIds: idsFromFactorChoice(id),
@@ -1332,7 +1664,6 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
         washLight: MuhasabahColors.hadithWash,
         washDark: MuhasabahColors.hadithWashDark,
         extraNote: Copy.hadithObservationNote,
-        includeHadithFocus: true,
         expandFirst: expandFirst,
         mixKeys: mixKeys,
       ),
@@ -1342,6 +1673,7 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
         rows: dhikrHomeRows,
         washLight: MuhasabahColors.dhikrWash,
         washDark: MuhasabahColors.dhikrWashDark,
+        extraNote: Copy.dhikrPostFardNote,
         expandFirst: expandFirst,
         mixKeys: mixKeys,
       ),
@@ -1450,6 +1782,7 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
   Widget _collapsibleTraceBand({
     required String title,
     required String band,
+    required Color family,
     required bool initiallyExpanded,
     required List<Widget> children,
   }) {
@@ -1460,11 +1793,14 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
         initiallyExpanded: initiallyExpanded,
         tilePadding: EdgeInsets.zero,
         childrenPadding: EdgeInsets.zero,
-        title: Text(
-          band.toUpperCase(),
-          style: Theme.of(context).textTheme.labelSmall
-              ?.copyWith(letterSpacing: 0.4, fontWeight: FontWeight.w600),
+        title: HomeBandHeading(
+          band: band,
+          family: family,
+          baseWash: Theme.of(context).colorScheme.surface,
         ),
+        onExpansionChanged: (open) {
+          if (open) _collapseBriefing();
+        },
         children: children,
       ),
     );
@@ -1505,20 +1841,61 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
           CheckInDomainTitle(title, focus: focus),
           const SizedBox(height: 4),
           if (briefingForLabel(title) != null)
-            DomainBriefingNote(briefingForLabel(title)!)
+            CollapsingDomainBriefingNote(
+              briefingForLabel(title)!,
+              expanded: _briefingOpen,
+              onExpansionChanged: (open) {
+                if (open == _briefingOpen) return;
+                setState(() => _briefingOpen = open);
+              },
+            )
           else
             Text(
               extraNote ??
                   'Same rows as Home. Independent. Missing is not missed.',
             ),
+          if (title == MonitorDomain.akhlaq.label) ...[
+            const SizedBox(height: 8),
+            Text(
+              Copy.akhlaqCheckInNote,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
+          if (title == MonitorDomain.huquq.label) ...[
+            const SizedBox(height: 8),
+            Text(
+              Copy.huquqCheckInNote,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
           const SizedBox(height: 12),
           if (includeHajjStatus) _hajjStatusEditor(),
           for (var i = 0; i < bands.length; i++)
             _collapsibleTraceBand(
               title: title,
               band: bands[i],
-              initiallyExpanded: expandFirst && i == 0,
+              family: domainColorIdentity(
+                MonitorDomain.values
+                        .where((domain) => domain.label == title)
+                        .firstOrNull ??
+                    MonitorDomain.dhikr,
+              ).family,
+              initiallyExpanded: _sectionStartsOpen(
+                bands[i],
+                firstBand: bands.first,
+                expandFirst: expandFirst,
+              ),
               children: [
+                if (title == MonitorDomain.time.label &&
+                    timeSectionQuestion(bands[i]) != null)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Text(
+                      timeSectionQuestion(bands[i])!,
+                      style: Theme.of(context).textTheme.bodyMedium
+                          ?.copyWith(fontStyle: FontStyle.italic, height: 1.35),
+                    ),
+                  ),
                 for (final row in mixVisible)
                   if (row.band == bands[i]) _traceEditor(row),
               ],
@@ -1527,121 +1904,6 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
           if (includeHadithFocus) _hadithFocusEditor(),
           if (includeStruggleNote) _akhlaqStruggleEditor(),
         ],
-      ),
-    );
-  }
-
-  Widget _contextCard() {
-    final blocks = <Widget>[];
-    for (final dimension in quranDailyDimensions) {
-      final outcome = _draft.quranOutcome(dimension);
-      if (!contextAllowed(dimension, outcome)) continue;
-      final polarity = outcome == TernaryOutcome.positive
-          ? 'positive'
-          : 'negative';
-      final existing = _draft.contextFor(dimension, polarity);
-      final prompt = dimension.contextPrompt(outcome);
-      final noteKey = '${dimension.name}:$polarity';
-      _contextNotes.putIfAbsent(
-        noteKey,
-        () => TextEditingController(text: existing?.freeText ?? ''),
-      );
-      blocks.add(
-        Padding(
-          padding: const EdgeInsets.only(bottom: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '${dimension.label} · ${Copy.factorsYouNoticed}',
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-              Text(prompt),
-              const SizedBox(height: 4),
-              Text(
-                '${Copy.youRecorded} ${outcome == TernaryOutcome.positive ? dimension.positiveLabel.toLowerCase() : dimension.negativeLabel.toLowerCase()}.',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-              CheckInFactorSelects(
-                groups: factorGroupsForTernary(outcome),
-                helping: [
-                  for (final factor in ContextCatalog.positive)
-                    NamedFactor(id: factor.id, label: factor.label),
-                ],
-                distracting: [
-                  for (final factor in ContextCatalog.negative)
-                    NamedFactor(id: factor.id, label: factor.label),
-                ],
-                helpingId: safeFactorId(
-                  selectedFactorId(existing?.factorIds ?? const []),
-                  ContextCatalog.positive.map((factor) => factor.id),
-                ),
-                distractingId: safeFactorId(
-                  selectedFactorId(existing?.factorIds ?? const []),
-                  ContextCatalog.negative.map((factor) => factor.id),
-                ),
-                onHelpingChanged: (id) => setState(() {
-                  _draft = _draft.withContext(
-                    RecordedContext(
-                      subject: dimension,
-                      polarity: polarity,
-                      factorIds: idsFromFactorChoice(id),
-                      freeText: _contextNotes[noteKey]?.text,
-                    ),
-                  );
-                }),
-                onDistractingChanged: (id) => setState(() {
-                  _draft = _draft.withContext(
-                    RecordedContext(
-                      subject: dimension,
-                      polarity: polarity,
-                      factorIds: idsFromFactorChoice(id),
-                      freeText: _contextNotes[noteKey]?.text,
-                    ),
-                  );
-                }),
-              ),
-              TextField(
-                controller: _contextNotes[noteKey],
-                maxLines: 2,
-                decoration: const InputDecoration(
-                  hintText: 'Optional note (stays private to this day)',
-                ),
-                onChanged: (value) {
-                  _draft = _draft.withContext(
-                    RecordedContext(
-                      subject: dimension,
-                      polarity: polarity,
-                      factorIds: existing?.factorIds ?? const [],
-                      freeText: value,
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-    if (blocks.isEmpty) return const SizedBox.shrink();
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              Copy.factorsYouNoticed,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 4),
-            const Text(
-              'Recorded factors. Things you noticed — not causes. Skipping changes nothing.',
-            ),
-            const SizedBox(height: 12),
-            ...blocks,
-          ],
-        ),
       ),
     );
   }

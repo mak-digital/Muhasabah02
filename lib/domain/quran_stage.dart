@@ -353,8 +353,8 @@ extension QuranDimensionJourneyX on QuranDimension {
     };
   }
 
-  /// 30/90 Progress title — same check-in band as Home / 7-day.
-  String get progressCalendarTitle => homeBand;
+  /// 30/90 Progress title — the Home row name, not the shared wash.
+  String get progressCalendarTitle => label;
 
   /// Observational purpose. Duration is not a khushu’ score.
   String get progressCalendarSubtitle => switch (this) {

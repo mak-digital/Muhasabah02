@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/theme.dart';
 import '../../application/providers.dart';
 import '../../domain/activities.dart';
-import '../../domain/copy.dart';
 import '../../domain/daily_check_in.dart';
 import '../../domain/date_key.dart';
 import '../../domain/display_calendar.dart';
@@ -14,9 +13,11 @@ import '../../domain/quran.dart';
 import '../../domain/weekly_calendar.dart';
 import '../checkin/trace_record_sheets.dart';
 import '../shared/progress_calendar.dart';
+import '../shared/salah_activity_mark.dart';
 import '../shared/state_marker.dart';
 import '../shared/today_mark_halo.dart';
 import '../shared/ui_bits.dart';
+import '../shared/home_band_heading.dart';
 import '../shared/week_nav_strip.dart';
 
 class WeekMatrixColumn {
@@ -121,9 +122,9 @@ class _WeekMatrixBoardState extends ConsumerState<WeekMatrixBoard> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             WeekNavStrip(
-              label: widget.title,
+              label: displayHomeBand(widget.title),
               family: widget.family,
-              wash: weekNavStripWash(widget.family, cardWash),
+              wash: bandHeadingWash(widget.family, cardWash),
               previousKey: Key('week-matrix-prev-${widget.title}'),
               nextKey: Key('week-matrix-next-${widget.title}'),
               previousTooltip: 'Previous period',
@@ -366,7 +367,7 @@ class WeekTraceMatrix extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final now = ref.watch(nowProvider);
     return WeekMatrixBoard(
-      title: progressBandTitle(band),
+      title: band,
       family: family,
       highlightLunarWhiteDays: highlightLunarWhiteDays,
       itemAsRows: itemAsRows,
@@ -390,20 +391,22 @@ class WeekTraceMatrix extends ConsumerWidget {
     String key,
     HomeTraceRow row,
   ) {
+    final record = index[key];
     final outcome =
-        index[key]?.homeTrace(row.storageKey) ?? TernaryOutcome.unanswered;
+        record?.homeTrace(row.storageKey) ?? TernaryOutcome.unanswered;
+    final colours = ref.watch(appPrefsProvider).salahActivityColours;
     return ProgressDayCell(
       key: Key('progress-cell-${row.storageKey}-$key'),
       onTap: matrixCellOnTap(
         ref: ref,
+        context: context,
         dateKey: key,
         onOpen: onOpenDay == null ? null : () => onOpenDay!(context, key),
       ),
-      marker: RecordedStateMarker(
-        kind: markerForRecorded(
-          recorded: outcome.isRecorded,
-          positive: outcome == TernaryOutcome.positive,
-        ),
+      marker: SalahActivityMark.recordedMarkerForTrace(
+        row: row,
+        record: record,
+        activityColours: colours,
         semanticLabel:
             '$key ${weekdayNameForDate(key)} ${row.label} ${outcome.legendLabel}',
       ),
@@ -480,18 +483,15 @@ class _HomeStyleWeekMatrixState extends ConsumerState<HomeStyleWeekMatrix> {
           onNext: () => setState(() => _weekOffset++),
           nextEnabled: canGoNext,
         ),
-        Align(
-          alignment: Alignment.centerRight,
-          child: TextButton(
-            onPressed: _weekOffset == 0
-                ? null
-                : () => setState(() => _weekOffset = 0),
-            child: const Text(Copy.currentWeek),
-          ),
-        ),
         Row(
           children: [
-            const SizedBox(width: WeekMatrixBoard._labelWidth),
+            CurrentWeekGutter(
+              width: WeekMatrixBoard._labelWidth,
+              family: widget.family,
+              cardWash: theme.colorScheme.surface,
+              enabled: _weekOffset != 0,
+              onPressed: () => setState(() => _weekOffset = 0),
+            ),
             for (final key in dateKeys)
               Expanded(
                 child: _dayHeader(context, key, now, calendar, localizations),
@@ -567,23 +567,21 @@ class _HomeStyleWeekMatrixState extends ConsumerState<HomeStyleWeekMatrix> {
     required List<String> dateKeys,
     required DateTime now,
   }) {
+    final bandWash = widget.family.withValues(alpha: 0.12);
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: widget.family.withValues(alpha: 0.12),
+        color: bandWash,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(6, 8, 6, 6),
+        padding: const EdgeInsets.fromLTRB(6, 6, 6, 6),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              progressBandTitle(band).toUpperCase(),
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                letterSpacing: 0.4,
-                fontWeight: FontWeight.w600,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+            HomeBandHeading(
+              band: band,
+              family: widget.family,
+              baseWash: bandWash,
             ),
             const SizedBox(height: 6),
             for (final row in rows)
@@ -664,14 +662,14 @@ class _HomeStyleWeekMatrixState extends ConsumerState<HomeStyleWeekMatrix> {
     String key,
     HomeTraceRow row,
   ) {
+    final record = widget.index[key];
     final outcome =
-        widget.index[key]?.homeTrace(row.storageKey) ??
-        TernaryOutcome.unanswered;
-    final marker = RecordedStateMarker(
-      kind: markerForRecorded(
-        recorded: outcome.isRecorded,
-        positive: outcome == TernaryOutcome.positive,
-      ),
+        record?.homeTrace(row.storageKey) ?? TernaryOutcome.unanswered;
+    final colours = ref.watch(appPrefsProvider).salahActivityColours;
+    final marker = SalahActivityMark.recordedMarkerForTrace(
+      row: row,
+      record: record,
+      activityColours: colours,
       semanticLabel:
           '$key ${weekdayNameForDate(key)} ${row.label} ${outcome.legendLabel}',
     );
@@ -679,6 +677,7 @@ class _HomeStyleWeekMatrixState extends ConsumerState<HomeStyleWeekMatrix> {
       key: Key('progress-cell-${row.storageKey}-$key'),
       onTap: matrixCellOnTap(
         ref: ref,
+        context: context,
         dateKey: key,
         onOpen: () => widget.onOpenDay(
           context,
@@ -703,6 +702,7 @@ class _HomeStyleWeekMatrixState extends ConsumerState<HomeStyleWeekMatrix> {
       key: Key('progress-cell-zakat-$key'),
       onTap: matrixCellOnTap(
         ref: ref,
+        context: context,
         dateKey: key,
         onOpen: () => widget.onOpenDay(
           context,

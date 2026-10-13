@@ -1,6 +1,9 @@
 import 'activities.dart';
+import 'akhlaq_practices.dart';
+import 'huquq_practices.dart';
 import 'charity_factors.dart';
 import 'context_catalog.dart';
+import 'dhikr_factors.dart';
 import 'home_traces.dart';
 import 'monitor_domain.dart';
 import 'quran.dart';
@@ -8,9 +11,9 @@ import 'salah_factors.dart';
 
 /// Read-only ontology metadata version. Independent of DailyCheckIn schema v6.
 ///
-/// Version 2 adds explicit activity and context-factor records for existing
-/// persisted IDs. It does not change DailyCheckIn schema v6.
-const int kOntologyRegistryVersion = 2;
+/// Version 6 adds Rights of Others observation codes. It does not
+/// change DailyCheckIn schema v6.
+const int kOntologyRegistryVersion = 6;
 
 /// Active catalog rows vs historically readable retired rows.
 enum OntologyNodeStatus { active, retired }
@@ -110,10 +113,18 @@ enum OntologyActivityCatalog {
   zakat,
   family,
   hadith,
+  hadithEncounter,
+  hadithRetention,
+  hadithLearning,
+  hadithLivedNoticed,
+  timeObservation,
+  dhikrPostFard,
+  akhlaqObservation,
+  huquqObservation,
 }
 
 /// Production factor catalog. Factors are provenance, not practices or outcomes.
-enum OntologyFactorCatalog { quranContext, salah, charity }
+enum OntologyFactorCatalog { quranContext, salah, charity, dhikrAttentiveness }
 
 /// Minimum construct kind. Not a maturity ladder and not a score.
 enum OntologyConstructKind {
@@ -486,6 +497,12 @@ List<HomeTraceOntologyRecord> _buildHomeTraces() {
       ),
     for (final row in hajjHomeRows)
       _homeTraceRecord(row, OntologyNodeStatus.active, ConceptualDomainId.hajj),
+    for (final row in hadithRetiredHomeRows)
+      _homeTraceRecord(
+        row,
+        OntologyNodeStatus.retired,
+        ConceptualDomainId.hadithPropheticGuidance,
+      ),
     for (final row in hadithHomeRows)
       _homeTraceRecord(
         row,
@@ -658,7 +675,58 @@ List<ActivityOntologyRecord> _buildActivities() {
       catalog: OntologyActivityCatalog.hadith,
       options: ActivityCatalog.hadith,
       domain: ConceptualDomainId.hadithPropheticGuidance,
+      status: OntologyNodeStatus.retired,
+    ),
+    ..._mapActivityCatalog(
+      catalog: OntologyActivityCatalog.hadithEncounter,
+      options: ActivityCatalog.hadithEncounterDuration,
+      domain: ConceptualDomainId.hadithPropheticGuidance,
       status: OntologyNodeStatus.active,
+    ),
+    ..._mapActivityCatalog(
+      catalog: OntologyActivityCatalog.hadithRetention,
+      options: ActivityCatalog.hadithRetentionDuration,
+      domain: ConceptualDomainId.hadithPropheticGuidance,
+      status: OntologyNodeStatus.active,
+    ),
+    ..._mapActivityCatalog(
+      catalog: OntologyActivityCatalog.hadithLearning,
+      options: ActivityCatalog.hadithLearningDuration,
+      domain: ConceptualDomainId.hadithPropheticGuidance,
+      status: OntologyNodeStatus.active,
+    ),
+    ..._mapActivityCatalog(
+      catalog: OntologyActivityCatalog.hadithLivedNoticed,
+      options: ActivityCatalog.hadithLivedNoticed,
+      domain: ConceptualDomainId.hadithPropheticGuidance,
+      status: OntologyNodeStatus.active,
+    ),
+    ..._mapActivityCatalog(
+      catalog: OntologyActivityCatalog.timeObservation,
+      options: ActivityCatalog.timeObservation,
+      domain: ConceptualDomainId.timeAndResponsibility,
+      status: OntologyNodeStatus.active,
+      kind: OntologyConstructKind.observationState,
+    ),
+    ..._mapActivityCatalog(
+      catalog: OntologyActivityCatalog.dhikrPostFard,
+      options: ActivityCatalog.dhikrPostFard,
+      domain: ConceptualDomainId.remembranceAndDua,
+      status: OntologyNodeStatus.active,
+    ),
+    ..._mapActivityCatalog(
+      catalog: OntologyActivityCatalog.akhlaqObservation,
+      options: akhlaqLegendCatalog,
+      domain: ConceptualDomainId.characterSelfRegulation,
+      status: OntologyNodeStatus.active,
+      kind: OntologyConstructKind.observationState,
+    ),
+    ..._mapActivityCatalog(
+      catalog: OntologyActivityCatalog.huquqObservation,
+      options: huquqLegendCatalog,
+      domain: ConceptualDomainId.rightsFamilyRelationships,
+      status: OntologyNodeStatus.active,
+      kind: OntologyConstructKind.observationState,
     ),
   ];
 }
@@ -771,6 +839,12 @@ List<FactorOntologyRecord> _buildFactors() {
         catalog: OntologyFactorCatalog.charity,
         persistedId: id,
         status: OntologyNodeStatus.retired,
+      ),
+    for (final factor in DhikrAttentivenessCatalog.items)
+      FactorOntologyRecord(
+        catalog: OntologyFactorCatalog.dhikrAttentiveness,
+        persistedId: factor.id,
+        status: OntologyNodeStatus.active,
       ),
   ];
 }

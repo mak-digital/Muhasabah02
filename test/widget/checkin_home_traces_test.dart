@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muhasabah02/data/memory_repositories.dart';
+import 'package:muhasabah02/domain/activities.dart';
 import 'package:muhasabah02/domain/copy.dart';
 import 'package:muhasabah02/domain/home_traces.dart';
 import 'package:muhasabah02/domain/monitor_domain.dart';
@@ -50,24 +51,22 @@ void main() {
 
     await showCheckInDomain(tester, MonitorDomain.hadith);
     expect(find.text('HADITH & LIVING SUNNAH'), findsOneWidget);
-    await expandCheckInBand(
-      tester,
-      title: MonitorDomain.hadith.label,
-      band: 'Notice',
-    );
-    await expandCheckInBand(
-      tester,
-      title: MonitorDomain.hadith.label,
-      band: 'Live',
-    );
+    expect(find.text('ENGAGED WITH HADITH'), findsWidgets);
+    expect(find.text('RETENTION'), findsNothing);
+    expect(find.text('LEARNING'), findsNothing);
+    expect(find.text('LIVED / NOTICED'), findsNothing);
+    expect(find.text('Read and/or Listened'), findsOneWidget);
     await tester.scrollUntilVisible(
-      find.text('Noticed a sunnah in how I lived today'),
+      find.text('Lived /Noticed others'),
       280,
       scrollable: find.byType(Scrollable).last,
     );
     await tester.pumpAndSettle();
-    expect(find.text('Hadith Reflection'), findsOneWidget);
-    expect(find.text('Noticed a sunnah in how I lived today'), findsOneWidget);
+    expect(find.text('Memorization/Revision'), findsOneWidget);
+    expect(find.text('Study Circle/Discussion'), findsOneWidget);
+    expect(find.text('Lived /Noticed others'), findsWidgets);
+    expect(find.text('Hadith Reflection'), findsNothing);
+    expect(find.text('Noticed a sunnah in how I lived today'), findsNothing);
 
     await showCheckInDomain(tester, MonitorDomain.dhikr);
     expect(find.text('POST-FARD SALAH ADHKAR'), findsOneWidget);
@@ -173,26 +172,32 @@ void main() {
     expect(find.text('Held back useless speech'), findsOneWidget);
     await showCheckInDomain(tester, MonitorDomain.time);
     await tester.scrollUntilVisible(
-      find.text('Present in what I was doing'),
+      find.text('Began with a worthwhile intention'),
       280,
       scrollable: find.byType(Scrollable).last,
     );
     await tester.pumpAndSettle();
-    expect(find.text('PRESENCE'), findsOneWidget);
+    expect(find.text('INTENTION & PRIORITY'), findsOneWidget);
     await expandCheckInBand(
       tester,
       title: MonitorDomain.time.label,
-      band: 'Trust',
+      band: 'Attention & Presence',
     );
     await expandCheckInBand(
       tester,
       title: MonitorDomain.time.label,
-      band: 'Rest',
+      band: 'Responsibility & Action',
     );
-    expect(find.text('Did something I had delayed'), findsOneWidget);
-    expect(find.text('Rested from work as needed'), findsOneWidget);
+    await expandCheckInBand(
+      tester,
+      title: MonitorDomain.time.label,
+      band: 'Balance & Renewal',
+    );
+    expect(find.text('Put aside a digital distraction'), findsOneWidget);
+    expect(find.text('Took a step on something delayed'), findsOneWidget);
+    expect(find.text('Took needed rest'), findsOneWidget);
     expect(find.text('Guarded a prayer window from waste'), findsNothing);
-    expect(find.text('Rested as needed'), findsNothing);
+    expect(find.text('Present in what I was doing'), findsNothing);
     await showCheckInDomain(tester, MonitorDomain.health);
     await expandCheckInBand(
       tester,
@@ -268,12 +273,12 @@ void main() {
     await chooseCheckInOption(
       tester,
       dropdownKey: const Key('trace-dhikr.postFardFajr'),
-      optionLabel: traceOutcomeLabel(
-        'dhikr.postFardFajr',
-        TernaryOutcome.positive,
-      ),
+      optionLabel:
+          '${ActivityCatalog.dhikrPostFard.first.label} — Fajr',
     );
     await tester.pumpAndSettle();
+    expect(find.text(Copy.howAttentiveWasI.toUpperCase()), findsOneWidget);
+    expect(find.text('HELPING FACTORS'), findsNothing);
     await tester.tap(find.text('Save check-in'));
     await tester.pumpAndSettle();
 
@@ -282,6 +287,10 @@ void main() {
     expect(
       stored.single.homeTrace('dhikr.postFardFajr'),
       TernaryOutcome.positive,
+    );
+    expect(
+      stored.single.activityFor('dhikr.postFardFajr').id,
+      ActivityCatalog.dhikrWithAction,
     );
   });
 }

@@ -1,7 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muhasabah02/domain/activities.dart';
+import 'package:muhasabah02/domain/daily_check_in.dart';
+import 'package:muhasabah02/domain/akhlaq_practices.dart';
+import 'package:muhasabah02/domain/huquq_practices.dart';
 import 'package:muhasabah02/domain/charity_factors.dart';
 import 'package:muhasabah02/domain/context_catalog.dart';
+import 'package:muhasabah02/domain/dhikr_factors.dart';
 import 'package:muhasabah02/domain/home_traces.dart';
 import 'package:muhasabah02/domain/monitor_domain.dart';
 import 'package:muhasabah02/domain/ontology.dart';
@@ -12,9 +16,9 @@ void main() {
   test(
     'ontology registry has an explicit version independent of schema v6',
     () {
-      expect(kOntologyRegistryVersion, 2);
+      expect(kOntologyRegistryVersion, 6);
       expect(OntologyRegistry.version, kOntologyRegistryVersion);
-      expect(OntologyRegistry.version, isNot(6));
+      expect(kDailyCheckInSchemaVersion, 6);
     },
   );
 
@@ -226,7 +230,10 @@ void main() {
       expect(TernaryOutcome.unanswered.isRecorded, isFalse);
       expect(TernaryOutcome.negative.isRecorded, isTrue);
       expect(TernaryOutcome.positive.legendLabel, 'Recorded sitting');
-      expect(TernaryOutcome.negative.legendLabel, 'I did not notice this today');
+      expect(
+        TernaryOutcome.negative.legendLabel,
+        'I did not notice this today',
+      );
       expect(TernaryOutcome.unanswered.legendLabel, 'Unanswered');
 
       for (final record in OntologyRegistry.reflectionSubjects) {
@@ -426,6 +433,15 @@ void main() {
         factor.id,
       );
     }
+    for (final factor in DhikrAttentivenessCatalog.items) {
+      expect(
+        OntologyRegistry.forFactor(
+          catalog: OntologyFactorCatalog.dhikrAttentiveness,
+          persistedId: factor.id,
+        )?.persistedId,
+        factor.id,
+      );
+    }
   });
 
   test('reflective content is not classified as a scored observation', () {
@@ -473,6 +489,7 @@ List<HomeTraceRow> _retiredCatalogRows() {
     ...timeRetiredHomeRows,
     ...wealthRetiredHomeRows,
     ...ummahRetiredHomeRows,
+    ...hadithRetiredHomeRows,
   ];
 }
 
@@ -489,7 +506,7 @@ class _ActivityCatalogEntry {
 }
 
 List<_ActivityCatalogEntry> _productionActivityCatalogs() {
-  return const [
+  return [
     _ActivityCatalogEntry(
       catalog: OntologyActivityCatalog.salah,
       options: ActivityCatalog.salah,
@@ -575,9 +592,49 @@ List<_ActivityCatalogEntry> _productionActivityCatalogs() {
       options: ActivityCatalog.family,
       status: OntologyNodeStatus.retired,
     ),
-    _ActivityCatalogEntry(
+    const _ActivityCatalogEntry(
       catalog: OntologyActivityCatalog.hadith,
       options: ActivityCatalog.hadith,
+      status: OntologyNodeStatus.retired,
+    ),
+    _ActivityCatalogEntry(
+      catalog: OntologyActivityCatalog.hadithEncounter,
+      options: ActivityCatalog.hadithEncounterDuration,
+      status: OntologyNodeStatus.active,
+    ),
+    _ActivityCatalogEntry(
+      catalog: OntologyActivityCatalog.hadithRetention,
+      options: ActivityCatalog.hadithRetentionDuration,
+      status: OntologyNodeStatus.active,
+    ),
+    _ActivityCatalogEntry(
+      catalog: OntologyActivityCatalog.hadithLearning,
+      options: ActivityCatalog.hadithLearningDuration,
+      status: OntologyNodeStatus.active,
+    ),
+    const _ActivityCatalogEntry(
+      catalog: OntologyActivityCatalog.hadithLivedNoticed,
+      options: ActivityCatalog.hadithLivedNoticed,
+      status: OntologyNodeStatus.active,
+    ),
+    const _ActivityCatalogEntry(
+      catalog: OntologyActivityCatalog.timeObservation,
+      options: ActivityCatalog.timeObservation,
+      status: OntologyNodeStatus.active,
+    ),
+    const _ActivityCatalogEntry(
+      catalog: OntologyActivityCatalog.dhikrPostFard,
+      options: ActivityCatalog.dhikrPostFard,
+      status: OntologyNodeStatus.active,
+    ),
+    _ActivityCatalogEntry(
+      catalog: OntologyActivityCatalog.akhlaqObservation,
+      options: akhlaqLegendCatalog,
+      status: OntologyNodeStatus.active,
+    ),
+    _ActivityCatalogEntry(
+      catalog: OntologyActivityCatalog.huquqObservation,
+      options: huquqLegendCatalog,
       status: OntologyNodeStatus.active,
     ),
   ];

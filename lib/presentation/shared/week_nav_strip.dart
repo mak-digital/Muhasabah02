@@ -6,6 +6,11 @@ Color weekNavStripWash(Color family, Color cardWash) {
   return Color.alphaBlend(family.withValues(alpha: 0.22), cardWash);
 }
 
+/// Stronger shade of the same family, used only on band headings.
+Color bandHeadingWash(Color family, Color base) {
+  return Color.alphaBlend(family.withValues(alpha: 0.32), base);
+}
+
 class WeekNavStrip extends StatelessWidget {
   const WeekNavStrip({
     super.key,
@@ -28,6 +33,7 @@ class WeekNavStrip extends StatelessWidget {
     this.subtitleMaxLines = 2,
     this.paintBackground = true,
     this.compact = false,
+    this.leading,
   });
 
   final String label;
@@ -49,6 +55,7 @@ class WeekNavStrip extends StatelessWidget {
   final int subtitleMaxLines;
   final bool paintBackground;
   final bool compact;
+  final Widget? leading;
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +68,7 @@ class WeekNavStrip extends StatelessWidget {
           letterSpacing: 0.15,
           height: 1.1,
           fontSize: prominentLabel
-              ? 20
+              ? (compact ? 16 : 20)
               : compact
               ? 14
               : 16,
@@ -76,7 +83,7 @@ class WeekNavStrip extends StatelessWidget {
       overflow: TextOverflow.ellipsis,
       style: labelStyle,
     );
-    final center = subtitleText == null
+    var center = subtitleText == null
         ? labelText
         : Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -96,14 +103,25 @@ class WeekNavStrip extends StatelessWidget {
               ),
             ],
           );
+    final mark = leading;
+    if (mark != null) {
+      center = Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          mark,
+          const SizedBox(width: 8),
+          center,
+        ],
+      );
+    }
     final row = SizedBox(
       height: compact
-          ? (subtitleText != null ? 44 : 40)
+          ? (subtitleText != null ? 40 : 36)
           : subtitleText != null
-          ? 64
-          : maxLines > 1
           ? 56
-          : 48,
+          : maxLines > 1
+          ? 48
+          : 40,
       child: Row(
         children: [
           _chevron(
@@ -154,8 +172,8 @@ class WeekNavStrip extends StatelessWidget {
     required String tooltip,
     required VoidCallback? onPressed,
   }) {
-    final size = compact ? 36.0 : 44.0;
-    final iconSize = compact ? 22.0 : 26.0;
+    final size = compact ? 32.0 : 40.0;
+    final iconSize = compact ? 20.0 : 24.0;
     return SizedBox(
       width: size,
       height: size,
@@ -187,8 +205,6 @@ class HomeWeekChrome extends StatelessWidget {
     required this.onPreviousWeek,
     required this.onNextWeek,
     required this.nextWeekEnabled,
-    required this.showCurrentWeek,
-    required this.onCurrentWeek,
     this.question,
     this.onTitleTap,
   });
@@ -201,8 +217,6 @@ class HomeWeekChrome extends StatelessWidget {
   final VoidCallback onPreviousWeek;
   final VoidCallback? onNextWeek;
   final bool nextWeekEnabled;
-  final bool showCurrentWeek;
-  final VoidCallback onCurrentWeek;
   final VoidCallback? onTitleTap;
 
   @override
@@ -250,7 +264,7 @@ class HomeWeekChrome extends StatelessWidget {
           titleBlock
         else
           InkWell(onTap: onTitleTap, child: titleBlock),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         WeekNavStrip(
           label: weekLabel,
           family: family,
@@ -258,19 +272,67 @@ class HomeWeekChrome extends StatelessWidget {
           onPrevious: onPreviousWeek,
           onNext: onNextWeek,
           nextEnabled: nextWeekEnabled,
-        ),
-        Align(
-          alignment: Alignment.centerRight,
-          child: TextButton(
-            onPressed: showCurrentWeek ? onCurrentWeek : null,
-            style: TextButton.styleFrom(
-              visualDensity: VisualDensity.compact,
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-            ),
-            child: const Text(Copy.currentWeek),
-          ),
+          compact: true,
+          maxLines: 1,
         ),
       ],
+    );
+  }
+}
+
+/// Sits in the weekday-header gutter so “Current week” does not steal a row.
+class CurrentWeekGutter extends StatelessWidget {
+  const CurrentWeekGutter({
+    super.key,
+    required this.width,
+    required this.family,
+    required this.cardWash,
+    required this.enabled,
+    required this.onPressed,
+  });
+
+  final double width;
+  final Color family;
+  final Color cardWash;
+  final bool enabled;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final ink = enabled ? family : family.withValues(alpha: 0.45);
+    return SizedBox(
+      width: width,
+      height: 36,
+      child: Padding(
+        padding: const EdgeInsets.only(right: 4),
+        child: Material(
+          color: weekNavStripWash(family, cardWash),
+          borderRadius: BorderRadius.circular(8),
+          clipBehavior: Clip.hardEdge,
+          child: GestureDetector(
+            onTap: enabled ? onPressed : null,
+            behavior: HitTestBehavior.opaque,
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 2),
+                child: Text(
+                  Copy.currentWeek,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  textScaler: TextScaler.noScaling,
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    height: 1.1,
+                    fontSize: 10,
+                    color: ink,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

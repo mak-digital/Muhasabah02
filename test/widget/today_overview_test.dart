@@ -69,10 +69,16 @@ void main() {
   testWidgets('Today heading, weekday, and date are visible', (tester) async {
     await pumpHome(tester, now: DateTime(2026, 9, 22));
     expect(find.byKey(const Key('today-overview')), findsOneWidget);
-    expect(find.text(Copy.today), findsOneWidget);
-    expect(find.textContaining('Tuesday'), findsOneWidget);
-    expect(find.textContaining('22 Sep 2026'), findsOneWidget);
+    expect(
+      find.textContaining(Copy.todayHeading('Tuesday', '22 Sep 2026')),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('sample-data-notice')), findsNothing);
     expect(find.text(Copy.activeDomainAndMix), findsOneWidget);
+    expect(
+      tester.getSize(find.byKey(const Key('today-active-domain-mix'))).height,
+      lessThan(56),
+    );
     expect(find.byKey(const Key('today-domain-salah')), findsNothing);
     final dateBottom = tester.getBottomLeft(find.byKey(const Key('today-weekday-date'))).dy;
     final actions = tester.getRect(find.byKey(const Key('today-entry-actions')));
@@ -81,7 +87,8 @@ void main() {
     expect(actions.top, greaterThan(dateBottom));
     expect(checkIn.top, closeTo(quickTap.top, 1));
     expect(checkIn.left, lessThan(quickTap.left));
-    expect(checkIn.size.height, greaterThanOrEqualTo(48));
+    expect(checkIn.size.height, greaterThanOrEqualTo(40));
+    expect(checkIn.size.height, lessThan(48));
     expect(
       tester.widget<Material>(find.byKey(const Key('home-check-in'))).elevation,
       1.5,
@@ -182,7 +189,10 @@ void main() {
       now: DateTime(2026, 9, 22),
       visibleDomains: <MonitorDomain>{},
     );
-    expect(find.text(Copy.today), findsOneWidget);
+    expect(
+      find.textContaining(Copy.todayHeading('Tuesday', '22 Sep 2026')),
+      findsOneWidget,
+    );
     expect(find.text(Copy.todayEmpty), findsOneWidget);
     expect(find.byKey(const Key('today-active-domain-mix')), findsNothing);
     expect(find.byKey(const Key('today-domain-salah')), findsNothing);
@@ -311,5 +321,25 @@ void main() {
       ),
       findsOneWidget,
     );
+  });
+
+  testWidgets('sample notice sits under the TODAY line above Quick tap', (
+    tester,
+  ) async {
+    final checkIns = MemoryCheckInRepository();
+    await checkIns.save(
+      DailyCheckIn.empty('2026-09-22').copyWith(synthetic: true),
+    );
+    await pumpHome(
+      tester,
+      now: DateTime(2026, 9, 22),
+      checkIns: checkIns,
+    );
+    final notice = tester.getRect(find.byKey(const Key('sample-data-notice')));
+    final date = tester.getRect(find.byKey(const Key('today-weekday-date')));
+    final quickTap = tester.getRect(find.byKey(const Key('home-quick-tap')));
+    expect(notice.top, greaterThan(date.bottom - 1));
+    expect(notice.bottom, lessThanOrEqualTo(quickTap.top + 1));
+    expect(notice.left, closeTo(date.left, 8));
   });
 }

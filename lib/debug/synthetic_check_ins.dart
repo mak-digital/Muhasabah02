@@ -337,12 +337,24 @@ DailyCheckIn _day(String key, DateTime date, Random random) {
   );
 
   for (final row in allHomeTraceRows) {
+    if (hadithRetiredHomeRows.any((item) => item.storageKey == row.storageKey)) {
+      continue;
+    }
     final outcome = _pick(random, [
       (0.52, TernaryOutcome.unanswered),
       (0.82, TernaryOutcome.positive),
       (1.0, TernaryOutcome.negative),
     ]);
-    if (outcome != TernaryOutcome.unanswered) {
+    if (outcome == TernaryOutcome.unanswered) continue;
+    final catalog = ActivityCatalog.forHomeTrace(row.storageKey);
+    if (catalog.isNotEmpty) {
+      record = record.withHomeTraceActivity(
+        row.storageKey,
+        RecordedActivity(
+          id: ActivityCatalog.canonicalTernaryId(outcome, catalog),
+        ),
+      );
+    } else {
       record = record.withHomeTrace(row.storageKey, outcome);
     }
   }

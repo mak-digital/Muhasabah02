@@ -20,7 +20,9 @@ List<QuranDimension> get quranDailyDimensions => const [
 const kQuranRecitationBand = 'Recitation';
 const kQuranRetentionBand = 'Retention';
 const kQuranStudyBand = 'Study & notice';
-const kQuranEngagementBand = 'Engagement';
+
+/// Single Home / check-in / 7-day wash, like Hadith’s ENGAGED with Hadith.
+const kQuranEngagementBand = 'ENGAGEMENT with Qur’an';
 const kQuranUnderstandingBand = 'Understanding & reflection';
 const kQuranReflectionBand = 'Reflection';
 const kQuranApplicationBand = 'Practical relevance';
@@ -52,10 +54,10 @@ List<(String band, List<QuranDimension> rows)> quranHomeBandsFor(
 ) {
   final shown = display.toSet();
   const catalog = <(String, List<QuranDimension>)>[
-    (kQuranEngagementBand, engagementHomeRows),
-    (kQuranUnderstandingBand, understandingHomeRows),
-    (kQuranReflectionBand, reflectionHomeRows),
-    (kQuranApplicationBand, applicationHomeRows),
+    (
+      kQuranEngagementBand,
+      [...engagementHomeRows, ...understandingHomeRows, ...applicationHomeRows],
+    ),
   ];
   return [
     for (final entry in catalog)
@@ -101,16 +103,17 @@ extension QuranDimensionX on QuranDimension {
   bool get matrixColumnVertical => true;
 
   String get homeBand {
-    if (engagementHomeRows.contains(this)) return kQuranEngagementBand;
-    if (understandingHomeRows.contains(this)) return kQuranUnderstandingBand;
+    if (engagementHomeRows.contains(this) ||
+        understandingHomeRows.contains(this) ||
+        applicationHomeRows.contains(this)) {
+      return kQuranEngagementBand;
+    }
     if (reflectionHomeRows.contains(this)) return kQuranReflectionBand;
-    if (applicationHomeRows.contains(this)) return kQuranApplicationBand;
     return kQuranStudyBand;
   }
 
   String get question => switch (this) {
-    QuranDimension.reading =>
-      'Did you spend time with recitation, memorisation, and/or revision today?',
+    QuranDimension.reading => 'Did you spend time with recitation, memorisation, and/or revision today?',
     QuranDimension.meaning =>
       'Did you spend time with meaning and/or tafsir, plus pondering, today?',
     QuranDimension.memorisation =>

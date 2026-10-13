@@ -15,6 +15,7 @@ import '../checkin/check_in_screen.dart';
 import '../shared/salah_activity_mark.dart';
 import '../shared/state_marker.dart';
 import '../shared/today_mark_halo.dart';
+import '../shared/home_band_heading.dart';
 import '../shared/week_nav_strip.dart';
 
 class QuranHomeCard extends ConsumerStatefulWidget {
@@ -63,9 +64,6 @@ class _QuranHomeCardState extends ConsumerState<QuranHomeCard> {
       brightness,
     );
     final localizations = MaterialLocalizations.of(context);
-    final rows = [
-      for (final band in quranHomeBandsFor(_display)) ...band.$2,
-    ];
 
     return Semantics(
       container: true,
@@ -87,8 +85,6 @@ class _QuranHomeCardState extends ConsumerState<QuranHomeCard> {
                 onPreviousWeek: () => setState(() => _weekOffset--),
                 onNextWeek: () => setState(() => _weekOffset++),
                 nextWeekEnabled: _weekOffset < 0,
-                showCurrentWeek: _weekOffset != 0,
-                onCurrentWeek: () => setState(() => _weekOffset = 0),
                 onTitleTap: () {
                   refreshNowIfLocalDateChanged(ref);
                   openFocusedCheckIn(
@@ -101,7 +97,14 @@ class _QuranHomeCardState extends ConsumerState<QuranHomeCard> {
               const SizedBox(height: 4),
               Row(
                 children: [
-                  if (!widget.compactWeek) const SizedBox(width: 92),
+                  if (!widget.compactWeek)
+                    CurrentWeekGutter(
+                      width: 92,
+                      family: MuhasabahColors.quranFamily,
+                      cardWash: wash,
+                      enabled: _weekOffset != 0,
+                      onPressed: () => setState(() => _weekOffset = 0),
+                    ),
                   for (var col = 0; col < kCalendarWeekdayCount; col++)
                     Expanded(
                       child: Column(
@@ -154,8 +157,17 @@ class _QuranHomeCardState extends ConsumerState<QuranHomeCard> {
                   ],
                 )
               else
-                for (final dimension in rows)
-                  _row(dimension, keys, index, colours),
+                for (final entry in quranHomeBandsFor(_display)) ...[
+                  HomeBandHeading(
+                    band: entry.$1,
+                    family: MuhasabahColors.quranFamily,
+                    baseWash: wash,
+                  ),
+                  const SizedBox(height: 6),
+                  for (final dimension in entry.$2)
+                    _row(dimension, keys, index, colours),
+                  const SizedBox(height: 8),
+                ],
             ],
           ),
         ),
@@ -257,7 +269,10 @@ class _QuranHomeCardState extends ConsumerState<QuranHomeCard> {
         ActivityIds.unanswered;
     return RecordedStateMarker(
       key: Key('quran-home-${dimension.name}-$key'),
-      kind: SalahActivityMark.quranDurationKind(id),
+      kind: SalahActivityMark.quranDurationKind(
+        id,
+        activityColours: colours,
+      ),
       color: SalahActivityMark.quranDurationColour(id, colours: colours),
       semanticLabel: '$key ${dimension.label} ${outcome.legendLabel}',
     );

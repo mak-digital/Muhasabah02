@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../application/providers.dart';
 import '../../domain/activities.dart';
+import '../../domain/akhlaq_practices.dart';
+import '../../domain/huquq_practices.dart';
 import '../../domain/copy.dart';
 import '../../domain/daily_check_in.dart';
 import '../../domain/date_key.dart';
@@ -13,8 +15,13 @@ import '../../domain/personal_response.dart';
 import '../../domain/prayer.dart';
 import '../../domain/quran.dart';
 import '../../domain/salah_factors.dart';
+import '../../domain/time_practices.dart';
+import '../progress/progress_review_frame.dart';
 import '../recorded_days/day_evidence_screen.dart';
+import '../shared/time_practice_fields.dart';
 import '../shared/activity_picker.dart';
+import '../shared/akhlaq_follow_up_fields.dart';
+import '../shared/huquq_follow_up_fields.dart';
 import '../shared/add_response_button.dart';
 import '../shared/system_insets.dart';
 
@@ -48,6 +55,7 @@ void openDayEvidence(BuildContext context, String dateKey) {
 
 VoidCallback? matrixCellOnTap({
   required WidgetRef ref,
+  required BuildContext context,
   required String dateKey,
   VoidCallback? onOpen,
   VoidCallback? onPast,
@@ -60,8 +68,10 @@ VoidCallback? matrixCellOnTap({
       case DateCellKind.future:
         return;
       case DateCellKind.today:
+        ProgressChromeScope.collapseMarksOf(context);
         (onToday ?? onOpen)?.call();
       case DateCellKind.past:
+        ProgressChromeScope.collapseMarksOf(context);
         (onPast ?? onOpen)?.call();
     }
   };
@@ -76,8 +86,11 @@ Future<void> showHomeTraceRecordSheet({
   Key? dropdownKey,
 }) async {
   var outcome = record?.homeTrace(row.storageKey) ?? TernaryOutcome.unanswered;
+  var selectedId =
+      record?.activityFor(row.storageKey).id ?? ActivityIds.unanswered;
   var factors =
       record?.homeTraceFactors[row.storageKey] ?? const SalahFactorCapture();
+  final catalog = ActivityCatalog.forHomeTrace(row.storageKey);
   final systemBottom = presentingSystemBottom(context);
   await showModalBottomSheet<void>(
     context: context,
@@ -108,56 +121,448 @@ Future<void> showHomeTraceRecordSheet({
                       const Text(Copy.seePonderExplore),
                       const SizedBox(height: 8),
                       const CheckInRowLabel('What happened?'),
-                      CheckInSelect<TernaryOutcome>(
-                        dropdownKey: dropdownKey,
-                        value: outcome,
-                        sortLabels: false,
-                        entries: [
-                          for (final option in TernaryOutcome.values)
-                            CheckInSelectEntry(
-                              value: option,
-                              label: traceOutcomeLabel(row.storageKey, option),
-                            ),
-                        ],
-                        onChanged: (option) async {
-                          outcome = option;
-                          setSheet(() {});
-                          final base =
-                              _recordFor(ref, dateKey, record) ??
-                              DailyCheckIn.empty(dateKey);
-                          var next = base.withHomeTrace(row.storageKey, option);
-                          if (!hidesHomeTraceFactors(row.storageKey)) {
-                            final groups = factorGroupsForTernary(option);
-                            factors = SalahFactorCapture(
-                              supportIds: groups.showHelping
-                                  ? factors.supportIds.take(1).toList()
-                                  : const [],
-                              challengeIds: groups.showDistracting
-                                  ? factors.challengeIds.take(1).toList()
-                                  : const [],
-                              otherText: factors.otherText,
-                            );
-                            next = next.withHomeTraceFactors(
+                      if (catalog.isNotEmpty)
+                        ActivityPicker(
+                          statusKeyPrefix: 'trace-${row.storageKey}',
+                          options: catalog,
+                          selectedId: selectedId,
+                          namedSubject:
+                              isDhikrPostFardTrace(row.storageKey) ||
+                                  isAkhlaqTrace(row.storageKey) ||
+                                  isHuquqTrace(row.storageKey)
+                              ? row.label
+                              : null,
+                          onSelected: (option) async {
+                            selectedId = option.id;
+                            outcome =
+                                option.ternary ?? TernaryOutcome.unanswered;
+                            setSheet(() {});
+                            final base =
+                                _recordFor(ref, dateKey, record) ??
+                                DailyCheckIn.empty(dateKey);
+                            if (isTimeTrace(row.storageKey)) {
+                              DailyCheckIn next;
+                              if (option.id == ActivityIds.unanswered) {
+                                next = writeTimePractice(
+                                  base,
+                                  row.storageKey,
+                                  const TimePracticeCapture(),
+                                );
+                                factors = const SalahFactorCapture();
+                              } else {
+                                final existing = readTimePractice(
+                                  base,
+                                  row.storageKey,
+                                );
+                                next = writeTimePractice(
+                                  base,
+                                  row.storageKey,
+                                  TimePracticeCapture(
+                                    primaryId: option.id,
+                                    contextId: existing.contextId,
+                                    outcomeId: existing.outcomeId,
+                                    note: existing.note,
+                                  ),
+                                );
+                                factors =
+                                    next.homeTraceFactors[row.storageKey] ??
+                                    const SalahFactorCapture();
+                              }
+                              await _save(ref, next);
+                              return;
+                            }
+                            if (isAkhlaqTrace(row.storageKey)) {
+                              DailyCheckIn next;
+                              if (option.id == ActivityIds.unanswered) {
+                                next = writeAkhlaqFollowUp(
+                                  base,
+                                  row.storageKey,
+                                  const AkhlaqFollowUpCapture(),
+                                );
+                                factors = const SalahFactorCapture();
+                              } else {
+                                final existing = readAkhlaqFollowUp(
+                                  base,
+                                  row.storageKey,
+                                );
+                                next = writeAkhlaqFollowUp(
+                                  base,
+                                  row.storageKey,
+                                  AkhlaqFollowUpCapture(
+                                    primaryId: option.id,
+                                    contextId: existing.contextId,
+                                    helpId: existing.helpId,
+                                    note: existing.note,
+                                  ),
+                                );
+                                factors =
+                                    next.homeTraceFactors[row.storageKey] ??
+                                    const SalahFactorCapture();
+                              }
+                              await _save(ref, next);
+                              return;
+                            }
+                            if (isHuquqTrace(row.storageKey)) {
+                              DailyCheckIn next;
+                              if (option.id == ActivityIds.unanswered) {
+                                next = writeHuquqFollowUp(
+                                  base,
+                                  row.storageKey,
+                                  const HuquqFollowUpCapture(),
+                                );
+                                factors = const SalahFactorCapture();
+                              } else {
+                                final existing = readHuquqFollowUp(
+                                  base,
+                                  row.storageKey,
+                                );
+                                next = writeHuquqFollowUp(
+                                  base,
+                                  row.storageKey,
+                                  existing.copyWith(primaryId: option.id),
+                                );
+                                factors =
+                                    next.homeTraceFactors[row.storageKey] ??
+                                    const SalahFactorCapture();
+                              }
+                              await _save(ref, next);
+                              return;
+                            }
+                            var next = base.withHomeTraceActivity(
                               row.storageKey,
-                              factors,
+                              RecordedActivity(id: option.id),
                             );
-                          }
-                          await _save(ref, next);
-                        },
-                      ),
+                            if (!hidesHomeTraceFactors(row.storageKey)) {
+                              factors = nextHomeTraceFactors(
+                                storageKey: row.storageKey,
+                                outcome: outcome,
+                                existing: factors,
+                              );
+                              next = next.withHomeTraceFactors(
+                                row.storageKey,
+                                factors,
+                              );
+                            }
+                            await _save(ref, next);
+                          },
+                        )
+                      else
+                        CheckInSelect<TernaryOutcome>(
+                          dropdownKey: dropdownKey,
+                          value: outcome,
+                          sortLabels: false,
+                          entries: [
+                            for (final option in TernaryOutcome.values)
+                              CheckInSelectEntry(
+                                value: option,
+                                label: traceOutcomeLabel(
+                                  row.storageKey,
+                                  option,
+                                ),
+                              ),
+                          ],
+                          onChanged: (option) async {
+                            outcome = option;
+                            setSheet(() {});
+                            final base =
+                                _recordFor(ref, dateKey, record) ??
+                                DailyCheckIn.empty(dateKey);
+                            var next = base.withHomeTrace(
+                              row.storageKey,
+                              option,
+                            );
+                            if (!hidesHomeTraceFactors(row.storageKey)) {
+                              factors = nextHomeTraceFactors(
+                                storageKey: row.storageKey,
+                                outcome: option,
+                                existing: factors,
+                              );
+                              next = next.withHomeTraceFactors(
+                                row.storageKey,
+                                factors,
+                              );
+                            }
+                            await _save(ref, next);
+                          },
+                        ),
+                      if (isTimeTrace(row.storageKey) &&
+                          timePracticeByKey(row.storageKey) != null) ...[
+                        Padding(
+                          padding: const EdgeInsets.only(top: 6),
+                          child: Text(
+                            timePracticeByKey(row.storageKey)!.detail,
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ),
+                        if (selectedId != ActivityIds.unanswered)
+                          TimePracticeFields(
+                            practice: timePracticeByKey(row.storageKey)!,
+                            contextId: selectedFactorId(factors.supportIds),
+                            outcomeId: selectedFactorId(factors.challengeIds),
+                            note: factors.otherText ?? '',
+                            onContextChanged: (id) async {
+                              final base =
+                                  _recordFor(ref, dateKey, record) ??
+                                  DailyCheckIn.empty(dateKey);
+                              final next = writeTimePractice(
+                                base,
+                                row.storageKey,
+                                TimePracticeCapture(
+                                  primaryId: selectedId,
+                                  contextId: id,
+                                  outcomeId: selectedFactorId(
+                                    factors.challengeIds,
+                                  ),
+                                  note: factors.otherText ?? '',
+                                ),
+                              );
+                              factors =
+                                  next.homeTraceFactors[row.storageKey] ??
+                                  const SalahFactorCapture();
+                              setSheet(() {});
+                              await _save(ref, next);
+                            },
+                            onOutcomeChanged: (id) async {
+                              final base =
+                                  _recordFor(ref, dateKey, record) ??
+                                  DailyCheckIn.empty(dateKey);
+                              final next = writeTimePractice(
+                                base,
+                                row.storageKey,
+                                TimePracticeCapture(
+                                  primaryId: selectedId,
+                                  contextId: selectedFactorId(
+                                    factors.supportIds,
+                                  ),
+                                  outcomeId: id,
+                                  note: factors.otherText ?? '',
+                                ),
+                              );
+                              factors =
+                                  next.homeTraceFactors[row.storageKey] ??
+                                  const SalahFactorCapture();
+                              setSheet(() {});
+                              await _save(ref, next);
+                            },
+                            onNoteChanged: (value) async {
+                              final base =
+                                  _recordFor(ref, dateKey, record) ??
+                                  DailyCheckIn.empty(dateKey);
+                              final next = writeTimePractice(
+                                base,
+                                row.storageKey,
+                                TimePracticeCapture(
+                                  primaryId: selectedId,
+                                  contextId: selectedFactorId(
+                                    factors.supportIds,
+                                  ),
+                                  outcomeId: selectedFactorId(
+                                    factors.challengeIds,
+                                  ),
+                                  note: value,
+                                ),
+                              );
+                              factors =
+                                  next.homeTraceFactors[row.storageKey] ??
+                                  const SalahFactorCapture();
+                              await _save(ref, next);
+                            },
+                          ),
+                      ],
+                      if (isAkhlaqTrace(row.storageKey) &&
+                          selectedId != ActivityIds.unanswered)
+                        AkhlaqFollowUpFields(
+                          storageKey: row.storageKey,
+                          contextId: selectedFactorId(factors.supportIds),
+                          helpId: selectedFactorId(factors.challengeIds),
+                          note: factors.otherText ?? '',
+                          onContextChanged: (id) async {
+                            final base =
+                                _recordFor(ref, dateKey, record) ??
+                                DailyCheckIn.empty(dateKey);
+                            final next = writeAkhlaqFollowUp(
+                              base,
+                              row.storageKey,
+                              AkhlaqFollowUpCapture(
+                                primaryId: selectedId,
+                                contextId: id,
+                                helpId: selectedFactorId(factors.challengeIds),
+                                note: factors.otherText ?? '',
+                              ),
+                            );
+                            factors =
+                                next.homeTraceFactors[row.storageKey] ??
+                                const SalahFactorCapture();
+                            setSheet(() {});
+                            await _save(ref, next);
+                          },
+                          onHelpChanged: (id) async {
+                            final base =
+                                _recordFor(ref, dateKey, record) ??
+                                DailyCheckIn.empty(dateKey);
+                            final next = writeAkhlaqFollowUp(
+                              base,
+                              row.storageKey,
+                              AkhlaqFollowUpCapture(
+                                primaryId: selectedId,
+                                contextId: selectedFactorId(factors.supportIds),
+                                helpId: id,
+                                note: factors.otherText ?? '',
+                              ),
+                            );
+                            factors =
+                                next.homeTraceFactors[row.storageKey] ??
+                                const SalahFactorCapture();
+                            setSheet(() {});
+                            await _save(ref, next);
+                          },
+                          onNoteChanged: (value) async {
+                            final base =
+                                _recordFor(ref, dateKey, record) ??
+                                DailyCheckIn.empty(dateKey);
+                            final next = writeAkhlaqFollowUp(
+                              base,
+                              row.storageKey,
+                              AkhlaqFollowUpCapture(
+                                primaryId: selectedId,
+                                contextId: selectedFactorId(factors.supportIds),
+                                helpId: selectedFactorId(factors.challengeIds),
+                                note: value,
+                              ),
+                            );
+                            factors =
+                                next.homeTraceFactors[row.storageKey] ??
+                                const SalahFactorCapture();
+                            await _save(ref, next);
+                          },
+                        ),
+                      if (isHuquqTrace(row.storageKey) &&
+                          selectedId != ActivityIds.unanswered)
+                        HuquqFollowUpFields(
+                          storageKey: row.storageKey,
+                          engagementId: selectedFactorId(factors.supportIds),
+                          outcomeId: selectedFactorId(factors.challengeIds),
+                          occasions: decodeHuquqQuantity(
+                            (_recordFor(ref, dateKey, record) ??
+                                    DailyCheckIn.empty(dateKey))
+                                .activityFor(row.storageKey)
+                                .customText,
+                          ).occasions,
+                          timeSpent: decodeHuquqQuantity(
+                            (_recordFor(ref, dateKey, record) ??
+                                    DailyCheckIn.empty(dateKey))
+                                .activityFor(row.storageKey)
+                                .customText,
+                          ).timeSpent,
+                          note: factors.otherText ?? '',
+                          onEngagementChanged: (id) async {
+                            final base =
+                                _recordFor(ref, dateKey, record) ??
+                                DailyCheckIn.empty(dateKey);
+                            final next = writeHuquqFollowUp(
+                              base,
+                              row.storageKey,
+                              readHuquqFollowUp(
+                                base,
+                                row.storageKey,
+                              ).copyWith(
+                                primaryId: selectedId,
+                                engagementId: id,
+                              ),
+                            );
+                            factors =
+                                next.homeTraceFactors[row.storageKey] ??
+                                const SalahFactorCapture();
+                            setSheet(() {});
+                            await _save(ref, next);
+                          },
+                          onOutcomeChanged: (id) async {
+                            final base =
+                                _recordFor(ref, dateKey, record) ??
+                                DailyCheckIn.empty(dateKey);
+                            final next = writeHuquqFollowUp(
+                              base,
+                              row.storageKey,
+                              readHuquqFollowUp(
+                                base,
+                                row.storageKey,
+                              ).copyWith(
+                                primaryId: selectedId,
+                                outcomeId: id,
+                              ),
+                            );
+                            factors =
+                                next.homeTraceFactors[row.storageKey] ??
+                                const SalahFactorCapture();
+                            setSheet(() {});
+                            await _save(ref, next);
+                          },
+                          onOccasionsChanged: (value) async {
+                            final base =
+                                _recordFor(ref, dateKey, record) ??
+                                DailyCheckIn.empty(dateKey);
+                            final next = writeHuquqFollowUp(
+                              base,
+                              row.storageKey,
+                              readHuquqFollowUp(
+                                base,
+                                row.storageKey,
+                              ).copyWith(
+                                primaryId: selectedId,
+                                occasions: value,
+                              ),
+                            );
+                            factors =
+                                next.homeTraceFactors[row.storageKey] ??
+                                const SalahFactorCapture();
+                            await _save(ref, next);
+                          },
+                          onTimeSpentChanged: (value) async {
+                            final base =
+                                _recordFor(ref, dateKey, record) ??
+                                DailyCheckIn.empty(dateKey);
+                            final next = writeHuquqFollowUp(
+                              base,
+                              row.storageKey,
+                              readHuquqFollowUp(
+                                base,
+                                row.storageKey,
+                              ).copyWith(
+                                primaryId: selectedId,
+                                timeSpent: value,
+                              ),
+                            );
+                            factors =
+                                next.homeTraceFactors[row.storageKey] ??
+                                const SalahFactorCapture();
+                            await _save(ref, next);
+                          },
+                          onNoteChanged: (value) async {
+                            final base =
+                                _recordFor(ref, dateKey, record) ??
+                                DailyCheckIn.empty(dateKey);
+                            final next = writeHuquqFollowUp(
+                              base,
+                              row.storageKey,
+                              readHuquqFollowUp(
+                                base,
+                                row.storageKey,
+                              ).copyWith(
+                                primaryId: selectedId,
+                                note: value,
+                              ),
+                            );
+                            factors =
+                                next.homeTraceFactors[row.storageKey] ??
+                                const SalahFactorCapture();
+                            await _save(ref, next);
+                          },
+                        ),
                       if (!hidesHomeTraceFactors(row.storageKey))
-                        CheckInFactorSelects(
-                          groups: factorGroupsForTernary(outcome),
-                          helping: NamedFactor.helpingForHomeTrace(
-                            row.storageKey,
-                            existingIds: factors.supportIds,
-                          ),
-                          distracting: NamedFactor.distractingForHomeTrace(
-                            row.storageKey,
-                            existingIds: factors.challengeIds,
-                          ),
-                          helpingId: selectedFactorId(factors.supportIds),
-                          distractingId: selectedFactorId(factors.challengeIds),
+                        CheckInFactorSelects.forHomeTrace(
+                          storageKey: row.storageKey,
+                          outcome: outcome,
+                          factors: factors,
                           onHelpingChanged: (id) async {
                             factors = SalahFactorCapture(
                               supportIds: idsFromFactorChoice(id),

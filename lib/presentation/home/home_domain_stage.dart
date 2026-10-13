@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../application/providers.dart';
 import '../../domain/copy.dart';
 import '../../domain/monitor_domain.dart';
 import '../shared/domain_stage.dart';
+import 'salah_home_follow_on.dart';
 
-class HomeDomainStage extends StatelessWidget {
+class HomeDomainStage extends ConsumerWidget {
   const HomeDomainStage({
     super.key,
     required this.domains,
@@ -16,13 +18,31 @@ class HomeDomainStage extends StatelessWidget {
   final Widget Function(MonitorDomain domain) cardFor;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (domains.isEmpty) {
+      return DomainStage(
+        domains: domains,
+        cardFor: cardFor,
+        stageProvider: homeDomainStageProvider,
+        keyPrefix: 'home-domain',
+        pillsNote: Copy.homeDomainPillsNote,
+      );
+    }
+    final shown =
+        domains[homeDomainStageIndex(
+          domains,
+          ref.watch(homeDomainStageProvider),
+        )];
+    final practice = homePracticeWash(shown);
     return DomainStage(
       domains: domains,
       cardFor: cardFor,
       stageProvider: homeDomainStageProvider,
       keyPrefix: 'home-domain',
       pillsNote: Copy.homeDomainPillsNote,
+      aboveCard: [
+        if (practice != null) ...[practice, const SizedBox(height: 10)],
+      ],
     );
   }
 }

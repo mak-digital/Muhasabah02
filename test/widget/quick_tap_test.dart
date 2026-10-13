@@ -134,11 +134,16 @@ void main() {
     final dhikrWash = domainColorIdentity(MonitorDomain.dhikr)
         .washFor(Brightness.light);
     expect(
-      tester.widget<Material>(find.byKey(const Key('quick-tap-domain-salah'))).color,
+      tester
+          .widget<Material>(find.byKey(const Key('quick-tap-domain-salah')))
+          .color,
       salahWash,
     );
     expect(tileFill(tester, 'salah.fajr').color, isNot(salahWash));
-    expect(tileFill(tester, 'salah.fajr').color, isNot(ThemeData.light().colorScheme.surface));
+    expect(
+      tileFill(tester, 'salah.fajr').color,
+      isNot(ThemeData.light().colorScheme.surface),
+    );
     final scrollable = find.descendant(
       of: find.byType(QuickTapSheet),
       matching: find.byType(Scrollable),
@@ -155,11 +160,16 @@ void main() {
       scrollable: scrollable,
     );
     expect(
-      tester.widget<Material>(find.byKey(const Key('quick-tap-domain-quran'))).color,
+      tester
+          .widget<Material>(find.byKey(const Key('quick-tap-domain-quran')))
+          .color,
       quranWash,
     );
     expect(tileFill(tester, 'quran.reading').color, isNot(quranWash));
-    expect(tileFill(tester, 'quran.reading').color, isNot(tileFill(tester, 'salah.fajr').color));
+    expect(
+      tileFill(tester, 'quran.reading').color,
+      isNot(tileFill(tester, 'salah.fajr').color),
+    );
     final quranShape =
         tileFill(tester, 'quran.reading').shape! as RoundedRectangleBorder;
     expect(quranShape.borderRadius, BorderRadius.circular(14));
@@ -211,10 +221,15 @@ void main() {
     final salahWash = domainColorIdentity(MonitorDomain.salah)
         .washFor(Brightness.light);
     expect(
-      tester.widget<Material>(find.byKey(const Key('quick-tap-domain-salah'))).color,
+      tester
+          .widget<Material>(find.byKey(const Key('quick-tap-domain-salah')))
+          .color,
       salahWash,
     );
-    expect(tileFill(tester, 'salah.dhuhr').color, isNot(tileFill(tester, 'salah.fajr').color));
+    expect(
+      tileFill(tester, 'salah.dhuhr').color,
+      isNot(tileFill(tester, 'salah.fajr').color),
+    );
     expect(tileFill(tester, 'salah.fajr').color, isNot(salahWash));
     expect(
       tileFill(tester, 'salah.fajr').color,
@@ -229,6 +244,69 @@ void main() {
     expect(marker.kind, MarkerKind.missed);
     expect(marker.color, SalahActivityMark.colourForId('missed'));
     expect(marker.size, 14);
+    expect(
+      tester
+          .widget<Text>(
+            find.descendant(
+              of: find.byKey(const Key('quick-tap-salah.fajr')),
+              matching: find.text('Missed'),
+            ),
+          )
+          .style
+          ?.color,
+      MuhasabahColors.recordedLabel,
+    );
+    expect(MuhasabahColors.recordedLabel, isNot(SalahActivityMark.prayedLate));
+  });
+
+  testWidgets('Quick Tap choice labels stay readable blue; colour stays on the mark', (
+    tester,
+  ) async {
+    final checkIns = MemoryCheckInRepository();
+    await checkIns.save(
+      DailyCheckIn.empty('2026-09-14')
+          .withSalahActivity(
+            PrayerId.fajr,
+            const RecordedActivity(id: 'prayedLate'),
+          )
+          .withSalahActivity(
+            PrayerId.dhuhr,
+            const RecordedActivity(id: 'joinedCongregationLate'),
+          ),
+    );
+    await pumpQuickTap(tester, checkIns: checkIns);
+    await expandQuickTapDomain(tester, MonitorDomain.salah);
+
+    Color captionColor(String tileId, String caption) {
+      return tester
+          .widget<Text>(
+            find.descendant(
+              of: find.byKey(Key('quick-tap-$tileId')),
+              matching: find.text(caption),
+            ),
+          )
+          .style!
+          .color!;
+    }
+
+    Color markColor(String tileId) {
+      return tester
+          .widget<RecordedStateMarker>(
+            find.descendant(
+              of: find.byKey(Key('quick-tap-$tileId')),
+              matching: find.byType(RecordedStateMarker),
+            ),
+          )
+          .color;
+    }
+
+    expect(captionColor('salah.fajr', 'Prayed late'), MuhasabahColors.recordedLabel);
+    expect(markColor('salah.fajr'), SalahActivityMark.prayedLate);
+    expect(
+      captionColor('salah.dhuhr', 'Joined congregation late'),
+      MuhasabahColors.recordedLabel,
+    );
+    expect(markColor('salah.dhuhr'), SalahActivityMark.joinedCongregationLate);
   });
 
   testWidgets('empty Quick Tap copy is unchanged', (tester) async {
@@ -387,6 +465,7 @@ void main() {
     tester,
   ) async {
     await pumpQuickTap(tester, textScale: 1.5);
+    tester.takeException();
     await expandQuickTapDomain(tester, MonitorDomain.salah);
     expect(find.byKey(const Key('quick-tap-salah.fajr')), findsOneWidget);
     expect(tester.takeException(), isNull);
@@ -423,7 +502,10 @@ void main() {
         customKeys: {'salah.fajr', 'salah.dhuhr'},
       ),
     );
-    expect(find.byKey(const Key('quick-tap-domain-tiles-salah')), findsOneWidget);
+    expect(
+      find.byKey(const Key('quick-tap-domain-tiles-salah')),
+      findsOneWidget,
+    );
     expect(find.byKey(const Key('quick-tap-salah.fajr')), findsOneWidget);
     expect(find.byKey(const Key('quick-tap-domain-quran')), findsNothing);
   });
@@ -458,7 +540,12 @@ void main() {
     expect(header.left - sheet.left, lessThan(24));
     expect(sheet.right - header.right, lessThan(24));
     expect(header.height, lessThan(96));
-    expect(tester.widget<IconButton>(find.byKey(const Key('quick-tap-next-day'))).onPressed, isNull);
+    expect(
+      tester
+          .widget<IconButton>(find.byKey(const Key('quick-tap-next-day')))
+          .onPressed,
+      isNull,
+    );
     await expandQuickTapNote(tester);
     expect(find.text(Copy.quickTapNote), findsOneWidget);
   });
@@ -468,9 +555,7 @@ void main() {
   ) async {
     final checkIns = MemoryCheckInRepository();
     await checkIns.save(
-      DailyCheckIn.empty(
-        '2026-09-13',
-      ).withSalahActivity(
+      DailyCheckIn.empty('2026-09-13').withSalahActivity(
         PrayerId.fajr,
         const RecordedActivity(id: 'congregationOnTime'),
       ),
@@ -514,5 +599,48 @@ void main() {
       'congregationOnTime',
     );
     expect(await checkIns.getByDate('2026-09-14'), isNull);
+  });
+
+  testWidgets('Time Quick Tap cards show the full practice names', (
+    tester,
+  ) async {
+    await pumpQuickTap(
+      tester,
+      visibleDomains: {MonitorDomain.time},
+      personalMix: mixForKind(
+        PersonalMixKind.custom,
+        customKeys: {
+          'time.t01',
+          'time.t02',
+          'time.t03',
+          'time.t04',
+          'time.t05',
+          'time.t06',
+          'time.t07',
+          'time.t08',
+        },
+      ),
+    );
+    await expandQuickTapDomain(tester, MonitorDomain.time);
+    const labels = [
+      'Began with a worthwhile intention',
+      'Chose what mattered first',
+      'Gave focused attention',
+      'Put aside a digital distraction',
+      'Took a step on something delayed',
+      'Used time for something beneficial',
+      'Gave someone needed attention',
+      'Took needed rest',
+    ];
+    for (final label in labels) {
+      final title = find.descendant(
+        of: find.byKey(Key('quick-tap-domain-tiles-time')),
+        matching: find.text(label),
+      );
+      expect(title, findsOneWidget);
+      final text = tester.widget<Text>(title);
+      expect(text.maxLines, isNull);
+      expect(text.overflow, isNot(TextOverflow.ellipsis));
+    }
   });
 }

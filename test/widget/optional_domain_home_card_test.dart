@@ -76,10 +76,10 @@ void main() {
 
     await expectFullWeek(
       domain: MonitorDomain.time,
-      band: 'PRESENCE',
-      row: 'Present in what I was doing',
+      band: 'INTENTION & PRIORITY',
+      row: 'Began with a worthwhile intention',
       compactKey: 'home-compact-time-2026-09-03',
-      cellKey: 'home-time.presentInWhatIWasDoing-2026-09-03',
+      cellKey: 'home-time.t01-2026-09-03',
     );
     await expectFullWeek(
       domain: MonitorDomain.health,

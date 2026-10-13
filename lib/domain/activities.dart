@@ -1,12 +1,19 @@
+import 'akhlaq_practices.dart';
+import 'home_traces.dart';
+import 'huquq_practices.dart';
 import 'other_domains.dart';
 import 'prayer.dart';
 import 'quran.dart';
 import 'quran_duration.dart';
+import 'salah_extras.dart';
 
 class ActivityIds {
   static const unanswered = 'unanswered';
   static const noActivity = 'noActivity';
   static const other = 'other';
+  static const acted = 'acted';
+  static const noticedNotActed = 'noticedNotActed';
+  static const noSituation = 'noSituation';
 }
 
 class ActivityOption {
@@ -231,6 +238,71 @@ class ActivityCatalog {
       id: ActivityIds.other,
       label: 'Other',
       prayerStatus: PrayerStatus.other,
+    ),
+  ];
+
+  static const tahajjudEarlyMidAndLate = 'tahajjud.earlyMidAndLate';
+  static const tahajjudLaterPart = 'tahajjud.laterPart';
+  static const tahajjudEarlyMid = 'tahajjud.earlyMid';
+  static const tahajjudNotPrayed = 'tahajjud.notPrayed';
+  static const ishraqFollowingFajr = 'ishraq.followingFajr';
+  static const ishraqLaterMorning = 'ishraq.laterMorning';
+  static const ishraqPrayed = 'ishraq.prayed';
+  static const ishraqNotPrayed = 'ishraq.notPrayed';
+
+  static const tahajjud = <ActivityOption>[
+    ActivityOption(
+      id: tahajjudEarlyMidAndLate,
+      label: 'Prayed early/mid and late at night',
+      ternary: TernaryOutcome.positive,
+    ),
+    ActivityOption(
+      id: tahajjudLaterPart,
+      label: 'Prayed later part of night',
+      ternary: TernaryOutcome.positive,
+    ),
+    ActivityOption(
+      id: tahajjudEarlyMid,
+      label: 'Prayed early/mid night',
+      ternary: TernaryOutcome.positive,
+    ),
+    ActivityOption(
+      id: tahajjudNotPrayed,
+      label: 'Not Prayed',
+      ternary: TernaryOutcome.negative,
+    ),
+    ActivityOption(
+      id: ActivityIds.unanswered,
+      label: 'Not recorded',
+      ternary: TernaryOutcome.unanswered,
+    ),
+  ];
+
+  static const ishraq = <ActivityOption>[
+    ActivityOption(
+      id: ishraqFollowingFajr,
+      label: 'Prayed following Fajr',
+      ternary: TernaryOutcome.positive,
+    ),
+    ActivityOption(
+      id: ishraqLaterMorning,
+      label: 'Prayed later in the morning',
+      ternary: TernaryOutcome.positive,
+    ),
+    ActivityOption(
+      id: ishraqPrayed,
+      label: 'Prayed',
+      ternary: TernaryOutcome.positive,
+    ),
+    ActivityOption(
+      id: ishraqNotPrayed,
+      label: 'Not Prayed',
+      ternary: TernaryOutcome.negative,
+    ),
+    ActivityOption(
+      id: ActivityIds.unanswered,
+      label: 'Not recorded',
+      ternary: TernaryOutcome.unanswered,
     ),
   ];
 
@@ -861,6 +933,157 @@ class ActivityCatalog {
     ),
   ];
 
+  static const dhikrWithAction = 'dhikr.postFard.withAction';
+  static const dhikrAttentive = 'dhikr.postFard.attentive';
+  static const dhikrIntentional = 'dhikr.postFard.intentional';
+  static const dhikrBrief = 'dhikr.postFard.brief';
+
+  static const dhikrPostFard = <ActivityOption>[
+    ActivityOption(
+      id: dhikrWithAction,
+      label:
+          'Remembrance with action (I noticed a beneficial response in my behaviour)',
+      ternary: TernaryOutcome.positive,
+    ),
+    ActivityOption(
+      id: dhikrAttentive,
+      label:
+          'Attentive remembrance (I consciously reflected on the words or meaning)',
+      ternary: TernaryOutcome.positive,
+    ),
+    ActivityOption(
+      id: dhikrIntentional,
+      label:
+          'Intentional remembrance (I deliberately made time for dhikr or du‘a)',
+      ternary: TernaryOutcome.positive,
+    ),
+    ActivityOption(
+      id: dhikrBrief,
+      label: 'Brief remembrance (A short dhikr or du‘a during the time)',
+      ternary: TernaryOutcome.positive,
+    ),
+    ActivityOption(
+      id: ActivityIds.noActivity,
+      label: 'Not today (I did not practise or do not recall doing so)',
+      ternary: TernaryOutcome.negative,
+    ),
+    ActivityOption(
+      id: ActivityIds.unanswered,
+      label: 'Unanswered',
+      ternary: TernaryOutcome.unanswered,
+    ),
+  ];
+
+  static const hadithLivedStartedNew = 'hadithLived.startedNew';
+  static const hadithLivedIntroducedFamily = 'hadithLived.introducedFamily';
+  static const hadithLivedCorrectedPractice = 'hadithLived.correctedPractice';
+  static const hadithLivedObservedOther = 'hadithLived.observedOther';
+
+  static final hadithEncounterDuration = quranDuration(
+    verb: 'Engaged',
+    rowName: 'Read and/or Listened',
+  );
+  static final hadithRetentionDuration = quranDuration(
+    verb: 'Involved',
+    rowName: 'Memorization/Revision',
+  );
+  static final hadithLearningDuration = quranDuration(
+    verb: 'Involved',
+    rowName: 'Study Circle/Discussion',
+  );
+  static const hadithLivedNoticed = <ActivityOption>[
+    ActivityOption(
+      id: hadithLivedStartedNew,
+      label: 'Started living a new Hadith',
+      ternary: TernaryOutcome.positive,
+    ),
+    ActivityOption(
+      id: hadithLivedIntroducedFamily,
+      label: 'Introduced living a hadith in family',
+      ternary: TernaryOutcome.positive,
+    ),
+    ActivityOption(
+      id: hadithLivedCorrectedPractice,
+      label: 'Corrected a practice as per hadith',
+      ternary: TernaryOutcome.positive,
+    ),
+    ActivityOption(
+      id: hadithLivedObservedOther,
+      label: 'Observed living a hadith by other',
+      ternary: TernaryOutcome.positive,
+    ),
+    ActivityOption(
+      id: ActivityIds.noActivity,
+      label: 'Recorded as not engaged',
+      ternary: TernaryOutcome.negative,
+    ),
+    ActivityOption(
+      id: ActivityIds.unanswered,
+      label: 'Not answered',
+      ternary: TernaryOutcome.unanswered,
+    ),
+  ];
+
+  static List<ActivityOption> forHomeTrace(String storageKey) {
+    return switch (storageKey) {
+      hadithEncounterKey => hadithEncounterDuration,
+      hadithRetentionKey => hadithRetentionDuration,
+      hadithLearningKey => hadithLearningDuration,
+      hadithLivedNoticedKey => hadithLivedNoticed,
+      _ => isAkhlaqTrace(storageKey)
+          ? akhlaqCatalogFor(storageKey)
+          : isHuquqTrace(storageKey)
+          ? huquqCatalogFor(storageKey)
+          : isDhikrPostFardTrace(storageKey)
+          ? dhikrPostFard
+          : storageKey.startsWith('time.t0')
+          ? timeObservation
+          : const [],
+    };
+  }
+
+  static bool isDhikrPostFardCatalog(List<ActivityOption> options) {
+    return identical(options, dhikrPostFard);
+  }
+
+  static bool isAkhlaqObservationCatalog(List<ActivityOption> options) {
+    return options.length == 6 &&
+        options.first.id == AkhlaqObservationIds.practised &&
+        options[2].id == AkhlaqObservationIds.lapseRecognised;
+  }
+
+  static bool isHuquqObservationCatalog(List<ActivityOption> options) {
+    return options.length == 6 &&
+        options.first.id == HuquqObservationIds.practised &&
+        options[1].id == HuquqObservationIds.partialEffort &&
+        options[2].id == HuquqObservationIds.neglectRecognised;
+  }
+
+  /// Time & Barakah primary observation. Optional context/outcome live
+  /// on `homeTraceFactors` and are not required to save this value.
+  static const timeObservation = <ActivityOption>[
+    ActivityOption(
+      id: ActivityIds.acted,
+      label: 'I acted on this',
+      ternary: TernaryOutcome.positive,
+    ),
+    ActivityOption(
+      id: ActivityIds.noticedNotActed,
+      label: 'I noticed but did not act',
+      ternary: TernaryOutcome.negative,
+    ),
+    ActivityOption(
+      id: ActivityIds.noSituation,
+      label: 'No relevant situation today',
+      ternary: TernaryOutcome.positive,
+    ),
+    ActivityOption(
+      id: ActivityIds.unanswered,
+      label: 'Prefer not to record',
+      ternary: TernaryOutcome.unanswered,
+    ),
+  ];
+
   static const hadith = <ActivityOption>[
     ActivityOption(
       id: 'reading',
@@ -928,6 +1151,16 @@ class ActivityCatalog {
         identical(options, quranRelevanceDuration);
   }
 
+  static bool isHadithDurationCatalog(List<ActivityOption> options) {
+    return identical(options, hadithEncounterDuration) ||
+        identical(options, hadithRetentionDuration) ||
+        identical(options, hadithLearningDuration);
+  }
+
+  static bool isDurationCatalog(List<ActivityOption> options) {
+    return isQuranDurationCatalog(options) || isHadithDurationCatalog(options);
+  }
+
   static ActivityOption? find(List<ActivityOption> catalog, String id) {
     for (final option in catalog) {
       if (option.id == id) return option;
@@ -963,15 +1196,52 @@ class ActivityCatalog {
   }
 
   static bool preservePickerOrder(List<ActivityOption> options) {
-    if (identical(options, salah) || identical(options, jumuah)) return true;
+    if (identical(options, salah) ||
+        identical(options, jumuah) ||
+        identical(options, tahajjud) ||
+        identical(options, ishraq)) {
+      return true;
+    }
     for (final dimension in QuranDimension.values) {
       if (identical(options, forQuran(dimension))) return true;
+    }
+    if (isDurationCatalog(options) ||
+        identical(options, hadithLivedNoticed) ||
+        identical(options, dhikrPostFard) ||
+        identical(options, timeObservation) ||
+        isAkhlaqObservationCatalog(options) ||
+        isHuquqObservationCatalog(options)) {
+      return true;
     }
     return false;
   }
 
   static String salahKey(PrayerId id) => 'salah.${id.name}';
   static const jumuahKey = 'salah.jumuah';
+  static const tahajjudKey = 'salah.tahajjud';
+  static const ishraqKey = 'salah.ishraq';
+
+  static List<ActivityOption> forVoluntarySalah(SalahTraceRow row) {
+    return row == SalahTraceRow.tahajjud ? tahajjud : ishraq;
+  }
+
+  static String voluntarySalahKey(SalahTraceRow row) {
+    return row == SalahTraceRow.tahajjud ? tahajjudKey : ishraqKey;
+  }
+
+  static String canonicalVoluntarySalahId(
+    TernaryOutcome outcome,
+    SalahTraceRow row,
+  ) {
+    if (outcome == TernaryOutcome.unanswered) return ActivityIds.unanswered;
+    if (outcome == TernaryOutcome.negative) {
+      return row == SalahTraceRow.tahajjud
+          ? tahajjudNotPrayed
+          : ishraqNotPrayed;
+    }
+    return row == SalahTraceRow.tahajjud ? tahajjudEarlyMid : ishraqPrayed;
+  }
+
   static String quranKey(QuranDimension dimension) => 'quran.${dimension.name}';
   static const dhikrKey = 'dhikr';
   static const conductKey = 'conduct';

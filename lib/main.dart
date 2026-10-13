@@ -16,6 +16,25 @@ Future<void> main() async {
     overrides.add(
       responseRepositoryProvider.overrideWithValue(opened.responses),
     );
+    overrides.add(
+      domainActionRepositoryProvider.overrideWithValue(opened.domainActions),
+    );
+    overrides.add(
+      devFeedbackRepositoryProvider.overrideWithValue(opened.devFeedback),
+    );
+    overrides.add(
+      practiceHadithRepositoryProvider.overrideWithValue(opened.practiceHadith),
+    );
+    overrides.add(
+      personalQuranVerseRepositoryProvider.overrideWithValue(
+        opened.personalQuran,
+      ),
+    );
+    overrides.add(
+      personalHadithRepositoryProvider.overrideWithValue(
+        opened.personalHadith,
+      ),
+    );
     overrides.add(appPrefsProvider.overrideWithValue(opened.prefs));
     logAppEvent('persistence_ready');
   } catch (_) {

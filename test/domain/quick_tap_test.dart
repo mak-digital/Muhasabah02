@@ -1,5 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muhasabah02/domain/activities.dart';
+import 'package:muhasabah02/domain/akhlaq_practices.dart';
+import 'package:muhasabah02/domain/huquq_practices.dart';
 import 'package:muhasabah02/domain/daily_check_in.dart';
 import 'package:muhasabah02/domain/monitor_domain.dart';
 import 'package:muhasabah02/domain/personal_mix.dart';
@@ -179,5 +181,87 @@ void main() {
       ).any((item) => item.id == 'salah.jumuah'),
       isTrue,
     );
+  });
+
+  test('quick tap cycles tahajjud activity ids', () {
+    final item = quickTapItemsFor({'salah.tahajjud'}).single;
+    var record = DailyCheckIn.empty('2026-09-14');
+    expect(readQuickTapChoiceId(record, item), ActivityIds.unanswered);
+    final seen = <String>[];
+    for (var i = 0; i < 5; i++) {
+      final next = nextQuickTapChoice(record, item);
+      seen.add(next.id);
+      record = applyQuickTapChoice(record, item, next);
+    }
+    expect(seen, [
+      ActivityCatalog.tahajjudEarlyMidAndLate,
+      ActivityCatalog.tahajjudLaterPart,
+      ActivityCatalog.tahajjudEarlyMid,
+      ActivityCatalog.tahajjudNotPrayed,
+      ActivityIds.unanswered,
+    ]);
+    expect(record.tahajjud, TernaryOutcome.unanswered);
+  });
+
+  test('quick tap cycles post-fard dhikr remembrance levels', () {
+    final item = quickTapItemsFor({'dhikr.postFardFajr'}).single;
+    var record = DailyCheckIn.empty('2026-09-14');
+    expect(readQuickTapChoiceId(record, item), ActivityIds.unanswered);
+    final seen = <String>[];
+    for (var i = 0; i < 6; i++) {
+      final next = nextQuickTapChoice(record, item);
+      seen.add(next.id);
+      record = applyQuickTapChoice(record, item, next);
+    }
+    expect(seen, [
+      ActivityCatalog.dhikrWithAction,
+      ActivityCatalog.dhikrAttentive,
+      ActivityCatalog.dhikrIntentional,
+      ActivityCatalog.dhikrBrief,
+      ActivityIds.noActivity,
+      ActivityIds.unanswered,
+    ]);
+    expect(record.homeTrace('dhikr.postFardFajr'), TernaryOutcome.unanswered);
+  });
+
+  test('quick tap cycles akhlaq observation codes', () {
+    final item = quickTapItemsFor({'akhlaq.patience'}).single;
+    var record = DailyCheckIn.empty('2026-09-14');
+    expect(readQuickTapChoiceId(record, item), ActivityIds.unanswered);
+    final seen = <String>[];
+    for (var i = 0; i < 6; i++) {
+      final next = nextQuickTapChoice(record, item);
+      seen.add(next.id);
+      record = applyQuickTapChoice(record, item, next);
+    }
+    expect(seen, [
+      AkhlaqObservationIds.practised,
+      AkhlaqObservationIds.struggled,
+      AkhlaqObservationIds.lapseRecognised,
+      AkhlaqObservationIds.corrected,
+      AkhlaqObservationIds.noSituation,
+      ActivityIds.unanswered,
+    ]);
+  });
+
+  test('quick tap cycles huquq observation codes and can clear', () {
+    final item = quickTapItemsFor({'huquq.parents'}).single;
+    var record = DailyCheckIn.empty('2026-09-14');
+    expect(readQuickTapChoiceId(record, item), ActivityIds.unanswered);
+    final seen = <String>[];
+    for (var i = 0; i < 6; i++) {
+      final next = nextQuickTapChoice(record, item);
+      seen.add(next.id);
+      record = applyQuickTapChoice(record, item, next);
+    }
+    expect(seen, [
+      HuquqObservationIds.practised,
+      HuquqObservationIds.partialEffort,
+      HuquqObservationIds.neglectRecognised,
+      HuquqObservationIds.correctiveAction,
+      HuquqObservationIds.noSituation,
+      ActivityIds.unanswered,
+    ]);
+    expect(record.homeTrace('huquq.parents'), TernaryOutcome.unanswered);
   });
 }

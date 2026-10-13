@@ -3,8 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../application/providers.dart';
 import '../../domain/copy.dart';
+import '../../domain/home_traces.dart';
 import '../../domain/monitor_domain.dart';
 import '../../domain/personal_mix.dart';
+import '../shared/domain_line_icon.dart';
+import '../shared/domain_visual.dart';
+import '../shared/home_band_heading.dart';
 
 class PersonalMixEditor extends ConsumerWidget {
   const PersonalMixEditor({super.key});
@@ -171,7 +175,17 @@ class _DomainMixTile extends ConsumerWidget {
       key: Key('mix-domain-${domain.name}'),
       margin: const EdgeInsets.only(bottom: 8),
       child: ExpansionTile(
-        title: Text(domain.label),
+        title: Row(
+          children: [
+            DomainLineIcon(
+              domain,
+              size: 20,
+              color: domainColorIdentity(domain).family,
+            ),
+            const SizedBox(width: 8),
+            Expanded(child: Text(domain.label)),
+          ],
+        ),
         subtitle: Text(
           shown
               ? '$selectedCount of ${items.length} in the mix'
@@ -194,10 +208,10 @@ class _DomainMixTile extends ConsumerWidget {
           for (final band in bands) ...[
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-              child: Text(
-                band.toUpperCase(),
-                style: Theme.of(context).textTheme.labelSmall
-                    ?.copyWith(letterSpacing: 0.4, fontWeight: FontWeight.w600),
+              child: HomeBandHeading(
+                band: band,
+                family: domainColorIdentity(domain).family,
+                baseWash: Theme.of(context).colorScheme.surface,
               ),
             ),
             for (final item in items)

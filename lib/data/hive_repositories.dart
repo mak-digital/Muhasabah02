@@ -1,6 +1,7 @@
 import 'package:hive_flutter/hive_flutter.dart';
 
 import '../data/app_prefs.dart';
+import '../domain/arabic_script.dart';
 import '../domain/custom_selection_set.dart';
 import '../domain/daily_check_in.dart';
 import '../domain/display_calendar.dart';
@@ -10,7 +11,12 @@ import '../domain/monitor_domain.dart';
 import '../domain/personal_aspiration.dart';
 import '../domain/personal_baseline.dart';
 import '../domain/personal_mix.dart';
+import '../domain/dev_feedback.dart';
+import '../domain/domain_action.dart';
 import '../domain/personal_response.dart';
+import '../domain/personal_hadith.dart';
+import '../domain/personal_quran_verse.dart';
+import '../domain/practice_hadith.dart';
 import '../domain/quotation_cadence.dart';
 import 'codecs.dart';
 import 'repositories.dart';
@@ -18,6 +24,12 @@ import 'repositories.dart';
 const checkInsBoxName = 'muhasabah_checkins_v5';
 const responsesBoxName = 'muhasabah_responses_v1';
 const prefsBoxName = 'muhasabah_prefs_v1';
+const domainActionsBoxName = 'muhasabah_domain_actions_v1';
+const devFeedbackBoxName = 'muhasabah_dev_feedback_v1';
+const practiceHadithBoxName = 'muhasabah_practice_hadith_v1';
+const personalQuranBoxName = 'muhasabah_personal_quran_v1';
+const personalHadithBoxName = 'muhasabah_personal_hadith_v1';
+const kDevFeedbackSerialKey = '__next_serial';
 
 class HiveCheckInRepository implements CheckInRepository {
   HiveCheckInRepository(this._box);
@@ -162,6 +174,374 @@ class HiveResponseRepository implements ResponseRepository {
   }
 }
 
+class HiveDomainActionRepository implements DomainActionRepository {
+  HiveDomainActionRepository(this._box);
+
+  final Box<String> _box;
+  final List<String> _corrupt = [];
+
+  @override
+  List<String> get corruptKeys => List.unmodifiable(_corrupt);
+
+  @override
+  Future<List<DomainAction>> allHealthy() async {
+    _corrupt.clear();
+    final healthy = <DomainAction>[];
+    for (final key in _box.keys) {
+      final raw = _box.get(key);
+      if (raw == null) continue;
+      final parsed = decodeDomainAction(raw);
+      if (parsed.corrupt || parsed.record == null) {
+        _corrupt.add('$key');
+      } else {
+        healthy.add(parsed.record!);
+      }
+    }
+    healthy.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    return healthy;
+  }
+
+  @override
+  Future<DomainAction?> getById(String id) async {
+    final raw = _box.get(id);
+    if (raw == null) return null;
+    final parsed = decodeDomainAction(raw);
+    if (parsed.corrupt) {
+      if (!_corrupt.contains(id)) _corrupt.add(id);
+      return null;
+    }
+    return parsed.record;
+  }
+
+  @override
+  Future<void> save(DomainAction record) async {
+    final previous = _box.get(record.id);
+    try {
+      await _box.put(record.id, encodeDomainAction(record));
+      _corrupt.remove(record.id);
+    } catch (_) {
+      if (previous != null) {
+        await _box.put(record.id, previous);
+      }
+      rethrow;
+    }
+  }
+
+  @override
+  Future<bool> delete(String id) async {
+    final previous = _box.get(id);
+    if (previous == null) return true;
+    try {
+      await _box.delete(id);
+      _corrupt.remove(id);
+      return true;
+    } catch (_) {
+      if (!_box.containsKey(id) && previous.isNotEmpty) {
+        await _box.put(id, previous);
+      }
+      return false;
+    }
+  }
+}
+
+class HiveDevFeedbackRepository implements DevFeedbackRepository {
+  HiveDevFeedbackRepository(this._box);
+
+  final Box<String> _box;
+  final List<String> _corrupt = [];
+
+  @override
+  List<String> get corruptKeys => List.unmodifiable(_corrupt);
+
+  @override
+  Future<List<DevFeedback>> allHealthy() async {
+    _corrupt.clear();
+    final healthy = <DevFeedback>[];
+    for (final key in _box.keys) {
+      if ('$key' == kDevFeedbackSerialKey) continue;
+      final raw = _box.get(key);
+      if (raw == null) continue;
+      final parsed = decodeDevFeedback(raw);
+      if (parsed.corrupt || parsed.record == null) {
+        _corrupt.add('$key');
+      } else {
+        healthy.add(parsed.record!);
+      }
+    }
+    healthy.sort((a, b) => a.serial.compareTo(b.serial));
+    return healthy;
+  }
+
+  @override
+  Future<DevFeedback?> getById(String id) async {
+    final raw = _box.get(id);
+    if (raw == null) return null;
+    final parsed = decodeDevFeedback(raw);
+    if (parsed.corrupt) {
+      if (!_corrupt.contains(id)) _corrupt.add(id);
+      return null;
+    }
+    return parsed.record;
+  }
+
+  @override
+  Future<void> save(DevFeedback record) async {
+    final previous = _box.get(record.id);
+    try {
+      await _box.put(record.id, encodeDevFeedback(record));
+      _corrupt.remove(record.id);
+    } catch (_) {
+      if (previous != null) {
+        await _box.put(record.id, previous);
+      }
+      rethrow;
+    }
+  }
+
+  @override
+  Future<bool> delete(String id) async {
+    final previous = _box.get(id);
+    if (previous == null) return true;
+    try {
+      await _box.delete(id);
+      _corrupt.remove(id);
+      return true;
+    } catch (_) {
+      if (!_box.containsKey(id) && previous.isNotEmpty) {
+        await _box.put(id, previous);
+      }
+      return false;
+    }
+  }
+
+  @override
+  Future<int> nextSerial() async {
+    final raw = _box.get(kDevFeedbackSerialKey);
+    final current = int.tryParse(raw ?? '') ?? 1;
+    final n = current < 1 ? 1 : current;
+    await _box.put(kDevFeedbackSerialKey, '${n + 1}');
+    return n;
+  }
+}
+
+class HivePracticeHadithRepository implements PracticeHadithRepository {
+  HivePracticeHadithRepository(this._box);
+
+  final Box<String> _box;
+  final List<String> _corrupt = [];
+
+  @override
+  List<String> get corruptKeys => List.unmodifiable(_corrupt);
+
+  @override
+  Future<List<PracticeHadithRecord>> allHealthy() async {
+    _corrupt.clear();
+    final healthy = <PracticeHadithRecord>[];
+    for (final key in _box.keys) {
+      final raw = _box.get(key);
+      if (raw == null) continue;
+      final parsed = decodePracticeHadith(raw);
+      if (parsed.corrupt || parsed.record == null) {
+        _corrupt.add('$key');
+      } else {
+        healthy.add(parsed.record!);
+      }
+    }
+    return orderedPracticeHadithRegister(healthy);
+  }
+
+  @override
+  Future<PracticeHadithRecord?> getById(String id) async {
+    final raw = _box.get(id);
+    if (raw == null) return null;
+    final parsed = decodePracticeHadith(raw);
+    if (parsed.corrupt) {
+      if (!_corrupt.contains(id)) _corrupt.add(id);
+      return null;
+    }
+    return parsed.record;
+  }
+
+  @override
+  Future<void> save(PracticeHadithRecord record) async {
+    final previous = _box.get(record.id);
+    try {
+      await _box.put(record.id, encodePracticeHadith(record));
+      _corrupt.remove(record.id);
+    } catch (_) {
+      if (previous != null) {
+        await _box.put(record.id, previous);
+      }
+      rethrow;
+    }
+  }
+
+  @override
+  Future<bool> delete(String id) async {
+    final previous = _box.get(id);
+    if (previous == null) return true;
+    try {
+      await _box.delete(id);
+      _corrupt.remove(id);
+      return true;
+    } catch (_) {
+      if (!_box.containsKey(id) && previous.isNotEmpty) {
+        await _box.put(id, previous);
+      }
+      return false;
+    }
+  }
+}
+
+class HivePersonalQuranVerseRepository
+    implements PersonalQuranVerseRepository {
+  HivePersonalQuranVerseRepository(this._box);
+
+  final Box<String> _box;
+  final List<String> _corrupt = [];
+
+  @override
+  List<String> get corruptKeys => List.unmodifiable(_corrupt);
+
+  @override
+  Future<List<PersonalQuranVerse>> allHealthy() async {
+    _corrupt.clear();
+    final healthy = <PersonalQuranVerse>[];
+    for (final key in _box.keys) {
+      final raw = _box.get(key);
+      if (raw == null) continue;
+      final parsed = decodePersonalQuranVerse(raw);
+      if (parsed.corrupt || parsed.record == null) {
+        _corrupt.add('$key');
+      } else {
+        healthy.add(parsed.record!);
+      }
+    }
+    healthy.sort((a, b) {
+      final byDate = a.addedDateKey.compareTo(b.addedDateKey);
+      if (byDate != 0) return byDate;
+      return a.id.compareTo(b.id);
+    });
+    return healthy;
+  }
+
+  @override
+  Future<PersonalQuranVerse?> getById(String id) async {
+    final raw = _box.get(id);
+    if (raw == null) return null;
+    final parsed = decodePersonalQuranVerse(raw);
+    if (parsed.corrupt) {
+      if (!_corrupt.contains(id)) _corrupt.add(id);
+      return null;
+    }
+    return parsed.record;
+  }
+
+  @override
+  Future<void> save(PersonalQuranVerse record) async {
+    final previous = _box.get(record.id);
+    try {
+      await _box.put(record.id, encodePersonalQuranVerse(record));
+      _corrupt.remove(record.id);
+    } catch (_) {
+      if (previous != null) {
+        await _box.put(record.id, previous);
+      }
+      rethrow;
+    }
+  }
+
+  @override
+  Future<bool> delete(String id) async {
+    final previous = _box.get(id);
+    if (previous == null) return true;
+    try {
+      await _box.delete(id);
+      _corrupt.remove(id);
+      return true;
+    } catch (_) {
+      if (!_box.containsKey(id) && previous.isNotEmpty) {
+        await _box.put(id, previous);
+      }
+      return false;
+    }
+  }
+}
+
+class HivePersonalHadithRepository implements PersonalHadithRepository {
+  HivePersonalHadithRepository(this._box);
+
+  final Box<String> _box;
+  final List<String> _corrupt = [];
+
+  @override
+  List<String> get corruptKeys => List.unmodifiable(_corrupt);
+
+  @override
+  Future<List<PersonalHadith>> allHealthy() async {
+    _corrupt.clear();
+    final healthy = <PersonalHadith>[];
+    for (final key in _box.keys) {
+      final raw = _box.get(key);
+      if (raw == null) continue;
+      final parsed = decodePersonalHadith(raw);
+      if (parsed.corrupt || parsed.record == null) {
+        _corrupt.add('$key');
+      } else {
+        healthy.add(parsed.record!);
+      }
+    }
+    healthy.sort((a, b) {
+      final byDate = a.addedDateKey.compareTo(b.addedDateKey);
+      if (byDate != 0) return byDate;
+      return a.id.compareTo(b.id);
+    });
+    return healthy;
+  }
+
+  @override
+  Future<PersonalHadith?> getById(String id) async {
+    final raw = _box.get(id);
+    if (raw == null) return null;
+    final parsed = decodePersonalHadith(raw);
+    if (parsed.corrupt) {
+      if (!_corrupt.contains(id)) _corrupt.add(id);
+      return null;
+    }
+    return parsed.record;
+  }
+
+  @override
+  Future<void> save(PersonalHadith record) async {
+    final previous = _box.get(record.id);
+    try {
+      await _box.put(record.id, encodePersonalHadith(record));
+      _corrupt.remove(record.id);
+    } catch (_) {
+      if (previous != null) {
+        await _box.put(record.id, previous);
+      }
+      rethrow;
+    }
+  }
+
+  @override
+  Future<bool> delete(String id) async {
+    final previous = _box.get(id);
+    if (previous == null) return true;
+    try {
+      await _box.delete(id);
+      _corrupt.remove(id);
+      return true;
+    } catch (_) {
+      if (!_box.containsKey(id) && previous.isNotEmpty) {
+        await _box.put(id, previous);
+      }
+      return false;
+    }
+  }
+}
+
 class HiveAppPrefs implements AppPrefs {
   HiveAppPrefs(this._box);
 
@@ -177,14 +557,20 @@ class HiveAppPrefs implements AppPrefs {
   static const _personalMix = 'personal_mix';
   static const _customSelectionSets = 'custom_selection_sets';
   static const _quotationCadence = 'quotation_cadence';
+  static const _reflectionHoldPeriod = 'reflection_hold_period';
+  static const _reflectionHoldIndex = 'reflection_hold_index';
   static const _baselines = 'personal_baselines';
   static const _aspirations = 'personal_aspirations';
   static const _weeklyJournals = 'weekly_journals';
   static const _hadithFocus = 'hadith_memorisation_focus';
+  static const _practiceHadithIndex = 'practice_hadith_browse_index';
+  static const _practiceQuranIndex = 'practice_quran_browse_index';
   static const _hajjStatus = 'hajj_status';
   static const _mixHiddenHint = 'mix_hidden_domain_hint';
   static const _appLock = 'app_lock_enabled';
   static const _salahActivityColours = 'salah_activity_colours';
+  static const _arabicScriptFace = 'arabic_script_face';
+  static const _arabicScriptSize = 'arabic_script_size';
 
   bool _flag(String key) => _box.get(key) == 'true';
 
@@ -370,6 +756,16 @@ class HiveAppPrefs implements AppPrefs {
       QuotationCadenceX.fromId(_box.get(_quotationCadence));
 
   @override
+  String? get reflectionHoldPeriod {
+    final raw = _box.get(_reflectionHoldPeriod);
+    if (raw == null || raw.isEmpty) return null;
+    return raw;
+  }
+
+  @override
+  int? get reflectionHoldIndex => int.tryParse(_box.get(_reflectionHoldIndex) ?? '');
+
+  @override
   List<PersonalBaseline> get baselines => decodeBaselines(_box.get(_baselines));
 
   @override
@@ -383,6 +779,15 @@ class HiveAppPrefs implements AppPrefs {
   @override
   Future<void> setQuotationCadence(QuotationCadence value) =>
       _box.put(_quotationCadence, value.id);
+
+  @override
+  Future<void> setReflectionHold({
+    required String period,
+    required int index,
+  }) async {
+    await _box.put(_reflectionHoldPeriod, period);
+    await _box.put(_reflectionHoldIndex, '$index');
+  }
 
   @override
   Future<void> setBaselines(List<PersonalBaseline> value) =>
@@ -413,6 +818,22 @@ class HiveAppPrefs implements AppPrefs {
       _box.put(_hadithFocus, value.name);
 
   @override
+  int get practiceHadithBrowseIndex =>
+      int.tryParse(_box.get(_practiceHadithIndex) ?? '') ?? 0;
+
+  @override
+  Future<void> setPracticeHadithBrowseIndex(int value) =>
+      _box.put(_practiceHadithIndex, '$value');
+
+  @override
+  int get practiceQuranBrowseIndex =>
+      int.tryParse(_box.get(_practiceQuranIndex) ?? '') ?? 0;
+
+  @override
+  Future<void> setPracticeQuranBrowseIndex(int value) =>
+      _box.put(_practiceQuranIndex, '$value');
+
+  @override
   HajjStatus get hajjStatus => HajjStatusX.fromId(_box.get(_hajjStatus));
 
   @override
@@ -438,6 +859,25 @@ class HiveAppPrefs implements AppPrefs {
   @override
   Future<void> setSalahActivityColours(bool value) =>
       _setFlag(_salahActivityColours, value);
+
+  @override
+  ArabicScriptFace get arabicScriptFace =>
+      ArabicScriptFaceX.fromId(_box.get(_arabicScriptFace));
+
+  @override
+  Future<void> setArabicScriptFace(ArabicScriptFace value) =>
+      _box.put(_arabicScriptFace, value.id);
+
+  @override
+  double get arabicScriptSize =>
+      clampArabicScriptSize(
+        double.tryParse(_box.get(_arabicScriptSize) ?? '') ??
+            kDefaultArabicScriptSize,
+      );
+
+  @override
+  Future<void> setArabicScriptSize(double value) =>
+      _box.put(_arabicScriptSize, '${clampArabicScriptSize(value)}');
 }
 
 Future<
@@ -445,6 +885,11 @@ Future<
     HiveCheckInRepository checkIns,
     HiveResponseRepository responses,
     HiveAppPrefs prefs,
+    HiveDomainActionRepository domainActions,
+    HiveDevFeedbackRepository devFeedback,
+    HivePracticeHadithRepository practiceHadith,
+    HivePersonalQuranVerseRepository personalQuran,
+    HivePersonalHadithRepository personalHadith,
   })
 >
 openHiveRepositories() async {
@@ -452,9 +897,19 @@ openHiveRepositories() async {
   final checkIns = await Hive.openBox<String>(checkInsBoxName);
   final responses = await Hive.openBox<String>(responsesBoxName);
   final prefs = await Hive.openBox<String>(prefsBoxName);
+  final domainActions = await Hive.openBox<String>(domainActionsBoxName);
+  final devFeedback = await Hive.openBox<String>(devFeedbackBoxName);
+  final practiceHadith = await Hive.openBox<String>(practiceHadithBoxName);
+  final personalQuran = await Hive.openBox<String>(personalQuranBoxName);
+  final personalHadith = await Hive.openBox<String>(personalHadithBoxName);
   return (
     checkIns: HiveCheckInRepository(checkIns),
     responses: HiveResponseRepository(responses),
     prefs: HiveAppPrefs(prefs),
+    domainActions: HiveDomainActionRepository(domainActions),
+    devFeedback: HiveDevFeedbackRepository(devFeedback),
+    practiceHadith: HivePracticeHadithRepository(practiceHadith),
+    personalQuran: HivePersonalQuranVerseRepository(personalQuran),
+    personalHadith: HivePersonalHadithRepository(personalHadith),
   );
 }

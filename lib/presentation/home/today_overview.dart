@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../app/theme.dart';
 import '../../application/providers.dart';
 import '../../domain/copy.dart';
 import '../../domain/daily_check_in.dart';
@@ -11,9 +12,9 @@ import '../../domain/personalisation_resolver.dart';
 import '../../domain/today_workspace.dart';
 import '../checkin/check_in_screen.dart';
 import '../shared/domain_action_frame.dart';
+import '../shared/domain_line_icon.dart';
 import '../shared/domain_visual.dart';
 import '../shared/progress_calendar.dart';
-import '../shared/ui_bits.dart';
 import 'quick_tap_sheet.dart';
 import 'today_domain_workspace.dart';
 
@@ -47,31 +48,41 @@ class TodayOverview extends ConsumerWidget {
     final weekday = weekdayNameForDate(workspace.dateKey);
     final dateLine = formatDayMonthYear(now, prefs.displayCalendar);
     final theme = Theme.of(context);
+    final showSampleNotice = records.any((record) => record.synthetic);
     return Column(
       key: const Key('today-overview'),
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SectionHeader(Copy.today),
-        Text.rich(
-          key: const Key('today-weekday-date'),
-          TextSpan(
-            children: [
-              TextSpan(
-                text: weekday,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
+        Padding(
+          padding: const EdgeInsets.only(top: 4, bottom: 6),
+          child: Text.rich(
+            key: const Key('today-weekday-date'),
+            TextSpan(
+              children: [
+                TextSpan(
+                  text: '${Copy.today} : ',
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    color: theme.colorScheme.primary,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.2,
+                  ),
                 ),
-              ),
-              TextSpan(
-                text: ' · $dateLine',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
+                TextSpan(
+                  text: '$weekday, $dateLine',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
-        const SizedBox(height: 10),
+        if (showSampleNotice) ...[
+          const _SampleDataNotice(),
+          const SizedBox(height: 8),
+        ],
         const TodayEntryActions(),
         const SizedBox(height: 12),
         if (workspace.domains.isEmpty)
@@ -86,6 +97,30 @@ class TodayOverview extends ConsumerWidget {
         else
           _ActiveDomainMixPanel(workspace: workspace),
       ],
+    );
+  }
+}
+
+class _SampleDataNotice extends StatelessWidget {
+  const _SampleDataNotice();
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      key: const Key('sample-data-notice'),
+      color: MuhasabahColors.wash(
+        MuhasabahColors.sampleBannerWash,
+        MuhasabahColors.sampleBannerWashDark,
+        Theme.of(context).brightness,
+      ),
+      borderRadius: BorderRadius.circular(10),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        child: Text(
+          Copy.sampleDataNotice,
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(height: 1.25),
+        ),
+      ),
     );
   }
 }
@@ -118,21 +153,36 @@ class _ActiveDomainMixPanel extends ConsumerWidget {
         child: ExpansionTile(
           key: const Key('today-active-domain-mix'),
           initiallyExpanded: false,
+          dense: true,
+          visualDensity: VisualDensity.compact,
+          minTileHeight: 40,
           tilePadding: const EdgeInsets.symmetric(horizontal: 12),
           childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-          title: Text(
-            Copy.activeDomainAndMix,
-            style: theme.textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          subtitle: Text(
-            mixNote,
-            key: const Key('today-active-domain-mix-total'),
-            style: theme.textTheme.bodySmall?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: scheme.onSurfaceVariant,
-            ),
+          title: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  Copy.activeDomainAndMix,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    height: 1.1,
+                    letterSpacing: 0.35,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                mixNote,
+                key: const Key('today-active-domain-mix-total'),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  height: 1.1,
+                  color: scheme.onSurfaceVariant,
+                ),
+              ),
+            ],
           ),
           children: [
             LayoutBuilder(
@@ -246,13 +296,13 @@ class _TodayEntryButton extends StatelessWidget {
         onTap: onTap,
         borderRadius: radius,
         child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 48),
+          constraints: const BoxConstraints(minHeight: 40),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(icon, size: 18, color: ink),
+                Icon(icon, size: 16, color: ink),
                 const SizedBox(width: 6),
                 Flexible(
                   child: Text(
@@ -306,6 +356,8 @@ class _TodayDomainTile extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
         child: Row(
           children: [
+            DomainLineIcon(item.domain, size: 18, color: identity.family),
+            const SizedBox(width: 8),
             Expanded(
               child: Text(
                 label,

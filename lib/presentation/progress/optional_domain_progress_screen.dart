@@ -13,13 +13,14 @@ import '../../domain/review_period.dart';
 import '../checkin/check_in_screen.dart';
 import '../checkin/trace_record_sheets.dart';
 import '../shared/progress_calendar.dart';
+import '../shared/salah_activity_mark.dart';
 import '../shared/domain_briefing_note.dart';
 import '../shared/state_marker.dart';
-import '../shared/system_insets.dart';
 import '../shared/ui_bits.dart';
+import 'progress_review_frame.dart';
 import 'week_trace_matrix.dart';
 
-class OptionalDomainProgressScreen extends ConsumerWidget {
+class OptionalDomainProgressScreen extends ConsumerStatefulWidget {
   const OptionalDomainProgressScreen({
     super.key,
     required this.title,
@@ -50,7 +51,27 @@ class OptionalDomainProgressScreen extends ConsumerWidget {
   final bool itemRowsOn7Days;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<OptionalDomainProgressScreen> createState() =>
+      _OptionalDomainProgressScreenState();
+}
+
+class _OptionalDomainProgressScreenState
+    extends ConsumerState<OptionalDomainProgressScreen> {
+  String get title => widget.title;
+  String? get focusQuestion => widget.focusQuestion;
+  String? get note => widget.note;
+  List<HomeTraceRow> get rows => widget.rows;
+  Color get family => widget.family;
+  bool get includeZakat => widget.includeZakat;
+  bool get includeHadithFocus => widget.includeHadithFocus;
+  bool get includeHajjStatus => widget.includeHajjStatus;
+  bool get weekMatricesOn7Days => widget.weekMatricesOn7Days;
+  bool get highlightLunarWhiteDays => widget.highlightLunarWhiteDays;
+  bool get includeStruggleNote => widget.includeStruggleNote;
+  bool get itemRowsOn7Days => widget.itemRowsOn7Days;
+
+  @override
+  Widget build(BuildContext context) {
     final period = ref.watch(reviewPeriodProvider);
     final now = ref.watch(nowProvider);
     final async = ref.watch(checkInsProvider);
@@ -68,58 +89,52 @@ class OptionalDomainProgressScreen extends ConsumerWidget {
               .watch(appPrefsProvider)
               .hadithMemorisationFocus;
           final hajjStatus = ref.watch(appPrefsProvider).hajjStatus;
-          final question = focusQuestion;
-          return ListView(
-            padding: pageListPadding(context, recoverSystemBottom: true),
-            children: [
-              if (question != null && question.isNotEmpty) ...[
+          final briefing = briefingForLabel(title);
+          return ProgressReviewFrame(
+            focusQuestion: focusQuestion,
+            days: period.days,
+            onPeriodChanged: (days) {
+              ref.read(reviewPeriodProvider.notifier).state = switch (days) {
+                30 => ReviewPeriod.days30,
+                90 => ReviewPeriod.days90,
+                _ => ReviewPeriod.days7,
+              };
+            },
+            marksTitle: briefing != null
+                ? Copy.aboutThisDomain
+                : Copy.progressMarksTitle,
+            marks: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
                 Text(
-                  question,
-                  style: Theme.of(context).textTheme.bodyMedium
-                      ?.copyWith(fontStyle: FontStyle.italic, height: 1.35),
-                ),
-                const SizedBox(height: 8),
-              ],
-              PeriodSelector(
-                days: period.days,
-                onChanged: (days) {
-                  ref
-                      .read(reviewPeriodProvider.notifier)
-                      .state = switch (days) {
-                    30 => ReviewPeriod.days30,
-                    90 => ReviewPeriod.days90,
-                    _ => ReviewPeriod.days7,
-                  };
-                },
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'The card wash identifies the domain, not rank. Marks share one colour. Missing records are not treated as missed.',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-              if (briefingForLabel(title) != null) ...[
-                const SizedBox(height: 8),
-                DomainBriefingNote(briefingForLabel(title)!, compact: true),
-              ] else if (note != null && note!.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                Text(note!, style: Theme.of(context).textTheme.bodySmall),
-              ],
-              if (highlightLunarWhiteDays) ...[
-                const SizedBox(height: 8),
-                Text(
-                  Copy.lunarWhiteDaysNote,
+                  'The card wash identifies the domain, not rank. Marks share one colour. Missing records are not treated as missed.',
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
+                if (briefing != null) ...[
+                  const SizedBox(height: 8),
+                  DomainBriefingNote(briefing, compact: true),
+                ] else if (note != null && note!.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Text(note!, style: Theme.of(context).textTheme.bodySmall),
+                ],
+                if (highlightLunarWhiteDays) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    Copy.lunarWhiteDaysNote,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
               ],
+            ),
+            children: [
               if (includeHadithFocus) ...[
-                const SizedBox(height: 8),
                 Text(
                   '${Copy.hadithMemorisationFocus}: ${hadithFocus.label}',
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
+                const SizedBox(height: 8),
               ],
               if (includeHajjStatus) ...[
-                const SizedBox(height: 8),
                 Text(
                   '${Copy.hajjStatusLabel}: ${hajjStatus.label}',
                   style: Theme.of(context).textTheme.bodyMedium,
@@ -129,8 +144,8 @@ class OptionalDomainProgressScreen extends ConsumerWidget {
                   Copy.hajjStatusNote,
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
+                const SizedBox(height: 8),
               ],
-              const SizedBox(height: 12),
               if (weekMatricesOn7Days && period.days == 7) ...[
                 if (itemRowsOn7Days)
                   HomeStyleWeekMatrix(
@@ -201,6 +216,7 @@ class OptionalDomainProgressScreen extends ConsumerWidget {
           key: Key('progress-cell-zakat-$key'),
           onTap: matrixCellOnTap(
             ref: ref,
+            context: context,
             dateKey: key,
             onOpen: () =>
                 _openDay(context, key, band: kZakatTraceBand, rowId: 'zakat'),
@@ -251,17 +267,19 @@ class OptionalDomainProgressScreen extends ConsumerWidget {
         ),
         child: ProgressCalendarSection(
           title: row.label,
-          subtitle: row.band,
+          subtitle: displayHomeBand(row.band),
           periodDays: period.days,
           family: family,
           highlightLunarWhiteDays: highlightLunarWhiteDays,
           cellBuilder: (context, key) {
+            final record = index[key];
             final outcome =
-                index[key]?.homeTrace(row.storageKey) ??
-                TernaryOutcome.unanswered;
+                record?.homeTrace(row.storageKey) ?? TernaryOutcome.unanswered;
+            final colours = ref.watch(appPrefsProvider).salahActivityColours;
             return ProgressDayCell(
               onTap: matrixCellOnTap(
                 ref: ref,
+                context: context,
                 dateKey: key,
                 onOpen: () => _openDay(
                   context,
@@ -270,11 +288,10 @@ class OptionalDomainProgressScreen extends ConsumerWidget {
                   rowId: row.storageKey,
                 ),
               ),
-              marker: RecordedStateMarker(
-                kind: markerForRecorded(
-                  recorded: outcome.isRecorded,
-                  positive: outcome == TernaryOutcome.positive,
-                ),
+              marker: SalahActivityMark.recordedMarkerForTrace(
+                row: row,
+                record: record,
+                activityColours: colours,
                 semanticLabel:
                     '$key ${weekdayNameForDate(key)} ${row.label} ${outcome.legendLabel}',
               ),
@@ -308,6 +325,7 @@ class OptionalDomainProgressScreen extends ConsumerWidget {
             return ProgressDayCell(
               onTap: matrixCellOnTap(
                 ref: ref,
+                context: context,
                 dateKey: key,
                 onOpen: () => _openDay(
                   context,

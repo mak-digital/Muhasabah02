@@ -10,6 +10,7 @@ import '../../domain/monitor_domain.dart';
 import '../../domain/personalisation_resolver.dart';
 import '../../domain/today_workspace.dart';
 import '../shared/domain_action_frame.dart';
+import '../shared/domain_line_icon.dart';
 import '../shared/domain_visual.dart';
 import '../shared/progress_calendar.dart';
 import '../shared/state_marker.dart';
@@ -82,6 +83,8 @@ class TodayDomainWorkspacePage extends ConsumerWidget {
                     child: const SizedBox(width: 4, height: 36),
                   ),
                   const SizedBox(width: 12),
+                  DomainLineIcon(domain, size: 22, color: identity.family),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,

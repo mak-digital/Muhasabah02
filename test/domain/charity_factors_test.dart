@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muhasabah02/domain/charity_factors.dart';
+import 'package:muhasabah02/domain/dhikr_factors.dart';
 
 void main() {
   test(
@@ -54,9 +55,23 @@ void main() {
       );
       expect(
         helpingFactorsForHomeTrace('dhikr.postFardFajr')
-            .any((factor) => factor.id == 'quran.studyCircle'),
-        isTrue,
+            .map((factor) => factor.label)
+            .toList(),
+        [
+          'Reflected on the meaning',
+          'Aware of what I was saying',
+          'Mostly habitual recitation',
+        ],
       );
+      expect(
+        helpingFactorsForHomeTrace('dhikr.postFardFajr').map((factor) => factor.id),
+        [
+          DhikrAttentivenessCatalog.reflectedMeaning,
+          DhikrAttentivenessCatalog.aware,
+          DhikrAttentivenessCatalog.habitual,
+        ],
+      );
+      expect(distractingFactorsForHomeTrace('dhikr.postFardFajr'), isEmpty);
     },
   );
 }

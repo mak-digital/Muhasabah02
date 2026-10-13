@@ -5,7 +5,13 @@ import '../../application/providers.dart';
 import '../../domain/activities.dart';
 import '../../domain/charity_factors.dart';
 import '../../domain/context_catalog.dart';
+import '../../domain/copy.dart';
 import '../../domain/factor_groups.dart';
+import '../../domain/home_traces.dart';
+import '../../domain/quran.dart';
+import '../../domain/salah_factors.dart';
+import 'domain_line_icon.dart';
+import 'domain_visual.dart';
 import 'salah_activity_mark.dart';
 
 const checkInValueIndent = 20.0;
@@ -22,14 +28,29 @@ class CheckInDomainTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final question = focus;
+    final domain = domainForTitle(text);
+    final title = Text(
+      text.toUpperCase(),
+      style: Theme.of(context).textTheme.titleMedium
+          ?.copyWith(fontWeight: FontWeight.w700, letterSpacing: 0.8),
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          text.toUpperCase(),
-          style: Theme.of(context).textTheme.titleMedium
-              ?.copyWith(fontWeight: FontWeight.w700, letterSpacing: 0.8),
-        ),
+        if (domain == null)
+          title
+        else
+          Row(
+            children: [
+              DomainLineIcon(
+                domain,
+                size: 20,
+                color: domainColorIdentity(domain).family,
+              ),
+              const SizedBox(width: 8),
+              Expanded(child: title),
+            ],
+          ),
         if (question != null && question.isNotEmpty) ...[
           const SizedBox(height: 6),
           Text(
@@ -84,6 +105,7 @@ class CheckInSelect<T> extends StatelessWidget {
     this.dropdownKey,
     this.depth = CheckInFieldDepth.value,
     this.sortLabels = true,
+    this.fillColor,
   });
 
   final T value;
@@ -93,13 +115,15 @@ class CheckInSelect<T> extends StatelessWidget {
   final Key? dropdownKey;
   final CheckInFieldDepth depth;
   final bool sortLabels;
+  final Color? fillColor;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final nested = depth == CheckInFieldDepth.nested;
     final indent = nested ? checkInNestedIndent : checkInValueIndent;
-    final fill = scheme.surface.withValues(alpha: nested ? 0.52 : 0.9);
+    final fill =
+        fillColor ?? scheme.surface.withValues(alpha: nested ? 0.52 : 0.9);
     final ink = nested ? scheme.onSurfaceVariant : scheme.onSurface;
     final sorted = [...entries];
     if (sortLabels) {
@@ -189,6 +213,7 @@ class ActivityPicker extends ConsumerWidget {
     required this.onSelected,
     this.statusKeyPrefix,
     this.enabled = true,
+    this.namedSubject,
   });
 
   final List<ActivityOption> options;
@@ -196,16 +221,28 @@ class ActivityPicker extends ConsumerWidget {
   final ValueChanged<ActivityOption> onSelected;
   final String? statusKeyPrefix;
   final bool enabled;
+  final String? namedSubject;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(prefsTickProvider);
     final salahList =
         identical(options, ActivityCatalog.salah) ||
-        identical(options, ActivityCatalog.jumuah);
-    final durationList = ActivityCatalog.isQuranDurationCatalog(options);
+        identical(options, ActivityCatalog.jumuah) ||
+        identical(options, ActivityCatalog.tahajjud) ||
+        identical(options, ActivityCatalog.ishraq);
+    final durationList = ActivityCatalog.isDurationCatalog(options);
+    final livedList = identical(options, ActivityCatalog.hadithLivedNoticed);
+    final dhikrList = ActivityCatalog.isDhikrPostFardCatalog(options);
+    final akhlaqList = ActivityCatalog.isAkhlaqObservationCatalog(options);
+    final huquqList = ActivityCatalog.isHuquqObservationCatalog(options);
     final swatches =
-        (salahList || durationList) &&
+        (salahList ||
+            durationList ||
+            livedList ||
+            dhikrList ||
+            akhlaqList ||
+            huquqList) &&
         ref.watch(appPrefsProvider).salahActivityColours;
     final extra = options.any((option) => option.id == selectedId)
         ? null
@@ -221,7 +258,7 @@ class ActivityPicker extends ConsumerWidget {
         for (final option in shown)
           CheckInSelectEntry(
             value: option.id,
-            label: option.label,
+            label: _namedLabel(option.label),
             itemKey: _keyFor(option),
             swatch: swatches ? SalahActivityMark.colourForId(option.id) : null,
           ),
@@ -248,6 +285,12 @@ class ActivityPicker extends ConsumerWidget {
       return Key('$statusKeyPrefix-unanswered');
     }
     return Key('$statusKeyPrefix-${option.id}');
+  }
+
+  String _namedLabel(String label) {
+    final subject = namedSubject;
+    if (subject == null || subject.isEmpty) return label;
+    return '$label — $subject';
   }
 }
 
@@ -295,7 +338,48 @@ class CheckInFactorSelects extends StatelessWidget {
     required this.onDistractingChanged,
     this.helpingKey,
     this.distractingKey,
+    this.helpingTitle = 'HELPING FACTORS',
+    this.distractingTitle = 'DISTRACTING FACTORS',
+    this.sortHelping = true,
+    this.sortDistracting = true,
   });
+
+  factory CheckInFactorSelects.forHomeTrace({
+    Key? key,
+    required String storageKey,
+    required TernaryOutcome outcome,
+    required SalahFactorCapture factors,
+    required ValueChanged<String> onHelpingChanged,
+    required ValueChanged<String> onDistractingChanged,
+    Key? helpingKey,
+    Key? distractingKey,
+  }) {
+    final postFard = isDhikrPostFardTrace(storageKey);
+    return CheckInFactorSelects(
+      key: key,
+      groups: factorGroupsForHomeTrace(storageKey, outcome),
+      helping: NamedFactor.helpingForHomeTrace(
+        storageKey,
+        existingIds: factors.supportIds,
+      ),
+      distracting: postFard
+          ? const []
+          : NamedFactor.distractingForHomeTrace(
+              storageKey,
+              existingIds: factors.challengeIds,
+            ),
+      helpingId: selectedFactorId(factors.supportIds),
+      distractingId: selectedFactorId(factors.challengeIds),
+      helpingKey: helpingKey,
+      distractingKey: distractingKey,
+      helpingTitle: postFard
+          ? Copy.howAttentiveWasI.toUpperCase()
+          : 'HELPING FACTORS',
+      sortHelping: !postFard,
+      onHelpingChanged: onHelpingChanged,
+      onDistractingChanged: onDistractingChanged,
+    );
+  }
 
   final FactorGroups groups;
   final List<NamedFactor> helping;
@@ -306,6 +390,10 @@ class CheckInFactorSelects extends StatelessWidget {
   final ValueChanged<String> onDistractingChanged;
   final Key? helpingKey;
   final Key? distractingKey;
+  final String helpingTitle;
+  final String distractingTitle;
+  final bool sortHelping;
+  final bool sortDistracting;
 
   @override
   Widget build(BuildContext context) {
@@ -334,11 +422,12 @@ class CheckInFactorSelects extends StatelessWidget {
               top: 8,
               bottom: 6,
             ),
-            child: Text('HELPING FACTORS', style: labelStyle),
+            child: Text(helpingTitle, style: labelStyle),
           ),
           CheckInSelect<String>(
             depth: CheckInFieldDepth.nested,
             dropdownKey: helpingKey,
+            sortLabels: sortHelping,
             value: helping.any((factor) => factor.id == helpingId)
                 ? helpingId
                 : kFactorNotRecorded,
@@ -360,11 +449,12 @@ class CheckInFactorSelects extends StatelessWidget {
               top: 8,
               bottom: 6,
             ),
-            child: Text('DISTRACTING FACTORS', style: labelStyle),
+            child: Text(distractingTitle, style: labelStyle),
           ),
           CheckInSelect<String>(
             depth: CheckInFieldDepth.nested,
             dropdownKey: distractingKey,
+            sortLabels: sortDistracting,
             value: distracting.any((factor) => factor.id == distractingId)
                 ? distractingId
                 : kFactorNotRecorded,

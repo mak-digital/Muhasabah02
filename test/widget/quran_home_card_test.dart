@@ -6,7 +6,9 @@ import 'package:muhasabah02/domain/daily_check_in.dart';
 import 'package:muhasabah02/domain/first_day_of_week.dart';
 import 'package:muhasabah02/domain/monitor_domain.dart';
 import 'package:muhasabah02/domain/personal_mix.dart';
+import 'package:muhasabah02/domain/activities.dart';
 import 'package:muhasabah02/domain/quran.dart';
+import 'package:muhasabah02/domain/quran_duration.dart';
 import 'package:muhasabah02/presentation/checkin/check_in_screen.dart';
 import 'package:muhasabah02/presentation/shared/salah_activity_mark.dart';
 import 'package:muhasabah02/presentation/shared/state_marker.dart';
@@ -95,7 +97,7 @@ void main() {
     await pumpHome(tester);
     expect(find.text(Copy.quranJourney.toUpperCase()), findsNothing);
     expect(find.text(Copy.quranStageNote), findsNothing);
-    expect(find.text('ENGAGEMENT'), findsNothing);
+    expect(find.text('ENGAGEMENT WITH QUR’AN'), findsWidgets);
     expect(find.text('UNDERSTANDING & REFLECTION'), findsNothing);
     expect(find.text('REFLECTION'), findsNothing);
     expect(find.text('PRACTICAL RELEVANCE'), findsNothing);
@@ -110,9 +112,7 @@ void main() {
     expect(find.text('Application Reflection'), findsNothing);
   });
 
-  testWidgets('understanding sitting does not fill engagement', (
-    tester,
-  ) async {
+  testWidgets('understanding sitting does not fill engagement', (tester) async {
     await pumpHome(
       tester,
       days: [
@@ -155,9 +155,7 @@ void main() {
     expect(
       tester
           .widget<RecordedStateMarker>(
-            find.byKey(
-              const Key('quran-home-consciousApplication-2026-08-31'),
-            ),
+            find.byKey(const Key('quran-home-consciousApplication-2026-08-31')),
           )
           .kind,
       MarkerKind.filled,
@@ -191,14 +189,30 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('Did I let the Qur’an speak to me today?'), findsWidgets);
-    expect(find.text('ENGAGEMENT'), findsOneWidget);
+    expect(find.text('ENGAGEMENT WITH QUR’AN'), findsWidgets);
+    expect(find.text('UNDERSTANDING & REFLECTION'), findsNothing);
+    expect(find.text('PRACTICAL RELEVANCE'), findsNothing);
     expect(find.text('Engagement'), findsWidgets);
+    expect(find.text('Understanding & reflection'), findsWidgets);
+    expect(find.text('Practical relevance'), findsWidgets);
+    expect(find.text(Copy.quranCheckInIntroTitle), findsOneWidget);
+    expect(find.text(Copy.quranCheckInIntro), findsNothing);
+    expect(find.text(Copy.quranCheckInFactorsIntro), findsNothing);
+    expect(find.text(Copy.factorsYouNoticed), findsNothing);
+    expect(find.text('HELPING FACTORS'), findsNothing);
+    expect(find.text('DISTRACTING FACTORS'), findsNothing);
+    await tester.tap(find.text(Copy.quranCheckInIntroTitle));
+    await tester.pumpAndSettle();
+    expect(find.text(Copy.quranCheckInIntro), findsOneWidget);
+    expect(find.text(Copy.quranCheckInFactorsIntro), findsOneWidget);
     expect(find.text('Fajr'), findsNothing);
     expect(find.text('Morning Adhkar'), findsNothing);
     expect(find.text('Memorisation'), findsNothing);
   });
 
-  testWidgets('Qur’an cell opens focused check-in for that row', (tester) async {
+  testWidgets('Qur’an cell opens focused check-in for that row', (
+    tester,
+  ) async {
     await pumpHome(tester);
     await tester.ensureVisible(
       find.byKey(const Key('quran-home-consciousApplication-2026-09-03')),
@@ -215,7 +229,9 @@ void main() {
     );
     expect(find.text('Save'), findsOneWidget);
     expect(
-      find.text('Did you notice a possible practical relevance from learnt verses today?'),
+      find.text(
+        'Did you notice a possible practical relevance from learnt verses today?',
+      ),
       findsOneWidget,
     );
   });
@@ -239,6 +255,27 @@ void main() {
     );
   });
 
+  testWidgets(
+    '3–5 minutes is an empty light-green circle when activity colours are on',
+    (tester) async {
+      await pumpHome(
+        tester,
+        salahActivityColours: true,
+        days: [
+          DailyCheckIn.empty('2026-08-31').withQuranActivity(
+            QuranDimension.reading,
+            const RecordedActivity(id: QuranDurationIds.min3to5),
+          ),
+        ],
+      );
+      final marker = tester.widget<RecordedStateMarker>(
+        find.byKey(const Key('quran-home-reading-2026-08-31')),
+      );
+      expect(marker.kind, MarkerKind.outlined);
+      expect(marker.color, SalahActivityMark.aloneOnTime);
+    },
+  );
+
   testWidgets('future Qur’an cell does not open entry', (tester) async {
     await pumpHome(tester);
     await tester.tap(
@@ -249,19 +286,28 @@ void main() {
   });
 
   testWidgets('First season mix omits unused Qur’an Home rows', (tester) async {
-    await pumpHome(
-      tester,
-      personalMix: mixForKind(PersonalMixKind.firstLook),
+    await pumpHome(tester, personalMix: mixForKind(PersonalMixKind.firstLook));
+    expect(
+      find.byKey(const Key('quran-home-reading-2026-09-03')),
+      findsOneWidget,
     );
-    expect(find.byKey(const Key('quran-home-reading-2026-09-03')), findsOneWidget);
-    expect(find.byKey(const Key('quran-home-meaning-2026-09-03')), findsOneWidget);
+    expect(
+      find.byKey(const Key('quran-home-meaning-2026-09-03')),
+      findsOneWidget,
+    );
     expect(
       find.byKey(const Key('quran-home-memorisation-2026-09-03')),
       findsNothing,
     );
-    expect(find.byKey(const Key('quran-home-revision-2026-09-03')), findsNothing);
+    expect(
+      find.byKey(const Key('quran-home-revision-2026-09-03')),
+      findsNothing,
+    );
     expect(find.byKey(const Key('quran-home-tafsir-2026-09-03')), findsNothing);
-    expect(find.byKey(const Key('quran-home-consciousApplication-2026-09-03')), findsOneWidget);
+    expect(
+      find.byKey(const Key('quran-home-consciousApplication-2026-09-03')),
+      findsOneWidget,
+    );
     expect(
       find.byKey(const Key('quran-home-reflection-2026-09-03')),
       findsNothing,

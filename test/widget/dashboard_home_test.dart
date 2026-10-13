@@ -57,7 +57,12 @@ void main() {
     expect(find.text('Family & Community Care'), findsNothing);
     expect(find.text(MonitorDomain.quran.label), findsNothing);
     expect(find.text(Copy.reflectionOfTheWeek), findsOneWidget);
-    expect(find.text(Copy.weeklyJournalTitle), findsOneWidget);
+    expect(find.text(Copy.weeklyJournalTitle), findsNothing);
+    expect(
+      find.text(Copy.domainActionsTitle(MonitorDomain.salah.shortLabel)),
+      findsOneWidget,
+    );
+    expect(find.text(Copy.developerNotesTitle), findsOneWidget);
     expect(find.text(Copy.currentWeek), findsWidgets);
     expect(find.text('Parent Contact'), findsNothing);
     expect(find.text('Family & Community Care'), findsNothing);
@@ -65,7 +70,7 @@ void main() {
     expect(find.text('Recognition'), findsNothing);
     expect(find.text(Copy.noticedThisWeek), findsNothing);
     expect(find.text(Copy.patternsNoticed), findsNothing);
-    expect(find.text(Copy.addAResponse), findsWidgets);
+    expect(find.text(Copy.addAResponse), findsNothing);
     expect(find.text(Copy.homeCheckIn), findsOneWidget);
     expect(find.text(Copy.marksGuide), findsOneWidget);
     expect(find.byTooltip(Copy.marksGuideTitle), findsOneWidget);
@@ -101,10 +106,10 @@ void main() {
     expect(find.byKey(const Key('home-domain-pill-hadith')), findsNothing);
     expect(find.byKey(const Key('home-domain-pill-charity')), findsNothing);
     expect(find.byKey(const Key('home-domain-pill-akhlaq')), findsNothing);
-    expect(find.text(MonitorDomain.hadith.label), findsNothing);
-    expect(find.text(MonitorDomain.akhlaq.label), findsNothing);
-    expect(find.text(MonitorDomain.dhikr.label), findsNothing);
-    expect(find.text(MonitorDomain.knowledge.label), findsNothing);
+    expect(find.byKey(const Key('home-domain-card-hadith')), findsNothing);
+    expect(find.byKey(const Key('home-domain-card-akhlaq')), findsNothing);
+    expect(find.byKey(const Key('home-domain-card-dhikr')), findsNothing);
+    expect(find.byKey(const Key('home-domain-card-knowledge')), findsNothing);
     expect(find.text('Family & Community Care'), findsNothing);
     expect(find.text('Weekly Sunnah Fast'), findsNothing);
     expect(find.text(MonitorDomain.hajj.label), findsNothing);
@@ -121,8 +126,8 @@ void main() {
     );
     await tester.pumpAndSettle();
     await showHomeDomain(tester, MonitorDomain.dhikr);
-    await tester.ensureVisible(find.text(MonitorDomain.dhikr.label).first);
-    await tester.tap(find.text(MonitorDomain.dhikr.label).first);
+    await tester.ensureVisible(find.byKey(const Key('home-domain-card-dhikr')));
+    await tester.tap(find.text(MonitorDomain.dhikr.label).last);
     await tester.pumpAndSettle();
     expect(find.byType(CheckInScreen), findsOneWidget);
     expect(

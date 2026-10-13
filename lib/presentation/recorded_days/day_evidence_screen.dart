@@ -10,6 +10,7 @@ import '../../domain/copy.dart';
 import '../../domain/daily_check_in.dart';
 import '../../domain/display_calendar.dart';
 import '../../domain/home_traces.dart';
+import '../../domain/huquq_practices.dart';
 import '../../domain/monitor_domain.dart';
 import '../../domain/other_domains.dart';
 import '../../domain/personal_mix.dart';
@@ -18,16 +19,14 @@ import '../../domain/personalisation_resolver.dart';
 import '../../domain/prayer.dart';
 import '../../domain/quran.dart';
 import '../../domain/salah_extras.dart';
+import '../../domain/time_practices.dart';
 import '../shared/add_response_button.dart';
 import '../shared/system_insets.dart';
 import '../shared/ui_bits.dart';
 import 'evidence_ui.dart';
 
 class DayEvidenceScreen extends ConsumerWidget {
-  const DayEvidenceScreen({
-    super.key,
-    required this.dateKey,
-  });
+  const DayEvidenceScreen({super.key, required this.dateKey});
 
   final String dateKey;
 
@@ -104,13 +103,13 @@ class DayEvidenceScreen extends ConsumerWidget {
                     if (allows('salah.${SalahTraceRow.tahajjud.id}'))
                       EvidenceRow(
                         name: 'Tahajjud',
-                        value: _voluntary(record.tahajjud),
+                        value: _voluntaryLabel(record, SalahTraceRow.tahajjud),
                         quiet: record.tahajjud == TernaryOutcome.unanswered,
                       ),
                     if (allows('salah.${SalahTraceRow.ishraq.id}'))
                       EvidenceRow(
                         name: 'Ishraq',
-                        value: _voluntary(record.ishraq),
+                        value: _voluntaryLabel(record, SalahTraceRow.ishraq),
                         quiet: record.ishraq == TernaryOutcome.unanswered,
                       ),
                   ],
@@ -150,9 +149,7 @@ class DayEvidenceScreen extends ConsumerWidget {
                       EvidenceRow(
                         name: 'Application Reflection',
                         value: record
-                            .quranOutcome(
-                              QuranDimension.applicationReflection,
-                            )
+                            .quranOutcome(QuranDimension.applicationReflection)
                             .legendLabel,
                         note: Copy.applicationReflectionNote,
                       ),
@@ -252,7 +249,7 @@ class DayEvidenceScreen extends ConsumerWidget {
                     MuhasabahColors.timeWashDark,
                     brightness,
                   ),
-                  rows: _mixRows(timeAllHomeRows, allows),
+                  rows: _mixRows(timeHomeRows, allows),
                   record: record,
                   extraName: '',
                   extraValue: '',
@@ -470,17 +467,40 @@ class DayEvidenceScreen extends ConsumerWidget {
   }) {
     final children = <Widget>[];
     for (final row in rows) {
+      if (isTimeTrace(row.storageKey)) {
+        final capture = readTimePractice(record, row.storageKey);
+        if (!capture.isPrimaryRecorded) continue;
+        children.add(
+          EvidenceRow(
+            name: row.label,
+            value: timeEvidenceValue(record, row.storageKey),
+            note: timeEvidenceNote(record, row.storageKey),
+          ),
+        );
+        continue;
+      }
       final outcome = record.homeTrace(row.storageKey);
-      final factors = _factorLine(record, row.storageKey);
+      final factors = isHuquqTrace(row.storageKey)
+          ? huquqEvidenceNote(record, row.storageKey)
+          : _factorLine(record, row.storageKey);
       if (outcome == TernaryOutcome.unanswered && factors == null) continue;
+      final catalog = ActivityCatalog.forHomeTrace(row.storageKey);
+      final activity = catalog.isEmpty
+          ? null
+          : ActivityCatalog.find(
+              catalog,
+              record.activityFor(row.storageKey).id,
+            );
       children.add(
         EvidenceRow(
           name: row.label,
-          value: traceOutcomeLabel(
-            row.storageKey,
-            outcome,
-            includeSubject: false,
-          ),
+          value:
+              activity?.label ??
+              traceOutcomeLabel(
+                row.storageKey,
+                outcome,
+                includeSubject: false,
+              ),
           quiet: outcome == TernaryOutcome.unanswered,
           note: factors,
         ),
@@ -509,12 +529,14 @@ class DayEvidenceScreen extends ConsumerWidget {
     return label;
   }
 
-  String _voluntary(TernaryOutcome outcome) {
-    return switch (outcome) {
-      TernaryOutcome.positive => 'Performed',
-      TernaryOutcome.negative => 'Not performed',
-      TernaryOutcome.unanswered => 'Not recorded',
-    };
+  String _voluntaryLabel(DailyCheckIn record, SalahTraceRow row) {
+    final activity = record.activityFor(ActivityCatalog.voluntarySalahKey(row));
+    final catalog = ActivityCatalog.forVoluntarySalah(row);
+    final option = ActivityCatalog.find(catalog, activity.id);
+    return option?.label ??
+        voluntarySalahLabel(
+          row == SalahTraceRow.tahajjud ? record.tahajjud : record.ishraq,
+        );
   }
 
   String _observationLabel(

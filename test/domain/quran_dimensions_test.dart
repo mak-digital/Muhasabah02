@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muhasabah02/domain/daily_check_in.dart';
+import 'package:muhasabah02/domain/home_traces.dart';
 import 'package:muhasabah02/domain/quran.dart';
 import 'package:muhasabah02/domain/recorded_context.dart';
 
@@ -111,11 +112,22 @@ void main() {
       QuranDimension.meaning,
       QuranDimension.consciousApplication,
     ]);
-    expect(bands.map((band) => band.$1).toList(), [
-      kQuranUnderstandingBand,
-      kQuranApplicationBand,
+    expect(bands.map((band) => band.$1).toList(), [kQuranEngagementBand]);
+    expect(bands.single.$2, [
+      QuranDimension.meaning,
+      QuranDimension.consciousApplication,
     ]);
-    expect(bands.first.$2, [QuranDimension.meaning]);
-    expect(bands.last.$2, [QuranDimension.consciousApplication]);
+  });
+
+  test('band headings are caps in every surface', () {
+    expect(displayHomeBand(kQuranEngagementBand), 'ENGAGEMENT WITH QUR’AN');
+    expect(
+      displayHomeBand(kQuranUnderstandingBand),
+      'UNDERSTANDING & REFLECTION',
+    );
+    expect(displayHomeBand(kHadithEngagedBand), 'ENGAGED WITH HADITH');
+    expect(displayHomeBand('Virtues I noticed'), 'VIRTUES I NOTICED');
+    expect(displayHomeBand('Restraint'), 'RESTRAINT');
+    expect(displayHomeBand('Obligatory Salah'), 'OBLIGATORY SALAH');
   });
 }

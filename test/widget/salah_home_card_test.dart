@@ -23,6 +23,7 @@ void main() {
     required List<DailyCheckIn> days,
     FirstDayOfWeekPref firstDay = FirstDayOfWeekPref.monday,
     DisplayCalendar calendar = DisplayCalendar.gregorian,
+    bool salahActivityColours = false,
   }) async {
     tester.view.physicalSize = const Size(400, 2200);
     tester.view.devicePixelRatio = 1;
@@ -38,6 +39,7 @@ void main() {
         now: now,
         firstDayOfWeek: firstDay,
         displayCalendar: calendar,
+        salahActivityColours: salahActivityColours,
       ),
     );
     await tester.pumpAndSettle();
@@ -223,6 +225,38 @@ void main() {
             )
             .kind,
         MarkerKind.unanswered,
+      );
+    },
+  );
+
+  testWidgets(
+    'Not Prayed stays an empty solid circle when activity colours are on',
+    (tester) async {
+      await pumpHome(
+        tester,
+        days: [
+          DailyCheckIn.empty('2026-08-31').copyWith(
+            tahajjud: TernaryOutcome.negative,
+            ishraq: TernaryOutcome.negative,
+          ),
+        ],
+        salahActivityColours: true,
+      );
+      expect(
+        tester
+            .widget<RecordedStateMarker>(
+              find.byKey(const Key('salah-home-tahajjud-2026-08-31')),
+            )
+            .kind,
+        MarkerKind.outlined,
+      );
+      expect(
+        tester
+            .widget<RecordedStateMarker>(
+              find.byKey(const Key('salah-home-ishraq-2026-08-31')),
+            )
+            .kind,
+        MarkerKind.outlined,
       );
     },
   );

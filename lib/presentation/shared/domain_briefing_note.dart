@@ -1,6 +1,33 @@
 import 'package:flutter/material.dart';
 
+import '../../domain/copy.dart';
 import '../../domain/domain_briefing.dart';
+import 'ui_bits.dart';
+
+class CollapsingDomainBriefingNote extends StatelessWidget {
+  const CollapsingDomainBriefingNote(
+    this.briefing, {
+    super.key,
+    this.compact = false,
+    required this.expanded,
+    required this.onExpansionChanged,
+  });
+
+  final DomainBriefing briefing;
+  final bool compact;
+  final bool expanded;
+  final ValueChanged<bool> onExpansionChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return CollapsingNoteTile(
+      title: Copy.aboutThisDomain,
+      expanded: expanded,
+      onExpansionChanged: onExpansionChanged,
+      child: DomainBriefingNote(briefing, compact: compact),
+    );
+  }
+}
 
 class DomainBriefingNote extends StatelessWidget {
   const DomainBriefingNote(this.briefing, {super.key, this.compact = false});
