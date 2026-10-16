@@ -22,6 +22,15 @@ class DomainColorIdentity {
   Color washFor(Brightness brightness) =>
       MuhasabahColors.wash(washLight, washDark, brightness);
 
+  /// Same Learn & Practice panel on every domain. Distinct from the domain
+  /// week/actions wash. Colour still does not grade learning.
+  Color practiceWashFor(Brightness brightness) =>
+      MuhasabahColors.wash(
+        MuhasabahColors.practiceWash,
+        MuhasabahColors.practiceWashDark,
+        brightness,
+      );
+
   /// Slightly cooler mix so developer notes are not the same wash as actions.
   Color notesWashFor(Brightness brightness) => Color.alphaBlend(
     MuhasabahColors.journal.withValues(alpha: 0.28),

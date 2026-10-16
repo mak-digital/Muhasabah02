@@ -226,7 +226,7 @@ class _PracticeHadithWashState extends ConsumerState<PracticeHadithWash> {
     final item = practiceHadithAt(prefs.practiceHadithBrowseIndex, extra);
     final already = practiceHadithAlreadyRegistered(records, item.id);
     final identity = domainColorIdentity(widget.domain);
-    final wash = identity.washFor(Theme.of(context).brightness);
+    final wash = identity.practiceWashFor(Theme.of(context).brightness);
     final addedFill = Theme.of(context).colorScheme.secondaryContainer;
     final addedInk = Theme.of(context).colorScheme.onSecondaryContainer;
     final ink = already ? addedInk : null;
@@ -488,7 +488,7 @@ class _PracticeQuranWashState extends ConsumerState<PracticeQuranWash> {
     final item = practiceQuranAt(prefs.practiceQuranBrowseIndex, extra);
     final already = practiceHadithAlreadyRegistered(records, item.id);
     final identity = domainColorIdentity(widget.domain);
-    final wash = identity.washFor(Theme.of(context).brightness);
+    final wash = identity.practiceWashFor(Theme.of(context).brightness);
     final addedFill = Theme.of(context).colorScheme.secondaryContainer;
     final addedInk = Theme.of(context).colorScheme.onSecondaryContainer;
     final ink = already ? addedInk : null;

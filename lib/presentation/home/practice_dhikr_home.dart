@@ -21,6 +21,8 @@ import '../../domain/practice_hajj_catalog.dart';
 import '../../domain/practice_ummah_catalog.dart';
 import '../../domain/practice_wealth_catalog.dart';
 import '../../domain/practice_hadith.dart';
+import '../../domain/personalisation_resolver.dart';
+import '../../domain/practice_learn_focus.dart';
 import '../shared/domain_visual.dart';
 import '../shared/home_band_heading.dart';
 import '../shared/ui_bits.dart';
@@ -67,6 +69,29 @@ class PracticeLearnSpec {
       for (final item in catalog)
         if (item.group == group) item,
     ];
+  }
+
+  PracticeLearnSpec focused(PersonalisationResolver resolver) {
+    final nextCatalog = focusedPracticeCatalog(
+      domain: domain,
+      catalog: catalog,
+      resolver: resolver,
+    );
+    return PracticeLearnSpec(
+      domain: domain,
+      keyPrefix: keyPrefix,
+      title: title,
+      note: note,
+      addLabel: addLabel,
+      openRegister: openRegister,
+      registerTitle: registerTitle,
+      registerNote: registerNote,
+      registerEmpty: registerEmpty,
+      confirmDelete: confirmDelete,
+      groups: focusedPracticeGroups(groups: groups, catalog: nextCatalog),
+      catalog: nextCatalog,
+      recordFrom: recordFrom,
+    );
   }
 }
 
@@ -469,13 +494,21 @@ class _PracticeGroupedLearnWashState
 
   @override
   Widget build(BuildContext context) {
-    final spec = widget.spec;
+    ref.watch(prefsTickProvider);
+    final prefs = ref.watch(appPrefsProvider);
+    final spec = widget.spec.focused(
+      PersonalisationResolver(
+        visibleDomains: prefs.visibleDomains,
+        mix: prefs.personalMix,
+      ),
+    );
+    if (spec.groups.isEmpty) return const SizedBox.shrink();
     final records = practiceRecordsForDomain(
       ref.watch(practiceHadithProvider).value ?? const [],
       spec.domain,
     );
     final identity = domainColorIdentity(spec.domain);
-    final wash = identity.washFor(Theme.of(context).brightness);
+    final wash = identity.practiceWashFor(Theme.of(context).brightness);
     final addedFill = Theme.of(context).colorScheme.secondaryContainer;
     final addedInk = Theme.of(context).colorScheme.onSecondaryContainer;
 
@@ -523,7 +556,7 @@ class _PracticeGroupedLearnWashState
                     showDragHandle: true,
                     isScrollControlled: true,
                     builder: (context) =>
-                        _PracticeGroupedRegisterSheet(spec: spec),
+                        _PracticeGroupedRegisterSheet(spec: widget.spec),
                   );
                 },
                 child: Text(
@@ -544,6 +577,7 @@ class _PracticeGroupedLearnWashState
               ),
             for (var g = 0; g < spec.groups.length; g++)
               _groupTile(
+                spec: spec,
                 group: spec.groups[g],
                 initiallyExpanded: g == 0,
                 records: records,
@@ -557,13 +591,14 @@ class _PracticeGroupedLearnWashState
   }
 
   Widget _groupTile({
+    required PracticeLearnSpec spec,
     required String group,
     required bool initiallyExpanded,
     required List<PracticeHadithRecord> records,
     required Color addedFill,
     required Color addedInk,
   }) {
-    final items = widget.spec.itemsInGroup(group);
+    final items = spec.itemsInGroup(group);
     final children = <Widget>[];
     var lastSub = '';
     final clusters = <List<PracticeDhikrItem>>[];

@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:muhasabah02/application/providers.dart';
+import 'package:muhasabah02/data/app_prefs.dart';
 import 'package:muhasabah02/data/memory_repositories.dart';
 import 'package:muhasabah02/domain/copy.dart';
 import 'package:muhasabah02/domain/home_traces.dart';
 import 'package:muhasabah02/domain/domain_action.dart';
 import 'package:muhasabah02/domain/monitor_domain.dart';
+import 'package:muhasabah02/domain/personal_mix.dart';
+import 'package:muhasabah02/domain/salah_extras.dart';
 import 'package:muhasabah02/domain/practice_akhlaq_catalog.dart';
 import 'package:muhasabah02/domain/practice_dhikr_catalog.dart';
 import 'package:muhasabah02/domain/practice_hadith_catalog.dart';
@@ -20,6 +25,7 @@ import 'package:muhasabah02/domain/practice_fasting_catalog.dart';
 import 'package:muhasabah02/domain/practice_hajj_catalog.dart';
 import 'package:muhasabah02/domain/practice_ummah_catalog.dart';
 import 'package:muhasabah02/domain/practice_wealth_catalog.dart';
+import 'package:muhasabah02/presentation/shared/domain_visual.dart';
 import 'package:muhasabah02/presentation/shared/ui_bits.dart';
 
 import '../support/home_domain_stage.dart';
@@ -99,6 +105,22 @@ void main() {
             .widget<WashPanel>(find.byKey(const Key('salah-actions-panel')))
             .color,
       ),
+    );
+    expect(
+      tester
+          .widget<WashPanel>(find.byKey(const Key('salah-practice-panel')))
+          .color,
+      isNot(
+        tester
+            .widget<WashPanel>(find.byKey(const Key('salah-actions-panel')))
+            .color,
+      ),
+    );
+    expect(
+      tester
+          .widget<WashPanel>(find.byKey(const Key('salah-practice-panel')))
+          .color,
+      domainColorIdentity(MonitorDomain.salah).practiceWashFor(Brightness.light),
     );
     expect(
       tester.getSize(find.byKey(const Key('salah-actions-panel'))).height,
@@ -652,6 +674,22 @@ void main() {
     expect(find.byKey(const Key('dhikr-practice-wash')), findsOneWidget);
     expect(find.byKey(const Key('dhikr-actions-wash')), findsOneWidget);
     expect(find.byKey(const Key('dhikr-feedback-wash')), findsOneWidget);
+    expect(
+      tester
+          .widget<WashPanel>(find.byKey(const Key('dhikr-practice-panel')))
+          .color,
+      domainColorIdentity(MonitorDomain.dhikr).practiceWashFor(Brightness.light),
+    );
+    expect(
+      tester
+          .widget<WashPanel>(find.byKey(const Key('dhikr-practice-panel')))
+          .color,
+      isNot(
+        tester
+            .widget<WashPanel>(find.byKey(const Key('dhikr-actions-panel')))
+            .color,
+      ),
+    );
     expect(find.text(Copy.weeklyJournalTitle), findsNothing);
     expect(find.text(Copy.practiceDhikrNote), findsNothing);
 
@@ -1362,5 +1400,118 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect((await register.allHealthy()).single.domain, MonitorDomain.charity);
+  });
+
+  testWidgets('Learn & Practice follows Domains in Focus and the personal mix', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(400, 8000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(
+      testApp(
+        now: DateTime(2026, 10, 7),
+        visibleDomains: kBasicDhikrVisibleDomains,
+        personalMix: mixForKind(PersonalMixKind.firstLook),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('salah-practice-wash')), findsOneWidget);
+    expect(find.byKey(const Key('huquq-practice-wash')), findsNothing);
+
+    await tester.tap(find.text(Copy.practiceSalahTitle));
+    await tester.pumpAndSettle();
+    expect(find.text(displayHomeBand(kSalahObligatoryBand)), findsWidgets);
+    expect(find.text(displayHomeBand(kSalahVoluntaryBand)), findsNothing);
+    expect(find.text('Fajr'), findsWidgets);
+    expect(find.text('Tahajjud'), findsNothing);
+
+    await showHomeDomain(tester, MonitorDomain.dhikr);
+    await tester.tap(find.text(Copy.practiceDhikrTitle));
+    await tester.pumpAndSettle();
+    expect(find.text(displayHomeBand(kDhikrGroupPost)), findsWidgets);
+    expect(find.text(displayHomeBand(kDhikrGroupMorning)), findsWidgets);
+    expect(find.text(displayHomeBand(kDhikrGroupEvening)), findsNothing);
+  });
+
+  testWidgets('Dhikr Learn & Practice follows mix rows under Other Adhkar', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(400, 8000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(
+      testApp(
+        now: DateTime(2026, 10, 7),
+        visibleDomains: kBasicDhikrVisibleDomains,
+        personalMix: mixForKind(
+          PersonalMixKind.custom,
+          customKeys: {'dhikr.generalDhikr'},
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('dhikr-practice-wash')), findsOneWidget);
+    await tester.tap(find.text(Copy.practiceDhikrTitle));
+    await tester.pumpAndSettle();
+    expect(find.byKey(Key('dhikr-practice-group-$kDhikrGroupOther')), findsOneWidget);
+    expect(find.text(displayHomeBand(kDhikrGroupMorning)), findsNothing);
+    expect(find.text(displayHomeBand(kDhikrGroupEvening)), findsNothing);
+    expect(find.text(displayHomeBand(kDhikrSubGeneral)), findsWidgets);
+    expect(find.text(displayHomeBand(kDhikrSubGratitude)), findsNothing);
+    expect(find.text(displayHomeBand(kDhikrSubTravel)), findsNothing);
+  });
+
+  testWidgets('Dhikr Learn hides post-fard when Salah is not in Domains in Focus', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(400, 8000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final prefs = MemoryAppPrefs(
+      visibleDomains: {MonitorDomain.quran, MonitorDomain.dhikr},
+      personalMix: PersonalMix.sameAsDomains,
+    );
+    await tester.pumpWidget(
+      testApp(now: DateTime(2026, 10, 7), prefs: prefs),
+    );
+    await tester.pumpAndSettle();
+    await showHomeDomain(tester, MonitorDomain.dhikr);
+    await tester.tap(find.text(Copy.practiceDhikrTitle));
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(Key('dhikr-practice-group-$kDhikrGroupPost')),
+      findsNothing,
+    );
+    expect(
+      find.byKey(Key('dhikr-practice-group-$kDhikrGroupMorning')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(Key('dhikr-practice-group-$kDhikrGroupEvening')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(Key('dhikr-practice-group-$kDhikrGroupOther')),
+      findsOneWidget,
+    );
+
+    await prefs.setVisibleDomains(kBasicDhikrVisibleDomains);
+    ProviderScope.containerOf(
+      tester.element(find.byType(MaterialApp)),
+    ).read(prefsTickProvider.notifier).state++;
+    await tester.pumpAndSettle();
+    await showHomeDomain(tester, MonitorDomain.dhikr);
+    if (find.byKey(const Key('dhikr-practice-group-$kDhikrGroupMorning')).evaluate().isEmpty) {
+      await tester.tap(find.text(Copy.practiceDhikrTitle));
+      await tester.pumpAndSettle();
+    }
+    expect(
+      find.byKey(Key('dhikr-practice-group-$kDhikrGroupPost')),
+      findsOneWidget,
+    );
   });
 }
