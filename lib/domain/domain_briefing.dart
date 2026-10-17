@@ -135,7 +135,7 @@ const timeBriefing = DomainBriefing(
   ],
   items: [
     'The eight practices are optional observations, not eight daily achievements.',
-    'A first tap stores whether you acted, noticed without acting, had no relevant situation, or prefer not to record. Context and what happened afterwards are optional.',
+    'A first tap stores a descriptive observation: beneficial action, partial effort, a recognised lapse, a corrective adjustment, no relevant situation, or unanswered. Optional follow-ups are provenance, not a productivity score.',
     'The app records what you report. It does not infer intention, sincerity, laziness, psychological health, divine reward, or barakah.',
     'The fard stays on Salah. Sleep stays on Physical Health. Took needed rest here is recovery, not a sleep log.',
     'Hours, productivity scores, streaks, and hustle badges are not recorded.',
@@ -150,10 +150,11 @@ const healthBriefing = DomainBriefing(
   ],
   items: [
     'Sleep quality and amount are observations, not hour badges, and not Time & Barakah’s rest from work.',
+    'A first tap stores a descriptive observation. Prefer not to record is an explicit privacy choice, distinct from unanswered.',
     'A nap that cares for the body may be noticed here. The same day may be both. The app does not fill sleep from Time, or Time from sleep.',
     'Movement is for strength to worship and serve, not aesthetics or “gains”.',
-    'Nutrition is halal, healthy, and in moderation — not calorie counting. Hydration is simple, not obsessive.',
-    'Illness and disability are not failings. Seeking treatment, patience, and gratitude may all be care.',
+    'Nutrition is lawful, sufficient, and in moderation — not calorie counting. Hydration is simple, not obsessive.',
+    'Illness, disability, ageing, fatigue, and prescribed treatment are not failings. Seeking care is not ranked above having no illness.',
     'Physical and mental health are intertwined.',
     'This is not a fitness app: no weight, body metrics, body-shaming, or beauty-as-spiritual-goal.',
     'Extreme fasting outside Ramadan is not encouraged here.',

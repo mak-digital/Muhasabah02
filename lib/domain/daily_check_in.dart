@@ -4,6 +4,8 @@ import 'activities.dart';
 import 'akhlaq_practices.dart';
 import 'home_traces.dart';
 import 'huquq_practices.dart';
+import 'knowledge_practices.dart';
+import 'time_practices.dart';
 import 'other_domains.dart';
 import 'prayer.dart';
 import 'quran.dart';
@@ -141,7 +143,18 @@ class DailyCheckIn {
 
   RecordedActivity activityFor(String key) {
     final stored = activities[key];
-    if (stored != null) return stored;
+    if (stored != null) {
+      if (isTimeTrace(key)) {
+        return RecordedActivity(
+          id: canonicalizeTimeActivityId(stored.id),
+          customText: stored.customText,
+        );
+      }
+      if (isHealthTrace(key)) {
+        return stored;
+      }
+      return stored;
+    }
     if (key.startsWith('salah.')) {
       final name = key.substring(6);
       if (name == 'jumuah') {
@@ -227,6 +240,15 @@ class DailyCheckIn {
       }
       if (isHuquqTrace(key)) {
         return RecordedActivity(id: canonicalHuquqId(homeTrace(key)));
+      }
+      if (isKnowledgeTrace(key)) {
+        return RecordedActivity(id: canonicalKnowledgeId(homeTrace(key)));
+      }
+      if (isTimeTrace(key)) {
+        return RecordedActivity(id: canonicalTimeId(homeTrace(key)));
+      }
+      if (isHealthTrace(key)) {
+        return const RecordedActivity(id: ActivityIds.unanswered);
       }
       return RecordedActivity(
         id: ActivityCatalog.canonicalTernaryId(homeTrace(key), catalog),

@@ -2,6 +2,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:muhasabah02/domain/activities.dart';
 import 'package:muhasabah02/domain/akhlaq_practices.dart';
 import 'package:muhasabah02/domain/huquq_practices.dart';
+import 'package:muhasabah02/domain/knowledge_practices.dart';
+import 'package:muhasabah02/domain/health_practices.dart';
+import 'package:muhasabah02/domain/time_practices.dart';
 import 'package:muhasabah02/domain/daily_check_in.dart';
 import 'package:muhasabah02/domain/monitor_domain.dart';
 import 'package:muhasabah02/domain/personal_mix.dart';
@@ -263,5 +266,72 @@ void main() {
       ActivityIds.unanswered,
     ]);
     expect(record.homeTrace('huquq.parents'), TernaryOutcome.unanswered);
+  });
+
+  test('quick tap cycles knowledge observation codes and can clear', () {
+    final item = quickTapItemsFor({'knowledge.learnedSomethingTrue'}).single;
+    var record = DailyCheckIn.empty('2026-09-14');
+    expect(readQuickTapChoiceId(record, item), ActivityIds.unanswered);
+    final seen = <String>[];
+    for (var i = 0; i < 6; i++) {
+      final next = nextQuickTapChoice(record, item);
+      seen.add(next.id);
+      record = applyQuickTapChoice(record, item, next);
+    }
+    expect(seen, [
+      KnowledgeObservationIds.engaged,
+      KnowledgeObservationIds.progress,
+      KnowledgeObservationIds.gapRecognised,
+      KnowledgeObservationIds.corrected,
+      KnowledgeObservationIds.noSituation,
+      ActivityIds.unanswered,
+    ]);
+    expect(
+      record.homeTrace('knowledge.learnedSomethingTrue'),
+      TernaryOutcome.unanswered,
+    );
+  });
+
+  test('quick tap cycles time observation codes and can clear', () {
+    final item = quickTapItemsFor({'time.t01'}).single;
+    var record = DailyCheckIn.empty('2026-09-14');
+    expect(readQuickTapChoiceId(record, item), ActivityIds.unanswered);
+    final seen = <String>[];
+    for (var i = 0; i < 6; i++) {
+      final next = nextQuickTapChoice(record, item);
+      seen.add(next.id);
+      record = applyQuickTapChoice(record, item, next);
+    }
+    expect(seen, [
+      TimeObservationIds.acted,
+      TimeObservationIds.partialEffort,
+      TimeObservationIds.lapseRecognised,
+      TimeObservationIds.corrected,
+      TimeObservationIds.noSituation,
+      ActivityIds.unanswered,
+    ]);
+    expect(record.homeTrace('time.t01'), TernaryOutcome.unanswered);
+  });
+
+  test('quick tap cycles health observations and can clear', () {
+    final item = quickTapItemsFor({'health.sleepQuality'}).single;
+    var record = DailyCheckIn.empty('2026-10-17');
+    expect(readQuickTapChoiceId(record, item), ActivityIds.unanswered);
+    final seen = <String>[];
+    for (var i = 0; i < 7; i++) {
+      final next = nextQuickTapChoice(record, item);
+      seen.add(next.id);
+      record = applyQuickTapChoice(record, item, next);
+    }
+    expect(seen, [
+      'health.sleepQuality.refreshed',
+      'health.sleepQuality.interruptedRested',
+      'health.sleepQuality.sleptPoorly',
+      'health.sleepQuality.addressedDifficulty',
+      'health.sleepQuality.constrained',
+      HealthObservationIds.preferNot,
+      ActivityIds.unanswered,
+    ]);
+    expect(record.homeTrace('health.sleepQuality'), TernaryOutcome.unanswered);
   });
 }

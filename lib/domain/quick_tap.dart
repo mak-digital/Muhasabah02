@@ -4,6 +4,8 @@ import 'daily_check_in.dart';
 import 'home_traces.dart';
 import 'monitor_domain.dart';
 import 'huquq_practices.dart';
+import 'knowledge_practices.dart';
+import 'health_practices.dart';
 import 'time_practices.dart';
 import 'other_domains.dart';
 import 'personal_mix.dart';
@@ -365,12 +367,7 @@ DailyCheckIn applyQuickTapChoice(
           return writeTimePractice(
             record,
             item.traceKey!,
-            TimePracticeCapture(
-              primaryId: choice.id,
-              contextId: existing.contextId,
-              outcomeId: existing.outcomeId,
-              note: existing.note,
-            ),
+            existing.copyWith(primaryId: choice.id),
           );
         }
         if (isHuquqTrace(item.traceKey!)) {
@@ -383,6 +380,36 @@ DailyCheckIn applyQuickTapChoice(
           }
           final existing = readHuquqFollowUp(record, item.traceKey!);
           return writeHuquqFollowUp(
+            record,
+            item.traceKey!,
+            existing.copyWith(primaryId: choice.id),
+          );
+        }
+        if (isKnowledgeTrace(item.traceKey!)) {
+          if (choice.id == ActivityIds.unanswered) {
+            return writeKnowledgeFollowUp(
+              record,
+              item.traceKey!,
+              const KnowledgeFollowUpCapture(),
+            );
+          }
+          final existing = readKnowledgeFollowUp(record, item.traceKey!);
+          return writeKnowledgeFollowUp(
+            record,
+            item.traceKey!,
+            existing.copyWith(primaryId: choice.id),
+          );
+        }
+        if (isHealthTrace(item.traceKey!)) {
+          if (choice.id == ActivityIds.unanswered) {
+            return writeHealthPractice(
+              record,
+              item.traceKey!,
+              const HealthPracticeCapture(),
+            );
+          }
+          final existing = readHealthPractice(record, item.traceKey!);
+          return writeHealthPractice(
             record,
             item.traceKey!,
             existing.copyWith(primaryId: choice.id),
@@ -417,6 +444,9 @@ QuickTapChoice _fromActivity(ActivityOption option) {
 
 QuickTapMark _markFor(ActivityOption option) {
   if (option.isUnanswered) return QuickTapMark.unanswered;
+  if (healthKindFor(option.id) == HealthResponseKind.lapse) {
+    return QuickTapMark.slip;
+  }
   if (option.id == ActivityIds.noSituation) return QuickTapMark.noticed;
   if (option.prayerStatus == PrayerStatus.missed) return QuickTapMark.slip;
   if (option.ternary == TernaryOutcome.negative) return QuickTapMark.slip;

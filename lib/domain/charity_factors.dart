@@ -1,6 +1,8 @@
 import 'akhlaq_practices.dart';
 import 'context_catalog.dart';
 import 'huquq_practices.dart';
+import 'knowledge_practices.dart';
+import 'time_practices.dart';
 import 'dhikr_factors.dart';
 import 'home_traces.dart';
 
@@ -134,6 +136,12 @@ String homeTraceFactorLabel(
   }
   if (isHuquqTrace(storageKey)) {
     return huquqFollowUpLabel(id);
+  }
+  if (isKnowledgeTrace(storageKey)) {
+    return knowledgeFollowUpLabel(id);
+  }
+  if (isTimeTrace(storageKey)) {
+    return timeFollowUpLabel(id);
   }
   return ContextCatalog.labelFor(id, polarity);
 }

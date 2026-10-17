@@ -654,7 +654,7 @@ void main() {
       before,
     );
     expect(kDailyCheckInSchemaVersion, 6);
-    expect(kOntologyRegistryVersion, 6);
+    expect(kOntologyRegistryVersion, 9);
   });
 
   test('free-text presence still counts toward context without being read', () {

@@ -281,6 +281,11 @@ void main() {
       monitorDomainForStorageKey('knowledge.taughtSomeone'),
       MonitorDomain.knowledge,
     );
+    expect(
+      ActivityCatalog.forHomeTrace('knowledge.learnedSomethingTrue').first.label,
+      'Learned something new and verified its reliability',
+    );
+    expect(hidesHomeTraceFactors('knowledge.learnedSomethingTrue'), isTrue);
   });
 
   test('Time & Barakah is observational and not a productivity score', () {
@@ -304,6 +309,14 @@ void main() {
       'time.t08',
     ]);
     expect(homeTraceRowByKey('time.t08')?.label, 'Took needed rest');
+    expect(
+      ActivityCatalog.forHomeTrace('time.t01').first.label,
+      'Began an activity with a clear beneficial intention',
+    );
+    expect(
+      ActivityCatalog.forHomeTrace('time.t08')[4].label,
+      'No particular rest or recovery decision noticed today',
+    );
     expect(homeTraceRowByKey('time.t01')?.band, 'Intention & Priority');
     expect(homeTraceRowByKey('time.t03')?.band, 'Attention & Presence');
     expect(homeTraceRowByKey('time.t05')?.band, 'Responsibility & Action');
@@ -331,6 +344,14 @@ void main() {
     expect(MonitorDomain.health.id, 'health');
     expect(MonitorDomain.health.showsHomeActionFollowOn, isTrue);
     expect(hidesHomeTraceFactors('health.sleepQuality'), isTrue);
+    expect(
+      ActivityCatalog.forHomeTrace('health.sleepQuality').first.label,
+      'I slept well and felt reasonably refreshed.',
+    );
+    expect(
+      ActivityCatalog.forHomeTrace('health.illnessCare')[4].label,
+      'I experienced no particular illness or need for medical care today.',
+    );
     expect(
       monitorDomainForStorageKey('health.illnessCare'),
       MonitorDomain.health,

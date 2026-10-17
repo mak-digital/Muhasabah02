@@ -5,6 +5,7 @@ import '../../application/providers.dart';
 import '../../domain/activities.dart';
 import '../../domain/akhlaq_practices.dart';
 import '../../domain/huquq_practices.dart';
+import '../../domain/knowledge_practices.dart';
 import '../../domain/copy.dart';
 import '../../domain/daily_check_in.dart';
 import '../../domain/date_key.dart';
@@ -15,13 +16,16 @@ import '../../domain/personal_response.dart';
 import '../../domain/prayer.dart';
 import '../../domain/quran.dart';
 import '../../domain/salah_factors.dart';
+import '../../domain/health_practices.dart';
 import '../../domain/time_practices.dart';
 import '../progress/progress_review_frame.dart';
 import '../recorded_days/day_evidence_screen.dart';
+import '../shared/health_practice_fields.dart';
 import '../shared/time_practice_fields.dart';
 import '../shared/activity_picker.dart';
 import '../shared/akhlaq_follow_up_fields.dart';
 import '../shared/huquq_follow_up_fields.dart';
+import '../shared/knowledge_follow_up_fields.dart';
 import '../shared/add_response_button.dart';
 import '../shared/system_insets.dart';
 
@@ -129,7 +133,10 @@ Future<void> showHomeTraceRecordSheet({
                           namedSubject:
                               isDhikrPostFardTrace(row.storageKey) ||
                                   isAkhlaqTrace(row.storageKey) ||
-                                  isHuquqTrace(row.storageKey)
+                                  isHuquqTrace(row.storageKey) ||
+                                  isKnowledgeTrace(row.storageKey) ||
+                                  isTimeTrace(row.storageKey) ||
+                                  isHealthTrace(row.storageKey)
                               ? row.label
                               : null,
                           onSelected: (option) async {
@@ -157,12 +164,7 @@ Future<void> showHomeTraceRecordSheet({
                                 next = writeTimePractice(
                                   base,
                                   row.storageKey,
-                                  TimePracticeCapture(
-                                    primaryId: option.id,
-                                    contextId: existing.contextId,
-                                    outcomeId: existing.outcomeId,
-                                    note: existing.note,
-                                  ),
+                                  existing.copyWith(primaryId: option.id),
                                 );
                                 factors =
                                     next.homeTraceFactors[row.storageKey] ??
@@ -217,6 +219,58 @@ Future<void> showHomeTraceRecordSheet({
                                   row.storageKey,
                                 );
                                 next = writeHuquqFollowUp(
+                                  base,
+                                  row.storageKey,
+                                  existing.copyWith(primaryId: option.id),
+                                );
+                                factors =
+                                    next.homeTraceFactors[row.storageKey] ??
+                                    const SalahFactorCapture();
+                              }
+                              await _save(ref, next);
+                              return;
+                            }
+                            if (isKnowledgeTrace(row.storageKey)) {
+                              DailyCheckIn next;
+                              if (option.id == ActivityIds.unanswered) {
+                                next = writeKnowledgeFollowUp(
+                                  base,
+                                  row.storageKey,
+                                  const KnowledgeFollowUpCapture(),
+                                );
+                                factors = const SalahFactorCapture();
+                              } else {
+                                final existing = readKnowledgeFollowUp(
+                                  base,
+                                  row.storageKey,
+                                );
+                                next = writeKnowledgeFollowUp(
+                                  base,
+                                  row.storageKey,
+                                  existing.copyWith(primaryId: option.id),
+                                );
+                                factors =
+                                    next.homeTraceFactors[row.storageKey] ??
+                                    const SalahFactorCapture();
+                              }
+                              await _save(ref, next);
+                              return;
+                            }
+                            if (isHealthTrace(row.storageKey)) {
+                              DailyCheckIn next;
+                              if (option.id == ActivityIds.unanswered) {
+                                next = writeHealthPractice(
+                                  base,
+                                  row.storageKey,
+                                  const HealthPracticeCapture(),
+                                );
+                                factors = const SalahFactorCapture();
+                              } else {
+                                final existing = readHealthPractice(
+                                  base,
+                                  row.storageKey,
+                                );
+                                next = writeHealthPractice(
                                   base,
                                   row.storageKey,
                                   existing.copyWith(primaryId: option.id),
@@ -296,9 +350,37 @@ Future<void> showHomeTraceRecordSheet({
                         ),
                         if (selectedId != ActivityIds.unanswered)
                           TimePracticeFields(
-                            practice: timePracticeByKey(row.storageKey)!,
-                            contextId: selectedFactorId(factors.supportIds),
-                            outcomeId: selectedFactorId(factors.challengeIds),
+                            storageKey: row.storageKey,
+                            contextId: readTimePractice(
+                              _recordFor(ref, dateKey, record) ??
+                                  DailyCheckIn.empty(dateKey),
+                              row.storageKey,
+                            ).contextId,
+                            challengeId: readTimePractice(
+                              _recordFor(ref, dateKey, record) ??
+                                  DailyCheckIn.empty(dateKey),
+                              row.storageKey,
+                            ).challengeId,
+                            helpId: readTimePractice(
+                              _recordFor(ref, dateKey, record) ??
+                                  DailyCheckIn.empty(dateKey),
+                              row.storageKey,
+                            ).helpId,
+                            outcomeId: readTimePractice(
+                              _recordFor(ref, dateKey, record) ??
+                                  DailyCheckIn.empty(dateKey),
+                              row.storageKey,
+                            ).outcomeId,
+                            quantityId: readTimePractice(
+                              _recordFor(ref, dateKey, record) ??
+                                  DailyCheckIn.empty(dateKey),
+                              row.storageKey,
+                            ).quantityId,
+                            quantityText: readTimePractice(
+                              _recordFor(ref, dateKey, record) ??
+                                  DailyCheckIn.empty(dateKey),
+                              row.storageKey,
+                            ).quantityText,
                             note: factors.otherText ?? '',
                             onContextChanged: (id) async {
                               final base =
@@ -307,13 +389,54 @@ Future<void> showHomeTraceRecordSheet({
                               final next = writeTimePractice(
                                 base,
                                 row.storageKey,
-                                TimePracticeCapture(
+                                readTimePractice(
+                                  base,
+                                  row.storageKey,
+                                ).copyWith(
                                   primaryId: selectedId,
                                   contextId: id,
-                                  outcomeId: selectedFactorId(
-                                    factors.challengeIds,
-                                  ),
-                                  note: factors.otherText ?? '',
+                                ),
+                              );
+                              factors =
+                                  next.homeTraceFactors[row.storageKey] ??
+                                  const SalahFactorCapture();
+                              setSheet(() {});
+                              await _save(ref, next);
+                            },
+                            onChallengeChanged: (id) async {
+                              final base =
+                                  _recordFor(ref, dateKey, record) ??
+                                  DailyCheckIn.empty(dateKey);
+                              final next = writeTimePractice(
+                                base,
+                                row.storageKey,
+                                readTimePractice(
+                                  base,
+                                  row.storageKey,
+                                ).copyWith(
+                                  primaryId: selectedId,
+                                  challengeId: id,
+                                ),
+                              );
+                              factors =
+                                  next.homeTraceFactors[row.storageKey] ??
+                                  const SalahFactorCapture();
+                              setSheet(() {});
+                              await _save(ref, next);
+                            },
+                            onHelpChanged: (id) async {
+                              final base =
+                                  _recordFor(ref, dateKey, record) ??
+                                  DailyCheckIn.empty(dateKey);
+                              final next = writeTimePractice(
+                                base,
+                                row.storageKey,
+                                readTimePractice(
+                                  base,
+                                  row.storageKey,
+                                ).copyWith(
+                                  primaryId: selectedId,
+                                  helpId: id,
                                 ),
                               );
                               factors =
@@ -329,19 +452,59 @@ Future<void> showHomeTraceRecordSheet({
                               final next = writeTimePractice(
                                 base,
                                 row.storageKey,
-                                TimePracticeCapture(
+                                readTimePractice(
+                                  base,
+                                  row.storageKey,
+                                ).copyWith(
                                   primaryId: selectedId,
-                                  contextId: selectedFactorId(
-                                    factors.supportIds,
-                                  ),
                                   outcomeId: id,
-                                  note: factors.otherText ?? '',
                                 ),
                               );
                               factors =
                                   next.homeTraceFactors[row.storageKey] ??
                                   const SalahFactorCapture();
                               setSheet(() {});
+                              await _save(ref, next);
+                            },
+                            onQuantityChanged: (id) async {
+                              final base =
+                                  _recordFor(ref, dateKey, record) ??
+                                  DailyCheckIn.empty(dateKey);
+                              final next = writeTimePractice(
+                                base,
+                                row.storageKey,
+                                readTimePractice(
+                                  base,
+                                  row.storageKey,
+                                ).copyWith(
+                                  primaryId: selectedId,
+                                  quantityId: id,
+                                ),
+                              );
+                              factors =
+                                  next.homeTraceFactors[row.storageKey] ??
+                                  const SalahFactorCapture();
+                              setSheet(() {});
+                              await _save(ref, next);
+                            },
+                            onQuantityTextChanged: (value) async {
+                              final base =
+                                  _recordFor(ref, dateKey, record) ??
+                                  DailyCheckIn.empty(dateKey);
+                              final next = writeTimePractice(
+                                base,
+                                row.storageKey,
+                                readTimePractice(
+                                  base,
+                                  row.storageKey,
+                                ).copyWith(
+                                  primaryId: selectedId,
+                                  quantityText: value,
+                                ),
+                              );
+                              factors =
+                                  next.homeTraceFactors[row.storageKey] ??
+                                  const SalahFactorCapture();
                               await _save(ref, next);
                             },
                             onNoteChanged: (value) async {
@@ -351,14 +514,11 @@ Future<void> showHomeTraceRecordSheet({
                               final next = writeTimePractice(
                                 base,
                                 row.storageKey,
-                                TimePracticeCapture(
+                                readTimePractice(
+                                  base,
+                                  row.storageKey,
+                                ).copyWith(
                                   primaryId: selectedId,
-                                  contextId: selectedFactorId(
-                                    factors.supportIds,
-                                  ),
-                                  outcomeId: selectedFactorId(
-                                    factors.challengeIds,
-                                  ),
                                   note: value,
                                 ),
                               );
@@ -545,6 +705,242 @@ Future<void> showHomeTraceRecordSheet({
                               base,
                               row.storageKey,
                               readHuquqFollowUp(
+                                base,
+                                row.storageKey,
+                              ).copyWith(
+                                primaryId: selectedId,
+                                note: value,
+                              ),
+                            );
+                            factors =
+                                next.homeTraceFactors[row.storageKey] ??
+                                const SalahFactorCapture();
+                            await _save(ref, next);
+                          },
+                        ),
+                      if (isKnowledgeTrace(row.storageKey) &&
+                          selectedId != ActivityIds.unanswered)
+                        KnowledgeFollowUpFields(
+                          storageKey: row.storageKey,
+                          areaId: selectedFactorId(factors.supportIds),
+                          sourceId: decodeKnowledgeExtras(
+                            (_recordFor(ref, dateKey, record) ??
+                                    DailyCheckIn.empty(dateKey))
+                                .activityFor(row.storageKey)
+                                .customText,
+                          ).sourceId,
+                          verificationId: selectedFactorId(
+                            factors.challengeIds,
+                          ),
+                          understandingId: decodeKnowledgeExtras(
+                            (_recordFor(ref, dateKey, record) ??
+                                    DailyCheckIn.empty(dateKey))
+                                .activityFor(row.storageKey)
+                                .customText,
+                          ).understandingId,
+                          applicationId: decodeKnowledgeExtras(
+                            (_recordFor(ref, dateKey, record) ??
+                                    DailyCheckIn.empty(dateKey))
+                                .activityFor(row.storageKey)
+                                .customText,
+                          ).applicationId,
+                          quantityId: decodeKnowledgeExtras(
+                            (_recordFor(ref, dateKey, record) ??
+                                    DailyCheckIn.empty(dateKey))
+                                .activityFor(row.storageKey)
+                                .customText,
+                          ).quantityId,
+                          minutes: decodeKnowledgeExtras(
+                            (_recordFor(ref, dateKey, record) ??
+                                    DailyCheckIn.empty(dateKey))
+                                .activityFor(row.storageKey)
+                                .customText,
+                          ).minutes,
+                          note: factors.otherText ?? '',
+                          onAreaChanged: (id) async {
+                            final base =
+                                _recordFor(ref, dateKey, record) ??
+                                DailyCheckIn.empty(dateKey);
+                            final next = writeKnowledgeFollowUp(
+                              base,
+                              row.storageKey,
+                              readKnowledgeFollowUp(
+                                base,
+                                row.storageKey,
+                              ).copyWith(
+                                primaryId: selectedId,
+                                areaId: id,
+                              ),
+                            );
+                            factors =
+                                next.homeTraceFactors[row.storageKey] ??
+                                const SalahFactorCapture();
+                            setSheet(() {});
+                            await _save(ref, next);
+                          },
+                          onSourceChanged: (id) async {
+                            final base =
+                                _recordFor(ref, dateKey, record) ??
+                                DailyCheckIn.empty(dateKey);
+                            final next = writeKnowledgeFollowUp(
+                              base,
+                              row.storageKey,
+                              readKnowledgeFollowUp(
+                                base,
+                                row.storageKey,
+                              ).copyWith(
+                                primaryId: selectedId,
+                                sourceId: id,
+                              ),
+                            );
+                            factors =
+                                next.homeTraceFactors[row.storageKey] ??
+                                const SalahFactorCapture();
+                            setSheet(() {});
+                            await _save(ref, next);
+                          },
+                          onVerificationChanged: (id) async {
+                            final base =
+                                _recordFor(ref, dateKey, record) ??
+                                DailyCheckIn.empty(dateKey);
+                            final next = writeKnowledgeFollowUp(
+                              base,
+                              row.storageKey,
+                              readKnowledgeFollowUp(
+                                base,
+                                row.storageKey,
+                              ).copyWith(
+                                primaryId: selectedId,
+                                verificationId: id,
+                              ),
+                            );
+                            factors =
+                                next.homeTraceFactors[row.storageKey] ??
+                                const SalahFactorCapture();
+                            setSheet(() {});
+                            await _save(ref, next);
+                          },
+                          onUnderstandingChanged: (id) async {
+                            final base =
+                                _recordFor(ref, dateKey, record) ??
+                                DailyCheckIn.empty(dateKey);
+                            final next = writeKnowledgeFollowUp(
+                              base,
+                              row.storageKey,
+                              readKnowledgeFollowUp(
+                                base,
+                                row.storageKey,
+                              ).copyWith(
+                                primaryId: selectedId,
+                                understandingId: id,
+                              ),
+                            );
+                            factors =
+                                next.homeTraceFactors[row.storageKey] ??
+                                const SalahFactorCapture();
+                            setSheet(() {});
+                            await _save(ref, next);
+                          },
+                          onApplicationChanged: (id) async {
+                            final base =
+                                _recordFor(ref, dateKey, record) ??
+                                DailyCheckIn.empty(dateKey);
+                            final next = writeKnowledgeFollowUp(
+                              base,
+                              row.storageKey,
+                              readKnowledgeFollowUp(
+                                base,
+                                row.storageKey,
+                              ).copyWith(
+                                primaryId: selectedId,
+                                applicationId: id,
+                              ),
+                            );
+                            factors =
+                                next.homeTraceFactors[row.storageKey] ??
+                                const SalahFactorCapture();
+                            setSheet(() {});
+                            await _save(ref, next);
+                          },
+                          onQuantityChanged: (id) async {
+                            final base =
+                                _recordFor(ref, dateKey, record) ??
+                                DailyCheckIn.empty(dateKey);
+                            final next = writeKnowledgeFollowUp(
+                              base,
+                              row.storageKey,
+                              readKnowledgeFollowUp(
+                                base,
+                                row.storageKey,
+                              ).copyWith(
+                                primaryId: selectedId,
+                                quantityId: id,
+                              ),
+                            );
+                            factors =
+                                next.homeTraceFactors[row.storageKey] ??
+                                const SalahFactorCapture();
+                            setSheet(() {});
+                            await _save(ref, next);
+                          },
+                          onMinutesChanged: (value) async {
+                            final base =
+                                _recordFor(ref, dateKey, record) ??
+                                DailyCheckIn.empty(dateKey);
+                            final next = writeKnowledgeFollowUp(
+                              base,
+                              row.storageKey,
+                              readKnowledgeFollowUp(
+                                base,
+                                row.storageKey,
+                              ).copyWith(
+                                primaryId: selectedId,
+                                minutes: value,
+                              ),
+                            );
+                            factors =
+                                next.homeTraceFactors[row.storageKey] ??
+                                const SalahFactorCapture();
+                            await _save(ref, next);
+                          },
+                          onNoteChanged: (value) async {
+                            final base =
+                                _recordFor(ref, dateKey, record) ??
+                                DailyCheckIn.empty(dateKey);
+                            final next = writeKnowledgeFollowUp(
+                              base,
+                              row.storageKey,
+                              readKnowledgeFollowUp(
+                                base,
+                                row.storageKey,
+                              ).copyWith(
+                                primaryId: selectedId,
+                                note: value,
+                              ),
+                            );
+                            factors =
+                                next.homeTraceFactors[row.storageKey] ??
+                                const SalahFactorCapture();
+                            await _save(ref, next);
+                          },
+                        ),
+                      if (isHealthTrace(row.storageKey) &&
+                          selectedId != ActivityIds.unanswered)
+                        HealthPracticeFields(
+                          storageKey: row.storageKey,
+                          note: readHealthPractice(
+                            _recordFor(ref, dateKey, record) ??
+                                DailyCheckIn.empty(dateKey),
+                            row.storageKey,
+                          ).note,
+                          onNoteChanged: (value) async {
+                            final base =
+                                _recordFor(ref, dateKey, record) ??
+                                DailyCheckIn.empty(dateKey);
+                            final next = writeHealthPractice(
+                              base,
+                              row.storageKey,
+                              readHealthPractice(
                                 base,
                                 row.storageKey,
                               ).copyWith(

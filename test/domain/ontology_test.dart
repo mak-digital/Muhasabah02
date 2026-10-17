@@ -16,7 +16,7 @@ void main() {
   test(
     'ontology registry has an explicit version independent of schema v6',
     () {
-      expect(kOntologyRegistryVersion, 6);
+      expect(kOntologyRegistryVersion, 9);
       expect(OntologyRegistry.version, kOntologyRegistryVersion);
       expect(kDailyCheckInSchemaVersion, 6);
     },
@@ -617,9 +617,14 @@ List<_ActivityCatalogEntry> _productionActivityCatalogs() {
       options: ActivityCatalog.hadithLivedNoticed,
       status: OntologyNodeStatus.active,
     ),
-    const _ActivityCatalogEntry(
+    _ActivityCatalogEntry(
       catalog: OntologyActivityCatalog.timeObservation,
       options: ActivityCatalog.timeObservation,
+      status: OntologyNodeStatus.active,
+    ),
+    _ActivityCatalogEntry(
+      catalog: OntologyActivityCatalog.healthObservation,
+      options: ActivityCatalog.healthObservation,
       status: OntologyNodeStatus.active,
     ),
     const _ActivityCatalogEntry(

@@ -7,6 +7,7 @@ import '../../data/privacy_log.dart';
 import '../../domain/activities.dart';
 import '../../domain/akhlaq_practices.dart';
 import '../../domain/huquq_practices.dart';
+import '../../domain/knowledge_practices.dart';
 import '../../domain/context_catalog.dart';
 import '../../domain/copy.dart';
 import '../../domain/daily_check_in.dart';
@@ -25,10 +26,13 @@ import '../../domain/recorded_context.dart';
 import '../../domain/salah_extras.dart';
 import '../../domain/salah_factors.dart';
 import '../../domain/situation_notes.dart';
+import '../../domain/health_practices.dart';
 import '../../domain/time_practices.dart';
 import '../shared/activity_picker.dart';
 import '../shared/akhlaq_follow_up_fields.dart';
 import '../shared/huquq_follow_up_fields.dart';
+import '../shared/knowledge_follow_up_fields.dart';
+import '../shared/health_practice_fields.dart';
 import '../shared/time_practice_fields.dart';
 import '../shared/domain_briefing_note.dart';
 import '../shared/domain_stage.dart';
@@ -1110,6 +1114,12 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
     final huquqCapture = isHuquqTrace(key)
         ? readHuquqFollowUp(_draft, key)
         : const HuquqFollowUpCapture();
+    final knowledgeCapture = isKnowledgeTrace(key)
+        ? readKnowledgeFollowUp(_draft, key)
+        : const KnowledgeFollowUpCapture();
+    final healthCapture = isHealthTrace(key)
+        ? readHealthPractice(_draft, key)
+        : const HealthPracticeCapture();
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Column(
@@ -1124,7 +1134,10 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
             namedSubject:
                 isDhikrPostFardTrace(key) ||
                     isAkhlaqTrace(key) ||
-                    isHuquqTrace(key)
+                    isHuquqTrace(key) ||
+                    isKnowledgeTrace(key) ||
+                    isTimeTrace(key) ||
+                    isHealthTrace(key)
                 ? row.label
                 : null,
             onSelected: (option) => setState(() {
@@ -1141,12 +1154,7 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
                 _draft = writeTimePractice(
                   _draft,
                   key,
-                  TimePracticeCapture(
-                    primaryId: option.id,
-                    contextId: existing.contextId,
-                    outcomeId: existing.outcomeId,
-                    note: existing.note,
-                  ),
+                  existing.copyWith(primaryId: option.id),
                 );
                 return;
               }
@@ -1189,6 +1197,40 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
                 );
                 return;
               }
+              if (isKnowledgeTrace(key)) {
+                if (option.id == ActivityIds.unanswered) {
+                  _draft = writeKnowledgeFollowUp(
+                    _draft,
+                    key,
+                    const KnowledgeFollowUpCapture(),
+                  );
+                  return;
+                }
+                final existing = readKnowledgeFollowUp(_draft, key);
+                _draft = writeKnowledgeFollowUp(
+                  _draft,
+                  key,
+                  existing.copyWith(primaryId: option.id),
+                );
+                return;
+              }
+              if (isHealthTrace(key)) {
+                if (option.id == ActivityIds.unanswered) {
+                  _draft = writeHealthPractice(
+                    _draft,
+                    key,
+                    const HealthPracticeCapture(),
+                  );
+                  return;
+                }
+                final existing = readHealthPractice(_draft, key);
+                _draft = writeHealthPractice(
+                  _draft,
+                  key,
+                  existing.copyWith(primaryId: option.id),
+                );
+                return;
+              }
               var next = _draft.withHomeTraceActivity(
                 key,
                 RecordedActivity(
@@ -1219,49 +1261,186 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
             ),
             if (selected.id != ActivityIds.unanswered)
               TimePracticeFields(
-                practice: timePractice,
+                storageKey: key,
                 contextId: timeCapture.contextId,
+                challengeId: timeCapture.challengeId,
+                helpId: timeCapture.helpId,
                 outcomeId: timeCapture.outcomeId,
+                quantityId: timeCapture.quantityId,
+                quantityText: timeCapture.quantityText,
                 note: timeCapture.note,
+                quantityController: _note(
+                  '$key-time-amount',
+                  timeCapture.quantityText,
+                ),
                 noteController: _note('$key-time-note', timeCapture.note),
                 onContextChanged: (id) => setState(() {
                   _draft = writeTimePractice(
                     _draft,
                     key,
-                    TimePracticeCapture(
+                    timeCapture.copyWith(primaryId: selected.id, contextId: id),
+                  );
+                }),
+                onChallengeChanged: (id) => setState(() {
+                  _draft = writeTimePractice(
+                    _draft,
+                    key,
+                    timeCapture.copyWith(
                       primaryId: selected.id,
-                      contextId: id,
-                      outcomeId: timeCapture.outcomeId,
-                      note: timeCapture.note,
+                      challengeId: id,
                     ),
+                  );
+                }),
+                onHelpChanged: (id) => setState(() {
+                  _draft = writeTimePractice(
+                    _draft,
+                    key,
+                    timeCapture.copyWith(primaryId: selected.id, helpId: id),
                   );
                 }),
                 onOutcomeChanged: (id) => setState(() {
                   _draft = writeTimePractice(
                     _draft,
                     key,
-                    TimePracticeCapture(
+                    timeCapture.copyWith(primaryId: selected.id, outcomeId: id),
+                  );
+                }),
+                onQuantityChanged: (id) => setState(() {
+                  _draft = writeTimePractice(
+                    _draft,
+                    key,
+                    timeCapture.copyWith(
                       primaryId: selected.id,
-                      contextId: timeCapture.contextId,
-                      outcomeId: id,
-                      note: timeCapture.note,
+                      quantityId: id,
                     ),
                   );
                 }),
+                onQuantityTextChanged: (value) {
+                  _draft = writeTimePractice(
+                    _draft,
+                    key,
+                    timeCapture.copyWith(
+                      primaryId: selected.id,
+                      quantityText: value,
+                    ),
+                  );
+                },
                 onNoteChanged: (value) {
                   _draft = writeTimePractice(
                     _draft,
                     key,
-                    TimePracticeCapture(
-                      primaryId: selected.id,
-                      contextId: timeCapture.contextId,
-                      outcomeId: timeCapture.outcomeId,
-                      note: value,
-                    ),
+                    timeCapture.copyWith(primaryId: selected.id, note: value),
                   );
                 },
               ),
           ],
+          if (isKnowledgeTrace(key) && selected.id != ActivityIds.unanswered)
+            KnowledgeFollowUpFields(
+              storageKey: key,
+              areaId: knowledgeCapture.areaId,
+              sourceId: knowledgeCapture.sourceId,
+              verificationId: knowledgeCapture.verificationId,
+              understandingId: knowledgeCapture.understandingId,
+              applicationId: knowledgeCapture.applicationId,
+              quantityId: knowledgeCapture.quantityId,
+              minutes: knowledgeCapture.minutes,
+              note: knowledgeCapture.note,
+              minutesController: _note(
+                '$key-knowledge-minutes',
+                knowledgeCapture.minutes,
+              ),
+              noteController: _note(
+                '$key-knowledge-note',
+                knowledgeCapture.note,
+              ),
+              onAreaChanged: (id) => setState(() {
+                _draft = writeKnowledgeFollowUp(
+                  _draft,
+                  key,
+                  knowledgeCapture.copyWith(primaryId: selected.id, areaId: id),
+                );
+              }),
+              onSourceChanged: (id) => setState(() {
+                _draft = writeKnowledgeFollowUp(
+                  _draft,
+                  key,
+                  knowledgeCapture.copyWith(
+                    primaryId: selected.id,
+                    sourceId: id,
+                  ),
+                );
+              }),
+              onVerificationChanged: (id) => setState(() {
+                _draft = writeKnowledgeFollowUp(
+                  _draft,
+                  key,
+                  knowledgeCapture.copyWith(
+                    primaryId: selected.id,
+                    verificationId: id,
+                  ),
+                );
+              }),
+              onUnderstandingChanged: (id) => setState(() {
+                _draft = writeKnowledgeFollowUp(
+                  _draft,
+                  key,
+                  knowledgeCapture.copyWith(
+                    primaryId: selected.id,
+                    understandingId: id,
+                  ),
+                );
+              }),
+              onApplicationChanged: (id) => setState(() {
+                _draft = writeKnowledgeFollowUp(
+                  _draft,
+                  key,
+                  knowledgeCapture.copyWith(
+                    primaryId: selected.id,
+                    applicationId: id,
+                  ),
+                );
+              }),
+              onQuantityChanged: (id) => setState(() {
+                _draft = writeKnowledgeFollowUp(
+                  _draft,
+                  key,
+                  knowledgeCapture.copyWith(
+                    primaryId: selected.id,
+                    quantityId: id,
+                  ),
+                );
+              }),
+              onMinutesChanged: (value) {
+                _draft = writeKnowledgeFollowUp(
+                  _draft,
+                  key,
+                  knowledgeCapture.copyWith(
+                    primaryId: selected.id,
+                    minutes: value,
+                  ),
+                );
+              },
+              onNoteChanged: (value) {
+                _draft = writeKnowledgeFollowUp(
+                  _draft,
+                  key,
+                  knowledgeCapture.copyWith(primaryId: selected.id, note: value),
+                );
+              },
+            ),
+          if (isHealthTrace(key) && selected.id != ActivityIds.unanswered)
+            HealthPracticeFields(
+              storageKey: key,
+              note: healthCapture.note,
+              noteController: _note('$key-health-note', healthCapture.note),
+              onNoteChanged: (value) {
+                _draft = writeHealthPractice(
+                  _draft,
+                  key,
+                  healthCapture.copyWith(primaryId: selected.id, note: value),
+                );
+              },
+            ),
           if (isHuquqTrace(key) && selected.id != ActivityIds.unanswered)
             HuquqFollowUpFields(
               storageKey: key,

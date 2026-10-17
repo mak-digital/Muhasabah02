@@ -4,6 +4,9 @@ import '../../app/theme.dart';
 import '../../domain/activities.dart';
 import '../../domain/akhlaq_practices.dart';
 import '../../domain/huquq_practices.dart';
+import '../../domain/knowledge_practices.dart';
+import '../../domain/health_practices.dart';
+import '../../domain/time_practices.dart';
 import '../../domain/daily_check_in.dart';
 import '../../domain/home_traces.dart';
 import '../../domain/prayer.dart';
@@ -35,6 +38,20 @@ class SalahActivityMark {
   static const other = Color(0xFF616161);
 
   static Color colourForId(String activityId) {
+    final healthKind = healthKindFor(activityId);
+    if (healthKind != null) {
+      return switch (healthKind) {
+        HealthResponseKind.cared => congregationOnTime,
+        HealthResponseKind.partial => joinedCongregationLate,
+        HealthResponseKind.corrected => smallCongregation,
+        HealthResponseKind.constrained ||
+        HealthResponseKind.noSituation => aloneOnTime,
+        HealthResponseKind.difficulty => excused,
+        HealthResponseKind.lapse => prayedLate,
+        HealthResponseKind.preferNot => other,
+        HealthResponseKind.unanswered => unanswered,
+      };
+    }
     return switch (activityId) {
       'congregationOnTime' => congregationOnTime,
       'joinedCongregationLate' => joinedCongregationLate,
@@ -74,6 +91,10 @@ class SalahActivityMark {
       HuquqObservationIds.partialEffort => joinedCongregationLate,
       HuquqObservationIds.correctiveAction => smallCongregation,
       HuquqObservationIds.neglectRecognised => prayedLate,
+      TimeObservationIds.acted => congregationOnTime,
+      KnowledgeObservationIds.engaged => congregationOnTime,
+      KnowledgeObservationIds.progress => joinedCongregationLate,
+      KnowledgeObservationIds.gapRecognised => prayedLate,
       ActivityIds.noActivity => prayedLate,
       ActivityIds.unanswered => unanswered,
       ActivityIds.other => other,
@@ -212,7 +233,10 @@ class SalahActivityMark {
       return MarkerKind.unanswered;
     }
     if (activityId == AkhlaqObservationIds.lapseRecognised ||
-        activityId == HuquqObservationIds.neglectRecognised) {
+        activityId == HuquqObservationIds.neglectRecognised ||
+        activityId == KnowledgeObservationIds.gapRecognised ||
+        activityId == TimeObservationIds.lapseRecognised ||
+        healthKindFor(activityId) == HealthResponseKind.lapse) {
       return MarkerKind.outlined;
     }
     return MarkerKind.filled;
@@ -259,18 +283,6 @@ class SalahActivityMark {
     );
     final outcome =
         record?.homeTrace(row.storageKey) ?? TernaryOutcome.unanswered;
-    if (isTimeTrace(row.storageKey)) {
-      return SalahActivityMark(
-        kind: switch (id) {
-          ActivityIds.acted => MarkerKind.filled,
-          ActivityIds.noticedNotActed => MarkerKind.outlined,
-          ActivityIds.noSituation => MarkerKind.filledSquare,
-          _ => MarkerKind.unanswered,
-        },
-        color: MuhasabahColors.mark,
-        label: option?.label ?? row.label,
-      );
-    }
     if (isHadithDurationTrace(row.storageKey)) {
       return SalahActivityMark(
         kind: quranDurationKind(id, activityColours: activityColours),
@@ -292,7 +304,11 @@ class SalahActivityMark {
         label: option?.label ?? row.label,
       );
     }
-    if (isAkhlaqTrace(row.storageKey) || isHuquqTrace(row.storageKey)) {
+    if (isAkhlaqTrace(row.storageKey) ||
+        isHuquqTrace(row.storageKey) ||
+        isKnowledgeTrace(row.storageKey) ||
+        isTimeTrace(row.storageKey) ||
+        isHealthTrace(row.storageKey)) {
       return SalahActivityMark(
         kind: kindForAkhlaq(id),
         color: activityColours ? colourForId(id) : MuhasabahColors.mark,

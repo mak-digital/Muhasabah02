@@ -1,6 +1,9 @@
 import 'akhlaq_practices.dart';
 import 'home_traces.dart';
 import 'huquq_practices.dart';
+import 'knowledge_practices.dart';
+import 'health_practices.dart';
+import 'time_practices.dart';
 import 'other_domains.dart';
 import 'prayer.dart';
 import 'quran.dart';
@@ -1034,10 +1037,14 @@ class ActivityCatalog {
           ? akhlaqCatalogFor(storageKey)
           : isHuquqTrace(storageKey)
           ? huquqCatalogFor(storageKey)
+          : isKnowledgeTrace(storageKey)
+          ? knowledgeCatalogFor(storageKey)
           : isDhikrPostFardTrace(storageKey)
           ? dhikrPostFard
           : storageKey.startsWith('time.t0')
-          ? timeObservation
+          ? timeCatalogFor(storageKey)
+          : isHealthTrace(storageKey)
+          ? healthCatalogFor(storageKey)
           : const [],
     };
   }
@@ -1059,30 +1066,31 @@ class ActivityCatalog {
         options[2].id == HuquqObservationIds.neglectRecognised;
   }
 
-  /// Time & Barakah primary observation. Optional context/outcome live
-  /// on `homeTraceFactors` and are not required to save this value.
-  static const timeObservation = <ActivityOption>[
-    ActivityOption(
-      id: ActivityIds.acted,
-      label: 'I acted on this',
-      ternary: TernaryOutcome.positive,
-    ),
-    ActivityOption(
-      id: ActivityIds.noticedNotActed,
-      label: 'I noticed but did not act',
-      ternary: TernaryOutcome.negative,
-    ),
-    ActivityOption(
-      id: ActivityIds.noSituation,
-      label: 'No relevant situation today',
-      ternary: TernaryOutcome.positive,
-    ),
-    ActivityOption(
-      id: ActivityIds.unanswered,
-      label: 'Prefer not to record',
-      ternary: TernaryOutcome.unanswered,
-    ),
-  ];
+  static bool isKnowledgeObservationCatalog(List<ActivityOption> options) {
+    return options.length == 6 &&
+        options.first.id == KnowledgeObservationIds.engaged &&
+        options[1].id == KnowledgeObservationIds.progress &&
+        options[2].id == KnowledgeObservationIds.gapRecognised;
+  }
+
+  static bool isTimeObservationCatalog(List<ActivityOption> options) {
+    return options.length == 6 &&
+        options.first.id == TimeObservationIds.acted &&
+        options[1].id == TimeObservationIds.partialEffort &&
+        options[2].id == TimeObservationIds.lapseRecognised;
+  }
+
+  /// Shared Time & Barakah legend. Item wording lives in [timeCatalogFor].
+  static List<ActivityOption> get timeObservation => timeLegendCatalog;
+
+  static bool isHealthObservationCatalog(List<ActivityOption> options) {
+    return options.length == 7 &&
+        options[5].id == HealthObservationIds.preferNot &&
+        options.last.id == ActivityIds.unanswered;
+  }
+
+  /// Shared Physical Health legend. Item wording lives in [healthCatalogFor].
+  static List<ActivityOption> get healthObservation => healthLegendCatalog;
 
   static const hadith = <ActivityOption>[
     ActivityOption(
@@ -1208,9 +1216,11 @@ class ActivityCatalog {
     if (isDurationCatalog(options) ||
         identical(options, hadithLivedNoticed) ||
         identical(options, dhikrPostFard) ||
-        identical(options, timeObservation) ||
         isAkhlaqObservationCatalog(options) ||
-        isHuquqObservationCatalog(options)) {
+        isHuquqObservationCatalog(options) ||
+        isKnowledgeObservationCatalog(options) ||
+        isTimeObservationCatalog(options) ||
+        isHealthObservationCatalog(options)) {
       return true;
     }
     return false;

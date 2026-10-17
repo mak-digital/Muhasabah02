@@ -236,12 +236,48 @@ class Copy {
   static String get knowledgeObservationNote => knowledgeBriefing.plainText;
   static const knowledgeNoticed = 'I noticed this in myself';
   static const knowledgeNotToday = 'I did not notice this today';
+  static const knowledgeFollowUpNote =
+      'Optional. Stored. Never scores learning, intelligence, or religious merit. Reading, asking, teaching, or creating does not prove the information is correct. AI-assisted learning is not treated as verified.';
+  static const knowledgeTypeOfKnowledge = 'Type of knowledge or activity';
+  static const knowledgeSourceOfLearning = 'Source of learning';
+  static const knowledgeReliability = 'Reliability / verification';
+  static const knowledgeUnderstanding = 'Understanding';
+  static const knowledgeApplication = 'Application or outcome';
+  static const knowledgeOptionalQuantity = 'Optional quantity';
+  static const knowledgeMinutesHint =
+      'Approximate minutes. Not a measure of knowledge quality.';
+  static const knowledgePrivateReflection = 'Private reflection';
+  static const knowledgeReflectionHint =
+      'What did I learn? What do I still need to verify? How could I apply it beneficially? Did I correct something I previously misunderstood?';
+  static const knowledgeCheckInNote =
+      'Each row stores one observation: beneficial activity, partial engagement, a recognised gap, a correction, or no relevant situation. Colour names the recorded choice when activity colours are on. Unanswered is empty, not ignorance. Optional follow-ups are provenance, not a grade.';
   static String get timeObservationNote => timeBriefing.plainText;
   static const timeNoticed = 'I noticed this in myself';
   static const timeNotToday = 'I did not notice this today';
+  static const timeFollowUpNote =
+      'Optional. Stored as you report it. Not a productivity score, screen-time contest, or a measure of barakah. Recreation is not automatically wasted time. Illness, caregiving, and needed rest are not failings.';
+  static const timeActivityContext = 'Activity context';
+  static const timeMainChallenge = 'Main challenge noticed';
+  static const timeWhatHelped = 'What helped?';
+  static const timeObservableOutcome = 'Observable outcome';
+  static const timeOptionalQuantity = 'Optional quantitative information';
+  static const timeQuantityHint =
+      'A count or approximate minutes. Not a quality or barakah measure.';
+  static const timePrivateReflection = 'Private reflection';
+  static const timeReflectionHint =
+      'What mattered most today? What distracted me? What helped me return? What should I approach differently next time?';
+  static const timeCheckInNote =
+      'Each row stores one observation: beneficial action, partial effort, a recognised lapse, a corrective adjustment, or no relevant situation. Corrected is not ranked above acted. Colour names the recorded choice when activity colours are on. Unanswered is empty, not wasted time.';
   static String get healthObservationNote => healthBriefing.plainText;
   static const healthNoticed = 'I noticed this in myself';
   static const healthNotToday = 'I did not notice this today';
+  static const healthFollowUpNote =
+      'Optional. Stored as you report it. Not a fitness score, calorie log, hour badge, or a failing of the body. Illness, disability, and circumstances beyond your control are not neglect.';
+  static const healthPrivateReflection = 'Private reflection';
+  static const healthReflectionHint =
+      'What did my body need today? What made care harder? What helped me attend to it? What should I approach differently next time?';
+  static const healthCheckInNote =
+      'Each row stores one observation: care taken, partial or mixed care, a difficulty noticed, avoidable neglect, an adjustment, circumstances beyond control, no relevant need, or prefer not to record. Prefer not to record is not unanswered. Colour names the recorded choice when activity colours are on. Unanswered is empty, not a failing of the body.';
   static String get wealthObservationNote => wealthBriefing.plainText;
   static const wealthNoticed = 'I noticed this in myself';
   static const wealthNotToday = 'I did not notice this today';
@@ -325,12 +361,12 @@ class Copy {
   static const visibleDomains = 'Domains in Focus';
   static const activitiesTitle = 'Activities & legend';
   static const activitiesNote =
-      'Salah check-in list. Shared mark colour is the default. Optional activity colours name the recorded Salah choice, the Qur’an duration step, post-fard Dhikr remembrance, and Character & Morals observations. Not a score.';
+      'Salah check-in list. Shared mark colour is the default. Optional activity colours name the recorded Salah choice, the Qur’an duration step, post-fard Dhikr remembrance, Character & Morals, Rights of Others, Knowledge & Beneficial Speech, Time & Barakah, and Physical Health & Energy observations. Not a score.';
   static const salahMarkColour = 'Salah mark colour';
   static const salahMarkShared = 'Shared (current)';
   static const salahMarkActivityColours = 'Activity colours';
   static const salahMarkActivityNote =
-      'Colour names the recorded Salah choice, Qur’an duration step, post-fard Dhikr remembrance, or Character & Morals observation. It does not rank spirituality or tell you what to do next. Other domains keep the shared mark colour.';
+      'Colour names the recorded Salah choice, Qur’an duration step, post-fard Dhikr remembrance, Character & Morals, Rights of Others, Knowledge & Beneficial Speech, Time & Barakah, or Physical Health & Energy observation. It does not rank spirituality or tell you what to do next. Other domains keep the shared mark colour.';
   static const howAttentiveWasI = 'How attentive was I';
   static const dhikrPostFardNote =
       'Post-fard Salah Adhkar records remembrance after each fard prayer. Remembrance with action uses the same blue as congregation on time. The other steps twin the remaining Salah activity colours. How attentive was I is optional provenance, not a khushu’ score.';

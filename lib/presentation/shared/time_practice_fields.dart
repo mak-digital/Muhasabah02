@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../domain/copy.dart';
 import '../../domain/factor_groups.dart';
 import '../../domain/time_practices.dart';
 import 'activity_picker.dart';
@@ -7,24 +8,48 @@ import 'activity_picker.dart';
 class TimePracticeFields extends StatelessWidget {
   const TimePracticeFields({
     super.key,
-    required this.practice,
+    required this.storageKey,
     required this.contextId,
+    required this.challengeId,
+    required this.helpId,
     required this.outcomeId,
+    required this.quantityId,
+    required this.quantityText,
     required this.note,
     required this.onContextChanged,
+    required this.onChallengeChanged,
+    required this.onHelpChanged,
     required this.onOutcomeChanged,
+    required this.onQuantityChanged,
+    required this.onQuantityTextChanged,
     required this.onNoteChanged,
+    this.quantityController,
     this.noteController,
   });
 
-  final TimePractice practice;
+  final String storageKey;
   final String contextId;
+  final String challengeId;
+  final String helpId;
   final String outcomeId;
+  final String quantityId;
+  final String quantityText;
   final String note;
   final ValueChanged<String> onContextChanged;
+  final ValueChanged<String> onChallengeChanged;
+  final ValueChanged<String> onHelpChanged;
   final ValueChanged<String> onOutcomeChanged;
+  final ValueChanged<String> onQuantityChanged;
+  final ValueChanged<String> onQuantityTextChanged;
   final ValueChanged<String> onNoteChanged;
+  final TextEditingController? quantityController;
   final TextEditingController? noteController;
+
+  String _safe(String id, List<TimeChoice> choices) {
+    if (id == kFactorNotRecorded) return id;
+    if (choices.any((choice) => choice.id == id)) return id;
+    return kFactorNotRecorded;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,86 +64,91 @@ class TimePracticeFields extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.only(left: checkInValueIndent, top: 8),
           child: Text(
-            'Optional. Stored as you report it. Not a score or a judgment.',
+            Copy.timeFollowUpNote,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.only(
-            left: checkInNestedIndent,
-            top: 8,
-            bottom: 6,
-          ),
-          child: Text('WHAT WAS INVOLVED?', style: labelStyle),
-        ),
-        CheckInSelect<String>(
-          depth: CheckInFieldDepth.nested,
-          dropdownKey: Key('time-${practice.storageKey}-context'),
-          value: _safe(contextId, practice.contexts),
-          sortLabels: false,
-          entries: [
-            const CheckInSelectEntry(
-              value: kFactorNotRecorded,
-              label: 'Not recorded',
-            ),
-            for (final choice in practice.contexts)
-              CheckInSelectEntry(value: choice.id, label: choice.label),
-          ],
+        _heading(Copy.timeActivityContext, labelStyle),
+        _select(
+          field: 'context',
+          value: _safe(contextId, timeContexts),
+          choices: timeContexts,
           onChanged: onContextChanged,
         ),
-        Padding(
-          padding: const EdgeInsets.only(
-            left: checkInNestedIndent,
-            top: 8,
-            bottom: 6,
-          ),
-          child: Text('WHAT HAPPENED AFTERWARDS?', style: labelStyle),
+        _heading(Copy.timeMainChallenge, labelStyle),
+        _select(
+          field: 'challenge',
+          value: _safe(challengeId, timeChallenges),
+          choices: timeChallenges,
+          onChanged: onChallengeChanged,
         ),
-        CheckInSelect<String>(
-          depth: CheckInFieldDepth.nested,
-          dropdownKey: Key('time-${practice.storageKey}-outcome'),
-          value: _safe(outcomeId, practice.outcomes),
-          sortLabels: false,
-          entries: [
-            const CheckInSelectEntry(
-              value: kFactorNotRecorded,
-              label: 'Not recorded',
-            ),
-            for (final choice in practice.outcomes)
-              CheckInSelectEntry(value: choice.id, label: choice.label),
-          ],
+        _heading(Copy.timeWhatHelped, labelStyle),
+        _select(
+          field: 'help',
+          value: _safe(helpId, timeHelps),
+          choices: timeHelps,
+          onChanged: onHelpChanged,
+        ),
+        _heading(Copy.timeObservableOutcome, labelStyle),
+        _select(
+          field: 'outcome',
+          value: _safe(outcomeId, timeOutcomes),
+          choices: timeOutcomes,
           onChanged: onOutcomeChanged,
         ),
-        Padding(
-          padding: const EdgeInsets.only(
-            left: checkInNestedIndent,
-            top: 8,
-            bottom: 6,
-          ),
-          child: Text('PRIVATE REFLECTION (OPTIONAL)', style: labelStyle),
+        _heading(Copy.timeOptionalQuantity, labelStyle),
+        _select(
+          field: 'quantity',
+          value: _safe(quantityId, timeQuantities),
+          choices: timeQuantities,
+          notRecordedLabel: 'No quantity recorded',
+          onChanged: onQuantityChanged,
         ),
+        if (quantityId != kFactorNotRecorded && quantityId.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.only(left: checkInNestedIndent),
+            child: quantityController == null
+                ? TextFormField(
+                    key: Key('time-$storageKey-amount'),
+                    initialValue: quantityText,
+                    decoration: const InputDecoration(
+                      hintText: Copy.timeQuantityHint,
+                    ),
+                    onChanged: onQuantityTextChanged,
+                  )
+                : TextField(
+                    controller: quantityController,
+                    decoration: const InputDecoration(
+                      hintText: Copy.timeQuantityHint,
+                    ),
+                    onChanged: onQuantityTextChanged,
+                  ),
+          ),
+        ],
+        _heading(Copy.timePrivateReflection, labelStyle),
         Padding(
           padding: const EdgeInsets.only(left: checkInNestedIndent),
           child: noteController == null
               ? TextFormField(
-                  key: Key('time-${practice.storageKey}-note'),
+                  key: Key('time-$storageKey-note'),
                   initialValue: note,
-                  decoration: const InputDecoration(
-                    hintText: 'Private reflection (optional)',
-                  ),
                   minLines: 1,
                   maxLines: 4,
+                  decoration: const InputDecoration(
+                    hintText: Copy.timeReflectionHint,
+                  ),
                   onChanged: onNoteChanged,
                 )
               : TextField(
                   controller: noteController,
-                  decoration: const InputDecoration(
-                    hintText: 'Private reflection (optional)',
-                  ),
                   minLines: 1,
                   maxLines: 4,
+                  decoration: const InputDecoration(
+                    hintText: Copy.timeReflectionHint,
+                  ),
                   onChanged: onNoteChanged,
                 ),
         ),
@@ -126,9 +156,38 @@ class TimePracticeFields extends StatelessWidget {
     );
   }
 
-  String _safe(String id, List<TimeChoice> choices) {
-    if (id == kFactorNotRecorded) return id;
-    if (choices.any((choice) => choice.id == id)) return id;
-    return kFactorNotRecorded;
+  Widget _heading(String label, TextStyle? style) {
+    return Padding(
+      padding: const EdgeInsets.only(
+        left: checkInNestedIndent,
+        top: 8,
+        bottom: 6,
+      ),
+      child: Text(label.toUpperCase(), style: style),
+    );
+  }
+
+  Widget _select({
+    required String field,
+    required String value,
+    required List<TimeChoice> choices,
+    required ValueChanged<String> onChanged,
+    String notRecordedLabel = 'Not recorded',
+  }) {
+    return CheckInSelect<String>(
+      depth: CheckInFieldDepth.nested,
+      dropdownKey: Key('time-$storageKey-$field'),
+      value: value,
+      sortLabels: false,
+      entries: [
+        CheckInSelectEntry(
+          value: kFactorNotRecorded,
+          label: notRecordedLabel,
+        ),
+        for (final choice in choices)
+          CheckInSelectEntry(value: choice.id, label: choice.label),
+      ],
+      onChanged: onChanged,
+    );
   }
 }

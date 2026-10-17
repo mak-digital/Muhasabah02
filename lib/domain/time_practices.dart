@@ -1,7 +1,9 @@
+import 'dart:convert';
+
 import 'activities.dart';
 import 'daily_check_in.dart';
-import 'quran.dart';
 import 'factor_groups.dart';
+import 'quran.dart';
 import 'salah_factors.dart';
 
 /// Spec practice IDs (`time_t01`–`time_t08`). Storage keys stay `time.t01`
@@ -15,6 +17,24 @@ const kTimeIntentionBand = 'Intention & Priority';
 const kTimeAttentionBand = 'Attention & Presence';
 const kTimeActionBand = 'Responsibility & Action';
 const kTimeBalanceBand = 'Balance & Renewal';
+
+/// Stable observation codes for Time & Barakah. Not a productivity scale
+/// or a measure of barakah.
+abstract final class TimeObservationIds {
+  static const acted = ActivityIds.acted;
+  static const partialEffort = 'partial_effort';
+  static const lapseRecognised = 'lapse_recognised';
+  static const corrected = 'corrected';
+  static const noSituation = 'no_situation';
+
+  static const ordered = <String>[
+    acted,
+    partialEffort,
+    lapseRecognised,
+    corrected,
+    noSituation,
+  ];
+}
 
 class TimeChoice {
   const TimeChoice({required this.id, required this.label});
@@ -33,8 +53,6 @@ class TimePractice {
     required this.label,
     required this.detail,
     required this.matrixColumn,
-    required this.contexts,
-    required this.outcomes,
   });
 
   final String practiceId;
@@ -45,26 +63,279 @@ class TimePractice {
   final String label;
   final String detail;
   final String matrixColumn;
-  final List<TimeChoice> contexts;
-  final List<TimeChoice> outcomes;
 }
 
 class TimePracticeCapture {
   const TimePracticeCapture({
     this.primaryId = ActivityIds.unanswered,
     this.contextId = kFactorNotRecorded,
+    this.challengeId = kFactorNotRecorded,
+    this.helpId = kFactorNotRecorded,
     this.outcomeId = kFactorNotRecorded,
+    this.quantityId = kFactorNotRecorded,
+    this.quantityText = '',
     this.note = '',
   });
 
   final String primaryId;
   final String contextId;
+  final String challengeId;
+  final String helpId;
   final String outcomeId;
+  final String quantityId;
+  final String quantityText;
   final String note;
 
   bool get isPrimaryRecorded =>
       primaryId != ActivityIds.unanswered && primaryId.isNotEmpty;
+
+  bool get showsQuantityText =>
+      quantityId != kFactorNotRecorded && quantityId.isNotEmpty;
+
+  TimePracticeCapture copyWith({
+    String? primaryId,
+    String? contextId,
+    String? challengeId,
+    String? helpId,
+    String? outcomeId,
+    String? quantityId,
+    String? quantityText,
+    String? note,
+  }) {
+    return TimePracticeCapture(
+      primaryId: primaryId ?? this.primaryId,
+      contextId: contextId ?? this.contextId,
+      challengeId: challengeId ?? this.challengeId,
+      helpId: helpId ?? this.helpId,
+      outcomeId: outcomeId ?? this.outcomeId,
+      quantityId: quantityId ?? this.quantityId,
+      quantityText: quantityText ?? this.quantityText,
+      note: note ?? this.note,
+    );
+  }
 }
+
+const timeContexts = <TimeChoice>[
+  TimeChoice(id: 'time.context.worship', label: 'Worship'),
+  TimeChoice(
+    id: 'time.context.familyCaregiving',
+    label: 'Family or caregiving',
+  ),
+  TimeChoice(
+    id: 'time.context.work',
+    label: 'Work or professional responsibility',
+  ),
+  TimeChoice(id: 'time.context.study', label: 'Study or learning'),
+  TimeChoice(
+    id: 'time.context.healthPersonalCare',
+    label: 'Health or personal care',
+  ),
+  TimeChoice(
+    id: 'time.context.communityService',
+    label: 'Community or service',
+  ),
+  TimeChoice(
+    id: 'time.context.household',
+    label: 'Household responsibilities',
+  ),
+  TimeChoice(
+    id: 'time.context.restRecreation',
+    label: 'Rest or recreation',
+  ),
+  TimeChoice(id: 'time.context.other', label: 'Other'),
+  TimeChoice(
+    id: 'time.context.preferNotToSpecify',
+    label: 'Prefer not to specify',
+  ),
+];
+
+const timeChallenges = <TimeChoice>[
+  TimeChoice(
+    id: 'time.challenge.phoneSocial',
+    label: 'Phone or social media distraction',
+  ),
+  TimeChoice(
+    id: 'time.challenge.browsingEntertainment',
+    label: 'Unnecessary browsing or entertainment',
+  ),
+  TimeChoice(
+    id: 'time.challenge.interruptions',
+    label: 'Interruptions or competing demands',
+  ),
+  TimeChoice(
+    id: 'time.challenge.unclearPriorities',
+    label: 'Unclear priorities',
+  ),
+  TimeChoice(
+    id: 'time.challenge.procrastination',
+    label: 'Avoidable procrastination',
+  ),
+  TimeChoice(
+    id: 'time.challenge.fatigue',
+    label: 'Fatigue or insufficient rest',
+  ),
+  TimeChoice(
+    id: 'time.challenge.stressOverload',
+    label: 'Stress or mental overload',
+  ),
+  TimeChoice(id: 'time.challenge.overcommitment', label: 'Overcommitment'),
+  TimeChoice(
+    id: 'time.challenge.noParticular',
+    label: 'No particular challenge',
+  ),
+  TimeChoice(
+    id: 'time.challenge.preferNotToSpecify',
+    label: 'Prefer not to specify',
+  ),
+];
+
+const timeHelps = <TimeChoice>[
+  TimeChoice(
+    id: 'time.help.clarifiedIntention',
+    label: 'Clarified my intention',
+  ),
+  TimeChoice(
+    id: 'time.help.oneNextAction',
+    label: 'Chose one important next action',
+  ),
+  TimeChoice(id: 'time.help.putDeviceAside', label: 'Put my device aside'),
+  TimeChoice(
+    id: 'time.help.reducedInterruptions',
+    label: 'Reduced interruptions',
+  ),
+  TimeChoice(
+    id: 'time.help.smallStep',
+    label: 'Started with a small manageable step',
+  ),
+  TimeChoice(id: 'time.help.adjustedSchedule', label: 'Adjusted my schedule'),
+  TimeChoice(id: 'time.help.askedForAssistance', label: 'Asked for assistance'),
+  TimeChoice(id: 'time.help.tookRest', label: 'Took appropriate rest'),
+  TimeChoice(
+    id: 'time.help.reconsideredCompeting',
+    label: 'Reconsidered competing responsibilities',
+  ),
+  TimeChoice(id: 'time.help.other', label: 'Other'),
+];
+
+const timeOutcomes = <TimeChoice>[
+  TimeChoice(
+    id: 'time.outcome.responsibilityCompleted',
+    label: 'Important responsibility completed',
+  ),
+  TimeChoice(
+    id: 'time.outcome.meaningfulProgress',
+    label: 'Meaningful progress made',
+  ),
+  TimeChoice(id: 'time.outcome.attentionRestored', label: 'Attention restored'),
+  TimeChoice(
+    id: 'time.outcome.distractionReduced',
+    label: 'Unnecessary distraction reduced',
+  ),
+  TimeChoice(
+    id: 'time.outcome.needAddressed',
+    label: 'Someone\'s need addressed',
+  ),
+  TimeChoice(
+    id: 'time.outcome.restTaken',
+    label: 'Rest or recovery taken',
+  ),
+  TimeChoice(
+    id: 'time.outcome.postponedAppropriately',
+    label: 'Activity appropriately postponed',
+  ),
+  TimeChoice(
+    id: 'time.outcome.followUpNeeded',
+    label: 'Follow-up still needed',
+  ),
+];
+
+const timeQuantities = <TimeChoice>[
+  TimeChoice(
+    id: 'time.quantity.focusedMinutes',
+    label: 'Approximate focused minutes',
+  ),
+  TimeChoice(
+    id: 'time.quantity.distractionMinutesAvoided',
+    label: 'Approximate distraction minutes avoided',
+  ),
+  TimeChoice(
+    id: 'time.quantity.interruptedResumed',
+    label: 'Number of interrupted activities resumed',
+  ),
+  TimeChoice(
+    id: 'time.quantity.delayedProgressed',
+    label: 'Number of delayed tasks progressed',
+  ),
+];
+
+const timeLegendLabels = <String, String>{
+  TimeObservationIds.acted: 'Beneficial action observed',
+  TimeObservationIds.partialEffort: 'Partial effort or progress',
+  TimeObservationIds.lapseRecognised:
+      'Distraction, delay or shortcoming recognised',
+  TimeObservationIds.corrected: 'Deliberate adjustment or corrective action',
+  TimeObservationIds.noSituation: 'No relevant situation noticed',
+  ActivityIds.unanswered: 'Unanswered',
+};
+
+const _timeResponseLabels = <String, List<String>>{
+  'time.t01': [
+    'Began an activity with a clear beneficial intention',
+    'Remembered my intention after starting and continued purposefully',
+    'Started without considering my purpose and later recognised it',
+    'Reconsidered my purpose and redirected an unhelpful activity',
+    'No specific situation involving intention noticed today',
+  ],
+  'time.t02': [
+    'Prioritised an important responsibility or beneficial activity',
+    'Made progress on a priority but was delayed by less important activities',
+    'Recognised that I gave unnecessary priority to something less important',
+    'Reordered my activities and returned to an important responsibility',
+    'No particular priority decision noticed today',
+  ],
+  'time.t03': [
+    'Gave meaningful attention to a task, person or act of worship',
+    'Maintained attention for part of the activity despite interruptions',
+    'Recognised that distraction reduced my attention',
+    'Noticed my attention wandering and deliberately returned to the activity',
+    'No specific attention-related situation noticed today',
+  ],
+  'time.t04': [
+    'Put away or silenced a digital device when attention was needed',
+    'Reduced unnecessary device use but was still distracted',
+    'Recognised that unnecessary screen use displaced something important',
+    'Stopped unnecessary device use and returned to a beneficial activity',
+    'No significant digital distraction noticed today',
+  ],
+  'time.t05': [
+    'Completed a responsibility or task I had been unnecessarily delaying',
+    'Made meaningful progress on a previously delayed responsibility',
+    'Recognised that I continued postponing something requiring attention',
+    'Took a concrete first step after recognising unnecessary delay',
+    'No relevant overdue or unnecessarily delayed responsibility noticed today',
+  ],
+  'time.t06': [
+    'Used time meaningfully for worship, responsibility, learning or useful work',
+    'Made some beneficial use of available time despite interruptions',
+    'Recognised that avoidable activity displaced a beneficial opportunity',
+    'Redirected available time towards a beneficial activity',
+    'No specific discretionary-time decision noticed today',
+  ],
+  'time.t07': [
+    'Gave appropriate attention to someone who needed it',
+    'Made an effort to be present but was partly distracted',
+    'Recognised that I unnecessarily overlooked someone\'s reasonable need',
+    'Put aside another activity and gave the person appropriate attention',
+    'No specific unmet need for my attention noticed today',
+  ],
+  'time.t08': [
+    'Took appropriate rest or recovery when needed',
+    'Made some time for rest but did not recover sufficiently',
+    'Recognised that I unnecessarily neglected needed rest',
+    'Adjusted my activities to allow appropriate rest or recovery',
+    'No particular rest or recovery decision noticed today',
+  ],
+};
 
 const timePractices = <TimePractice>[
   TimePractice(
@@ -74,22 +345,9 @@ const timePractices = <TimePractice>[
     band: kTimeIntentionBand,
     sectionQuestion: 'Did I approach my time with purpose?',
     label: 'Began with a worthwhile intention',
-    detail: 'Recognised a beneficial purpose before starting an activity, whether worship, work, study, family care or daily responsibility.',
+    detail:
+        'Recognised a beneficial purpose before starting an activity, whether worship, work, study, family care or daily responsibility.',
     matrixColumn: 'Intention',
-    contexts: [
-      TimeChoice(id: 'worship', label: 'Worship'),
-      TimeChoice(id: 'workStudy', label: 'Work or study'),
-      TimeChoice(id: 'family', label: 'Family'),
-      TimeChoice(id: 'other', label: 'Other'),
-    ],
-    outcomes: [
-      TimeChoice(
-        id: 'recalledBefore',
-        label: 'Intention recalled before starting',
-      ),
-      TimeChoice(id: 'recalledDuring', label: 'Recalled during activity'),
-      TimeChoice(id: 'notRecalled', label: 'Not recalled'),
-    ],
   ),
   TimePractice(
     practiceId: 'time_t02',
@@ -98,18 +356,9 @@ const timePractices = <TimePractice>[
     band: kTimeIntentionBand,
     sectionQuestion: 'Did I approach my time with purpose?',
     label: 'Chose what mattered first',
-    detail: 'Identified an important responsibility or beneficial activity and gave it appropriate priority over something less important.',
+    detail:
+        'Identified an important responsibility or beneficial activity and gave it appropriate priority over something less important.',
     matrixColumn: 'Priority',
-    contexts: [
-      TimeChoice(id: 'responsibility', label: 'Responsibility'),
-      TimeChoice(id: 'beneficialOpportunity', label: 'Beneficial opportunity'),
-      TimeChoice(id: 'competingActivities', label: 'Competing activities'),
-    ],
-    outcomes: [
-      TimeChoice(id: 'prioritised', label: 'Important activity prioritised'),
-      TimeChoice(id: 'partlyPrioritised', label: 'Partly prioritised'),
-      TimeChoice(id: 'deferred', label: 'Deferred'),
-    ],
   ),
   TimePractice(
     practiceId: 'time_t03',
@@ -118,19 +367,9 @@ const timePractices = <TimePractice>[
     band: kTimeAttentionBand,
     sectionQuestion: 'Did I give proper attention to what mattered?',
     label: 'Gave focused attention',
-    detail: 'Stayed meaningfully engaged with a task, conversation, learning activity or act of worship, or returned attention after noticing it had wandered.',
+    detail:
+        'Stayed meaningfully engaged with a task, conversation, learning activity or act of worship, or returned attention after noticing it had wandered.',
     matrixColumn: 'Focus',
-    contexts: [
-      TimeChoice(id: 'worship', label: 'Worship'),
-      TimeChoice(id: 'workStudy', label: 'Work or study'),
-      TimeChoice(id: 'conversation', label: 'Conversation'),
-      TimeChoice(id: 'other', label: 'Other'),
-    ],
-    outcomes: [
-      TimeChoice(id: 'maintained', label: 'Attention maintained'),
-      TimeChoice(id: 'restored', label: 'Attention restored'),
-      TimeChoice(id: 'frequentlyDistracted', label: 'Frequently distracted'),
-    ],
   ),
   TimePractice(
     practiceId: 'time_t04',
@@ -139,20 +378,9 @@ const timePractices = <TimePractice>[
     band: kTimeAttentionBand,
     sectionQuestion: 'Did I give proper attention to what mattered?',
     label: 'Put aside a digital distraction',
-    detail: 'Resisted or interrupted unnecessary scrolling, notifications, device checking or other digital interruptions.',
+    detail:
+        'Resisted or interrupted unnecessary scrolling, notifications, device checking or other digital interruptions.',
     matrixColumn: 'Digital',
-    contexts: [
-      TimeChoice(id: 'socialMedia', label: 'Social media'),
-      TimeChoice(id: 'notifications', label: 'Notifications'),
-      TimeChoice(id: 'entertainment', label: 'Entertainment'),
-      TimeChoice(id: 'repeatedChecking', label: 'Repeated checking'),
-      TimeChoice(id: 'other', label: 'Other'),
-    ],
-    outcomes: [
-      TimeChoice(id: 'avoided', label: 'Avoided interruption'),
-      TimeChoice(id: 'stoppedAfterStarting', label: 'Stopped after starting'),
-      TimeChoice(id: 'continued', label: 'Continued'),
-    ],
   ),
   TimePractice(
     practiceId: 'time_t05',
@@ -161,20 +389,9 @@ const timePractices = <TimePractice>[
     band: kTimeActionBand,
     sectionQuestion: 'Did I turn available time into beneficial action?',
     label: 'Took a step on something delayed',
-    detail: 'Started or advanced a worthwhile task that had been unnecessarily postponed.',
+    detail:
+        'Started or advanced a worthwhile task that had been unnecessarily postponed.',
     matrixColumn: 'Delayed',
-    contexts: [
-      TimeChoice(id: 'workStudy', label: 'Work or study'),
-      TimeChoice(id: 'personalDuty', label: 'Personal duty'),
-      TimeChoice(id: 'family', label: 'Family'),
-      TimeChoice(id: 'other', label: 'Other'),
-    ],
-    outcomes: [
-      TimeChoice(id: 'started', label: 'Started'),
-      TimeChoice(id: 'madeProgress', label: 'Made progress'),
-      TimeChoice(id: 'completed', label: 'Completed'),
-      TimeChoice(id: 'stillPostponed', label: 'Still postponed'),
-    ],
   ),
   TimePractice(
     practiceId: 'time_t06',
@@ -183,20 +400,9 @@ const timePractices = <TimePractice>[
     band: kTimeActionBand,
     sectionQuestion: 'Did I turn available time into beneficial action?',
     label: 'Used time for something beneficial',
-    detail: 'Consciously used an opportunity for learning, service, useful work, worship or another legitimate benefit.',
+    detail:
+        'Consciously used an opportunity for learning, service, useful work, worship or another legitimate benefit.',
     matrixColumn: 'Benefit',
-    contexts: [
-      TimeChoice(id: 'learning', label: 'Learning'),
-      TimeChoice(id: 'service', label: 'Service'),
-      TimeChoice(id: 'work', label: 'Work'),
-      TimeChoice(id: 'worship', label: 'Worship'),
-      TimeChoice(id: 'other', label: 'Other'),
-    ],
-    outcomes: [
-      TimeChoice(id: 'completed', label: 'Meaningful action completed'),
-      TimeChoice(id: 'usefulProgress', label: 'Useful progress made'),
-      TimeChoice(id: 'unused', label: 'Opportunity unused'),
-    ],
   ),
   TimePractice(
     practiceId: 'time_t07',
@@ -206,20 +412,9 @@ const timePractices = <TimePractice>[
     sectionQuestion:
         'Did I respect the rights of others and my own need for recovery?',
     label: 'Gave someone needed attention',
-    detail: 'Made appropriate time for a family member, colleague, neighbour or another person with a legitimate need.',
+    detail:
+        'Made appropriate time for a family member, colleague, neighbour or another person with a legitimate need.',
     matrixColumn: 'Others',
-    contexts: [
-      TimeChoice(id: 'family', label: 'Family'),
-      TimeChoice(id: 'friends', label: 'Friends'),
-      TimeChoice(id: 'colleagues', label: 'Colleagues'),
-      TimeChoice(id: 'community', label: 'Community'),
-      TimeChoice(id: 'other', label: 'Other'),
-    ],
-    outcomes: [
-      TimeChoice(id: 'gaveAttention', label: 'Gave needed attention'),
-      TimeChoice(id: 'partlyAttended', label: 'Partly attended'),
-      TimeChoice(id: 'couldNotAttend', label: 'Could not attend'),
-    ],
   ),
   TimePractice(
     practiceId: 'time_t08',
@@ -229,21 +424,77 @@ const timePractices = <TimePractice>[
     sectionQuestion:
         'Did I respect the rights of others and my own need for recovery?',
     label: 'Took needed rest',
-    detail: 'Allowed suitable sleep, recovery or restorative breaks rather than unnecessarily neglecting the body\'s needs.',
+    detail:
+        'Allowed suitable sleep, recovery or restorative breaks rather than unnecessarily neglecting the body\'s needs. Intentional rest is not wasted time.',
     matrixColumn: 'Rest',
-    contexts: [
-      TimeChoice(id: 'sleep', label: 'Sleep'),
-      TimeChoice(id: 'breakRest', label: 'Break'),
-      TimeChoice(id: 'physicalRecovery', label: 'Physical recovery'),
-      TimeChoice(id: 'mentalRecovery', label: 'Mental recovery'),
-    ],
-    outcomes: [
-      TimeChoice(id: 'sufficient', label: 'Rest was sufficient'),
-      TimeChoice(id: 'partial', label: 'Rest was partial'),
-      TimeChoice(id: 'missed', label: 'Needed rest was missed'),
-    ],
   ),
 ];
+
+List<ActivityOption> timeCatalogFor(String storageKey) {
+  final labels =
+      _timeResponseLabels[storageKey] ?? _timeResponseLabels['time.t01']!;
+  return [
+    ActivityOption(
+      id: TimeObservationIds.acted,
+      label: labels[0],
+      ternary: TernaryOutcome.positive,
+    ),
+    ActivityOption(
+      id: TimeObservationIds.partialEffort,
+      label: labels[1],
+      ternary: TernaryOutcome.positive,
+    ),
+    ActivityOption(
+      id: TimeObservationIds.lapseRecognised,
+      label: labels[2],
+      ternary: TernaryOutcome.negative,
+    ),
+    ActivityOption(
+      id: TimeObservationIds.corrected,
+      label: labels[3],
+      ternary: TernaryOutcome.positive,
+    ),
+    ActivityOption(
+      id: TimeObservationIds.noSituation,
+      label: labels[4],
+      ternary: TernaryOutcome.positive,
+    ),
+    const ActivityOption(
+      id: ActivityIds.unanswered,
+      label: 'Unanswered',
+      ternary: TernaryOutcome.unanswered,
+    ),
+  ];
+}
+
+List<ActivityOption> get timeLegendCatalog => [
+  for (final id in [...TimeObservationIds.ordered, ActivityIds.unanswered])
+    ActivityOption(
+      id: id,
+      label: timeLegendLabels[id] ?? id,
+      ternary: switch (id) {
+        TimeObservationIds.lapseRecognised => TernaryOutcome.negative,
+        ActivityIds.unanswered => TernaryOutcome.unanswered,
+        _ => TernaryOutcome.positive,
+      },
+    ),
+];
+
+String canonicalizeTimeActivityId(String id) {
+  return switch (id) {
+    ActivityIds.noticedNotActed => TimeObservationIds.lapseRecognised,
+    ActivityIds.noSituation => TimeObservationIds.noSituation,
+    _ => id,
+  };
+}
+
+String canonicalTimeId(TernaryOutcome outcome) {
+  return switch (outcome) {
+    TernaryOutcome.unanswered => ActivityIds.unanswered,
+    TernaryOutcome.positive => TimeObservationIds.acted,
+    TernaryOutcome.negative => TimeObservationIds.lapseRecognised,
+  };
+}
 
 TimePractice? timePracticeByKey(String storageKey) {
   for (final practice in timePractices) {
@@ -259,11 +510,12 @@ String? timeSectionQuestion(String band) {
   return null;
 }
 
-String timePrimaryLabel(String activityId) {
-  for (final option in ActivityCatalog.timeObservation) {
-    if (option.id == activityId) return option.label;
+String timePrimaryLabel(String storageKey, String activityId) {
+  final id = canonicalizeTimeActivityId(activityId);
+  for (final option in timeCatalogFor(storageKey)) {
+    if (option.id == id) return option.label;
   }
-  return 'Unanswered';
+  return timeLegendLabels[id] ?? 'Unanswered';
 }
 
 String? timeChoiceLabel(List<TimeChoice> choices, String id) {
@@ -274,14 +526,84 @@ String? timeChoiceLabel(List<TimeChoice> choices, String id) {
   return null;
 }
 
+String timeFollowUpLabel(String id) {
+  return timeChoiceLabel(timeContexts, id) ??
+      timeChoiceLabel(timeChallenges, id) ??
+      timeChoiceLabel(timeHelps, id) ??
+      timeChoiceLabel(timeOutcomes, id) ??
+      timeChoiceLabel(timeQuantities, id) ??
+      id;
+}
+
+bool _stored(String id) => id.isNotEmpty && id != kFactorNotRecorded;
+
+String _asId(Object? value) {
+  if (value is String && value.isNotEmpty) return value;
+  return kFactorNotRecorded;
+}
+
+String? encodeTimeExtras(TimePracticeCapture capture) {
+  final map = <String, String>{
+    if (_stored(capture.helpId)) 'help': capture.helpId,
+    if (_stored(capture.outcomeId)) 'outcome': capture.outcomeId,
+    if (_stored(capture.quantityId)) 'quantity': capture.quantityId,
+    if (capture.showsQuantityText && capture.quantityText.trim().isNotEmpty)
+      'amount': capture.quantityText.trim(),
+  };
+  if (map.isEmpty) return null;
+  return jsonEncode(map);
+}
+
+({String helpId, String outcomeId, String quantityId, String quantityText})
+decodeTimeExtras(String? customText) {
+  if (customText == null || customText.trim().isEmpty) {
+    return (
+      helpId: kFactorNotRecorded,
+      outcomeId: kFactorNotRecorded,
+      quantityId: kFactorNotRecorded,
+      quantityText: '',
+    );
+  }
+  try {
+    final decoded = jsonDecode(customText);
+    if (decoded is! Map) {
+      return (
+        helpId: kFactorNotRecorded,
+        outcomeId: kFactorNotRecorded,
+        quantityId: kFactorNotRecorded,
+        quantityText: '',
+      );
+    }
+    final map = Map<String, dynamic>.from(decoded);
+    return (
+      helpId: _asId(map['help']),
+      outcomeId: _asId(map['outcome']),
+      quantityId: _asId(map['quantity']),
+      quantityText: map['amount'] is String ? map['amount'] as String : '',
+    );
+  } on FormatException {
+    return (
+      helpId: kFactorNotRecorded,
+      outcomeId: kFactorNotRecorded,
+      quantityId: kFactorNotRecorded,
+      quantityText: '',
+    );
+  }
+}
+
 TimePracticeCapture readTimePractice(DailyCheckIn record, String storageKey) {
   final activity = record.activityFor(storageKey);
   final factors =
       record.homeTraceFactors[storageKey] ?? const SalahFactorCapture();
+  final extras = decodeTimeExtras(activity.customText);
   return TimePracticeCapture(
-    primaryId: activity.id,
+    primaryId: canonicalizeTimeActivityId(activity.id),
     contextId: selectedFactorId(factors.supportIds),
-    outcomeId: selectedFactorId(factors.challengeIds),
+    challengeId: selectedFactorId(factors.challengeIds),
+    helpId: extras.helpId,
+    outcomeId: extras.outcomeId,
+    quantityId: extras.quantityId,
+    quantityText: extras.quantityText,
     note: factors.otherText ?? '',
   );
 }
@@ -291,9 +613,13 @@ DailyCheckIn writeTimePractice(
   String storageKey,
   TimePracticeCapture capture,
 ) {
+  final packed = encodeTimeExtras(capture);
   var next = record.withHomeTraceActivity(
     storageKey,
-    RecordedActivity(id: capture.primaryId),
+    RecordedActivity(
+      id: canonicalizeTimeActivityId(capture.primaryId),
+      customText: packed,
+    ),
   );
   if (!capture.isPrimaryRecorded) {
     return next.withHomeTraceFactors(storageKey, const SalahFactorCapture());
@@ -302,7 +628,7 @@ DailyCheckIn writeTimePractice(
     storageKey,
     SalahFactorCapture(
       supportIds: idsFromFactorChoice(capture.contextId),
-      challengeIds: idsFromFactorChoice(capture.outcomeId),
+      challengeIds: idsFromFactorChoice(capture.challengeId),
       otherText: capture.note.trim().isEmpty ? null : capture.note.trim(),
     ),
   );
@@ -316,21 +642,27 @@ String timeEvidenceValue(DailyCheckIn record, String storageKey) {
     }
     return 'Unanswered';
   }
-  return timePrimaryLabel(capture.primaryId);
+  return timePrimaryLabel(storageKey, capture.primaryId);
 }
 
 String? timeEvidenceNote(DailyCheckIn record, String storageKey) {
-  final practice = timePracticeByKey(storageKey);
-  if (practice == null) return null;
   final capture = readTimePractice(record, storageKey);
   if (!capture.isPrimaryRecorded) return null;
-  final parts = <String>[];
-  final context = timeChoiceLabel(practice.contexts, capture.contextId);
-  final outcome = timeChoiceLabel(practice.outcomes, capture.outcomeId);
-  if (context != null) parts.add(context);
-  if (outcome != null) parts.add(outcome);
-  final note = capture.note.trim();
-  if (note.isNotEmpty) parts.add(note);
+  final parts = <String>[
+    if (timeChoiceLabel(timeContexts, capture.contextId) != null)
+      timeChoiceLabel(timeContexts, capture.contextId)!,
+    if (timeChoiceLabel(timeChallenges, capture.challengeId) != null)
+      timeChoiceLabel(timeChallenges, capture.challengeId)!,
+    if (timeChoiceLabel(timeHelps, capture.helpId) != null)
+      timeChoiceLabel(timeHelps, capture.helpId)!,
+    if (timeChoiceLabel(timeOutcomes, capture.outcomeId) != null)
+      timeChoiceLabel(timeOutcomes, capture.outcomeId)!,
+    if (timeChoiceLabel(timeQuantities, capture.quantityId) != null)
+      timeChoiceLabel(timeQuantities, capture.quantityId)!,
+    if (capture.showsQuantityText && capture.quantityText.trim().isNotEmpty)
+      capture.quantityText.trim(),
+    if (capture.note.trim().isNotEmpty) capture.note.trim(),
+  ];
   if (parts.isEmpty) return null;
-  return parts.join(' · ');
+  return parts.join(', ');
 }

@@ -413,4 +413,147 @@ void main() {
     await tester.tap(find.text('Not recorded').hitTestable());
     await tester.pumpAndSettle();
   });
+
+  testWidgets('knowledge learned uses item wording and optional follow-up', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(400, 2400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          checkInRepositoryProvider.overrideWithValue(
+            MemoryCheckInRepository(),
+          ),
+          appPrefsProvider.overrideWithValue(
+            MemoryAppPrefs(visibleDomains: allVisibleDomains()),
+          ),
+          nowProvider.overrideWithValue(DateTime(2026, 9, 3)),
+        ],
+        child: MaterialApp(home: CheckInScreen(date: DateTime(2026, 9, 3))),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await showCheckInDomain(tester, MonitorDomain.knowledge);
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('trace-knowledge.learnedSomethingTrue')),
+      280,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.pumpAndSettle();
+
+    await chooseCheckInOption(
+      tester,
+      dropdownKey: const Key('trace-knowledge.learnedSomethingTrue'),
+      optionLabel:
+          'Learned something new and verified its reliability — Learned something true',
+    );
+    expect(find.text(Copy.knowledgeTypeOfKnowledge.toUpperCase()), findsOneWidget);
+    expect(find.text(Copy.knowledgeReliability.toUpperCase()), findsOneWidget);
+    expect(find.text('HELPING FACTORS'), findsNothing);
+
+    await tester.tap(
+      find.byKey(const Key('trace-knowledge.learnedSomethingTrue-area')),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      find.text('Professional or vocational knowledge').hitTestable(),
+      findsOneWidget,
+    );
+    await tester.tap(find.text('Not recorded').hitTestable());
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('time intention uses item wording and optional follow-up', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(400, 2400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          checkInRepositoryProvider.overrideWithValue(
+            MemoryCheckInRepository(),
+          ),
+          appPrefsProvider.overrideWithValue(
+            MemoryAppPrefs(visibleDomains: allVisibleDomains()),
+          ),
+          nowProvider.overrideWithValue(DateTime(2026, 9, 3)),
+        ],
+        child: MaterialApp(home: CheckInScreen(date: DateTime(2026, 9, 3))),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await showCheckInDomain(tester, MonitorDomain.time);
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('trace-time.t01')),
+      280,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.pumpAndSettle();
+
+    await chooseCheckInOption(
+      tester,
+      dropdownKey: const Key('trace-time.t01'),
+      optionLabel:
+          'Began an activity with a clear beneficial intention — Began with a worthwhile intention',
+    );
+    expect(find.text(Copy.timeActivityContext.toUpperCase()), findsOneWidget);
+    expect(find.text(Copy.timeMainChallenge.toUpperCase()), findsOneWidget);
+    expect(find.text('HELPING FACTORS'), findsNothing);
+
+    await tester.tap(find.byKey(const Key('time-time.t01-context')));
+    await tester.pumpAndSettle();
+    expect(find.text('Worship').hitTestable(), findsOneWidget);
+    await tester.tap(find.text('Not recorded').hitTestable());
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('health sleep quality uses item wording and optional note', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(400, 2400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          checkInRepositoryProvider.overrideWithValue(
+            MemoryCheckInRepository(),
+          ),
+          appPrefsProvider.overrideWithValue(
+            MemoryAppPrefs(visibleDomains: allVisibleDomains()),
+          ),
+          nowProvider.overrideWithValue(DateTime(2026, 9, 3)),
+        ],
+        child: MaterialApp(home: CheckInScreen(date: DateTime(2026, 9, 3))),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await showCheckInDomain(tester, MonitorDomain.health);
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('trace-health.sleepQuality')),
+      280,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.pumpAndSettle();
+
+    await chooseCheckInOption(
+      tester,
+      dropdownKey: const Key('trace-health.sleepQuality'),
+      optionLabel:
+          'I slept well and felt reasonably refreshed. — Sleep quality',
+    );
+    expect(find.text(Copy.healthPrivateReflection.toUpperCase()), findsOneWidget);
+    expect(find.text('HELPING FACTORS'), findsNothing);
+    expect(find.text('I noticed this in myself — Sleep quality'), findsNothing);
+  });
 }

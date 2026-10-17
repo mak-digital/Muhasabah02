@@ -280,7 +280,7 @@ Do not:
 - Congratulate the user for being learned
 - Treat all knowledge as equal
 
-Unanswered is not ignorance. Marks mean “I noticed this in myself” or “I did not notice this today”. These traces do not increase `recordableFieldCount`.
+Unanswered is not ignorance. Each of the seven Home rows has six item-specific observations (beneficial activity, partial engagement, a recognised gap, a correction, no relevant situation, unanswered). Optional type, source, verification, understanding, application, quantity, and private reflection are provenance only: they never grade knowledge, treat reading or AI-assisted learning as verified, or duplicate Qur’an, Hadith, or Akhlaq. These traces do not increase `recordableFieldCount`.
 
 Home also lists **Knowledge & Beneficial Speech Learn & Practice**: Qur’an verses and authentic hadith grouped as on Home, collapsed to title, with citation pages and a private register (Learning, Learnt, Practicing, Habit). It stays residual of Qur’an, Hadith, and Akhlaq tone. It is not a learnedness grade, study-hour badge, or daily grade.
 
@@ -299,7 +299,7 @@ Record eight independent observations in daily-life order (intention → attenti
 - Responsibility & Action (`time_action`): took a step on something delayed (`time.t05`); used time for something beneficial (`time.t06`)
 - Balance & Renewal (`time_balance`): gave someone needed attention (`time.t07`); took needed rest (`time.t08`)
 
-Primary value: `acted`, `noticedNotActed`, `noSituation`, or unanswered (`null`). Optional per-practice context, observed outcome, and private note. A first tap is enough; secondary fields are never required to save. Unanswered is distinct from an explicit outcome.
+Each of the eight Home rows has six item-specific observations (`acted`, `partial_effort`, `lapse_recognised`, `corrected`, `no_situation`, unanswered/`null`). These are descriptive categories, not a numerical scale. Do not assume `corrected` is spiritually better or worse than `acted`. Optional activity context, challenge, what helped, observable outcome, quantity, and private reflection are provenance only: they never score barakah, rank a busy day as beneficial, treat rest as wasted time, auto-classify recreation as waste, or penalise illness, disability, caregiving, recovery, or unavoidable interruptions. A first tap is enough; secondary fields are never required to save. Unanswered is distinct from an explicit outcome. These traces do not increase `recordableFieldCount`. Older four-choice days (`acted` / `noticedNotActed` / `noSituation`) still read; they canonicalise to `acted`, `lapse_recognised`, and `no_situation` until edited.
 
 The fard stays on Salah. Sleep stays on Physical Health. Do not auto-fill Time from Salah or Health. Record what the user reports. Do not infer intention, sincerity, laziness, psychological health, divine reward, or barakah.
 
@@ -342,7 +342,7 @@ Do not:
 - Ignore that physical and mental health are intertwined
 - Auto-fill sleep from Time’s rest, or Time from sleep
 
-Unanswered is not a failing of the body. Marks mean “I noticed this in myself” or “I did not notice this today”. These traces do not increase `recordableFieldCount`.
+Each of the eight Home rows has item-specific observations (care taken, partial or mixed care, difficulty noticed, avoidable neglect, an adjustment, circumstances beyond control, no relevant need where that applies, prefer not to record, and unanswered/`null`). Prefer not to record is an explicit privacy choice, distinct from unanswered. These are descriptive categories, not a fitness, calorie, sleep-hour, or spiritual scale. Sleeping poorly is not classified as failure. Seeking care is not interpreted as better health than having no illness. Optional private reflection is provenance only. A first tap is enough; a note is never required to save. Unanswered is distinct from an explicit outcome. These traces do not increase `recordableFieldCount`. DailyCheckIn schema remains **6**.
 
 Home also lists **Physical Health & Energy Learn & Practice**: Qur’an verses and authentic hadith grouped as on Home, collapsed to title, with citation pages and a private register (Learning, Learnt, Practicing, Habit). It is not a fitness programme, calorie log, or body grade.
 

@@ -2,6 +2,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:muhasabah02/domain/activities.dart';
 import 'package:muhasabah02/domain/akhlaq_practices.dart';
 import 'package:muhasabah02/domain/huquq_practices.dart';
+import 'package:muhasabah02/domain/knowledge_practices.dart';
+import 'package:muhasabah02/domain/health_practices.dart';
+import 'package:muhasabah02/domain/time_practices.dart';
 import 'package:muhasabah02/domain/daily_check_in.dart';
 import 'package:muhasabah02/domain/home_traces.dart';
 import 'package:muhasabah02/domain/prayer.dart';
@@ -428,6 +431,286 @@ void main() {
     expect(
       legacy.activityFor('huquq.spouse').id,
       HuquqObservationIds.neglectRecognised,
+    );
+  });
+
+  test('knowledge rows use item-specific wording and salah colour twins', () {
+    expect(
+      ActivityCatalog.forHomeTrace(
+        'knowledge.learnedSomethingTrue',
+      ).map((o) => o.id).toList(),
+      [
+        KnowledgeObservationIds.engaged,
+        KnowledgeObservationIds.progress,
+        KnowledgeObservationIds.gapRecognised,
+        KnowledgeObservationIds.corrected,
+        KnowledgeObservationIds.noSituation,
+        ActivityIds.unanswered,
+      ],
+    );
+    expect(
+      ActivityCatalog.forHomeTrace('knowledge.learnedSomethingTrue').first.label,
+      'Learned something new and verified its reliability',
+    );
+    expect(
+      ActivityCatalog.forHomeTrace('knowledge.heldBackUselessSpeech')[2].label,
+      'Engaged in unnecessary or harmful speech and recognised it',
+    );
+    expect(
+      ActivityCatalog.forHomeTrace('knowledge.beneficialCreating')[0].label,
+      'Completed useful content or work with a clear beneficial purpose',
+    );
+    expect(
+      SalahActivityMark.colourForId(KnowledgeObservationIds.engaged),
+      SalahActivityMark.congregationOnTime,
+    );
+    expect(
+      SalahActivityMark.colourForId(KnowledgeObservationIds.progress),
+      SalahActivityMark.joinedCongregationLate,
+    );
+    expect(
+      SalahActivityMark.colourForId(KnowledgeObservationIds.corrected),
+      SalahActivityMark.smallCongregation,
+    );
+    expect(
+      SalahActivityMark.colourForId(KnowledgeObservationIds.noSituation),
+      SalahActivityMark.aloneOnTime,
+    );
+    expect(
+      SalahActivityMark.colourForId(KnowledgeObservationIds.gapRecognised),
+      SalahActivityMark.prayedLate,
+    );
+    expect(
+      SalahActivityMark.kindForAkhlaq(KnowledgeObservationIds.noSituation),
+      MarkerKind.filled,
+    );
+    expect(
+      SalahActivityMark.kindForAkhlaq(KnowledgeObservationIds.gapRecognised),
+      MarkerKind.outlined,
+    );
+    var record = DailyCheckIn.empty('2026-09-03');
+    expect(
+      record.activityFor('knowledge.learnedSomethingTrue').id,
+      ActivityIds.unanswered,
+    );
+    record = writeKnowledgeFollowUp(
+      record,
+      'knowledge.learnedSomethingTrue',
+      const KnowledgeFollowUpCapture(
+        primaryId: KnowledgeObservationIds.engaged,
+        areaId: 'knowledge.area.professional',
+        sourceId: 'knowledge.source.course',
+        verificationId: 'knowledge.verification.pending',
+        understandingId: 'knowledge.understanding.mainIdea',
+        applicationId: 'knowledge.application.identified',
+        quantityId: 'knowledge.quantity.oneOccasion',
+        note: 'I noted a method to apply',
+      ),
+    );
+    expect(
+      record.homeTrace('knowledge.learnedSomethingTrue'),
+      TernaryOutcome.positive,
+    );
+    var capture = readKnowledgeFollowUp(
+      record,
+      'knowledge.learnedSomethingTrue',
+    );
+    expect(capture.areaId, 'knowledge.area.professional');
+    expect(capture.verificationId, 'knowledge.verification.pending');
+    expect(capture.applicationId, 'knowledge.application.identified');
+    expect(
+      knowledgeEvidenceNote(record, 'knowledge.learnedSomethingTrue'),
+      contains('Professional or vocational knowledge'),
+    );
+    record = writeKnowledgeFollowUp(
+      record,
+      'knowledge.learnedSomethingTrue',
+      capture.copyWith(primaryId: KnowledgeObservationIds.gapRecognised),
+    );
+    expect(
+      record.homeTrace('knowledge.learnedSomethingTrue'),
+      TernaryOutcome.negative,
+    );
+    expect(
+      SalahActivityMark.forHadithTrace(
+        record: record,
+        row: homeTraceRowByKey('knowledge.learnedSomethingTrue')!,
+        activityColours: true,
+      ).kind,
+      MarkerKind.outlined,
+    );
+    record = writeKnowledgeFollowUp(
+      record,
+      'knowledge.learnedSomethingTrue',
+      const KnowledgeFollowUpCapture(),
+    );
+    expect(
+      record.homeTrace('knowledge.learnedSomethingTrue'),
+      TernaryOutcome.unanswered,
+    );
+    expect(
+      readKnowledgeFollowUp(record, 'knowledge.learnedSomethingTrue').note,
+      isEmpty,
+    );
+    final legacy = DailyCheckIn.empty('2026-09-03').withHomeTrace(
+      'knowledge.taughtSomeone',
+      TernaryOutcome.negative,
+    );
+    expect(
+      legacy.activityFor('knowledge.taughtSomeone').id,
+      KnowledgeObservationIds.noSituation,
+    );
+  });
+
+  test('time rows use item-specific wording and salah colour twins', () {
+    expect(
+      ActivityCatalog.forHomeTrace('time.t01').map((o) => o.id).toList(),
+      [
+        TimeObservationIds.acted,
+        TimeObservationIds.partialEffort,
+        TimeObservationIds.lapseRecognised,
+        TimeObservationIds.corrected,
+        TimeObservationIds.noSituation,
+        ActivityIds.unanswered,
+      ],
+    );
+    expect(
+      ActivityCatalog.forHomeTrace('time.t01').first.label,
+      'Began an activity with a clear beneficial intention',
+    );
+    expect(
+      ActivityCatalog.forHomeTrace('time.t04')[2].label,
+      'Recognised that unnecessary screen use displaced something important',
+    );
+    expect(
+      ActivityCatalog.forHomeTrace('time.t08')[0].label,
+      'Took appropriate rest or recovery when needed',
+    );
+    expect(
+      SalahActivityMark.colourForId(TimeObservationIds.acted),
+      SalahActivityMark.congregationOnTime,
+    );
+    expect(
+      SalahActivityMark.colourForId(TimeObservationIds.partialEffort),
+      SalahActivityMark.joinedCongregationLate,
+    );
+    expect(
+      SalahActivityMark.colourForId(TimeObservationIds.corrected),
+      SalahActivityMark.smallCongregation,
+    );
+    expect(
+      SalahActivityMark.colourForId(TimeObservationIds.noSituation),
+      SalahActivityMark.aloneOnTime,
+    );
+    expect(
+      SalahActivityMark.colourForId(TimeObservationIds.lapseRecognised),
+      SalahActivityMark.prayedLate,
+    );
+    expect(
+      SalahActivityMark.kindForAkhlaq(TimeObservationIds.noSituation),
+      MarkerKind.filled,
+    );
+    expect(
+      SalahActivityMark.kindForAkhlaq(TimeObservationIds.lapseRecognised),
+      MarkerKind.outlined,
+    );
+    var record = DailyCheckIn.empty('2026-09-03');
+    expect(record.activityFor('time.t01').id, ActivityIds.unanswered);
+    record = writeTimePractice(
+      record,
+      'time.t01',
+      const TimePracticeCapture(
+        primaryId: TimeObservationIds.acted,
+        contextId: 'time.context.worship',
+        helpId: 'time.help.clarifiedIntention',
+        outcomeId: 'time.outcome.meaningfulProgress',
+        note: 'I started with a purpose',
+      ),
+    );
+    expect(record.homeTrace('time.t01'), TernaryOutcome.positive);
+    var capture = readTimePractice(record, 'time.t01');
+    expect(capture.contextId, 'time.context.worship');
+    expect(capture.helpId, 'time.help.clarifiedIntention');
+    expect(
+      timeEvidenceNote(record, 'time.t01'),
+      contains('Worship'),
+    );
+    record = writeTimePractice(
+      record,
+      'time.t01',
+      capture.copyWith(primaryId: TimeObservationIds.lapseRecognised),
+    );
+    expect(record.homeTrace('time.t01'), TernaryOutcome.negative);
+    expect(
+      SalahActivityMark.forHadithTrace(
+        record: record,
+        row: homeTraceRowByKey('time.t01')!,
+        activityColours: true,
+      ).kind,
+      MarkerKind.outlined,
+    );
+    record = writeTimePractice(
+      record,
+      'time.t01',
+      const TimePracticeCapture(),
+    );
+    expect(record.homeTrace('time.t01'), TernaryOutcome.unanswered);
+    expect(readTimePractice(record, 'time.t01').note, isEmpty);
+    final legacy = DailyCheckIn.empty('2026-09-03').withHomeTrace(
+      'time.t08',
+      TernaryOutcome.negative,
+    );
+    expect(
+      legacy.activityFor('time.t08').id,
+      TimeObservationIds.lapseRecognised,
+    );
+  });
+
+  test('health rows use item-specific wording and salah colour twins', () {
+    expect(ActivityCatalog.forHomeTrace('health.sleepQuality').length, 7);
+    expect(
+      ActivityCatalog.forHomeTrace('health.sleepQuality').first.label,
+      'I slept well and felt reasonably refreshed.',
+    );
+    expect(
+      ActivityCatalog.forHomeTrace('health.sleepQuality')[5].id,
+      HealthObservationIds.preferNot,
+    );
+    expect(
+      SalahActivityMark.colourForId('health.sleepQuality.refreshed'),
+      SalahActivityMark.congregationOnTime,
+    );
+    expect(
+      SalahActivityMark.colourForId('health.sleepQuality.sleptPoorly'),
+      SalahActivityMark.excused,
+    );
+    expect(
+      SalahActivityMark.colourForId('health.illnessCare.delayedCare'),
+      SalahActivityMark.prayedLate,
+    );
+    expect(
+      SalahActivityMark.kindForAkhlaq('health.illnessCare.delayedCare'),
+      MarkerKind.outlined,
+    );
+    expect(
+      SalahActivityMark.kindForAkhlaq('health.sleepQuality.sleptPoorly'),
+      MarkerKind.filled,
+    );
+    var record = writeHealthPractice(
+      DailyCheckIn.empty('2026-10-17'),
+      'health.illnessCare',
+      const HealthPracticeCapture(
+        primaryId: 'health.illnessCare.noIllness',
+      ),
+    );
+    expect(record.homeTrace('health.illnessCare'), TernaryOutcome.positive);
+    expect(
+      SalahActivityMark.forHadithTrace(
+        record: record,
+        row: homeTraceRowByKey('health.illnessCare')!,
+        activityColours: true,
+      ).kind,
+      MarkerKind.filled,
     );
   });
 }

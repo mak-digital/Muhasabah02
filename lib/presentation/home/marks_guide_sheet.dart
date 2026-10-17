@@ -7,6 +7,9 @@ import '../../application/providers.dart';
 import '../../domain/activities.dart';
 import '../../domain/akhlaq_practices.dart';
 import '../../domain/huquq_practices.dart';
+import '../../domain/knowledge_practices.dart';
+import '../../domain/health_practices.dart';
+import '../../domain/time_practices.dart';
 import '../../domain/quran.dart';
 import '../../domain/copy.dart';
 import '../../domain/monitor_domain.dart';
@@ -409,21 +412,36 @@ Future<void> showMarksGuide(BuildContext context) {
                     const SizedBox(height: 8),
                     DomainBriefingNote(knowledgeBriefing, compact: true),
                     const SizedBox(height: 8),
-                    _row(
-                      context,
-                      kind: MarkerKind.filled,
-                      label: Copy.knowledgeNoticed,
+                    Text(
+                      Copy.knowledgeCheckInNote,
+                      style: Theme.of(context).textTheme.bodySmall,
                     ),
-                    _row(
-                      context,
-                      kind: MarkerKind.outlined,
-                      label: Copy.knowledgeNotToday,
-                    ),
-                    _row(
-                      context,
-                      kind: MarkerKind.unanswered,
-                      label: 'Unanswered',
-                    ),
+                    const SizedBox(height: 8),
+                    if (colours)
+                      for (final option in knowledgeLegendCatalog)
+                        _row(
+                          context,
+                          kind: SalahActivityMark.kindForAkhlaq(option.id),
+                          color: SalahActivityMark.colourForId(option.id),
+                          label: option.label,
+                        )
+                    else ...[
+                      _row(
+                        context,
+                        kind: MarkerKind.filled,
+                        label: Copy.knowledgeNoticed,
+                      ),
+                      _row(
+                        context,
+                        kind: MarkerKind.outlined,
+                        label: Copy.knowledgeNotToday,
+                      ),
+                      _row(
+                        context,
+                        kind: MarkerKind.unanswered,
+                        label: 'Unanswered',
+                      ),
+                    ],
                     const SizedBox(height: 16),
                     Text(
                       MonitorDomain.time.label,
@@ -442,21 +460,36 @@ Future<void> showMarksGuide(BuildContext context) {
                     const SizedBox(height: 8),
                     DomainBriefingNote(timeBriefing, compact: true),
                     const SizedBox(height: 8),
-                    _row(
-                      context,
-                      kind: MarkerKind.filled,
-                      label: Copy.timeNoticed,
+                    Text(
+                      Copy.timeCheckInNote,
+                      style: Theme.of(context).textTheme.bodySmall,
                     ),
-                    _row(
-                      context,
-                      kind: MarkerKind.outlined,
-                      label: Copy.timeNotToday,
-                    ),
-                    _row(
-                      context,
-                      kind: MarkerKind.unanswered,
-                      label: 'Unanswered',
-                    ),
+                    const SizedBox(height: 8),
+                    if (colours)
+                      for (final option in timeLegendCatalog)
+                        _row(
+                          context,
+                          kind: SalahActivityMark.kindForAkhlaq(option.id),
+                          color: SalahActivityMark.colourForId(option.id),
+                          label: option.label,
+                        )
+                    else ...[
+                      _row(
+                        context,
+                        kind: MarkerKind.filled,
+                        label: Copy.timeNoticed,
+                      ),
+                      _row(
+                        context,
+                        kind: MarkerKind.outlined,
+                        label: Copy.timeNotToday,
+                      ),
+                      _row(
+                        context,
+                        kind: MarkerKind.unanswered,
+                        label: 'Unanswered',
+                      ),
+                    ],
                     const SizedBox(height: 16),
                     Text(
                       MonitorDomain.health.label,
@@ -475,21 +508,36 @@ Future<void> showMarksGuide(BuildContext context) {
                     const SizedBox(height: 8),
                     DomainBriefingNote(healthBriefing, compact: true),
                     const SizedBox(height: 8),
-                    _row(
-                      context,
-                      kind: MarkerKind.filled,
-                      label: Copy.healthNoticed,
+                    Text(
+                      Copy.healthCheckInNote,
+                      style: Theme.of(context).textTheme.bodySmall,
                     ),
-                    _row(
-                      context,
-                      kind: MarkerKind.outlined,
-                      label: Copy.healthNotToday,
-                    ),
-                    _row(
-                      context,
-                      kind: MarkerKind.unanswered,
-                      label: 'Unanswered',
-                    ),
+                    const SizedBox(height: 8),
+                    if (colours)
+                      for (final option in healthLegendCatalog)
+                        _row(
+                          context,
+                          kind: SalahActivityMark.kindForAkhlaq(option.id),
+                          color: SalahActivityMark.colourForId(option.id),
+                          label: option.label,
+                        )
+                    else ...[
+                      _row(
+                        context,
+                        kind: MarkerKind.filled,
+                        label: Copy.healthNoticed,
+                      ),
+                      _row(
+                        context,
+                        kind: MarkerKind.outlined,
+                        label: Copy.healthNotToday,
+                      ),
+                      _row(
+                        context,
+                        kind: MarkerKind.unanswered,
+                        label: 'Unanswered',
+                      ),
+                    ],
                     const SizedBox(height: 16),
                     Text(
                       MonitorDomain.wealth.label,

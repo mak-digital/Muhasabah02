@@ -11,6 +11,7 @@ import '../../domain/daily_check_in.dart';
 import '../../domain/display_calendar.dart';
 import '../../domain/home_traces.dart';
 import '../../domain/huquq_practices.dart';
+import '../../domain/knowledge_practices.dart';
 import '../../domain/monitor_domain.dart';
 import '../../domain/other_domains.dart';
 import '../../domain/personal_mix.dart';
@@ -19,6 +20,7 @@ import '../../domain/personalisation_resolver.dart';
 import '../../domain/prayer.dart';
 import '../../domain/quran.dart';
 import '../../domain/salah_extras.dart';
+import '../../domain/health_practices.dart';
 import '../../domain/time_practices.dart';
 import '../shared/add_response_button.dart';
 import '../shared/system_insets.dart';
@@ -479,9 +481,23 @@ class DayEvidenceScreen extends ConsumerWidget {
         );
         continue;
       }
+      if (isHealthTrace(row.storageKey)) {
+        final capture = readHealthPractice(record, row.storageKey);
+        if (!capture.isPrimaryRecorded) continue;
+        children.add(
+          EvidenceRow(
+            name: row.label,
+            value: healthEvidenceValue(record, row.storageKey),
+            note: healthEvidenceNote(record, row.storageKey),
+          ),
+        );
+        continue;
+      }
       final outcome = record.homeTrace(row.storageKey);
       final factors = isHuquqTrace(row.storageKey)
           ? huquqEvidenceNote(record, row.storageKey)
+          : isKnowledgeTrace(row.storageKey)
+          ? knowledgeEvidenceNote(record, row.storageKey)
           : _factorLine(record, row.storageKey);
       if (outcome == TernaryOutcome.unanswered && factors == null) continue;
       final catalog = ActivityCatalog.forHomeTrace(row.storageKey);

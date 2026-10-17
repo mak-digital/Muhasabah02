@@ -134,7 +134,7 @@ class CheckInSelect<T> extends StatelessWidget {
     Widget labelFor(CheckInSelectEntry<T> entry) {
       final text = Text(
         entry.label,
-        maxLines: 3,
+        maxLines: 6,
         overflow: TextOverflow.ellipsis,
         style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: ink),
       );
@@ -169,6 +169,7 @@ class CheckInSelect<T> extends StatelessWidget {
               key: ValueKey<T>(value),
               isExpanded: true,
               isDense: true,
+              itemHeight: null,
               value: value,
               menuMaxHeight: 560,
               style: Theme.of(context).textTheme.bodyMedium
@@ -236,13 +237,19 @@ class ActivityPicker extends ConsumerWidget {
     final dhikrList = ActivityCatalog.isDhikrPostFardCatalog(options);
     final akhlaqList = ActivityCatalog.isAkhlaqObservationCatalog(options);
     final huquqList = ActivityCatalog.isHuquqObservationCatalog(options);
+    final knowledgeList = ActivityCatalog.isKnowledgeObservationCatalog(options);
+    final timeList = ActivityCatalog.isTimeObservationCatalog(options);
+    final healthList = ActivityCatalog.isHealthObservationCatalog(options);
     final swatches =
         (salahList ||
             durationList ||
             livedList ||
             dhikrList ||
             akhlaqList ||
-            huquqList) &&
+            huquqList ||
+            knowledgeList ||
+            timeList ||
+            healthList) &&
         ref.watch(appPrefsProvider).salahActivityColours;
     final extra = options.any((option) => option.id == selectedId)
         ? null

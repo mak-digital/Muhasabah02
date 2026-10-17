@@ -9,6 +9,9 @@ import '../../domain/arabic_script.dart';
 import '../../domain/activities.dart';
 import '../../domain/akhlaq_practices.dart';
 import '../../domain/huquq_practices.dart';
+import '../../domain/knowledge_practices.dart';
+import '../../domain/health_practices.dart';
+import '../../domain/time_practices.dart';
 import '../../domain/copy.dart';
 import '../../domain/display_calendar.dart';
 import '../../domain/first_day_of_week.dart';
@@ -474,6 +477,84 @@ class ActivitiesSettingsScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
             for (final option in huquqLegendCatalog)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  children: [
+                    RecordedStateMarker(
+                      kind: SalahActivityMark.kindForAkhlaq(option.id),
+                      color: SalahActivityMark.colourForId(option.id),
+                      semanticLabel: option.label,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(child: Text(option.label)),
+                  ],
+                ),
+              ),
+            const SizedBox(height: 16),
+            Text(
+              MonitorDomain.knowledge.label,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              Copy.knowledgeCheckInNote,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 8),
+            for (final option in knowledgeLegendCatalog)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  children: [
+                    RecordedStateMarker(
+                      kind: SalahActivityMark.kindForAkhlaq(option.id),
+                      color: SalahActivityMark.colourForId(option.id),
+                      semanticLabel: option.label,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(child: Text(option.label)),
+                  ],
+                ),
+              ),
+            const SizedBox(height: 16),
+            Text(
+              MonitorDomain.time.label,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              Copy.timeCheckInNote,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 8),
+            for (final option in timeLegendCatalog)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  children: [
+                    RecordedStateMarker(
+                      kind: SalahActivityMark.kindForAkhlaq(option.id),
+                      color: SalahActivityMark.colourForId(option.id),
+                      semanticLabel: option.label,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(child: Text(option.label)),
+                  ],
+                ),
+              ),
+            const SizedBox(height: 16),
+            Text(
+              MonitorDomain.health.label,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              Copy.healthCheckInNote,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 8),
+            for (final option in healthLegendCatalog)
               Padding(
                 padding: const EdgeInsets.only(bottom: 8),
                 child: Row(

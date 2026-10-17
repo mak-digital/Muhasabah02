@@ -1,4 +1,5 @@
 import 'activities.dart';
+import 'health_practices.dart';
 import 'akhlaq_practices.dart';
 import 'huquq_practices.dart';
 import 'charity_factors.dart';
@@ -11,9 +12,9 @@ import 'salah_factors.dart';
 
 /// Read-only ontology metadata version. Independent of DailyCheckIn schema v6.
 ///
-/// Version 6 adds Rights of Others observation codes. It does not
-/// change DailyCheckIn schema v6.
-const int kOntologyRegistryVersion = 6;
+/// Version 9 adds Physical Health observation kinds. It does not change
+/// DailyCheckIn schema v6.
+const int kOntologyRegistryVersion = 9;
 
 /// Active catalog rows vs historically readable retired rows.
 enum OntologyNodeStatus { active, retired }
@@ -118,6 +119,7 @@ enum OntologyActivityCatalog {
   hadithLearning,
   hadithLivedNoticed,
   timeObservation,
+  healthObservation,
   dhikrPostFard,
   akhlaqObservation,
   huquqObservation,
@@ -705,6 +707,13 @@ List<ActivityOntologyRecord> _buildActivities() {
       catalog: OntologyActivityCatalog.timeObservation,
       options: ActivityCatalog.timeObservation,
       domain: ConceptualDomainId.timeAndResponsibility,
+      status: OntologyNodeStatus.active,
+      kind: OntologyConstructKind.observationState,
+    ),
+    ..._mapActivityCatalog(
+      catalog: OntologyActivityCatalog.healthObservation,
+      options: ActivityCatalog.healthObservation,
+      domain: ConceptualDomainId.physicalWellbeing,
       status: OntologyNodeStatus.active,
       kind: OntologyConstructKind.observationState,
     ),
