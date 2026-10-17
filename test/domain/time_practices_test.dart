@@ -69,7 +69,6 @@ void main() {
         outcomeId: 'time.outcome.distractionReduced',
         quantityId: 'time.quantity.focusedMinutes',
         quantityText: '20',
-        note: 'Put the phone down',
       ),
     );
     expect(record.homeTrace('time.t04'), TernaryOutcome.positive);
@@ -80,7 +79,7 @@ void main() {
     expect(stored.helpId, 'time.help.putDeviceAside');
     expect(stored.outcomeId, 'time.outcome.distractionReduced');
     expect(stored.quantityText, '20');
-    expect(stored.note, 'Put the phone down');
+    expect(stored.note, isEmpty);
     expect(
       timeEvidenceNote(record, 'time.t04'),
       contains('Work or professional responsibility'),

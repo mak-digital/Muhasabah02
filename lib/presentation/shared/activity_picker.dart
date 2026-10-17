@@ -152,6 +152,7 @@ class CheckInSelect<T> extends StatelessWidget {
         ],
       );
     }
+
     return Padding(
       padding: EdgeInsets.only(left: indent),
       child: KeyedSubtree(
@@ -237,12 +238,15 @@ class ActivityPicker extends ConsumerWidget {
     final dhikrList = ActivityCatalog.isDhikrPostFardCatalog(options);
     final akhlaqList = ActivityCatalog.isAkhlaqObservationCatalog(options);
     final huquqList = ActivityCatalog.isHuquqObservationCatalog(options);
-    final knowledgeList = ActivityCatalog.isKnowledgeObservationCatalog(options);
+    final knowledgeList = ActivityCatalog.isKnowledgeObservationCatalog(
+      options,
+    );
     final timeList = ActivityCatalog.isTimeObservationCatalog(options);
     final healthList = ActivityCatalog.isHealthObservationCatalog(options);
     final wealthList = ActivityCatalog.isWealthObservationCatalog(options);
     final ummahList = ActivityCatalog.isUmmahObservationCatalog(options);
     final charityList = ActivityCatalog.isCharityObservationCatalog(options);
+    final fastingList = ActivityCatalog.isFastingObservationCatalog(options);
     final swatches =
         (salahList ||
             durationList ||
@@ -255,7 +259,8 @@ class ActivityPicker extends ConsumerWidget {
             healthList ||
             wealthList ||
             ummahList ||
-            charityList) &&
+            charityList ||
+            fastingList) &&
         ref.watch(appPrefsProvider).salahActivityColours;
     final extra = options.any((option) => option.id == selectedId)
         ? null

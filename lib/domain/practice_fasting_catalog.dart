@@ -2,13 +2,180 @@ import 'monitor_domain.dart';
 import 'practice_dhikr_catalog.dart';
 import 'practice_hadith.dart';
 
+const kFastingGroupFastConduct = 'Fast & Conduct';
+const kFastingGroupFocusedWorship = 'Focused Worship';
+const kFastingGroupStewardship = 'Stewardship';
+const kFastingGroupApplication = 'Application';
 const kFastingGroupVoluntary = 'Voluntary and make-up';
 
-const kPracticeFastingGroups = [kFastingGroupVoluntary];
+const kPracticeFastingGroups = [
+  kFastingGroupFastConduct,
+  kFastingGroupFocusedWorship,
+  kFastingGroupStewardship,
+  kFastingGroupApplication,
+  kFastingGroupVoluntary,
+];
 
 /// Qur’an and authentic hadith that encourage Fasting Home rows.
-/// Noticing of voluntary and make-up fasts — not a Ramadan score or a prescription.
+/// Ramadan observations are descriptive. Voluntary noticing is not a prescription.
 final List<PracticeDhikrItem> kPracticeFastingCatalog = [
+  _item(
+    id: 'fs.ramadan.observed.2_183',
+    group: kFastingGroupFastConduct,
+    topic: 'Observed the Ramadan fast',
+    text: 'O you who believe, fasting is prescribed for you as it was prescribed for those before you:',
+    arabic: 'يَا أَيُّهَا الَّذِينَ آمَنُوا كُتِبَ عَلَيْكُمُ الصِّيَامُ كَمَا كُتِبَ عَلَى الَّذِينَ مِن قَبْلِكُمْ',
+    transliteration: 'Yā ayyuhā lladhīna āmanū kutiba ʿalaykumu ṣ-ṣiyāmu kamā kutiba ʿalā lladhīna min qablikum.',
+    translation: 'O you who believe, fasting is prescribed for you as it was prescribed for those before you.',
+    source: 'Qur’an 2:183',
+    detail: 'A Ramadan fast you noticed. The app does not judge validity or exemption. Not recorded is not a missed fast.',
+  ),
+  _item(
+    id: 'fs.ramadan.observed.bukhari_1904',
+    group: kFastingGroupFastConduct,
+    topic: 'Observed the Ramadan fast',
+    text: 'The Messenger of Allah ﷺ said:',
+    arabic: 'الصِّيَامُ جُنَّةٌ',
+    transliteration: 'Aṣ-ṣiyāmu junnah.',
+    translation: 'Fasting is a shield.',
+    source: 'Ṣaḥīḥ al-Bukhārī 1904',
+    detail: 'A Ramadan fast you noticed. Fasting today can be edited after iftar. It is not auto-completed.',
+  ),
+  _item(
+    id: 'fs.ramadan.conduct.bukhari_1903',
+    group: kFastingGroupFastConduct,
+    topic: 'Guarded my speech and conduct',
+    text: 'The Messenger of Allah ﷺ said:',
+    arabic: 'مَنْ لَمْ يَدَعْ قَوْلَ الزُّورِ وَالْعَمَلَ بِهِ فَلَيْسَ لِلَّهِ حَاجَةٌ فِي أَنْ يَدَعَ طَعَامَهُ وَشَرَابَهُ',
+    transliteration: 'Man lam yadaʿ qawla z-zūri wa-l-ʿamala bihi fa-laysa li-llāhi ḥājatun fī an yadaʿa ṭaʿāmahu wa-sharābah.',
+    translation: 'Whoever does not give up false speech and acting upon it, Allah has no need that he give up his food and drink.',
+    source: 'Ṣaḥīḥ al-Bukhārī 1903',
+    detail: 'Speech and conduct you noticed. This is not a character score, and a slip is not a graded failure.',
+  ),
+  _item(
+    id: 'fs.ramadan.conduct.23_1',
+    group: kFastingGroupFastConduct,
+    topic: 'Guarded my speech and conduct',
+    text: 'Successful are the believers who turn away from idle talk:',
+    arabic: 'قَدْ أَفْلَحَ الْمُؤْمِنُونَ ۝ الَّذِينَ هُمْ فِي صَلَاتِهِمْ خَاشِعُونَ ۝ وَالَّذِينَ هُمْ عَنِ اللَّغْوِ مُعْرِضُونَ',
+    transliteration: 'Qad aflaḥa l-muʾminūn. Alladhīna hum fī ṣalātihim khāshiʿūn. Wa-lladhīna hum ʿani l-laghwi muʿriḍūn.',
+    translation: 'Successful are the believers: those who are humble in their prayer, and those who turn away from idle talk.',
+    source: 'Qur’an 23:1–3',
+    detail: 'Speech and conduct you noticed. Necessary conversation is not automatically idle talk.',
+  ),
+  _item(
+    id: 'fs.ramadan.attention.2_187',
+    group: kFastingGroupFocusedWorship,
+    topic: 'Protected attention and time',
+    text: 'Then complete the fast until the night:',
+    arabic: 'ثُمَّ أَتِمُّوا الصِّيَامَ إِلَى اللَّيْلِ',
+    transliteration: 'Thumma atimmū ṣ-ṣiyāma ilā l-layl.',
+    translation: 'Then complete the fast until the night.',
+    source: 'Qur’an 2:187',
+    detail: 'Attention you noticed. Necessary work, care, rest, and recreation are not automatically waste. There is no screen-time monitoring.',
+  ),
+  _item(
+    id: 'fs.ramadan.quran.bukhari_4997',
+    group: kFastingGroupFocusedWorship,
+    topic: 'Engaged meaningfully with the Qur’an',
+    text: 'Gabriel would review the Qur’an with the Prophet ﷺ in Ramadan.',
+    arabic: 'كَانَ جِبْرِيلُ يَلْقَاهُ فِي كُلِّ لَيْلَةٍ مِنْ رَمَضَانَ فَيُدَارِسُهُ الْقُرْآنَ',
+    transliteration: 'Kāna Jibrīlu yalqāhu fī kulli laylatin min Ramaḍāna fa-yudārisuhu l-Qurʾān.',
+    translation: 'Gabriel would meet him every night of Ramadan and review the Qur’an with him.',
+    source: 'Ṣaḥīḥ al-Bukhārī 4997',
+    detail: 'Qur’an engagement you noticed. Limited opportunity for study is not a failing. Hours are not a quality measure.',
+  ),
+  _item(
+    id: 'fs.ramadan.salah.29_45',
+    group: kFastingGroupFocusedWorship,
+    topic: 'Brought greater attention to obligatory Salah',
+    text: 'Establish the prayer. Indeed prayer prevents indecency and wrongdoing:',
+    arabic: 'وَأَقِمِ الصَّلَاةَ ۖ إِنَّ الصَّلَاةَ تَنْهَىٰ عَنِ الْفَحْشَاءِ وَالْمُنكَرِ',
+    transliteration:
+        'Wa-aqimi ṣ-ṣalāh. Inna ṣ-ṣalāta tanhā ʿani l-faḥshāʾi wa-l-munkar.',
+    translation: 'And establish the prayer. Indeed, prayer prevents indecency and wrongdoing.',
+    source: 'Qur’an 29:45',
+    detail: 'Attention in the fard you noticed. The app does not adjudicate validity or measure khushu’. The five prayers stay on Salah.',
+  ),
+  _item(
+    id: 'fs.ramadan.extra.73_20',
+    group: kFastingGroupStewardship,
+    topic: 'Made room for extra worship',
+    text: 'Recite what is easy of the Qur’an:',
+    arabic: 'فَاقْرَءُوا مَا تَيَسَّرَ مِنَ الْقُرْآنِ',
+    transliteration: 'Fa-qraʾū mā tayassara mina l-Qurʾān.',
+    translation: 'So recite what is easy of the Qur’an.',
+    source: 'Qur’an 73:20',
+    detail: 'Extra worship you noticed. There is no rak‘ah or minute quota. Valid limits, including menstruation, are not presented as failure.',
+  ),
+  _item(
+    id: 'fs.ramadan.extra.bukhari_2009',
+    group: kFastingGroupStewardship,
+    topic: 'Made room for extra worship',
+    text: 'The Messenger of Allah ﷺ said:',
+    arabic: 'مَنْ قَامَ رَمَضَانَ إِيمَانًا وَاحْتِسَابًا غُفِرَ لَهُ مَا تَقَدَّمَ مِنْ ذَنْبِهِ',
+    transliteration: 'Man qāma Ramaḍāna īmānan wa-ḥtisāban ghufira lahu mā taqaddama min dhanbih.',
+    translation: 'Whoever stands in Ramadan out of faith and seeking reward, his previous sins will be forgiven.',
+    source: 'Ṣaḥīḥ al-Bukhārī 2009',
+    detail: 'Night prayer or remembrance you noticed. Non-prayer worship remains available where prayer is not. This is not a taraweeh quota.',
+  ),
+  _item(
+    id: 'fs.ramadan.extra.97',
+    group: kFastingGroupStewardship,
+    topic: 'Made room for extra worship',
+    text: 'The Night of Decree is better than a thousand months:',
+    arabic: 'لَيْلَةُ الْقَدْرِ خَيْرٌ مِّنْ أَلْفِ شَهْرٍ',
+    transliteration: 'Laylatu l-qadri khayrun min alfi shahr.',
+    translation: 'The Night of Decree is better than a thousand months.',
+    source: 'Qur’an 97:1–5',
+    detail: 'Extra worship you noticed. The app does not date Laylat al-Qadr or require a night vigil.',
+  ),
+  _item(
+    id: 'fs.ramadan.habits.17_26',
+    group: kFastingGroupStewardship,
+    topic: 'Supported worship through balanced daily habits',
+    text: 'Do not squander wastefully:',
+    arabic: 'وَلَا تُبَذِّرْ تَبْذِيرًا ۝ إِنَّ الْمُبَذِّرِينَ كَانُوا إِخْوَانَ الشَّيَاطِينِ',
+    transliteration: 'Wa-lā tubadhdhir tabdhīrā. Inna l-mubadhdhirīna kānū ikhwāna sh-shayāṭīn.',
+    translation: 'And do not spend wastefully. Indeed, the wasteful are brothers of the devils.',
+    source: 'Qur’an 17:26–27',
+    detail: 'Routine you noticed. No medical, nutrition, or fasting-safety targets. Do not treat rest or family meals as waste.',
+  ),
+  _item(
+    id: 'fs.ramadan.practice.2_185',
+    group: kFastingGroupApplication,
+    topic: 'Put Ramadan learning into practice',
+    text: 'Allah intends ease for you, and does not intend hardship for you:',
+    arabic: 'يُرِيدُ اللَّهُ بِكُمُ الْيُسْرَ وَلَا يُرِيدُ بِكُمُ الْعُسْرَ',
+    transliteration: 'Yurīdu llāhu bikumu l-yusra wa-lā yurīdu bikumu l-ʿusr.',
+    translation:
+        'Allah intends for you ease and does not intend for you hardship.',
+    source: 'Qur’an 2:185',
+    detail: 'A step you noticed. This is self-reflection, not a claim to measure taqwa or acceptance.',
+  ),
+  _item(
+    id: 'fs.voluntary.prep.bukhari_1969',
+    group: kFastingGroupVoluntary,
+    topic: 'Ramadan Preparation',
+    text: 'The Prophet ﷺ would fast in Sha‘ban more than in other months besides Ramadan.',
+    arabic: 'كَانَ أَحَبَّ الشُّهُورِ إِلَى رَسُولِ اللَّهِ ﷺ أَنْ يَصُومَهُ شَعْبَانُ ثُمَّ يَصِلُهُ بِرَمَضَانَ',
+    transliteration: 'Kāna aḥabba sh-shuhūri ilā rasūli llāhi an yaṣūmahu Shaʿbānu thumma yaṣiluhu bi-Ramaḍān.',
+    translation: 'The most beloved month for the Messenger of Allah ﷺ to fast was Sha‘ban, then he would join it with Ramadan.',
+    source: 'Ṣaḥīḥ al-Bukhārī 1969',
+    detail: 'Preparation you noticed, including Sha‘ban where appropriate. Not a countdown and not a quota.',
+  ),
+  _item(
+    id: 'fs.voluntary.post.muslim_1164',
+    group: kFastingGroupVoluntary,
+    topic: 'Post-Ramadan Activities',
+    text: 'The Messenger of Allah ﷺ said:',
+    arabic: 'مَنْ صَامَ رَمَضَانَ ثُمَّ أَتْبَعَهُ سِتًّا مِنْ شَوَّالٍ كَانَ كَصِيَامِ الدَّهْرِ',
+    transliteration: 'Man ṣāma Ramaḍāna thumma atbaʿahu sittan min Shawwālin kāna ka-ṣiyāmi d-dahr.',
+    translation: 'Whoever fasts Ramadan then follows it with six from Shawwal, it is like fasting for a lifetime.',
+    source: 'Ṣaḥīḥ Muslim 1164',
+    detail: 'A post-Ramadan step you noticed. The six Shawwal fasts are voluntary. An actual make-up stays on Make-up Fast. The app does not rank Shawwal above make-up.',
+  ),
+
   _item(
     id: 'fs.voluntary.sunnah',
     group: kFastingGroupVoluntary,
@@ -26,10 +193,8 @@ final List<PracticeDhikrItem> kPracticeFastingCatalog = [
     topic: 'Weekly Sunnah Fast',
     text: 'Fasting is prescribed for you as it was prescribed for those before you:',
     arabic: 'يَا أَيُّهَا الَّذِينَ آمَنُوا كُتِبَ عَلَيْكُمُ الصِّيَامُ كَمَا كُتِبَ عَلَى الَّذِينَ مِن قَبْلِكُمْ',
-    transliteration:
-        'Yā ayyuhā lladhīna āmanū kutiba ʿalaykumu ṣ-ṣiyāmu kamā kutiba ʿalā lladhīna min qablikum.',
-    translation:
-        'O you who believe, fasting is prescribed for you as it was prescribed for those before you.',
+    transliteration: 'Yā ayyuhā lladhīna āmanū kutiba ʿalaykumu ṣ-ṣiyāmu kamā kutiba ʿalā lladhīna min qablikum.',
+    translation: 'O you who believe, fasting is prescribed for you as it was prescribed for those before you.',
     source: 'Qur’an 2:183',
     detail: 'A Monday or Thursday fast you noticed. The fard of Ramadan is not graded here.',
   ),
@@ -39,10 +204,8 @@ final List<PracticeDhikrItem> kPracticeFastingCatalog = [
     topic: 'Weekly Sunnah Fast',
     text: 'The Messenger of Allah ﷺ said:',
     arabic: 'أَحَبُّ الصِّيَامِ إِلَى اللَّهِ صِيَامُ دَاوُدَ، كَانَ يَصُومُ يَوْمًا وَيُفْطِرُ يَوْمًا',
-    transliteration:
-        'Aḥabbu ṣ-ṣiyāmi ilā llāhi ṣiyāmu Dāwūd, kāna yaṣūmu yawman wa-yufṭiru yawmā.',
-    translation:
-        'The most beloved fasting to Allah is the fasting of Dawud: he would fast a day and break a day.',
+    transliteration: 'Aḥabbu ṣ-ṣiyāmi ilā llāhi ṣiyāmu Dāwūd, kāna yaṣūmu yawman wa-yufṭiru yawmā.',
+    translation: 'The most beloved fasting to Allah is the fasting of Dawud: he would fast a day and break a day.',
     source: 'Ṣaḥīḥ al-Bukhārī 3420',
     detail: 'A weekly sunnah fast you noticed. Extreme fasting outside Ramadan is not encouraged here.',
   ),
@@ -73,7 +236,8 @@ final List<PracticeDhikrItem> kPracticeFastingCatalog = [
     group: kFastingGroupVoluntary,
     topic: 'White Days (Ayyam Al-Bid)',
     text: 'The Messenger of Allah ﷺ said:',
-    arabic: 'صَوْمُ ثَلَاثَةِ أَيَّامٍ مِنْ كُلِّ شَهْرٍ صَوْمُ الدَّهْرِ كُلِّهِ',
+    arabic:
+        'صَوْمُ ثَلَاثَةِ أَيَّامٍ مِنْ كُلِّ شَهْرٍ صَوْمُ الدَّهْرِ كُلِّهِ',
     transliteration:
         'Ṣawmu thalāthati ayyāmin min kulli shahrin ṣawmu d-dahri kullih.',
     translation: 'Fasting three days of every month is fasting for a lifetime.',
@@ -88,8 +252,7 @@ final List<PracticeDhikrItem> kPracticeFastingCatalog = [
     arabic: 'أَوْصَانِي خَلِيلِي ﷺ بِثَلَاثٍ: صِيَامِ ثَلَاثَةِ أَيَّامٍ مِنْ كُلِّ شَهْرٍ',
     transliteration:
         'Awṣānī khalīlī bi-thalāth: ṣiyāmi thalāthati ayyāmin min kulli shahr.',
-    translation:
-        'My close friend ﷺ advised me with three: fasting three days of every month.',
+    translation: 'My close friend ﷺ advised me with three: fasting three days of every month.',
     source: 'Ṣaḥīḥ al-Bukhārī 1981',
     detail: 'White Days you noticed. It does not record a fast or tell you to fast.',
   ),
@@ -100,7 +263,8 @@ final List<PracticeDhikrItem> kPracticeFastingCatalog = [
     text: 'Allah intends ease, not hardship:',
     arabic: 'يُرِيدُ اللَّهُ بِكُمُ الْيُسْرَ وَلَا يُرِيدُ بِكُمُ الْعُسْرَ',
     transliteration: 'Yurīdu llāhu bikumu l-yusra wa-lā yurīdu bikumu l-ʿusr.',
-    translation: 'Allah intends for you ease and does not intend for you hardship.',
+    translation:
+        'Allah intends for you ease and does not intend for you hardship.',
     source: 'Qur’an 2:185',
     detail: 'White Days you noticed. Illness and travel are not failings.',
   ),
@@ -120,12 +284,10 @@ final List<PracticeDhikrItem> kPracticeFastingCatalog = [
     group: kFastingGroupVoluntary,
     topic: 'Make-up Fast',
     text: 'Whoever is ill or on a journey, then an equal number of other days:',
-    arabic:
-        'وَمَن كَانَ مَرِيضًا أَوْ عَلَىٰ سَفَرٍ فَعِدَّةٌ مِّنْ أَيَّامٍ أُخَرَ',
+    arabic: 'وَمَن كَانَ مَرِيضًا أَوْ عَلَىٰ سَفَرٍ فَعِدَّةٌ مِّنْ أَيَّامٍ أُخَرَ',
     transliteration:
         'Wa-man kāna marīḍan aw ʿalā safarin fa-ʿiddatun min ayyāmin ukhar.',
-    translation:
-        'And whoever is ill or on a journey — then an equal number of other days.',
+    translation: 'And whoever is ill or on a journey — then an equal number of other days.',
     source: 'Qur’an 2:185',
     detail: 'A make-up you noticed. Illness and travel are not failings.',
   ),
@@ -147,10 +309,8 @@ final List<PracticeDhikrItem> kPracticeFastingCatalog = [
     topic: 'Make-up Fast',
     text: 'Aisha, may Allah be pleased with her, said she would make up missed fasts in Sha‘ban.',
     arabic: 'كَانَ يَكُونُ عَلَيَّ الصَّوْمُ مِنْ رَمَضَانَ فَمَا أَسْتَطِيعُ أَنْ أَقْضِيَهُ إِلَّا فِي شَعْبَانَ',
-    transliteration:
-        'Kāna yakūnu ʿalayya ṣ-ṣawmu min Ramaḍāna fa-mā astaṭīʿu an aqḍiyahu illā fī Shaʿbān.',
-    translation:
-        'I would have fasts due from Ramadan, and I would not be able to make them up except in Sha‘ban.',
+    transliteration: 'Kāna yakūnu ʿalayya ṣ-ṣawmu min Ramaḍāna fa-mā astaṭīʿu an aqḍiyahu illā fī Shaʿbān.',
+    translation: 'I would have fasts due from Ramadan, and I would not be able to make them up except in Sha‘ban.',
     source: 'Ṣaḥīḥ al-Bukhārī 1950',
     detail: 'A make-up you noticed. Illness and travel are not failings.',
   ),

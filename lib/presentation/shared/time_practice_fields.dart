@@ -15,16 +15,13 @@ class TimePracticeFields extends StatelessWidget {
     required this.outcomeId,
     required this.quantityId,
     required this.quantityText,
-    required this.note,
     required this.onContextChanged,
     required this.onChallengeChanged,
     required this.onHelpChanged,
     required this.onOutcomeChanged,
     required this.onQuantityChanged,
     required this.onQuantityTextChanged,
-    required this.onNoteChanged,
     this.quantityController,
-    this.noteController,
   });
 
   final String storageKey;
@@ -34,16 +31,13 @@ class TimePracticeFields extends StatelessWidget {
   final String outcomeId;
   final String quantityId;
   final String quantityText;
-  final String note;
   final ValueChanged<String> onContextChanged;
   final ValueChanged<String> onChallengeChanged;
   final ValueChanged<String> onHelpChanged;
   final ValueChanged<String> onOutcomeChanged;
   final ValueChanged<String> onQuantityChanged;
   final ValueChanged<String> onQuantityTextChanged;
-  final ValueChanged<String> onNoteChanged;
   final TextEditingController? quantityController;
-  final TextEditingController? noteController;
 
   String _safe(String id, List<TimeChoice> choices) {
     if (id == kFactorNotRecorded) return id;
@@ -128,30 +122,6 @@ class TimePracticeFields extends StatelessWidget {
                   ),
           ),
         ],
-        _heading(Copy.timePrivateReflection, labelStyle),
-        Padding(
-          padding: const EdgeInsets.only(left: checkInNestedIndent),
-          child: noteController == null
-              ? TextFormField(
-                  key: Key('time-$storageKey-note'),
-                  initialValue: note,
-                  minLines: 1,
-                  maxLines: 4,
-                  decoration: const InputDecoration(
-                    hintText: Copy.timeReflectionHint,
-                  ),
-                  onChanged: onNoteChanged,
-                )
-              : TextField(
-                  controller: noteController,
-                  minLines: 1,
-                  maxLines: 4,
-                  decoration: const InputDecoration(
-                    hintText: Copy.timeReflectionHint,
-                  ),
-                  onChanged: onNoteChanged,
-                ),
-        ),
       ],
     );
   }

@@ -7,6 +7,7 @@ import 'charity_practices.dart';
 import 'ummah_practices.dart';
 import 'wealth_practices.dart';
 import 'time_practices.dart';
+import 'fasting_practices.dart';
 import 'other_domains.dart';
 import 'prayer.dart';
 import 'quran.dart';
@@ -963,20 +964,17 @@ class ActivityCatalog {
   static const dhikrPostFard = <ActivityOption>[
     ActivityOption(
       id: dhikrWithAction,
-      label:
-          'Remembrance with action (I noticed a beneficial response in my behaviour)',
+      label: 'Remembrance with action (I noticed a beneficial response in my behaviour)',
       ternary: TernaryOutcome.positive,
     ),
     ActivityOption(
       id: dhikrAttentive,
-      label:
-          'Attentive remembrance (I consciously reflected on the words or meaning)',
+      label: 'Attentive remembrance (I consciously reflected on the words or meaning)',
       ternary: TernaryOutcome.positive,
     ),
     ActivityOption(
       id: dhikrIntentional,
-      label:
-          'Intentional remembrance (I deliberately made time for dhikr or du‘a)',
+      label: 'Intentional remembrance (I deliberately made time for dhikr or du‘a)',
       ternary: TernaryOutcome.positive,
     ),
     ActivityOption(
@@ -1052,23 +1050,26 @@ class ActivityCatalog {
       hadithRetentionKey => hadithRetentionDuration,
       hadithLearningKey => hadithLearningDuration,
       hadithLivedNoticedKey => hadithLivedNoticed,
-      _ => isAkhlaqTrace(storageKey)
-          ? akhlaqCatalogFor(storageKey)
-          : isHuquqTrace(storageKey)
-          ? huquqCatalogFor(storageKey)
-          : isKnowledgeTrace(storageKey)
-          ? knowledgeCatalogFor(storageKey)
-          : isDhikrPostFardTrace(storageKey)
-          ? dhikrPostFard
-          : storageKey.startsWith('time.t0')
-          ? timeCatalogFor(storageKey)
-          : isHealthTrace(storageKey)
-          ? healthCatalogFor(storageKey)
-          : isWealthTrace(storageKey)
-          ? wealthCatalogFor(storageKey)
-          : isUmmahTrace(storageKey)
-          ? ummahCatalogFor(storageKey)
-          : charityCatalogFor(storageKey),
+      _ =>
+        isAkhlaqTrace(storageKey)
+            ? akhlaqCatalogFor(storageKey)
+            : isHuquqTrace(storageKey)
+            ? huquqCatalogFor(storageKey)
+            : isKnowledgeTrace(storageKey)
+            ? knowledgeCatalogFor(storageKey)
+            : isDhikrPostFardTrace(storageKey)
+            ? dhikrPostFard
+            : storageKey.startsWith('time.t0')
+            ? timeCatalogFor(storageKey)
+            : isHealthTrace(storageKey)
+            ? healthCatalogFor(storageKey)
+            : isWealthTrace(storageKey)
+            ? wealthCatalogFor(storageKey)
+            : isUmmahTrace(storageKey)
+            ? ummahCatalogFor(storageKey)
+            : isFastingPracticeTrace(storageKey)
+            ? fastingCatalogFor(storageKey)
+            : charityCatalogFor(storageKey),
     };
   }
 
@@ -1137,11 +1138,21 @@ class ActivityCatalog {
         options[1].id.startsWith('charity.');
   }
 
+  static bool isFastingObservationCatalog(List<ActivityOption> options) {
+    return options.length >= 6 &&
+        options.first.id == ActivityIds.unanswered &&
+        options.last.id == FastingObservationIds.preferNot &&
+        options[1].id.startsWith('fasting.');
+  }
+
   /// Shared Ummah legend. Item wording lives in [ummahCatalogFor].
   static List<ActivityOption> get ummahObservation => ummahLegendCatalog;
 
   /// Shared Charity legend. Item wording lives in [charityCatalogFor].
   static List<ActivityOption> get charityObservation => charityLegendCatalog;
+
+  /// Shared Fasting legend. Item wording lives in [fastingCatalogFor].
+  static List<ActivityOption> get fastingObservation => fastingLegendCatalog;
 
   /// Shared Wealth legend. Item wording lives in [wealthCatalogFor].
   static List<ActivityOption> get wealthObservation => wealthLegendCatalog;
@@ -1277,7 +1288,8 @@ class ActivityCatalog {
         isHealthObservationCatalog(options) ||
         isWealthObservationCatalog(options) ||
         isUmmahObservationCatalog(options) ||
-        isCharityObservationCatalog(options)) {
+        isCharityObservationCatalog(options) ||
+        isFastingObservationCatalog(options)) {
       return true;
     }
     return false;

@@ -28,6 +28,7 @@ import '../../domain/salah_factors.dart';
 import '../../domain/situation_notes.dart';
 import '../../domain/health_practices.dart';
 import '../../domain/charity_practices.dart';
+import '../../domain/fasting_practices.dart';
 import '../../domain/ummah_practices.dart';
 import '../../domain/wealth_practices.dart';
 import '../../domain/time_practices.dart';
@@ -149,8 +150,7 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
     _reflection = TextEditingController();
     _situationCustom = TextEditingController();
     _akhlaqStruggle = TextEditingController();
-    _briefingOpen =
-        widget.focusBand == null && widget.focusRowId == null;
+    _briefingOpen = widget.focusBand == null && widget.focusRowId == null;
     Future<void>.microtask(_hydrate);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _scrollToFocusedRow();
@@ -942,9 +942,21 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
   List<Widget> _tracesBody(Set<String> mixKeys) {
     final accent = widget.familyColor ?? MuhasabahColors.dhikr;
     final hajjStatus = ref.watch(appPrefsProvider).hajjStatus;
-    final visible = widget.includeHajjStatus
+    var visible = widget.includeHajjStatus
         ? hajjRowsForStatus(widget.traceRows, hajjStatus)
         : widget.traceRows;
+    if (visible.any((row) => isFastingRamadanTrace(row.storageKey))) {
+      final prefs = ref.watch(appPrefsProvider);
+      visible = gateFastingHomeRows(
+        visible,
+        showRamadan: showsFastingRamadanRows(
+          date: parseDateKey(_openedDateKey),
+          offsetDays: prefs.ramadanCalendarOffsetDays,
+          showHistory: prefs.showFastingRamadanHistory,
+          records: [_draft],
+        ),
+      );
+    }
     final rows = [
       for (final row in visible)
         if (mixKeys.isEmpty || mixKeys.contains(row.storageKey)) row,
@@ -1283,6 +1295,23 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
                 );
                 return;
               }
+              if (isFastingPracticeTrace(key)) {
+                if (option.id == ActivityIds.unanswered) {
+                  _draft = writeFastingPractice(
+                    _draft,
+                    key,
+                    const FastingPracticeCapture(),
+                  );
+                  return;
+                }
+                final existing = readFastingPractice(_draft, key);
+                _draft = writeFastingPractice(
+                  _draft,
+                  key,
+                  existing.copyWith(primaryId: option.id),
+                );
+                return;
+              }
               var next = _draft.withHomeTraceActivity(
                 key,
                 RecordedActivity(
@@ -1320,12 +1349,10 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
                 outcomeId: timeCapture.outcomeId,
                 quantityId: timeCapture.quantityId,
                 quantityText: timeCapture.quantityText,
-                note: timeCapture.note,
                 quantityController: _note(
                   '$key-time-amount',
                   timeCapture.quantityText,
                 ),
-                noteController: _note('$key-time-note', timeCapture.note),
                 onContextChanged: (id) => setState(() {
                   _draft = writeTimePractice(
                     _draft,
@@ -1375,13 +1402,6 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
                       primaryId: selected.id,
                       quantityText: value,
                     ),
-                  );
-                },
-                onNoteChanged: (value) {
-                  _draft = writeTimePractice(
-                    _draft,
-                    key,
-                    timeCapture.copyWith(primaryId: selected.id, note: value),
                   );
                 },
               ),
@@ -1476,7 +1496,10 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
                 _draft = writeKnowledgeFollowUp(
                   _draft,
                   key,
-                  knowledgeCapture.copyWith(primaryId: selected.id, note: value),
+                  knowledgeCapture.copyWith(
+                    primaryId: selected.id,
+                    note: value,
+                  ),
                 );
               },
             ),
@@ -1501,7 +1524,10 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
                 _draft = writeHuquqFollowUp(
                   _draft,
                   key,
-                  huquqCapture.copyWith(primaryId: selected.id, engagementId: id),
+                  huquqCapture.copyWith(
+                    primaryId: selected.id,
+                    engagementId: id,
+                  ),
                 );
               }),
               onOutcomeChanged: (id) => setState(() {
@@ -1968,10 +1994,20 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
         mixKeys: mixKeys,
       ),
       MonitorDomain.fasting => _homeTraceDomainCard(
-        title: 'Fasting',
-        rows: fastingHomeRows,
+        title: MonitorDomain.fasting.label,
+        focus: MonitorDomain.fasting.focusQuestion,
+        rows: gateFastingHomeRows(
+          fastingHomeRows,
+          showRamadan: showsFastingRamadanRows(
+            date: parseDateKey(_openedDateKey),
+            offsetDays: ref.watch(appPrefsProvider).ramadanCalendarOffsetDays,
+            showHistory: ref.watch(appPrefsProvider).showFastingRamadanHistory,
+            records: [_draft],
+          ),
+        ),
         washLight: MuhasabahColors.fastingWash,
         washDark: MuhasabahColors.fastingWashDark,
+        extraNote: Copy.fastingObservationNote,
         expandFirst: expandFirst,
         mixKeys: mixKeys,
       ),

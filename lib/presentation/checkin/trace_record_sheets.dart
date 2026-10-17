@@ -18,6 +18,7 @@ import '../../domain/quran.dart';
 import '../../domain/salah_factors.dart';
 import '../../domain/health_practices.dart';
 import '../../domain/charity_practices.dart';
+import '../../domain/fasting_practices.dart';
 import '../../domain/ummah_practices.dart';
 import '../../domain/wealth_practices.dart';
 import '../../domain/time_practices.dart';
@@ -364,6 +365,32 @@ Future<void> showHomeTraceRecordSheet({
                               await _save(ref, next);
                               return;
                             }
+                            if (isFastingPracticeTrace(row.storageKey)) {
+                              DailyCheckIn next;
+                              if (option.id == ActivityIds.unanswered) {
+                                next = writeFastingPractice(
+                                  base,
+                                  row.storageKey,
+                                  const FastingPracticeCapture(),
+                                );
+                                factors = const SalahFactorCapture();
+                              } else {
+                                final existing = readFastingPractice(
+                                  base,
+                                  row.storageKey,
+                                );
+                                next = writeFastingPractice(
+                                  base,
+                                  row.storageKey,
+                                  existing.copyWith(primaryId: option.id),
+                                );
+                                factors =
+                                    next.homeTraceFactors[row.storageKey] ??
+                                    const SalahFactorCapture();
+                              }
+                              await _save(ref, next);
+                              return;
+                            }
                             var next = base.withHomeTraceActivity(
                               row.storageKey,
                               RecordedActivity(id: option.id),
@@ -463,7 +490,6 @@ Future<void> showHomeTraceRecordSheet({
                                   DailyCheckIn.empty(dateKey),
                               row.storageKey,
                             ).quantityText,
-                            note: factors.otherText ?? '',
                             onContextChanged: (id) async {
                               final base =
                                   _recordFor(ref, dateKey, record) ??
@@ -471,10 +497,7 @@ Future<void> showHomeTraceRecordSheet({
                               final next = writeTimePractice(
                                 base,
                                 row.storageKey,
-                                readTimePractice(
-                                  base,
-                                  row.storageKey,
-                                ).copyWith(
+                                readTimePractice(base, row.storageKey).copyWith(
                                   primaryId: selectedId,
                                   contextId: id,
                                 ),
@@ -492,10 +515,7 @@ Future<void> showHomeTraceRecordSheet({
                               final next = writeTimePractice(
                                 base,
                                 row.storageKey,
-                                readTimePractice(
-                                  base,
-                                  row.storageKey,
-                                ).copyWith(
+                                readTimePractice(base, row.storageKey).copyWith(
                                   primaryId: selectedId,
                                   challengeId: id,
                                 ),
@@ -516,10 +536,7 @@ Future<void> showHomeTraceRecordSheet({
                                 readTimePractice(
                                   base,
                                   row.storageKey,
-                                ).copyWith(
-                                  primaryId: selectedId,
-                                  helpId: id,
-                                ),
+                                ).copyWith(primaryId: selectedId, helpId: id),
                               );
                               factors =
                                   next.homeTraceFactors[row.storageKey] ??
@@ -534,10 +551,7 @@ Future<void> showHomeTraceRecordSheet({
                               final next = writeTimePractice(
                                 base,
                                 row.storageKey,
-                                readTimePractice(
-                                  base,
-                                  row.storageKey,
-                                ).copyWith(
+                                readTimePractice(base, row.storageKey).copyWith(
                                   primaryId: selectedId,
                                   outcomeId: id,
                                 ),
@@ -555,10 +569,7 @@ Future<void> showHomeTraceRecordSheet({
                               final next = writeTimePractice(
                                 base,
                                 row.storageKey,
-                                readTimePractice(
-                                  base,
-                                  row.storageKey,
-                                ).copyWith(
+                                readTimePractice(base, row.storageKey).copyWith(
                                   primaryId: selectedId,
                                   quantityId: id,
                                 ),
@@ -576,32 +587,9 @@ Future<void> showHomeTraceRecordSheet({
                               final next = writeTimePractice(
                                 base,
                                 row.storageKey,
-                                readTimePractice(
-                                  base,
-                                  row.storageKey,
-                                ).copyWith(
+                                readTimePractice(base, row.storageKey).copyWith(
                                   primaryId: selectedId,
                                   quantityText: value,
-                                ),
-                              );
-                              factors =
-                                  next.homeTraceFactors[row.storageKey] ??
-                                  const SalahFactorCapture();
-                              await _save(ref, next);
-                            },
-                            onNoteChanged: (value) async {
-                              final base =
-                                  _recordFor(ref, dateKey, record) ??
-                                  DailyCheckIn.empty(dateKey);
-                              final next = writeTimePractice(
-                                base,
-                                row.storageKey,
-                                readTimePractice(
-                                  base,
-                                  row.storageKey,
-                                ).copyWith(
-                                  primaryId: selectedId,
-                                  note: value,
                                 ),
                               );
                               factors =
@@ -704,10 +692,7 @@ Future<void> showHomeTraceRecordSheet({
                             final next = writeHuquqFollowUp(
                               base,
                               row.storageKey,
-                              readHuquqFollowUp(
-                                base,
-                                row.storageKey,
-                              ).copyWith(
+                              readHuquqFollowUp(base, row.storageKey).copyWith(
                                 primaryId: selectedId,
                                 engagementId: id,
                               ),
@@ -728,10 +713,7 @@ Future<void> showHomeTraceRecordSheet({
                               readHuquqFollowUp(
                                 base,
                                 row.storageKey,
-                              ).copyWith(
-                                primaryId: selectedId,
-                                outcomeId: id,
-                              ),
+                              ).copyWith(primaryId: selectedId, outcomeId: id),
                             );
                             factors =
                                 next.homeTraceFactors[row.storageKey] ??
@@ -746,10 +728,7 @@ Future<void> showHomeTraceRecordSheet({
                             final next = writeHuquqFollowUp(
                               base,
                               row.storageKey,
-                              readHuquqFollowUp(
-                                base,
-                                row.storageKey,
-                              ).copyWith(
+                              readHuquqFollowUp(base, row.storageKey).copyWith(
                                 primaryId: selectedId,
                                 occasions: value,
                               ),
@@ -766,10 +745,7 @@ Future<void> showHomeTraceRecordSheet({
                             final next = writeHuquqFollowUp(
                               base,
                               row.storageKey,
-                              readHuquqFollowUp(
-                                base,
-                                row.storageKey,
-                              ).copyWith(
+                              readHuquqFollowUp(base, row.storageKey).copyWith(
                                 primaryId: selectedId,
                                 timeSpent: value,
                               ),
@@ -789,10 +765,7 @@ Future<void> showHomeTraceRecordSheet({
                               readHuquqFollowUp(
                                 base,
                                 row.storageKey,
-                              ).copyWith(
-                                primaryId: selectedId,
-                                note: value,
-                              ),
+                              ).copyWith(primaryId: selectedId, note: value),
                             );
                             factors =
                                 next.homeTraceFactors[row.storageKey] ??
@@ -849,10 +822,7 @@ Future<void> showHomeTraceRecordSheet({
                               readKnowledgeFollowUp(
                                 base,
                                 row.storageKey,
-                              ).copyWith(
-                                primaryId: selectedId,
-                                areaId: id,
-                              ),
+                              ).copyWith(primaryId: selectedId, areaId: id),
                             );
                             factors =
                                 next.homeTraceFactors[row.storageKey] ??
@@ -870,10 +840,7 @@ Future<void> showHomeTraceRecordSheet({
                               readKnowledgeFollowUp(
                                 base,
                                 row.storageKey,
-                              ).copyWith(
-                                primaryId: selectedId,
-                                sourceId: id,
-                              ),
+                              ).copyWith(primaryId: selectedId, sourceId: id),
                             );
                             factors =
                                 next.homeTraceFactors[row.storageKey] ??
@@ -954,10 +921,7 @@ Future<void> showHomeTraceRecordSheet({
                               readKnowledgeFollowUp(
                                 base,
                                 row.storageKey,
-                              ).copyWith(
-                                primaryId: selectedId,
-                                quantityId: id,
-                              ),
+                              ).copyWith(primaryId: selectedId, quantityId: id),
                             );
                             factors =
                                 next.homeTraceFactors[row.storageKey] ??
@@ -975,10 +939,7 @@ Future<void> showHomeTraceRecordSheet({
                               readKnowledgeFollowUp(
                                 base,
                                 row.storageKey,
-                              ).copyWith(
-                                primaryId: selectedId,
-                                minutes: value,
-                              ),
+                              ).copyWith(primaryId: selectedId, minutes: value),
                             );
                             factors =
                                 next.homeTraceFactors[row.storageKey] ??
@@ -995,10 +956,7 @@ Future<void> showHomeTraceRecordSheet({
                               readKnowledgeFollowUp(
                                 base,
                                 row.storageKey,
-                              ).copyWith(
-                                primaryId: selectedId,
-                                note: value,
-                              ),
+                              ).copyWith(primaryId: selectedId, note: value),
                             );
                             factors =
                                 next.homeTraceFactors[row.storageKey] ??

@@ -253,9 +253,10 @@ class DailyCheckIn {
       if (isHealthTrace(key) ||
           (isWealthTrace(key) &&
               ActivityCatalog.forHomeTrace(key).isNotEmpty) ||
-          (isUmmahTrace(key) &&
-              ActivityCatalog.forHomeTrace(key).isNotEmpty) ||
+          (isUmmahTrace(key) && ActivityCatalog.forHomeTrace(key).isNotEmpty) ||
           (key.startsWith('charity.') &&
+              ActivityCatalog.forHomeTrace(key).isNotEmpty) ||
+          (key.startsWith('fasting.') &&
               ActivityCatalog.forHomeTrace(key).isNotEmpty)) {
         return const RecordedActivity(id: ActivityIds.unanswered);
       }
@@ -518,7 +519,10 @@ class DailyCheckIn {
     final catalog = ActivityCatalog.forHomeTrace(storageKey);
     final option = ActivityCatalog.find(catalog, activity.id);
     final outcome = option?.ternary ?? TernaryOutcome.unanswered;
-    return withHomeTrace(storageKey, outcome).withActivity(storageKey, activity);
+    return withHomeTrace(
+      storageKey,
+      outcome,
+    ).withActivity(storageKey, activity);
   }
 
   DailyCheckIn withHomeTrace(String storageKey, TernaryOutcome outcome) {
@@ -815,15 +819,9 @@ Map<String, dynamic> _overlayChangedJson(
     final baseVal = result[key];
     if (userVal is Map && emptyVal is Map && baseVal is Map) {
       result[key] = _overlayChangedJson(
-        Map<String, dynamic>.from(
-          baseVal.map((k, v) => MapEntry('$k', v)),
-        ),
-        Map<String, dynamic>.from(
-          userVal.map((k, v) => MapEntry('$k', v)),
-        ),
-        Map<String, dynamic>.from(
-          emptyVal.map((k, v) => MapEntry('$k', v)),
-        ),
+        Map<String, dynamic>.from(baseVal.map((k, v) => MapEntry('$k', v))),
+        Map<String, dynamic>.from(userVal.map((k, v) => MapEntry('$k', v))),
+        Map<String, dynamic>.from(emptyVal.map((k, v) => MapEntry('$k', v))),
       );
     } else {
       result[key] = userVal;

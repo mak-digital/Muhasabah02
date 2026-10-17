@@ -240,6 +240,62 @@ const hajjHomeRows = [
 
 const fastingHomeRows = [
   HomeTraceRow(
+    storageKey: 'fasting.ramadanObserved',
+    label: 'Observed the Ramadan fast',
+    band: 'Fast & Conduct',
+    matrixColumn: 'Fast',
+    matrixColumnVertical: true,
+  ),
+  HomeTraceRow(
+    storageKey: 'fasting.ramadanConduct',
+    label: 'Guarded my speech and conduct',
+    band: 'Fast & Conduct',
+    matrixColumn: 'Conduct',
+    matrixColumnVertical: true,
+  ),
+  HomeTraceRow(
+    storageKey: 'fasting.ramadanAttention',
+    label: 'Protected attention and time',
+    band: 'Focused Worship',
+    matrixColumn: 'Attention',
+    matrixColumnVertical: true,
+  ),
+  HomeTraceRow(
+    storageKey: 'fasting.ramadanQuran',
+    label: 'Engaged meaningfully with the Qur’an',
+    band: 'Focused Worship',
+    matrixColumn: 'Qur’an',
+    matrixColumnVertical: true,
+  ),
+  HomeTraceRow(
+    storageKey: 'fasting.ramadanSalah',
+    label: 'Brought greater attention to obligatory Salah',
+    band: 'Focused Worship',
+    matrixColumn: 'Salah',
+    matrixColumnVertical: true,
+  ),
+  HomeTraceRow(
+    storageKey: 'fasting.ramadanExtraWorship',
+    label: 'Made room for extra worship',
+    band: 'Stewardship',
+    matrixColumn: 'Extra',
+    matrixColumnVertical: true,
+  ),
+  HomeTraceRow(
+    storageKey: 'fasting.ramadanHabits',
+    label: 'Supported worship through balanced daily habits',
+    band: 'Stewardship',
+    matrixColumn: 'Habits',
+    matrixColumnVertical: true,
+  ),
+  HomeTraceRow(
+    storageKey: 'fasting.ramadanPractice',
+    label: 'Put Ramadan learning into practice',
+    band: 'Application',
+    matrixColumn: 'Practice',
+    matrixColumnVertical: true,
+  ),
+  HomeTraceRow(
     storageKey: 'fasting.weeklySunnah',
     label: 'Weekly Sunnah Fast',
     band: 'Voluntary and make-up',
@@ -264,7 +320,14 @@ const fastingHomeRows = [
     storageKey: 'fasting.ramadanPrep',
     label: 'Ramadan Preparation',
     band: 'Voluntary and make-up',
-    matrixColumn: 'Ramadan',
+    matrixColumn: 'Prep',
+    matrixColumnVertical: true,
+  ),
+  HomeTraceRow(
+    storageKey: 'fasting.postRamadan',
+    label: 'Post-Ramadan Activities',
+    band: 'Voluntary and make-up',
+    matrixColumn: 'Post',
     matrixColumnVertical: true,
   ),
 ];
@@ -956,6 +1019,8 @@ bool isLivedSunnahTrace(String storageKey) => isHadithLivedTrace(storageKey);
 
 bool isHajjTrace(String storageKey) => storageKey.startsWith('hajj.');
 
+bool isFastingTrace(String storageKey) => storageKey.startsWith('fasting.');
+
 bool hidesHomeTraceFactors(String storageKey) =>
     isAkhlaqTrace(storageKey) ||
     isHuquqTrace(storageKey) ||
@@ -965,6 +1030,7 @@ bool hidesHomeTraceFactors(String storageKey) =>
     isWealthTrace(storageKey) ||
     isUmmahTrace(storageKey) ||
     storageKey.startsWith('charity.') ||
+    isFastingTrace(storageKey) ||
     isLivedSunnahTrace(storageKey) ||
     isHajjTrace(storageKey);
 

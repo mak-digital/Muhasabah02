@@ -7,6 +7,7 @@ import 'huquq_practices.dart';
 import 'knowledge_practices.dart';
 import 'health_practices.dart';
 import 'charity_practices.dart';
+import 'fasting_practices.dart';
 import 'ummah_practices.dart';
 import 'wealth_practices.dart';
 import 'time_practices.dart';
@@ -461,6 +462,22 @@ DailyCheckIn applyQuickTapChoice(
           }
           final existing = readCharityPractice(record, item.traceKey!);
           return writeCharityPractice(
+            record,
+            item.traceKey!,
+            existing.copyWith(primaryId: choice.id),
+          );
+        }
+        if (isFastingPracticeTrace(item.traceKey!) &&
+            ActivityCatalog.forHomeTrace(item.traceKey!).isNotEmpty) {
+          if (choice.id == ActivityIds.unanswered) {
+            return writeFastingPractice(
+              record,
+              item.traceKey!,
+              const FastingPracticeCapture(),
+            );
+          }
+          final existing = readFastingPractice(record, item.traceKey!);
+          return writeFastingPractice(
             record,
             item.traceKey!,
             existing.copyWith(primaryId: choice.id),

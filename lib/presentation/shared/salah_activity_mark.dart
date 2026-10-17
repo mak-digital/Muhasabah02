@@ -7,6 +7,7 @@ import '../../domain/huquq_practices.dart';
 import '../../domain/knowledge_practices.dart';
 import '../../domain/health_practices.dart';
 import '../../domain/charity_practices.dart';
+import '../../domain/fasting_practices.dart';
 import '../../domain/ummah_practices.dart';
 import '../../domain/wealth_practices.dart';
 import '../../domain/time_practices.dart';
@@ -88,6 +89,18 @@ class SalahActivityMark {
         CharityResponseKind.difficulty => excused,
         CharityResponseKind.preferNot => other,
         CharityResponseKind.unanswered => unanswered,
+      };
+    }
+    final fastingKind = fastingKindFor(activityId);
+    if (fastingKind != null) {
+      return switch (fastingKind) {
+        FastingResponseKind.acted => congregationOnTime,
+        FastingResponseKind.partial => joinedCongregationLate,
+        FastingResponseKind.noSituation => aloneOnTime,
+        FastingResponseKind.constrained => smallCongregation,
+        FastingResponseKind.difficulty => excused,
+        FastingResponseKind.preferNot => other,
+        FastingResponseKind.unanswered => unanswered,
       };
     }
     return switch (activityId) {
@@ -349,7 +362,8 @@ class SalahActivityMark {
         isHealthTrace(row.storageKey) ||
         isWealthTrace(row.storageKey) ||
         isUmmahTrace(row.storageKey) ||
-        row.storageKey.startsWith('charity.')) {
+        row.storageKey.startsWith('charity.') ||
+        isFastingPracticeTrace(row.storageKey)) {
       return SalahActivityMark(
         kind: kindForAkhlaq(id),
         color: activityColours ? colourForId(id) : MuhasabahColors.mark,

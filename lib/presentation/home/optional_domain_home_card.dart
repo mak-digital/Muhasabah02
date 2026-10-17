@@ -10,6 +10,7 @@ import '../../domain/date_key.dart';
 import '../../domain/display_calendar.dart';
 import '../../domain/first_day_of_week.dart';
 import '../../domain/home_traces.dart';
+import '../../domain/fasting_practices.dart';
 import '../../domain/personal_mix.dart';
 import '../../domain/quran.dart';
 import '../../domain/weekly_calendar.dart';
@@ -35,6 +36,7 @@ class OptionalDomainHomeCard extends ConsumerStatefulWidget {
     this.includeHadithFocus = false,
     this.includeHajjStatus = false,
     this.highlightLunarWhiteDays = false,
+    this.gateFastingRamadan = false,
     this.focus,
     this.includeStruggleNote = false,
     this.compactWeek = false,
@@ -52,6 +54,7 @@ class OptionalDomainHomeCard extends ConsumerStatefulWidget {
   final bool includeHadithFocus;
   final bool includeHajjStatus;
   final bool highlightLunarWhiteDays;
+  final bool gateFastingRamadan;
   final String? focus;
   final bool includeStruggleNote;
   final bool compactWeek;
@@ -89,9 +92,22 @@ class _OptionalDomainHomeCardState
     );
     final localizations = MaterialLocalizations.of(context);
     final hajjStatus = ref.watch(appPrefsProvider).hajjStatus;
-    final visibleRows = widget.includeHajjStatus
+    var visibleRows = widget.includeHajjStatus
         ? hajjRowsForStatus(widget.rows, hajjStatus)
         : widget.rows;
+    if (widget.gateFastingRamadan) {
+      final prefs = ref.watch(appPrefsProvider);
+      visibleRows = gateFastingHomeRows(
+        visibleRows,
+        showRamadan: showsFastingRamadanRows(
+          date: now,
+          offsetDays: prefs.ramadanCalendarOffsetDays,
+          showHistory: prefs.showFastingRamadanHistory,
+          extraDates: [for (final key in keys) parseDateKey(key)],
+          records: widget.records,
+        ),
+      );
+    }
     final bands = bandsFor(visibleRows);
     final question = widget.focus;
     final showWeek = visibleRows.isNotEmpty;
@@ -367,7 +383,8 @@ class _OptionalDomainHomeCardState
   }) {
     final whiteDay = widget.highlightLunarWhiteDays && isLunarWhiteDayKey(key);
     final record = index[key];
-    final outcome = record?.homeTrace(row.storageKey) ?? TernaryOutcome.unanswered;
+    final outcome =
+        record?.homeTrace(row.storageKey) ?? TernaryOutcome.unanswered;
     final kind = dateCellKind(key, ref.read(nowProvider));
     final colours = ref.watch(appPrefsProvider).salahActivityColours;
     final marker = SalahActivityMark.recordedMarkerForTrace(
@@ -457,12 +474,25 @@ class _OptionalDomainHomeCardState
   }
 
   void _openProgress() {
+    final prefs = ref.read(appPrefsProvider);
+    var rows = widget.progressRows ?? widget.rows;
+    if (widget.gateFastingRamadan) {
+      rows = gateFastingHomeRows(
+        rows,
+        showRamadan: showsFastingRamadanRows(
+          date: ref.read(nowProvider),
+          offsetDays: prefs.ramadanCalendarOffsetDays,
+          showHistory: prefs.showFastingRamadanHistory,
+          records: widget.records,
+        ),
+      );
+    }
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => OptionalDomainProgressScreen(
           title: widget.title,
           focusQuestion: widget.focus,
-          rows: widget.progressRows ?? widget.rows,
+          rows: rows,
           family: widget.family,
           includeZakat: widget.includeZakat,
           includeHadithFocus: widget.includeHadithFocus,

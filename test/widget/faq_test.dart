@@ -147,14 +147,14 @@ void main() {
       findsOneWidget,
     );
     await tester.ensureVisible(
-      find.textContaining('24. Does Fasting score my sawm?'),
+      find.textContaining('24. Does Dhikr & Dua score my remembrance?'),
     );
     expect(
-      find.textContaining('24. Does Fasting score my sawm?'),
+      find.textContaining('24. Does Dhikr & Dua score my remembrance?'),
       findsOneWidget,
     );
     expect(
-      find.textContaining('25. Does Dhikr & Dua score my remembrance?'),
+      find.textContaining('25. Does Fasting score my sawm?'),
       findsOneWidget,
     );
     expect(

@@ -625,7 +625,6 @@ void main() {
         contextId: 'time.context.worship',
         helpId: 'time.help.clarifiedIntention',
         outcomeId: 'time.outcome.meaningfulProgress',
-        note: 'I started with a purpose',
       ),
     );
     expect(record.homeTrace('time.t01'), TernaryOutcome.positive);

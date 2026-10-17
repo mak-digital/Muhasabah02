@@ -130,6 +130,17 @@ bool isLunarWhiteDay(DateTime date) {
 
 bool isLunarWhiteDayKey(String key) => isLunarWhiteDay(parseDateKey(key));
 
+/// Civil (tabular) Ramadan is Hijri month 9. Sighting may differ by a day.
+/// [offsetDays] of -1 or +1 is a local moon-sighting correction, not a ruling.
+bool isCivilRamadan(DateTime date, {int offsetDays = 0}) {
+  var day = DateTime(date.year, date.month, date.day);
+  if (offsetDays != 0) day = day.add(Duration(days: offsetDays));
+  return hijriParts(day).month == 9;
+}
+
+bool isCivilRamadanKey(String key, {int offsetDays = 0}) =>
+    isCivilRamadan(parseDateKey(key), offsetDays: offsetDays);
+
 int _gregorianToJd(int year, int month, int day) {
   final a = ((14 - month) ~/ 12);
   final y = year + 4800 - a;

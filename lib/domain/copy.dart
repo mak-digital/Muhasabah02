@@ -207,8 +207,7 @@ class Copy {
   static const akhlaqStruggleNote = 'Struggle note';
   static const akhlaqStruggleHint =
       'Optional, about yourself only. Not a score. Example: I was impatient today, but I caught myself. Or: I reached for it, then I stopped.';
-  static const akhlaqStruggleFieldHint =
-      'About yourself only. Not a score.';
+  static const akhlaqStruggleFieldHint = 'About yourself only. Not a score.';
   static const akhlaqFollowUpNote =
       'Optional. Stored. Never causes, completion, or scores. Not a character grade.';
   static const akhlaqWhereDidItHappen = 'Where did it happen?';
@@ -263,9 +262,6 @@ class Copy {
   static const timeOptionalQuantity = 'Optional quantitative information';
   static const timeQuantityHint =
       'A count or approximate minutes. Not a quality or barakah measure.';
-  static const timePrivateReflection = 'Private reflection';
-  static const timeReflectionHint =
-      'What mattered most today? What distracted me? What helped me return? What should I approach differently next time?';
   static const timeCheckInNote =
       'Each row stores one observation: beneficial action, partial effort, a recognised lapse, a corrective adjustment, or no relevant situation. Corrected is not ranked above acted. Colour names the recorded choice when activity colours are on. Unanswered is empty, not wasted time.';
   static String get healthObservationNote => healthBriefing.plainText;
@@ -282,6 +278,7 @@ class Copy {
   static const ummahNoticed = 'I noticed this in myself';
   static const ummahNotToday = 'I did not notice this today';
   static String get charityObservationNote => charityBriefing.plainText;
+  static String get fastingObservationNote => fastingBriefing.plainText;
   static const charityNoticed = 'I noticed this in myself';
   static const charityNotToday = 'I did not notice this today';
   static const charityCheckInNote =
@@ -362,15 +359,24 @@ class Copy {
   static const calendar = 'Calendar';
   static const calendarNote =
       'Changes how dates are shown. Uses the civil Islamic calendar when Islamic is selected; moon sighting may differ by a day. Saved records are not altered.';
+  static const ramadanCalendarOffset = 'Ramadan dates';
+  static const ramadanCalendarOffsetNote =
+      'Ramadan observation rows follow civil Hijri month 9. If local moon sighting differs by a day, choose one day earlier or later. This is not a legal ruling, and it does not change saved days.';
+  static const ramadanOffsetCivil = 'Civil tabular dates (default)';
+  static const ramadanOffsetEarlier = 'Start Ramadan one day earlier';
+  static const ramadanOffsetLater = 'Start Ramadan one day later';
+  static const showFastingRamadanHistory = 'Show Ramadan rows outside Ramadan';
+  static const showFastingRamadanHistoryNote =
+      'Ramadan rows appear on civil Ramadan dates by default. Turn this on to review or record them at other times. Days that already have a Ramadan mark still show those rows.';
   static const visibleDomains = 'Domains in Focus';
   static const activitiesTitle = 'Activities & legend';
   static const activitiesNote =
-      'Salah check-in list. Shared mark colour is the default. Optional activity colours name the recorded Salah choice, the Qur’an duration step, post-fard Dhikr remembrance, Character & Morals, Rights of Others, Charity, Knowledge & Beneficial Speech, Time & Barakah, Physical Health & Energy, Wealth & Stewardship, and Ummah observations. Not a score.';
+      'Salah check-in list. Shared mark colour is the default. Optional activity colours name the recorded Salah choice, the Qur’an duration step, post-fard Dhikr remembrance, Character & Morals, Rights of Others, Charity, Knowledge & Beneficial Speech, Time & Barakah, Physical Health & Energy, Wealth & Stewardship, Ummah, and Fasting observations. Not a score.';
   static const salahMarkColour = 'Salah mark colour';
   static const salahMarkShared = 'Shared (current)';
   static const salahMarkActivityColours = 'Activity colours';
   static const salahMarkActivityNote =
-      'Colour names the recorded Salah choice, Qur’an duration step, post-fard Dhikr remembrance, Character & Morals, Rights of Others, Charity, Knowledge & Beneficial Speech, Time & Barakah, Physical Health & Energy, Wealth & Stewardship, or Ummah observation. It does not rank spirituality or tell you what to do next. Other domains keep the shared mark colour.';
+      'Colour names the recorded Salah choice, Qur’an duration step, post-fard Dhikr remembrance, Character & Morals, Rights of Others, Charity, Knowledge & Beneficial Speech, Time & Barakah, Physical Health & Energy, Wealth & Stewardship, Ummah, or Fasting observation. It does not rank spirituality or tell you what to do next. Other domains keep the shared mark colour.';
   static const howAttentiveWasI = 'How attentive was I';
   static const dhikrPostFardNote =
       'Post-fard Salah Adhkar records remembrance after each fard prayer. Remembrance with action uses the same blue as congregation on time. The other steps twin the remaining Salah activity colours. How attentive was I is optional provenance, not a khushu’ score.';
@@ -666,7 +672,7 @@ class Copy {
       'Remove the selected reminders from this device? This cannot be undone.';
   static String get practiceFastingTitle => practiceLearnTitle('Fasting');
   static const practiceFastingNote =
-      'Qur’an verses and authentic hadith that encourage the rows on this card, grouped as on Home. Voluntary and make-up noticing — not a Ramadan fard tracker. Add one if you want to learn it and bring it into practice. This is not a sawm score, countdown, or prescription to fast.';
+      'Qur’an verses and authentic hadith that encourage the rows on this card, grouped as on Home. Ramadan observations are descriptive, not a ruling on validity. Voluntary and make-up noticing stays separate. Add one if you want to learn it and bring it into practice. This is not a sawm score, countdown, or prescription to fast.';
   static const addPracticeFasting = '+ add reminder';
   static String get openPracticeFastingRegister =>
       openPracticeLearnRegister('Fasting');

@@ -173,13 +173,18 @@ class _ActiveDomainMixPanel extends ConsumerWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              Text(
-                mixNote,
-                key: const Key('today-active-domain-mix-total'),
-                style: theme.textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  height: 1.1,
-                  color: scheme.onSurfaceVariant,
+              Flexible(
+                child: Text(
+                  mixNote,
+                  key: const Key('today-active-domain-mix-total'),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.end,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    height: 1.1,
+                    color: scheme.onSurfaceVariant,
+                  ),
                 ),
               ),
             ],
@@ -376,6 +381,8 @@ class _TodayDomainTile extends StatelessWidget {
               children: [
                 Text(
                   Copy.mixRowsCount(item.recordedMixCount, item.mixRowCount),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w800,
                     height: 1.1,
@@ -384,6 +391,8 @@ class _TodayDomainTile extends StatelessWidget {
                 ),
                 Text(
                   Copy.todayRecorded,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
                     fontWeight: FontWeight.w600,
                     height: 1.1,

@@ -46,7 +46,6 @@ void main() {
   expectThreeToFivePerTopic('Health', kPracticeHealthCatalog);
   expectThreeToFivePerTopic('Wealth', kPracticeWealthCatalog);
   expectThreeToFivePerTopic('Charity', kPracticeCharityCatalog);
-  expectThreeToFivePerTopic('Fasting', kPracticeFastingCatalog);
   expectThreeToFivePerTopic('Hajj', kPracticeHajjCatalog);
   expectThreeToFivePerTopic('Ummah', kPracticeUmmahCatalog);
   expectThreeToFivePerTopic('Knowledge', kPracticeKnowledgeCatalog);
@@ -54,4 +53,21 @@ void main() {
   expectThreeToFivePerTopic('Huquq', kPracticeHuquqCatalog);
   expectThreeToFivePerTopic('Akhlaq', kPracticeAkhlaqCatalog);
   expectThreeToFivePerTopic('Dhikr', kPracticeDhikrCatalog);
+
+  test('Fasting Learn bank is 20–30 verified refs without a five-cap', () {
+    expect(
+      kPracticeFastingCatalog.length,
+      inInclusiveRange(20, 30),
+    );
+    expect(
+      kPracticeFastingCatalog.every(
+        (item) => reflectionSourceUris(item.source).isNotEmpty,
+      ),
+      isTrue,
+    );
+    expect(
+      kPracticeFastingCatalog.map((item) => item.id).toSet().length,
+      kPracticeFastingCatalog.length,
+    );
+  });
 }

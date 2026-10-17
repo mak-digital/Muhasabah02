@@ -214,7 +214,10 @@ void main() {
       dropdownKey: const Key('trace-charity.voluntary'),
       optionLabel: 'Gave voluntary charity',
     );
-    expect(find.text('Gave voluntary charity — Voluntary Charity'), findsNothing);
+    expect(
+      find.text('Gave voluntary charity — Voluntary Charity'),
+      findsNothing,
+    );
     expect(find.text('PRIVATE REFLECTION'), findsNothing);
     expect(find.text('HELPING FACTORS'), findsNothing);
     expect(find.text('Recorded sitting'), findsNothing);
@@ -252,8 +255,7 @@ void main() {
     await chooseCheckInOption(
       tester,
       dropdownKey: const Key('trace-dhikr.postFardFajr'),
-      optionLabel:
-          'Remembrance with action (I noticed a beneficial response in my behaviour) — Fajr',
+      optionLabel: 'Remembrance with action (I noticed a beneficial response in my behaviour) — Fajr',
     );
     expect(find.text('HOW ATTENTIVE WAS I'), findsOneWidget);
     expect(find.text('HELPING FACTORS'), findsNothing);
@@ -319,7 +321,10 @@ void main() {
       dropdownKey: const Key('trace-akhlaq.patience'),
       optionLabel: 'Remained patient when tested — Patience',
     );
-    expect(find.text(Copy.akhlaqWhereDidItHappen.toUpperCase()), findsOneWidget);
+    expect(
+      find.text(Copy.akhlaqWhereDidItHappen.toUpperCase()),
+      findsOneWidget,
+    );
     expect(find.text(Copy.akhlaqWhatHelped.toUpperCase()), findsOneWidget);
     expect(find.text('HELPING FACTORS'), findsNothing);
 
@@ -364,10 +369,12 @@ void main() {
     await chooseCheckInOption(
       tester,
       dropdownKey: const Key('trace-huquq.parents'),
-      optionLabel:
-          'Honoured my parents through care, respect, contact or du‘a — Parents',
+      optionLabel: 'Honoured my parents through care, respect, contact or du‘a — Parents',
     );
-    expect(find.text(Copy.huquqNatureOfEngagement.toUpperCase()), findsOneWidget);
+    expect(
+      find.text(Copy.huquqNatureOfEngagement.toUpperCase()),
+      findsOneWidget,
+    );
     expect(find.text(Copy.huquqOutcomeObserved.toUpperCase()), findsOneWidget);
     expect(find.text('HELPING FACTORS'), findsNothing);
 
@@ -412,10 +419,12 @@ void main() {
     await chooseCheckInOption(
       tester,
       dropdownKey: const Key('trace-knowledge.learnedSomethingTrue'),
-      optionLabel:
-          'Learned something new and verified its reliability — Learned something true',
+      optionLabel: 'Learned something new and verified its reliability — Learned something true',
     );
-    expect(find.text(Copy.knowledgeTypeOfKnowledge.toUpperCase()), findsOneWidget);
+    expect(
+      find.text(Copy.knowledgeTypeOfKnowledge.toUpperCase()),
+      findsOneWidget,
+    );
     expect(find.text(Copy.knowledgeReliability.toUpperCase()), findsOneWidget);
     expect(find.text('HELPING FACTORS'), findsNothing);
 
@@ -465,11 +474,11 @@ void main() {
     await chooseCheckInOption(
       tester,
       dropdownKey: const Key('trace-time.t01'),
-      optionLabel:
-          'Began an activity with a clear beneficial intention — Began with a worthwhile intention',
+      optionLabel: 'Began an activity with a clear beneficial intention — Began with a worthwhile intention',
     );
     expect(find.text(Copy.timeActivityContext.toUpperCase()), findsOneWidget);
     expect(find.text(Copy.timeMainChallenge.toUpperCase()), findsOneWidget);
+    expect(find.text('PRIVATE REFLECTION'), findsNothing);
     expect(find.text('HELPING FACTORS'), findsNothing);
 
     await tester.tap(find.byKey(const Key('time-time.t01-context')));
@@ -555,8 +564,7 @@ void main() {
     await chooseCheckInOption(
       tester,
       dropdownKey: const Key('trace-wealth.halalEarning'),
-      optionLabel:
-          'My income or work today came from a source I reasonably understand to be lawful. — Earned from a halal source',
+      optionLabel: 'My income or work today came from a source I reasonably understand to be lawful. — Earned from a halal source',
     );
     expect(find.text('PRIVATE REFLECTION'), findsNothing);
     expect(find.text('HELPING FACTORS'), findsNothing);
@@ -600,8 +608,7 @@ void main() {
     await chooseCheckInOption(
       tester,
       dropdownKey: const Key('trace-ummah.masjidAttendance'),
-      optionLabel:
-          'I participated remotely in a masjid-led learning or community gathering. — Masjid class or gathering (not the fard)',
+      optionLabel: 'I participated remotely in a masjid-led learning or community gathering. — Masjid class or gathering (not the fard)',
     );
     expect(find.text('PRIVATE REFLECTION'), findsNothing);
     expect(find.text('HELPING FACTORS'), findsNothing);
@@ -611,5 +618,52 @@ void main() {
       ),
       findsNothing,
     );
+  });
+
+  testWidgets('fasting ramadan uses item wording without helping factors', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(400, 2800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          checkInRepositoryProvider.overrideWithValue(
+            MemoryCheckInRepository(),
+          ),
+          appPrefsProvider.overrideWithValue(
+            MemoryAppPrefs(
+              visibleDomains: allVisibleDomains(),
+              showFastingRamadanHistory: true,
+            ),
+          ),
+          nowProvider.overrideWithValue(DateTime(2026, 9, 3)),
+        ],
+        child: MaterialApp(home: CheckInScreen(date: DateTime(2026, 9, 3))),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await showCheckInDomain(tester, MonitorDomain.fasting);
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('trace-fasting.ramadanObserved')),
+      280,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.pumpAndSettle();
+
+    await chooseCheckInOption(
+      tester,
+      dropdownKey: const Key('trace-fasting.ramadanObserved'),
+      optionLabel: "Completed today's fast",
+    );
+    expect(
+      find.text("Completed today's fast — Observed the Ramadan fast"),
+      findsNothing,
+    );
+    expect(find.text('PRIVATE REFLECTION'), findsNothing);
+    expect(find.text('HELPING FACTORS'), findsNothing);
   });
 }

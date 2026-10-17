@@ -629,7 +629,6 @@ DailyCheckIn writeTimePractice(
     SalahFactorCapture(
       supportIds: idsFromFactorChoice(capture.contextId),
       challengeIds: idsFromFactorChoice(capture.challengeId),
-      otherText: capture.note.trim().isEmpty ? null : capture.note.trim(),
     ),
   );
 }
@@ -661,7 +660,6 @@ String? timeEvidenceNote(DailyCheckIn record, String storageKey) {
       timeChoiceLabel(timeQuantities, capture.quantityId)!,
     if (capture.showsQuantityText && capture.quantityText.trim().isNotEmpty)
       capture.quantityText.trim(),
-    if (capture.note.trim().isNotEmpty) capture.note.trim(),
   ];
   if (parts.isEmpty) return null;
   return parts.join(', ');

@@ -208,6 +208,20 @@ const hadithBriefing = DomainBriefing(
   ],
 );
 
+const fastingBriefing = DomainBriefing(
+  lead: [
+    'Two sections: Ramadan fasting & excellence, and voluntary and make-up. Not recorded is empty, not a missed fast. Prefer not to record is a privacy choice.',
+  ],
+  items: [
+    'Ramadan rows appear on civil Ramadan dates. Settings → Calendar can shift them by a day for local moon sighting, or show them outside Ramadan for history.',
+    'The app does not judge validity, exemption, make-up, or fidyah. An exemption is not a failure. Fasting today can be edited after iftar; it is not auto-completed.',
+    'Necessary work, care, rest, and recreation are not automatically waste. There is no screen-time monitoring.',
+    'Salah validity and khushu’ are not measured here. Extra worship has no rak‘ah or minute quota. Menstruation and other valid limits are not presented as failure.',
+    'Weekly sunnah, White Days, and make-up keep their existing rows. Post-Ramadan may note Shawwal planning; an actual make-up stays on Make-up Fast.',
+    'Progress highlighting civil Hijri 13–15 is orientation only. Extreme fasting outside Ramadan is not encouraged.',
+  ],
+);
+
 const hajjBriefing = DomainBriefing(
   lead: [
     'Hajj is a standing status you set: not due, due as you see it, preparing, performed, or not applicable.',
@@ -243,6 +257,7 @@ DomainBriefing? briefingForDomain(MonitorDomain domain) => switch (domain) {
   MonitorDomain.health => healthBriefing,
   MonitorDomain.wealth => wealthBriefing,
   MonitorDomain.ummah => ummahBriefing,
+  MonitorDomain.fasting => fastingBriefing,
   MonitorDomain.hajj => hajjBriefing,
   _ => null,
 };

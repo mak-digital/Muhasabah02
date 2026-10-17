@@ -378,13 +378,15 @@ class HomeScreen extends ConsumerWidget {
       case MonitorDomain.fasting:
         return OptionalDomainHomeCard(
           records: records,
-          title: 'Fasting',
+          title: domain.label,
+          focus: domain.focusQuestion,
           rows: inMix ? mixTraceRows(domain, mixKeys) : fastingHomeRows,
           progressRows: fastingHomeRows,
           washLight: MuhasabahColors.fastingWash,
           washDark: MuhasabahColors.fastingWashDark,
           family: MuhasabahColors.fastingFamily,
           highlightLunarWhiteDays: true,
+          gateFastingRamadan: true,
           compactWeek: useCompact,
         );
       case MonitorDomain.hajj:

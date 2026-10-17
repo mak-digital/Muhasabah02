@@ -393,8 +393,7 @@ class HivePracticeHadithRepository implements PracticeHadithRepository {
   }
 }
 
-class HivePersonalQuranVerseRepository
-    implements PersonalQuranVerseRepository {
+class HivePersonalQuranVerseRepository implements PersonalQuranVerseRepository {
   HivePersonalQuranVerseRepository(this._box);
 
   final Box<String> _box;
@@ -566,6 +565,8 @@ class HiveAppPrefs implements AppPrefs {
   static const _practiceHadithIndex = 'practice_hadith_browse_index';
   static const _practiceQuranIndex = 'practice_quran_browse_index';
   static const _hajjStatus = 'hajj_status';
+  static const _ramadanOffset = 'ramadan_calendar_offset_days';
+  static const _fastingRamadanHistory = 'show_fasting_ramadan_history';
   static const _mixHiddenHint = 'mix_hidden_domain_hint';
   static const _appLock = 'app_lock_enabled';
   static const _salahActivityColours = 'salah_activity_colours';
@@ -763,7 +764,8 @@ class HiveAppPrefs implements AppPrefs {
   }
 
   @override
-  int? get reflectionHoldIndex => int.tryParse(_box.get(_reflectionHoldIndex) ?? '');
+  int? get reflectionHoldIndex =>
+      int.tryParse(_box.get(_reflectionHoldIndex) ?? '');
 
   @override
   List<PersonalBaseline> get baselines => decodeBaselines(_box.get(_baselines));
@@ -841,6 +843,31 @@ class HiveAppPrefs implements AppPrefs {
       _box.put(_hajjStatus, value.name);
 
   @override
+  int get ramadanCalendarOffsetDays {
+    final parsed = int.tryParse(_box.get(_ramadanOffset) ?? '') ?? 0;
+    if (parsed < -1) return -1;
+    if (parsed > 1) return 1;
+    return parsed;
+  }
+
+  @override
+  Future<void> setRamadanCalendarOffsetDays(int value) {
+    final clamped = value < -1
+        ? -1
+        : value > 1
+        ? 1
+        : value;
+    return _box.put(_ramadanOffset, '$clamped');
+  }
+
+  @override
+  bool get showFastingRamadanHistory => _flag(_fastingRamadanHistory);
+
+  @override
+  Future<void> setShowFastingRamadanHistory(bool value) =>
+      _setFlag(_fastingRamadanHistory, value);
+
+  @override
   bool get mixHiddenDomainHintShown => _flag(_mixHiddenHint);
 
   @override
@@ -869,11 +896,10 @@ class HiveAppPrefs implements AppPrefs {
       _box.put(_arabicScriptFace, value.id);
 
   @override
-  double get arabicScriptSize =>
-      clampArabicScriptSize(
-        double.tryParse(_box.get(_arabicScriptSize) ?? '') ??
-            kDefaultArabicScriptSize,
-      );
+  double get arabicScriptSize => clampArabicScriptSize(
+    double.tryParse(_box.get(_arabicScriptSize) ?? '') ??
+        kDefaultArabicScriptSize,
+  );
 
   @override
   Future<void> setArabicScriptSize(double value) =>

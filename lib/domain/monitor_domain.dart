@@ -3,6 +3,7 @@ enum MonitorDomain {
   quran,
   hadith,
   dhikr,
+  fasting,
   akhlaq,
   huquq,
   charity,
@@ -11,7 +12,6 @@ enum MonitorDomain {
   health,
   wealth,
   ummah,
-  fasting,
   hajj,
 }
 
@@ -154,6 +154,8 @@ extension MonitorDomainX on MonitorDomain {
     MonitorDomain.wealth =>
       'Did I manage earning, spending and wealth as trusts from Allah?',
     MonitorDomain.ummah => 'Did I serve anyone beyond myself today?',
+    MonitorDomain.fasting =>
+      'Did I notice fasting, worship, and balance without scoring sawm?',
     MonitorDomain.hajj => 'Have I named how Hajj stands with me — as I see it, not as the app decides?',
     _ => null,
   };

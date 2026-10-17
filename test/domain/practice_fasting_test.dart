@@ -61,7 +61,7 @@ void main() {
       addedDateKey: '2026-10-10',
     );
     expect(record.domain, MonitorDomain.fasting);
-    expect(record.group, kFastingGroupVoluntary);
+    expect(record.group, kFastingGroupFastConduct);
     expect(record.status, PracticeHadithStatus.learning);
     expect(practiceRecordsForDomain([record], MonitorDomain.health), isEmpty);
   });

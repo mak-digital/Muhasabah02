@@ -299,7 +299,7 @@ Record eight independent observations in daily-life order (intention → attenti
 - Responsibility & Action (`time_action`): took a step on something delayed (`time.t05`); used time for something beneficial (`time.t06`)
 - Balance & Renewal (`time_balance`): gave someone needed attention (`time.t07`); took needed rest (`time.t08`)
 
-Each of the eight Home rows has six item-specific observations (`acted`, `partial_effort`, `lapse_recognised`, `corrected`, `no_situation`, unanswered/`null`). These are descriptive categories, not a numerical scale. Do not assume `corrected` is spiritually better or worse than `acted`. Optional activity context, challenge, what helped, observable outcome, quantity, and private reflection are provenance only: they never score barakah, rank a busy day as beneficial, treat rest as wasted time, auto-classify recreation as waste, or penalise illness, disability, caregiving, recovery, or unavoidable interruptions. A first tap is enough; secondary fields are never required to save. Unanswered is distinct from an explicit outcome. These traces do not increase `recordableFieldCount`. Older four-choice days (`acted` / `noticedNotActed` / `noSituation`) still read; they canonicalise to `acted`, `lapse_recognised`, and `no_situation` until edited.
+Each of the eight Home rows has six item-specific observations (`acted`, `partial_effort`, `lapse_recognised`, `corrected`, `no_situation`, unanswered/`null`). These are descriptive categories, not a numerical scale. Do not assume `corrected` is spiritually better or worse than `acted`. Optional activity context, challenge, what helped, observable outcome, and quantity are provenance only. Free-text plans and reflections stay on listed Actions: they never score barakah, rank a busy day as beneficial, treat rest as wasted time, auto-classify recreation as waste, or penalise illness, disability, caregiving, recovery, or unavoidable interruptions. A first tap is enough; secondary fields are never required to save. Unanswered is distinct from an explicit outcome. These traces do not increase `recordableFieldCount`. Older four-choice days (`acted` / `noticedNotActed` / `noSituation`) still read; they canonicalise to `acted`, `lapse_recognised`, and `no_situation` until edited.
 
 The fard stays on Salah. Sleep stays on Physical Health. Do not auto-fill Time from Salah or Health. Record what the user reports. Do not infer intention, sincerity, laziness, psychological health, divine reward, or barakah.
 
@@ -313,7 +313,7 @@ Do not:
 - Treat rest as failure
 - Record a second prayer-window log on this domain
 
-Unanswered is not wasted time. These traces do not increase `recordableFieldCount`. Pre-launch Presence / Trust / Rest keys (`time.presentInWhatIWasDoing`, `time.didWhatIDelayed`, `time.steppedAwayFromIdleTime`, `time.restedAsNeeded`, `time.beganWithIntention`, `time.guardedPrayerWindow`) are retired: leftover development values may remain in local Hive until that day is overwritten; they are not migrated and are not shown on Home, check-in, Review, or Historical Reflection. Unrelated domain records are left intact. DailyCheckIn schema remains **6** (`homeTraces` plus `activities` for the primary value; optional context/outcome/note in `homeTraceFactors` for that storage key).
+Unanswered is not wasted time. These traces do not increase `recordableFieldCount`. Pre-launch Presence / Trust / Rest keys (`time.presentInWhatIWasDoing`, `time.didWhatIDelayed`, `time.steppedAwayFromIdleTime`, `time.restedAsNeeded`, `time.beganWithIntention`, `time.guardedPrayerWindow`) are retired: leftover development values may remain in local Hive until that day is overwritten; they are not migrated and are not shown on Home, check-in, Review, or Historical Reflection. Unrelated domain records are left intact. DailyCheckIn schema remains **6** (`homeTraces` plus `activities` for the primary value; optional context in `homeTraceFactors` and help/outcome/quantity in `activities` custom text for that storage key).
 
 Home also lists **Time & Barakah Learn & Practice**: Qur’an verses and authentic hadith grouped as on Home, collapsed to title, with citation pages and a private register (Learning, Learnt, Practicing, Habit). The eight practices remain independent observations, not eight daily achievements. It is not a productivity score, schedule, streak, or estimate of barakah.
 
@@ -417,13 +417,18 @@ Home and **7-day Progress** show those items as rows and weekdays as columns. **
 
 ### 4.12 Fasting
 
-Core question (orientation only; not scored and not a spiritual grade): noticing of voluntary and make-up fasts, not a Ramadan fard tracker.
+Presentation order places Fasting immediately after Dhikr & Dua. Stored domain ids and mix selections are not rewritten.
 
-Home rows: Weekly Sunnah Fast; White Days (Ayyam Al-Bid); Make-up Fast; Ramadan Preparation.
+Two Home sections:
+
+- **Ramadan fasting & excellence** (civil Hijri month 9, with a ±1 day moon-sighting offset in Settings → Calendar): Observed the Ramadan fast; Guarded my speech and conduct; Protected attention and time; Engaged meaningfully with the Qur’an; Brought greater attention to obligatory Salah; Made room for extra worship; Supported worship through balanced daily habits; Put Ramadan learning into practice. These eight rows are hidden outside Ramadan unless the person turns on history mode or that day already has a Ramadan mark.
+- **Voluntary and make-up**: Weekly Sunnah Fast; White Days (Ayyam Al-Bid); Make-up Fast; Ramadan Preparation; Post-Ramadan Activities. Weekly sunnah, White Days, and make-up keep existing storage keys and ternary noticing. Preparation and post-Ramadan use item-specific observations. An actual make-up stays on Make-up Fast; post-Ramadan may note Shawwal planning only.
+
+Ramadan and catalog rows default to not recorded/`null`, with a separate prefer not to record state. The app does not judge validity, exemption, make-up, or fidyah. Exemption is not failure. “Fasting today” is not auto-completed after iftar. Unanswered is not a missed fast.
 
 Do not prescribe a fast, treat unanswered as missed, encourage extreme fasting outside Ramadan, or treat Progress highlighting of civil Hijri 13–15 as a record.
 
-Home also lists **Fasting Learn & Practice**: Qur’an verses and authentic hadith grouped as on Home, collapsed to title, with citation pages and a private register (Learning, Learnt, Practicing, Habit). It is not a sawm score, countdown, or prescription.
+Home also lists **Fasting Learn & Practice**: a 20–30 item bank of Qur’an verses and authentic hadith grouped as on Home, collapsed to title, with citation pages and a private register (Learning, Learnt, Practicing, Habit). It is not a sawm score, countdown, or prescription. This domain is not limited to five sources per topic.
 
 ### 4.13 Hajj
 

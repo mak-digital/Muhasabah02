@@ -21,6 +21,7 @@ import '../../domain/prayer.dart';
 import '../../domain/quran.dart';
 import '../../domain/salah_extras.dart';
 import '../../domain/charity_practices.dart';
+import '../../domain/fasting_practices.dart';
 import '../../domain/health_practices.dart';
 import '../../domain/ummah_practices.dart';
 import '../../domain/wealth_practices.dart';
@@ -518,6 +519,22 @@ class DayEvidenceScreen extends ConsumerWidget {
             name: row.label,
             value: ummahEvidenceValue(record, row.storageKey),
             note: ummahEvidenceNote(record, row.storageKey),
+          ),
+        );
+        continue;
+      }
+      if (isFastingPracticeTrace(row.storageKey) &&
+          ActivityCatalog.forHomeTrace(row.storageKey).isNotEmpty) {
+        final capture = readFastingPractice(record, row.storageKey);
+        if (!capture.isPrimaryRecorded &&
+            !record.homeTrace(row.storageKey).isRecorded) {
+          continue;
+        }
+        children.add(
+          EvidenceRow(
+            name: row.label,
+            value: fastingEvidenceValue(record, row.storageKey),
+            note: fastingEvidenceNote(record, row.storageKey),
           ),
         );
         continue;

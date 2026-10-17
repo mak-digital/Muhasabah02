@@ -794,10 +794,7 @@ class ArabicScriptSettingsScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 16),
-          Text(
-            Copy.textSize,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
+          Text(Copy.textSize, style: Theme.of(context).textTheme.titleMedium),
           Slider(
             key: const Key('arabic-script-size'),
             min: 0,
@@ -936,7 +933,8 @@ class CalendarSettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(prefsTickProvider);
-    final current = ref.watch(appPrefsProvider).displayCalendar;
+    final prefs = ref.watch(appPrefsProvider);
+    final current = prefs.displayCalendar;
     return Scaffold(
       appBar: AppBar(title: const Text(Copy.calendar)),
       body: ListView(
@@ -968,6 +966,54 @@ class CalendarSettingsScreen extends ConsumerWidget {
                     ),
                 ],
               ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            Copy.ramadanCalendarOffsetNote,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          const SizedBox(height: 12),
+          Card(
+            child: RadioGroup<int>(
+              groupValue: prefs.ramadanCalendarOffsetDays,
+              onChanged: (value) async {
+                if (value == null) return;
+                await ref
+                    .read(appPrefsProvider)
+                    .setRamadanCalendarOffsetDays(value);
+                ref.read(prefsTickProvider.notifier).state++;
+              },
+              child: Column(
+                children: [
+                  RadioListTile<int>(
+                    title: const Text(Copy.ramadanOffsetCivil),
+                    value: 0,
+                  ),
+                  RadioListTile<int>(
+                    title: const Text(Copy.ramadanOffsetEarlier),
+                    value: -1,
+                  ),
+                  RadioListTile<int>(
+                    title: const Text(Copy.ramadanOffsetLater),
+                    value: 1,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Card(
+            child: SwitchListTile(
+              title: const Text(Copy.showFastingRamadanHistory),
+              subtitle: const Text(Copy.showFastingRamadanHistoryNote),
+              value: prefs.showFastingRamadanHistory,
+              onChanged: (value) async {
+                await ref
+                    .read(appPrefsProvider)
+                    .setShowFastingRamadanHistory(value);
+                ref.read(prefsTickProvider.notifier).state++;
+              },
             ),
           ),
         ],

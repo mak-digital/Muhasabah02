@@ -483,6 +483,10 @@ void main() {
     expect(HajjStatus.preparing.showsPreparation, isTrue);
     expect(HajjStatus.performed.showsPreparation, isFalse);
     expect(hidesHomeTraceFactors(kHajjPreparationKey), isTrue);
+    expect(
+      MonitorDomain.values.indexOf(MonitorDomain.fasting),
+      MonitorDomain.values.indexOf(MonitorDomain.dhikr) + 1,
+    );
     expect(MonitorDomain.fasting.showsHomeActionFollowOn, isTrue);
     expect(MonitorDomain.charity.showsHomeActionFollowOn, isTrue);
     expect(

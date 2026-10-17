@@ -9,6 +9,7 @@ import '../../domain/daily_check_in.dart';
 import '../../domain/date_key.dart';
 import '../../domain/display_calendar.dart';
 import '../../domain/home_traces.dart';
+import '../../domain/fasting_practices.dart';
 import '../../domain/monitor_domain.dart';
 import '../../domain/other_domains.dart';
 import '../../domain/personal_mix.dart';
@@ -234,6 +235,40 @@ class ReviewScreen extends ConsumerWidget {
                   itemRowsOn7Days: true,
                 ),
               ),
+            if (shows(MonitorDomain.fasting))
+              _ReviewDomainTile(
+                tileKey: const Key('review-domain-fasting'),
+                title: MonitorDomain.fasting.label,
+                progressLabel: '${MonitorDomain.fasting.label} Progress',
+                line:
+                    '$fastingDays days with a recorded observation. White Days are orientation only.',
+                color: MuhasabahColors.wash(
+                  MuhasabahColors.fastingWash,
+                  MuhasabahColors.fastingWashDark,
+                  brightness,
+                ),
+                onTap: () => _openTraceProgress(
+                  context,
+                  title: MonitorDomain.fasting.label,
+                  focusQuestion: MonitorDomain.fasting.focusQuestion,
+                  note: Copy.fastingObservationNote,
+                  rows: gateFastingHomeRows(
+                    rowsFor(MonitorDomain.fasting, fastingHomeRows),
+                    showRamadan: showsFastingRamadanRows(
+                      date: now,
+                      offsetDays: ref
+                          .watch(appPrefsProvider)
+                          .ramadanCalendarOffsetDays,
+                      showHistory: ref
+                          .watch(appPrefsProvider)
+                          .showFastingRamadanHistory,
+                      records: inPeriod,
+                    ),
+                  ),
+                  family: MuhasabahColors.fastingFamily,
+                  highlightLunarWhiteDays: true,
+                ),
+              ),
             if (shows(MonitorDomain.akhlaq))
               _ReviewDomainTile(
                 tileKey: const Key('review-domain-akhlaq'),
@@ -376,26 +411,6 @@ class ReviewScreen extends ConsumerWidget {
                   note: Copy.ummahObservationNote,
                   rows: rowsFor(MonitorDomain.ummah, ummahHomeRows),
                   family: MuhasabahColors.ummahFamily,
-                ),
-              ),
-            if (shows(MonitorDomain.fasting))
-              _ReviewDomainTile(
-                tileKey: const Key('review-domain-fasting'),
-                title: 'Fasting',
-                progressLabel: 'Fasting Progress',
-                line:
-                    '$fastingDays days with a recorded observation. White Days are orientation only.',
-                color: MuhasabahColors.wash(
-                  MuhasabahColors.fastingWash,
-                  MuhasabahColors.fastingWashDark,
-                  brightness,
-                ),
-                onTap: () => _openTraceProgress(
-                  context,
-                  title: 'Fasting',
-                  rows: rowsFor(MonitorDomain.fasting, fastingHomeRows),
-                  family: MuhasabahColors.fastingFamily,
-                  highlightLunarWhiteDays: true,
                 ),
               ),
             if (shows(MonitorDomain.hajj))
