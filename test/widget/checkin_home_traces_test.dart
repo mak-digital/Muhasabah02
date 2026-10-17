@@ -233,6 +233,18 @@ void main() {
     expect(find.text('EARNING'), findsOneWidget);
     expect(find.text('Stayed clear of riba'), findsOneWidget);
     expect(find.text('Avoided waste'), findsOneWidget);
+    await expandCheckInBand(
+      tester,
+      title: MonitorDomain.wealth.label,
+      band: 'Lawful wealth management',
+    );
+    await tester.scrollUntilVisible(
+      find.text('Managed wealth responsibly and lawfully'),
+      280,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Managed wealth responsibly and lawfully'), findsOneWidget);
     expect(find.text('Gave sadaqah'), findsNothing);
     expect(find.text('Attended to zakat'), findsNothing);
     await showCheckInDomain(tester, MonitorDomain.ummah);

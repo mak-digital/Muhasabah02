@@ -3,6 +3,9 @@ import 'home_traces.dart';
 import 'huquq_practices.dart';
 import 'knowledge_practices.dart';
 import 'health_practices.dart';
+import 'charity_practices.dart';
+import 'ummah_practices.dart';
+import 'wealth_practices.dart';
 import 'time_practices.dart';
 import 'other_domains.dart';
 import 'prayer.dart';
@@ -109,17 +112,38 @@ class DomainObservation {
   }
 }
 
-enum ZakatStatus { unanswered, due, planned, paid, notApplicable }
+enum ZakatStatus {
+  unanswered,
+  due,
+  planned,
+  paid,
+  notApplicable,
+  reviewing,
+  preferNot,
+}
+
+/// Display order for Zakat. Stored names stay [ZakatStatus.name].
+const kZakatPickerOrder = <ZakatStatus>[
+  ZakatStatus.unanswered,
+  ZakatStatus.paid,
+  ZakatStatus.planned,
+  ZakatStatus.reviewing,
+  ZakatStatus.notApplicable,
+  ZakatStatus.due,
+  ZakatStatus.preferNot,
+];
 
 extension ZakatStatusX on ZakatStatus {
   bool get isRecorded => this != ZakatStatus.unanswered;
 
   String get label => switch (this) {
     ZakatStatus.unanswered => 'Not recorded',
-    ZakatStatus.due => 'Due',
-    ZakatStatus.planned => 'Planned',
-    ZakatStatus.paid => 'Paid',
-    ZakatStatus.notApplicable => 'Not applicable',
+    ZakatStatus.paid => 'Paid Zakat due',
+    ZakatStatus.planned => 'Arranged or initiated payment',
+    ZakatStatus.reviewing => 'Reviewing whether Zakat is due',
+    ZakatStatus.notApplicable => 'Zakat not currently due',
+    ZakatStatus.due => 'Zakat due but not yet paid',
+    ZakatStatus.preferNot => 'Prefer not to record',
   };
 }
 
@@ -877,20 +901,15 @@ class ActivityCatalog {
     ),
   ];
 
-  static const zakat = <ActivityOption>[
-    ActivityOption(id: 'due', label: 'Due', zakat: ZakatStatus.due),
-    ActivityOption(id: 'planned', label: 'Planned', zakat: ZakatStatus.planned),
-    ActivityOption(id: 'paid', label: 'Paid', zakat: ZakatStatus.paid),
-    ActivityOption(
-      id: 'notApplicable',
-      label: 'Not applicable',
-      zakat: ZakatStatus.notApplicable,
-    ),
-    ActivityOption(
-      id: ActivityIds.unanswered,
-      label: 'No answer recorded',
-      zakat: ZakatStatus.unanswered,
-    ),
+  static List<ActivityOption> get zakat => [
+    for (final status in kZakatPickerOrder)
+      ActivityOption(
+        id: status == ZakatStatus.unanswered
+            ? ActivityIds.unanswered
+            : status.name,
+        label: status.label,
+        zakat: status,
+      ),
   ];
 
   static const family = <ActivityOption>[
@@ -1045,7 +1064,11 @@ class ActivityCatalog {
           ? timeCatalogFor(storageKey)
           : isHealthTrace(storageKey)
           ? healthCatalogFor(storageKey)
-          : const [],
+          : isWealthTrace(storageKey)
+          ? wealthCatalogFor(storageKey)
+          : isUmmahTrace(storageKey)
+          ? ummahCatalogFor(storageKey)
+          : charityCatalogFor(storageKey),
     };
   }
 
@@ -1085,12 +1108,43 @@ class ActivityCatalog {
 
   static bool isHealthObservationCatalog(List<ActivityOption> options) {
     return options.length == 7 &&
+        options.first.id.startsWith('health.') &&
         options[5].id == HealthObservationIds.preferNot &&
         options.last.id == ActivityIds.unanswered;
   }
 
   /// Shared Physical Health legend. Item wording lives in [healthCatalogFor].
   static List<ActivityOption> get healthObservation => healthLegendCatalog;
+
+  static bool isWealthObservationCatalog(List<ActivityOption> options) {
+    return options.length >= 7 &&
+        options.first.id.startsWith('wealth.') &&
+        options[options.length - 2].id == WealthObservationIds.preferNot &&
+        options.last.id == ActivityIds.unanswered;
+  }
+
+  static bool isUmmahObservationCatalog(List<ActivityOption> options) {
+    return options.length >= 6 &&
+        options.first.id.startsWith('ummah.') &&
+        options[options.length - 2].id == UmmahObservationIds.preferNot &&
+        options.last.id == ActivityIds.unanswered;
+  }
+
+  static bool isCharityObservationCatalog(List<ActivityOption> options) {
+    return options.length >= 6 &&
+        options.first.id == ActivityIds.unanswered &&
+        options.last.id == CharityObservationIds.preferNot &&
+        options[1].id.startsWith('charity.');
+  }
+
+  /// Shared Ummah legend. Item wording lives in [ummahCatalogFor].
+  static List<ActivityOption> get ummahObservation => ummahLegendCatalog;
+
+  /// Shared Charity legend. Item wording lives in [charityCatalogFor].
+  static List<ActivityOption> get charityObservation => charityLegendCatalog;
+
+  /// Shared Wealth legend. Item wording lives in [wealthCatalogFor].
+  static List<ActivityOption> get wealthObservation => wealthLegendCatalog;
 
   static const hadith = <ActivityOption>[
     ActivityOption(
@@ -1220,7 +1274,10 @@ class ActivityCatalog {
         isHuquqObservationCatalog(options) ||
         isKnowledgeObservationCatalog(options) ||
         isTimeObservationCatalog(options) ||
-        isHealthObservationCatalog(options)) {
+        isHealthObservationCatalog(options) ||
+        isWealthObservationCatalog(options) ||
+        isUmmahObservationCatalog(options) ||
+        isCharityObservationCatalog(options)) {
       return true;
     }
     return false;

@@ -435,6 +435,7 @@ class ReviewScreen extends ConsumerWidget {
                 onTap: () => _openTraceProgress(
                   context,
                   title: 'Charity',
+                  note: Copy.charityObservationNote,
                   rows: rowsFor(MonitorDomain.charity, charityHomeRows),
                   family: MuhasabahColors.charityFamily,
                   includeZakat:

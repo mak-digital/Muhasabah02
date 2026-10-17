@@ -859,6 +859,13 @@ const wealthHomeRows = [
     matrixColumn: 'Waste',
     matrixColumnVertical: true,
   ),
+  HomeTraceRow(
+    storageKey: 'wealth.lawfulManagement',
+    label: 'Managed wealth responsibly and lawfully',
+    band: 'Lawful wealth management',
+    matrixColumn: 'Manage',
+    matrixColumnVertical: true,
+  ),
 ];
 
 const wealthAllHomeRows = [...wealthRetiredHomeRows, ...wealthHomeRows];
@@ -957,6 +964,7 @@ bool hidesHomeTraceFactors(String storageKey) =>
     isHealthTrace(storageKey) ||
     isWealthTrace(storageKey) ||
     isUmmahTrace(storageKey) ||
+    storageKey.startsWith('charity.') ||
     isLivedSunnahTrace(storageKey) ||
     isHajjTrace(storageKey);
 
@@ -988,6 +996,7 @@ String traceOutcomePhrase(String storageKey, TernaryOutcome outcome) {
       isWealthTrace(storageKey) ||
       isHajjTrace(storageKey) ||
       isUmmahTrace(storageKey) ||
+      storageKey.startsWith('charity.') ||
       isLivedSunnahTrace(storageKey)) {
     return switch (outcome) {
       TernaryOutcome.positive => 'I noticed this in myself',

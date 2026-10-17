@@ -41,22 +41,15 @@ abstract final class HealthObservationIds {
 }
 
 class HealthPracticeCapture {
-  const HealthPracticeCapture({
-    this.primaryId = ActivityIds.unanswered,
-    this.note = '',
-  });
+  const HealthPracticeCapture({this.primaryId = ActivityIds.unanswered});
 
   final String primaryId;
-  final String note;
 
   bool get isPrimaryRecorded =>
       primaryId != ActivityIds.unanswered && primaryId.isNotEmpty;
 
-  HealthPracticeCapture copyWith({String? primaryId, String? note}) {
-    return HealthPracticeCapture(
-      primaryId: primaryId ?? this.primaryId,
-      note: note ?? this.note,
-    );
+  HealthPracticeCapture copyWith({String? primaryId}) {
+    return HealthPracticeCapture(primaryId: primaryId ?? this.primaryId);
   }
 }
 
@@ -361,12 +354,8 @@ HealthPracticeCapture readHealthPractice(
   DailyCheckIn record,
   String storageKey,
 ) {
-  final activity = record.activityFor(storageKey);
-  final factors =
-      record.homeTraceFactors[storageKey] ?? const SalahFactorCapture();
   return HealthPracticeCapture(
-    primaryId: activity.id,
-    note: factors.otherText ?? '',
+    primaryId: record.activityFor(storageKey).id,
   );
 }
 
@@ -375,19 +364,12 @@ DailyCheckIn writeHealthPractice(
   String storageKey,
   HealthPracticeCapture capture,
 ) {
-  var next = record.withHomeTraceActivity(
-    storageKey,
-    RecordedActivity(id: capture.primaryId),
-  );
-  if (!capture.isPrimaryRecorded) {
-    return next.withHomeTraceFactors(storageKey, const SalahFactorCapture());
-  }
-  return next.withHomeTraceFactors(
-    storageKey,
-    SalahFactorCapture(
-      otherText: capture.note.trim().isEmpty ? null : capture.note.trim(),
-    ),
-  );
+  return record
+      .withHomeTraceActivity(
+        storageKey,
+        RecordedActivity(id: capture.primaryId),
+      )
+      .withHomeTraceFactors(storageKey, const SalahFactorCapture());
 }
 
 String healthEvidenceValue(DailyCheckIn record, String storageKey) {
@@ -399,9 +381,4 @@ String healthEvidenceValue(DailyCheckIn record, String storageKey) {
   return healthPrimaryLabel(storageKey, capture.primaryId);
 }
 
-String? healthEvidenceNote(DailyCheckIn record, String storageKey) {
-  final capture = readHealthPractice(record, storageKey);
-  if (!capture.isPrimaryRecorded) return null;
-  final note = capture.note.trim();
-  return note.isEmpty ? null : note;
-}
+String? healthEvidenceNote(DailyCheckIn record, String storageKey) => null;

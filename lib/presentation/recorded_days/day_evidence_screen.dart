@@ -20,7 +20,10 @@ import '../../domain/personalisation_resolver.dart';
 import '../../domain/prayer.dart';
 import '../../domain/quran.dart';
 import '../../domain/salah_extras.dart';
+import '../../domain/charity_practices.dart';
 import '../../domain/health_practices.dart';
+import '../../domain/ummah_practices.dart';
+import '../../domain/wealth_practices.dart';
 import '../../domain/time_practices.dart';
 import '../shared/add_response_button.dart';
 import '../shared/system_insets.dart';
@@ -226,6 +229,29 @@ class DayEvidenceScreen extends ConsumerWidget {
                   extraQuiet: true,
                   showExtra: false,
                 ),
+              if (show(MonitorDomain.charity))
+                ..._traceBand(
+                  context,
+                  title: 'Charity',
+                  color: MuhasabahColors.wash(
+                    MuhasabahColors.charityWash,
+                    MuhasabahColors.charityWashDark,
+                    brightness,
+                  ),
+                  rows: _mixRows(charityHomeRows, allows),
+                  record: record,
+                  extraName: 'Financial charity',
+                  extraValue: _observationLabel(
+                    ActivityCatalog.charity,
+                    record.charity,
+                  ),
+                  extraQuiet: !record.charity.isRecorded,
+                  showExtra: sameAsDomains && record.charity.isRecorded,
+                  extraRows: [
+                    if (record.zakat.isRecorded && allows(kZakatMixKey))
+                      EvidenceRow(name: 'Zakat', value: record.zakat.label),
+                  ],
+                ),
               if (show(MonitorDomain.knowledge))
                 ..._traceBand(
                   context,
@@ -340,29 +366,6 @@ class DayEvidenceScreen extends ConsumerWidget {
                   extraValue: '',
                   extraQuiet: true,
                   showExtra: false,
-                ),
-              if (show(MonitorDomain.charity))
-                ..._traceBand(
-                  context,
-                  title: 'Charity',
-                  color: MuhasabahColors.wash(
-                    MuhasabahColors.charityWash,
-                    MuhasabahColors.charityWashDark,
-                    brightness,
-                  ),
-                  rows: _mixRows(charityHomeRows, allows),
-                  record: record,
-                  extraName: 'Financial charity',
-                  extraValue: _observationLabel(
-                    ActivityCatalog.charity,
-                    record.charity,
-                  ),
-                  extraQuiet: !record.charity.isRecorded,
-                  showExtra: sameAsDomains && record.charity.isRecorded,
-                  extraRows: [
-                    if (record.zakat.isRecorded && allows(kZakatMixKey))
-                      EvidenceRow(name: 'Zakat', value: record.zakat.label),
-                  ],
                 ),
               EvidenceBand(
                 title: Copy.notesOnThisDay,
@@ -489,6 +492,48 @@ class DayEvidenceScreen extends ConsumerWidget {
             name: row.label,
             value: healthEvidenceValue(record, row.storageKey),
             note: healthEvidenceNote(record, row.storageKey),
+          ),
+        );
+        continue;
+      }
+      if (isWealthTrace(row.storageKey) &&
+          ActivityCatalog.forHomeTrace(row.storageKey).isNotEmpty) {
+        final capture = readWealthPractice(record, row.storageKey);
+        if (!capture.isPrimaryRecorded) continue;
+        children.add(
+          EvidenceRow(
+            name: row.label,
+            value: wealthEvidenceValue(record, row.storageKey),
+            note: wealthEvidenceNote(record, row.storageKey),
+          ),
+        );
+        continue;
+      }
+      if (isUmmahTrace(row.storageKey) &&
+          ActivityCatalog.forHomeTrace(row.storageKey).isNotEmpty) {
+        final capture = readUmmahPractice(record, row.storageKey);
+        if (!capture.isPrimaryRecorded) continue;
+        children.add(
+          EvidenceRow(
+            name: row.label,
+            value: ummahEvidenceValue(record, row.storageKey),
+            note: ummahEvidenceNote(record, row.storageKey),
+          ),
+        );
+        continue;
+      }
+      if (row.storageKey.startsWith('charity.') &&
+          ActivityCatalog.forHomeTrace(row.storageKey).isNotEmpty) {
+        final capture = readCharityPractice(record, row.storageKey);
+        if (!capture.isPrimaryRecorded &&
+            !record.homeTrace(row.storageKey).isRecorded) {
+          continue;
+        }
+        children.add(
+          EvidenceRow(
+            name: row.label,
+            value: charityEvidenceValue(record, row.storageKey),
+            note: charityEvidenceNote(record, row.storageKey),
           ),
         );
         continue;

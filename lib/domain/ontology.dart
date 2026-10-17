@@ -1,5 +1,4 @@
 import 'activities.dart';
-import 'health_practices.dart';
 import 'akhlaq_practices.dart';
 import 'huquq_practices.dart';
 import 'charity_factors.dart';
@@ -12,9 +11,9 @@ import 'salah_factors.dart';
 
 /// Read-only ontology metadata version. Independent of DailyCheckIn schema v6.
 ///
-/// Version 9 adds Physical Health observation kinds. It does not change
-/// DailyCheckIn schema v6.
-const int kOntologyRegistryVersion = 9;
+/// Version 12 adds Charity observation kinds and Zakat labels.
+/// It does not change DailyCheckIn schema v6.
+const int kOntologyRegistryVersion = 12;
 
 /// Active catalog rows vs historically readable retired rows.
 enum OntologyNodeStatus { active, retired }
@@ -120,6 +119,9 @@ enum OntologyActivityCatalog {
   hadithLivedNoticed,
   timeObservation,
   healthObservation,
+  wealthObservation,
+  ummahObservation,
+  charityObservation,
   dhikrPostFard,
   akhlaqObservation,
   huquqObservation,
@@ -714,6 +716,27 @@ List<ActivityOntologyRecord> _buildActivities() {
       catalog: OntologyActivityCatalog.healthObservation,
       options: ActivityCatalog.healthObservation,
       domain: ConceptualDomainId.physicalWellbeing,
+      status: OntologyNodeStatus.active,
+      kind: OntologyConstructKind.observationState,
+    ),
+    ..._mapActivityCatalog(
+      catalog: OntologyActivityCatalog.wealthObservation,
+      options: ActivityCatalog.wealthObservation,
+      domain: ConceptualDomainId.financialStewardshipGiving,
+      status: OntologyNodeStatus.active,
+      kind: OntologyConstructKind.observationState,
+    ),
+    ..._mapActivityCatalog(
+      catalog: OntologyActivityCatalog.ummahObservation,
+      options: ActivityCatalog.ummahObservation,
+      domain: ConceptualDomainId.communityAndService,
+      status: OntologyNodeStatus.active,
+      kind: OntologyConstructKind.observationState,
+    ),
+    ..._mapActivityCatalog(
+      catalog: OntologyActivityCatalog.charityObservation,
+      options: ActivityCatalog.charityObservation,
+      domain: ConceptualDomainId.financialStewardshipGiving,
       status: OntologyNodeStatus.active,
       kind: OntologyConstructKind.observationState,
     ),

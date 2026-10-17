@@ -6,6 +6,9 @@ import '../../domain/akhlaq_practices.dart';
 import '../../domain/huquq_practices.dart';
 import '../../domain/knowledge_practices.dart';
 import '../../domain/health_practices.dart';
+import '../../domain/charity_practices.dart';
+import '../../domain/ummah_practices.dart';
+import '../../domain/wealth_practices.dart';
 import '../../domain/time_practices.dart';
 import '../../domain/daily_check_in.dart';
 import '../../domain/home_traces.dart';
@@ -50,6 +53,41 @@ class SalahActivityMark {
         HealthResponseKind.lapse => prayedLate,
         HealthResponseKind.preferNot => other,
         HealthResponseKind.unanswered => unanswered,
+      };
+    }
+    final wealthKind = wealthKindFor(activityId);
+    if (wealthKind != null) {
+      return switch (wealthKind) {
+        WealthResponseKind.cared => congregationOnTime,
+        WealthResponseKind.partial => joinedCongregationLate,
+        WealthResponseKind.corrected => smallCongregation,
+        WealthResponseKind.noSituation => aloneOnTime,
+        WealthResponseKind.difficulty => excused,
+        WealthResponseKind.preferNot => other,
+        WealthResponseKind.unanswered => unanswered,
+      };
+    }
+    final ummahKind = ummahKindFor(activityId);
+    if (ummahKind != null) {
+      return switch (ummahKind) {
+        UmmahResponseKind.cared => congregationOnTime,
+        UmmahResponseKind.partial => joinedCongregationLate,
+        UmmahResponseKind.corrected => smallCongregation,
+        UmmahResponseKind.noSituation => aloneOnTime,
+        UmmahResponseKind.difficulty => excused,
+        UmmahResponseKind.preferNot => other,
+        UmmahResponseKind.unanswered => unanswered,
+      };
+    }
+    final charityKind = charityKindFor(activityId);
+    if (charityKind != null) {
+      return switch (charityKind) {
+        CharityResponseKind.cared => congregationOnTime,
+        CharityResponseKind.partial => joinedCongregationLate,
+        CharityResponseKind.noSituation => aloneOnTime,
+        CharityResponseKind.difficulty => excused,
+        CharityResponseKind.preferNot => other,
+        CharityResponseKind.unanswered => unanswered,
       };
     }
     return switch (activityId) {
@@ -308,7 +346,10 @@ class SalahActivityMark {
         isHuquqTrace(row.storageKey) ||
         isKnowledgeTrace(row.storageKey) ||
         isTimeTrace(row.storageKey) ||
-        isHealthTrace(row.storageKey)) {
+        isHealthTrace(row.storageKey) ||
+        isWealthTrace(row.storageKey) ||
+        isUmmahTrace(row.storageKey) ||
+        row.storageKey.startsWith('charity.')) {
       return SalahActivityMark(
         kind: kindForAkhlaq(id),
         color: activityColours ? colourForId(id) : MuhasabahColors.mark,

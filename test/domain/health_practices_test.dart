@@ -58,7 +58,6 @@ void main() {
       'health.sleepQuality',
       const HealthPracticeCapture(
         primaryId: HealthObservationIds.preferNot,
-        note: 'Private',
       ),
     );
     expect(record.homeTrace('health.sleepQuality').isRecorded, isTrue);
@@ -66,7 +65,6 @@ void main() {
       record.activityFor('health.sleepQuality').id,
       HealthObservationIds.preferNot,
     );
-    expect(readHealthPractice(record, 'health.sleepQuality').note, 'Private');
 
     record = writeHealthPractice(
       record,
@@ -74,7 +72,6 @@ void main() {
       const HealthPracticeCapture(),
     );
     expect(record.homeTrace('health.sleepQuality'), TernaryOutcome.unanswered);
-    expect(readHealthPractice(record, 'health.sleepQuality').note, isEmpty);
   });
 
   test('sleeping poorly is recorded and is not a lapse', () {

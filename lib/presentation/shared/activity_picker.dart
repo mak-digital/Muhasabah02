@@ -240,6 +240,9 @@ class ActivityPicker extends ConsumerWidget {
     final knowledgeList = ActivityCatalog.isKnowledgeObservationCatalog(options);
     final timeList = ActivityCatalog.isTimeObservationCatalog(options);
     final healthList = ActivityCatalog.isHealthObservationCatalog(options);
+    final wealthList = ActivityCatalog.isWealthObservationCatalog(options);
+    final ummahList = ActivityCatalog.isUmmahObservationCatalog(options);
+    final charityList = ActivityCatalog.isCharityObservationCatalog(options);
     final swatches =
         (salahList ||
             durationList ||
@@ -249,7 +252,10 @@ class ActivityPicker extends ConsumerWidget {
             huquqList ||
             knowledgeList ||
             timeList ||
-            healthList) &&
+            healthList ||
+            wealthList ||
+            ummahList ||
+            charityList) &&
         ref.watch(appPrefsProvider).salahActivityColours;
     final extra = options.any((option) => option.id == selectedId)
         ? null

@@ -4,8 +4,13 @@ import 'practice_hadith.dart';
 
 const kWealthGroupEarning = 'Earning';
 const kWealthGroupRestraint = 'Restraint';
+const kWealthGroupManagement = 'Lawful wealth management';
 
-const kPracticeWealthGroups = [kWealthGroupEarning, kWealthGroupRestraint];
+const kPracticeWealthGroups = [
+  kWealthGroupEarning,
+  kWealthGroupRestraint,
+  kWealthGroupManagement,
+];
 
 /// Qur’an and authentic hadith that encourage Wealth Home rows.
 /// Earning as a trust — not net worth, giving, or a zakat calculator.
@@ -152,6 +157,46 @@ final List<PracticeDhikrItem> kPracticeWealthCatalog = [
         'And those who, when they spend, are neither wasteful nor stingy, but hold a just balance between.',
     source: 'Qur’an 25:67',
     detail: 'Avoiding waste is stewardship. Amounts are not recorded.',
+  ),
+  _item(
+    id: 'wl.management.4_29',
+    group: kWealthGroupManagement,
+    topic: 'Managed wealth responsibly and lawfully',
+    text: 'Do not consume one another’s wealth unjustly:',
+    arabic: 'يَا أَيُّهَا الَّذِينَ آمَنُوا لَا تَأْكُلُوا أَمْوَالَكُم بَيْنَكُم بِالْبَاطِلِ',
+    transliteration:
+        'Yā ayyuhā lladhīna āmanū lā taʾkulū amwālakum baynakum bi-l-bāṭil.',
+    translation:
+        'O you who believe, do not consume one another’s wealth among you unjustly.',
+    source: 'Qur’an 4:29',
+    detail:
+        'Stewardship as you report it. Not a legal ruling or automatic ḥalāl certification. Amounts are not recorded.',
+  ),
+  _item(
+    id: 'wl.management.4_58',
+    group: kWealthGroupManagement,
+    topic: 'Managed wealth responsibly and lawfully',
+    text: 'Render trusts to those to whom they are due:',
+    arabic: 'إِنَّ اللَّهَ يَأْمُرُكُمْ أَن تُؤَدُّوا الْأَمَانَاتِ إِلَىٰ أَهْلِهَا',
+    transliteration:
+        'Inna llāha yaʾmurukum an tuʾaddū l-amānāti ilā ahlihā.',
+    translation:
+        'Indeed, Allah commands you to render trusts to those to whom they are due.',
+    source: 'Qur’an 4:58',
+    detail:
+        'A trust you noticed. Not a bank log. Giving and zakat stay on Charity.',
+  ),
+  _item(
+    id: 'wl.management.23_8',
+    group: kWealthGroupManagement,
+    topic: 'Managed wealth responsibly and lawfully',
+    text: 'Those who keep their trusts and their covenant:',
+    arabic: 'وَالَّذِينَ هُمْ لِأَمَانَاتِهِمْ وَعَهْدِهِمْ رَاعُونَ',
+    transliteration: 'Wa-lladhīna hum li-amānātihim wa-ʿahdihim rāʿūn.',
+    translation: 'And those who are keepers of their trusts and their covenant.',
+    source: 'Qur’an 23:8',
+    detail:
+        'Stewardship of what was entrusted. Poverty and debt are not failings. Amounts are not recorded.',
   ),
 ];
 

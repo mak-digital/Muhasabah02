@@ -11,6 +11,9 @@ import '../../domain/akhlaq_practices.dart';
 import '../../domain/huquq_practices.dart';
 import '../../domain/knowledge_practices.dart';
 import '../../domain/health_practices.dart';
+import '../../domain/charity_practices.dart';
+import '../../domain/ummah_practices.dart';
+import '../../domain/wealth_practices.dart';
 import '../../domain/time_practices.dart';
 import '../../domain/copy.dart';
 import '../../domain/display_calendar.dart';
@@ -493,6 +496,32 @@ class ActivitiesSettingsScreen extends ConsumerWidget {
               ),
             const SizedBox(height: 16),
             Text(
+              MonitorDomain.charity.label,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              Copy.charityCheckInNote,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 8),
+            for (final option in charityLegendCatalog)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  children: [
+                    RecordedStateMarker(
+                      kind: SalahActivityMark.kindForAkhlaq(option.id),
+                      color: SalahActivityMark.colourForId(option.id),
+                      semanticLabel: option.label,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(child: Text(option.label)),
+                  ],
+                ),
+              ),
+            const SizedBox(height: 16),
+            Text(
               MonitorDomain.knowledge.label,
               style: Theme.of(context).textTheme.titleSmall,
             ),
@@ -555,6 +584,58 @@ class ActivitiesSettingsScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
             for (final option in healthLegendCatalog)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  children: [
+                    RecordedStateMarker(
+                      kind: SalahActivityMark.kindForAkhlaq(option.id),
+                      color: SalahActivityMark.colourForId(option.id),
+                      semanticLabel: option.label,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(child: Text(option.label)),
+                  ],
+                ),
+              ),
+            const SizedBox(height: 16),
+            Text(
+              MonitorDomain.wealth.label,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              Copy.wealthCheckInNote,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 8),
+            for (final option in wealthLegendCatalog)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  children: [
+                    RecordedStateMarker(
+                      kind: SalahActivityMark.kindForAkhlaq(option.id),
+                      color: SalahActivityMark.colourForId(option.id),
+                      semanticLabel: option.label,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(child: Text(option.label)),
+                  ],
+                ),
+              ),
+            const SizedBox(height: 16),
+            Text(
+              MonitorDomain.ummah.label,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              Copy.ummahCheckInNote,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 8),
+            for (final option in ummahLegendCatalog)
               Padding(
                 padding: const EdgeInsets.only(bottom: 8),
                 child: Row(

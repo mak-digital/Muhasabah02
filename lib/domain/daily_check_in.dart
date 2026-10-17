@@ -150,7 +150,10 @@ class DailyCheckIn {
           customText: stored.customText,
         );
       }
-      if (isHealthTrace(key)) {
+      if (isHealthTrace(key) ||
+          isWealthTrace(key) ||
+          isUmmahTrace(key) ||
+          key.startsWith('charity.')) {
         return stored;
       }
       return stored;
@@ -247,7 +250,13 @@ class DailyCheckIn {
       if (isTimeTrace(key)) {
         return RecordedActivity(id: canonicalTimeId(homeTrace(key)));
       }
-      if (isHealthTrace(key)) {
+      if (isHealthTrace(key) ||
+          (isWealthTrace(key) &&
+              ActivityCatalog.forHomeTrace(key).isNotEmpty) ||
+          (isUmmahTrace(key) &&
+              ActivityCatalog.forHomeTrace(key).isNotEmpty) ||
+          (key.startsWith('charity.') &&
+              ActivityCatalog.forHomeTrace(key).isNotEmpty)) {
         return const RecordedActivity(id: ActivityIds.unanswered);
       }
       return RecordedActivity(

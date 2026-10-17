@@ -271,19 +271,23 @@ class Copy {
   static String get healthObservationNote => healthBriefing.plainText;
   static const healthNoticed = 'I noticed this in myself';
   static const healthNotToday = 'I did not notice this today';
-  static const healthFollowUpNote =
-      'Optional. Stored as you report it. Not a fitness score, calorie log, hour badge, or a failing of the body. Illness, disability, and circumstances beyond your control are not neglect.';
-  static const healthPrivateReflection = 'Private reflection';
-  static const healthReflectionHint =
-      'What did my body need today? What made care harder? What helped me attend to it? What should I approach differently next time?';
   static const healthCheckInNote =
       'Each row stores one observation: care taken, partial or mixed care, a difficulty noticed, avoidable neglect, an adjustment, circumstances beyond control, no relevant need, or prefer not to record. Prefer not to record is not unanswered. Colour names the recorded choice when activity colours are on. Unanswered is empty, not a failing of the body.';
   static String get wealthObservationNote => wealthBriefing.plainText;
   static const wealthNoticed = 'I noticed this in myself';
   static const wealthNotToday = 'I did not notice this today';
+  static const wealthCheckInNote =
+      'Each row stores one observation: a reported action, a check or clarification, an unresolved concern, no relevant activity, or prefer not to record. Prefer not to record is not unanswered. No relevant activity is not a failure. Colour names the recorded choice when activity colours are on. Unanswered is empty, not a failing of provision.';
   static String get ummahObservationNote => ummahBriefing.plainText;
   static const ummahNoticed = 'I noticed this in myself';
   static const ummahNotToday = 'I did not notice this today';
+  static String get charityObservationNote => charityBriefing.plainText;
+  static const charityNoticed = 'I noticed this in myself';
+  static const charityNotToday = 'I did not notice this today';
+  static const charityCheckInNote =
+      'Each row stores one observation: a reported gift or support, an intended or arranged effort, a recognised need without the wished action, no relevant opportunity, or prefer not to record. Prefer not to record is not the same as not recorded. No relevant opportunity is not withheld charity. Zakat is a separate status, not a calculator and not a daily missed obligation. Colour names the recorded choice when activity colours are on. Not recorded is empty.';
+  static const ummahCheckInNote =
+      'Each row stores one observation: a reported action, remote or spoken effort, an opportunity noticed without the wished action, no relevant opportunity, or prefer not to record. Prefer not to record is not unanswered. No relevant opportunity is not neglect of the Ummah. Colour names the recorded choice when activity colours are on. Unanswered is empty, not isolation.';
   static String get hadithObservationNote => hadithBriefing.plainText;
   static const hadithNoticed = 'I noticed this in myself';
   static const hadithNotToday = 'I did not notice this today';
@@ -361,12 +365,12 @@ class Copy {
   static const visibleDomains = 'Domains in Focus';
   static const activitiesTitle = 'Activities & legend';
   static const activitiesNote =
-      'Salah check-in list. Shared mark colour is the default. Optional activity colours name the recorded Salah choice, the Qur’an duration step, post-fard Dhikr remembrance, Character & Morals, Rights of Others, Knowledge & Beneficial Speech, Time & Barakah, and Physical Health & Energy observations. Not a score.';
+      'Salah check-in list. Shared mark colour is the default. Optional activity colours name the recorded Salah choice, the Qur’an duration step, post-fard Dhikr remembrance, Character & Morals, Rights of Others, Charity, Knowledge & Beneficial Speech, Time & Barakah, Physical Health & Energy, Wealth & Stewardship, and Ummah observations. Not a score.';
   static const salahMarkColour = 'Salah mark colour';
   static const salahMarkShared = 'Shared (current)';
   static const salahMarkActivityColours = 'Activity colours';
   static const salahMarkActivityNote =
-      'Colour names the recorded Salah choice, Qur’an duration step, post-fard Dhikr remembrance, Character & Morals, Rights of Others, Knowledge & Beneficial Speech, Time & Barakah, or Physical Health & Energy observation. It does not rank spirituality or tell you what to do next. Other domains keep the shared mark colour.';
+      'Colour names the recorded Salah choice, Qur’an duration step, post-fard Dhikr remembrance, Character & Morals, Rights of Others, Charity, Knowledge & Beneficial Speech, Time & Barakah, Physical Health & Energy, Wealth & Stewardship, or Ummah observation. It does not rank spirituality or tell you what to do next. Other domains keep the shared mark colour.';
   static const howAttentiveWasI = 'How attentive was I';
   static const dhikrPostFardNote =
       'Post-fard Salah Adhkar records remembrance after each fard prayer. Remembrance with action uses the same blue as congregation on time. The other steps twin the remaining Salah activity colours. How attentive was I is optional provenance, not a khushu’ score.';

@@ -5,6 +5,7 @@ enum MonitorDomain {
   dhikr,
   akhlaq,
   huquq,
+  charity,
   knowledge,
   time,
   health,
@@ -12,7 +13,6 @@ enum MonitorDomain {
   ummah,
   fasting,
   hajj,
-  charity,
 }
 
 /// Salah, Qur’an, and Dhikr & Dua.
@@ -54,6 +54,7 @@ bool usesCompactHomeWeek(MonitorDomain domain) {
     case MonitorDomain.dhikr:
     case MonitorDomain.akhlaq:
     case MonitorDomain.huquq:
+    case MonitorDomain.charity:
     case MonitorDomain.knowledge:
     case MonitorDomain.time:
     case MonitorDomain.health:
@@ -61,7 +62,6 @@ bool usesCompactHomeWeek(MonitorDomain domain) {
     case MonitorDomain.ummah:
     case MonitorDomain.fasting:
     case MonitorDomain.hajj:
-    case MonitorDomain.charity:
       return false;
   }
 }
@@ -90,6 +90,7 @@ extension MonitorDomainX on MonitorDomain {
     MonitorDomain.dhikr => 'Dhikr & Dua',
     MonitorDomain.akhlaq => 'Character & Morals (Akhlaq)',
     MonitorDomain.huquq => 'Rights of Others (Huquq al-Ibad)',
+    MonitorDomain.charity => 'Charity',
     MonitorDomain.knowledge => 'Knowledge & Beneficial Speech',
     MonitorDomain.time => 'Time & Barakah',
     MonitorDomain.health => 'Physical Health & Energy',
@@ -97,7 +98,6 @@ extension MonitorDomainX on MonitorDomain {
     MonitorDomain.ummah => 'Ummah',
     MonitorDomain.fasting => 'Fasting',
     MonitorDomain.hajj => 'Hajj',
-    MonitorDomain.charity => 'Charity',
   };
 
   /// Compact Home stage label. Full [label] stays on the week card.
@@ -108,6 +108,7 @@ extension MonitorDomainX on MonitorDomain {
     MonitorDomain.dhikr => 'Dhikr',
     MonitorDomain.akhlaq => 'Character',
     MonitorDomain.huquq => 'Rights',
+    MonitorDomain.charity => 'Charity',
     MonitorDomain.knowledge => 'Knowledge',
     MonitorDomain.time => 'Time',
     MonitorDomain.health => 'Health',
@@ -115,7 +116,6 @@ extension MonitorDomainX on MonitorDomain {
     MonitorDomain.ummah => 'Ummah',
     MonitorDomain.fasting => 'Fasting',
     MonitorDomain.hajj => 'Hajj',
-    MonitorDomain.charity => 'Charity',
   };
 
   /// Every shown domain Home lists actions and notes. Learn & Practice catalogs
@@ -127,14 +127,14 @@ extension MonitorDomainX on MonitorDomain {
     MonitorDomain.dhikr ||
     MonitorDomain.akhlaq ||
     MonitorDomain.huquq ||
+    MonitorDomain.charity ||
     MonitorDomain.knowledge ||
     MonitorDomain.time ||
     MonitorDomain.health ||
     MonitorDomain.wealth ||
     MonitorDomain.ummah ||
     MonitorDomain.fasting ||
-    MonitorDomain.hajj ||
-    MonitorDomain.charity => true,
+    MonitorDomain.hajj => true,
   };
 
   /// Orientation only. Not a scored field and not a spiritual grade.
@@ -151,7 +151,8 @@ extension MonitorDomainX on MonitorDomain {
       'Did I learn something true, and did I speak only what was beneficial?',
     MonitorDomain.time => 'Did I treat my time as a trust from Allah?',
     MonitorDomain.health => 'Did I care for the body Allah entrusted to me?',
-    MonitorDomain.wealth => 'Did my spending and earning please Allah?',
+    MonitorDomain.wealth =>
+      'Did I manage earning, spending and wealth as trusts from Allah?',
     MonitorDomain.ummah => 'Did I serve anyone beyond myself today?',
     MonitorDomain.hajj => 'Have I named how Hajj stands with me — as I see it, not as the app decides?',
     _ => null,

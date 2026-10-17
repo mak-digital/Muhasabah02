@@ -17,10 +17,12 @@ import '../../domain/prayer.dart';
 import '../../domain/quran.dart';
 import '../../domain/salah_factors.dart';
 import '../../domain/health_practices.dart';
+import '../../domain/charity_practices.dart';
+import '../../domain/ummah_practices.dart';
+import '../../domain/wealth_practices.dart';
 import '../../domain/time_practices.dart';
 import '../progress/progress_review_frame.dart';
 import '../recorded_days/day_evidence_screen.dart';
-import '../shared/health_practice_fields.dart';
 import '../shared/time_practice_fields.dart';
 import '../shared/activity_picker.dart';
 import '../shared/akhlaq_follow_up_fields.dart';
@@ -136,7 +138,9 @@ Future<void> showHomeTraceRecordSheet({
                                   isHuquqTrace(row.storageKey) ||
                                   isKnowledgeTrace(row.storageKey) ||
                                   isTimeTrace(row.storageKey) ||
-                                  isHealthTrace(row.storageKey)
+                                  isHealthTrace(row.storageKey) ||
+                                  isWealthTrace(row.storageKey) ||
+                                  isUmmahTrace(row.storageKey)
                               ? row.label
                               : null,
                           onSelected: (option) async {
@@ -271,6 +275,84 @@ Future<void> showHomeTraceRecordSheet({
                                   row.storageKey,
                                 );
                                 next = writeHealthPractice(
+                                  base,
+                                  row.storageKey,
+                                  existing.copyWith(primaryId: option.id),
+                                );
+                                factors =
+                                    next.homeTraceFactors[row.storageKey] ??
+                                    const SalahFactorCapture();
+                              }
+                              await _save(ref, next);
+                              return;
+                            }
+                            if (isWealthTrace(row.storageKey)) {
+                              DailyCheckIn next;
+                              if (option.id == ActivityIds.unanswered) {
+                                next = writeWealthPractice(
+                                  base,
+                                  row.storageKey,
+                                  const WealthPracticeCapture(),
+                                );
+                                factors = const SalahFactorCapture();
+                              } else {
+                                final existing = readWealthPractice(
+                                  base,
+                                  row.storageKey,
+                                );
+                                next = writeWealthPractice(
+                                  base,
+                                  row.storageKey,
+                                  existing.copyWith(primaryId: option.id),
+                                );
+                                factors =
+                                    next.homeTraceFactors[row.storageKey] ??
+                                    const SalahFactorCapture();
+                              }
+                              await _save(ref, next);
+                              return;
+                            }
+                            if (isUmmahTrace(row.storageKey)) {
+                              DailyCheckIn next;
+                              if (option.id == ActivityIds.unanswered) {
+                                next = writeUmmahPractice(
+                                  base,
+                                  row.storageKey,
+                                  const UmmahPracticeCapture(),
+                                );
+                                factors = const SalahFactorCapture();
+                              } else {
+                                final existing = readUmmahPractice(
+                                  base,
+                                  row.storageKey,
+                                );
+                                next = writeUmmahPractice(
+                                  base,
+                                  row.storageKey,
+                                  existing.copyWith(primaryId: option.id),
+                                );
+                                factors =
+                                    next.homeTraceFactors[row.storageKey] ??
+                                    const SalahFactorCapture();
+                              }
+                              await _save(ref, next);
+                              return;
+                            }
+                            if (row.storageKey.startsWith('charity.')) {
+                              DailyCheckIn next;
+                              if (option.id == ActivityIds.unanswered) {
+                                next = writeCharityPractice(
+                                  base,
+                                  row.storageKey,
+                                  const CharityPracticeCapture(),
+                                );
+                                factors = const SalahFactorCapture();
+                              } else {
+                                final existing = readCharityPractice(
+                                  base,
+                                  row.storageKey,
+                                );
+                                next = writeCharityPractice(
                                   base,
                                   row.storageKey,
                                   existing.copyWith(primaryId: option.id),
@@ -924,36 +1006,6 @@ Future<void> showHomeTraceRecordSheet({
                             await _save(ref, next);
                           },
                         ),
-                      if (isHealthTrace(row.storageKey) &&
-                          selectedId != ActivityIds.unanswered)
-                        HealthPracticeFields(
-                          storageKey: row.storageKey,
-                          note: readHealthPractice(
-                            _recordFor(ref, dateKey, record) ??
-                                DailyCheckIn.empty(dateKey),
-                            row.storageKey,
-                          ).note,
-                          onNoteChanged: (value) async {
-                            final base =
-                                _recordFor(ref, dateKey, record) ??
-                                DailyCheckIn.empty(dateKey);
-                            final next = writeHealthPractice(
-                              base,
-                              row.storageKey,
-                              readHealthPractice(
-                                base,
-                                row.storageKey,
-                              ).copyWith(
-                                primaryId: selectedId,
-                                note: value,
-                              ),
-                            );
-                            factors =
-                                next.homeTraceFactors[row.storageKey] ??
-                                const SalahFactorCapture();
-                            await _save(ref, next);
-                          },
-                        ),
                       if (!hidesHomeTraceFactors(row.storageKey))
                         CheckInFactorSelects.forHomeTrace(
                           storageKey: row.storageKey,
@@ -1055,8 +1107,9 @@ Future<void> showZakatRecordSheet({
                 const SizedBox(height: 8),
                 CheckInSelect<ZakatStatus>(
                   value: status,
+                  sortLabels: false,
                   entries: [
-                    for (final option in ZakatStatus.values)
+                    for (final option in kZakatPickerOrder)
                       CheckInSelectEntry(value: option, label: option.label),
                   ],
                   onChanged: (option) async {

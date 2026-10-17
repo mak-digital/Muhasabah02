@@ -5,6 +5,7 @@ import 'package:muhasabah02/domain/huquq_practices.dart';
 import 'package:muhasabah02/domain/knowledge_practices.dart';
 import 'package:muhasabah02/domain/health_practices.dart';
 import 'package:muhasabah02/domain/time_practices.dart';
+import 'package:muhasabah02/domain/ummah_practices.dart';
 import 'package:muhasabah02/domain/daily_check_in.dart';
 import 'package:muhasabah02/domain/home_traces.dart';
 import 'package:muhasabah02/domain/prayer.dart';
@@ -710,6 +711,80 @@ void main() {
         row: homeTraceRowByKey('health.illnessCare')!,
         activityColours: true,
       ).kind,
+      MarkerKind.filled,
+    );
+  });
+
+  test('wealth rows use item-specific wording and salah colour twins', () {
+    expect(
+      ActivityCatalog.forHomeTrace('wealth.avoidedRiba').first.label,
+      'I avoided entering a transaction involving prohibited riba.',
+    );
+    expect(
+      ActivityCatalog.forHomeTrace('wealth.lawfulManagement')[5].id,
+      'wealth.lawfulManagement.noDecision',
+    );
+    expect(
+      SalahActivityMark.colourForId('wealth.halalEarning.lawfulSource'),
+      SalahActivityMark.congregationOnTime,
+    );
+    expect(
+      SalahActivityMark.colourForId('wealth.halalEarning.unresolvedConcern'),
+      SalahActivityMark.excused,
+    );
+    expect(
+      SalahActivityMark.kindForAkhlaq('wealth.halalEarning.unresolvedConcern'),
+      MarkerKind.filled,
+    );
+  });
+
+  test('ummah rows use item-specific wording and salah colour twins', () {
+    expect(ActivityCatalog.forHomeTrace('ummah.masjidAttendance').length, 6);
+    expect(
+      ActivityCatalog.forHomeTrace('ummah.masjidAttendance')[1].label,
+      'I participated remotely in a masjid-led learning or community gathering.',
+    );
+    expect(
+      ActivityCatalog.forHomeTrace('ummah.masjidAttendance')[4].id,
+      UmmahObservationIds.preferNot,
+    );
+    expect(
+      SalahActivityMark.colourForId('ummah.masjidAttendance.attended'),
+      SalahActivityMark.congregationOnTime,
+    );
+    expect(
+      SalahActivityMark.colourForId('ummah.masjidAttendance.remote'),
+      SalahActivityMark.joinedCongregationLate,
+    );
+    expect(
+      SalahActivityMark.colourForId('ummah.supportedOppressed.didNotAct'),
+      SalahActivityMark.excused,
+    );
+    expect(
+      SalahActivityMark.kindForAkhlaq('ummah.supportedOppressed.didNotAct'),
+      MarkerKind.filled,
+    );
+  });
+
+  test('charity rows use item-specific wording without leftover names', () {
+    expect(
+      ActivityCatalog.forHomeTrace('charity.voluntary').first.label,
+      'Not recorded',
+    );
+    expect(
+      ActivityCatalog.forHomeTrace('charity.voluntary')[1].label,
+      'Gave voluntary charity',
+    );
+    expect(
+      ActivityCatalog.forHomeTrace('charity.emergency')[3].label,
+      'Recognised an emergency but could not help',
+    );
+    expect(
+      SalahActivityMark.colourForId('charity.voluntary.gave'),
+      SalahActivityMark.congregationOnTime,
+    );
+    expect(
+      SalahActivityMark.kindForAkhlaq('charity.voluntary.didNotGive'),
       MarkerKind.filled,
     );
   });

@@ -104,7 +104,7 @@ void main() {
     expect(find.text('Correct or remove a saved day'), findsOneWidget);
     expect(find.text('Look at what was recorded'), findsOneWidget);
     await tester.ensureVisible(
-      find.textContaining('22. Does Ummah grade my social life?'),
+      find.textContaining('23. Does Ummah grade my social life?'),
     );
     expect(
       find.textContaining('15. Does Character & Morals grade me?'),
@@ -115,42 +115,42 @@ void main() {
       findsOneWidget,
     );
     expect(
+      find.textContaining('17. Does Charity score my giving?'),
+      findsOneWidget,
+    );
+    expect(
       find.textContaining(
-        '17. Does Knowledge & Beneficial Speech grade how learned I am?',
+        '18. Does Knowledge & Beneficial Speech grade how learned I am?',
       ),
       findsOneWidget,
     );
     expect(
       find.textContaining(
-        '18. Does Hadith & Living Sunnah score my revival of the Sunnah?',
+        '19. Does Hadith & Living Sunnah score my revival of the Sunnah?',
       ),
       findsOneWidget,
     );
     expect(
-      find.textContaining('19. Does Time & Barakah score my productivity?'),
+      find.textContaining('20. Does Time & Barakah score my productivity?'),
       findsOneWidget,
     );
     expect(
-      find.textContaining('20. Does Physical Health & Energy grade my body?'),
+      find.textContaining('21. Does Physical Health & Energy grade my body?'),
       findsOneWidget,
     );
     expect(
-      find.textContaining('21. Does Wealth & Stewardship score my money?'),
+      find.textContaining('22. Does Wealth & Stewardship score my money?'),
       findsOneWidget,
     );
     expect(
-      find.textContaining('22. Does Ummah grade my social life?'),
+      find.textContaining('23. Does Ummah grade my social life?'),
       findsOneWidget,
     );
     await tester.ensureVisible(
-      find.textContaining('23. Does Fasting score my sawm?'),
+      find.textContaining('24. Does Fasting score my sawm?'),
     );
     expect(
-      find.textContaining('23. Does Fasting score my sawm?'),
-      findsOneWidget,
-    );
-    expect(
-      find.textContaining('24. Does Charity score my giving?'),
+      find.textContaining('24. Does Fasting score my sawm?'),
       findsOneWidget,
     );
     expect(

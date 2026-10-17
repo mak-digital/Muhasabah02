@@ -163,11 +163,14 @@ const healthBriefing = DomainBriefing(
 
 const wealthBriefing = DomainBriefing(
   lead: [
-    'Wealth is a trust. Record whether earning and spending pleased Allah — not how much you have.',
+    'Wealth is a trust. Record how you managed earning, spending, and what was entrusted to you — not how much you have.',
   ],
   items: [
-    'Earning may be noticing a halal source, or staying clear of riba.',
+    'Earning may be noticing a lawful source, or staying clear of riba.',
     'Avoiding waste is part of stewardship.',
+    'Lawful wealth management is responsible use of money, debts, records, and trusts. It is not a bank log.',
+    'A reported action is distinct from an unresolved concern. No relevant activity is not a failure.',
+    'Self-report is not a legal or scholarly determination. Complex cases need qualified advice.',
     'Giving — sadaqah, family support, community care, and zakat due, planned, or paid — is on Charity. Amounts are not recorded. There is no zakat calculator.',
     'Net worth and savings are not spiritual metrics.',
     'Poverty and debt are not failings. Wealth is not a sign of Allah’s pleasure.',
@@ -180,8 +183,8 @@ const ummahBriefing = DomainBriefing(
     'This is about the Ummah — privately. The fard and Jumu‘ah stay on Salah. This card is not a public masjid check-in.',
   ],
   items: [
-    'A masjid class or gathering (not the fard) may be noticed here.',
-    'Da’wah here is by character, not argument, and not Character & Morals’ virtue list.',
+    'A masjid class or gathering (not the fard) may be noticed here. Remote participation is recorded as remote, not as being present.',
+    'Da’wah here is by character, not argument, and not Character & Morals’ virtue list. No quota, and no inference of anyone else’s faith.',
     'Solidarity may be dua, awareness, or material help for the oppressed; working for unity; or praying for the Ummah, especially in crisis.',
     'The earth is a trust.',
     'Help to a neighbour, community giving, and sick care stay on Rights of Others and Charity.',
@@ -216,10 +219,25 @@ const hajjBriefing = DomainBriefing(
   ],
 );
 
+const charityBriefing = DomainBriefing(
+  lead: [
+    'This is giving and care you noticed — privately. Amounts, recipient names, and financial circumstances are not recorded. Ordinary household nafaqa stays on Rights of Others.',
+  ],
+  items: [
+    'Voluntary charity, family support, and community support are independent of Zakat.',
+    'Zakat is a status you name, not a calculator and not a daily missed obligation.',
+    'A smile is sadaqah. Poverty is not a failing.',
+    'Prefer not to record is a privacy choice, distinct from not recorded.',
+    'No relevant opportunity is not withheld charity.',
+    'There is no charity leaderboard and no most-generous badge.',
+  ],
+);
+
 DomainBriefing? briefingForDomain(MonitorDomain domain) => switch (domain) {
   MonitorDomain.hadith => hadithBriefing,
   MonitorDomain.akhlaq => akhlaqBriefing,
   MonitorDomain.huquq => huquqBriefing,
+  MonitorDomain.charity => charityBriefing,
   MonitorDomain.knowledge => knowledgeBriefing,
   MonitorDomain.time => timeBriefing,
   MonitorDomain.health => healthBriefing,

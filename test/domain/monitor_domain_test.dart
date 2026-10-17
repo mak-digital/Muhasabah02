@@ -362,7 +362,7 @@ void main() {
     expect(MonitorDomain.wealth.label, 'Wealth & Stewardship');
     expect(
       MonitorDomain.wealth.focusQuestion,
-      'Did my spending and earning please Allah?',
+      'Did I manage earning, spending and wealth as trusts from Allah?',
     );
     expect(MonitorDomain.wealth.id, 'wealth');
     expect(MonitorDomain.wealth.showsHomeActionFollowOn, isTrue);
@@ -375,7 +375,12 @@ void main() {
       'wealth.halalEarning',
       'wealth.avoidedRiba',
       'wealth.avoidedWaste',
+      'wealth.lawfulManagement',
     ]);
+    expect(
+      ActivityCatalog.forHomeTrace('wealth.halalEarning').first.label,
+      'My income or work today came from a source I reasonably understand to be lawful.',
+    );
     expect(homeTraceRowByKey('wealth.gaveSadaqah')?.label, 'Gave sadaqah');
   });
 
@@ -407,6 +412,14 @@ void main() {
     expect(
       homeTraceRowByKey('ummah.communityService')?.label,
       'Served beyond myself',
+    );
+    expect(
+      ActivityCatalog.forHomeTrace('ummah.masjidAttendance').first.label,
+      'I attended a beneficial masjid class or gathering.',
+    );
+    expect(
+      ActivityCatalog.forHomeTrace('ummah.prayedForUmmah')[3].label,
+      'I did not recall making such du’a today.',
     );
   });
 
@@ -472,6 +485,18 @@ void main() {
     expect(hidesHomeTraceFactors(kHajjPreparationKey), isTrue);
     expect(MonitorDomain.fasting.showsHomeActionFollowOn, isTrue);
     expect(MonitorDomain.charity.showsHomeActionFollowOn, isTrue);
+    expect(
+      MonitorDomain.values.indexOf(MonitorDomain.charity),
+      MonitorDomain.values.indexOf(MonitorDomain.huquq) + 1,
+    );
+    expect(
+      MonitorDomain.values.indexOf(MonitorDomain.knowledge),
+      MonitorDomain.values.indexOf(MonitorDomain.charity) + 1,
+    );
+    expect(
+      ActivityCatalog.forHomeTrace('charity.voluntary')[1].label,
+      'Gave voluntary charity',
+    );
   });
 
   test('Huquq hardship care replaced the Family domain', () {

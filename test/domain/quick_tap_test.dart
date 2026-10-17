@@ -4,6 +4,9 @@ import 'package:muhasabah02/domain/akhlaq_practices.dart';
 import 'package:muhasabah02/domain/huquq_practices.dart';
 import 'package:muhasabah02/domain/knowledge_practices.dart';
 import 'package:muhasabah02/domain/health_practices.dart';
+import 'package:muhasabah02/domain/wealth_practices.dart';
+import 'package:muhasabah02/domain/charity_practices.dart';
+import 'package:muhasabah02/domain/ummah_practices.dart';
 import 'package:muhasabah02/domain/time_practices.dart';
 import 'package:muhasabah02/domain/daily_check_in.dart';
 import 'package:muhasabah02/domain/monitor_domain.dart';
@@ -333,5 +336,69 @@ void main() {
       ActivityIds.unanswered,
     ]);
     expect(record.homeTrace('health.sleepQuality'), TernaryOutcome.unanswered);
+  });
+
+  test('quick tap cycles wealth observations and can clear', () {
+    final item = quickTapItemsFor({'wealth.halalEarning'}).single;
+    var record = DailyCheckIn.empty('2026-10-17');
+    expect(readQuickTapChoiceId(record, item), ActivityIds.unanswered);
+    final seen = <String>[];
+    for (var i = 0; i < 7; i++) {
+      final next = nextQuickTapChoice(record, item);
+      seen.add(next.id);
+      record = applyQuickTapChoice(record, item, next);
+    }
+    expect(seen, [
+      'wealth.halalEarning.lawfulSource',
+      'wealth.halalEarning.checkedConcern',
+      'wealth.halalEarning.avoidedQuestionable',
+      'wealth.halalEarning.unresolvedConcern',
+      'wealth.halalEarning.noActivity',
+      WealthObservationIds.preferNot,
+      ActivityIds.unanswered,
+    ]);
+    expect(record.homeTrace('wealth.halalEarning'), TernaryOutcome.unanswered);
+  });
+
+  test('quick tap cycles ummah observations and can clear', () {
+    final item = quickTapItemsFor({'ummah.masjidAttendance'}).single;
+    var record = DailyCheckIn.empty('2026-10-17');
+    expect(readQuickTapChoiceId(record, item), ActivityIds.unanswered);
+    final seen = <String>[];
+    for (var i = 0; i < 6; i++) {
+      final next = nextQuickTapChoice(record, item);
+      seen.add(next.id);
+      record = applyQuickTapChoice(record, item, next);
+    }
+    expect(seen, [
+      'ummah.masjidAttendance.attended',
+      'ummah.masjidAttendance.remote',
+      'ummah.masjidAttendance.intendedDidNot',
+      'ummah.masjidAttendance.noOpportunity',
+      UmmahObservationIds.preferNot,
+      ActivityIds.unanswered,
+    ]);
+    expect(record.homeTrace('ummah.masjidAttendance'), TernaryOutcome.unanswered);
+  });
+
+  test('quick tap cycles charity observations and can clear', () {
+    final item = quickTapItemsFor({'charity.voluntary'}).single;
+    var record = DailyCheckIn.empty('2026-10-17');
+    expect(readQuickTapChoiceId(record, item), ActivityIds.unanswered);
+    final seen = <String>[];
+    for (var i = 0; i < 6; i++) {
+      final next = nextQuickTapChoice(record, item);
+      seen.add(next.id);
+      record = applyQuickTapChoice(record, item, next);
+    }
+    expect(seen, [
+      'charity.voluntary.gave',
+      'charity.voluntary.intended',
+      'charity.voluntary.didNotGive',
+      'charity.voluntary.noOpportunity',
+      CharityObservationIds.preferNot,
+      ActivityIds.unanswered,
+    ]);
+    expect(record.homeTrace('charity.voluntary'), TernaryOutcome.unanswered);
   });
 }

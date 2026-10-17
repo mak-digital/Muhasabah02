@@ -6,6 +6,9 @@ import 'monitor_domain.dart';
 import 'huquq_practices.dart';
 import 'knowledge_practices.dart';
 import 'health_practices.dart';
+import 'charity_practices.dart';
+import 'ummah_practices.dart';
+import 'wealth_practices.dart';
 import 'time_practices.dart';
 import 'other_domains.dart';
 import 'personal_mix.dart';
@@ -213,7 +216,7 @@ List<QuickTapChoice> quickTapCatalog(QuickTapItem item) {
       ];
     case QuickTapKind.zakat:
       return [
-        for (final status in ZakatStatus.values)
+        for (final status in kZakatPickerOrder)
           QuickTapChoice(
             id: status.name,
             label: status.label,
@@ -410,6 +413,54 @@ DailyCheckIn applyQuickTapChoice(
           }
           final existing = readHealthPractice(record, item.traceKey!);
           return writeHealthPractice(
+            record,
+            item.traceKey!,
+            existing.copyWith(primaryId: choice.id),
+          );
+        }
+        if (isWealthTrace(item.traceKey!) &&
+            ActivityCatalog.forHomeTrace(item.traceKey!).isNotEmpty) {
+          if (choice.id == ActivityIds.unanswered) {
+            return writeWealthPractice(
+              record,
+              item.traceKey!,
+              const WealthPracticeCapture(),
+            );
+          }
+          final existing = readWealthPractice(record, item.traceKey!);
+          return writeWealthPractice(
+            record,
+            item.traceKey!,
+            existing.copyWith(primaryId: choice.id),
+          );
+        }
+        if (isUmmahTrace(item.traceKey!) &&
+            ActivityCatalog.forHomeTrace(item.traceKey!).isNotEmpty) {
+          if (choice.id == ActivityIds.unanswered) {
+            return writeUmmahPractice(
+              record,
+              item.traceKey!,
+              const UmmahPracticeCapture(),
+            );
+          }
+          final existing = readUmmahPractice(record, item.traceKey!);
+          return writeUmmahPractice(
+            record,
+            item.traceKey!,
+            existing.copyWith(primaryId: choice.id),
+          );
+        }
+        if (item.traceKey!.startsWith('charity.') &&
+            ActivityCatalog.forHomeTrace(item.traceKey!).isNotEmpty) {
+          if (choice.id == ActivityIds.unanswered) {
+            return writeCharityPractice(
+              record,
+              item.traceKey!,
+              const CharityPracticeCapture(),
+            );
+          }
+          final existing = readCharityPractice(record, item.traceKey!);
+          return writeCharityPractice(
             record,
             item.traceKey!,
             existing.copyWith(primaryId: choice.id),

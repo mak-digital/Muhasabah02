@@ -27,12 +27,14 @@ import '../../domain/salah_extras.dart';
 import '../../domain/salah_factors.dart';
 import '../../domain/situation_notes.dart';
 import '../../domain/health_practices.dart';
+import '../../domain/charity_practices.dart';
+import '../../domain/ummah_practices.dart';
+import '../../domain/wealth_practices.dart';
 import '../../domain/time_practices.dart';
 import '../shared/activity_picker.dart';
 import '../shared/akhlaq_follow_up_fields.dart';
 import '../shared/huquq_follow_up_fields.dart';
 import '../shared/knowledge_follow_up_fields.dart';
-import '../shared/health_practice_fields.dart';
 import '../shared/time_practice_fields.dart';
 import '../shared/domain_briefing_note.dart';
 import '../shared/domain_stage.dart';
@@ -1117,9 +1119,6 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
     final knowledgeCapture = isKnowledgeTrace(key)
         ? readKnowledgeFollowUp(_draft, key)
         : const KnowledgeFollowUpCapture();
-    final healthCapture = isHealthTrace(key)
-        ? readHealthPractice(_draft, key)
-        : const HealthPracticeCapture();
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Column(
@@ -1137,7 +1136,9 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
                     isHuquqTrace(key) ||
                     isKnowledgeTrace(key) ||
                     isTimeTrace(key) ||
-                    isHealthTrace(key)
+                    isHealthTrace(key) ||
+                    isWealthTrace(key) ||
+                    isUmmahTrace(key)
                 ? row.label
                 : null,
             onSelected: (option) => setState(() {
@@ -1225,6 +1226,57 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
                 }
                 final existing = readHealthPractice(_draft, key);
                 _draft = writeHealthPractice(
+                  _draft,
+                  key,
+                  existing.copyWith(primaryId: option.id),
+                );
+                return;
+              }
+              if (isWealthTrace(key)) {
+                if (option.id == ActivityIds.unanswered) {
+                  _draft = writeWealthPractice(
+                    _draft,
+                    key,
+                    const WealthPracticeCapture(),
+                  );
+                  return;
+                }
+                final existing = readWealthPractice(_draft, key);
+                _draft = writeWealthPractice(
+                  _draft,
+                  key,
+                  existing.copyWith(primaryId: option.id),
+                );
+                return;
+              }
+              if (isUmmahTrace(key)) {
+                if (option.id == ActivityIds.unanswered) {
+                  _draft = writeUmmahPractice(
+                    _draft,
+                    key,
+                    const UmmahPracticeCapture(),
+                  );
+                  return;
+                }
+                final existing = readUmmahPractice(_draft, key);
+                _draft = writeUmmahPractice(
+                  _draft,
+                  key,
+                  existing.copyWith(primaryId: option.id),
+                );
+                return;
+              }
+              if (key.startsWith('charity.')) {
+                if (option.id == ActivityIds.unanswered) {
+                  _draft = writeCharityPractice(
+                    _draft,
+                    key,
+                    const CharityPracticeCapture(),
+                  );
+                  return;
+                }
+                final existing = readCharityPractice(_draft, key);
+                _draft = writeCharityPractice(
                   _draft,
                   key,
                   existing.copyWith(primaryId: option.id),
@@ -1428,19 +1480,6 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
                 );
               },
             ),
-          if (isHealthTrace(key) && selected.id != ActivityIds.unanswered)
-            HealthPracticeFields(
-              storageKey: key,
-              note: healthCapture.note,
-              noteController: _note('$key-health-note', healthCapture.note),
-              onNoteChanged: (value) {
-                _draft = writeHealthPractice(
-                  _draft,
-                  key,
-                  healthCapture.copyWith(primaryId: selected.id, note: value),
-                );
-              },
-            ),
           if (isHuquqTrace(key) && selected.id != ActivityIds.unanswered)
             HuquqFollowUpFields(
               storageKey: key,
@@ -1604,8 +1643,9 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
           CheckInSelect<ZakatStatus>(
             dropdownKey: const Key('zakat-status'),
             value: _draft.zakat,
+            sortLabels: false,
             entries: [
-              for (final status in ZakatStatus.values)
+              for (final status in kZakatPickerOrder)
                 CheckInSelectEntry(value: status, label: status.label),
             ],
             onChanged: (status) => setState(() {
@@ -1951,6 +1991,7 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
         rows: charityHomeRows,
         washLight: MuhasabahColors.charityWash,
         washDark: MuhasabahColors.charityWashDark,
+        extraNote: Copy.charityObservationNote,
         includeZakat: mixKeys.isEmpty || mixIncludesZakat(mixKeys),
         expandFirst: expandFirst,
         mixKeys: mixKeys,

@@ -342,7 +342,7 @@ Do not:
 - Ignore that physical and mental health are intertwined
 - Auto-fill sleep from Time’s rest, or Time from sleep
 
-Each of the eight Home rows has item-specific observations (care taken, partial or mixed care, difficulty noticed, avoidable neglect, an adjustment, circumstances beyond control, no relevant need where that applies, prefer not to record, and unanswered/`null`). Prefer not to record is an explicit privacy choice, distinct from unanswered. These are descriptive categories, not a fitness, calorie, sleep-hour, or spiritual scale. Sleeping poorly is not classified as failure. Seeking care is not interpreted as better health than having no illness. Optional private reflection is provenance only. A first tap is enough; a note is never required to save. Unanswered is distinct from an explicit outcome. These traces do not increase `recordableFieldCount`. DailyCheckIn schema remains **6**.
+Each of the eight Home rows has item-specific observations (care taken, partial or mixed care, difficulty noticed, avoidable neglect, an adjustment, circumstances beyond control, no relevant need where that applies, prefer not to record, and unanswered/`null`). Prefer not to record is an explicit privacy choice, distinct from unanswered. These are descriptive categories, not a fitness, calorie, sleep-hour, or spiritual scale. Sleeping poorly is not classified as failure. Seeking care is not interpreted as better health than having no illness. A first tap is enough. Free-text plans stay on listed Actions, not on these rows. Unanswered is distinct from an explicit outcome. These traces do not increase `recordableFieldCount`. DailyCheckIn schema remains **6**.
 
 Home also lists **Physical Health & Energy Learn & Practice**: Qur’an verses and authentic hadith grouped as on Home, collapsed to title, with citation pages and a private register (Learning, Learnt, Practicing, Habit). It is not a fitness programme, calorie log, or body grade.
 
@@ -352,26 +352,31 @@ Home and **7-day Progress** show those items as rows and weekdays as columns. **
 
 Core question (orientation only; not scored and not a spiritual grade):
 
-**Did my spending and earning please Allah?**
+**Did I manage earning, spending and wealth as trusts from Allah?**
 
 Record self-focused stewardship of wealth as a trust, not net worth:
 
-- Earning: earned from a halal source; stayed clear of riba
-- Restraint: avoided waste
+- Earning (`wealth.halalEarning`, `wealth.avoidedRiba`): earned from a halal source; stayed clear of riba
+- Restraint (`wealth.avoidedWaste`): avoided waste
+- Lawful wealth management (`wealth.lawfulManagement`): managed wealth responsibly and lawfully
+
+Each Home row has item-specific observations (reported action, check or clarification, unresolved concern, no relevant activity, prefer not to record, and unanswered/`null`). Prefer not to record is an explicit privacy choice, distinct from unanswered. No relevant activity is not a failure. Unresolved concern is not a legal or scholarly ruling. A first tap is enough. Free-text plans stay on listed Actions, not on these rows. These traces do not increase `recordableFieldCount`. DailyCheckIn schema remains **6**.
 
 Giving (sadaqah, family support, community and care channels) and zakat due / planned / paid stay on Charity, without amounts. A smile is sadaqah. Giving rows formerly on Wealth are not shown on Home, check-in, or Progress; stored `wealth.*` giving marks are kept for Historical Reflection.
 
 Do not:
 
-- Track net worth or savings as a spiritual metric
+- Track net worth, balances, or savings as a spiritual metric
+- Store bank details, creditor identities, or account numbers
 - Show charity leaderboards or “most generous” badges
 - Require amounts
 - Shame poverty or debt
 - Treat wealth as a sign of Allah’s pleasure
+- Auto-certify a source as ḥalāl
 - Ignore that some people cannot give money
 - Duplicate Charity giving or zakat on this domain
 
-Unanswered is not a failing of provision. Marks mean “I noticed this in myself” or “I did not notice this today”. These traces do not increase `recordableFieldCount`.
+Unanswered is not a failing of provision.
 
 Home also lists **Wealth & Stewardship Learn & Practice**: Qur’an verses and authentic hadith grouped as on Home, collapsed to title, with citation pages and a private register (Learning, Learnt, Practicing, Habit). Giving stays on Charity. It is not a money score, net-worth tracker, or zakat calculator.
 
@@ -402,7 +407,9 @@ Do not:
 - Ignore isolation (including converts and new immigrants)
 - Conflate community with an ethnic group — the Ummah is global
 
-Unanswered is not isolation or neglect of the Ummah. Marks mean “I noticed this in myself” or “I did not notice this today”. These traces do not increase `recordableFieldCount`.
+Each of the six Home rows has item-specific observations (reported action, remote or spoken effort, an opportunity noticed without the wished action, no relevant opportunity where that applies, prefer not to record, and unanswered/`null`). Prefer not to record is an explicit privacy choice, distinct from unanswered. No relevant opportunity is not neglect. Remote masjid participation is not recorded as physical attendance. Du’a for the oppressed is distinct from practical help. “Did not recall” dua is not a moral verdict. A first tap is enough. Free-text plans stay on listed Actions. These traces do not increase `recordableFieldCount`. DailyCheckIn schema remains **6**.
+
+Older generic noticed / not-noticed days are not rewritten into a specific new choice. Until that day is edited, the picker shows Unanswered rather than assuming attendance or neglect.
 
 Home also lists **Ummah Learn & Practice**: Qur’an verses and authentic hadith grouped as on Home, collapsed to title, with citation pages and a private register (Learning, Learnt, Practicing, Habit). The fard stays on Salah; neighbour and giving stay on Rights of Others and Charity. It is not a public check-in, political log, or ethnic list.
 
@@ -426,7 +433,13 @@ Home also lists **Hajj Learn & Practice**: Qur’an verses and authentic hadith 
 
 ### 4.14 Charity
 
-Record giving and care without amounts: voluntary charity, family support, community support, educational support, emergency support, and support under financial stress. A smile is sadaqah. Ordinary household nafaqa stays on Rights of Others. Zakat is a status, not a calculator.
+Record giving and care without amounts. Presentation order places Charity immediately after Rights of Others and before Knowledge & Beneficial Speech. Stored domain ids and mix selections are not rewritten.
+
+Each of the six Home rows has item-specific observations (reported gift or support, intended or arranged effort, a recognised need without the wished action, no relevant opportunity or need, prefer not to record, and not recorded/`null`). Prefer not to record is an explicit privacy choice, distinct from not recorded. No relevant opportunity is not withheld charity. A first tap is enough. Amounts, recipient names, and financial circumstances are not collected. Ordinary household nafaqa stays on Rights of Others. A smile is sadaqah.
+
+Zakat remains a separate standing daily status (`due`, `planned`, `paid`, `notApplicable`, plus `reviewing` and `preferNot`). Labels name those states; the app does not calculate zakat, infer liability, or treat daily nonpayment as a missed obligation. Older `due` / `planned` / `paid` / `notApplicable` / `unanswered` names still read. These traces do not increase `recordableFieldCount`. DailyCheckIn schema remains **6**.
+
+Older generic noticed / not-noticed days are not rewritten into a specific new choice. Until that day is edited, the picker shows Not recorded rather than assuming a gift.
 
 Home also lists **Charity Learn & Practice**: Qur’an verses and authentic hadith grouped as on Home, collapsed to title, with citation pages and a private register (Learning, Learnt, Practicing, Habit). It is not a generosity score or leaderboard.
 
