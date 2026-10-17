@@ -252,18 +252,16 @@ class ReviewScreen extends ConsumerWidget {
                   title: MonitorDomain.fasting.label,
                   focusQuestion: MonitorDomain.fasting.focusQuestion,
                   note: Copy.fastingObservationNote,
-                  rows: gateFastingHomeRows(
+                  rows: gatedFastingHomeRows(
                     rowsFor(MonitorDomain.fasting, fastingHomeRows),
-                    showRamadan: showsFastingRamadanRows(
-                      date: now,
-                      offsetDays: ref
-                          .watch(appPrefsProvider)
-                          .ramadanCalendarOffsetDays,
-                      showHistory: ref
-                          .watch(appPrefsProvider)
-                          .showFastingRamadanHistory,
-                      records: inPeriod,
-                    ),
+                    date: now,
+                    offsetDays: ref
+                        .watch(appPrefsProvider)
+                        .ramadanCalendarOffsetDays,
+                    showHistory: ref
+                        .watch(appPrefsProvider)
+                        .showFastingRamadanHistory,
+                    records: inPeriod,
                   ),
                   family: MuhasabahColors.fastingFamily,
                   highlightLunarWhiteDays: true,

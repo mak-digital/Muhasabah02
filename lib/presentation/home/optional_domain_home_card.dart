@@ -97,15 +97,13 @@ class _OptionalDomainHomeCardState
         : widget.rows;
     if (widget.gateFastingRamadan) {
       final prefs = ref.watch(appPrefsProvider);
-      visibleRows = gateFastingHomeRows(
+      visibleRows = gatedFastingHomeRows(
         visibleRows,
-        showRamadan: showsFastingRamadanRows(
-          date: now,
-          offsetDays: prefs.ramadanCalendarOffsetDays,
-          showHistory: prefs.showFastingRamadanHistory,
-          extraDates: [for (final key in keys) parseDateKey(key)],
-          records: widget.records,
-        ),
+        date: now,
+        offsetDays: prefs.ramadanCalendarOffsetDays,
+        showHistory: prefs.showFastingRamadanHistory,
+        extraDates: [for (final key in keys) parseDateKey(key)],
+        records: widget.records,
       );
     }
     final bands = bandsFor(visibleRows);
@@ -477,14 +475,12 @@ class _OptionalDomainHomeCardState
     final prefs = ref.read(appPrefsProvider);
     var rows = widget.progressRows ?? widget.rows;
     if (widget.gateFastingRamadan) {
-      rows = gateFastingHomeRows(
+      rows = gatedFastingHomeRows(
         rows,
-        showRamadan: showsFastingRamadanRows(
-          date: ref.read(nowProvider),
-          offsetDays: prefs.ramadanCalendarOffsetDays,
-          showHistory: prefs.showFastingRamadanHistory,
-          records: widget.records,
-        ),
+        date: ref.read(nowProvider),
+        offsetDays: prefs.ramadanCalendarOffsetDays,
+        showHistory: prefs.showFastingRamadanHistory,
+        records: widget.records,
       );
     }
     Navigator.of(context).push(

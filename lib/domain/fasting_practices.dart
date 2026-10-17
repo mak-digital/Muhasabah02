@@ -79,6 +79,14 @@ const fastingRamadanStorageKeys = <String>{
   kFastingRamadanPracticeKey,
 };
 
+const fastingVoluntaryStorageKeys = <String>{
+  kFastingWeeklySunnahKey,
+  kFastingMonthlyKey,
+  kFastingMakeupKey,
+  kFastingRamadanPrepKey,
+  kFastingPostRamadanKey,
+};
+
 const fastingTernaryStorageKeys = <String>{
   kFastingWeeklySunnahKey,
   kFastingMonthlyKey,
@@ -93,6 +101,9 @@ int clampRamadanCalendarOffsetDays(int value) {
 
 bool isFastingRamadanTrace(String storageKey) =>
     fastingRamadanStorageKeys.contains(storageKey);
+
+bool isFastingVoluntaryTrace(String storageKey) =>
+    fastingVoluntaryStorageKeys.contains(storageKey);
 
 bool isFastingPracticeTrace(String storageKey) =>
     storageKey.startsWith('fasting.') &&
@@ -477,8 +488,14 @@ String fastingEvidenceValue(DailyCheckIn record, String storageKey) {
 
 String? fastingEvidenceNote(DailyCheckIn record, String storageKey) => null;
 
-bool recordHasFastingRamadan(DailyCheckIn record) {
-  for (final key in fastingRamadanStorageKeys) {
+bool recordHasFastingRamadan(DailyCheckIn record) =>
+    _recordHasFastingKeys(record, fastingRamadanStorageKeys);
+
+bool recordHasFastingVoluntary(DailyCheckIn record) =>
+    _recordHasFastingKeys(record, fastingVoluntaryStorageKeys);
+
+bool _recordHasFastingKeys(DailyCheckIn record, Set<String> keys) {
+  for (final key in keys) {
     if (record.homeTrace(key).isRecorded) return true;
     final id = record.activities[key]?.id;
     if (id != null && id.isNotEmpty && id != ActivityIds.unanswered) {
@@ -488,6 +505,48 @@ bool recordHasFastingRamadan(DailyCheckIn record) {
   return false;
 }
 
+class FastingSeasonGate {
+  const FastingSeasonGate({
+    required this.showRamadan,
+    required this.showVoluntary,
+  });
+
+  final bool showRamadan;
+  final bool showVoluntary;
+}
+
+/// Ramadan rows in Ramadan, voluntary rows outside it.
+/// [showHistory] forces both for review. Leftover marks still show.
+FastingSeasonGate fastingSeasonGate({
+  required DateTime date,
+  int offsetDays = 0,
+  bool showHistory = false,
+  Iterable<DateTime> extraDates = const [],
+  Iterable<DailyCheckIn> records = const [],
+}) {
+  if (showHistory) {
+    return const FastingSeasonGate(showRamadan: true, showVoluntary: true);
+  }
+  final days = extraDates.isEmpty ? <DateTime>[date] : extraDates;
+  var showRamadan = false;
+  var showVoluntary = false;
+  for (final day in days) {
+    if (isCivilRamadan(day, offsetDays: offsetDays)) {
+      showRamadan = true;
+    } else {
+      showVoluntary = true;
+    }
+  }
+  for (final record in records) {
+    if (recordHasFastingRamadan(record)) showRamadan = true;
+    if (recordHasFastingVoluntary(record)) showVoluntary = true;
+  }
+  return FastingSeasonGate(
+    showRamadan: showRamadan,
+    showVoluntary: showVoluntary,
+  );
+}
+
 bool showsFastingRamadanRows({
   required DateTime date,
   int offsetDays = 0,
@@ -495,24 +554,52 @@ bool showsFastingRamadanRows({
   Iterable<DateTime> extraDates = const [],
   Iterable<DailyCheckIn> records = const [],
 }) {
-  if (showHistory) return true;
-  if (isCivilRamadan(date, offsetDays: offsetDays)) return true;
-  for (final extra in extraDates) {
-    if (isCivilRamadan(extra, offsetDays: offsetDays)) return true;
-  }
-  for (final record in records) {
-    if (recordHasFastingRamadan(record)) return true;
-  }
-  return false;
+  return fastingSeasonGate(
+    date: date,
+    offsetDays: offsetDays,
+    showHistory: showHistory,
+    extraDates: extraDates,
+    records: records,
+  ).showRamadan;
 }
 
 List<HomeTraceRow> gateFastingHomeRows(
   List<HomeTraceRow> rows, {
-  required bool showRamadan,
+  FastingSeasonGate? season,
+  bool showRamadan = false,
+  bool showVoluntary = true,
 }) {
-  if (showRamadan) return List<HomeTraceRow>.from(rows);
+  final gate =
+      season ??
+      FastingSeasonGate(showRamadan: showRamadan, showVoluntary: showVoluntary);
   return [
     for (final row in rows)
-      if (!isFastingRamadanTrace(row.storageKey)) row,
+      if (_keepFastingSeasonRow(row.storageKey, gate)) row,
   ];
+}
+
+List<HomeTraceRow> gatedFastingHomeRows(
+  List<HomeTraceRow> rows, {
+  required DateTime date,
+  int offsetDays = 0,
+  bool showHistory = false,
+  Iterable<DateTime> extraDates = const [],
+  Iterable<DailyCheckIn> records = const [],
+}) {
+  return gateFastingHomeRows(
+    rows,
+    season: fastingSeasonGate(
+      date: date,
+      offsetDays: offsetDays,
+      showHistory: showHistory,
+      extraDates: extraDates,
+      records: records,
+    ),
+  );
+}
+
+bool _keepFastingSeasonRow(String storageKey, FastingSeasonGate gate) {
+  if (isFastingRamadanTrace(storageKey)) return gate.showRamadan;
+  if (isFastingVoluntaryTrace(storageKey)) return gate.showVoluntary;
+  return true;
 }

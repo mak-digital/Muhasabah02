@@ -945,16 +945,14 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
     var visible = widget.includeHajjStatus
         ? hajjRowsForStatus(widget.traceRows, hajjStatus)
         : widget.traceRows;
-    if (visible.any((row) => isFastingRamadanTrace(row.storageKey))) {
+    if (visible.any((row) => row.storageKey.startsWith('fasting.'))) {
       final prefs = ref.watch(appPrefsProvider);
-      visible = gateFastingHomeRows(
+      visible = gatedFastingHomeRows(
         visible,
-        showRamadan: showsFastingRamadanRows(
-          date: parseDateKey(_openedDateKey),
-          offsetDays: prefs.ramadanCalendarOffsetDays,
-          showHistory: prefs.showFastingRamadanHistory,
-          records: [_draft],
-        ),
+        date: parseDateKey(_openedDateKey),
+        offsetDays: prefs.ramadanCalendarOffsetDays,
+        showHistory: prefs.showFastingRamadanHistory,
+        records: [_draft],
       );
     }
     final rows = [
@@ -1996,14 +1994,12 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
       MonitorDomain.fasting => _homeTraceDomainCard(
         title: MonitorDomain.fasting.label,
         focus: MonitorDomain.fasting.focusQuestion,
-        rows: gateFastingHomeRows(
+        rows: gatedFastingHomeRows(
           fastingHomeRows,
-          showRamadan: showsFastingRamadanRows(
-            date: parseDateKey(_openedDateKey),
-            offsetDays: ref.watch(appPrefsProvider).ramadanCalendarOffsetDays,
-            showHistory: ref.watch(appPrefsProvider).showFastingRamadanHistory,
-            records: [_draft],
-          ),
+          date: parseDateKey(_openedDateKey),
+          offsetDays: ref.watch(appPrefsProvider).ramadanCalendarOffsetDays,
+          showHistory: ref.watch(appPrefsProvider).showFastingRamadanHistory,
+          records: [_draft],
         ),
         washLight: MuhasabahColors.fastingWash,
         washDark: MuhasabahColors.fastingWashDark,

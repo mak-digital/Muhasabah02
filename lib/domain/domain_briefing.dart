@@ -213,7 +213,7 @@ const fastingBriefing = DomainBriefing(
     'Two sections: Ramadan fasting & excellence, and voluntary and make-up. Not recorded is empty, not a missed fast. Prefer not to record is a privacy choice.',
   ],
   items: [
-    'Ramadan rows appear on civil Ramadan dates. Settings → Calendar can shift them by a day for local moon sighting, or show them outside Ramadan for history.',
+    'Ramadan rows appear on civil Ramadan dates; voluntary and make-up rows appear outside it. Settings → Calendar can shift Ramadan by a day for local moon sighting, or show all Fasting rows for review.',
     'The app does not judge validity, exemption, make-up, or fidyah. An exemption is not a failure. Fasting today can be edited after iftar; it is not auto-completed.',
     'Necessary work, care, rest, and recreation are not automatically waste. There is no screen-time monitoring.',
     'Salah validity and khushu’ are not measured here. Extra worship has no rak‘ah or minute quota. Menstruation and other valid limits are not presented as failure.',

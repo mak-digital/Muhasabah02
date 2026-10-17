@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muhasabah02/domain/activities.dart';
 import 'package:muhasabah02/domain/daily_check_in.dart';
+import 'package:muhasabah02/domain/date_key.dart';
 import 'package:muhasabah02/domain/display_calendar.dart';
 import 'package:muhasabah02/domain/fasting_practices.dart';
 import 'package:muhasabah02/domain/home_traces.dart';
@@ -149,6 +150,44 @@ void main() {
           kFastingRamadanPrepKey,
           kFastingPostRamadanKey,
         ],
+      );
+    },
+  );
+
+  test(
+    'Voluntary rows stay off in Ramadan unless history or a leftover mark',
+    () {
+      final ramadan = _firstRamadan();
+      final later = ramadan.add(const Duration(days: 40));
+      expect(fastingSeasonGate(date: ramadan).showVoluntary, isFalse);
+      expect(fastingSeasonGate(date: later).showVoluntary, isTrue);
+      expect(
+        fastingSeasonGate(date: ramadan, showHistory: true).showVoluntary,
+        isTrue,
+      );
+      expect(
+        fastingSeasonGate(date: ramadan, showHistory: true).showRamadan,
+        isTrue,
+      );
+      expect(
+        gatedFastingHomeRows(
+          fastingHomeRows,
+          date: ramadan,
+        ).map((row) => row.storageKey),
+        [
+          for (final row in fastingHomeRows)
+            if (isFastingRamadanTrace(row.storageKey)) row.storageKey,
+        ],
+      );
+      final leftover = DailyCheckIn.empty(dateKey(ramadan))
+          .withHomeTrace(kFastingWeeklySunnahKey, TernaryOutcome.positive);
+      expect(
+        gatedFastingHomeRows(
+          fastingHomeRows,
+          date: ramadan,
+          records: [leftover],
+        ).map((row) => row.storageKey),
+        fastingHomeRows.map((row) => row.storageKey),
       );
     },
   );

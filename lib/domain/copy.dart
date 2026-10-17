@@ -365,9 +365,9 @@ class Copy {
   static const ramadanOffsetCivil = 'Civil tabular dates (default)';
   static const ramadanOffsetEarlier = 'Start Ramadan one day earlier';
   static const ramadanOffsetLater = 'Start Ramadan one day later';
-  static const showFastingRamadanHistory = 'Show Ramadan rows outside Ramadan';
+  static const showFastingRamadanHistory = 'Show all Fasting rows for review';
   static const showFastingRamadanHistoryNote =
-      'Ramadan rows appear on civil Ramadan dates by default. Turn this on to review or record them at other times. Days that already have a Ramadan mark still show those rows.';
+      'Ramadan rows appear in Ramadan. Voluntary and make-up rows appear outside it. Turn this on to see both at any time for review or testing. Days that already have a mark still show those rows.';
   static const visibleDomains = 'Domains in Focus';
   static const activitiesTitle = 'Activities & legend';
   static const activitiesNote =
