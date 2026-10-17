@@ -7,6 +7,10 @@ Private, local-first Islamic self-reflection. The app helps you record practice 
 
 Canonical flow: **RECORD → REFLECT → REVIEW → RECOGNISE → PONDER → RESPOND**
 
+## Development sessions
+
+After a clone, IDE or machine restart, or resuming work, follow **`docs/AGENTS.md` § 3.1** (Git, Flutter, emulator reuse) before changing the app. Cursor loads the same checklist from `.cursor/rules/session-prerequisites.mdc` and emulator policy from `.cursor/rules/emulator-reuse.mdc`. Keep those files in the repository so every machine receives them.
+
 ## Build and run (Android)
 
 ```bash

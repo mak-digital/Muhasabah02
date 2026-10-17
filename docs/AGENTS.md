@@ -42,6 +42,22 @@ Never reset, clean, revert, discard, or overwrite unknown or accepted user work.
 
 If the tree is dirty, determine whether it contains intentional in-progress/accepted work before changing it.
 
+### 3.1 Session restart and fresh initiation
+
+This applies on **any machine**, after idle time, a machine or IDE restart, a new clone, or when the user asks to continue work. Do not start feature work until the check has run. Then tell the user what is ready, what you prepared, and what is still missing.
+
+Check, in this order:
+
+1. **Git** — branch, upstream, `git status -sb`, `git fetch` (or dry-run). Confirm the GitHub remote still answers.
+2. **GitHub CLI** — `gh auth status` if PRs or issues will be needed. Do not run interactive `gh auth login` unless the user asked. Git HTTPS fetch/push can work without `gh`.
+3. **Flutter** — SDK responds (`flutter --version`). Run `flutter pub get` if dependencies may be stale.
+4. **Android** — follow `.cursor/rules/emulator-reuse.mdc`. List devices first; reuse a running emulator; start **Medium Phone** only if none is open **and** device testing is needed.
+5. **Network** — only note if fetch, pub get, or doctor network failed.
+
+Report a short ready / prepared / blocked list. Do not hide uncommitted local work. Do not commit, push, merge, or start a second emulator as part of this check.
+
+Cursor agents also load this same checklist from `.cursor/rules/session-prerequisites.mdc` (always apply). Emulator reuse is `.cursor/rules/emulator-reuse.mdc`. Those files must stay in the repository so a clone on another computer receives the same instructions.
+
 ## 4. Baseline validation
 
 When practical, establish a baseline with the project-equivalent of:
