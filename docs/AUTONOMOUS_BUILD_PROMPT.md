@@ -8,16 +8,16 @@ Before changing code, read and follow, in order:
 
 1. any explicit task/user instructions supplied with this run;
 2. `docs/accepted_product_state.md` if present;
-3. `PRODUCT_SPEC.md`;
+3. `docs/PRODUCT_SPEC.md`;
 4. `docs/product_guardrails.md` if present;
-5. `AGENTS.md`;
+5. `AGENTS.md` (repository root);
 6. established architecture and passing tests.
 
 Use the tools available in your environment. Where these documents name a particular command, shell, Git action, emulator mechanism, or file operation, perform the equivalent operation with your available tooling. Do not skip a required validation because the exact interface differs.
 
 ## Mission
 
-Inspect the existing repository, preserve valid existing and in-progress work, complete all missing functionality required by `PRODUCT_SPEC.md`, harmonize the application into a modern production-quality experience, add comprehensive automated testing, perform actual emulator/device verification where available, repair all defects found, and produce installable Android artifacts.
+Inspect the existing repository, preserve valid existing and in-progress work, complete all missing functionality required by `docs/PRODUCT_SPEC.md`, harmonize the application into a modern production-quality experience, add comprehensive automated testing, perform actual emulator/device verification where available, repair all defects found, and produce installable Android artifacts.
 
 Work autonomously. Do not request approval between phases or milestones.
 
@@ -126,8 +126,8 @@ The result should look like a coherent modern mobile product, not a developer pr
 Keep project documentation synchronized with implementation. Create/update as appropriate:
 
 - `README.md`
-- `AGENTS.md`
-- `PRODUCT_SPEC.md`
+- `AGENTS.md` (repository root)
+- `docs/PRODUCT_SPEC.md`
 - `docs/accepted_product_state.md`
 - `docs/product_guardrails.md`
 - `docs/architecture.md`

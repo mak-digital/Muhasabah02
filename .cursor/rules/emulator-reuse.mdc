@@ -5,6 +5,8 @@ alwaysApply: true
 
 # Android emulator reuse
 
+Authoritative text for every agent: **`AGENTS.md` § 3.2**. If this file and AGENTS.md differ, follow AGENTS.md.
+
 When device or emulator testing is needed:
 
 1. List running emulators/devices first (`adb devices`, Flutter device list, or equivalent).

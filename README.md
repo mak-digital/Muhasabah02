@@ -9,7 +9,7 @@ Canonical flow: **RECORD → REFLECT → REVIEW → RECOGNISE → PONDER → RES
 
 ## Development sessions
 
-After a clone, IDE or machine restart, or resuming work, follow **`docs/AGENTS.md` § 3.1** (Git, Flutter, emulator reuse) before changing the app. Cursor loads the same checklist from `.cursor/rules/session-prerequisites.mdc` and emulator policy from `.cursor/rules/emulator-reuse.mdc`. Keep those files in the repository so every machine receives them.
+The owner of this app is not expected to write code. Coding agents must follow **`AGENTS.md`** at the repository root (any tool, any machine). After a clone, restart, or resuming work, they complete **§ 3.1** before changing the app. `docs/AGENTS.md`, `CLAUDE.md`, and `.github/copilot-instructions.md` only point at that file.
 
 ## Build and run (Android)
 
