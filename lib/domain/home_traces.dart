@@ -21,6 +21,9 @@ class HomeTraceRow {
 const kZakatTraceBand = 'Zakat status';
 const kHajjPreparationKey = 'hajj.preparation';
 const kHajjPreparationBand = 'Preparation';
+const kHajjLearnBand = 'Learn';
+const kHajjReadinessBand = 'Readiness';
+const kHajjAfterBand = 'After Hajj';
 
 const kHadithEngagedBand = 'ENGAGED with Hadith';
 
@@ -229,7 +232,11 @@ const charityHomeRows = [
   ),
 ];
 
-const hajjHomeRows = [
+/// Hajj is a lifetime standing record, not a daily Home observation.
+const hajjHomeRows = <HomeTraceRow>[];
+
+/// Leftover daily-preparation traces from the retired Home row.
+const hajjRetiredHomeRows = [
   HomeTraceRow(
     storageKey: kHajjPreparationKey,
     label: 'Noticed preparation',
@@ -1096,6 +1103,7 @@ const allHomeTraceRows = [
   ...charityHomeRows,
   ...fastingHomeRows,
   ...hajjHomeRows,
+  ...hajjRetiredHomeRows,
   ...hadithRetiredHomeRows,
   ...hadithHomeRows,
 ];
@@ -1132,42 +1140,6 @@ Map<String, String> tracesToJson(Map<String, TernaryOutcome> traces) {
             ? 'positive'
             : 'didNot',
   };
-}
-
-enum HajjStatus { unanswered, notDue, due, preparing, performed, notApplicable }
-
-extension HajjStatusX on HajjStatus {
-  bool get isRecorded => this != HajjStatus.unanswered;
-
-  bool get showsPreparation =>
-      this == HajjStatus.due || this == HajjStatus.preparing;
-
-  String get label => switch (this) {
-    HajjStatus.unanswered => 'Not recorded',
-    HajjStatus.notDue => 'Not due',
-    HajjStatus.due => 'Due',
-    HajjStatus.preparing => 'Preparing',
-    HajjStatus.performed => 'Performed',
-    HajjStatus.notApplicable => 'Not applicable',
-  };
-
-  static HajjStatus fromId(String? id) {
-    return HajjStatus.values.firstWhere(
-      (item) => item.name == id,
-      orElse: () => HajjStatus.unanswered,
-    );
-  }
-}
-
-List<HomeTraceRow> hajjRowsForStatus(
-  List<HomeTraceRow> rows,
-  HajjStatus status,
-) {
-  if (status.showsPreparation) return rows;
-  return [
-    for (final row in rows)
-      if (row.storageKey != kHajjPreparationKey) row,
-  ];
 }
 
 enum HadithMemorisationFocus { unanswered, reviewing, memorising, memorised }

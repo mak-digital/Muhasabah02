@@ -282,7 +282,9 @@ void main() {
       MonitorDomain.knowledge,
     );
     expect(
-      ActivityCatalog.forHomeTrace('knowledge.learnedSomethingTrue').first.label,
+      ActivityCatalog.forHomeTrace('knowledge.learnedSomethingTrue')
+          .first
+          .label,
       'Learned something new and verified its reliability',
     );
     expect(hidesHomeTraceFactors('knowledge.learnedSomethingTrue'), isTrue);
@@ -477,11 +479,10 @@ void main() {
       MonitorDomain.hajj.focusQuestion,
       'Have I named how Hajj stands with me — as I see it, not as the app decides?',
     );
-    expect(hajjHomeRows.map((row) => row.storageKey), [kHajjPreparationKey]);
-    expect(HajjStatus.unanswered.showsPreparation, isFalse);
-    expect(HajjStatus.due.showsPreparation, isTrue);
-    expect(HajjStatus.preparing.showsPreparation, isTrue);
-    expect(HajjStatus.performed.showsPreparation, isFalse);
+    expect(hajjHomeRows, isEmpty);
+    expect(hajjRetiredHomeRows.map((row) => row.storageKey), [
+      kHajjPreparationKey,
+    ]);
     expect(hidesHomeTraceFactors(kHajjPreparationKey), isTrue);
     expect(
       MonitorDomain.values.indexOf(MonitorDomain.fasting),

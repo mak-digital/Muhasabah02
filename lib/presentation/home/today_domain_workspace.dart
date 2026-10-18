@@ -51,7 +51,6 @@ class TodayDomainWorkspacePage extends ConsumerWidget {
         mix: prefs.personalMix,
       ),
       record: todayRecord,
-      hajjStatus: prefs.hajjStatus,
     );
     TodayDomain? group;
     for (final item in workspace.domains) {

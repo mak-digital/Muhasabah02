@@ -3,60 +3,58 @@ import 'monitor_domain.dart';
 import 'practice_dhikr_catalog.dart';
 import 'practice_hadith.dart';
 
-const kPracticeHajjGroups = [kHajjPreparationBand];
+const kPracticeHajjGroups = [
+  kHajjLearnBand,
+  kHajjReadinessBand,
+  kHajjAfterBand,
+];
 
-/// Qur’an that encourages the Hajj Home row.
-/// Noticing preparation — not a due-date, istita‘ah engine, or Umrah log.
+/// Educational catalog, always available. Not gated by standing or journey.
 final List<PracticeDhikrItem> kPracticeHajjCatalog = [
   _item(
     id: 'hj.prep.noticed',
-    group: kHajjPreparationBand,
-    topic: 'Noticed preparation',
+    group: kHajjLearnBand,
+    topic: 'Standing',
     text: 'Pilgrimage is a duty for those who are able:',
     arabic: 'وَلِلَّهِ عَلَى النَّاسِ حِجُّ الْبَيْتِ مَنِ اسْتَطَاعَ إِلَيْهِ سَبِيلًا',
     transliteration:
         'Wa-li-llāhi ʿalā n-nāsi ḥijju l-bayti mani staṭāʿa ilayhi sabīlā.',
     translation: 'Pilgrimage to the House is a duty owed to Allah by people who are able to undertake it.',
     source: 'Qur’an 3:97',
-    detail: 'A step of preparation you noticed. The app does not calculate whether Hajj is obligatory, does not set a year, and does not treat unanswered as missed. Umrah is not this status. Performed is a record, not a trophy.',
+    detail: 'Learn at any time. The app does not calculate whether Hajj is obligatory, does not set a year, and does not treat unanswered as missed. Umrah is not this standing. Performed is a record, not a trophy.',
   ),
   _item(
     id: 'hj.prep.noticed.2_196',
-    group: kHajjPreparationBand,
-    topic: 'Noticed preparation',
+    group: kHajjLearnBand,
+    topic: 'Completing',
     text: 'Complete the Hajj and the Umrah for Allah:',
     arabic: 'وَأَتِمُّوا الْحَجَّ وَالْعُمْرَةَ لِلَّهِ',
     transliteration: 'Wa-atimmū l-ḥajja wa-l-ʿumrata li-llāh.',
     translation: 'And complete the Hajj and the Umrah for Allah.',
     source: 'Qur’an 2:196',
-    detail:
-        'A step of preparation you noticed. Umrah is not this standing status. The app does not set a year.',
+    detail: 'Learn at any time. Umrah is not this standing. The app does not set a year.',
   ),
   _item(
     id: 'hj.prep.noticed.2_197',
-    group: kHajjPreparationBand,
-    topic: 'Noticed preparation',
+    group: kHajjReadinessBand,
+    topic: 'Known months',
     text: 'Hajj is in well-known months:',
     arabic: 'الْحَجُّ أَشْهُرٌ مَّعْلُومَاتٌ',
     transliteration: 'Al-ḥajju ashhurun maʿlūmāt.',
     translation: 'Hajj is in well-known months.',
     source: 'Qur’an 2:197',
-    detail:
-        'A step of preparation you noticed. The app does not calculate whether Hajj is obligatory.',
+    detail: 'Readiness is a checklist on a journey you choose, not a daily score. The app does not calculate whether Hajj is obligatory.',
   ),
   _item(
     id: 'hj.prep.noticed.bukhari_1513',
-    group: kHajjPreparationBand,
-    topic: 'Noticed preparation',
+    group: kHajjAfterBand,
+    topic: 'After Hajj',
     text: 'The Messenger of Allah ﷺ said:',
     arabic: 'مَنْ حَجَّ فَلَمْ يَرْفُثْ وَلَمْ يَفْسُقْ رَجَعَ كَيَوْمِ وَلَدَتْهُ أُمُّهُ',
-    transliteration:
-        'Man ḥajja fa-lam yarfuth wa-lam yafsuq rajaʿa ka-yawmi waladathu ummuh.',
-    translation:
-        'Whoever performs Hajj and does not engage in sexual talk or sin returns like the day his mother bore him.',
+    transliteration: 'Man ḥajja fa-lam yarfuth wa-lam yafsuq rajaʿa ka-yawmi waladathu ummuh.',
+    translation: 'Whoever performs Hajj and does not engage in sexual talk or sin returns like the day his mother bore him.',
     source: 'Ṣaḥīḥ al-Bukhārī 1521',
-    detail:
-        'A step of preparation you noticed. Performed is a record, not a trophy. Unanswered is not missed Hajj.',
+    detail: 'Optional after-Hajj reflection and continuing practice. Performed is a record, not a trophy. Unanswered is not missed Hajj.',
   ),
 ];
 

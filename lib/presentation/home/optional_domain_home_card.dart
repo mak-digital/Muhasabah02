@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/theme.dart';
 import '../../application/providers.dart';
 import '../../domain/activities.dart';
-import '../../domain/copy.dart';
 import '../../domain/daily_check_in.dart';
 import '../../domain/date_key.dart';
 import '../../domain/display_calendar.dart';
@@ -15,8 +14,8 @@ import '../../domain/personal_mix.dart';
 import '../../domain/quran.dart';
 import '../../domain/weekly_calendar.dart';
 import '../checkin/check_in_screen.dart';
+import 'hajj_home_dashboard.dart';
 import '../progress/optional_domain_progress_screen.dart';
-import '../shared/activity_picker.dart';
 import '../shared/salah_activity_mark.dart';
 import '../shared/state_marker.dart';
 import '../shared/today_mark_halo.dart';
@@ -91,10 +90,7 @@ class _OptionalDomainHomeCardState
       Theme.of(context).brightness,
     );
     final localizations = MaterialLocalizations.of(context);
-    final hajjStatus = ref.watch(appPrefsProvider).hajjStatus;
-    var visibleRows = widget.includeHajjStatus
-        ? hajjRowsForStatus(widget.rows, hajjStatus)
-        : widget.rows;
+    var visibleRows = widget.rows;
     if (widget.gateFastingRamadan) {
       final prefs = ref.watch(appPrefsProvider);
       visibleRows = gatedFastingHomeRows(
@@ -138,7 +134,6 @@ class _OptionalDomainHomeCardState
                       },
               ),
               const SizedBox(height: 4),
-              if (widget.includeHajjStatus) _hajjStatus(),
               if (showWeek) ...[
                 Row(
                   children: [
@@ -196,46 +191,10 @@ class _OptionalDomainHomeCardState
                   if (widget.includeZakat) _zakatBand(keys: keys, index: index),
                 ],
               ],
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _hajjStatus() {
-    final prefs = ref.watch(appPrefsProvider);
-    final current = prefs.hajjStatus;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: widget.family.withValues(alpha: 0.12),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const CheckInRowLabel(Copy.hajjStatusLabel),
-              CheckInSelect<HajjStatus>(
-                dropdownKey: const Key('hajj-status'),
-                value: current,
-                entries: [
-                  for (final option in HajjStatus.values)
-                    CheckInSelectEntry(value: option, label: option.label),
-                ],
-                onChanged: (option) async {
-                  await prefs.setHajjStatus(option);
-                  ref.read(prefsTickProvider.notifier).state++;
-                },
-              ),
-              const SizedBox(height: 6),
-              Text(
-                Copy.hajjStatusNote,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
+              if (widget.includeHajjStatus) ...[
+                const SizedBox(height: 8),
+                HajjHomeDashboard(family: widget.family),
+              ],
             ],
           ),
         ),

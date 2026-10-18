@@ -5,6 +5,7 @@ import '../domain/personal_response.dart';
 import '../domain/personal_hadith.dart';
 import '../domain/personal_quran_verse.dart';
 import '../domain/practice_hadith.dart';
+import '../domain/hajj_planning.dart';
 
 abstract class CheckInRepository {
   Future<DailyCheckIn?> getByDate(String dateKey);
@@ -52,6 +53,14 @@ abstract class PersonalHadithRepository {
   Future<void> save(PersonalHadith record);
   Future<bool> delete(String id);
   List<String> get corruptKeys;
+}
+
+abstract class HajjStoreRepository {
+  HajjStore get store;
+  HajjStoreDecodeKind get loadKind;
+  bool get hasUnknownSchema;
+  Future<void> save(HajjStore store);
+  Future<HajjStore> initializeIfNeeded();
 }
 
 abstract class DevFeedbackRepository {

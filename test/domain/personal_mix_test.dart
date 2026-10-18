@@ -13,7 +13,7 @@ void main() {
     );
     expect(mixCatalog.any((item) => item.id == kZakatMixKey), isTrue);
     expect(mixCatalog.any((item) => item.id == kHajjMixKey), isTrue);
-    expect(mixCatalog.any((item) => item.id == kHajjPreparationKey), isTrue);
+    expect(mixCatalog.any((item) => item.id == kHajjPreparationKey), isFalse);
     expect(
       mixCatalog.any((item) => item.id == 'akhlaq.guardedMyGlance'),
       isFalse,
@@ -90,7 +90,7 @@ void main() {
     expect(kWorshipMixKeys.contains('quran.reading'), isTrue);
     expect(kWorshipMixKeys.contains('dhikr.postFardFajr'), isTrue);
     expect(kWorshipMixKeys.contains(kHajjMixKey), isTrue);
-    expect(kWorshipMixKeys.contains(kHajjPreparationKey), isTrue);
+    expect(kWorshipMixKeys.contains(kHajjPreparationKey), isFalse);
     expect(kWorshipMixKeys.contains(hadithEncounterKey), isTrue);
     expect(kWorshipMixKeys.contains(hadithLivedNoticedKey), isTrue);
     expect(kWorshipMixKeys.contains('hadith.reading'), isFalse);

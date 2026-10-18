@@ -30,7 +30,6 @@ abstract class AppPrefs {
   HadithMemorisationFocus get hadithMemorisationFocus;
   int get practiceHadithBrowseIndex;
   int get practiceQuranBrowseIndex;
-  HajjStatus get hajjStatus;
   int get ramadanCalendarOffsetDays;
   bool get showFastingRamadanHistory;
   bool get mixHiddenDomainHintShown;
@@ -66,7 +65,6 @@ abstract class AppPrefs {
   Future<void> setHadithMemorisationFocus(HadithMemorisationFocus value);
   Future<void> setPracticeHadithBrowseIndex(int value);
   Future<void> setPracticeQuranBrowseIndex(int value);
-  Future<void> setHajjStatus(HajjStatus value);
   Future<void> setRamadanCalendarOffsetDays(int value);
   Future<void> setShowFastingRamadanHistory(bool value);
   Future<void> setMixHiddenDomainHintShown(bool value);
@@ -93,7 +91,6 @@ class MemoryAppPrefs implements AppPrefs {
     this.hadithMemorisationFocus = HadithMemorisationFocus.unanswered,
     this.practiceHadithBrowseIndex = 0,
     this.practiceQuranBrowseIndex = 0,
-    this.hajjStatus = HajjStatus.unanswered,
     this.ramadanCalendarOffsetDays = 0,
     this.showFastingRamadanHistory = false,
     this.mixHiddenDomainHintShown = false,
@@ -158,9 +155,6 @@ class MemoryAppPrefs implements AppPrefs {
 
   @override
   int practiceQuranBrowseIndex;
-
-  @override
-  HajjStatus hajjStatus;
 
   @override
   int ramadanCalendarOffsetDays;
@@ -386,9 +380,6 @@ class MemoryAppPrefs implements AppPrefs {
   @override
   Future<void> setPracticeQuranBrowseIndex(int value) async =>
       practiceQuranBrowseIndex = value;
-
-  @override
-  Future<void> setHajjStatus(HajjStatus value) async => hajjStatus = value;
 
   @override
   Future<void> setRamadanCalendarOffsetDays(int value) async =>

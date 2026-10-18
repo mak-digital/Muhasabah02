@@ -49,3 +49,9 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+# Local Hajj Worker (Wrangler). Never commit account state or node_modules.
+backend/hajj-worker/node_modules/
+backend/hajj-worker/.wrangler/
+backend/hajj-worker/wrangler.toml
+docs/hajj/**/uidump.xml

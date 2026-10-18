@@ -29,6 +29,7 @@ import '../../domain/situation_notes.dart';
 import '../../domain/health_practices.dart';
 import '../../domain/charity_practices.dart';
 import '../../domain/fasting_practices.dart';
+import '../shared/hajj_standing_editor.dart';
 import '../../domain/ummah_practices.dart';
 import '../../domain/wealth_practices.dart';
 import '../../domain/time_practices.dart';
@@ -941,10 +942,7 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
 
   List<Widget> _tracesBody(Set<String> mixKeys) {
     final accent = widget.familyColor ?? MuhasabahColors.dhikr;
-    final hajjStatus = ref.watch(appPrefsProvider).hajjStatus;
-    var visible = widget.includeHajjStatus
-        ? hajjRowsForStatus(widget.traceRows, hajjStatus)
-        : widget.traceRows;
+    var visible = widget.traceRows;
     if (visible.any((row) => row.storageKey.startsWith('fasting.'))) {
       final prefs = ref.watch(appPrefsProvider);
       visible = gatedFastingHomeRows(
@@ -983,7 +981,7 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
           'Only this domain is shown. Other records for the day stay unchanged.',
         ),
       const SizedBox(height: 12),
-      if (widget.includeHajjStatus) _hajjStatusEditor(),
+      if (widget.includeHajjStatus) const HajjStandingEditor(bottomPadding: 12),
       for (var i = 0; i < bands.length; i++)
         _collapsibleTraceBand(
           title: widget.domainTitle ?? 'Record',
@@ -1681,38 +1679,6 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
     );
   }
 
-  Widget _hajjStatusEditor() {
-    final prefs = ref.watch(appPrefsProvider);
-    final current = prefs.hajjStatus;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const CheckInRowLabel(Copy.hajjStatusLabel),
-          CheckInSelect<HajjStatus>(
-            dropdownKey: const Key('hajj-status'),
-            value: current,
-            entries: [
-              for (final option in HajjStatus.values)
-                CheckInSelectEntry(value: option, label: option.label),
-            ],
-            onChanged: (option) async {
-              await prefs.setHajjStatus(option);
-              ref.read(prefsTickProvider.notifier).state++;
-              setState(() {});
-            },
-          ),
-          const SizedBox(height: 6),
-          Text(
-            Copy.hajjStatusNote,
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _hadithFocusEditor() {
     final prefs = ref.watch(appPrefsProvider);
     final current = prefs.hadithMemorisationFocus;
@@ -2072,10 +2038,7 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
     bool expandFirst = true,
     Set<String> mixKeys = const {},
   }) {
-    final status = ref.watch(appPrefsProvider).hajjStatus;
-    final visibleRows = includeHajjStatus
-        ? hajjRowsForStatus(rows, status)
-        : rows;
+    final visibleRows = rows;
     final mixVisible = [
       for (final row in visibleRows)
         if (mixKeys.isEmpty || mixKeys.contains(row.storageKey)) row,
@@ -2121,7 +2084,7 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
             ),
           ],
           const SizedBox(height: 12),
-          if (includeHajjStatus) _hajjStatusEditor(),
+          if (includeHajjStatus) const HajjStandingEditor(bottomPadding: 12),
           for (var i = 0; i < bands.length; i++)
             _collapsibleTraceBand(
               title: title,

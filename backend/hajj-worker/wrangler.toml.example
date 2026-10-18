@@ -1,0 +1,37 @@
+# Production-shaped template. Copy to wrangler.toml only after owner approval.
+# Never set ENVIRONMENT=local or HAJJ_MOCK_ORIGIN here.
+name = "muhasabah-hajj-sources"
+main = "src/worker.js"
+compatibility_date = "2026-10-18"
+
+# Optional public-page cache only. Do not use KV for quotas.
+# kv_namespaces = [{ binding = "HAJJ_SOURCE_CACHE", id = "REPLACE_AFTER_APPROVAL" }]
+
+[[ratelimits]]
+name = "INCOMING_LIMITER"
+namespace_id = "1001"
+[ratelimits.simple]
+limit = 40
+period = 60
+
+[[ratelimits]]
+name = "ORIGIN_LIMITER"
+namespace_id = "1002"
+[ratelimits.simple]
+limit = 6
+period = 60
+
+[vars]
+CONTRACT_VERSION = "v1"
+ENVIRONMENT = "production"
+CACHE_TTL_SECONDS = "86400"
+FETCH_TIMEOUT_MS = "8000"
+MAX_BODY_BYTES = "8000"
+PER_INSTALL_DAILY = "5"
+GLOBAL_ACCEPTED_DAILY = "200"
+GLOBAL_INCOMING_DAILY = "4000"
+BURST_PER_MINUTE = "5"
+ORIGIN_GETS_PER_ADAPTER_DAILY = "2"
+ORIGIN_GETS_GLOBAL_DAILY = "8"
+# Leave empty in git. Set in the dashboard after approval; never commit the value.
+PILOT_GATE = ""

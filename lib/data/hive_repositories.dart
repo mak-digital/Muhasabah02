@@ -17,6 +17,7 @@ import '../domain/personal_response.dart';
 import '../domain/personal_hadith.dart';
 import '../domain/personal_quran_verse.dart';
 import '../domain/practice_hadith.dart';
+import '../domain/hajj_planning.dart';
 import '../domain/quotation_cadence.dart';
 import 'codecs.dart';
 import 'repositories.dart';
@@ -564,7 +565,6 @@ class HiveAppPrefs implements AppPrefs {
   static const _hadithFocus = 'hadith_memorisation_focus';
   static const _practiceHadithIndex = 'practice_hadith_browse_index';
   static const _practiceQuranIndex = 'practice_quran_browse_index';
-  static const _hajjStatus = 'hajj_status';
   static const _ramadanOffset = 'ramadan_calendar_offset_days';
   static const _fastingRamadanHistory = 'show_fasting_ramadan_history';
   static const _mixHiddenHint = 'mix_hidden_domain_hint';
@@ -835,12 +835,11 @@ class HiveAppPrefs implements AppPrefs {
   Future<void> setPracticeQuranBrowseIndex(int value) =>
       _box.put(_practiceQuranIndex, '$value');
 
-  @override
-  HajjStatus get hajjStatus => HajjStatusX.fromId(_box.get(_hajjStatus));
+  Future<void> discardLegacyHajjStatus() async {
+    await _box.delete(kLegacyHajjStatusPrefsKey);
+  }
 
-  @override
-  Future<void> setHajjStatus(HajjStatus value) =>
-      _box.put(_hajjStatus, value.name);
+  bool get hasLegacyHajjStatus => _box.containsKey(kLegacyHajjStatusPrefsKey);
 
   @override
   int get ramadanCalendarOffsetDays {
@@ -906,6 +905,53 @@ class HiveAppPrefs implements AppPrefs {
       _box.put(_arabicScriptSize, '${clampArabicScriptSize(value)}');
 }
 
+class HiveHajjStoreRepository implements HajjStoreRepository {
+  HiveHajjStoreRepository(this._box);
+
+  final Box<String> _box;
+
+  @override
+  HajjStore store = const HajjStore();
+
+  @override
+  HajjStoreDecodeKind loadKind = HajjStoreDecodeKind.missing;
+
+  @override
+  bool get hasUnknownSchema => loadKind == HajjStoreDecodeKind.unknownVersion;
+
+  @override
+  Future<void> save(HajjStore next) async {
+    if (hasUnknownSchema) return;
+    final encoded = encodeHajjStore(next);
+    await _box.put(kHajjStoreDocumentKey, encoded);
+    store = next;
+    loadKind = HajjStoreDecodeKind.ok;
+  }
+
+  @override
+  Future<HajjStore> initializeIfNeeded() async {
+    final raw = _box.get(kHajjStoreDocumentKey);
+    final decoded = decodeHajjStore(raw);
+    loadKind = decoded.kind;
+    if (decoded.kind == HajjStoreDecodeKind.unknownVersion) {
+      store = const HajjStore();
+      return store;
+    }
+    if (decoded.kind == HajjStoreDecodeKind.ok && decoded.store != null) {
+      store = decoded.store!;
+      return store;
+    }
+    if (decoded.kind == HajjStoreDecodeKind.corrupt) {
+      store = const HajjStore();
+      return store;
+    }
+    store = const HajjStore();
+    loadKind = HajjStoreDecodeKind.ok;
+    await _box.put(kHajjStoreDocumentKey, encodeHajjStore(store));
+    return store;
+  }
+}
+
 Future<
   ({
     HiveCheckInRepository checkIns,
@@ -916,6 +962,7 @@ Future<
     HivePracticeHadithRepository practiceHadith,
     HivePersonalQuranVerseRepository personalQuran,
     HivePersonalHadithRepository personalHadith,
+    HiveHajjStoreRepository hajj,
   })
 >
 openHiveRepositories() async {
@@ -928,14 +975,20 @@ openHiveRepositories() async {
   final practiceHadith = await Hive.openBox<String>(practiceHadithBoxName);
   final personalQuran = await Hive.openBox<String>(personalQuranBoxName);
   final personalHadith = await Hive.openBox<String>(personalHadithBoxName);
+  final hajjBox = await Hive.openBox<String>(hajjStoreBoxName);
+  final hivePrefs = HiveAppPrefs(prefs);
+  await hivePrefs.discardLegacyHajjStatus();
+  final hajj = HiveHajjStoreRepository(hajjBox);
+  await hajj.initializeIfNeeded();
   return (
     checkIns: HiveCheckInRepository(checkIns),
     responses: HiveResponseRepository(responses),
-    prefs: HiveAppPrefs(prefs),
+    prefs: hivePrefs,
     domainActions: HiveDomainActionRepository(domainActions),
     devFeedback: HiveDevFeedbackRepository(devFeedback),
     practiceHadith: HivePracticeHadithRepository(practiceHadith),
     personalQuran: HivePersonalQuranVerseRepository(personalQuran),
     personalHadith: HivePersonalHadithRepository(personalHadith),
+    hajj: hajj,
   );
 }

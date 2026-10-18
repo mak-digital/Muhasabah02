@@ -16,6 +16,12 @@ import '../domain/personal_hadith.dart';
 import '../domain/personal_quran_verse.dart';
 import '../domain/personal_response.dart';
 import '../domain/practice_hadith.dart';
+import '../data/hajj_live_http.dart';
+import '../domain/hajj_live_gateway.dart';
+import '../domain/hajj_online_assist.dart';
+import '../domain/hajj_online_contracts.dart';
+import '../domain/hajj_planning.dart';
+import '../domain/hajj_source_catalog.dart';
 import '../domain/quran_verse_fetch.dart';
 import '../domain/review_period.dart';
 
@@ -53,6 +59,68 @@ final quranVerseFetchProvider = Provider<QuranVerseFetch>(
 final personalHadithRepositoryProvider = Provider<PersonalHadithRepository>(
   (ref) => MemoryPersonalHadithRepository(),
 );
+
+final hajjStoreRepositoryProvider = Provider<HajjStoreRepository>(
+  (ref) => MemoryHajjStoreRepository(),
+);
+
+final hajjStoreTickProvider = StateProvider<int>((ref) => 0);
+
+final hajjSourceRegistryProvider = Provider<HajjSourceRegistry>(
+  (ref) => const BundledHajjSourceRegistry(),
+);
+
+final hajjPathwayResolverProvider = Provider<HajjPathwayResolver>(
+  (ref) =>
+      LocalHajjPathwayResolver(registry: ref.watch(hajjSourceRegistryProvider)),
+);
+
+final hajjOnlineAssistGatewayProvider = Provider<HajjOnlineAssistGateway>((
+  ref,
+) {
+  final demo = DemoHajjOnlineAssistGateway(
+    registry: ref.watch(hajjSourceRegistryProvider),
+  );
+  final liveUrl = kHajjLiveBaseUrl.trim();
+  if (liveUrl.isEmpty) return demo;
+  return SelectableHajjOnlineAssistGateway(
+    demo: demo,
+    live: LiveHajjOnlineAssistGateway(
+      send: (request) => hajjLiveHttpPost(
+        baseUrl: liveUrl,
+        request: request,
+        pilotGate: kHajjLiveGate,
+      ),
+    ),
+  );
+});
+
+final hajjOfficialSourceGatewayProvider = Provider<HajjOfficialSourceGateway>(
+  (ref) => DemoHajjOfficialSourceGateway(
+    inner: DemoHajjOnlineAssistGateway(
+      registry: ref.watch(hajjSourceRegistryProvider),
+    ),
+  ),
+);
+
+final hajjAiInterpretationGatewayProvider =
+    Provider<HajjAIInterpretationGateway>(
+      (ref) => const DemoHajjAIInterpretationGateway(),
+    );
+
+final hajjProviderDirectoryGatewayProvider =
+    Provider<HajjProviderDirectoryGateway>(
+      (ref) => const EmptyHajjProviderDirectoryGateway(),
+    );
+
+Future<void> persistHajjStore(
+  WidgetRef ref,
+  HajjStore Function(HajjStore current) update,
+) async {
+  final repo = ref.read(hajjStoreRepositoryProvider);
+  await repo.save(update(repo.store));
+  ref.read(hajjStoreTickProvider.notifier).state++;
+}
 
 final hadithFetchProvider = Provider<HadithFetch>(
   (ref) => PublicHadithFetch(get: quranVerseHttpGet),
@@ -246,7 +314,8 @@ final devFeedbackProvider =
       DevFeedbackController.new,
     );
 
-class PracticeHadithController extends AsyncNotifier<List<PracticeHadithRecord>> {
+class PracticeHadithController
+    extends AsyncNotifier<List<PracticeHadithRecord>> {
   @override
   Future<List<PracticeHadithRecord>> build() {
     return ref.read(practiceHadithRepositoryProvider).allHealthy();

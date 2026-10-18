@@ -30,13 +30,11 @@ void main() {
     Set<MonitorDomain>? visible,
     PersonalMix? mix,
     DailyCheckIn? record,
-    HajjStatus hajjStatus = HajjStatus.unanswered,
   }) {
     return deriveTodayWorkspace(
       dateKey: dateKey,
       resolver: resolver(visible: visible, mix: mix),
       record: record,
-      hajjStatus: hajjStatus,
     );
   }
 
@@ -184,8 +182,7 @@ void main() {
 
   test('hidden domain is absent even when mix names its rows', () {
     final mix = mixForKind(PersonalMixKind.firstLook);
-    final visible = {...kBasicDhikrVisibleDomains}
-      ..remove(MonitorDomain.quran);
+    final visible = {...kBasicDhikrVisibleDomains}..remove(MonitorDomain.quran);
     final subject = workspace(visible: visible, mix: mix);
     expect(
       subject.domains.map((group) => group.domain),
@@ -296,28 +293,12 @@ void main() {
       kind: PersonalMixKind.custom,
       keys: {'salah.fajr', kHajjMixKey, kHajjPreparationKey},
     );
-    final hiddenPrep = workspace(
-      visible: visible,
-      mix: mix,
-      hajjStatus: HajjStatus.notDue,
-    );
-    expect(rowOf(hiddenPrep, kHajjMixKey), isNull);
-    expect(rowOf(hiddenPrep, kHajjPreparationKey), isNull);
+    final subject = workspace(visible: visible, mix: mix);
+    expect(rowOf(subject, kHajjMixKey), isNull);
+    expect(rowOf(subject, kHajjPreparationKey), isNull);
     expect(
-      hiddenPrep.domains.any((group) => group.domain == MonitorDomain.hajj),
+      subject.domains.any((group) => group.domain == MonitorDomain.hajj),
       isTrue,
-    );
-
-    final shownPrep = workspace(
-      visible: visible,
-      mix: mix,
-      hajjStatus: HajjStatus.preparing,
-    );
-    expect(rowOf(shownPrep, kHajjMixKey), isNull);
-    expect(rowOf(shownPrep, kHajjPreparationKey)?.kind, TodayRowKind.homeTrace);
-    expect(
-      rowOf(shownPrep, kHajjPreparationKey)?.recordedState,
-      TodayRecordedState.noResponse,
     );
   });
 

@@ -31,11 +31,10 @@ Future<void> main() async {
       ),
     );
     overrides.add(
-      personalHadithRepositoryProvider.overrideWithValue(
-        opened.personalHadith,
-      ),
+      personalHadithRepositoryProvider.overrideWithValue(opened.personalHadith),
     );
     overrides.add(appPrefsProvider.overrideWithValue(opened.prefs));
+    overrides.add(hajjStoreRepositoryProvider.overrideWithValue(opened.hajj));
     logAppEvent('persistence_ready');
   } catch (_) {
     logAppEvent('persistence_fallback_memory');

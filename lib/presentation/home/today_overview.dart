@@ -43,7 +43,6 @@ class TodayOverview extends ConsumerWidget {
         mix: prefs.personalMix,
       ),
       record: todayRecord,
-      hajjStatus: prefs.hajjStatus,
     );
     final weekday = weekdayNameForDate(workspace.dateKey);
     final dateLine = formatDayMonthYear(now, prefs.displayCalendar);

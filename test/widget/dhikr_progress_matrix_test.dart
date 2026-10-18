@@ -328,8 +328,8 @@ void main() {
     await tester.pumpAndSettle();
 
     await openProgress(const Key('review-domain-hajj'));
-    expect(find.text('Noticed preparation'), findsOneWidget);
-    expect(find.text('Prep'), findsNothing);
+    expect(find.text('Noticed preparation'), findsNothing);
+    expect(find.textContaining('Hajj standing'), findsWidgets);
   });
 
   testWidgets('Salah 7-day Progress uses prayer-row matrices', (tester) async {

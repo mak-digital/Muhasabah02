@@ -7,6 +7,7 @@ import '../../domain/analytics.dart';
 import '../../domain/copy.dart';
 import '../../domain/daily_check_in.dart';
 import '../../domain/home_traces.dart';
+import '../../domain/hajj_planning.dart';
 import '../../domain/domain_briefing.dart';
 import '../../domain/quran.dart';
 import '../../domain/review_period.dart';
@@ -88,7 +89,12 @@ class _OptionalDomainProgressScreenState
           final hadithFocus = ref
               .watch(appPrefsProvider)
               .hadithMemorisationFocus;
-          final hajjStatus = ref.watch(appPrefsProvider).hajjStatus;
+          ref.watch(hajjStoreTickProvider);
+          final hajjStanding = ref
+              .watch(hajjStoreRepositoryProvider)
+              .store
+              .standing
+              .kind;
           final briefing = briefingForLabel(title);
           return ProgressReviewFrame(
             focusQuestion: focusQuestion,
@@ -136,7 +142,7 @@ class _OptionalDomainProgressScreenState
               ],
               if (includeHajjStatus) ...[
                 Text(
-                  '${Copy.hajjStatusLabel}: ${hajjStatus.label}',
+                  '${Copy.hajjStatusLabel}: ${hajjStanding.label}',
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 const SizedBox(height: 4),

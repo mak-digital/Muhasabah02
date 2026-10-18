@@ -1,0 +1,33 @@
+# Staging shape for a later workers.dev or preview hostname. Mock is ignored
+# because ENVIRONMENT is not local/test.
+name = "muhasabah-hajj-sources-staging"
+main = "src/worker.js"
+compatibility_date = "2026-10-18"
+
+[[ratelimits]]
+name = "INCOMING_LIMITER"
+namespace_id = "1001"
+[ratelimits.simple]
+limit = 20
+period = 60
+
+[[ratelimits]]
+name = "ORIGIN_LIMITER"
+namespace_id = "1002"
+[ratelimits.simple]
+limit = 6
+period = 60
+
+[vars]
+CONTRACT_VERSION = "v1"
+ENVIRONMENT = "staging"
+CACHE_TTL_SECONDS = "86400"
+FETCH_TIMEOUT_MS = "8000"
+MAX_BODY_BYTES = "8000"
+PER_INSTALL_DAILY = "3"
+GLOBAL_ACCEPTED_DAILY = "50"
+GLOBAL_INCOMING_DAILY = "500"
+BURST_PER_MINUTE = "5"
+ORIGIN_GETS_PER_ADAPTER_DAILY = "2"
+ORIGIN_GETS_GLOBAL_DAILY = "8"
+PILOT_GATE = ""

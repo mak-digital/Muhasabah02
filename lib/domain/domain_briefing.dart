@@ -224,12 +224,12 @@ const fastingBriefing = DomainBriefing(
 
 const hajjBriefing = DomainBriefing(
   lead: [
-    'Hajj is a standing status you set: not due, due as you see it, preparing, performed, or not applicable.',
+    'Hajj standing is a lifetime record you set. A journey is optional and separately stored. The app does not decide whether Hajj is obligatory.',
   ],
   items: [
-    'The app does not calculate whether Hajj is obligatory, does not set a year, and does not treat an empty mark as missed.',
-    'Daily preparation is optional noticing — saving, health, learning rites, or travel — not a countdown and not a visa checklist score.',
-    'Umrah is not this status. Performed is a record, not a trophy.',
+    'Unanswered, unsure, not planning, not applicable, and prefer not to record stay available. Empty is not missed Hajj.',
+    'Readiness is a checklist on a journey you choose to start — not a daily score and not a visa engine.',
+    'Learn & Practice is always available, independent of standing or journey. After Hajj is optional reflection, not a trophy. Umrah is not this standing.',
   ],
 );
 

@@ -9,6 +9,7 @@ import '../../domain/daily_check_in.dart';
 import '../../domain/date_key.dart';
 import '../../domain/display_calendar.dart';
 import '../../domain/home_traces.dart';
+import '../../domain/hajj_planning.dart';
 import '../../domain/fasting_practices.dart';
 import '../../domain/monitor_domain.dart';
 import '../../domain/other_domains.dart';
@@ -37,6 +38,7 @@ class ReviewScreen extends ConsumerWidget {
     final period = ref.watch(reviewPeriodProvider);
     final now = ref.watch(nowProvider);
     final async = ref.watch(checkInsProvider);
+    ref.watch(hajjStoreTickProvider);
     return Scaffold(
       appBar: AppBar(title: const Text(Copy.reviewTitle)),
       body: async.when(
@@ -72,7 +74,6 @@ class ReviewScreen extends ConsumerWidget {
           var wealthDays = 0;
           var ummahDays = 0;
           var fastingDays = 0;
-          var hajjDays = 0;
           var charityDays = 0;
           var hadithDays = 0;
           var conductDays = 0;
@@ -109,9 +110,6 @@ class ReviewScreen extends ConsumerWidget {
             if (record.fasting.isRecorded ||
                 _hasRecordedTrace(record, fastingHomeRows)) {
               fastingDays++;
-            }
-            if (_hasRecordedTrace(record, hajjHomeRows)) {
-              hajjDays++;
             }
             if (record.charity.isRecorded ||
                 _hasRecordedTrace(record, charityHomeRows)) {
@@ -417,7 +415,7 @@ class ReviewScreen extends ConsumerWidget {
                 title: MonitorDomain.hajj.label,
                 progressLabel: '${MonitorDomain.hajj.label} Progress',
                 line:
-                    'Standing status: ${ref.watch(appPrefsProvider).hajjStatus.label}. $hajjDays days with noticed preparation.',
+                    'Standing: ${ref.watch(hajjStoreRepositoryProvider).store.standing.kind.label}. ${ref.watch(hajjStoreRepositoryProvider).store.journeys.length} stored journey(s). Learn & Practice is independent.',
                 color: MuhasabahColors.wash(
                   MuhasabahColors.hajjWash,
                   MuhasabahColors.hajjWashDark,

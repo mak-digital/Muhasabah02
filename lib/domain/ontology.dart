@@ -501,6 +501,12 @@ List<HomeTraceOntologyRecord> _buildHomeTraces() {
       ),
     for (final row in hajjHomeRows)
       _homeTraceRecord(row, OntologyNodeStatus.active, ConceptualDomainId.hajj),
+    for (final row in hajjRetiredHomeRows)
+      _homeTraceRecord(
+        row,
+        OntologyNodeStatus.retired,
+        ConceptualDomainId.hajj,
+      ),
     for (final row in hadithRetiredHomeRows)
       _homeTraceRecord(
         row,

@@ -138,7 +138,7 @@ List<MixItem> _buildMixCatalog() {
     const MixItem(
       id: kHajjMixKey,
       domain: MonitorDomain.hajj,
-      band: 'Hajj status',
+      band: 'Hajj standing',
       label: 'Hajj',
     ),
   );
@@ -162,8 +162,7 @@ final kWorshipMixKeys = mixKeysWhere(
               item.id == hadithLivedNoticedKey)) ||
       (item.domain == MonitorDomain.dhikr &&
           item.band == 'Post-fard Salah Adhkar') ||
-      item.id == kHajjMixKey ||
-      item.id == kHajjPreparationKey,
+      item.id == kHajjMixKey,
 );
 
 final kCharacterRightsMixKeys = mixKeysWhere(
@@ -337,8 +336,7 @@ List<HomeTraceRow> mixTraceRows(MonitorDomain domain, Set<String> keys) {
 
 bool mixIncludesZakat(Set<String> keys) => keys.contains(kZakatMixKey);
 
-bool mixIncludesHajj(Set<String> keys) =>
-    keys.contains(kHajjMixKey) || keys.contains(kHajjPreparationKey);
+bool mixIncludesHajj(Set<String> keys) => keys.contains(kHajjMixKey);
 
 Set<MonitorDomain> hiddenDomainsInMix(
   PersonalMix mix,

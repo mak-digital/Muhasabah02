@@ -291,13 +291,81 @@ class Copy {
   static const hadithDurationNote =
       'ENGAGED with Hadith holds four rows: read and/or listened, memorization or revision, study circle or discussion, and lived or noticed in others. The first three use the same duration steps as Qur’an Engagement. Lived /Noticed others is how a teaching reached life today — not a revival score.';
   static String get hajjObservationNote => hajjBriefing.plainText;
-  static const hajjStatusLabel = 'Hajj';
+  static const hajjStatusLabel = 'Hajj standing';
   static const hajjStatusNote =
-      'This is your record, not a ruling. The app does not decide ability or timing.';
+      'This is a lifetime record you set, not a ruling. The app does not decide ability or timing. A journey is optional and separate. Unsure and not applicable stay available.';
+  static const hajjJourneyInvite =
+      'You may keep a plan here if you want. Creating a plan does not mean you must undertake Hajj.';
+  static const hajjCreateJourney = 'Create a Hajj plan';
+  static const hajjJourneySection = 'My Hajj Journey';
+  static const hajjReadinessSection = 'Readiness & Prerequisites';
+  static const hajjCalendarSection = 'Planning Calendar';
+  static const hajjFamilySection = 'Family & Companions';
+  static const hajjAfterSection = 'After Hajj';
+  static const hajjLearningSection = 'Readiness learning';
+  static const hajjConfirmationNote =
+      'Confirmed by you is not official verification. Official deadlines stay as you typed them.';
+  static const hajjOfficialVerifiedLabel = 'Verified official requirement';
+  static const hajjUserConfirmedLabel = 'Confirmed by user';
+  static const hajjTravelerReadinessNote =
+      'Each companion keeps their own passport, residence, health, and travel confirmations. Shared milestones do not copy those confirmations.';
+  static const hajjNoDocumentUpload =
+      'Do not upload identity documents. Notes and a source label you type are enough.';
+  static const hajjDependencyCycle =
+      'A milestone cannot depend on itself or on a chain that loops back.';
+  static const hajjActionWindow = 'Recommended action window';
+  static const hajjMilestoneTitleRequired =
+      'Name this milestone before saving.';
+  static const hajjMilestoneDateRequired =
+      'Add an official or tentative date, or mark it as unscheduled.';
+  static const hajjMilestoneDateInvalid =
+      'Use YYYY-MM-DD for dates you type. The official deadline is not invented.';
+  static const hajjMilestoneUnscheduled = 'Unscheduled — no date yet';
+  static const hajjPastMilestones = 'Past dates';
+  static const hajjBeyondHorizon = 'After this horizon';
+  static const hajjUnscheduledMilestones = 'Unscheduled milestones';
+  static const hajjMonthEmpty = 'No stored dates this month';
+  static const hajjPlanSummarySection = 'Journey summary';
+  static const hajjPathwaySection = 'Planning pathways';
+  static const hajjReturnSection = 'Return scenarios';
+  static const hajjPathwayConfirm = 'Confirm planning route';
+  static const hajjApplyTemplates = 'Apply preparation template';
+  static const hajjPathwayNotEligibility =
+      'These are planning categories, not legal eligibility. Confirm a route yourself. The app does not check quota, visas, or operators.';
+  static const hajjEstimateNotOfficial =
+      'Suggested dates are planning estimates. Official deadlines stay as you typed them.';
+  static const hajjUnusedNotRefundable =
+      'Unused package services are not assumed refundable.';
+  static const hajjRitesMustComplete =
+      'Do not omit required Hajj rites to leave earlier.';
+  static const hajjOnlineSection = 'Online assistance';
+  static const hajjSourcesSection = 'Official sources';
+  static const hajjProvidersSection = 'Provider information';
+  static const hajjOnlineDefault =
+      'Offline by default. Nothing is sent until you opt in.';
+  static const hajjDemoNoLiveVerification = 'Demo — no live verification';
+  static const hajjConsentLookup =
+      'Allow official-source bookmarks (demonstration catalog on this device)';
+  static const hajjConsentAi =
+      'Allow AI-style interpretation (demonstration only; not a live model)';
+  static const hajjConsentBody =
+      'If you continue, only season, nationality, residence, departure country, and confirmed pathway labels may be used. Passport numbers, scans, health notes, family names, and private reflections are not sent. Live lookup stays off until a Worker URL is configured. AI is not enabled. You can turn either control off at any time.';
+  static const hajjOfflineMode = 'Offline';
+  static const hajjLiveMode = 'Live official-source information';
+  static const hajjManualMode = 'Source requires manual verification';
+  static const hajjUnavailableMode = 'Source unavailable';
+  static const hajjAiDisabled = 'AI is not enabled.';
+  static const hajjNotEstimated = 'Not estimated';
+  static const hajjUntitledMilestones =
+      'Untitled milestones are excluded from the critical path until you name or delete them.';
+  static const hajjAfterNote =
+      'Optional. Performed standing does not open this for you. Not a trophy or acceptance claim.';
+  static const hajjNoPassportScan =
+      'Do not store passport numbers or scans. Nationality and residence are separate.';
   static const hajjPonderDue =
-      'You recorded Hajj as due. What preparation, if any, would you like to notice this season?';
+      'You recorded that you believe Hajj is due. A journey is optional. Learn & Practice stays available either way.';
   static const hajjPonderPreparing =
-      'You recorded Hajj as preparing. What, if anything, would you like to notice next?';
+      'You recorded Hajj as preparing. Readiness lives on a journey you choose to start. It is not a daily score.';
   static const pastSalahEntryNote =
       'This day is stored. Tap Edit to change it, then Save. Unanswered is not missed.';
   static const applicationReflectionIntroTitle = 'Application Reflection';
@@ -685,7 +753,7 @@ class Copy {
       'Remove the selected reminders from this device? This cannot be undone.';
   static String get practiceHajjTitle => practiceLearnTitle('Hajj');
   static const practiceHajjNote =
-      'Qur’an verses and authentic hadith that encourage the preparation row on this card. Standing status stays in Settings. Add one if you want to learn it and bring it into practice. This is not a due-date, ability calculator, countdown, or trophy.';
+      'Qur’an verses and authentic hadith you may learn at any time. Learn & Practice is independent of standing and of any journey. Add one if you want to learn it and bring it into practice. This is not a due-date, ability calculator, checklist score, or trophy.';
   static const addPracticeHajj = '+ add reminder';
   static String get openPracticeHajjRegister =>
       openPracticeLearnRegister('Hajj');

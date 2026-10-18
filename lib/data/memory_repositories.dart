@@ -5,6 +5,7 @@ import '../domain/personal_hadith.dart';
 import '../domain/personal_quran_verse.dart';
 import '../domain/personal_response.dart';
 import '../domain/practice_hadith.dart';
+import '../domain/hajj_planning.dart';
 import 'codecs.dart';
 import 'repositories.dart';
 
@@ -405,4 +406,69 @@ class MemoryPracticeHadithRepository implements PracticeHadithRepository {
     _corrupt.remove(id);
     return true;
   }
+}
+
+class MemoryHajjStoreRepository implements HajjStoreRepository {
+  MemoryHajjStoreRepository({
+    HajjStore? store,
+    String? raw,
+    this.legacyHajjStatusPresent = false,
+  }) : _raw = raw,
+       store = store ?? const HajjStore(),
+       loadKind = HajjStoreDecodeKind.missing {
+    if (raw != null) {
+      final decoded = decodeHajjStore(raw);
+      loadKind = decoded.kind;
+      if (decoded.store != null) {
+        this.store = decoded.store!;
+        _raw = encodeHajjStore(this.store);
+      }
+    } else if (store != null) {
+      loadKind = HajjStoreDecodeKind.ok;
+      _raw = encodeHajjStore(store);
+    }
+  }
+
+  String? _raw;
+  var initializeCount = 0;
+  bool legacyHajjStatusPresent;
+
+  @override
+  HajjStore store;
+
+  @override
+  HajjStoreDecodeKind loadKind;
+
+  @override
+  bool get hasUnknownSchema => loadKind == HajjStoreDecodeKind.unknownVersion;
+
+  @override
+  Future<void> save(HajjStore next) async {
+    if (hasUnknownSchema) return;
+    store = next;
+    loadKind = HajjStoreDecodeKind.ok;
+    _raw = encodeHajjStore(next);
+  }
+
+  @override
+  Future<HajjStore> initializeIfNeeded() async {
+    initializeCount++;
+    if (legacyHajjStatusPresent) {
+      legacyHajjStatusPresent = false;
+    }
+    if (hasUnknownSchema) return store;
+    if (_raw != null &&
+        (loadKind == HajjStoreDecodeKind.ok ||
+            loadKind == HajjStoreDecodeKind.corrupt)) {
+      return store;
+    }
+    if (_raw == null) {
+      store = const HajjStore();
+      loadKind = HajjStoreDecodeKind.ok;
+      _raw = encodeHajjStore(store);
+    }
+    return store;
+  }
+
+  String? get persistedRaw => _raw;
 }

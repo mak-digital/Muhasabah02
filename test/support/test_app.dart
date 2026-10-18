@@ -47,6 +47,7 @@ Widget testApp({
   PersonalHadithRepository? personalHadithRepository,
   HadithFetch? hadithFetch,
   MemoryAppPrefs? prefs,
+  MemoryHajjStoreRepository? hajjStore,
   DateTime? now,
   DateTime Function()? clock,
   FirstDayOfWeekPref firstDayOfWeek = FirstDayOfWeekPref.monday,
@@ -112,6 +113,9 @@ Widget testApp({
               appLockEnabled: appLockEnabled,
               salahActivityColours: salahActivityColours,
             ),
+      ),
+      hajjStoreRepositoryProvider.overrideWithValue(
+        hajjStore ?? MemoryHajjStoreRepository(),
       ),
       if (clock != null) nowClockProvider.overrideWithValue(clock),
       if (now != null) nowClockProvider.overrideWithValue(() => now),
@@ -238,10 +242,8 @@ class _FakeCitationPageState extends ConsumerState<_FakeCitationPage> {
           if (bringHadith != null)
             TextButton(
               key: const Key('citation-bring-hadith'),
-              onPressed: () => showBringHadithSheet(
-                context,
-                initial: bringHadith.hadithKey,
-              ),
+              onPressed: () =>
+                  showBringHadithSheet(context, initial: bringHadith.hadithKey),
               child: const Text(Copy.bringThisHadithIntoLearn),
             ),
           if (hasPager)

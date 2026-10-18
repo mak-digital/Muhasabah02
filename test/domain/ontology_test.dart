@@ -490,6 +490,7 @@ List<HomeTraceRow> _retiredCatalogRows() {
     ...wealthRetiredHomeRows,
     ...ummahRetiredHomeRows,
     ...hadithRetiredHomeRows,
+    ...hajjRetiredHomeRows,
   ];
 }
 

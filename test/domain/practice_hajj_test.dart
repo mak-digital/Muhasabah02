@@ -6,10 +6,11 @@ import 'package:muhasabah02/domain/practice_hajj_catalog.dart';
 import 'package:muhasabah02/domain/reflection_source.dart';
 
 void main() {
-  test('Hajj catalog is grouped by Home bands with unique ids', () {
+  test('Hajj catalog is independent of daily Home rows', () {
     final ids = kPracticeHajjCatalog.map((item) => item.id).toList();
     expect(ids.toSet().length, ids.length);
     expect(kPracticeHajjCatalog, isNotEmpty);
+    expect(hajjHomeRows, isEmpty);
     expect(
       kPracticeHajjCatalog.every(
         (item) =>
@@ -19,11 +20,16 @@ void main() {
       ),
       isTrue,
     );
-    expect(kPracticeHajjGroups, bandsFor(hajjHomeRows));
-    expect(
-      kPracticeHajjCatalog.map((item) => item.topic).toSet(),
-      hajjHomeRows.map((row) => row.label).toSet(),
-    );
+    expect(kPracticeHajjGroups, [
+      kHajjLearnBand,
+      kHajjReadinessBand,
+      kHajjAfterBand,
+    ]);
+    expect(kPracticeHajjCatalog.map((item) => item.group).toSet(), {
+      kHajjLearnBand,
+      kHajjReadinessBand,
+      kHajjAfterBand,
+    });
     expect(
       kPracticeHajjCatalog.every(
         (item) => reflectionSourceUris(item.source).isNotEmpty,
@@ -32,17 +38,18 @@ void main() {
     );
   });
 
-  test('Hajj reminders stay preparation noticing, not a due-date', () {
+  test('Hajj reminders are not a due-date or obligation engine', () {
     expect(
       kPracticeHajjCatalog.any(
-        (item) =>
-            item.sourceDetail.contains('does not calculate whether Hajj is obligatory'),
+        (item) => item.sourceDetail.contains(
+          'does not calculate whether Hajj is obligatory',
+        ),
       ),
       isTrue,
     );
     expect(
       kPracticeHajjCatalog.any(
-        (item) => item.sourceDetail.contains('Umrah is not this status'),
+        (item) => item.sourceDetail.contains('Umrah is not this standing'),
       ),
       isTrue,
     );
@@ -56,7 +63,7 @@ void main() {
       addedDateKey: '2026-10-10',
     );
     expect(record.domain, MonitorDomain.hajj);
-    expect(record.group, kHajjPreparationBand);
+    expect(record.group, kHajjLearnBand);
     expect(record.status, PracticeHadithStatus.learning);
     expect(practiceRecordsForDomain([record], MonitorDomain.charity), isEmpty);
   });

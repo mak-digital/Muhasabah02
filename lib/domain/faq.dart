@@ -187,7 +187,7 @@ const faqEntries = <FaqEntry>[
   ),
   FaqEntry(
     question: 'Does Hajj tell me I must go this year?',
-    answer: 'No. Hajj is a standing status you set: not due, due as you see it, preparing, performed, or not applicable. The app does not calculate whether Hajj is obligatory, does not set a year, and does not treat an empty mark as missed. Daily preparation is optional noticing, not a countdown. Umrah is not this status. Performed is a record, not a trophy.\n\nHajj Learn & Practice is a built-in list of Qur’an verses and authentic hadith grouped like Home (Preparation). You may add one to a private register (Learning, Learnt, Practicing, Habit). It is not a daily grade, a due-date, or a trophy. Unanswered is not missed Hajj.',
+    answer: 'No. Hajj standing is a lifetime record you set: not recorded, unsure, I believe it is due, preparing, performed, not planning, not applicable, or prefer not to record. The app does not calculate whether Hajj is obligatory, does not set a year, and does not treat an empty mark as missed. A journey is optional and separate; you may have performed Hajj without planning another journey. Readiness is a checklist on a journey, not a daily score. Umrah is not this standing. Performed is a record, not a trophy.\n\nHajj Learn & Practice is a built-in list of Qur’an verses and authentic hadith grouped as Learn, Readiness, and After Hajj. It is available at all times, independent of journey status. You may add one to a private register (Learning, Learnt, Practicing, Habit). It is not a daily grade, a due-date, or a trophy. Unanswered is not missed Hajj.',
   ),
   FaqEntry(
     question: 'Are my records private if the phone is lost?',

@@ -1,6 +1,5 @@
 import 'activities.dart';
 import 'daily_check_in.dart';
-import 'home_traces.dart';
 import 'monitor_domain.dart';
 import 'personal_mix.dart';
 import 'personalisation_resolver.dart';
@@ -69,9 +68,7 @@ class TodayWorkspace {
   final String dateKey;
   final List<TodayDomain> domains;
 
-  int get mixRowCount => [
-    for (final domain in domains) ...domain.rows,
-  ].length;
+  int get mixRowCount => [for (final domain in domains) ...domain.rows].length;
 
   int get recordedMixCount => [
     for (final domain in domains)
@@ -89,7 +86,6 @@ TodayWorkspace deriveTodayWorkspace({
   required String dateKey,
   required PersonalisationResolver resolver,
   DailyCheckIn? record,
-  HajjStatus hajjStatus = HajjStatus.unanswered,
 }) {
   final todayRecord = record != null && record.dateKey == dateKey
       ? record
@@ -106,7 +102,6 @@ TodayWorkspace deriveTodayWorkspace({
             domain: domain,
             keys: keys,
             friday: friday,
-            hajjStatus: hajjStatus,
             record: todayRecord,
           ),
         ),
@@ -118,7 +113,6 @@ List<TodayRow> _rowsForDomain({
   required MonitorDomain domain,
   required Set<String> keys,
   required bool friday,
-  required HajjStatus hajjStatus,
   required DailyCheckIn? record,
 }) {
   switch (domain) {
@@ -163,17 +157,7 @@ List<TodayRow> _rowsForDomain({
           ),
       ];
     case MonitorDomain.hajj:
-      final traces = hajjRowsForStatus(mixTraceRows(domain, keys), hajjStatus);
-      return [
-        for (final row in traces)
-          if (row.storageKey != kHajjMixKey)
-            TodayRow(
-              mixId: row.storageKey,
-              domain: domain,
-              kind: TodayRowKind.homeTrace,
-              recordedState: _traceRecorded(record, row.storageKey),
-            ),
-      ];
+      return const [];
     case MonitorDomain.hadith:
     case MonitorDomain.dhikr:
     case MonitorDomain.akhlaq:
