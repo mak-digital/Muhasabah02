@@ -58,6 +58,7 @@ All local, Hive, schema version **1** (proposed box `muhasabah_productivity_v1`)
 - Original estimate when known (optional; for planned vs actual later).
 - Target completion date (Gregorian `YYYY-MM-DD`, optional, unknown allowed).
 - Parent id (optional). Depth **at most three**: action → child → grandchild.
+- **Details** opens sub-activities with user weightage (should add to 100%), expected hours, % done, and target date/time. The parent % is rolled up from those sub-activities and labelled **ahead / on / behind the target pace** (schedule vs the date you set, not a grade). Title can be renamed without changing other fields.
 - Prerequisite action ids (optional). An action is **blocked** while any unfinished prerequisite remains.
 - Sort order within Today’s five and within MAL.
 - Created / updated timestamps (ISO, local device).
@@ -66,11 +67,11 @@ Synthetic flag for tests only.
 
 ### 4.2 Today’s five
 
-At most **five** actions marked as today’s focus. Order is user-owned (reorder on the dashboard). Selecting a sixth requires releasing one of the five, with a clear prompt — not silent drop.
+The person chooses how many focus rows to show today (**1, 2, 3, 4, or 5**). That is a **display** choice: lowering the number hides extra nominated today items, and raising it shows them again. The Productivity register is a **popup** (tick boxes and Fetch / copy), not an on-page list. Completing a today action offers pending register items to Fetch / copy onto the board.
 
 ### 4.3 Master Action List (MAL)
 
-Every non-deleted action. The dashboard shows it **collapsed** by default. From MAL the person can add to Today’s five, change priority, or open the card expand.
+The Master List is the **consolidated register of open listed-actions from other domains** (not completed). It is not the Productivity register. **Pick from Master List** opens that register (domain, date initiated, action id, priority, tick boxes) and **Fetch / copy** imports selected rows into Productivity. **+ Add action** creates a new Productivity item. Hajj types are not imported; Hajj listed-actions may appear if they already exist in the shared listed-action store.
 
 ### 4.4 Events (history)
 
@@ -93,8 +94,8 @@ For each local date key: which five were focus, which were carried forward, reco
 
 ## 5. Behaviours
 
-1. **Add action** — from dashboard; lands in MAL; optional “add to Today’s five” if a slot is free.
-2. **Select from MAL** — pick into Today’s five (cap 5).
+1. **Add action** — from dashboard; lands in the Productivity register; optional “add to today” if a visible slot is free.
+2. **Pick from Master List** — copy open actions from other domains into the Productivity register, then onto today if a slot is free.
 3. **Reorder** today’s five.
 4. **Change priority** on the card (one or two taps).
 5. **Start / pause / resume / complete** on the card.

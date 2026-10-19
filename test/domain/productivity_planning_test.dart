@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muhasabah02/domain/daily_check_in.dart';
+import 'package:muhasabah02/domain/domain_action.dart';
+import 'package:muhasabah02/domain/monitor_domain.dart';
 import 'package:muhasabah02/domain/productivity_planning.dart';
 
 ProductivityAction _action({
@@ -16,6 +18,7 @@ ProductivityAction _action({
   double doneHours = 0,
   bool synthetic = true,
   DateTime? createdAt,
+  int sortOrder = 0,
 }) {
   return ProductivityAction(
     id: id,
@@ -28,6 +31,7 @@ ProductivityAction _action({
     prerequisiteIds: prerequisiteIds,
     hours: hours,
     doneHours: doneHours,
+    sortOrder: sortOrder,
     synthetic: synthetic,
   );
 }
@@ -150,6 +154,115 @@ void main() {
 
   test('D11 fixtures can be synthetic', () {
     expect(_action(id: 's', title: 'Sample').synthetic, isTrue);
+  });
+
+  test('frozen clock still issues distinct action ids', () {
+    final stamp = DateTime(2026, 10, 18, 10);
+    expect(
+      newProductivityId('act', stamp, disambiguator: 0),
+      isNot(newProductivityId('act', stamp, disambiguator: 1)),
+    );
+  });
+
+  test('import copies an open domain action once', () {
+    final source = DomainAction(
+      id: 'health-1',
+      domain: MonitorDomain.health,
+      title: 'Call clinic',
+      targetDateKey: '2026-10-21',
+      priority: ActionPriority.week,
+      status: ActionStatus.open,
+      createdAt: DateTime(2026, 10, 10),
+    );
+    var store = importDomainAction(
+      const ProductivityStore(),
+      source,
+      now: DateTime(2026, 10, 18),
+    );
+    expect(store.actions.single.title, 'Call clinic');
+    expect(store.actions.single.sourceActionId, 'health-1');
+    expect(store.actions.single.today, isTrue);
+    store = importDomainAction(store, source, now: DateTime(2026, 10, 18, 11));
+    expect(store.actions.length, 1);
+  });
+
+  test('today slot count 2 keeps extras in the register', () {
+    var store = ProductivityStore(
+      actions: [
+        for (var i = 0; i < 4; i++)
+          _action(id: 't$i', title: 'Item $i', today: true, sortOrder: i),
+      ],
+    );
+    store = setTodaySlotCount(store, 2);
+    expect(store.todaySlotCount, 2);
+    expect(store.visibleTodayActions.length, 2);
+    expect(store.todayActions.length, 4);
+    store = setTodaySlotCount(store, 4);
+    expect(store.visibleTodayActions.map((action) => action.id), [
+      't0',
+      't1',
+      't2',
+      't3',
+    ]);
+  });
+
+  test(
+    'completed today action leaves the board as pending stay selectable',
+    () {
+      var store = ProductivityStore(
+        actions: [
+          _action(id: 'done', title: 'Done', today: true),
+          _action(id: 'wait', title: 'Wait', today: false),
+        ],
+      );
+      store = markProductivityStatus(
+        store,
+        actionById(store, 'done')!,
+        ProductivityStatus.completed,
+        now: DateTime(2026, 10, 18, 12),
+      );
+      expect(actionById(store, 'done')?.today, isFalse);
+      expect(actionById(store, 'done')?.listing, ProductivityListing.completed);
+      expect(pendingRegisterActions(store).single.id, 'wait');
+    },
+  );
+
+  test('sub-activity weights roll up to the parent percent', () {
+    final action = _action(id: 'p', title: 'Parent').copyWith(
+      subtasks: const [
+        ProductivitySubtask(title: 'A', weight: 40, percent: 50, hours: 2),
+        ProductivitySubtask(title: 'B', weight: 60, percent: 100, hours: 3),
+      ],
+    );
+    expect(subtaskWeightsComplete(action.subtasks), isTrue);
+    expect(action.percent, 80);
+    expect(
+      paceAgainstTarget(
+        actualPercent: 80,
+        now: DateTime(2026, 10, 10),
+        start: DateTime(2026, 10, 1),
+        target: DateTime(2026, 10, 20),
+      ),
+      ProductivityPace.ahead,
+    );
+  });
+
+  test('rename changes only the title', () {
+    var store = ProductivityStore(
+      actions: [
+        _action(
+          id: 'a',
+          title: 'Old',
+          today: true,
+          status: ProductivityStatus.inProgress,
+        ),
+      ],
+    );
+    store = renameProductivityAction(store, 'a', 'New name');
+    final action = actionById(store, 'a')!;
+    expect(action.title, 'New name');
+    expect(action.status, ProductivityStatus.inProgress);
+    expect(action.today, isTrue);
   });
 
   test('G4 DailyCheckIn schema stays 6', () {

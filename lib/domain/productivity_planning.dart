@@ -1,5 +1,8 @@
 import 'dart:convert';
 
+import 'domain_action.dart';
+import 'monitor_domain.dart';
+
 const kProductivityStoreSchemaVersion = 1;
 const kProductivityTodayCap = 5;
 const kProductivityTabletMinWidth = 720.0;
@@ -16,6 +19,8 @@ enum ProductivityStatus {
   completed,
   deleted,
 }
+
+enum ProductivityListing { pending, active, inProgress, hold, completed }
 
 enum ProductivityStoreDecodeKind { missing, ok, corrupt, unknownVersion }
 
@@ -57,36 +62,84 @@ extension ProductivityStatusX on ProductivityStatus {
       this != ProductivityStatus.deleted;
 }
 
+extension ProductivityListingX on ProductivityListing {
+  String get label => switch (this) {
+    ProductivityListing.pending => 'Pending',
+    ProductivityListing.active => 'Active',
+    ProductivityListing.inProgress => 'In progress',
+    ProductivityListing.hold => 'Hold',
+    ProductivityListing.completed => 'Completed',
+  };
+}
+
+enum ProductivityPace { unknown, ahead, onPlan, behind }
+
+extension ProductivityPaceX on ProductivityPace {
+  String get label => switch (this) {
+    ProductivityPace.unknown => 'No target date yet',
+    ProductivityPace.ahead => 'Ahead of the target pace',
+    ProductivityPace.onPlan => 'On the target pace',
+    ProductivityPace.behind => 'Behind the target pace',
+  };
+}
+
 class ProductivitySubtask {
   const ProductivitySubtask({
     required this.title,
-    this.hours = 0.2,
+    this.hours = 1,
+    this.percent = 0,
+    this.weight = 0,
+    this.targetAt,
     this.done = false,
   });
 
   final String title;
   final double hours;
+  final int percent;
+  final double weight;
+  final DateTime? targetAt;
   final bool done;
 
-  ProductivitySubtask copyWith({bool? done}) {
+  ProductivitySubtask copyWith({
+    String? title,
+    double? hours,
+    int? percent,
+    double? weight,
+    DateTime? targetAt,
+    bool clearTarget = false,
+    bool? done,
+  }) {
+    final nextPercent = (percent ?? this.percent).clamp(0, 100);
     return ProductivitySubtask(
-      title: title,
-      hours: hours,
-      done: done ?? this.done,
+      title: title ?? this.title,
+      hours: hours ?? this.hours,
+      percent: nextPercent,
+      weight: weight ?? this.weight,
+      targetAt: clearTarget ? null : (targetAt ?? this.targetAt),
+      done: done ?? nextPercent >= 100,
     );
   }
 
   Map<String, dynamic> toJson() => {
     'title': title,
     'hours': hours,
-    'done': done,
+    'percent': percent,
+    'weight': weight,
+    if (targetAt != null) 'targetAt': targetAt!.toIso8601String(),
+    'done': done || percent >= 100,
   };
 
   static ProductivitySubtask fromJson(Map<String, dynamic> json) {
+    final percent =
+        (json['percent'] as num?)?.round() ??
+        ((json['done'] == true) ? 100 : 0);
     return ProductivitySubtask(
       title: json['title'] as String? ?? '',
-      hours: (json['hours'] as num?)?.toDouble() ?? 0.2,
-      done: json['done'] == true,
+      hours: (json['hours'] as num?)?.toDouble() ?? 1,
+      percent: percent.clamp(0, 100),
+      weight: (json['weight'] as num?)?.toDouble() ?? 0,
+      targetAt: DateTime.tryParse(json['targetAt'] as String? ?? ''),
+      done: json['done'] == true || percent >= 100,
     );
   }
 }
@@ -109,6 +162,8 @@ class ProductivityAction {
     this.subtasks = const [],
     this.today = false,
     this.sortOrder = 0,
+    this.sourceDomainId,
+    this.sourceActionId,
     this.synthetic = false,
   });
 
@@ -127,11 +182,28 @@ class ProductivityAction {
   final List<ProductivitySubtask> subtasks;
   final bool today;
   final int sortOrder;
+  final String? sourceDomainId;
+  final String? sourceActionId;
   final DateTime createdAt;
   final bool synthetic;
 
-  int get percent =>
-      hours <= 0 ? 0 : ((doneHours / hours) * 100).round().clamp(0, 100);
+  int get percent {
+    if (subtasks.isNotEmpty) return rolledUpSubtaskPercent(subtasks);
+    return hours <= 0 ? 0 : ((doneHours / hours) * 100).round().clamp(0, 100);
+  }
+
+  ProductivityListing get listing {
+    if (status == ProductivityStatus.completed ||
+        status == ProductivityStatus.deleted) {
+      return ProductivityListing.completed;
+    }
+    if (status == ProductivityStatus.paused) return ProductivityListing.hold;
+    if (status == ProductivityStatus.inProgress) {
+      return ProductivityListing.inProgress;
+    }
+    if (today) return ProductivityListing.active;
+    return ProductivityListing.pending;
+  }
 
   ProductivityAction copyWith({
     String? title,
@@ -147,6 +219,8 @@ class ProductivityAction {
     List<ProductivitySubtask>? subtasks,
     bool? today,
     int? sortOrder,
+    String? sourceDomainId,
+    String? sourceActionId,
   }) {
     return ProductivityAction(
       id: id,
@@ -164,6 +238,8 @@ class ProductivityAction {
       subtasks: subtasks ?? this.subtasks,
       today: today ?? this.today,
       sortOrder: sortOrder ?? this.sortOrder,
+      sourceDomainId: sourceDomainId ?? this.sourceDomainId,
+      sourceActionId: sourceActionId ?? this.sourceActionId,
       createdAt: createdAt,
       synthetic: synthetic,
     );
@@ -185,6 +261,8 @@ class ProductivityAction {
     'subtasks': [for (final item in subtasks) item.toJson()],
     'today': today,
     'sortOrder': sortOrder,
+    if (sourceDomainId != null) 'sourceDomainId': sourceDomainId,
+    if (sourceActionId != null) 'sourceActionId': sourceActionId,
     'createdAt': createdAt.toIso8601String(),
     'synthetic': synthetic,
   };
@@ -225,6 +303,8 @@ class ProductivityAction {
       ],
       today: json['today'] == true,
       sortOrder: json['sortOrder'] as int? ?? 0,
+      sourceDomainId: json['sourceDomainId'] as String?,
+      sourceActionId: json['sourceActionId'] as String?,
       createdAt:
           DateTime.tryParse(json['createdAt'] as String? ?? '') ??
           DateTime(2026, 1, 1),
@@ -275,12 +355,14 @@ class ProductivityStore {
     this.actions = const [],
     this.events = const [],
     this.lastRolloverDateKey,
+    this.todaySlotCount = kProductivityTodayCap,
   });
 
   final int schemaVersion;
   final List<ProductivityAction> actions;
   final List<ProductivityEvent> events;
   final String? lastRolloverDateKey;
+  final int todaySlotCount;
 
   List<ProductivityAction> get todayActions {
     final list = [
@@ -298,16 +380,28 @@ class ProductivityStore {
         action,
   ];
 
+  List<ProductivityAction> get visibleTodayActions {
+    final cap = todaySlotCount.clamp(1, kProductivityTodayCap);
+    final today = todayActions;
+    if (today.length <= cap) return today;
+    return today.take(cap).toList();
+  }
+
   ProductivityStore copyWith({
     List<ProductivityAction>? actions,
     List<ProductivityEvent>? events,
     String? lastRolloverDateKey,
+    int? todaySlotCount,
   }) {
     return ProductivityStore(
       schemaVersion: schemaVersion,
       actions: actions ?? this.actions,
       events: events ?? this.events,
       lastRolloverDateKey: lastRolloverDateKey ?? this.lastRolloverDateKey,
+      todaySlotCount: (todaySlotCount ?? this.todaySlotCount).clamp(
+        1,
+        kProductivityTodayCap,
+      ),
     );
   }
 }
@@ -411,6 +505,9 @@ ProductivityStore recordProductivityEvent(
   );
 }
 
+int effectiveTodayCap(ProductivityStore store) =>
+    store.todaySlotCount.clamp(1, kProductivityTodayCap);
+
 ProductivityStore setTodayFlag(ProductivityStore store, String id, bool today) {
   final action = actionById(store, id);
   if (action == null) return store;
@@ -422,6 +519,33 @@ ProductivityStore setTodayFlag(ProductivityStore store, String id, bool today) {
       sortOrder: today ? store.todayActions.length : action.sortOrder,
     ),
   );
+}
+
+ProductivityStore applyTodaySelection(
+  ProductivityStore store,
+  Iterable<String> ids,
+) {
+  final cap = kProductivityTodayCap;
+  final chosen = <String>[];
+  for (final id in ids) {
+    if (chosen.contains(id)) continue;
+    if (actionById(store, id) == null) continue;
+    chosen.add(id);
+    if (chosen.length >= cap) break;
+  }
+  final chosenSet = chosen.toSet();
+  final actions = [
+    for (final action in store.actions)
+      action.copyWith(
+        today: chosenSet.contains(action.id),
+        sortOrder: chosen.indexOf(action.id),
+      ),
+  ];
+  return store.copyWith(actions: actions);
+}
+
+ProductivityStore setTodaySlotCount(ProductivityStore store, int count) {
+  return store.copyWith(todaySlotCount: count);
 }
 
 ProductivityStore reorderToday(ProductivityStore store, String id, int delta) {
@@ -514,10 +638,107 @@ ProductivityStore addEvent(ProductivityStore store, ProductivityEvent event) {
 bool canAddToToday(ProductivityStore store) =>
     store.todayActions.length < kProductivityTodayCap;
 
+List<ProductivityAction> pendingRegisterActions(ProductivityStore store) {
+  return [
+    for (final action in store.masterList)
+      if (action.listing == ProductivityListing.pending) action,
+  ];
+}
+
+ProductivityStore markProductivityStatus(
+  ProductivityStore store,
+  ProductivityAction action,
+  ProductivityStatus status, {
+  required DateTime now,
+}) {
+  final next = action.copyWith(
+    status: status,
+    today: status == ProductivityStatus.completed ? false : action.today,
+    doneHours: status == ProductivityStatus.completed
+        ? action.hours
+        : action.doneHours,
+  );
+  var updated = upsertAction(store, next);
+  return recordProductivityEvent(
+    updated,
+    kind: status == ProductivityStatus.completed
+        ? 'completed'
+        : 'statusChanged',
+    at: now,
+    actionId: action.id,
+    detail: next.listing.label,
+  );
+}
+
+List<DomainAction> openMasterListCandidates(List<DomainAction> all) {
+  final open = [
+    for (final action in all)
+      if (action.status.isOpen && action.domain != MonitorDomain.productivity)
+        action,
+  ];
+  open.sort((a, b) {
+    final byCreated = b.createdAt.compareTo(a.createdAt);
+    if (byCreated != 0) return byCreated;
+    return a.id.compareTo(b.id);
+  });
+  return open;
+}
+
+ProductivityPriority priorityFromDomainAction(ActionPriority priority) {
+  return switch (priority) {
+    ActionPriority.soon => ProductivityPriority.critical,
+    ActionPriority.week => ProductivityPriority.high,
+    ActionPriority.later => ProductivityPriority.medium,
+  };
+}
+
+bool alreadyImportedSource(ProductivityStore store, String sourceActionId) {
+  for (final action in store.actions) {
+    if (action.sourceActionId == sourceActionId && action.status.isOpen) {
+      return true;
+    }
+  }
+  return false;
+}
+
+ProductivityStore importDomainAction(
+  ProductivityStore store,
+  DomainAction source, {
+  required DateTime now,
+  bool addToToday = true,
+}) {
+  if (source.status != ActionStatus.open) return store;
+  if (alreadyImportedSource(store, source.id)) return store;
+  final placeToday = addToToday && canAddToToday(store);
+  final action = ProductivityAction(
+    id: newProductivityId('act', now, disambiguator: store.actions.length),
+    title: source.title,
+    createdAt: now,
+    note: '${source.domain.shortLabel} · ${source.id}',
+    tags: [source.domain.shortLabel],
+    priority: priorityFromDomainAction(source.priority),
+    targetDateKey: source.targetDateKey,
+    today: placeToday,
+    sortOrder: store.todayActions.length,
+    sourceDomainId: source.domain.id,
+    sourceActionId: source.id,
+    synthetic: false,
+  );
+  var next = upsertAction(store, action);
+  return recordProductivityEvent(
+    next,
+    kind: 'imported',
+    at: now,
+    actionId: action.id,
+    detail: source.domain.id,
+  );
+}
+
 String encodeProductivityStore(ProductivityStore store) {
   return jsonEncode({
     'schemaVersion': store.schemaVersion,
     'lastRolloverDateKey': store.lastRolloverDateKey,
+    'todaySlotCount': store.todaySlotCount,
     'actions': [for (final action in store.actions) action.toJson()],
     'events': [for (final event in store.events) event.toJson()],
   });
@@ -547,6 +768,7 @@ ProductivityStoreDecode decodeProductivityStore(String? raw) {
       store: ProductivityStore(
         schemaVersion: kProductivityStoreSchemaVersion,
         lastRolloverDateKey: json['lastRolloverDateKey'] as String?,
+        todaySlotCount: json['todaySlotCount'] as int? ?? kProductivityTodayCap,
         actions: [
           for (final item in json['actions'] as List? ?? const [])
             if (item is Map)
@@ -566,8 +788,11 @@ ProductivityStoreDecode decodeProductivityStore(String? raw) {
   }
 }
 
-String newProductivityId(String prefix, DateTime now) =>
-    '$prefix${now.microsecondsSinceEpoch}';
+String newProductivityId(
+  String prefix,
+  DateTime now, {
+  int disambiguator = 0,
+}) => '$prefix${now.microsecondsSinceEpoch}-$disambiguator';
 
 String formatEffortHours(double hours) {
   final whole = hours.floor();
@@ -575,4 +800,114 @@ String formatEffortHours(double hours) {
   if (whole == 0) return '${minutes}m';
   if (minutes == 0) return '${whole}h';
   return '${whole}h ${minutes}m';
+}
+
+double subtaskWeightTotal(List<ProductivitySubtask> subtasks) =>
+    subtasks.fold<double>(0, (sum, item) => sum + item.weight);
+
+bool subtaskWeightsComplete(List<ProductivitySubtask> subtasks) =>
+    subtasks.isNotEmpty && (subtaskWeightTotal(subtasks) - 100).abs() < 0.51;
+
+int rolledUpSubtaskPercent(List<ProductivitySubtask> subtasks) {
+  if (subtasks.isEmpty) return 0;
+  final total = subtaskWeightTotal(subtasks);
+  if (total <= 0) {
+    final avg =
+        subtasks.fold<int>(0, (sum, item) => sum + item.percent) /
+        subtasks.length;
+    return avg.round().clamp(0, 100);
+  }
+  final weighted = subtasks.fold<double>(
+    0,
+    (sum, item) => sum + item.weight * item.percent,
+  );
+  return (weighted / total).round().clamp(0, 100);
+}
+
+DateTime? actionTargetAt(ProductivityAction action) {
+  DateTime? latest;
+  for (final item in action.subtasks) {
+    final at = item.targetAt;
+    if (at == null) continue;
+    if (latest == null || at.isAfter(latest)) latest = at;
+  }
+  if (latest != null) return latest;
+  final key = action.targetDateKey;
+  if (key == null || key.isEmpty) return null;
+  return DateTime.tryParse('${key}T23:59:00');
+}
+
+ProductivityPace paceAgainstTarget({
+  required int actualPercent,
+  required DateTime now,
+  required DateTime start,
+  DateTime? target,
+}) {
+  if (target == null) return ProductivityPace.unknown;
+  final window = target.difference(start);
+  if (window.inMinutes <= 0) {
+    return actualPercent >= 100
+        ? ProductivityPace.onPlan
+        : ProductivityPace.behind;
+  }
+  final expected = ((now.difference(start).inMinutes / window.inMinutes) * 100)
+      .clamp(0, 100);
+  final delta = actualPercent - expected;
+  if (delta >= 8) return ProductivityPace.ahead;
+  if (delta <= -8) return ProductivityPace.behind;
+  return ProductivityPace.onPlan;
+}
+
+ProductivityPace paceForAction(ProductivityAction action, DateTime now) {
+  return paceAgainstTarget(
+    actualPercent: action.percent,
+    now: now,
+    start: action.createdAt,
+    target: actionTargetAt(action),
+  );
+}
+
+ProductivityStore renameProductivityAction(
+  ProductivityStore store,
+  String id,
+  String title,
+) {
+  final action = actionById(store, id);
+  final nextTitle = title.trim();
+  if (action == null || nextTitle.isEmpty) return store;
+  return upsertAction(store, action.copyWith(title: nextTitle));
+}
+
+ProductivityStore applyActionSubtasks(
+  ProductivityStore store,
+  ProductivityAction action,
+  List<ProductivitySubtask> subtasks,
+) {
+  var hours = action.hours;
+  if (subtasks.isNotEmpty) {
+    final summed = subtasks.fold<double>(0, (sum, item) => sum + item.hours);
+    if (summed > 0) hours = summed;
+  }
+  final rolled = ProductivityAction(
+    id: action.id,
+    title: action.title,
+    createdAt: action.createdAt,
+    note: action.note,
+    tags: action.tags,
+    priority: action.priority,
+    status: action.status,
+    hours: hours,
+    doneHours: hours * rolledUpSubtaskPercent(subtasks) / 100,
+    targetDateKey: action.targetDateKey,
+    parentId: action.parentId,
+    prerequisiteIds: action.prerequisiteIds,
+    blocksTitles: action.blocksTitles,
+    subtasks: subtasks,
+    today: action.today,
+    sortOrder: action.sortOrder,
+    sourceDomainId: action.sourceDomainId,
+    sourceActionId: action.sourceActionId,
+    synthetic: action.synthetic,
+  );
+  return upsertAction(store, rolled);
 }

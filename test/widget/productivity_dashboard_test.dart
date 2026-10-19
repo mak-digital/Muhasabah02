@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muhasabah02/app/app.dart';
 import 'package:muhasabah02/application/providers.dart';
+import 'package:muhasabah02/data/codecs.dart';
 import 'package:muhasabah02/data/memory_repositories.dart';
 import 'package:muhasabah02/domain/copy.dart';
+import 'package:muhasabah02/domain/domain_action.dart';
 import 'package:muhasabah02/domain/monitor_domain.dart';
 import 'package:muhasabah02/domain/productivity_planning.dart';
 import 'package:muhasabah02/presentation/settings/settings_screen.dart';
@@ -48,6 +50,7 @@ Set<MonitorDomain> _shown() => {
 Future<void> _openDashboard(
   WidgetTester tester, {
   MemoryProductivityStoreRepository? store,
+  MemoryDomainActionRepository? domainActions,
   Size size = const Size(400, 2400),
   int? themeMode,
 }) async {
@@ -60,6 +63,7 @@ Future<void> _openDashboard(
       now: DateTime(2026, 10, 18, 10),
       visibleDomains: _shown(),
       productivityStore: store,
+      domainActions: domainActions,
     ),
   );
   await tester.pumpAndSettle();
@@ -87,12 +91,11 @@ void main() {
     await _openDashboard(tester);
     expect(find.byKey(const Key('productivity-dashboard')), findsOneWidget);
     expect(find.text('Nothing queued'), findsOneWidget);
-    expect(find.text('Today’s Actions (5)'), findsOneWidget);
-    expect(find.byKey(const Key('productivity-slot-1')), findsOneWidget);
-    expect(find.byKey(const Key('productivity-slot-5')), findsOneWidget);
+    expect(find.text('Today’s Actions (0 of 5)'), findsOneWidget);
+    expect(find.byKey(const Key('productivity-add')), findsOneWidget);
   });
 
-  testWidgets('today’s board keeps five slots when one action is queued', (
+  testWidgets('today’s board shows queued actions without empty slots', (
     tester,
   ) async {
     await _openDashboard(
@@ -105,15 +108,16 @@ void main() {
       ),
     );
     expect(find.byKey(const Key('productivity-action-a')), findsOneWidget);
-    expect(find.byKey(const Key('productivity-slot-2')), findsOneWidget);
-    expect(find.byKey(const Key('productivity-slot-5')), findsOneWidget);
-    expect(find.byKey(const Key('productivity-slot-1')), findsNothing);
+    expect(find.text('Today’s Actions (1 of 5)'), findsOneWidget);
+    expect(find.byKey(const Key('productivity-slot-2')), findsNothing);
   });
 
-  testWidgets('W2 add action appears in MAL and today', (tester) async {
+  testWidgets('W2 add action appears in today and the register', (
+    tester,
+  ) async {
     await _openDashboard(tester);
-    await tester.ensureVisible(find.byKey(const Key('productivity-slot-1')));
-    await tester.tap(find.byKey(const Key('productivity-slot-1')));
+    await tester.ensureVisible(find.byKey(const Key('productivity-add')));
+    await tester.tap(find.byKey(const Key('productivity-add')));
     await tester.pumpAndSettle();
     await tester.enterText(
       find.byKey(const Key('productivity-add-title')),
@@ -122,9 +126,27 @@ void main() {
     await tester.tap(find.byKey(const Key('productivity-add-save')));
     await tester.pumpAndSettle();
     expect(find.text('Write weekly note'), findsWidgets);
-    await tester.tap(find.text('Master List'));
-    await tester.pumpAndSettle();
-    expect(find.text('Write weekly note'), findsWidgets);
+  });
+
+  testWidgets('three new actions all stay in the register', (tester) async {
+    final store = MemoryProductivityStoreRepository(
+      store: const ProductivityStore(lastRolloverDateKey: '2026-10-18'),
+    );
+    await _openDashboard(tester, store: store);
+    for (final title in ['One', 'Two', 'Three']) {
+      await tester.ensureVisible(find.byKey(const Key('productivity-add')));
+      await tester.tap(find.byKey(const Key('productivity-add')));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(const Key('productivity-add-title')),
+        title,
+      );
+      await tester.tap(find.byKey(const Key('productivity-add-save')));
+      await tester.pumpAndSettle();
+    }
+    expect(store.store.actions.length, 3);
+    expect(find.text('Three'), findsWidgets);
+    expect(find.text('One'), findsWidgets);
   });
 
   testWidgets('W3 today five reorder up and down', (tester) async {
@@ -138,9 +160,13 @@ void main() {
       ),
     );
     await _openDashboard(tester, store: store);
+    await tester.tap(find.byKey(const Key('productivity-menu-a')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('productivity-move-down-a')));
     await tester.pumpAndSettle();
     expect(store.store.todayActions.first.id, 'b');
+    await tester.tap(find.byKey(const Key('productivity-menu-a')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('productivity-move-up-a')));
     await tester.pumpAndSettle();
     expect(store.store.todayActions.first.id, 'a');
@@ -156,9 +182,13 @@ void main() {
       ),
     );
     await _openDashboard(tester, store: store);
+    await tester.tap(find.byKey(const Key('productivity-menu-a')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('productivity-priority-a')));
     await tester.pumpAndSettle();
     expect(store.store.actions.single.priority, ProductivityPriority.low);
+    await tester.tap(find.byKey(const Key('productivity-menu-a')));
+    await tester.pumpAndSettle();
     expect(find.textContaining('Low'), findsWidgets);
   });
 
@@ -205,28 +235,152 @@ void main() {
         ),
       ),
     );
-    await tester.tap(find.text('Show children').first);
+    await tester.tap(find.byKey(const Key('productivity-details-p')));
     await tester.pumpAndSettle();
     expect(find.text('Child row'), findsOneWidget);
-    await tester.tap(find.text('Show children').last);
+    await tester.tap(find.text('Details').last);
     await tester.pumpAndSettle();
     expect(find.text('Grandchild row'), findsOneWidget);
   });
 
+  testWidgets('details rolls sub-activity progress onto the parent card', (
+    tester,
+  ) async {
+    await _openDashboard(
+      tester,
+      store: MemoryProductivityStoreRepository(
+        store: ProductivityStore(
+          lastRolloverDateKey: '2026-10-18',
+          actions: [
+            _sample(
+              id: 'a',
+              title: 'Alpha',
+              subtasks: const [
+                ProductivitySubtask(
+                  title: 'Draft',
+                  weight: 40,
+                  percent: 50,
+                  hours: 1,
+                ),
+                ProductivitySubtask(
+                  title: 'Review',
+                  weight: 60,
+                  percent: 100,
+                  hours: 1,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+    expect(find.textContaining('80%'), findsWidgets);
+    await tester.tap(find.byKey(const Key('productivity-details-a')));
+    await tester.pumpAndSettle();
+    expect(find.text('Draft'), findsWidgets);
+    expect(find.text('Review'), findsWidgets);
+    await tester.tap(find.byKey(const Key('productivity-add-subtask-a')));
+    await tester.pumpAndSettle();
+    expect(find.text('Sub-activity 3'), findsOneWidget);
+    await tester.enterText(
+      find.byKey(const Key('productivity-subtask-title-a-0')),
+      'Outline draft',
+    );
+    await tester.tap(find.byKey(const Key('productivity-details-save')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('productivity-details-a')));
+    await tester.pumpAndSettle();
+    expect(find.text('Outline draft'), findsWidgets);
+  });
+
   testWidgets('W7 MAL can place an item into today', (tester) async {
+    final listed = DomainAction(
+      id: 'health-clinic-1',
+      domain: MonitorDomain.health,
+      title: 'From list',
+      targetDateKey: '2026-10-20',
+      priority: ActionPriority.soon,
+      status: ActionStatus.open,
+      createdAt: DateTime(2026, 10, 12, 8),
+    );
+    final store = MemoryProductivityStoreRepository(
+      store: const ProductivityStore(lastRolloverDateKey: '2026-10-18'),
+    );
+    await _openDashboard(
+      tester,
+      store: store,
+      domainActions: MemoryDomainActionRepository(
+        raw: {listed.id: encodeDomainAction(listed)},
+      ),
+    );
+    await tester.ensureVisible(find.byKey(const Key('productivity-pick-mal')));
+    await tester.tap(find.byKey(const Key('productivity-pick-mal')));
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.byKey(const Key('productivity-mal-pick-health-clinic-1')),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('productivity-mal-import')));
+    await tester.pumpAndSettle();
+    expect(store.store.actions.single.title, 'From list');
+    expect(store.store.actions.single.today, isTrue);
+    expect(store.store.actions.single.sourceActionId, listed.id);
+    expect(find.text('From list'), findsWidgets);
+  });
+
+  testWidgets('today slot chips hide then restore nominated actions', (
+    tester,
+  ) async {
+    await _openDashboard(
+      tester,
+      store: MemoryProductivityStoreRepository(
+        store: ProductivityStore(
+          lastRolloverDateKey: '2026-10-18',
+          actions: [
+            _sample(id: 'a', title: 'Alpha', sortOrder: 0),
+            _sample(id: 'b', title: 'Beta', sortOrder: 1),
+            _sample(id: 'c', title: 'Gamma', sortOrder: 2),
+          ],
+        ),
+      ),
+    );
+    await tester.tap(find.byKey(const Key('productivity-today-slots-2')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('productivity-action-a')), findsOneWidget);
+    expect(find.byKey(const Key('productivity-action-b')), findsOneWidget);
+    expect(find.byKey(const Key('productivity-action-c')), findsNothing);
+    await tester.tap(find.byKey(const Key('productivity-today-slots-5')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('productivity-action-c')), findsOneWidget);
+  });
+
+  testWidgets('completing a today action offers pending register copy', (
+    tester,
+  ) async {
     final store = MemoryProductivityStoreRepository(
       store: ProductivityStore(
         lastRolloverDateKey: '2026-10-18',
-        actions: [_sample(id: 'm', title: 'From list', today: false)],
+        actions: [
+          _sample(id: 'a', title: 'Alpha'),
+          _sample(id: 'p', title: 'Pending note', today: false),
+        ],
       ),
     );
     await _openDashboard(tester, store: store);
-    await tester.ensureVisible(find.byKey(const Key('productivity-mal')));
-    await tester.tap(find.byKey(const Key('productivity-mal')));
+    await tester.tap(find.text('Complete'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Use today'));
+    expect(
+      find.byKey(const Key('productivity-register-sheet')),
+      findsOneWidget,
+    );
+    await tester.tap(find.byKey(const Key('productivity-register-row-p')));
     await tester.pumpAndSettle();
-    expect(store.store.actions.single.today, isTrue);
+    await tester.tap(find.byKey(const Key('productivity-register-import')));
+    await tester.pumpAndSettle();
+    expect(
+      store.store.actions.firstWhere((action) => action.id == 'p').today,
+      isTrue,
+    );
   });
 
   testWidgets('W8 history lists a completion event', (tester) async {
@@ -324,6 +478,8 @@ void main() {
         ),
       ),
     );
+    await tester.tap(find.byKey(const Key('productivity-menu-a')));
+    await tester.pumpAndSettle();
     expect(find.textContaining('High'), findsWidgets);
   });
 
