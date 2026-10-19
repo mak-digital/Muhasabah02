@@ -1984,6 +1984,16 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
         expandFirst: expandFirst,
         mixKeys: mixKeys,
       ),
+      MonitorDomain.productivity => _homeTraceDomainCard(
+        title: MonitorDomain.productivity.label,
+        focus: MonitorDomain.productivity.focusQuestion,
+        rows: productivityHomeRows,
+        washLight: MuhasabahColors.productivityWash,
+        washDark: MuhasabahColors.productivityWashDark,
+        extraNote: Copy.productivityObservationNote,
+        expandFirst: expandFirst,
+        mixKeys: mixKeys,
+      ),
       MonitorDomain.charity => _homeTraceDomainCard(
         title: 'Charity',
         rows: charityHomeRows,

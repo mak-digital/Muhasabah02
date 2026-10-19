@@ -16,7 +16,7 @@ void main() {
   test(
     'ontology registry has an explicit version independent of schema v6',
     () {
-      expect(kOntologyRegistryVersion, 12);
+      expect(kOntologyRegistryVersion, 13);
       expect(OntologyRegistry.version, kOntologyRegistryVersion);
       expect(kDailyCheckInSchemaVersion, 6);
     },

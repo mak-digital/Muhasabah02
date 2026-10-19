@@ -6,6 +6,7 @@ import '../domain/personal_quran_verse.dart';
 import '../domain/personal_response.dart';
 import '../domain/practice_hadith.dart';
 import '../domain/hajj_planning.dart';
+import '../domain/productivity_planning.dart';
 import 'codecs.dart';
 import 'repositories.dart';
 
@@ -471,4 +472,30 @@ class MemoryHajjStoreRepository implements HajjStoreRepository {
   }
 
   String? get persistedRaw => _raw;
+}
+
+class MemoryProductivityStoreRepository implements ProductivityStoreRepository {
+  MemoryProductivityStoreRepository({ProductivityStore? store})
+    : store = store ?? const ProductivityStore(),
+      loadKind = ProductivityStoreDecodeKind.ok;
+
+  @override
+  ProductivityStore store;
+
+  @override
+  ProductivityStoreDecodeKind loadKind;
+
+  @override
+  bool get hasUnknownSchema =>
+      loadKind == ProductivityStoreDecodeKind.unknownVersion;
+
+  @override
+  Future<void> save(ProductivityStore next) async {
+    if (hasUnknownSchema) return;
+    store = next;
+    loadKind = ProductivityStoreDecodeKind.ok;
+  }
+
+  @override
+  Future<ProductivityStore> initializeIfNeeded() async => store;
 }

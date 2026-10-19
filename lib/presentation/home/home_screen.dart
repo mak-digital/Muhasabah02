@@ -45,6 +45,11 @@ class HomeScreen extends ConsumerWidget {
             message: Copy.marksGuideTitle,
             child: TextButton(
               onPressed: () => showMarksGuide(context),
+              style: TextButton.styleFrom(
+                visualDensity: VisualDensity.compact,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+              ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -220,6 +225,9 @@ class HomeScreen extends ConsumerWidget {
       if (shown.showsHomeActionFollowOn) {
         return [DomainHomeFollowOn(domain: shown)];
       }
+      if (shown == MonitorDomain.productivity) {
+        return const [];
+      }
     }
     return [
       const WeeklyJournalCard(),
@@ -387,6 +395,20 @@ class HomeScreen extends ConsumerWidget {
           family: MuhasabahColors.fastingFamily,
           highlightLunarWhiteDays: true,
           gateFastingRamadan: true,
+          compactWeek: useCompact,
+        );
+      case MonitorDomain.productivity:
+        final includeProductivity = !inMix || mixIncludesProductivity(mixKeys);
+        return OptionalDomainHomeCard(
+          records: records,
+          title: MonitorDomain.productivity.label,
+          focus: MonitorDomain.productivity.focusQuestion,
+          rows: productivityHomeRows,
+          progressRows: productivityHomeRows,
+          washLight: MuhasabahColors.productivityWash,
+          washDark: MuhasabahColors.productivityWashDark,
+          family: MuhasabahColors.productivityFamily,
+          includeProductivityDashboard: includeProductivity,
           compactWeek: useCompact,
         );
       case MonitorDomain.hajj:

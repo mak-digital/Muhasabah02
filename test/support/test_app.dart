@@ -48,6 +48,7 @@ Widget testApp({
   HadithFetch? hadithFetch,
   MemoryAppPrefs? prefs,
   MemoryHajjStoreRepository? hajjStore,
+  MemoryProductivityStoreRepository? productivityStore,
   DateTime? now,
   DateTime Function()? clock,
   FirstDayOfWeekPref firstDayOfWeek = FirstDayOfWeekPref.monday,
@@ -116,6 +117,9 @@ Widget testApp({
       ),
       hajjStoreRepositoryProvider.overrideWithValue(
         hajjStore ?? MemoryHajjStoreRepository(),
+      ),
+      productivityStoreRepositoryProvider.overrideWithValue(
+        productivityStore ?? MemoryProductivityStoreRepository(),
       ),
       if (clock != null) nowClockProvider.overrideWithValue(clock),
       if (now != null) nowClockProvider.overrideWithValue(() => now),

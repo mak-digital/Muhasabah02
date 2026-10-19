@@ -15,6 +15,7 @@ import '../../domain/quran.dart';
 import '../../domain/weekly_calendar.dart';
 import '../checkin/check_in_screen.dart';
 import 'hajj_home_dashboard.dart';
+import 'productivity_dashboard.dart';
 import '../progress/optional_domain_progress_screen.dart';
 import '../shared/salah_activity_mark.dart';
 import '../shared/state_marker.dart';
@@ -34,6 +35,7 @@ class OptionalDomainHomeCard extends ConsumerStatefulWidget {
     this.includeZakat = false,
     this.includeHadithFocus = false,
     this.includeHajjStatus = false,
+    this.includeProductivityDashboard = false,
     this.highlightLunarWhiteDays = false,
     this.gateFastingRamadan = false,
     this.focus,
@@ -52,6 +54,7 @@ class OptionalDomainHomeCard extends ConsumerStatefulWidget {
   final bool includeZakat;
   final bool includeHadithFocus;
   final bool includeHajjStatus;
+  final bool includeProductivityDashboard;
   final bool highlightLunarWhiteDays;
   final bool gateFastingRamadan;
   final String? focus;
@@ -195,6 +198,13 @@ class _OptionalDomainHomeCardState
                 const SizedBox(height: 8),
                 HajjHomeDashboard(family: widget.family),
               ],
+              if (widget.includeProductivityDashboard) ...[
+                const SizedBox(height: 8),
+                ProductivityDashboard(
+                  key: const ValueKey<String>('productivity-home'),
+                  family: widget.family,
+                ),
+              ],
             ],
           ),
         ),
@@ -208,7 +218,11 @@ class _OptionalDomainHomeCardState
     required List<HomeTraceRow> rows,
   }) {
     final domainId = rows.isEmpty
-        ? (widget.includeHajjStatus ? 'hajj' : 'domain')
+        ? (widget.includeHajjStatus
+              ? 'hajj'
+              : widget.includeProductivityDashboard
+              ? 'productivity'
+              : 'domain')
         : rows.first.storageKey.split('.').first;
     return DecoratedBox(
       decoration: BoxDecoration(

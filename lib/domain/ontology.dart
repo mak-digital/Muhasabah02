@@ -11,9 +11,9 @@ import 'salah_factors.dart';
 
 /// Read-only ontology metadata version. Independent of DailyCheckIn schema v6.
 ///
-/// Version 12 adds Charity observation kinds and Zakat labels.
+/// Version 13 adds Productivity as a Home dashboard domain (own store).
 /// It does not change DailyCheckIn schema v6.
-const int kOntologyRegistryVersion = 12;
+const int kOntologyRegistryVersion = 13;
 
 /// Active catalog rows vs historically readable retired rows.
 enum OntologyNodeStatus { active, retired }
@@ -33,6 +33,7 @@ enum ConceptualDomainId {
   communityAndService,
   fasting,
   hajj,
+  productivity,
   reflectionPersonalResponse,
 }
 
@@ -288,6 +289,12 @@ class OntologyRegistry {
       id: ConceptualDomainId.hajj,
       label: 'Hajj',
       sourceMonitorDomains: {MonitorDomain.hajj},
+      isObservationDomain: true,
+    ),
+    ConceptualDomainRecord(
+      id: ConceptualDomainId.productivity,
+      label: 'Productivity',
+      sourceMonitorDomains: {MonitorDomain.productivity},
       isObservationDomain: true,
     ),
     ConceptualDomainRecord(

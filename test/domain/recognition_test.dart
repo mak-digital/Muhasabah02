@@ -134,35 +134,38 @@ void main() {
     expect(negativePatterns.first.outcome, TernaryOutcome.negative);
   });
 
-  test('empty and all-unanswered windows report zero saved vs calendar days', () {
-    final empty = engine.coverage(
-      records: const [],
-      period: ReviewPeriod.days30,
-      now: nowJuly,
-    );
-    expect(empty.windowDays, 30);
-    expect(empty.savedDays, 0);
+  test(
+    'empty and all-unanswered windows report zero saved vs calendar days',
+    () {
+      final empty = engine.coverage(
+        records: const [],
+        period: ReviewPeriod.days30,
+        now: nowJuly,
+      );
+      expect(empty.windowDays, 30);
+      expect(empty.savedDays, 0);
 
-    final unanswered = [
-      DailyCheckIn.empty('2026-07-12'),
-      DailyCheckIn.empty('2026-07-10'),
-    ];
-    final sparse = engine.coverage(
-      records: unanswered,
-      period: ReviewPeriod.days30,
-      now: nowJuly,
-    );
-    expect(sparse.windowDays, 30);
-    expect(sparse.savedDays, 2);
-    expect(
-      engine.detect(
+      final unanswered = [
+        DailyCheckIn.empty('2026-07-12'),
+        DailyCheckIn.empty('2026-07-10'),
+      ];
+      final sparse = engine.coverage(
         records: unanswered,
         period: ReviewPeriod.days30,
         now: nowJuly,
-      ),
-      isEmpty,
-    );
-  });
+      );
+      expect(sparse.windowDays, 30);
+      expect(sparse.savedDays, 2);
+      expect(
+        engine.detect(
+          records: unanswered,
+          period: ReviewPeriod.days30,
+          now: nowJuly,
+        ),
+        isEmpty,
+      );
+    },
+  );
 
   test('partial coverage counts only in-window saved check-ins', () {
     final now = DateTime(2026, 9, 30);
@@ -184,43 +187,47 @@ void main() {
     expect(periodDateKeys(30, now: now).last, '2026-09-30');
   });
 
-  test('engine ignores out-of-window records even when they would pass thresholds', () {
-    final now = DateTime(2026, 9, 30);
-    final inWindow = [
-      for (var i = 1; i <= 12; i++)
-        day(
-          date: '2026-09-${i.toString().padLeft(2, '0')}',
-          outcome: TernaryOutcome.positive,
-          factor: 'routine',
+  test(
+    'engine ignores out-of-window records even when they would pass thresholds',
+    () {
+      final now = DateTime(2026, 9, 30);
+      final inWindow = [
+        for (var i = 1; i <= 12; i++)
+          day(
+            date: '2026-09-${i.toString().padLeft(2, '0')}',
+            outcome: TernaryOutcome.positive,
+            factor: 'routine',
+          ),
+      ];
+      final outside = [
+        for (var i = 1; i <= 12; i++)
+          day(
+            date: '2026-08-${i.toString().padLeft(2, '0')}',
+            outcome: TernaryOutcome.negative,
+            factor: 'fatigue',
+            subject: QuranDimension.revision,
+          ),
+      ];
+      final patterns = engine.detect(
+        records: [...outside, ...inWindow],
+        period: ReviewPeriod.days30,
+        now: now,
+      );
+      expect(patterns, isNotEmpty);
+      expect(
+        patterns.every((pattern) => pattern.subject == QuranDimension.meaning),
+        isTrue,
+      );
+      expect(
+        patterns.every(
+          (pattern) => pattern.supportingDates.every(
+            (date) => date.startsWith('2026-09-'),
+          ),
         ),
-    ];
-    final outside = [
-      for (var i = 1; i <= 12; i++)
-        day(
-          date: '2026-08-${i.toString().padLeft(2, '0')}',
-          outcome: TernaryOutcome.negative,
-          factor: 'fatigue',
-          subject: QuranDimension.revision,
-        ),
-    ];
-    final patterns = engine.detect(
-      records: [...outside, ...inWindow],
-      period: ReviewPeriod.days30,
-      now: now,
-    );
-    expect(patterns, isNotEmpty);
-    expect(
-      patterns.every((pattern) => pattern.subject == QuranDimension.meaning),
-      isTrue,
-    );
-    expect(
-      patterns.every(
-        (pattern) =>
-            pattern.supportingDates.every((date) => date.startsWith('2026-09-')),
-      ),
-      isTrue,
-    );
-  });
+        isTrue,
+      );
+    },
+  );
 
   test('90-day window includes an earlier month that 30-day excludes', () {
     final now = DateTime(2026, 9, 30);
@@ -264,32 +271,35 @@ void main() {
     }
   });
 
-  test('Recitation and Application Reflection never become Recognition subjects', () {
-    final now = DateTime(2026, 7, 12);
-    final reading = consecutive(
-      prefix: '2026-07-',
-      count: 12,
-      outcome: TernaryOutcome.positive,
-      factor: 'routine',
-      subject: QuranDimension.reading,
-    );
-    final application = consecutive(
-      prefix: '2026-07-',
-      count: 12,
-      outcome: TernaryOutcome.positive,
-      factor: 'routine',
-      subject: QuranDimension.applicationReflection,
-    );
-    expect(
-      engine.detect(
-        records: [...reading, ...application],
-        period: ReviewPeriod.days30,
-        now: now,
-        subjects: QuranDimension.values,
-      ),
-      isEmpty,
-    );
-  });
+  test(
+    'Recitation and Application Reflection never become Recognition subjects',
+    () {
+      final now = DateTime(2026, 7, 12);
+      final reading = consecutive(
+        prefix: '2026-07-',
+        count: 12,
+        outcome: TernaryOutcome.positive,
+        factor: 'routine',
+        subject: QuranDimension.reading,
+      );
+      final application = consecutive(
+        prefix: '2026-07-',
+        count: 12,
+        outcome: TernaryOutcome.positive,
+        factor: 'routine',
+        subject: QuranDimension.applicationReflection,
+      );
+      expect(
+        engine.detect(
+          records: [...reading, ...application],
+          period: ReviewPeriod.days30,
+          now: now,
+          subjects: QuranDimension.values,
+        ),
+        isEmpty,
+      );
+    },
+  );
 
   test('independent Qur’an dimensions do not share evidence', () {
     final meaning = consecutive(
@@ -340,48 +350,53 @@ void main() {
     expect(meaningPattern.outcome, TernaryOutcome.positive);
   });
 
-  test('mix exclusions omit peer dimensions that still have stored evidence', () {
-    final meaning = consecutive(
-      prefix: '2026-07-',
-      count: 12,
-      outcome: TernaryOutcome.positive,
-      factor: 'routine',
-    );
-    final revision = consecutive(
-      prefix: '2026-07-',
-      count: 12,
-      outcome: TernaryOutcome.negative,
-      factor: 'fatigue',
-      subject: QuranDimension.revision,
-    );
-    final all = engine.detect(
-      records: [...meaning, ...revision],
-      period: ReviewPeriod.days30,
-      now: nowJuly,
-      subjects: const [QuranDimension.meaning, QuranDimension.revision],
-    );
-    expect(all.map((pattern) => pattern.subject).toSet(), {
-      QuranDimension.meaning,
-      QuranDimension.revision,
-    });
-    final meaningOnly = engine.detect(
-      records: [...meaning, ...revision],
-      period: ReviewPeriod.days30,
-      now: nowJuly,
-      subjects: const [QuranDimension.meaning],
-    );
-    expect(
-      meaningOnly.every((pattern) => pattern.subject == QuranDimension.meaning),
-      isTrue,
-    );
-    final none = engine.detect(
-      records: [...meaning, ...revision],
-      period: ReviewPeriod.days30,
-      now: nowJuly,
-      subjects: const [],
-    );
-    expect(none, isEmpty);
-  });
+  test(
+    'mix exclusions omit peer dimensions that still have stored evidence',
+    () {
+      final meaning = consecutive(
+        prefix: '2026-07-',
+        count: 12,
+        outcome: TernaryOutcome.positive,
+        factor: 'routine',
+      );
+      final revision = consecutive(
+        prefix: '2026-07-',
+        count: 12,
+        outcome: TernaryOutcome.negative,
+        factor: 'fatigue',
+        subject: QuranDimension.revision,
+      );
+      final all = engine.detect(
+        records: [...meaning, ...revision],
+        period: ReviewPeriod.days30,
+        now: nowJuly,
+        subjects: const [QuranDimension.meaning, QuranDimension.revision],
+      );
+      expect(all.map((pattern) => pattern.subject).toSet(), {
+        QuranDimension.meaning,
+        QuranDimension.revision,
+      });
+      final meaningOnly = engine.detect(
+        records: [...meaning, ...revision],
+        period: ReviewPeriod.days30,
+        now: nowJuly,
+        subjects: const [QuranDimension.meaning],
+      );
+      expect(
+        meaningOnly.every(
+          (pattern) => pattern.subject == QuranDimension.meaning,
+        ),
+        isTrue,
+      );
+      final none = engine.detect(
+        records: [...meaning, ...revision],
+        period: ReviewPeriod.days30,
+        now: nowJuly,
+        subjects: const [],
+      );
+      expect(none, isEmpty);
+    },
+  );
 
   test('PersonalisationResolver supplies mix-filtered peer subjects', () {
     final hidden = PersonalisationResolver(
@@ -425,13 +440,10 @@ void main() {
       visibleDomains: {MonitorDomain.quran, MonitorDomain.salah},
       mix: PersonalMix.sameAsDomains,
     );
-    expect(
-      sameAsDomains.eligibleRecognitionSubjects.toSet(),
-      {
-        QuranDimension.meaning,
-        QuranDimension.consciousApplication,
-      },
-    );
+    expect(sameAsDomains.eligibleRecognitionSubjects.toSet(), {
+      QuranDimension.meaning,
+      QuranDimension.consciousApplication,
+    });
     expect(
       sameAsDomains.eligibleRecognitionSubjects,
       isNot(contains(QuranDimension.reading)),
@@ -463,11 +475,7 @@ void main() {
     expect(coverage.savedDays, 1);
     expect(periodDateKeys(30, now: now).last, '2026-09-30');
     expect(
-      engine.detect(
-        records: records,
-        period: ReviewPeriod.days30,
-        now: now,
-      ),
+      engine.detect(records: records, period: ReviewPeriod.days30, now: now),
       isEmpty,
     );
   });
@@ -654,7 +662,7 @@ void main() {
       before,
     );
     expect(kDailyCheckInSchemaVersion, 6);
-    expect(kOntologyRegistryVersion, 12);
+    expect(kOntologyRegistryVersion, 13);
   });
 
   test('free-text presence still counts toward context without being read', () {
@@ -688,8 +696,7 @@ void main() {
       period: ReviewPeriod.days30,
       now: nowJuly,
     );
-    final blob =
-        '${patterns.first.coverageLine} ${patterns.first.factorLine}';
+    final blob = '${patterns.first.coverageLine} ${patterns.first.factorLine}';
     for (final word in [
       'caused',
       'because',

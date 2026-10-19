@@ -39,6 +39,7 @@ class ReviewScreen extends ConsumerWidget {
     final now = ref.watch(nowProvider);
     final async = ref.watch(checkInsProvider);
     ref.watch(hajjStoreTickProvider);
+    ref.watch(productivityStoreTickProvider);
     return Scaffold(
       appBar: AppBar(title: const Text(Copy.reviewTitle)),
       body: async.when(
@@ -407,6 +408,30 @@ class ReviewScreen extends ConsumerWidget {
                   note: Copy.ummahObservationNote,
                   rows: rowsFor(MonitorDomain.ummah, ummahHomeRows),
                   family: MuhasabahColors.ummahFamily,
+                ),
+              ),
+            if (shows(MonitorDomain.productivity))
+              _ReviewDomainTile(
+                tileKey: const Key('review-domain-productivity'),
+                title: MonitorDomain.productivity.label,
+                progressLabel: '${MonitorDomain.productivity.label} Progress',
+                line:
+                    '${ref.watch(productivityStoreRepositoryProvider).store.masterList.length} stored action(s). Effort vs plan is not a grade.',
+                color: MuhasabahColors.wash(
+                  MuhasabahColors.productivityWash,
+                  MuhasabahColors.productivityWashDark,
+                  brightness,
+                ),
+                onTap: () => _openTraceProgress(
+                  context,
+                  title: MonitorDomain.productivity.label,
+                  focusQuestion: MonitorDomain.productivity.focusQuestion,
+                  note: Copy.productivityObservationNote,
+                  rows: rowsFor(
+                    MonitorDomain.productivity,
+                    productivityHomeRows,
+                  ),
+                  family: MuhasabahColors.productivityFamily,
                 ),
               ),
             if (shows(MonitorDomain.hajj))

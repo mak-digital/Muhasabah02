@@ -59,6 +59,7 @@ class MuhasabahColors {
   static const fastingFamily = Color(0xFF3F4C8A);
   static const hajjFamily = Color(0xFF4A6B52);
   static const hadithFamily = Color(0xFF4A6D8C);
+  static const productivityFamily = Color(0xFF4A6A7A);
 
   static const salahWash = Color(0xFFD7ECEB);
   static const quranWash = Color(0xFFD7E4F2);
@@ -75,6 +76,7 @@ class MuhasabahColors {
   static const fastingWash = Color(0xFFC5CCEB);
   static const hajjWash = Color(0xFFE2EDE4);
   static const hadithWash = Color(0xFFD4E2EE);
+  static const productivityWash = Color(0xFFDCE6EC);
   static const summaryWash = Color(0xFFEEF2F4);
   /// Shared Learn & Practice panel. Not a domain family and not a grade.
   static const practiceWash = Color(0xFFE4E0EC);
@@ -103,6 +105,7 @@ class MuhasabahColors {
   static const fastingWashDark = Color(0xFF2A3050);
   static const hajjWashDark = Color(0xFF2A3A2E);
   static const hadithWashDark = Color(0xFF2A3848);
+  static const productivityWashDark = Color(0xFF2A3844);
   static const summaryWashDark = Color(0xFF2A3336);
   static const practiceWashDark = Color(0xFF322E3C);
   static const sampleBannerWashDark = Color(0xFF3A3424);

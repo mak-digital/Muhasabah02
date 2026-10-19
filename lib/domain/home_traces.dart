@@ -235,6 +235,9 @@ const charityHomeRows = [
 /// Hajj is a lifetime standing record, not a daily Home observation.
 const hajjHomeRows = <HomeTraceRow>[];
 
+/// Productivity is a dashboard of actions, not a daily week matrix.
+const productivityHomeRows = <HomeTraceRow>[];
+
 /// Leftover daily-preparation traces from the retired Home row.
 const hajjRetiredHomeRows = [
   HomeTraceRow(

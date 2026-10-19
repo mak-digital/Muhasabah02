@@ -1053,12 +1053,12 @@ class VisibleDomainsSettingsScreen extends ConsumerWidget {
                 label: const Text(Copy.selectAllDomains),
                 selected: sameVisibleDomains(
                   current,
-                  MonitorDomain.values.toSet(),
+                  selectableMonitorDomains(),
                 ),
                 onSelected: (_) async {
                   await ref
                       .read(appPrefsProvider)
-                      .setVisibleDomains(MonitorDomain.values.toSet());
+                      .setVisibleDomains(selectableMonitorDomains());
                   ref.read(prefsTickProvider.notifier).state++;
                 },
               ),
@@ -1104,17 +1104,26 @@ class VisibleDomainsSettingsScreen extends ConsumerWidget {
                         Expanded(child: Text(domain.label)),
                       ],
                     ),
-                    value: current.contains(domain),
-                    onChanged: (checked) async {
-                      final next = Set<MonitorDomain>.from(current);
-                      if (checked == true) {
-                        next.add(domain);
-                      } else {
-                        next.remove(domain);
-                      }
-                      await ref.read(appPrefsProvider).setVisibleDomains(next);
-                      ref.read(prefsTickProvider.notifier).state++;
-                    },
+                    subtitle: isDormantMonitorDomain(domain)
+                        ? const Text(Copy.dormantDomainNote)
+                        : null,
+                    value: isDormantMonitorDomain(domain)
+                        ? false
+                        : current.contains(domain),
+                    onChanged: isDormantMonitorDomain(domain)
+                        ? null
+                        : (checked) async {
+                            final next = Set<MonitorDomain>.from(current);
+                            if (checked == true) {
+                              next.add(domain);
+                            } else {
+                              next.remove(domain);
+                            }
+                            await ref
+                                .read(appPrefsProvider)
+                                .setVisibleDomains(next);
+                            ref.read(prefsTickProvider.notifier).state++;
+                          },
                   ),
               ],
             ),

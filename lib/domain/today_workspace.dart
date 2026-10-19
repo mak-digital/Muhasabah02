@@ -157,6 +157,7 @@ List<TodayRow> _rowsForDomain({
           ),
       ];
     case MonitorDomain.hajj:
+    case MonitorDomain.productivity:
       return const [];
     case MonitorDomain.hadith:
     case MonitorDomain.dhikr:

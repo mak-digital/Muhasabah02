@@ -5,6 +5,7 @@ import 'salah_extras.dart';
 
 const kZakatMixKey = 'zakat';
 const kHajjMixKey = 'hajj';
+const kProductivityMixKey = 'productivity';
 
 enum PersonalMixKind {
   sameAsDomains,
@@ -71,6 +72,7 @@ List<HomeTraceRow> homeTraceRowsFor(MonitorDomain domain) {
     MonitorDomain.ummah => ummahHomeRows,
     MonitorDomain.fasting => fastingHomeRows,
     MonitorDomain.hajj => hajjHomeRows,
+    MonitorDomain.productivity => productivityHomeRows,
     MonitorDomain.charity => charityHomeRows,
     MonitorDomain.salah || MonitorDomain.quran => const [],
   };
@@ -140,6 +142,14 @@ List<MixItem> _buildMixCatalog() {
       domain: MonitorDomain.hajj,
       band: 'Hajj standing',
       label: 'Hajj',
+    ),
+  );
+  items.add(
+    const MixItem(
+      id: kProductivityMixKey,
+      domain: MonitorDomain.productivity,
+      band: 'Actions',
+      label: 'Productivity',
     ),
   );
   return items;
@@ -337,6 +347,9 @@ List<HomeTraceRow> mixTraceRows(MonitorDomain domain, Set<String> keys) {
 bool mixIncludesZakat(Set<String> keys) => keys.contains(kZakatMixKey);
 
 bool mixIncludesHajj(Set<String> keys) => keys.contains(kHajjMixKey);
+
+bool mixIncludesProductivity(Set<String> keys) =>
+    keys.contains(kProductivityMixKey);
 
 Set<MonitorDomain> hiddenDomainsInMix(
   PersonalMix mix,

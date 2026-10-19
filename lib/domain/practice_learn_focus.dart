@@ -59,7 +59,10 @@ bool practiceLearnItemAllowed({
   if (allowed.any((item) => item.band == group)) return true;
 
   final hasTraceRows = allowed.any(
-    (item) => item.id != kZakatMixKey && item.id != kHajjMixKey,
+    (item) =>
+        item.id != kZakatMixKey &&
+        item.id != kHajjMixKey &&
+        item.id != kProductivityMixKey,
   );
   return !hasTraceRows;
 }

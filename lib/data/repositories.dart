@@ -6,6 +6,7 @@ import '../domain/personal_hadith.dart';
 import '../domain/personal_quran_verse.dart';
 import '../domain/practice_hadith.dart';
 import '../domain/hajj_planning.dart';
+import '../domain/productivity_planning.dart';
 
 abstract class CheckInRepository {
   Future<DailyCheckIn?> getByDate(String dateKey);
@@ -61,6 +62,14 @@ abstract class HajjStoreRepository {
   bool get hasUnknownSchema;
   Future<void> save(HajjStore store);
   Future<HajjStore> initializeIfNeeded();
+}
+
+abstract class ProductivityStoreRepository {
+  ProductivityStore get store;
+  ProductivityStoreDecodeKind get loadKind;
+  bool get hasUnknownSchema;
+  Future<void> save(ProductivityStore store);
+  Future<ProductivityStore> initializeIfNeeded();
 }
 
 abstract class DevFeedbackRepository {

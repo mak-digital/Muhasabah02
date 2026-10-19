@@ -181,7 +181,25 @@ void main() {
     expect(usesCompactHomeWeek(MonitorDomain.ummah), isFalse);
     expect(usesCompactHomeWeek(MonitorDomain.fasting), isFalse);
     expect(usesCompactHomeWeek(MonitorDomain.hajj), isFalse);
+    expect(usesCompactHomeWeek(MonitorDomain.productivity), isFalse);
+    expect(
+      kBasicDhikrVisibleDomains.contains(MonitorDomain.productivity),
+      isFalse,
+    );
+    expect(
+      selectableMonitorDomains().contains(MonitorDomain.productivity),
+      isTrue,
+    );
     expect(kBasicDhikrVisibleDomains.contains(MonitorDomain.hajj), isFalse);
+    expect(isDormantMonitorDomain(MonitorDomain.hajj), isTrue);
+    expect(isDormantMonitorDomain(MonitorDomain.fasting), isFalse);
+    expect(selectableMonitorDomains().contains(MonitorDomain.hajj), isFalse);
+    expect(
+      decodeVisibleDomains(encodeVisibleDomains(MonitorDomain.values.toSet()))
+          .contains(MonitorDomain.hajj),
+      isFalse,
+    );
+    expect(visibleDomainsSummary(selectableMonitorDomains()), 'All domains');
     expect(MonitorDomain.salah.shortLabel, 'Salah');
     expect(MonitorDomain.quran.shortLabel, 'Qur’an');
     expect(MonitorDomain.akhlaq.shortLabel, 'Character');

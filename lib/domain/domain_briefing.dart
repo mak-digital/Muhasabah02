@@ -233,6 +233,17 @@ const hajjBriefing = DomainBriefing(
   ],
 );
 
+const productivityBriefing = DomainBriefing(
+  lead: [
+    'Productivity is a user-owned action list on one dashboard. It is not a score, streak, or Time & Barakah replacement.',
+  ],
+  items: [
+    'Today’s five, remaining effort, and carry-forward are planning tools. Unfinished work is not a fail.',
+    'Needs a look means blocked or past a date you set — not a grade.',
+    'Private titles stay on the device. The app does not log them.',
+  ],
+);
+
 const charityBriefing = DomainBriefing(
   lead: [
     'This is giving and care you noticed — privately. Amounts, recipient names, and financial circumstances are not recorded. Ordinary household nafaqa stays on Rights of Others.',
@@ -259,6 +270,7 @@ DomainBriefing? briefingForDomain(MonitorDomain domain) => switch (domain) {
   MonitorDomain.ummah => ummahBriefing,
   MonitorDomain.fasting => fastingBriefing,
   MonitorDomain.hajj => hajjBriefing,
+  MonitorDomain.productivity => productivityBriefing,
   _ => null,
 };
 

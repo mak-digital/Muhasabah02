@@ -97,6 +97,7 @@ Widget? homePracticeWash(MonitorDomain domain) {
     MonitorDomain.ummah => PracticeUmmahWash(domain: domain),
     MonitorDomain.fasting => PracticeFastingWash(domain: domain),
     MonitorDomain.hajj => PracticeHajjWash(domain: domain),
+    MonitorDomain.productivity => null,
     MonitorDomain.charity => PracticeCharityWash(domain: domain),
   };
 }

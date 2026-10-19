@@ -35,6 +35,11 @@ Future<void> main() async {
     );
     overrides.add(appPrefsProvider.overrideWithValue(opened.prefs));
     overrides.add(hajjStoreRepositoryProvider.overrideWithValue(opened.hajj));
+    overrides.add(
+      productivityStoreRepositoryProvider.overrideWithValue(
+        opened.productivity,
+      ),
+    );
     logAppEvent('persistence_ready');
   } catch (_) {
     logAppEvent('persistence_fallback_memory');

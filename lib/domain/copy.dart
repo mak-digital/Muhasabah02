@@ -291,6 +291,7 @@ class Copy {
   static const hadithDurationNote =
       'ENGAGED with Hadith holds four rows: read and/or listened, memorization or revision, study circle or discussion, and lived or noticed in others. The first three use the same duration steps as Qur’an Engagement. Lived /Noticed others is how a teaching reached life today — not a revival score.';
   static String get hajjObservationNote => hajjBriefing.plainText;
+  static String get productivityObservationNote => productivityBriefing.plainText;
   static const hajjStatusLabel = 'Hajj standing';
   static const hajjStatusNote =
       'This is a lifetime record you set, not a ruling. The app does not decide ability or timing. A journey is optional and separate. Unsure and not applicable stay available.';
@@ -452,6 +453,8 @@ class Copy {
       'Choose which domains belong in this profile. This season’s mix, on the same screen, is a subset of those domains: bands and rows to notice. Leave a domain or row unselected if it does not apply. Home, Review, Progress, check-in, Quick Tap, and Recorded days follow the mix among the domains shown. Hidden domains keep any saved records.';
   static const shownDomainsNote =
       'Choose which domains belong in this profile. Leave a domain unselected if it does not apply. Home, Review, and today’s check-in follow the domains shown here and the mix below. Hidden domains keep any saved records.';
+  static const dormantDomainNote =
+      'Listed here so you can find it. Not active in this season. Saved records stay. Home, Review, and check-in do not use it yet.';
   static const thisSeasonsMix = 'This season’s mix';
   static const personalMix = 'Personal mix';
   static const personalMixNote =

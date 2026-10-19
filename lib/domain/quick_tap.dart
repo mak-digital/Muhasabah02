@@ -84,7 +84,7 @@ List<(MonitorDomain, List<QuickTapItem>)> quickTapSectionsFor(
 }
 
 QuickTapItem? _itemForMix(MixItem mix, {required bool friday}) {
-  if (mix.id == kHajjMixKey) return null;
+  if (mix.id == kHajjMixKey || mix.id == kProductivityMixKey) return null;
   if (mix.id == kZakatMixKey) {
     return QuickTapItem(
       id: mix.id,
@@ -170,6 +170,7 @@ String _iconName(MonitorDomain domain) => switch (domain) {
   MonitorDomain.ummah => 'call',
   MonitorDomain.fasting => 'favorite_outline',
   MonitorDomain.hajj => 'self_improvement',
+  MonitorDomain.productivity => 'self_improvement',
   MonitorDomain.charity => 'volunteer_activism',
 };
 

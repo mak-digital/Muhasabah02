@@ -213,7 +213,7 @@ class MemoryAppPrefs implements AppPrefs {
 
   @override
   Future<void> setVisibleDomains(Set<MonitorDomain> value) async {
-    visibleDomains = Set<MonitorDomain>.from(value);
+    visibleDomains = withoutDormantMonitorDomains(value);
     mutationCount++;
   }
 
@@ -244,7 +244,7 @@ class MemoryAppPrefs implements AppPrefs {
       activeSlotId: customSelectionSets.activeSlotId,
       slots: List.of(customSelectionSets.slots),
     );
-    visibleDomains = Set<MonitorDomain>.from(domains);
+    visibleDomains = withoutDormantMonitorDomains(domains);
     personalMix = mix;
     customSelectionSets = CustomSelectionSetsRecord(
       activeSlotId: sets.activeSlotId,

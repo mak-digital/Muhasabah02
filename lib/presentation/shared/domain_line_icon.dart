@@ -74,6 +74,8 @@ class _DomainLinePainter extends CustomPainter {
         _crescent(canvas, paint);
       case MonitorDomain.hajj:
         _kaaba(canvas, paint);
+      case MonitorDomain.productivity:
+        _checklist(canvas, paint);
       case MonitorDomain.charity:
         _openHands(canvas, paint);
     }
@@ -197,6 +199,20 @@ class _DomainLinePainter extends CustomPainter {
           radius: const Radius.circular(6),
         )
         ..close(),
+      paint,
+    );
+  }
+
+  void _checklist(Canvas canvas, Paint paint) {
+    canvas.drawRRect(
+      RRect.fromLTRBR(5, 4, 19, 20, const Radius.circular(2)),
+      paint,
+    );
+    canvas.drawPath(
+      Path()
+        ..moveTo(7.5, 11)
+        ..lineTo(10.2, 13.6)
+        ..lineTo(16.2, 8),
       paint,
     );
   }

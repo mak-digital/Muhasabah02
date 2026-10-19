@@ -21,6 +21,7 @@ import '../domain/hajj_live_gateway.dart';
 import '../domain/hajj_online_assist.dart';
 import '../domain/hajj_online_contracts.dart';
 import '../domain/hajj_planning.dart';
+import '../domain/productivity_planning.dart';
 import '../domain/hajj_source_catalog.dart';
 import '../domain/quran_verse_fetch.dart';
 import '../domain/review_period.dart';
@@ -66,6 +67,13 @@ final hajjStoreRepositoryProvider = Provider<HajjStoreRepository>(
 
 final hajjStoreTickProvider = StateProvider<int>((ref) => 0);
 
+final productivityStoreRepositoryProvider =
+    Provider<ProductivityStoreRepository>(
+      (ref) => MemoryProductivityStoreRepository(),
+    );
+
+final productivityStoreTickProvider = StateProvider<int>((ref) => 0);
+
 final hajjSourceRegistryProvider = Provider<HajjSourceRegistry>(
   (ref) => const BundledHajjSourceRegistry(),
 );
@@ -90,6 +98,8 @@ final hajjOnlineAssistGatewayProvider = Provider<HajjOnlineAssistGateway>((
         baseUrl: liveUrl,
         request: request,
         pilotGate: kHajjLiveGate,
+        accessClientId: kHajjAccessClientId,
+        accessClientSecret: kHajjAccessClientSecret,
       ),
     ),
   );
@@ -120,6 +130,17 @@ Future<void> persistHajjStore(
   final repo = ref.read(hajjStoreRepositoryProvider);
   await repo.save(update(repo.store));
   ref.read(hajjStoreTickProvider.notifier).state++;
+}
+
+Future<void> persistProductivityStore(
+  WidgetRef ref,
+  ProductivityStore Function(ProductivityStore current) update,
+) async {
+  final repo = ref.read(productivityStoreRepositoryProvider);
+  final next = update(repo.store);
+  if (identical(next, repo.store)) return;
+  await repo.save(next);
+  ref.read(productivityStoreTickProvider.notifier).state++;
 }
 
 final hadithFetchProvider = Provider<HadithFetch>(

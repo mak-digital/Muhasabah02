@@ -54,6 +54,7 @@ String todayDomainLabel(MonitorDomain domain) {
     MonitorDomain.ummah => 'Ummah',
     MonitorDomain.fasting => 'Fasting',
     MonitorDomain.hajj => 'Hajj',
+    MonitorDomain.productivity => 'Productivity',
     MonitorDomain.charity => 'Charity',
   };
 }
@@ -152,6 +153,11 @@ DomainColorIdentity domainColorIdentity(MonitorDomain domain) {
       family: MuhasabahColors.hajjFamily,
       washLight: MuhasabahColors.hajjWash,
       washDark: MuhasabahColors.hajjWashDark,
+    ),
+    MonitorDomain.productivity => const DomainColorIdentity(
+      family: MuhasabahColors.productivityFamily,
+      washLight: MuhasabahColors.productivityWash,
+      washDark: MuhasabahColors.productivityWashDark,
     ),
     MonitorDomain.charity => const DomainColorIdentity(
       family: MuhasabahColors.charityFamily,

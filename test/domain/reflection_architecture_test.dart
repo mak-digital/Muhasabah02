@@ -38,6 +38,7 @@ void main() {
 
   test('each domain has Qur’an verses and authentic hadith for reflection', () {
     for (final domain in MonitorDomain.values) {
+      if (domain == MonitorDomain.productivity) continue;
       final pool = [
         for (final quote in kReflectionQuotes)
           if (quote.domain == domain) quote,

@@ -18,6 +18,7 @@ import '../domain/personal_hadith.dart';
 import '../domain/personal_quran_verse.dart';
 import '../domain/practice_hadith.dart';
 import '../domain/hajj_planning.dart';
+import '../domain/productivity_planning.dart';
 import '../domain/quotation_cadence.dart';
 import 'codecs.dart';
 import 'repositories.dart';
@@ -633,8 +634,10 @@ class HiveAppPrefs implements AppPrefs {
       _box.put(_displayCalendar, value.id);
 
   @override
-  Future<void> setVisibleDomains(Set<MonitorDomain> value) =>
-      _box.put(_visibleDomains, encodeVisibleDomains(value));
+  Future<void> setVisibleDomains(Set<MonitorDomain> value) => _box.put(
+    _visibleDomains,
+    encodeVisibleDomains(withoutDormantMonitorDomains(value)),
+  );
 
   @override
   Future<void> setPersonalMix(PersonalMix value) =>
@@ -655,7 +658,9 @@ class HiveAppPrefs implements AppPrefs {
     final previousSets = _box.get(_customSelectionSets);
     try {
       await _box.putAll({
-        _visibleDomains: encodeVisibleDomains(domains),
+        _visibleDomains: encodeVisibleDomains(
+          withoutDormantMonitorDomains(domains),
+        ),
         _personalMix: encodePersonalMix(mix),
         _customSelectionSets: encodeCustomSelectionSets(sets),
       });
@@ -939,6 +944,10 @@ class HiveHajjStoreRepository implements HajjStoreRepository {
     }
     if (decoded.kind == HajjStoreDecodeKind.ok && decoded.store != null) {
       store = decoded.store!;
+      final encoded = encodeHajjStore(store);
+      if (encoded != raw) {
+        await _box.put(kHajjStoreDocumentKey, encoded);
+      }
       return store;
     }
     if (decoded.kind == HajjStoreDecodeKind.corrupt) {
@@ -948,6 +957,58 @@ class HiveHajjStoreRepository implements HajjStoreRepository {
     store = const HajjStore();
     loadKind = HajjStoreDecodeKind.ok;
     await _box.put(kHajjStoreDocumentKey, encodeHajjStore(store));
+    return store;
+  }
+}
+
+class HiveProductivityStoreRepository implements ProductivityStoreRepository {
+  HiveProductivityStoreRepository(this._box);
+
+  final Box<String> _box;
+
+  @override
+  ProductivityStore store = const ProductivityStore();
+
+  @override
+  ProductivityStoreDecodeKind loadKind = ProductivityStoreDecodeKind.missing;
+
+  @override
+  bool get hasUnknownSchema =>
+      loadKind == ProductivityStoreDecodeKind.unknownVersion;
+
+  @override
+  Future<void> save(ProductivityStore next) async {
+    if (hasUnknownSchema) return;
+    final encoded = encodeProductivityStore(next);
+    await _box.put(kProductivityStoreDocumentKey, encoded);
+    store = next;
+    loadKind = ProductivityStoreDecodeKind.ok;
+  }
+
+  @override
+  Future<ProductivityStore> initializeIfNeeded() async {
+    final raw = _box.get(kProductivityStoreDocumentKey);
+    final decoded = decodeProductivityStore(raw);
+    loadKind = decoded.kind;
+    if (decoded.kind == ProductivityStoreDecodeKind.unknownVersion) {
+      store = const ProductivityStore();
+      return store;
+    }
+    if (decoded.kind == ProductivityStoreDecodeKind.ok &&
+        decoded.store != null) {
+      store = decoded.store!;
+      return store;
+    }
+    if (decoded.kind == ProductivityStoreDecodeKind.corrupt) {
+      store = const ProductivityStore();
+      return store;
+    }
+    store = const ProductivityStore();
+    loadKind = ProductivityStoreDecodeKind.ok;
+    await _box.put(
+      kProductivityStoreDocumentKey,
+      encodeProductivityStore(store),
+    );
     return store;
   }
 }
@@ -963,6 +1024,7 @@ Future<
     HivePersonalQuranVerseRepository personalQuran,
     HivePersonalHadithRepository personalHadith,
     HiveHajjStoreRepository hajj,
+    HiveProductivityStoreRepository productivity,
   })
 >
 openHiveRepositories() async {
@@ -976,10 +1038,13 @@ openHiveRepositories() async {
   final personalQuran = await Hive.openBox<String>(personalQuranBoxName);
   final personalHadith = await Hive.openBox<String>(personalHadithBoxName);
   final hajjBox = await Hive.openBox<String>(hajjStoreBoxName);
+  final productivityBox = await Hive.openBox<String>(kProductivityStoreBoxName);
   final hivePrefs = HiveAppPrefs(prefs);
   await hivePrefs.discardLegacyHajjStatus();
   final hajj = HiveHajjStoreRepository(hajjBox);
   await hajj.initializeIfNeeded();
+  final productivity = HiveProductivityStoreRepository(productivityBox);
+  await productivity.initializeIfNeeded();
   return (
     checkIns: HiveCheckInRepository(checkIns),
     responses: HiveResponseRepository(responses),
@@ -990,5 +1055,6 @@ openHiveRepositories() async {
     personalQuran: HivePersonalQuranVerseRepository(personalQuran),
     personalHadith: HivePersonalHadithRepository(personalHadith),
     hajj: hajj,
+    productivity: productivity,
   );
 }

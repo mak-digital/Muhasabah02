@@ -83,6 +83,8 @@ void main() {
         find.byKey(const Key('domain-visible-hajj')),
       );
       expect(hajjTile.value, isFalse);
+      expect(hajjTile.onChanged, isNull);
+      expect(find.text(Copy.dormantDomainNote), findsWidgets);
       await tester.tap(find.text(Copy.selectAllDomains));
       await tester.pumpAndSettle();
       expect(
@@ -92,6 +94,14 @@ void main() {
             )
             .value,
         isTrue,
+      );
+      expect(
+        tester
+            .widget<CheckboxListTile>(
+              find.byKey(const Key('domain-visible-hajj')),
+            )
+            .value,
+        isFalse,
       );
       await tester.tap(find.byKey(const Key('domain-visible-fasting')));
       await tester.pumpAndSettle();

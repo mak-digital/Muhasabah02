@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Productivity dashboard mockup — Private Muhasabah</title>
+  <style>
+    :root {
+      --ink: #15232a;
+      --muted: #5a6b72;
+      --line: #d8e0e4;
+      --bg: #eef3f4;
+      --paper: #ffffff;
+      --teal: #2f6f73;
+      --teal-soft: #d7eceb;
+      --focus: #e7f6ee;
+      --quote: #f7f0dd;
+      --crit: #d45b5b;
+      --high: #e39a3c;
+      --med: #4d86d6;
+      --low: #7a6fd1;
+      --crit-wash: #fdeeee;
+      --high-wash: #fff4e4;
+      --med-wash: #eaf2fc;
+      --low-wash: #f0eefb;
+      --look: #e56b6b;
+      --done: #3d9a6a;
+      --prog: #4d86d6;
+      --radius: 16px;
+      --shadow: 0 8px 28px rgba(21, 35, 42, 0.08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: #dfe8ea;
+      color: var(--ink);
+    }
+    button, input { font: inherit; }
+    .review-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      padding: 10px 16px;
+      background: #14323a;
+      color: #eef6f6;
+      font-size: 13px;
+    }
+    .review-bar strong { font-weight: 600; }
+    .review-bar button {
+      border: 0;
+      background: #2f6f73;
+      color: white;
+      border-radius: 999px;
+      padding: 6px 12px;
+      cursor: pointer;
+    }
+    .review-bar button[aria-pressed="true"] { background: #e7f6ee; color: #14323a; }
+    .shell {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      min-height: calc(100vh - 44px);
+    }
+    .shell.phone {
+      grid-template-columns: 1fr;
+      max-width: 400px;
+      margin: 16px auto 40px;
+      min-height: auto;
+      border-radius: 28px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      background: var(--bg);
+    }
+    .shell.phone .rail, .shell.phone .wide-only { display: none; }
+    .shell.phone .main { padding: 12px; }
+    .shell.phone .work {
+      grid-template-columns: 1fr;
+    }
+    .rail {
+      background: #f7fbfb;
+      border-right: 1px solid var(--line);
+      padding: 18px 12px;
+    }
+    .brand {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      padding: 4px 8px 16px;
+    }
+    .brand-mark {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: var(--teal-soft); color: var(--teal);
+      display: grid; place-items: center; font-weight: 700;
+    }
+    .brand small { display: block; color: var(--muted); font-size: 11px; }
+    .nav-item {
+      width: 100%;
+      text-align: left;
+      border: 0;
+      background: transparent;
+      padding: 10px 12px;
+      border-radius: 12px;
+      color: var(--ink);
+      cursor: default;
+    }
+    .nav-item.active { background: var(--teal-soft); color: var(--teal); font-weight: 600; }
+    .nav-item.dormant { color: #8a969b; font-size: 13px; }
+    .nav-item.dormant::after { content: " · dormant"; font-weight: 400; font-size: 11px; }
+    .main { padding: 18px 20px 28px; background: var(--bg); }
+    .top {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .title {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 22px; font-weight: 700;
+    }
+    .check {
+      width: 22px; height: 22px; border-radius: 50%;
+      background: var(--teal); color: white;
+      display: grid; place-items: center; font-size: 12px;
+    }
+    .tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+    .tabs button {
+      border: 0; background: transparent; padding: 8px 10px;
+      border-radius: 999px; cursor: pointer; color: var(--muted);
+    }
+    .tabs button[aria-selected="true"] {
+      background: white; color: var(--teal); font-weight: 600;
+      box-shadow: var(--shadow);
+    }
+    .date-line { color: var(--muted); font-size: 13px; text-align: right; }
+    .work {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
+      gap: 14px;
+      align-items: start;
+      overflow: visible;
+    }
+    .work > * { min-width: 0; }
+    .card {
+      background: var(--paper);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+    .focus {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      background: var(--focus);
+    }
+    .kicker { font-size: 12px; color: var(--teal); font-weight: 600; }
+    .bar {
+      height: 8px; background: #cfe6d8; border-radius: 99px; overflow: hidden; margin: 8px 0;
+    }
+    .bar > span { display: block; height: 100%; background: var(--teal); }
+    .time-box { min-width: 140px; text-align: right; }
+    .time-box .big { font-size: 22px; font-weight: 700; color: var(--teal); }
+    .list-head {
+      display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; align-items: center;
+      margin-bottom: 10px;
+    }
+    .ghost, .solid {
+      border-radius: 12px; padding: 8px 12px; cursor: pointer;
+    }
+    .ghost { border: 1px solid var(--line); background: white; }
+    .solid { border: 0; background: var(--teal); color: white; }
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      padding: 10px 12px;
+      border-radius: 14px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      border: 2px solid transparent;
+    }
+    .row .body { flex: 1; min-width: 160px; }
+    .row[aria-selected="true"] { border-color: var(--teal); }
+    .row.p1 { background: var(--crit-wash); }
+    .row.p2 { background: var(--high-wash); }
+    .row.p3 { background: var(--med-wash); }
+    .row.p4 { background: var(--low-wash); }
+    .disc {
+      width: 26px; height: 26px; border-radius: 50%; color: white;
+      display: grid; place-items: center; font-size: 12px; font-weight: 700;
+    }
+    .p1 .disc { background: var(--crit); }
+    .p2 .disc { background: var(--high); }
+    .p3 .disc { background: var(--med); }
+    .p4 .disc { background: var(--low); }
+    .tick {
+      width: 18px; height: 18px; border-radius: 5px;
+      border: 2px solid #8aa0a6; background: white;
+    }
+    .row.done .tick { background: var(--done); border-color: var(--done); }
+    .meta { font-size: 12px; color: var(--muted); }
+    .tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+    .tag {
+      font-size: 11px; background: white; border-radius: 999px; padding: 2px 8px; color: var(--muted);
+    }
+    .effort { display: none; }
+    .status {
+      display: inline-block; font-size: 11px; font-weight: 600;
+      padding: 3px 8px; border-radius: 999px; margin-top: 4px;
+    }
+    .st-look { background: #fad4d4; color: #8a2f2f; }
+    .st-done { background: #d7f0e2; color: #216246; }
+    .st-prog { background: #d9e7fa; color: #2a4f86; }
+    .st-wait { background: #e8ecee; color: #4d5c63; }
+    .st-pause { background: #f3ead4; color: #6a5420; }
+    .details h3 { margin: 0 0 8px; font-size: 16px; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 13px; }
+    .sub { display: flex; gap: 8px; align-items: center; font-size: 13px; margin: 4px 0; }
+    .quote { background: var(--quote); font-size: 14px; line-height: 1.4; }
+    .cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; font-size: 12px; }
+    .cal .d { padding: 6px 0; border-radius: 8px; }
+    .cal .today { background: var(--teal); color: white; }
+    .hours { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; font-size: 12px; }
+    .hours strong { overflow-wrap: anywhere; }
+    .notice { background: var(--focus); font-size: 13px; }
+    .quick { display: flex; gap: 6px; }
+    .quick input { flex: 1; border: 1px solid var(--line); border-radius: 10px; padding: 8px; }
+    .guide { font-size: 13px; }
+    .dot { width: 16px; height: 16px; border-radius: 50%; display: inline-block; margin-right: 8px; vertical-align: middle; }
+    .sheet {
+      position: fixed; inset: 0; background: rgba(20, 50, 58, 0.35);
+      display: none; align-items: flex-end; justify-content: center; z-index: 20;
+    }
+    .sheet.open { display: flex; }
+    .sheet .panel {
+      background: white; width: min(520px, 100%);
+      border-radius: 20px 20px 0 0; padding: 16px; max-height: 80vh; overflow: auto;
+    }
+    .mal-item {
+      display: flex; justify-content: space-between; gap: 8px;
+      padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 14px;
+    }
+    .collapse > summary {
+      cursor: pointer; font-weight: 600; padding: 4px 0;
+    }
+    .move { border: 0; background: transparent; cursor: pointer; color: var(--muted); }
+    .phone-stack .focus { grid-template-columns: 1fr; }
+    .phone-stack .time-box { text-align: left; }
+    .phone-stack .row { grid-template-columns: 26px 20px 1fr; }
+    .phone-stack .effort { grid-column: 1 / -1; text-align: left; }
+    .hint { font-size: 12px; color: var(--muted); margin: 0 0 12px; }
+  </style>
+</head>
+<body>
+  <div class="review-bar">
+    <strong>P0 mockup</strong>
+    <span>Not the shipping app. Single dashboard. Hajj listed as dormant.</span>
+    <button type="button" id="btn-tablet" aria-pressed="true">Tablet</button>
+    <button type="button" id="btn-phone" aria-pressed="false">Phone</button>
+  </div>
+
+  <div class="shell" id="shell">
+    <aside class="rail" aria-label="Conceptual domains">
+      <div class="brand">
+        <div class="brand-mark">M</div>
+        <div><strong>Muhasabah</strong><small>Private record</small></div>
+      </div>
+      <button class="nav-item" type="button">Home</button>
+      <button class="nav-item" type="button">Qur’an</button>
+      <button class="nav-item" type="button">Prayer</button>
+      <button class="nav-item" type="button">Dhikr</button>
+      <button class="nav-item active" type="button">Productivity</button>
+      <button class="nav-item dormant" type="button">Hajj Planner</button>
+      <button class="nav-item" type="button">Health</button>
+      <button class="nav-item" type="button">Settings</button>
+    </aside>
+
+    <main class="main">
+      <div class="top">
+        <div class="title"><span class="check">✓</span> Productivity</div>
+        <div class="tabs" role="tablist">
+          <button type="button" data-tab="today" aria-selected="true">Today</button>
+          <button type="button" data-tab="planner">Planner</button>
+          <button type="button" data-tab="mal">Master List</button>
+          <button type="button" data-tab="history">History</button>
+        </div>
+        <div class="date-line">Sat, 18 Oct 2026<br />22 Rabi‘ al-Thani 1448</div>
+      </div>
+      <p class="hint">Tabs stay on this page: they show or hide sections. They are not separate screens.</p>
+
+      <div class="work" id="work">
+        <div>
+          <section class="card focus" id="focus-card"></section>
+          <section class="card" id="today-card">
+            <div class="list-head">
+              <div>
+                <strong>Today’s Actions (<span id="today-count">0</span>)</strong>
+                <div class="meta">Reorder · tap a row for details · unfinished moves to tomorrow</div>
+              </div>
+              <div>
+                <button class="solid" type="button" id="btn-add">+ Add action</button>
+                <button class="ghost" type="button" id="btn-mal">Pick from Master List</button>
+              </div>
+            </div>
+            <div id="today-list"></div>
+          </section>
+          <section class="card details" id="details-card"></section>
+          <details class="card collapse" id="mal-panel">
+            <summary>Master Action List</summary>
+            <div id="mal-inline"></div>
+          </details>
+          <details class="card collapse" id="hist-panel">
+            <summary>History and trends</summary>
+            <div id="hist-inline" class="meta"></div>
+          </details>
+        </div>
+        <div>
+          <section class="card quote wide-only">“A small step taken consistently is better than a big step delayed.”</section>
+          <section class="card" id="calendar-card">
+            <strong>October 2026</strong>
+            <div class="cal" id="cal"></div>
+          </section>
+          <section class="card" id="time-card"></section>
+          <section class="card notice" id="notice-card"></section>
+          <section class="card">
+            <strong>Quick add</strong>
+            <div class="quick" style="margin-top:8px">
+              <input id="quick-title" placeholder="Add a new action…" />
+              <select id="quick-hours">
+                <option value="0.5">0.5h</option>
+                <option value="1" selected>1h</option>
+                <option value="1.5">1.5h</option>
+                <option value="2">2h</option>
+              </select>
+              <button class="solid" type="button" id="btn-quick">Add</button>
+            </div>
+          </section>
+          <section class="card guide">
+            <strong>Priority guide</strong>
+            <p><span class="dot" style="background:var(--crit)"></span>1 Critical (Do first)</p>
+            <p><span class="dot" style="background:var(--high)"></span>2 High (Important)</p>
+            <p><span class="dot" style="background:var(--med)"></span>3 Medium (Do today)</p>
+            <p><span class="dot" style="background:var(--low)"></span>4 Low (If time permits)</p>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="sheet" id="sheet" role="dialog" aria-modal="true">
+    <div class="panel">
+      <strong id="sheet-title">Sheet</strong>
+      <div id="sheet-body"></div>
+      <p><button class="ghost" type="button" id="sheet-close">Close</button></p>
+    </div>
+  </div>
+
+  <script>
+    const STATUS = {
+      look: { label: "Needs a look", cls: "st-look" },
+      done: { label: "Completed", cls: "st-done" },
+      prog: { label: "In progress", cls: "st-prog" },
+      wait: { label: "Not started", cls: "st-wait" },
+      pause: { label: "Paused", cls: "st-pause" },
+    };
+
+    const actions = [
+      { id: "a1", title: "Fix Worker / health timeout", note: "Kill leftover workerd, confirm 200", tags: ["Main activity", "Setup"], hours: 1, doneHours: 0, priority: 1, status: "look", today: true, target: "Today, 11:00", domain: "Technology",
+        subs: [
+          { t: "Stop leftover workerd processes", h: 0.2, done: false },
+          { t: "Start Wrangler on 127.0.0.1:8787", h: 0.3, done: false },
+          { t: "Confirm GET /health returns 200", h: 0.2, done: false },
+        ],
+        before: ["Flutter integration tests"],
+        blocks: ["Phase 3B-2G report"],
+      },
+      { id: "a2", title: "Run JS Worker tests", note: "Execute test suite and confirm all pass", tags: ["Main activity", "Testing"], hours: 0.5, doneHours: 0.5, priority: 2, status: "done", today: true, target: "Today", domain: "Technology", subs: [], before: [], blocks: [] },
+      { id: "a3", title: "Run Flutter integration tests", note: "Consent, lookup, offline fallback", tags: ["Main activity", "App testing"], hours: 1, doneHours: 0.6, priority: 3, status: "prog", today: true, target: "Today", domain: "Technology", subs: [], before: [], blocks: [] },
+      { id: "a4", title: "Update provenance model", note: "Origin from userEntered to live retrieval", tags: ["Main activity", "App improvement"], hours: 1.5, doneHours: 0, priority: 4, status: "wait", today: true, target: "Tomorrow", domain: "Technology", subs: [], before: [], blocks: [] },
+      { id: "a5", title: "Prepare Phase 3B-2G report", note: "Test results, files changed, next steps", tags: ["Main activity", "Documentation"], hours: 1.5, doneHours: 0, priority: 4, status: "wait", today: true, target: "Tomorrow", domain: "Documentation", subs: [], before: ["Fix Worker / health timeout"], blocks: [] },
+      { id: "a6", title: "File tax papers", note: "Household, not worship", tags: ["Household"], hours: 2, doneHours: 0, priority: 3, status: "wait", today: false, target: "This week", domain: "Household", subs: [], before: [], blocks: [] },
+      { id: "a7", title: "Call the clinic", note: "Appointment only", tags: ["Health"], hours: 0.5, doneHours: 0, priority: 2, status: "wait", today: false, target: "This week", domain: "Health", subs: [], before: [], blocks: [] },
+    ];
+    const events = ["18 Oct · Run JS Worker tests completed", "18 Oct · Flutter tests moved to in progress"];
+    let selected = "a1";
+
+    const $ = (id) => document.getElementById(id);
+
+    function todayList() { return actions.filter((a) => a.today); }
+    function pct(a) { return a.hours ? Math.round((a.doneHours / a.hours) * 100) : 0; }
+    function hoursOf(list, pred) {
+      return list.filter(pred).reduce((n, a) => n + a.hours, 0);
+    }
+
+    function render() {
+      const today = todayList();
+      const next = today.find((a) => a.status !== "done" && a.status !== "pause") || today[0];
+      const planned = hoursOf(today, () => true);
+      const completed = today.reduce((n, a) => n + a.doneHours, 0);
+      const remaining = Math.max(planned - completed, 0);
+      const unfinished = today.filter((a) => a.status !== "done").length;
+
+      $("today-count").textContent = today.length;
+      $("focus-card").innerHTML = next ? `
+        <div>
+          <div class="kicker">Today’s focus</div>
+          <strong>${next.title}</strong>
+          <div class="meta">${next.note}</div>
+          <div class="bar"><span style="width:${pct(next)}%"></span></div>
+          <div class="meta">${pct(next)}% of this action’s estimate · not a grade</div>
+        </div>
+        <div class="time-box">
+          <div class="kicker">Time remaining</div>
+          <div class="big">${fmt(remaining)}</div>
+          <div class="meta">of ${fmt(planned)} planned today</div>
+        </div>` : `<div>Nothing queued.</div>`;
+
+      $("today-list").innerHTML = today.map((a, i) => `
+        <div class="row p${a.priority} ${a.status === "done" ? "done" : ""}" data-id="${a.id}" aria-selected="${a.id === selected}">
+          <span class="disc">${i + 1}</span>
+          <span class="tick" data-complete="${a.id}" title="Complete"></span>
+          <div class="body">
+            <strong>${a.title}</strong>
+            <div class="meta">${a.note}</div>
+            <div class="tags">${a.tags.map((t) => `<span class="tag">${t}</span>`).join("")}</div>
+            <div class="meta">${a.hours}h · ${pct(a)}% of estimate · <span class="status ${STATUS[a.status].cls}">${STATUS[a.status].label}</span>
+              <button class="move" data-up="${a.id}" type="button">↑</button>
+              <button class="move" data-down="${a.id}" type="button">↓</button>
+            </div>
+            <div class="bar"><span style="width:${pct(a)}%"></span></div>
+          </div>
+        </div>`).join("");
+
+      const sel = actions.find((a) => a.id === selected);
+      $("details-card").innerHTML = sel ? `
+        <div class="kicker">Selected action details</div>
+        <h3>${sel.title}</h3>
+        <div class="meta">${sel.note}</div>
+        <div class="grid2" style="margin-top:10px">
+          <div>Tag<br /><strong>${sel.domain}</strong></div>
+          <div>Target completion<br /><strong>${sel.target}</strong></div>
+          <div>Estimated time<br /><strong>${sel.hours} hour</strong></div>
+          <div>Status<br /><span class="status ${STATUS[sel.status].cls}">${STATUS[sel.status].label}</span></div>
+        </div>
+        <div class="grid2" style="margin-top:12px">
+          <div>
+            <strong>Subtasks (${sel.subs.length})</strong>
+            ${sel.subs.map((s, i) => `<div class="sub"><input type="checkbox" data-sub="${sel.id}:${i}" ${s.done ? "checked" : ""} /> ${s.t} <span class="meta">${s.h}h</span></div>`).join("") || "<div class='meta'>None yet</div>"}
+            <p><button class="ghost" type="button" id="btn-sub">+ Add subtask</button></p>
+          </div>
+          <div>
+            <strong>Dependencies</strong>
+            <div class="meta">Must complete before</div>
+            ${(sel.before.map((b) => `<div>${b}</div>`).join("") || "—")}
+            <div class="meta" style="margin-top:8px">Blocks</div>
+            ${(sel.blocks.map((b) => `<div>${b}</div>`).join("") || "—")}
+          </div>
+        </div>
+        <p class="meta">Priority ${sel.priority} · ${["", "Critical", "High", "Medium", "Low"][sel.priority]}</p>
+        <p>
+          <button class="ghost" data-status="prog" type="button">Start / in progress</button>
+          <button class="ghost" data-status="pause" type="button">Pause</button>
+          <button class="ghost" data-status="done" type="button">Complete</button>
+        </p>` : "<div class='meta'>Tap a row.</div>";
+
+      $("time-card").innerHTML = `
+        <strong>Today’s time</strong>
+        <div class="hours" style="margin-top:8px">
+          <div>Planned<br /><strong>${fmt(planned)}</strong></div>
+          <div>Recorded<br /><strong>${fmt(completed)} (${planned ? Math.round(completed / planned * 100) : 0}%)</strong></div>
+          <div>Remaining<br /><strong>${fmt(remaining)}</strong></div>
+        </div>
+        <div class="bar" style="margin-top:8px"><span style="width:${planned ? (completed / planned * 100) : 0}%"></span></div>
+        <div class="meta">Effort vs plan for today. Not a productivity score.</div>`;
+
+      $("notice-card").style.display = unfinished ? "block" : "none";
+      $("notice-card").textContent = unfinished
+        ? `${unfinished} unfinished action${unfinished === 1 ? "" : "s"} will move to tomorrow. That is carry-forward, not a fail.`
+        : "";
+
+      $("mal-inline").innerHTML = actions.map((a) => `
+        <div class="mal-item">
+          <span>${a.title}${a.today ? " · today" : ""}</span>
+          ${a.today ? "<span class='meta'>On today’s five</span>" : `<button class="ghost" data-pick="${a.id}" type="button">Add to today</button>`}
+        </div>`).join("");
+
+      $("hist-inline").innerHTML = events.map((e) => `<div>${e}</div>`).join("");
+
+      const cal = $("cal");
+      const labels = ["Su","Mo","Tu","We","Th","Fr","Sa"];
+      const cells = labels.map((l) => `<div class="meta">${l}</div>`);
+      const start = 4;
+      for (let i = 0; i < start; i++) cells.push("<div></div>");
+      for (let d = 1; d <= 31; d++) {
+        cells.push(`<div class="d${d === 18 ? " today" : ""}">${d}</div>`);
+      }
+      cal.innerHTML = cells.join("");
+    }
+
+    function fmt(h) {
+      const hr = Math.floor(h);
+      const m = Math.round((h - hr) * 60);
+      if (!hr) return `${m}m`;
+      if (!m) return `${hr}h`;
+      return `${hr}h ${m}m`;
+    }
+
+    function openSheet(title, html) {
+      $("sheet-title").textContent = title;
+      $("sheet-body").innerHTML = html;
+      $("sheet").classList.add("open");
+    }
+
+    document.body.addEventListener("click", (e) => {
+      const row = e.target.closest(".row");
+      if (row && !e.target.dataset.complete && !e.target.dataset.up && !e.target.dataset.down) {
+        selected = row.dataset.id;
+        render();
+      }
+      if (e.target.dataset.complete) {
+        const a = actions.find((x) => x.id === e.target.dataset.complete);
+        a.status = a.status === "done" ? "wait" : "done";
+        a.doneHours = a.status === "done" ? a.hours : 0;
+        events.unshift(`18 Oct · ${a.title} ${a.status === "done" ? "completed" : "reopened"}`);
+        render();
+      }
+      if (e.target.dataset.up || e.target.dataset.down) {
+        const id = e.target.dataset.up || e.target.dataset.down;
+        const list = todayList();
+        const i = list.findIndex((a) => a.id === id);
+        const j = e.target.dataset.up ? i - 1 : i + 1;
+        if (j < 0 || j >= list.length) return;
+        const ia = actions.indexOf(list[i]);
+        const ja = actions.indexOf(list[j]);
+        const tmp = actions[ia];
+        actions[ia] = actions[ja];
+        actions[ja] = tmp;
+        render();
+      }
+      if (e.target.dataset.status) {
+        const a = actions.find((x) => x.id === selected);
+        a.status = e.target.dataset.status;
+        if (a.status === "done") a.doneHours = a.hours;
+        events.unshift(`18 Oct · ${a.title} → ${STATUS[a.status].label}`);
+        render();
+      }
+      if (e.target.dataset.pick) {
+        const today = todayList();
+        if (today.length >= 5) {
+          openSheet("Today’s five is full", "<p>Release one action from today first. Nothing is deleted.</p>");
+          return;
+        }
+        actions.find((x) => x.id === e.target.dataset.pick).today = true;
+        $("sheet").classList.remove("open");
+        render();
+      }
+      if (e.target.dataset.sub) {
+        const [id, idx] = e.target.dataset.sub.split(":");
+        const a = actions.find((x) => x.id === id);
+        a.subs[Number(idx)].done = e.target.checked;
+        render();
+      }
+    });
+
+    $("btn-add").onclick = $("btn-quick").onclick = () => {
+      const title = $("quick-title").value.trim() || prompt("Action title?");
+      if (!title) return;
+      const hours = Number($("quick-hours").value);
+      const today = todayList().length < 5;
+      actions.unshift({
+        id: "n" + Date.now(), title, note: "Added from dashboard", tags: ["Main activity"],
+        hours, doneHours: 0, priority: 3, status: "wait", today, target: "Today",
+        domain: "General", subs: [], before: [], blocks: [],
+      });
+      $("quick-title").value = "";
+      events.unshift("18 Oct · added " + title);
+      render();
+    };
+
+    $("btn-mal").onclick = () => {
+      openSheet("Master Action List", actions.map((a) => `
+        <div class="mal-item">
+          <span>${a.title}</span>
+          ${a.today ? "<span class='meta'>Already today</span>" : `<button class="ghost" data-pick="${a.id}" type="button">Add to today</button>`}
+        </div>`).join(""));
+    };
+
+    $("sheet-close").onclick = () => $("sheet").classList.remove("open");
+
+    document.getElementById("details-card").addEventListener("click", (e) => {
+      if (e.target.id !== "btn-sub") return;
+      const a = actions.find((x) => x.id === selected);
+      const t = prompt("Subtask title?");
+      if (!t) return;
+      a.subs.push({ t, h: 0.2, done: false });
+      render();
+    });
+
+    document.querySelectorAll(".tabs button").forEach((btn) => {
+      btn.onclick = () => {
+        document.querySelectorAll(".tabs button").forEach((b) => b.setAttribute("aria-selected", "false"));
+        btn.setAttribute("aria-selected", "true");
+        const tab = btn.dataset.tab;
+        if (tab === "mal") $("mal-panel").open = true;
+        if (tab === "history" || tab === "planner") $("hist-panel").open = true;
+        const el = tab === "mal" ? $("mal-panel") : tab === "today" ? $("today-card") : tab === "planner" ? $("calendar-card") : $("hist-panel");
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      };
+    });
+
+    function setPhone(on) {
+      $("shell").classList.toggle("phone", on);
+      $("work").classList.toggle("phone-stack", on);
+      $("btn-phone").setAttribute("aria-pressed", on);
+      $("btn-tablet").setAttribute("aria-pressed", !on);
+    }
+    $("btn-phone").onclick = () => setPhone(true);
+    $("btn-tablet").onclick = () => setPhone(false);
+
+    render();
+  </script>
+</body>
+</html>

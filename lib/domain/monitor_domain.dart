@@ -13,6 +13,7 @@ enum MonitorDomain {
   wealth,
   ummah,
   hajj,
+  productivity,
 }
 
 /// Salah, Qur’an, and Dhikr & Dua.
@@ -62,9 +63,26 @@ bool usesCompactHomeWeek(MonitorDomain domain) {
     case MonitorDomain.ummah:
     case MonitorDomain.fasting:
     case MonitorDomain.hajj:
+    case MonitorDomain.productivity:
       return false;
   }
 }
+
+/// Listed in Domains in Focus, not selectable and not on Home this season.
+const kDormantMonitorDomains = {MonitorDomain.hajj};
+
+bool isDormantMonitorDomain(MonitorDomain domain) =>
+    kDormantMonitorDomains.contains(domain);
+
+Set<MonitorDomain> selectableMonitorDomains() => {
+  for (final domain in MonitorDomain.values)
+    if (!isDormantMonitorDomain(domain)) domain,
+};
+
+Set<MonitorDomain> withoutDormantMonitorDomains(Set<MonitorDomain> value) => {
+  for (final domain in MonitorDomain.values)
+    if (value.contains(domain) && !isDormantMonitorDomain(domain)) domain,
+};
 
 const kLegacyAllDomainIds = {
   'salah',
@@ -98,6 +116,7 @@ extension MonitorDomainX on MonitorDomain {
     MonitorDomain.ummah => 'Ummah',
     MonitorDomain.fasting => 'Fasting',
     MonitorDomain.hajj => 'Hajj',
+    MonitorDomain.productivity => 'Productivity',
   };
 
   /// Compact Home stage label. Full [label] stays on the week card.
@@ -116,6 +135,7 @@ extension MonitorDomainX on MonitorDomain {
     MonitorDomain.ummah => 'Ummah',
     MonitorDomain.fasting => 'Fasting',
     MonitorDomain.hajj => 'Hajj',
+    MonitorDomain.productivity => 'Productivity',
   };
 
   /// Every shown domain Home lists actions and notes. Learn & Practice catalogs
@@ -135,6 +155,7 @@ extension MonitorDomainX on MonitorDomain {
     MonitorDomain.ummah ||
     MonitorDomain.fasting ||
     MonitorDomain.hajj => true,
+    MonitorDomain.productivity => false,
   };
 
   /// Orientation only. Not a scored field and not a spiritual grade.
@@ -157,6 +178,8 @@ extension MonitorDomainX on MonitorDomain {
     MonitorDomain.fasting =>
       'Did I notice fasting, worship, and balance without scoring sawm?',
     MonitorDomain.hajj => 'Have I named how Hajj stands with me — as I see it, not as the app decides?',
+    MonitorDomain.productivity =>
+      'Which actions did I choose to move today?',
     _ => null,
   };
 }
@@ -181,14 +204,14 @@ Set<MonitorDomain> decodeVisibleDomains(
   }
   if (stored.length == kLegacyAllDomainIds.length &&
       stored.every(kLegacyAllDomainIds.contains)) {
-    return Set<MonitorDomain>.from(MonitorDomain.values);
+    return selectableMonitorDomains();
   }
   if (migrateNamedPreset &&
       (sameVisibleDomains(next, kLegacyBasicAkhlaqVisibleDomains) ||
           sameVisibleDomains(next, kLegacySixDomainDhikrPreset))) {
     return Set<MonitorDomain>.from(kBasicDhikrVisibleDomains);
   }
-  return next;
+  return withoutDormantMonitorDomains(next);
 }
 
 String encodeVisibleDomains(Set<MonitorDomain> value) {
@@ -199,7 +222,11 @@ String encodeVisibleDomains(Set<MonitorDomain> value) {
 }
 
 String visibleDomainsSummary(Set<MonitorDomain> value) {
-  if (value.length == MonitorDomain.values.length) return 'All domains';
+  final active = withoutDormantMonitorDomains(value);
+  if (value.length == MonitorDomain.values.length ||
+      sameVisibleDomains(active, selectableMonitorDomains())) {
+    return 'All domains';
+  }
   if (value.isEmpty) return 'None shown';
   if (sameVisibleDomains(value, kBasicDhikrVisibleDomains)) {
     return 'Salah, Qur’an & Dhikr';
@@ -223,6 +250,7 @@ MonitorDomain? monitorDomainForStorageKey(String key) {
     'ummah' => MonitorDomain.ummah,
     'fasting' => MonitorDomain.fasting,
     'hajj' => MonitorDomain.hajj,
+    'productivity' => MonitorDomain.productivity,
     'charity' => MonitorDomain.charity,
     'hadith' => MonitorDomain.hadith,
     _ => null,
