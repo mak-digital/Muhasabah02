@@ -16,10 +16,13 @@ class ProductivityDashboard extends ConsumerStatefulWidget {
       _ProductivityDashboardState();
 }
 
+enum _DashSection { today, planner, mal, history }
+
 class _ProductivityDashboardState extends ConsumerState<ProductivityDashboard> {
   String? _selectedId;
   final _quick = TextEditingController();
   var _expandedIds = <String>{};
+  var _section = _DashSection.today;
 
   @override
   void initState() {
@@ -76,52 +79,55 @@ class _ProductivityDashboardState extends ConsumerState<ProductivityDashboard> {
           now: now,
           tablet: tablet,
         );
+        final chrome = _chrome(now);
         if (!tablet) {
           return KeyedSubtree(
             key: const Key('productivity-dashboard'),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                chrome,
                 ...main,
-                const SizedBox(height: 8),
-                _collapsedPanels(store, now),
-                const SizedBox(height: 8),
-                _quickAdd(),
-                const SizedBox(height: 8),
-                ExpansionTile(
-                  title: const Text('Priority guide'),
-                  children: [_priorityGuide()],
-                ),
+                if (_section == _DashSection.today) ...[
+                  const SizedBox(height: 8),
+                  _collapsedPanels(store, now),
+                ],
               ],
             ),
           );
         }
         return KeyedSubtree(
           key: const Key('productivity-dashboard'),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Expanded(
-                flex: 7,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: main,
-                ),
-              ),
-              const SizedBox(width: 12),
-              SizedBox(
-                width: 300,
-                child: KeyedSubtree(
-                  key: const Key('productivity-tablet-side'),
-                  child: _sideColumn(
-                    store: store,
-                    now: now,
-                    planned: planned,
-                    recorded: recorded,
-                    remaining: remaining,
-                    unfinished: unfinished,
+              chrome,
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    flex: 7,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: main,
+                    ),
                   ),
-                ),
+                  const SizedBox(width: 12),
+                  SizedBox(
+                    width: 300,
+                    child: KeyedSubtree(
+                      key: const Key('productivity-tablet-side'),
+                      child: _sideColumn(
+                        store: store,
+                        now: now,
+                        planned: planned,
+                        recorded: recorded,
+                        remaining: remaining,
+                        unfinished: unfinished,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -139,21 +145,49 @@ class _ProductivityDashboardState extends ConsumerState<ProductivityDashboard> {
     required DateTime now,
     required bool tablet,
   }) {
-    return [
-      _header(today, now),
-      const SizedBox(height: 8),
-      _focusBanner(next, today),
-      const SizedBox(height: 8),
-      _todayList(store, today),
-      if (!tablet && unfinished > 0) ...[
-        const SizedBox(height: 8),
-        _notice(unfinished),
-      ],
-      if (selected != null) ...[
-        const SizedBox(height: 8),
-        _details(store, selected),
-      ],
-    ];
+    switch (_section) {
+      case _DashSection.today:
+        return [
+          _focusBanner(next, today),
+          const SizedBox(height: 8),
+          _todayList(store, today),
+          if (!tablet && unfinished > 0) ...[
+            const SizedBox(height: 8),
+            _notice(unfinished),
+          ],
+          if (selected != null) ...[
+            const SizedBox(height: 8),
+            _details(store, selected),
+          ],
+        ];
+      case _DashSection.planner:
+        return [
+          _monthCalendar(now),
+          const SizedBox(height: 8),
+          _timeCard(
+            plannedHours(today),
+            recordedHours(today),
+            remainingHours(today),
+          ),
+          if (unfinished > 0) ...[
+            const SizedBox(height: 8),
+            _notice(unfinished),
+          ],
+          const SizedBox(height: 8),
+          _paper(child: _quickAdd()),
+          const SizedBox(height: 8),
+          _paper(child: _priorityGuide()),
+        ];
+      case _DashSection.mal:
+        return [_malPanel(store, expanded: true)];
+      case _DashSection.history:
+        return [_historyPanel(store, now, expanded: true)];
+    }
+  }
+
+  double remainingHours(List<ProductivityAction> today) {
+    final planned = plannedHours(today);
+    return (planned - recordedHours(today)).clamp(0.0, planned).toDouble();
   }
 
   Widget _sideColumn({
@@ -181,35 +215,110 @@ class _ProductivityDashboardState extends ConsumerState<ProductivityDashboard> {
     );
   }
 
-  Widget _header(List<ProductivityAction> today, DateTime now) {
-    final inProgress = today
-        .where((action) => action.status == ProductivityStatus.inProgress)
-        .length;
-    final look = today
-        .where((action) => action.status == ProductivityStatus.needsLook)
-        .length;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _chrome(DateTime now) {
+    final hijri = formatDayMonthYear(now, DisplayCalendar.islamic);
+    final gregorian = formatDayMonthYear(now, DisplayCalendar.gregorian);
+    const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    final weekday = weekdays[now.weekday - 1];
+    final title = Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                formatGregorianAndHijri(now),
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ),
-            TextButton(
-              key: const Key('productivity-add'),
-              onPressed: _openAddSheet,
-              child: const Text('Add'),
-            ),
-          ],
+        CircleAvatar(
+          radius: 11,
+          backgroundColor: _teal,
+          child: const Icon(Icons.check, size: 14, color: Colors.white),
         ),
+        const SizedBox(width: 8),
         Text(
-          'Focus ${today.length}/$kProductivityTodayCap · In progress $inProgress · Needs a look $look',
-          style: Theme.of(context).textTheme.labelSmall,
+          'Productivity',
+          style: Theme.of(context).textTheme.titleLarge
+              ?.copyWith(fontWeight: FontWeight.w700),
         ),
+      ],
+    );
+    final date = Text(
+      '$weekday, $gregorian\n$hijri',
+      textAlign: TextAlign.right,
+      style: Theme.of(context).textTheme.bodySmall
+          ?.copyWith(color: Theme.of(context).hintColor),
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        LayoutBuilder(
+          builder: (context, constraints) {
+            if (constraints.maxWidth < 520) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  title,
+                  const SizedBox(height: 8),
+                  _sectionTabs(),
+                  const SizedBox(height: 6),
+                  Align(alignment: Alignment.centerRight, child: date),
+                ],
+              );
+            }
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                title,
+                const SizedBox(width: 12),
+                Expanded(child: _sectionTabs()),
+                date,
+              ],
+            );
+          },
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Tabs stay on this page; they show or hide sections. They are not separate screens.',
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+        const SizedBox(height: 10),
+      ],
+    );
+  }
+
+  Widget _sectionTabs() {
+    Widget tab(_DashSection section, String label) {
+      final selected = _section == section;
+      return GestureDetector(
+        onTap: () => setState(() => _section = section),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: selected
+                ? Theme.of(context).colorScheme.surface
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(999),
+            boxShadow: selected
+                ? [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.08),
+                      blurRadius: 12,
+                    ),
+                  ]
+                : null,
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+              color: selected ? _teal : Theme.of(context).hintColor,
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Wrap(
+      spacing: 4,
+      children: [
+        tab(_DashSection.today, 'Today'),
+        tab(_DashSection.planner, 'Planner'),
+        tab(_DashSection.mal, 'Master List'),
+        tab(_DashSection.history, 'History'),
       ],
     );
   }
@@ -219,98 +328,212 @@ class _ProductivityDashboardState extends ConsumerState<ProductivityDashboard> {
     List<ProductivityAction> today,
   ) {
     final planned = plannedHours(today);
-    final remaining = (planned - recordedHours(today))
-        .clamp(0.0, planned)
-        .toDouble();
-    return Material(
-      key: const Key('productivity-focus'),
-      color: widget.family.withValues(alpha: 0.12),
-      borderRadius: BorderRadius.circular(14),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: next == null
-            ? const Text('Nothing queued')
-            : Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Today’s focus',
-                    style: Theme.of(context).textTheme.labelSmall,
-                  ),
-                  Text(
-                    next.title,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  if (next.note.isNotEmpty)
-                    Text(
-                      next.note,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  const SizedBox(height: 6),
-                  _effortBar(next.percent),
-                  Text(
-                    'Remaining ${formatEffortHours(remaining)} of ${formatEffortHours(planned)} planned',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                  Wrap(
-                    spacing: 8,
-                    children: [
-                      TextButton(
-                        onPressed: () =>
-                            _setStatus(next, ProductivityStatus.inProgress),
-                        child: const Text('Start'),
-                      ),
-                      TextButton(
-                        onPressed: () =>
-                            _setStatus(next, ProductivityStatus.paused),
-                        child: const Text('Pause'),
-                      ),
-                      TextButton(
-                        onPressed: () =>
-                            _setStatus(next, ProductivityStatus.inProgress),
-                        child: const Text('Resume'),
-                      ),
-                      TextButton(
-                        onPressed: () =>
-                            _setStatus(next, ProductivityStatus.completed),
-                        child: const Text('Complete'),
-                      ),
-                    ],
-                  ),
-                ],
+    final remaining = remainingHours(today);
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    const kickerStyle = TextStyle(
+      fontSize: 12,
+      fontWeight: FontWeight.w600,
+      color: _teal,
+    );
+    final timeBox = next == null
+        ? const SizedBox.shrink()
+        : Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Time remaining', style: kickerStyle),
+              Text(
+                formatEffortHours(remaining),
+                style: Theme.of(context).textTheme.headlineSmall
+                    ?.copyWith(color: _teal, fontWeight: FontWeight.w700),
               ),
-      ),
+              Text(
+                'of ${formatEffortHours(planned)} planned today',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
+          );
+    final body = next == null
+        ? const Text('Nothing queued')
+        : Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Today’s focus', style: kickerStyle),
+              Text(
+                next.title,
+                style: Theme.of(context).textTheme.titleMedium
+                    ?.copyWith(fontWeight: FontWeight.w700),
+              ),
+              if (next.note.isNotEmpty)
+                Text(
+                  next.note,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              const SizedBox(height: 6),
+              _effortBar(next.percent, color: _teal),
+              Text(
+                '${next.percent}% of this action’s estimate · not a grade',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
+          );
+    return _paper(
+      key: const Key('productivity-focus'),
+      color: dark ? widget.family.withValues(alpha: 0.28) : _focusWash,
+      child: next == null
+          ? body
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    if (constraints.maxWidth < 420) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [body, const SizedBox(height: 10), timeBox],
+                      );
+                    }
+                    return Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(child: body),
+                        const SizedBox(width: 12),
+                        timeBox,
+                      ],
+                    );
+                  },
+                ),
+                Wrap(
+                  spacing: 8,
+                  children: [
+                    TextButton(
+                      onPressed: () =>
+                          _setStatus(next, ProductivityStatus.inProgress),
+                      child: const Text('Start'),
+                    ),
+                    TextButton(
+                      onPressed: () =>
+                          _setStatus(next, ProductivityStatus.paused),
+                      child: const Text('Pause'),
+                    ),
+                    TextButton(
+                      onPressed: () =>
+                          _setStatus(next, ProductivityStatus.inProgress),
+                      child: const Text('Resume'),
+                    ),
+                    TextButton(
+                      onPressed: () =>
+                          _setStatus(next, ProductivityStatus.completed),
+                      child: const Text('Complete'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
     );
   }
 
   Widget _todayList(ProductivityStore store, List<ProductivityAction> today) {
-    return Column(
-      key: const Key('productivity-today-list'),
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                'Today’s actions (${today.length})',
-                style: Theme.of(context).textTheme.titleSmall,
+    return _paper(
+      child: Column(
+        key: const Key('productivity-today-list'),
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Today’s Actions ($kProductivityTodayCap)',
+                    style: Theme.of(context).textTheme.titleSmall
+                        ?.copyWith(fontWeight: FontWeight.w700),
+                  ),
+                  Text(
+                    'Reorder · tap a row for details · unfinished moves to tomorrow',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
               ),
-            ),
-            TextButton(
-              key: const Key('productivity-pick-mal'),
-              onPressed: () => _openMalSheet(store),
-              child: const Text('Pick from MAL'),
-            ),
-          ],
-        ),
-        if (today.isEmpty)
-          const Text(
-            'No actions on today yet. Add one, or pick from the list.',
+              Wrap(
+                spacing: 8,
+                children: [
+                  FilledButton(
+                    key: const Key('productivity-add'),
+                    style: FilledButton.styleFrom(backgroundColor: _teal),
+                    onPressed: canAddToToday(store)
+                        ? () => _openAddSheet()
+                        : null,
+                    child: const Text('+ Add action'),
+                  ),
+                  OutlinedButton(
+                    key: const Key('productivity-pick-mal'),
+                    onPressed: () => _openMalSheet(store),
+                    child: const Text('Pick from Master List'),
+                  ),
+                ],
+              ),
+            ],
           ),
-        for (var i = 0; i < today.length; i++)
-          _actionCard(store, today[i], index: i + 1, depth: 0),
-      ],
+          const SizedBox(height: 10),
+          for (var i = 0; i < kProductivityTodayCap; i++)
+            if (i < today.length)
+              _actionCard(store, today[i], index: i + 1, depth: 0)
+            else
+              _emptySlot(i + 1, enabled: canAddToToday(store)),
+        ],
+      ),
+    );
+  }
+
+  Widget _emptySlot(int number, {required bool enabled}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Material(
+        key: Key('productivity-slot-$number'),
+        color: Theme.of(context).colorScheme.surfaceContainerHighest
+            .withValues(alpha: 0.45),
+        borderRadius: BorderRadius.circular(14),
+        child: InkWell(
+          onTap: enabled ? () => _openAddSheet() : null,
+          borderRadius: BorderRadius.circular(14),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  radius: 13,
+                  backgroundColor: _teal.withValues(alpha: 0.25),
+                  foregroundColor: _teal,
+                  child: Text(
+                    '$number',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'Open slot $number of $kProductivityTodayCap',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ),
+                Text(
+                  enabled ? 'Tap to add' : 'Today is full',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -323,16 +546,24 @@ class _ProductivityDashboardState extends ConsumerState<ProductivityDashboard> {
     final blockedTitles = openPrerequisiteTitles(store, action);
     final expanded = _expandedIds.contains(action.id);
     final kids = childrenOf(store, action.id);
+    final selected = _selectedId == action.id;
     return Padding(
       padding: EdgeInsets.only(left: depth * 12, bottom: 8),
       child: Material(
         key: Key('productivity-action-${action.id}'),
         color: _priorityWash(action.priority),
-        borderRadius: BorderRadius.circular(12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+          side: BorderSide(
+            color: selected ? _teal : Colors.transparent,
+            width: 2,
+          ),
+        ),
         child: InkWell(
           onTap: () => setState(() => _selectedId = action.id),
+          borderRadius: BorderRadius.circular(14),
           child: Padding(
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.fromLTRB(10, 10, 8, 10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -340,18 +571,20 @@ class _ProductivityDashboardState extends ConsumerState<ProductivityDashboard> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     CircleAvatar(
-                      radius: 12,
+                      radius: 13,
                       backgroundColor: _priorityColor(action.priority),
                       child: Text(
                         '$index',
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 12,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                     ),
                     Checkbox(
                       key: Key('productivity-complete-${action.id}'),
+                      visualDensity: VisualDensity.compact,
                       value: action.status == ProductivityStatus.completed,
                       onChanged: (value) {
                         _setStatus(
@@ -368,7 +601,8 @@ class _ProductivityDashboardState extends ConsumerState<ProductivityDashboard> {
                         children: [
                           Text(
                             action.title,
-                            style: Theme.of(context).textTheme.titleSmall,
+                            style: Theme.of(context).textTheme.titleSmall
+                                ?.copyWith(fontWeight: FontWeight.w700),
                           ),
                           if (action.note.isNotEmpty)
                             Text(
@@ -377,70 +611,84 @@ class _ProductivityDashboardState extends ConsumerState<ProductivityDashboard> {
                               overflow: TextOverflow.ellipsis,
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
+                          if (action.tags.isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 4),
+                              child: Wrap(
+                                spacing: 6,
+                                runSpacing: 4,
+                                children: [
+                                  for (final tag in action.tags)
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .surface,
+                                        borderRadius: BorderRadius.circular(
+                                          999,
+                                        ),
+                                      ),
+                                      child: Text(
+                                        tag,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .labelSmall,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
                           Wrap(
                             spacing: 6,
                             runSpacing: 4,
+                            crossAxisAlignment: WrapCrossAlignment.center,
                             children: [
-                              for (final tag in action.tags)
-                                Chip(
-                                  visualDensity: VisualDensity.compact,
-                                  label: Text(tag),
-                                ),
-                            ],
-                          ),
-                          Text(
-                            '${formatEffortHours(action.hours)} · ${action.percent}% of estimate',
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                          _effortBar(action.percent),
-                          Wrap(
-                            spacing: 6,
-                            runSpacing: 4,
-                            children: [
-                              _priorityChip(action),
+                              Text(
+                                '${formatEffortHours(action.hours)} · ${action.percent}% of estimate',
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
                               _statusChip(action),
-                              if (blockedTitles.isNotEmpty)
-                                Text(
-                                  'Waiting on ${blockedTitles.join(', ')}',
-                                  key: Key('productivity-blocked-${action.id}'),
-                                  style: Theme.of(context).textTheme.labelSmall,
+                              _priorityChip(action),
+                              if (action.today) ...[
+                                IconButton(
+                                  key: Key('productivity-move-up-${action.id}'),
+                                  visualDensity: VisualDensity.compact,
+                                  iconSize: 18,
+                                  onPressed: () => _save(
+                                    (store) =>
+                                        reorderToday(store, action.id, -1),
+                                  ),
+                                  icon: const Icon(Icons.arrow_upward),
                                 ),
+                                IconButton(
+                                  key: Key(
+                                    'productivity-move-down-${action.id}',
+                                  ),
+                                  visualDensity: VisualDensity.compact,
+                                  iconSize: 18,
+                                  onPressed: () => _save(
+                                    (store) =>
+                                        reorderToday(store, action.id, 1),
+                                  ),
+                                  icon: const Icon(Icons.arrow_downward),
+                                ),
+                              ],
                             ],
                           ),
+                          if (blockedTitles.isNotEmpty)
+                            Text(
+                              'Waiting on ${blockedTitles.join(', ')}',
+                              key: Key('productivity-blocked-${action.id}'),
+                              style: Theme.of(context).textTheme.labelSmall,
+                            ),
+                          const SizedBox(height: 4),
+                          _effortBar(action.percent, color: _teal),
                         ],
                       ),
-                    ),
-                    Column(
-                      children: [
-                        IconButton(
-                          key: Key('productivity-move-up-${action.id}'),
-                          icon: const Icon(Icons.keyboard_arrow_up),
-                          visualDensity: VisualDensity.compact,
-                          constraints: const BoxConstraints(
-                            minWidth: 32,
-                            minHeight: 32,
-                          ),
-                          onPressed: action.today
-                              ? () => _save(
-                                  (store) => reorderToday(store, action.id, -1),
-                                )
-                              : null,
-                        ),
-                        IconButton(
-                          key: Key('productivity-move-down-${action.id}'),
-                          icon: const Icon(Icons.keyboard_arrow_down),
-                          visualDensity: VisualDensity.compact,
-                          constraints: const BoxConstraints(
-                            minWidth: 32,
-                            minHeight: 32,
-                          ),
-                          onPressed: action.today
-                              ? () => _save(
-                                  (store) => reorderToday(store, action.id, 1),
-                                )
-                              : null,
-                        ),
-                      ],
                     ),
                   ],
                 ),
@@ -498,6 +746,7 @@ class _ProductivityDashboardState extends ConsumerState<ProductivityDashboard> {
   }
 
   Widget _statusChip(ProductivityAction action) {
+    final colors = _statusColors(action.status);
     return PopupMenuButton<ProductivityStatus>(
       key: Key('productivity-status-${action.id}'),
       onSelected: (status) => _setStatus(action, status),
@@ -506,7 +755,22 @@ class _ProductivityDashboardState extends ConsumerState<ProductivityDashboard> {
           if (status != ProductivityStatus.deleted)
             PopupMenuItem(value: status, child: Text(status.label)),
       ],
-      child: Chip(label: Text(action.status.label)),
+      child: Container(
+        margin: const EdgeInsets.only(top: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+        decoration: BoxDecoration(
+          color: colors.$1,
+          borderRadius: BorderRadius.circular(999),
+        ),
+        child: Text(
+          action.status.label,
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            color: colors.$2,
+          ),
+        ),
+      ),
     );
   }
 
@@ -575,50 +839,77 @@ class _ProductivityDashboardState extends ConsumerState<ProductivityDashboard> {
   Widget _collapsedPanels(ProductivityStore store, DateTime now) {
     return Column(
       children: [
-        ExpansionTile(
-          key: const Key('productivity-mal'),
-          title: const Text('Master Action List'),
-          children: [
-            for (final action in store.masterList)
-              ListTile(
-                title: Text(action.title),
-                subtitle: Text(action.today ? 'On today' : action.status.label),
-                trailing: action.today
-                    ? null
-                    : TextButton(
-                        onPressed: canAddToToday(store)
-                            ? () => _save(
-                                (current) =>
-                                    setTodayFlag(current, action.id, true),
-                              )
-                            : null,
-                        child: const Text('Today'),
-                      ),
-              ),
-          ],
-        ),
-        ExpansionTile(
-          key: const Key('productivity-history'),
-          title: const Text('History and trends'),
-          children: [
-            _timeCard(
-              plannedHours(store.todayActions),
-              recordedHours(store.todayActions),
-              (plannedHours(store.todayActions) -
-                      recordedHours(store.todayActions))
-                  .clamp(0.0, plannedHours(store.todayActions))
-                  .toDouble(),
-            ),
-            _monthCalendar(now),
-            for (final event in store.events.take(12))
-              ListTile(
-                dense: true,
-                title: Text(event.kind),
-                subtitle: Text(event.detail),
-              ),
-          ],
-        ),
+        _malPanel(store, expanded: false),
+        _historyPanel(store, now, expanded: false),
       ],
+    );
+  }
+
+  Widget _malPanel(ProductivityStore store, {required bool expanded}) {
+    return _paper(
+      child: ExpansionTile(
+        key: const Key('productivity-mal'),
+        initiallyExpanded: expanded,
+        title: const Text('Master Action List'),
+        children: [
+          for (final action in store.masterList)
+            ListTile(
+              title: Text(action.title),
+              subtitle: Text(action.today ? 'On today' : action.status.label),
+              trailing: action.today
+                  ? null
+                  : TextButton(
+                      onPressed: canAddToToday(store)
+                          ? () => _save(
+                              (current) =>
+                                  setTodayFlag(current, action.id, true),
+                            )
+                          : null,
+                      child: const Text('Use today'),
+                    ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _historyPanel(
+    ProductivityStore store,
+    DateTime now, {
+    required bool expanded,
+  }) {
+    return _paper(
+      child: ExpansionTile(
+        key: const Key('productivity-history'),
+        initiallyExpanded: expanded,
+        title: const Text('History and trends'),
+        children: [
+          _timeCard(
+            plannedHours(store.todayActions),
+            recordedHours(store.todayActions),
+            remainingHours(store.todayActions),
+          ),
+          _monthCalendar(now),
+          for (final event in store.events.take(12))
+            ListTile(
+              dense: true,
+              title: Text(event.kind),
+              subtitle: Text(event.detail),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _paper({Key? key, required Widget child, Color? color}) {
+    return Material(
+      key: key,
+      color: color ?? Theme.of(context).colorScheme.surface,
+      elevation: 1,
+      shadowColor: Colors.black.withValues(alpha: 0.12),
+      borderRadius: BorderRadius.circular(16),
+      clipBehavior: Clip.antiAlias,
+      child: Padding(padding: const EdgeInsets.all(14), child: child),
     );
   }
 
@@ -761,10 +1052,16 @@ class _ProductivityDashboardState extends ConsumerState<ProductivityDashboard> {
     );
   }
 
-  Widget _effortBar(int percent) {
+  Widget _effortBar(int percent, {Color? color}) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(99),
-      child: LinearProgressIndicator(value: (percent.clamp(0, 100)) / 100),
+      child: LinearProgressIndicator(
+        value: (percent.clamp(0, 100)) / 100,
+        color: color,
+        backgroundColor: (color ?? Theme.of(context).colorScheme.primary)
+            .withValues(alpha: 0.18),
+        minHeight: 8,
+      ),
     );
   }
 
@@ -918,6 +1215,32 @@ class _ProductivityDashboardState extends ConsumerState<ProductivityDashboard> {
     });
   }
 }
+
+const _teal = Color(0xFF2F6F73);
+const _focusWash = Color(0xFFE7F6EE);
+
+(Color, Color) _statusColors(ProductivityStatus status) => switch (status) {
+  ProductivityStatus.needsLook => (
+    const Color(0xFFFAD4D4),
+    const Color(0xFF8A2F2F),
+  ),
+  ProductivityStatus.completed => (
+    const Color(0xFFD7F0E2),
+    const Color(0xFF216246),
+  ),
+  ProductivityStatus.inProgress => (
+    const Color(0xFFD9E7FA),
+    const Color(0xFF2A4F86),
+  ),
+  ProductivityStatus.paused => (
+    const Color(0xFFF3EAD4),
+    const Color(0xFF6A5420),
+  ),
+  ProductivityStatus.notStarted || ProductivityStatus.deleted => (
+    const Color(0xFFE8ECEE),
+    const Color(0xFF4D5C63),
+  ),
+};
 
 Color _priorityColor(ProductivityPriority priority) => switch (priority) {
   ProductivityPriority.critical => const Color(0xFFD45B5B),

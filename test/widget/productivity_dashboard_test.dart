@@ -87,11 +87,33 @@ void main() {
     await _openDashboard(tester);
     expect(find.byKey(const Key('productivity-dashboard')), findsOneWidget);
     expect(find.text('Nothing queued'), findsOneWidget);
+    expect(find.text('Today’s Actions (5)'), findsOneWidget);
+    expect(find.byKey(const Key('productivity-slot-1')), findsOneWidget);
+    expect(find.byKey(const Key('productivity-slot-5')), findsOneWidget);
+  });
+
+  testWidgets('today’s board keeps five slots when one action is queued', (
+    tester,
+  ) async {
+    await _openDashboard(
+      tester,
+      store: MemoryProductivityStoreRepository(
+        store: ProductivityStore(
+          lastRolloverDateKey: '2026-10-18',
+          actions: [_sample(id: 'a', title: 'Alpha')],
+        ),
+      ),
+    );
+    expect(find.byKey(const Key('productivity-action-a')), findsOneWidget);
+    expect(find.byKey(const Key('productivity-slot-2')), findsOneWidget);
+    expect(find.byKey(const Key('productivity-slot-5')), findsOneWidget);
+    expect(find.byKey(const Key('productivity-slot-1')), findsNothing);
   });
 
   testWidgets('W2 add action appears in MAL and today', (tester) async {
     await _openDashboard(tester);
-    await tester.tap(find.byKey(const Key('productivity-add')));
+    await tester.ensureVisible(find.byKey(const Key('productivity-slot-1')));
+    await tester.tap(find.byKey(const Key('productivity-slot-1')));
     await tester.pumpAndSettle();
     await tester.enterText(
       find.byKey(const Key('productivity-add-title')),
@@ -100,7 +122,7 @@ void main() {
     await tester.tap(find.byKey(const Key('productivity-add-save')));
     await tester.pumpAndSettle();
     expect(find.text('Write weekly note'), findsWidgets);
-    await tester.tap(find.byKey(const Key('productivity-mal')));
+    await tester.tap(find.text('Master List'));
     await tester.pumpAndSettle();
     expect(find.text('Write weekly note'), findsWidgets);
   });
@@ -199,9 +221,10 @@ void main() {
       ),
     );
     await _openDashboard(tester, store: store);
+    await tester.ensureVisible(find.byKey(const Key('productivity-mal')));
     await tester.tap(find.byKey(const Key('productivity-mal')));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Today'));
+    await tester.tap(find.text('Use today'));
     await tester.pumpAndSettle();
     expect(store.store.actions.single.today, isTrue);
   });
