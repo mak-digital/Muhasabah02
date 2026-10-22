@@ -11,6 +11,7 @@ import '../../domain/knowledge_practices.dart';
 import '../../domain/context_catalog.dart';
 import '../../domain/copy.dart';
 import '../../domain/daily_check_in.dart';
+import '../../domain/dhikr_context.dart';
 import '../../domain/date_key.dart';
 import '../../domain/display_calendar.dart';
 import '../../domain/domain_briefing.dart';
@@ -33,6 +34,7 @@ import '../shared/hajj_standing_editor.dart';
 import '../../domain/ummah_practices.dart';
 import '../../domain/wealth_practices.dart';
 import '../../domain/time_practices.dart';
+import 'dhikr_context_editor.dart';
 import '../shared/activity_picker.dart';
 import '../shared/akhlaq_follow_up_fields.dart';
 import '../shared/huquq_follow_up_fields.dart';
@@ -197,6 +199,7 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
         _akhlaqStruggle.text = merged.akhlaqStruggleNote ?? '';
       }
     });
+    _focusScrollAttempts = 0;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _scrollToFocusedRow();
     });
@@ -240,19 +243,16 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
   void _scrollToFocusedRow() {
     if (widget.focusRowId == null || widget.focusRowId!.isEmpty) return;
     final target = _focusAnchor.currentContext;
-    if (target != null && _focusListController.hasClients) {
-      final box = target.findRenderObject();
-      if (box is RenderBox && box.hasSize) {
-        final offset =
-            _focusListController.offset +
-            box.localToGlobal(Offset.zero).dy -
-            120;
-        final max = _focusListController.position.maxScrollExtent;
-        _focusListController.jumpTo(offset.clamp(0, max));
-        return;
-      }
+    if (target != null) {
+      Scrollable.ensureVisible(
+        target,
+        alignment: 0,
+        duration: Duration.zero,
+        alignmentPolicy: ScrollPositionAlignmentPolicy.explicit,
+      );
+      if (_focusScrollAttempts >= 3) return;
     }
-    if (_focusScrollAttempts >= 8) return;
+    if (_focusScrollAttempts >= 16) return;
     _focusScrollAttempts++;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _scrollToFocusedRow();
@@ -448,7 +448,8 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
     final showJumuah = _mixAllows(mixKeys, 'salah.jumuah');
     final showTahajjud = _mixAllows(mixKeys, 'salah.tahajjud');
     final showIshraq = _mixAllows(mixKeys, 'salah.ishraq');
-    final showVoluntary = showTahajjud || showIshraq;
+    final showTawbah = _mixAllows(mixKeys, 'salah.tawbah');
+    final showVoluntary = showTahajjud || showIshraq || showTawbah;
     final firstBand = obligatory.isNotEmpty
         ? kSalahObligatoryBand
         : showJumuah
@@ -526,6 +527,11 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
                   _anchorIfFocused(
                     'salah.ishraq',
                     _voluntaryRow(SalahTraceRow.ishraq),
+                  ),
+                if (showTawbah)
+                  _anchorIfFocused(
+                    'salah.tawbah',
+                    _voluntaryRow(SalahTraceRow.tawbah),
                   ),
               ],
             ),
@@ -1031,6 +1037,17 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
   }
 
   Widget _traceEditor(HomeTraceRow row, {bool includeFactors = true}) {
+    if (isDhikrContextTrace(row.storageKey)) {
+      return DhikrContextEditor(
+        key: Key('dhikr-context-${row.storageKey}'),
+        rowKey: row.storageKey,
+        label: row.label,
+        record: _draft,
+        forceOpen: widget.focusRowId == row.storageKey,
+        dropdownKey: Key('trace-${row.storageKey}'),
+        onChanged: (next) => setState(() => _draft = next),
+      );
+    }
     final catalog = ActivityCatalog.forHomeTrace(row.storageKey);
     if (catalog.isNotEmpty) {
       return _activityTraceEditor(row, catalog, includeFactors: includeFactors);
@@ -1140,7 +1157,6 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
             statusKeyPrefix: 'trace-$key',
             namedSubject:
                 isDhikrPostFardTrace(key) ||
-                    isAkhlaqTrace(key) ||
                     isHuquqTrace(key) ||
                     isKnowledgeTrace(key) ||
                     isTimeTrace(key) ||
@@ -1566,8 +1582,6 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
               storageKey: key,
               contextId: akhlaqCapture.contextId,
               helpId: akhlaqCapture.helpId,
-              note: akhlaqCapture.note,
-              noteController: _note('$key-akhlaq-note', akhlaqCapture.note),
               onContextChanged: (id) => setState(() {
                 _draft = writeAkhlaqFollowUp(
                   _draft,
@@ -1592,18 +1606,6 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
                   ),
                 );
               }),
-              onNoteChanged: (value) {
-                _draft = writeAkhlaqFollowUp(
-                  _draft,
-                  key,
-                  AkhlaqFollowUpCapture(
-                    primaryId: selected.id,
-                    contextId: akhlaqCapture.contextId,
-                    helpId: akhlaqCapture.helpId,
-                    note: value,
-                  ),
-                );
-              },
             ),
           if (selected.id == ActivityIds.other)
             Padding(

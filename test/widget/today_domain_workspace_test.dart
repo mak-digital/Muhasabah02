@@ -9,9 +9,11 @@ import 'package:muhasabah02/domain/activities.dart';
 import 'package:muhasabah02/domain/copy.dart';
 import 'package:muhasabah02/domain/daily_check_in.dart';
 import 'package:muhasabah02/domain/date_key.dart';
+import 'package:muhasabah02/domain/dhikr_context.dart';
 import 'package:muhasabah02/domain/home_traces.dart';
 import 'package:muhasabah02/domain/monitor_domain.dart';
 import 'package:muhasabah02/domain/personal_mix.dart';
+import 'package:muhasabah02/domain/practice_dhikr_catalog.dart';
 import 'package:muhasabah02/domain/prayer.dart';
 import 'package:muhasabah02/domain/quick_tap.dart';
 import 'package:muhasabah02/domain/quran.dart';
@@ -297,48 +299,37 @@ void main() {
     );
   });
 
-  testWidgets('Dhikr negative observation is recorded and editable', (
+  testWidgets('Dhikr morning observation is recorded and editable', (
     tester,
   ) async {
     final checkIns = MemoryCheckInRepository();
     await pumpHome(tester, checkIns: checkIns);
+    tester.view.physicalSize = const Size(400, 3200);
+    await tester.pump();
     await openDomain(tester, 'dhikr');
     await tester.tap(find.byKey(const Key('today-row-dhikr.morningAdhkar')));
     await tester.pumpAndSettle();
-    await chooseCheckInOption(
-      tester,
-      dropdownKey: const Key('today-trace-dhikr.morningAdhkar'),
-      optionLabel: traceOutcomeLabel(
-        'dhikr.morningAdhkar',
-        TernaryOutcome.negative,
-      ),
-    );
+    final first = practiceDhikrPrimaryForGroup(kDhikrGroupMorning).first;
+    final pick = Key('dhikr-pick-$kDhikrMorningKey.${first.id}');
+    await tester.ensureVisible(find.byKey(pick));
+    await tester.tap(find.byKey(pick));
+    await tester.pumpAndSettle();
     expect(
-      (await checkIns.getByDate('2026-09-22'))
-          ?.homeTrace('dhikr.morningAdhkar'),
-      TernaryOutcome.negative,
-    );
-    await chooseCheckInOption(
-      tester,
-      dropdownKey: const Key('today-trace-dhikr.morningAdhkar'),
-      optionLabel: traceOutcomeLabel(
-        'dhikr.morningAdhkar',
-        TernaryOutcome.positive,
-      ),
-    );
-    expect(
-      (await checkIns.getByDate('2026-09-22'))
-          ?.homeTrace('dhikr.morningAdhkar'),
+      (await checkIns.getByDate('2026-09-22'))?.homeTrace(kDhikrMorningKey),
       TernaryOutcome.positive,
     );
     await tester.tap(find.byType(ModalBarrier).last);
     await tester.pumpAndSettle();
+    await tester.ensureVisible(
+      find.byKey(const Key('today-row-dhikr.morningAdhkar')),
+    );
     expect(
-      find.descendant(
-        of: find.byKey(const Key('today-row-dhikr.morningAdhkar')),
-        matching: find.text(Copy.todayRecorded),
-      ),
-      findsOneWidget,
+      tester
+          .widget<RecordedStateMarker>(
+            find.byKey(const Key('today-row-marker-dhikr.morningAdhkar')),
+          )
+          .kind,
+      MarkerKind.filled,
     );
   });
 
@@ -984,6 +975,7 @@ void main() {
     record = record.copyWith(
       tahajjud: TernaryOutcome.negative,
       ishraq: TernaryOutcome.positive,
+      tawbah: TernaryOutcome.positive,
     );
     final checkIns = MemoryCheckInRepository();
     await checkIns.save(record);
@@ -996,9 +988,7 @@ void main() {
     expect(find.textContaining('Perfect'), findsNothing);
   });
 
-  testWidgets('Qur’an duration rows stay independent in Today', (
-    tester,
-  ) async {
+  testWidgets('Qur’an duration rows stay independent in Today', (tester) async {
     final checkIns = MemoryCheckInRepository();
     await checkIns.save(
       DailyCheckIn.empty('2026-09-22')

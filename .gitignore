@@ -54,4 +54,7 @@ app.*.map.json
 backend/hajj-worker/node_modules/
 backend/hajj-worker/.wrangler/
 backend/hajj-worker/wrangler.toml
+backend/hajj-worker/wrangler.staging.toml
+backend/hajj-worker/.dev.vars
 docs/hajj/**/uidump.xml
+tool/hajj_staging.defines.json

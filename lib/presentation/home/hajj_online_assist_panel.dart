@@ -269,6 +269,7 @@ class HajjOnlineAssistPanel extends ConsumerWidget {
               : requirement.text.trim(),
           retrievedAt: dateKey(now),
           verificationStatus: HajjVerificationStatus.unverified,
+          origin: HajjSourceOrigin.userEntered,
           provenance: HajjProvenanceKind.userEntered,
         ),
       );
@@ -305,8 +306,8 @@ class HajjSourcesBody extends ConsumerWidget {
             subtitle: Text(
               [
                 hajjSourceStatusLabel(source, todayKey: today),
+                source.origin.label,
                 source.retrievalMode.label,
-                source.provenance.label,
                 if (source.issuingAuthority != null) source.issuingAuthority!,
                 if (source.jurisdictionCountry != null)
                   source.jurisdictionCountry!,
@@ -322,13 +323,7 @@ class HajjSourcesBody extends ConsumerWidget {
                   ? HajjVerificationStatus.unverified
                   : HajjVerificationStatus.verifiedByUser;
               return current.upsertSource(
-                source.copyWith(
-                  verificationStatus: nextStatus,
-                  provenance:
-                      nextStatus == HajjVerificationStatus.verifiedByUser
-                      ? HajjProvenanceKind.officialVerified
-                      : HajjProvenanceKind.userEntered,
-                ),
+                source.copyWith(verificationStatus: nextStatus),
               );
             }),
           ),

@@ -119,13 +119,17 @@ class SalahActivityMark {
       QuranDurationIds.min3to5 => aloneOnTime,
       QuranDurationIds.notNoticed => prayedLate,
       ActivityCatalog.tahajjudEarlyMidAndLate ||
-      ActivityCatalog.ishraqFollowingFajr => congregationOnTime,
+      ActivityCatalog.ishraqFollowingFajr ||
+      ActivityCatalog.tawbahAfterSlip => congregationOnTime,
       ActivityCatalog.tahajjudLaterPart ||
-      ActivityCatalog.ishraqLaterMorning => joinedCongregationLate,
+      ActivityCatalog.ishraqLaterMorning ||
+      ActivityCatalog.tawbahTwoRakahs => joinedCongregationLate,
       ActivityCatalog.tahajjudEarlyMid ||
-      ActivityCatalog.ishraqPrayed => smallCongregation,
+      ActivityCatalog.ishraqPrayed ||
+      ActivityCatalog.tawbahPrayed => smallCongregation,
       ActivityCatalog.tahajjudNotPrayed ||
-      ActivityCatalog.ishraqNotPrayed => aloneOnTime,
+      ActivityCatalog.ishraqNotPrayed ||
+      ActivityCatalog.tawbahNotPrayed => aloneOnTime,
       ActivityCatalog.hadithLivedStartedNew => congregationOnTime,
       ActivityCatalog.hadithLivedIntroducedFamily => joinedCongregationLate,
       ActivityCatalog.hadithLivedCorrectedPractice => smallCongregation,
@@ -224,9 +228,7 @@ class SalahActivityMark {
     final option = ActivityCatalog.find(catalog, id);
     final outcome =
         option?.ternary ??
-        (row == SalahTraceRow.tahajjud
-            ? (record?.tahajjud ?? TernaryOutcome.unanswered)
-            : (record?.ishraq ?? TernaryOutcome.unanswered));
+        (record?.voluntaryOutcome(row) ?? TernaryOutcome.unanswered);
     return SalahActivityMark(
       kind: kindForVoluntaryId(id, outcome),
       color: activityColours ? colourForId(id) : MuhasabahColors.mark,
@@ -244,6 +246,7 @@ class SalahActivityMark {
     }
     if (activityId == ActivityCatalog.tahajjudNotPrayed ||
         activityId == ActivityCatalog.ishraqNotPrayed ||
+        activityId == ActivityCatalog.tawbahNotPrayed ||
         outcome == TernaryOutcome.negative) {
       return MarkerKind.outlined;
     }

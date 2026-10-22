@@ -44,6 +44,19 @@ void main() {
     }
   });
 
+  test('Hijri to Gregorian round-trips civil tabular days', () {
+    for (final month in [1, 6, 9, 11, 12]) {
+      for (final day in [1, 8, 13, 15, 29]) {
+        final gregorian = gregorianFromHijri(1447, month, day);
+        final parts = hijriParts(gregorian);
+        expect(parts.year, 1447, reason: 'month $month day $day');
+        expect(parts.month, month, reason: 'month $month day $day');
+        expect(parts.day, day, reason: 'month $month day $day');
+      }
+    }
+    expect(hijriMonthLength(1447, 12), inInclusiveRange(29, 30));
+  });
+
   test('lunar white days are civil Hijri 13 to 15', () {
     var found = 0;
     for (var i = 0; i < 60; i++) {

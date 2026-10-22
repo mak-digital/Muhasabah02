@@ -316,7 +316,7 @@ void main() {
     await tester.tap(find.text(Copy.unsavedResponseSave));
     await tester.pumpAndSettle();
     expect(find.byType(ResponseEditorScreen), findsOneWidget);
-    expect(find.text('A response needs some text.'), findsOneWidget);
+    expect(find.text('A note needs some text.'), findsOneWidget);
     expect((await repo.inner.getById('resp-1'))!.text, 'Kept note');
   });
 
@@ -329,7 +329,7 @@ void main() {
     await tester.tap(find.text(Copy.saveResponse));
     await tester.pumpAndSettle();
     expect(find.byType(ResponseEditorScreen), findsOneWidget);
-    expect(find.text('A response needs some text.'), findsOneWidget);
+    expect(find.text('A note needs some text.'), findsOneWidget);
     expect(await repo.inner.allHealthy(), isEmpty);
   });
 

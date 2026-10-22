@@ -5,6 +5,10 @@ import 'dart:io';
 import '../domain/hajj_online_assist.dart';
 
 const kHajjLiveGate = String.fromEnvironment('HAJJ_LIVE_GATE');
+const kHajjAccessClientId = String.fromEnvironment('HAJJ_ACCESS_CLIENT_ID');
+const kHajjAccessClientSecret = String.fromEnvironment(
+  'HAJJ_ACCESS_CLIENT_SECRET',
+);
 
 /// One attempt. No automatic retries or background polling.
 Future<Map<String, Object?>> hajjLiveHttpPost({
@@ -13,6 +17,8 @@ Future<Map<String, Object?>> hajjLiveHttpPost({
   int maxAttempts = 1,
   String? installationKey,
   String? pilotGate,
+  String? accessClientId,
+  String? accessClientSecret,
 }) async {
   if (maxAttempts != 1) {
     throw HajjOnlineAssistException('Live lookup does not retry.');
@@ -34,6 +40,12 @@ Future<Map<String, Object?>> hajjLiveHttpPost({
     final gate = (pilotGate ?? kHajjLiveGate).trim();
     if (gate.isNotEmpty) {
       httpRequest.headers.set('X-Muhasabah-Pilot', gate);
+    }
+    final accessId = (accessClientId ?? kHajjAccessClientId).trim();
+    final accessSecret = (accessClientSecret ?? kHajjAccessClientSecret).trim();
+    if (accessId.isNotEmpty && accessSecret.isNotEmpty) {
+      httpRequest.headers.set('CF-Access-Client-Id', accessId);
+      httpRequest.headers.set('CF-Access-Client-Secret', accessSecret);
     }
     httpRequest.write(jsonEncode(request.toPayload()));
     final response = await httpRequest.close().timeout(

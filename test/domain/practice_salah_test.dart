@@ -61,6 +61,12 @@ void main() {
       ),
       isTrue,
     );
+    expect(
+      kPracticeSalahCatalog.any(
+        (item) => item.sourceDetail.contains('Not completed tawbah'),
+      ),
+      isTrue,
+    );
   });
 
   test('Salah register records stay on the Salah domain', () {
@@ -73,9 +79,6 @@ void main() {
     expect(record.domain, MonitorDomain.salah);
     expect(record.group, kSalahObligatoryBand);
     expect(record.status, PracticeHadithStatus.learning);
-    expect(
-      practiceRecordsForDomain([record], MonitorDomain.quran),
-      isEmpty,
-    );
+    expect(practiceRecordsForDomain([record], MonitorDomain.quran), isEmpty);
   });
 }

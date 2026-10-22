@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -101,14 +100,7 @@ void main() {
 
 String launcherForegroundVector() {
   const s = 108.0;
-  final cx = s * 0.42;
-  final cy = s * 0.40;
-  final r = s * 0.22;
-  final haloR = r + s * 0.018;
-  final dx = s * 0.66;
-  final dy = s * 0.66;
-  final dr = s * 0.155;
-  final dotR = s * 0.012;
+  final g = brandMarkGeometry(s);
   final buffer = StringBuffer()
     ..writeln('<?xml version="1.0" encoding="utf-8"?>')
     ..writeln(
@@ -120,20 +112,25 @@ String launcherForegroundVector() {
     ..writeln('    android:viewportHeight="108">')
     ..writeln('    <path')
     ..writeln('        android:fillColor="#00000000"')
-    ..writeln('        android:pathData="${_circlePath(cx, cy, haloR)}"')
-    ..writeln('        android:strokeWidth="3"')
+    ..writeln(
+      '        android:pathData="${_circlePath(g.filledCenter.dx, g.filledCenter.dy, g.haloRadius)}"',
+    )
+    ..writeln(
+      '        android:strokeWidth="${g.haloStroke.toStringAsFixed(2)}"',
+    )
     ..writeln('        android:strokeColor="#F3ECC0"/>')
     ..writeln('    <path')
     ..writeln('        android:fillColor="#2F6F73"')
-    ..writeln('        android:pathData="${_circlePath(cx, cy, r)}"/>');
-  for (var i = 0; i < 20; i++) {
-    final angle = (math.pi * 2 * i) / 20;
-    final x = dx + dr * math.cos(angle);
-    final y = dy + dr * math.sin(angle);
+    ..writeln(
+      '        android:pathData="${_circlePath(g.filledCenter.dx, g.filledCenter.dy, g.filledRadius)}"/>',
+    );
+  for (final dot in g.dots) {
     buffer
       ..writeln('    <path')
       ..writeln('        android:fillColor="#2F6F73"')
-      ..writeln('        android:pathData="${_circlePath(x, y, dotR)}"/>');
+      ..writeln(
+        '        android:pathData="${_circlePath(dot.dx, dot.dy, g.dotRadius)}"/>',
+      );
   }
   buffer.writeln('</vector>');
   return buffer.toString();

@@ -157,17 +157,16 @@ class CollapsingNoteTile extends StatelessWidget {
         initiallyExpanded: expanded,
         dense: true,
         visualDensity: VisualDensity.compact,
+        minTileHeight: 36,
         tilePadding: EdgeInsets.zero,
-        childrenPadding: const EdgeInsets.only(bottom: 4),
+        childrenPadding: const EdgeInsets.only(bottom: 2),
         onExpansionChanged: onExpansionChanged,
         title: Text(
           title,
           style: Theme.of(context).textTheme.labelSmall
               ?.copyWith(fontWeight: FontWeight.w700, letterSpacing: 0.3),
         ),
-        children: [
-          Align(alignment: Alignment.centerLeft, child: child),
-        ],
+        children: [Align(alignment: Alignment.centerLeft, child: child)],
       ),
     );
   }
@@ -188,6 +187,10 @@ class PeriodSelector extends StatelessWidget {
     final selector = Semantics(
       label: 'Period selector',
       child: SegmentedButton<int>(
+        style: const ButtonStyle(
+          visualDensity: VisualDensity.compact,
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        ),
         segments: const [
           ButtonSegment(value: 7, label: Text('7 days')),
           ButtonSegment(value: 30, label: Text('30 days')),

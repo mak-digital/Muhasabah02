@@ -118,6 +118,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(CheckInScreen), findsOneWidget);
     expect(find.text('Tahajjud'), findsNothing);
+    expect(find.text('Salat At Tawbah'), findsNothing);
     expect(find.text('Dhuhr'), findsNothing);
     expect(find.byKey(const Key('salah-isha')), findsOneWidget);
   });
@@ -137,5 +138,48 @@ void main() {
     expect(find.byKey(const Key('trace-dhikr.postFardFajr')), findsOneWidget);
     expect(find.text('General Dhikr'), findsNothing);
     expect(find.text('Gratitude Dhikr'), findsNothing);
+  });
+
+  testWidgets('tapped Dhikr row opens expanded and scrolled to the top', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(400, 720);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          checkInRepositoryProvider.overrideWithValue(
+            MemoryCheckInRepository(),
+          ),
+          appPrefsProvider.overrideWithValue(
+            MemoryAppPrefs(visibleDomains: allVisibleDomains()),
+          ),
+          nowProvider.overrideWithValue(now),
+        ],
+        child: MaterialApp(
+          home: CheckInScreen(
+            date: now,
+            focus: CheckInFocus.traces,
+            domainTitle: MonitorDomain.dhikr.label,
+            domainFocus: MonitorDomain.dhikr.focusQuestion,
+            focusBand: 'Post-fard Salah Adhkar',
+            focusRowId: 'dhikr.postFardAsr',
+            traceRows: dhikrHomeRows,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final asrTitle = find.descendant(
+      of: find.byKey(const Key('trace-dhikr.postFardAsr')),
+      matching: find.text('Asr'),
+    );
+    expect(asrTitle.hitTestable(), findsOneWidget);
+    expect(tester.getTopLeft(asrTitle).dy, lessThan(180));
+    expect(find.text('Istighfar three times').hitTestable(), findsOneWidget);
+    expect(find.text('Fajr').hitTestable(), findsNothing);
+    expect(find.text('Travel Remembrance').hitTestable(), findsNothing);
   });
 }

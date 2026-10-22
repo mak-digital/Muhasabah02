@@ -36,7 +36,7 @@ class SalahProgressScreen extends ConsumerWidget {
     final async = ref.watch(checkInsProvider);
     ref.watch(prefsTickProvider);
     return Scaffold(
-      appBar: AppBar(title: Text('${MonitorDomain.salah.label} Progress')),
+      appBar: progressAppBar(context, '${MonitorDomain.salah.label} Progress'),
       body: async.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) => EmptyState(
@@ -57,11 +57,7 @@ class SalahProgressScreen extends ConsumerWidget {
               if (allows('salah.${prayer.name}')) prayer,
           ];
           final extras = [
-            for (final row in const [
-              SalahTraceRow.jumuah,
-              SalahTraceRow.tahajjud,
-              SalahTraceRow.ishraq,
-            ])
+            for (final row in [SalahTraceRow.jumuah, ...kSalahVoluntaryRows])
               if (allows('salah.${row.name}')) row,
           ];
           return ProgressReviewFrame(
@@ -143,7 +139,7 @@ class SalahProgressScreen extends ConsumerWidget {
     ];
     final showJumuah = allows('salah.jumuah');
     final voluntary = [
-      for (final row in const [SalahTraceRow.tahajjud, SalahTraceRow.ishraq])
+      for (final row in kSalahVoluntaryRows)
         if (allows('salah.${row.name}')) row,
     ];
     return [
@@ -220,6 +216,20 @@ class SalahProgressScreen extends ConsumerWidget {
     Map<String, DailyCheckIn> index,
     ReviewPeriod period,
   ) {
+    final keys = periodDateKeys(period.days, now: now);
+    var recordedDays = 0;
+    var activityDays = 0;
+    var notDoneDays = 0;
+    for (final key in keys) {
+      final status = index[key]?.prayer(prayer) ?? PrayerStatus.unanswered;
+      if (status == PrayerStatus.unanswered) continue;
+      recordedDays++;
+      if (status == PrayerStatus.missed) {
+        notDoneDays++;
+      } else if (status == PrayerStatus.onTime || status == PrayerStatus.late) {
+        activityDays++;
+      }
+    }
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: WashPanel(
@@ -231,6 +241,12 @@ class SalahProgressScreen extends ConsumerWidget {
           title: prayer.label,
           periodDays: period.days,
           family: MuhasabahColors.prayer(prayer),
+          summaryLines: progressThirtyDaySummary(
+            periodDays: period.days,
+            recordedDays: recordedDays,
+            activityDays: activityDays,
+            notDoneDays: notDoneDays,
+          ),
           cellBuilder: (context, key) =>
               _dayMarker(context, ref, now, prayer, key, index[key]),
         ),
@@ -412,7 +428,7 @@ class QuranProgressScreen extends ConsumerWidget {
     final now = ref.watch(nowProvider);
     final async = ref.watch(checkInsProvider);
     return Scaffold(
-      appBar: AppBar(title: Text('${MonitorDomain.quran.label} Progress')),
+      appBar: progressAppBar(context, '${MonitorDomain.quran.label} Progress'),
       body: async.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) => EmptyState(
@@ -530,14 +546,12 @@ class QuranProgressScreen extends ConsumerWidget {
                       ? TernaryOutcome.unanswered
                       : record.quranOutcome(dimension);
                   final id =
-                      record?.activityFor(
-                        ActivityCatalog.quranKey(dimension),
-                      ).id ??
+                      record
+                          ?.activityFor(ActivityCatalog.quranKey(dimension))
+                          .id ??
                       ActivityIds.unanswered;
                   return ProgressDayCell(
-                    key: Key(
-                      'progress-cell-quran-${dimension.name}-$key',
-                    ),
+                    key: Key('progress-cell-quran-${dimension.name}-$key'),
                     onTap: matrixCellOnTap(
                       ref: ref,
                       context: context,
@@ -608,14 +622,17 @@ class QuranProgressScreen extends ConsumerWidget {
               subtitle: dimension.progressCalendarSubtitle,
               periodDays: period.days,
               family: MuhasabahColors.quran(dimension),
-              belowTitle: dimension.isNeutralPeerDimension
-                  ? Text(
-                      'Recorded on $recordedDays of ${keys.length} days · activity days $positiveDays · recorded as not done $negativeDays',
-                    )
-                  : dimension == QuranDimension.consciousApplication
+              summaryLines: progressThirtyDaySummary(
+                periodDays: period.days,
+                recordedDays: recordedDays,
+                activityDays: positiveDays,
+                notDoneDays: negativeDays,
+              ),
+              belowTitle: dimension == QuranDimension.consciousApplication
                   ? Text(
                       Copy.consciousApplicationNote,
-                      style: Theme.of(context).textTheme.bodySmall,
+                      style: Theme.of(context).textTheme.bodySmall
+                          ?.copyWith(fontSize: 11, height: 1.35),
                     )
                   : null,
               cellBuilder: (context, key) {
@@ -623,12 +640,13 @@ class QuranProgressScreen extends ConsumerWidget {
                 final outcome = record == null
                     ? TernaryOutcome.unanswered
                     : record.quranOutcome(dimension);
-                final colours =
-                    ref.watch(appPrefsProvider).salahActivityColours;
+                final colours = ref
+                    .watch(appPrefsProvider)
+                    .salahActivityColours;
                 final id =
-                    record?.activityFor(
-                      ActivityCatalog.quranKey(dimension),
-                    ).id ??
+                    record
+                        ?.activityFor(ActivityCatalog.quranKey(dimension))
+                        .id ??
                     ActivityIds.unanswered;
                 return ProgressDayCell(
                   onTap: matrixCellOnTap(

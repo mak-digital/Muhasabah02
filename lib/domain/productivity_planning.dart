@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'date_key.dart';
 import 'domain_action.dart';
 import 'monitor_domain.dart';
 
@@ -156,6 +157,7 @@ class ProductivityAction {
     this.hours = 1,
     this.doneHours = 0,
     this.targetDateKey,
+    this.targetAt,
     this.parentId,
     this.prerequisiteIds = const [],
     this.blocksTitles = const [],
@@ -176,6 +178,7 @@ class ProductivityAction {
   final double hours;
   final double doneHours;
   final String? targetDateKey;
+  final DateTime? targetAt;
   final String? parentId;
   final List<String> prerequisiteIds;
   final List<String> blocksTitles;
@@ -214,6 +217,7 @@ class ProductivityAction {
     double? hours,
     double? doneHours,
     String? targetDateKey,
+    DateTime? targetAt,
     bool clearTarget = false,
     List<String>? prerequisiteIds,
     List<ProductivitySubtask>? subtasks,
@@ -232,6 +236,7 @@ class ProductivityAction {
       hours: hours ?? this.hours,
       doneHours: doneHours ?? this.doneHours,
       targetDateKey: clearTarget ? null : (targetDateKey ?? this.targetDateKey),
+      targetAt: clearTarget ? null : (targetAt ?? this.targetAt),
       parentId: parentId,
       prerequisiteIds: prerequisiteIds ?? this.prerequisiteIds,
       blocksTitles: blocksTitles,
@@ -255,6 +260,7 @@ class ProductivityAction {
     'hours': hours,
     'doneHours': doneHours,
     'targetDateKey': targetDateKey,
+    if (targetAt != null) 'targetAt': targetAt!.toIso8601String(),
     'parentId': parentId,
     'prerequisiteIds': prerequisiteIds,
     'blocksTitles': blocksTitles,
@@ -268,47 +274,50 @@ class ProductivityAction {
   };
 
   static ProductivityAction fromJson(Map<String, dynamic> json) {
-    return ProductivityAction(
-      id: json['id'] as String? ?? '',
-      title: json['title'] as String? ?? '',
-      note: json['note'] as String? ?? '',
-      tags: [
-        for (final tag in json['tags'] as List? ?? const [])
-          if (tag is String) tag,
-      ],
-      priority: ProductivityPriority.values.firstWhere(
-        (value) => value.name == json['priority'],
-        orElse: () => ProductivityPriority.medium,
+    return syncStoredProductivityAction(
+      ProductivityAction(
+        id: json['id'] as String? ?? '',
+        title: json['title'] as String? ?? '',
+        note: json['note'] as String? ?? '',
+        tags: [
+          for (final tag in json['tags'] as List? ?? const [])
+            if (tag is String) tag,
+        ],
+        priority: ProductivityPriority.values.firstWhere(
+          (value) => value.name == json['priority'],
+          orElse: () => ProductivityPriority.medium,
+        ),
+        status: ProductivityStatus.values.firstWhere(
+          (value) => value.name == json['status'],
+          orElse: () => ProductivityStatus.notStarted,
+        ),
+        hours: (json['hours'] as num?)?.toDouble() ?? 1,
+        doneHours: (json['doneHours'] as num?)?.toDouble() ?? 0,
+        targetDateKey: json['targetDateKey'] as String?,
+        targetAt: DateTime.tryParse(json['targetAt'] as String? ?? ''),
+        parentId: json['parentId'] as String?,
+        prerequisiteIds: [
+          for (final id in json['prerequisiteIds'] as List? ?? const [])
+            if (id is String) id,
+        ],
+        blocksTitles: [
+          for (final title in json['blocksTitles'] as List? ?? const [])
+            if (title is String) title,
+        ],
+        subtasks: [
+          for (final item in json['subtasks'] as List? ?? const [])
+            if (item is Map)
+              ProductivitySubtask.fromJson(Map<String, dynamic>.from(item)),
+        ],
+        today: json['today'] == true,
+        sortOrder: json['sortOrder'] as int? ?? 0,
+        sourceDomainId: json['sourceDomainId'] as String?,
+        sourceActionId: json['sourceActionId'] as String?,
+        createdAt:
+            DateTime.tryParse(json['createdAt'] as String? ?? '') ??
+            DateTime(2026, 1, 1),
+        synthetic: json['synthetic'] == true,
       ),
-      status: ProductivityStatus.values.firstWhere(
-        (value) => value.name == json['status'],
-        orElse: () => ProductivityStatus.notStarted,
-      ),
-      hours: (json['hours'] as num?)?.toDouble() ?? 1,
-      doneHours: (json['doneHours'] as num?)?.toDouble() ?? 0,
-      targetDateKey: json['targetDateKey'] as String?,
-      parentId: json['parentId'] as String?,
-      prerequisiteIds: [
-        for (final id in json['prerequisiteIds'] as List? ?? const [])
-          if (id is String) id,
-      ],
-      blocksTitles: [
-        for (final title in json['blocksTitles'] as List? ?? const [])
-          if (title is String) title,
-      ],
-      subtasks: [
-        for (final item in json['subtasks'] as List? ?? const [])
-          if (item is Map)
-            ProductivitySubtask.fromJson(Map<String, dynamic>.from(item)),
-      ],
-      today: json['today'] == true,
-      sortOrder: json['sortOrder'] as int? ?? 0,
-      sourceDomainId: json['sourceDomainId'] as String?,
-      sourceActionId: json['sourceActionId'] as String?,
-      createdAt:
-          DateTime.tryParse(json['createdAt'] as String? ?? '') ??
-          DateTime(2026, 1, 1),
-      synthetic: json['synthetic'] == true,
     );
   }
 }
@@ -589,10 +598,6 @@ ProductivityStore applyProductivityRollover(
   final events = [...store.events];
   final actions = <ProductivityAction>[];
   for (final action in store.actions) {
-    if (action.today && action.status == ProductivityStatus.completed) {
-      actions.add(action.copyWith(today: false));
-      continue;
-    }
     if (action.today && action.status.isOpen) {
       events.add(
         ProductivityEvent(
@@ -645,19 +650,98 @@ List<ProductivityAction> pendingRegisterActions(ProductivityStore store) {
   ];
 }
 
+ProductivityAction effortAlignedToStatus(ProductivityAction action) {
+  if (action.status == ProductivityStatus.deleted) return action;
+  if (action.status == ProductivityStatus.completed) {
+    return _withRecordedPercent(action, 100);
+  }
+  if (action.status == ProductivityStatus.notStarted ||
+      action.status == ProductivityStatus.needsLook) {
+    return _withRecordedPercent(action, 0);
+  }
+  if (action.percent >= 100) {
+    return _withRecordedPercent(
+      action.copyWith(status: ProductivityStatus.completed),
+      100,
+    );
+  }
+  return action;
+}
+
+ProductivityAction statusAlignedToProgress(ProductivityAction action) {
+  if (action.status == ProductivityStatus.deleted) return action;
+  final percent = action.percent;
+  if (percent >= 100) {
+    return _withRecordedPercent(
+      action.copyWith(status: ProductivityStatus.completed),
+      100,
+    );
+  }
+  if (action.status == ProductivityStatus.completed) {
+    return action.copyWith(status: ProductivityStatus.inProgress);
+  }
+  if (percent > 0 &&
+      (action.status == ProductivityStatus.notStarted ||
+          action.status == ProductivityStatus.needsLook)) {
+    return action.copyWith(status: ProductivityStatus.inProgress);
+  }
+  return action;
+}
+
+/// Heals stored records so status and effort cannot contradict each other.
+/// Not started at 100% follows the status (effort returns to 0%). Partial
+/// effort on a not-started row becomes In progress.
+ProductivityAction syncStoredProductivityAction(ProductivityAction action) {
+  if (action.status == ProductivityStatus.deleted) return action;
+  if (action.status == ProductivityStatus.completed) {
+    return _withRecordedPercent(action, 100);
+  }
+  if (action.status == ProductivityStatus.notStarted ||
+      action.status == ProductivityStatus.needsLook) {
+    if (action.percent >= 100) return _withRecordedPercent(action, 0);
+    if (action.percent > 0) {
+      return action.copyWith(status: ProductivityStatus.inProgress);
+    }
+    return action;
+  }
+  if (action.percent >= 100) {
+    return _withRecordedPercent(
+      action.copyWith(status: ProductivityStatus.completed),
+      100,
+    );
+  }
+  return action;
+}
+
+ProductivityStore syncProductivityStore(ProductivityStore store) {
+  return store.copyWith(
+    actions: [
+      for (final action in store.actions) syncStoredProductivityAction(action),
+    ],
+  );
+}
+
+ProductivityAction _withRecordedPercent(
+  ProductivityAction action,
+  int percent,
+) {
+  final nextPercent = percent.clamp(0, 100);
+  final subtasks = [
+    for (final item in action.subtasks) item.copyWith(percent: nextPercent),
+  ];
+  return action.copyWith(
+    doneHours: action.hours * nextPercent / 100,
+    subtasks: subtasks,
+  );
+}
+
 ProductivityStore markProductivityStatus(
   ProductivityStore store,
   ProductivityAction action,
   ProductivityStatus status, {
   required DateTime now,
 }) {
-  final next = action.copyWith(
-    status: status,
-    today: status == ProductivityStatus.completed ? false : action.today,
-    doneHours: status == ProductivityStatus.completed
-        ? action.hours
-        : action.doneHours,
-  );
+  final next = effortAlignedToStatus(action.copyWith(status: status));
   var updated = upsertAction(store, next);
   return recordProductivityEvent(
     updated,
@@ -802,6 +886,14 @@ String formatEffortHours(double hours) {
   return '${whole}h ${minutes}m';
 }
 
+/// Shortens long ids/tokens in on-screen notes so a phone row can hold them.
+String compactProductivityLabel(String text) {
+  return text.replaceAllMapped(RegExp(r'[A-Fa-f0-9]{10,}'), (match) {
+    final value = match[0]!;
+    return '${value.substring(0, 6)}…';
+  });
+}
+
 double subtaskWeightTotal(List<ProductivitySubtask> subtasks) =>
     subtasks.fold<double>(0, (sum, item) => sum + item.weight);
 
@@ -825,6 +917,7 @@ int rolledUpSubtaskPercent(List<ProductivitySubtask> subtasks) {
 }
 
 DateTime? actionTargetAt(ProductivityAction action) {
+  if (action.targetAt != null) return action.targetAt;
   DateTime? latest;
   for (final item in action.subtasks) {
     final at = item.targetAt;
@@ -867,6 +960,105 @@ ProductivityPace paceForAction(ProductivityAction action, DateTime now) {
   );
 }
 
+DateTime _plannerDay(DateTime date) =>
+    DateTime(date.year, date.month, date.day);
+
+String _plannerEndKey(ProductivityAction action, DateTime now) {
+  final target = actionTargetAt(action);
+  if (target != null) return dateKey(target);
+  final key = action.targetDateKey;
+  if (key != null && key.isNotEmpty) return key;
+  return dateKey(now);
+}
+
+class PlannerDayMark {
+  const PlannerDayMark({
+    required this.priority,
+    this.isStart = false,
+    this.isEnd = false,
+    this.isProgress = false,
+  });
+
+  final ProductivityPriority priority;
+  final bool isStart;
+  final bool isEnd;
+  final bool isProgress;
+
+  @override
+  bool operator ==(Object other) {
+    return other is PlannerDayMark &&
+        other.priority == priority &&
+        other.isStart == isStart &&
+        other.isEnd == isEnd &&
+        other.isProgress == isProgress;
+  }
+
+  @override
+  int get hashCode => Object.hash(priority, isStart, isEnd, isProgress);
+}
+
+String plannerProgressDateKey({
+  required String startKey,
+  required String endKey,
+  required int percent,
+}) {
+  final span = daysInclusiveSpan(startKey, endKey);
+  if (span <= 1) return startKey;
+  final offset = ((percent.clamp(0, 100) / 100) * (span - 1)).round();
+  return shiftDateKey(startKey, offset);
+}
+
+/// Priority lines for the Planner month. Only [displayed] daily-list actions
+/// are included, including paused and completed rows still on the board.
+/// Start/end balls sit on the first and last days; a diamond sits on the
+/// date matching recorded progress along that span.
+Map<String, List<PlannerDayMark>> plannerLinesForDisplayedActions(
+  List<ProductivityAction> displayed, {
+  required DateTime now,
+}) {
+  final marks = <String, List<PlannerDayMark>>{};
+  void addMark(String key, PlannerDayMark mark) {
+    final list = marks.putIfAbsent(key, () => []);
+    if (list.length >= kProductivityTodayCap) return;
+    list.add(mark);
+  }
+
+  for (final action in displayed) {
+    if (action.status == ProductivityStatus.deleted) continue;
+    var start = _plannerDay(action.createdAt);
+    var end = _plannerDay(parseDateKey(_plannerEndKey(action, now)));
+    if (end.isBefore(start)) {
+      final swap = start;
+      start = end;
+      end = swap;
+    }
+    final startKey = dateKey(start);
+    final endKey = dateKey(end);
+    final progressKey = plannerProgressDateKey(
+      startKey: startKey,
+      endKey: endKey,
+      percent: action.percent,
+    );
+    for (
+      var day = start;
+      !day.isAfter(end);
+      day = DateTime(day.year, day.month, day.day + 1)
+    ) {
+      final key = dateKey(day);
+      addMark(
+        key,
+        PlannerDayMark(
+          priority: action.priority,
+          isStart: key == startKey,
+          isEnd: key == endKey,
+          isProgress: key == progressKey,
+        ),
+      );
+    }
+  }
+  return marks;
+}
+
 ProductivityStore renameProductivityAction(
   ProductivityStore store,
   String id,
@@ -883,31 +1075,59 @@ ProductivityStore applyActionSubtasks(
   ProductivityAction action,
   List<ProductivitySubtask> subtasks,
 ) {
-  var hours = action.hours;
-  if (subtasks.isNotEmpty) {
-    final summed = subtasks.fold<double>(0, (sum, item) => sum + item.hours);
-    if (summed > 0) hours = summed;
+  return applyActionProgress(store, action, subtasks: subtasks);
+}
+
+ProductivityStore applyActionProgress(
+  ProductivityStore store,
+  ProductivityAction action, {
+  String? title,
+  double? hours,
+  int? percent,
+  DateTime? targetAt,
+  bool clearTarget = false,
+  List<ProductivitySubtask>? subtasks,
+}) {
+  final latest = actionById(store, action.id) ?? action;
+  final nextTitle = (title ?? latest.title).trim();
+  final nextSubs = subtasks ?? latest.subtasks;
+  var nextHours = (hours ?? latest.hours).clamp(0.25, 40).toDouble();
+  if (nextSubs.isNotEmpty) {
+    final summed = nextSubs.fold<double>(0, (sum, item) => sum + item.hours);
+    if (summed > 0) nextHours = summed.clamp(0.25, 40).toDouble();
   }
-  final rolled = ProductivityAction(
-    id: action.id,
-    title: action.title,
-    createdAt: action.createdAt,
-    note: action.note,
-    tags: action.tags,
-    priority: action.priority,
-    status: action.status,
-    hours: hours,
-    doneHours: hours * rolledUpSubtaskPercent(subtasks) / 100,
-    targetDateKey: action.targetDateKey,
-    parentId: action.parentId,
-    prerequisiteIds: action.prerequisiteIds,
-    blocksTitles: action.blocksTitles,
-    subtasks: subtasks,
-    today: action.today,
-    sortOrder: action.sortOrder,
-    sourceDomainId: action.sourceDomainId,
-    sourceActionId: action.sourceActionId,
-    synthetic: action.synthetic,
+  final rolledPercent = nextSubs.isNotEmpty
+      ? rolledUpSubtaskPercent(nextSubs)
+      : (percent ?? latest.percent).clamp(0, 100);
+  final nextTarget = clearTarget ? null : (targetAt ?? latest.targetAt);
+  final nextKey = clearTarget
+      ? null
+      : (nextTarget != null ? dateKey(nextTarget) : latest.targetDateKey);
+  return upsertAction(
+    store,
+    statusAlignedToProgress(
+      ProductivityAction(
+        id: latest.id,
+        title: nextTitle.isEmpty ? latest.title : nextTitle,
+        createdAt: latest.createdAt,
+        note: latest.note,
+        tags: latest.tags,
+        priority: latest.priority,
+        status: latest.status,
+        hours: nextHours,
+        doneHours: nextHours * rolledPercent / 100,
+        targetDateKey: nextKey,
+        targetAt: nextTarget,
+        parentId: latest.parentId,
+        prerequisiteIds: latest.prerequisiteIds,
+        blocksTitles: latest.blocksTitles,
+        subtasks: nextSubs,
+        today: latest.today,
+        sortOrder: latest.sortOrder,
+        sourceDomainId: latest.sourceDomainId,
+        sourceActionId: latest.sourceActionId,
+        synthetic: latest.synthetic,
+      ),
+    ),
   );
-  return upsertAction(store, rolled);
 }

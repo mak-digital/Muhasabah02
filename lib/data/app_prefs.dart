@@ -37,6 +37,8 @@ abstract class AppPrefs {
   bool get salahActivityColours;
   ArabicScriptFace get arabicScriptFace;
   double get arabicScriptSize;
+  Map<String, int> get dhikrCountDefaults;
+  int? dhikrCountDefaultFor(String activityId);
 
   Future<void> setSampleSeeded(bool value);
   Future<void> setSampleRemovedByUser(bool value);
@@ -72,6 +74,7 @@ abstract class AppPrefs {
   Future<void> setSalahActivityColours(bool value);
   Future<void> setArabicScriptFace(ArabicScriptFace value);
   Future<void> setArabicScriptSize(double value);
+  Future<void> setDhikrCountDefault(String activityId, int value);
 }
 
 class MemoryAppPrefs implements AppPrefs {
@@ -98,6 +101,7 @@ class MemoryAppPrefs implements AppPrefs {
     this.salahActivityColours = false,
     this.arabicScriptFace = ArabicScriptFace.uthmani,
     this.arabicScriptSize = kDefaultArabicScriptSize,
+    Map<String, int>? dhikrCountDefaults,
     List<PersonalBaseline>? baselines,
     List<PersonalAspiration>? aspirations,
     Map<String, String>? weeklyJournals,
@@ -109,7 +113,10 @@ class MemoryAppPrefs implements AppPrefs {
        ),
        personalMix = personalMix ?? PersonalMix.sameAsDomains,
        customSelectionSets =
-           customSelectionSets ?? CustomSelectionSetsRecord.empty();
+           customSelectionSets ?? CustomSelectionSetsRecord.empty(),
+       dhikrCountDefaults = Map<String, int>.from(
+         dhikrCountDefaults ?? const {},
+       );
 
   @override
   bool sampleSeeded;
@@ -176,6 +183,13 @@ class MemoryAppPrefs implements AppPrefs {
 
   @override
   double arabicScriptSize;
+
+  @override
+  Map<String, int> dhikrCountDefaults;
+
+  @override
+  int? dhikrCountDefaultFor(String activityId) =>
+      dhikrCountDefaults[activityId];
 
   @override
   List<PersonalBaseline> baselines;
@@ -411,6 +425,17 @@ class MemoryAppPrefs implements AppPrefs {
   @override
   Future<void> setArabicScriptSize(double value) async =>
       arabicScriptSize = clampArabicScriptSize(value);
+
+  @override
+  Future<void> setDhikrCountDefault(String activityId, int value) async {
+    if (activityId.isEmpty) return;
+    final clamped = value < 1
+        ? 1
+        : value > 999
+        ? 999
+        : value;
+    dhikrCountDefaults[activityId] = clamped;
+  }
 }
 
 List<PersonalBaseline> decodeBaselines(String? raw) {
@@ -456,3 +481,23 @@ Map<String, String> decodeJournals(String? raw) {
 }
 
 String encodeJournals(Map<String, String> value) => jsonEncode(value);
+
+Map<String, int> decodeDhikrCountDefaults(String? raw) {
+  if (raw == null || raw.isEmpty) return {};
+  try {
+    final decoded = jsonDecode(raw);
+    if (decoded is! Map) return {};
+    return {
+      for (final entry in decoded.entries)
+        if (entry.value is num && (entry.value as num).toInt() > 0)
+          '${entry.key}': (entry.value as num).toInt().clamp(1, 999),
+    };
+  } catch (_) {
+    return {};
+  }
+}
+
+String encodeDhikrCountDefaults(Map<String, int> value) => jsonEncode({
+  for (final entry in value.entries)
+    if (entry.value > 0) entry.key: entry.value.clamp(1, 999),
+});

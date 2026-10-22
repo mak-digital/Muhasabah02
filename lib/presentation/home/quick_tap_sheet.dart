@@ -6,11 +6,14 @@ import '../../application/providers.dart';
 import '../../domain/copy.dart';
 import '../../domain/daily_check_in.dart';
 import '../../domain/date_key.dart';
+import '../../domain/dhikr_context.dart';
 import '../../domain/display_calendar.dart';
+import '../../domain/home_traces.dart';
 import '../../domain/monitor_domain.dart';
 import '../../domain/personalisation_resolver.dart';
 import '../../domain/quick_tap.dart';
 import '../../domain/salah_extras.dart';
+import '../checkin/trace_record_sheets.dart';
 import '../shared/domain_action_frame.dart';
 import '../shared/domain_line_icon.dart';
 import '../shared/domain_visual.dart';
@@ -245,6 +248,20 @@ class _QuickTapSheetState extends ConsumerState<QuickTapSheet> {
                               });
                             },
                             onTap: (item) async {
+                              if (item.traceKey != null &&
+                                  isDhikrContextTrace(item.traceKey!)) {
+                                final row = homeTraceRowByKey(item.traceKey!);
+                                if (row != null) {
+                                  await showHomeTraceRecordSheet(
+                                    context: context,
+                                    ref: ref,
+                                    row: row,
+                                    dateKey: key,
+                                    record: day,
+                                  );
+                                  return;
+                                }
+                              }
                               final next = nextQuickTapChoice(
                                 day,
                                 item,

@@ -53,12 +53,13 @@ All local, Hive, schema version **1** (proposed box `muhasabah_productivity_v1`)
 - Priority (four levels, matching the sample): **1 Critical (Do first)**, **2 High (Important)**, **3 Medium (Do today)**, **4 Low (If time permits)** — numbered colour **and** words. Colour names order of work, not worth or iman.
 - Optional tags (sample: Main Activity, Setup, Testing, App Testing, App Improvement, Documentation, Technology). User-owned labels, not scores.
 - Status (sample wording): **Not started**, **In progress**, **Needs a look** (blocked, past the date you set, or 0% with remaining work — never “failed”), **Paused**, **Completed**. Deleted is a register state.
+- Status, % done, and hours are **one record**. The **Current focus (Today’s focus)** wash, the action row, and progress details always show the same values. The wash shows priority as plain numbered text (no chip outline) and has no Pause, Complete, Start, or Resume buttons. **Not started** / **Needs a look** means 0% recorded. **Completed** means 100%. **In progress** / **Paused** is 0–99%. Start does not invent hours. Completing (or saving 100% in details) fills 100% and does not take the row off today. Saving any progress from Not started moves the row to In progress. Setting the row back to Not started clears recorded effort so the bar cannot stay at 100%.
 - Estimate (hours/minutes) and remaining; a fill bar is **effort used vs planned**, not a grade.
 - Remaining effort when known (whole minutes or a short user unit; optional).
 - Original estimate when known (optional; for planned vs actual later).
 - Target completion date (Gregorian `YYYY-MM-DD`, optional, unknown allowed).
 - Parent id (optional). Depth **at most three**: action → child → grandchild.
-- **Details** opens sub-activities with user weightage (should add to 100%), expected hours, % done, and target date/time. The parent % is rolled up from those sub-activities and labelled **ahead / on / behind the target pace** (schedule vs the date you set, not a grade). Title can be renamed without changing other fields.
+- **Six dots** open **progress details** for that row (main or sub-item): expected hours, % done, target date/time, and for sub-items a **share of the main action** (shares should add to 100%). Parent % is rolled up from sub-items and labelled **ahead / on / behind the target pace** (schedule, not a grade). Title can be renamed on the same sheet without resetting the other fields.
 - Prerequisite action ids (optional). An action is **blocked** while any unfinished prerequisite remains.
 - Sort order within Today’s five and within MAL.
 - Created / updated timestamps (ISO, local device).
@@ -67,7 +68,7 @@ Synthetic flag for tests only.
 
 ### 4.2 Today’s five
 
-The person chooses how many focus rows to show today (**1, 2, 3, 4, or 5**). That is a **display** choice: lowering the number hides extra nominated today items, and raising it shows them again. The Productivity register is a **popup** (tick boxes and Fetch / copy), not an on-page list. Completing a today action offers pending register items to Fetch / copy onto the board.
+The person chooses how many focus rows to show today (**1, 2, 3, 4, or 5**) under **Settings → Productivity → Daily action(s)**. That is a **display** choice: lowering the number hides extra nominated today items, and raising it shows them again. **+ Add action**, **Pick from Master List**, and **Productivity register** live under the Today list’s three-dot menu. The register is a **popup** (tick boxes and Fetch / copy), not an on-page list. Completing a today action offers pending register items to Fetch / copy onto the board.
 
 ### 4.3 Master Action List (MAL)
 
@@ -98,22 +99,23 @@ For each local date key: which five were focus, which were carried forward, reco
 2. **Pick from Master List** — copy open actions from other domains into the Productivity register, then onto today if a slot is free.
 3. **Reorder** today’s five.
 4. **Change priority** on the card (one or two taps).
-5. **Start / pause / resume / complete** on the card.
+5. **Start / pause / resume / complete** on the action row (status chip and checkbox). The current-focus wash has no Pause, Complete, Start, or Resume buttons.
 6. **Update remaining effort** inline or in a compact sheet.
-7. **Expand** children and grandchildren inline.
+7. **Expand** children and grandchildren **inline under that action**. The right-hand arrow opens or hides the same card arrangement as the main list, for that item only. Six dots still open Details.
 8. **Prerequisites** — view and edit; blocked cards show **what** is blocking, in words.
 9. **Target date** — change without leaving the dashboard (sheet allowed).
-10. **Carry-forward** — unfinished today’s items appear next day without retyping. A notice lists them.
+10. **Carry-forward** — unfinished today’s items appear next day without retyping. Settings → Productivity explains this as information. The today board does not show a carry-forward banner.
 11. **Recommended next** — first of today’s five that is not blocked and not paused, else first unblocked carry-forward, else empty state (“Nothing queued”). Never “you failed yesterday”.
 12. **History / trends** — expandable; inspect events; compact planned vs actual when both estimates exist.
+13. **Planner month** — month title centred with previous/next arrows. Weekday letters on each column. Coloured lines under days show **only the actions currently on the daily list** (the 1–5 shown rows), including paused and completed rows still on the board, from the date initiated through any tentative target date. A small ball marks the start and the end of each line. A diamond marks the progress point along that span (from % done). Colour is the action’s priority (Critical / High / Medium / Low), not a grade. Register-only items are not drawn.
 
 ## 6. Carry-forward rule
 
 At the first dashboard open after local midnight (or when the date key changes):
 
-- Today’s five that are not Completed remain focus **and** emit a carry-forward event if they were already focus yesterday.
-- Completed items leave the five; MAL keeps them as completed.
-- The person may drop an item from today’s five without deleting it.
+- Today’s items that are not Completed remain focus **and** emit a carry-forward event if they were already focus yesterday.
+- Completing an item does **not** take it off today’s list. It stays until the person chooses **Remove from today**.
+- The person may drop an item from today without deleting it.
 
 No streak. No penalty copy.
 

@@ -209,6 +209,26 @@ void main() {
     expect(record.tahajjud, TernaryOutcome.unanswered);
   });
 
+  test('quick tap cycles tawbah activity ids', () {
+    final item = quickTapItemsFor({'salah.tawbah'}).single;
+    var record = DailyCheckIn.empty('2026-09-14');
+    expect(readQuickTapChoiceId(record, item), ActivityIds.unanswered);
+    final seen = <String>[];
+    for (var i = 0; i < 5; i++) {
+      final next = nextQuickTapChoice(record, item);
+      seen.add(next.id);
+      record = applyQuickTapChoice(record, item, next);
+    }
+    expect(seen, [
+      ActivityCatalog.tawbahAfterSlip,
+      ActivityCatalog.tawbahTwoRakahs,
+      ActivityCatalog.tawbahPrayed,
+      ActivityCatalog.tawbahNotPrayed,
+      ActivityIds.unanswered,
+    ]);
+    expect(record.tawbah, TernaryOutcome.unanswered);
+  });
+
   test('quick tap cycles post-fard dhikr remembrance levels', () {
     final item = quickTapItemsFor({'dhikr.postFardFajr'}).single;
     var record = DailyCheckIn.empty('2026-09-14');
@@ -378,7 +398,10 @@ void main() {
       UmmahObservationIds.preferNot,
       ActivityIds.unanswered,
     ]);
-    expect(record.homeTrace('ummah.masjidAttendance'), TernaryOutcome.unanswered);
+    expect(
+      record.homeTrace('ummah.masjidAttendance'),
+      TernaryOutcome.unanswered,
+    );
   });
 
   test('quick tap cycles charity observations and can clear', () {

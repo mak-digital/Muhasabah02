@@ -4,12 +4,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../application/providers.dart';
 import '../../domain/copy.dart';
 import '../../domain/date_key.dart';
+import '../../domain/display_calendar.dart';
 import '../../domain/hajj_learning_catalog.dart';
 import '../../domain/hajj_pathway.dart';
 import '../../domain/hajj_planning.dart';
 import '../../domain/hajj_planning_engine.dart';
 import '../../domain/hajj_planning_math.dart';
+import '../../domain/hajj_planning_windows.dart';
 import '../../domain/hajj_readiness_catalog.dart';
+import 'hajj_lunar_date_picker.dart';
 import 'hajj_online_assist_panel.dart';
 import '../shared/activity_picker.dart';
 import '../shared/hajj_standing_editor.dart';
@@ -1267,41 +1270,130 @@ Future<void> _openJourneySheet(
                     onChanged: (value) =>
                         setState(() => horizon = value ?? horizon),
                   ),
-                  TextField(
-                    key: const Key('hajj-period-start'),
+                  _hajjPlanningDateField(
+                    fieldKey: const Key('hajj-period-start'),
+                    label: 'Expected Hajj period start',
                     controller: periodStartCtrl,
-                    decoration: const InputDecoration(
-                      labelText: 'Expected Hajj period start YYYY-MM-DD',
+                    onTap: () => _pickHajjPlanningDate(
+                      sheetContext: context,
+                      setState: setState,
+                      kind: HajjLunarPickerKind.ritesStart,
+                      controller: periodStartCtrl,
+                      seasonYearText: season.text,
+                      seasonUndecided: undecidedSeason,
+                      authorityText: authorityCtrl.text,
+                      today: ref.read(nowProvider),
                     ),
                   ),
-                  TextField(
+                  _hajjPlanningDateField(
+                    fieldKey: const Key('hajj-period-end'),
+                    label: 'Expected Hajj period end',
                     controller: periodEndCtrl,
-                    decoration: const InputDecoration(
-                      labelText: 'Expected Hajj period end YYYY-MM-DD',
+                    onTap: () => _pickHajjPlanningDate(
+                      sheetContext: context,
+                      setState: setState,
+                      kind: HajjLunarPickerKind.ritesEnd,
+                      controller: periodEndCtrl,
+                      seasonYearText: season.text,
+                      seasonUndecided: undecidedSeason,
+                      authorityText: authorityCtrl.text,
+                      today: ref.read(nowProvider),
                     ),
                   ),
+                  DropdownButton<HajjPathwayFamily?>(
+                    key: const Key('hajj-planning-pathway'),
+                    isExpanded: true,
+                    value: hajjPathwayFamilyFromAuthority(authorityCtrl.text),
+                    hint: const Text('Planning pathway (for typical dates)'),
+                    items: [
+                      const DropdownMenuItem<HajjPathwayFamily?>(
+                        value: null,
+                        child: Text('Not chosen yet'),
+                      ),
+                      for (final family in HajjPathwayFamily.values)
+                        DropdownMenuItem<HajjPathwayFamily?>(
+                          value: family,
+                          child: Text(
+                            family.label,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                    ],
+                    onChanged: (value) {
+                      setState(() {
+                        authorityCtrl.text = value?.label ?? '';
+                      });
+                    },
+                  ),
                   TextField(
+                    key: const Key('hajj-registration-authority'),
                     controller: authorityCtrl,
+                    onChanged: (_) => setState(() {}),
                     decoration: const InputDecoration(
                       labelText: 'Registration pathway or authority (optional)',
                     ),
                   ),
-                  TextField(
+                  if (hajjPathwayFamilyFromAuthority(authorityCtrl.text) !=
+                      null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4, bottom: 8),
+                      child: Text(
+                        _typicalRegistrationHint(
+                          family: hajjPathwayFamilyFromAuthority(
+                            authorityCtrl.text,
+                          )!,
+                          hijriYear: resolveHajjPlanningHijriYear(
+                            today: ref.read(nowProvider),
+                            storedHijriYear: int.tryParse(season.text.trim()),
+                            seasonUndecided: undecidedSeason,
+                          ),
+                        ),
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ),
+                  _hajjPlanningDateField(
+                    fieldKey: const Key('hajj-reg-open'),
+                    label: 'Registration opening date if known',
                     controller: openCtrl,
-                    decoration: const InputDecoration(
-                      labelText: 'Registration opening date if known',
+                    onTap: () => _pickHajjPlanningDate(
+                      sheetContext: context,
+                      setState: setState,
+                      kind: HajjLunarPickerKind.regOpen,
+                      controller: openCtrl,
+                      seasonYearText: season.text,
+                      seasonUndecided: undecidedSeason,
+                      authorityText: authorityCtrl.text,
+                      today: ref.read(nowProvider),
                     ),
                   ),
-                  TextField(
+                  _hajjPlanningDateField(
+                    fieldKey: const Key('hajj-reg-close'),
+                    label: 'Registration closing date if known',
                     controller: closeCtrl,
-                    decoration: const InputDecoration(
-                      labelText: 'Registration closing date if known',
+                    onTap: () => _pickHajjPlanningDate(
+                      sheetContext: context,
+                      setState: setState,
+                      kind: HajjLunarPickerKind.regClose,
+                      controller: closeCtrl,
+                      seasonYearText: season.text,
+                      seasonUndecided: undecidedSeason,
+                      authorityText: authorityCtrl.text,
+                      today: ref.read(nowProvider),
                     ),
                   ),
-                  TextField(
+                  _hajjPlanningDateField(
+                    fieldKey: const Key('hajj-package-deadline'),
+                    label: 'Package booking deadline if known',
                     controller: packageCtrl,
-                    decoration: const InputDecoration(
-                      labelText: 'Package booking deadline if known',
+                    onTap: () => _pickHajjPlanningDate(
+                      sheetContext: context,
+                      setState: setState,
+                      kind: HajjLunarPickerKind.package,
+                      controller: packageCtrl,
+                      seasonYearText: season.text,
+                      seasonUndecided: undecidedSeason,
+                      authorityText: authorityCtrl.text,
+                      today: ref.read(nowProvider),
                     ),
                   ),
                   TextField(
@@ -2214,6 +2306,74 @@ List<HajjMilestone> _upsertMilestone(
 String? _blankToNull(String text) {
   final trimmed = text.trim();
   return trimmed.isEmpty ? null : trimmed;
+}
+
+Widget _hajjPlanningDateField({
+  required Key fieldKey,
+  required String label,
+  required TextEditingController controller,
+  required VoidCallback onTap,
+}) {
+  String? dual;
+  final raw = controller.text.trim();
+  if (raw.isNotEmpty) {
+    try {
+      dual = formatGregorianAndHijri(parseDateKey(raw));
+    } catch (_) {
+      dual = null;
+    }
+  }
+  return TextField(
+    key: fieldKey,
+    controller: controller,
+    readOnly: true,
+    onTap: onTap,
+    decoration: InputDecoration(
+      labelText: label,
+      helperText: dual ?? 'Lunar calendar · confirm later if needed',
+      suffixIcon: const Icon(Icons.calendar_month_outlined),
+    ),
+  );
+}
+
+Future<void> _pickHajjPlanningDate({
+  required BuildContext sheetContext,
+  required void Function(void Function()) setState,
+  required HajjLunarPickerKind kind,
+  required TextEditingController controller,
+  required String seasonYearText,
+  required bool seasonUndecided,
+  required String authorityText,
+  required DateTime today,
+}) async {
+  final chosen = await showHajjLunarDatePicker(
+    context: sheetContext,
+    kind: kind,
+    hijriYear: resolveHajjPlanningHijriYear(
+      today: today,
+      storedHijriYear: int.tryParse(seasonYearText.trim()),
+      seasonUndecided: seasonUndecided,
+    ),
+    pathway: hajjPathwayFamilyFromAuthority(authorityText),
+    currentKey: controller.text.trim().isEmpty ? null : controller.text.trim(),
+    firstDayOfWeekIndex: MaterialLocalizations.of(sheetContext)
+        .firstDayOfWeekIndex,
+  );
+  if (chosen == null) return;
+  setState(() => controller.text = chosen);
+}
+
+String _typicalRegistrationHint({
+  required HajjPathwayFamily family,
+  required int hijriYear,
+}) {
+  final estimate = hajjRegistrationEstimate(
+    family: family,
+    hijriYear: hijriYear,
+  );
+  final start = formatGregorianAndHijri(estimate.typicalWindow.start.gregorian);
+  final end = formatGregorianAndHijri(estimate.typicalWindow.end.gregorian);
+  return 'Typical historical window $start – $end. Planning estimate only; reconfirm when you can go online.';
 }
 
 int? _optIntText(String text) {

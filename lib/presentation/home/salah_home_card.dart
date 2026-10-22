@@ -68,7 +68,7 @@ class _SalahHomeCardState extends ConsumerState<SalahHomeCard> {
     ];
     final friday = display.contains(SalahTraceRow.jumuah);
     final voluntary = [
-      for (final row in const [SalahTraceRow.tahajjud, SalahTraceRow.ishraq])
+      for (final row in kSalahVoluntaryRows)
         if (display.contains(row)) row,
     ];
 
@@ -133,8 +133,8 @@ class _SalahHomeCardState extends ConsumerState<SalahHomeCard> {
                                           DateTime.friday
                                       ? MuhasabahColors.salahFamily
                                       : Theme.of(context)
-                                          .colorScheme
-                                          .onSurfaceVariant,
+                                            .colorScheme
+                                            .onSurfaceVariant,
                                 ),
                           ),
                           Text(
@@ -253,9 +253,7 @@ class _SalahHomeCardState extends ConsumerState<SalahHomeCard> {
     for (final row in display) {
       if (row.fridayOnly && !isFridayDateKey(key)) continue;
       if (row.isVoluntary) {
-        final outcome = row == SalahTraceRow.tahajjud
-            ? record.tahajjud
-            : record.ishraq;
+        final outcome = record.voluntaryOutcome(row);
         if (outcome.isRecorded) return true;
       } else if (row == SalahTraceRow.jumuah) {
         if (record.jumuah.isRecorded || record.jumuahCongregation) return true;

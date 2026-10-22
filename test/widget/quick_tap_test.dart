@@ -5,6 +5,7 @@ import 'package:muhasabah02/data/memory_repositories.dart';
 import 'package:muhasabah02/domain/activities.dart';
 import 'package:muhasabah02/domain/copy.dart';
 import 'package:muhasabah02/domain/daily_check_in.dart';
+import 'package:muhasabah02/domain/dhikr_context.dart';
 import 'package:muhasabah02/domain/display_calendar.dart';
 import 'package:muhasabah02/domain/monitor_domain.dart';
 import 'package:muhasabah02/domain/personal_mix.dart';
@@ -259,55 +260,62 @@ void main() {
     expect(MuhasabahColors.recordedLabel, isNot(SalahActivityMark.prayedLate));
   });
 
-  testWidgets('Quick Tap choice labels stay readable blue; colour stays on the mark', (
-    tester,
-  ) async {
-    final checkIns = MemoryCheckInRepository();
-    await checkIns.save(
-      DailyCheckIn.empty('2026-09-14')
-          .withSalahActivity(
-            PrayerId.fajr,
-            const RecordedActivity(id: 'prayedLate'),
-          )
-          .withSalahActivity(
-            PrayerId.dhuhr,
-            const RecordedActivity(id: 'joinedCongregationLate'),
-          ),
-    );
-    await pumpQuickTap(tester, checkIns: checkIns);
-    await expandQuickTapDomain(tester, MonitorDomain.salah);
-
-    Color captionColor(String tileId, String caption) {
-      return tester
-          .widget<Text>(
-            find.descendant(
-              of: find.byKey(Key('quick-tap-$tileId')),
-              matching: find.text(caption),
+  testWidgets(
+    'Quick Tap choice labels stay readable blue; colour stays on the mark',
+    (tester) async {
+      final checkIns = MemoryCheckInRepository();
+      await checkIns.save(
+        DailyCheckIn.empty('2026-09-14')
+            .withSalahActivity(
+              PrayerId.fajr,
+              const RecordedActivity(id: 'prayedLate'),
+            )
+            .withSalahActivity(
+              PrayerId.dhuhr,
+              const RecordedActivity(id: 'joinedCongregationLate'),
             ),
-          )
-          .style!
-          .color!;
-    }
+      );
+      await pumpQuickTap(tester, checkIns: checkIns);
+      await expandQuickTapDomain(tester, MonitorDomain.salah);
 
-    Color markColor(String tileId) {
-      return tester
-          .widget<RecordedStateMarker>(
-            find.descendant(
-              of: find.byKey(Key('quick-tap-$tileId')),
-              matching: find.byType(RecordedStateMarker),
-            ),
-          )
-          .color;
-    }
+      Color captionColor(String tileId, String caption) {
+        return tester
+            .widget<Text>(
+              find.descendant(
+                of: find.byKey(Key('quick-tap-$tileId')),
+                matching: find.text(caption),
+              ),
+            )
+            .style!
+            .color!;
+      }
 
-    expect(captionColor('salah.fajr', 'Prayed late'), MuhasabahColors.recordedLabel);
-    expect(markColor('salah.fajr'), SalahActivityMark.prayedLate);
-    expect(
-      captionColor('salah.dhuhr', 'Joined congregation late'),
-      MuhasabahColors.recordedLabel,
-    );
-    expect(markColor('salah.dhuhr'), SalahActivityMark.joinedCongregationLate);
-  });
+      Color markColor(String tileId) {
+        return tester
+            .widget<RecordedStateMarker>(
+              find.descendant(
+                of: find.byKey(Key('quick-tap-$tileId')),
+                matching: find.byType(RecordedStateMarker),
+              ),
+            )
+            .color;
+      }
+
+      expect(
+        captionColor('salah.fajr', 'Prayed late'),
+        MuhasabahColors.recordedLabel,
+      );
+      expect(markColor('salah.fajr'), SalahActivityMark.prayedLate);
+      expect(
+        captionColor('salah.dhuhr', 'Joined congregation late'),
+        MuhasabahColors.recordedLabel,
+      );
+      expect(
+        markColor('salah.dhuhr'),
+        SalahActivityMark.joinedCongregationLate,
+      );
+    },
+  );
 
   testWidgets('empty Quick Tap copy is unchanged', (tester) async {
     await pumpQuickTap(
@@ -643,4 +651,37 @@ void main() {
       expect(text.overflow, isNot(TextOverflow.ellipsis));
     }
   });
+
+  testWidgets(
+    'Other Adhkar Quick Tap opens the activity list and keeps selections',
+    (tester) async {
+      final checkIns = MemoryCheckInRepository();
+      await checkIns.save(
+        DailyCheckIn.empty('2026-09-14')
+            .withDhikrContextCaptures('dhikr.generalDhikr', const [
+              DhikrContextCapture(
+                activityId: 'dhikr.general.tasbih',
+                response: DhikrContextResponse.practised,
+              ),
+            ]),
+      );
+      await pumpQuickTap(
+        tester,
+        checkIns: checkIns,
+        visibleDomains: {MonitorDomain.dhikr},
+        personalMix: mixForKind(
+          PersonalMixKind.custom,
+          customKeys: {'dhikr.generalDhikr'},
+        ),
+      );
+      await expandQuickTapDomain(tester, MonitorDomain.dhikr);
+      await tester.tap(find.byKey(const Key('quick-tap-dhikr.generalDhikr')));
+      await tester.pumpAndSettle();
+      expect(find.text(Copy.dhikrPerformedHint), findsOneWidget);
+      expect(find.text('Add a General Dhikr activity'), findsNothing);
+      expect(find.text('SubhanAllah — Tasbih'), findsOneWidget);
+      final stored = await checkIns.getByDate('2026-09-14');
+      expect(stored?.dhikrContextFor('dhikr.generalDhikr'), hasLength(1));
+    },
+  );
 }

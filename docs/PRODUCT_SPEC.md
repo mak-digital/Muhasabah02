@@ -65,7 +65,7 @@ REVIEW
 │   ├── Salah & Prayer Quality
 │   └── Qur’an Engagement
 ├── Recorded days
-└── My Response
+└── My Notes
 ```
 
 Evidence exploration may lead to Recorded Context, Recognition, supporting dates, Historical Reflection, and optional Response creation.
@@ -101,13 +101,13 @@ At minimum distinguish:
 
 Never infer `missed` from absence.
 
-Salah check-in uses a fixed activity list (congregation on time, joined congregation late, small congregation, alone on time, excused, prayed late, missed then made up, missed, no answer recorded, other). **Friday Prayer** is one Jumu‘ah row with that same list and Friday wording (for example prayed late (alone)); it is not a second “Friday congregation” field. **Tahajjud** and **Ishraq** use their own five-choice lists (night timing / morning timing / prayed / not prayed / not recorded), not the obligatory Salah list and not missed-red. **Not Prayed** is a solid empty circle (the activity colour as the border, no fill). Settings → Preferences → **Activities & legend** may colour Salah, Jumu‘ah, Tahajjud, and Ishraq marks by that recorded choice, starting with congregation-on-time blue for the first option. Shared mark colour remains the default. Colour names the choice; it does not rank spirituality or prescribe a next step. Voluntary rows stay off the recordable-field count. Unanswered is not missed.
+Salah check-in uses a fixed activity list (congregation on time, joined congregation late, small congregation, alone on time, excused, prayed late, missed then made up, missed, no answer recorded, other). **Friday Prayer** is one Jumu‘ah row with that same list and Friday wording (for example prayed late (alone)); it is not a second “Friday congregation” field. **Tahajjud**, **Ishraq**, and **Salat At Tawbah** use their own five-choice lists (night timing / morning timing / turning-back extra / prayed / not prayed / not recorded), not the obligatory Salah list and not missed-red. Recording Salat At Tawbah is observational only: the app does not prescribe tawbah or treat a mark as completed tawbah. **Not Prayed** is a solid empty circle (the activity colour as the border, no fill). Settings → Preferences → **Activities & legend** may colour Salah, Jumu‘ah, Tahajjud, Ishraq, and Salat At Tawbah marks by that recorded choice, starting with congregation-on-time blue for the first option. Shared mark colour remains the default. Colour names the choice; it does not rank spirituality or prescribe a next step. Voluntary rows stay off the recordable-field count. Unanswered is not missed.
 
 Do not record or score presence of heart as a grade.
 
 Do not create a combined spiritual score.
 
-**7-day Progress** shows Obligatory Salah, Friday Prayer, and Voluntary Prayers with prayer names as rows and weekday letter + date as columns. Jumu‘ah is Friday-only (other days blank, not unanswered). **30-day and 90-day** stay one calendar per prayer, including Jumu‘ah, Tahajjud, and Ishraq. Jumu‘ah remains Friday-only.
+**7-day Progress** shows Obligatory Salah, Friday Prayer, and Voluntary Prayers with prayer names as rows and weekday letter + date as columns. Jumu‘ah is Friday-only (other days blank, not unanswered). **30-day and 90-day** stay one calendar per prayer, including Jumu‘ah, Tahajjud, Ishraq, and Salat At Tawbah. Jumu‘ah remains Friday-only.
 
 Home also lists **Salah & Prayer Quality Learn & Practice**: Qur’an verses and authentic hadith grouped as on Home (Obligatory Salah, Friday Prayer, Voluntary Prayers), collapsed to title, with citation pages and a private register (Learning, Learnt, Practicing, Habit). It is not a khushu’ score, congregation requirement, or daily grade.
 
@@ -181,7 +181,7 @@ Core question (orientation only; not scored and not a spiritual grade):
 
 **Did I remember Allah outside of prayer?**
 
-Retain factual recording for existing Dhikr rows (post-fard adhkar, morning and evening, other remembrance). Post-fard rows (Fajr, Dhuhr, Asr, Maghrib, Isha) use one remembrance list: Remembrance with action (beneficial response in behaviour; same blue as congregation on time when activity colours are on), Attentive remembrance, Intentional remembrance, Brief remembrance, Not today, and Unanswered. How attentive was I is an optional second dropdown (Reflected on the meaning, Aware of what I was saying, Mostly habitual recitation) — provenance, not a khushu’ score. Morning, evening, and other remembrance keep their own rows. Home and 7-day Progress show those items as rows and weekdays as columns (same orientation as Akhlaq): one week of columns, stacked Home bands, and the day-of-month only under each weekday letter. Do not score remembrance. Unanswered is empty, not missed.
+Retain factual recording for existing Dhikr rows (post-fard adhkar, morning and evening, other remembrance). **Post-fard** rows (Fajr, Dhuhr, Asr, Maghrib, Isha), **Morning Adhkar**, **Evening Adhkar**, and **Other Adhkar** (General Dhikr, Gratitude Dhikr, Travel Remembrance, Personal, Other Adhkars) each open a performed list of that row’s items: tick what was involved and change the respective count to actual; the count box is sized for three digits with ordinary numbers; a typed count is that item’s default next session; heading select-all; unticked stays not recorded. The performed count sits top-right of the row title. **Verified wording available** opens the matching Learn & Practice item with the Arabic face and − A + size controls; Close returns without losing the recording in progress. Unselected stays not recorded, not “not today.” Personal dua records a topic without requiring the words. Verified wording and citations open on demand; unverified formulas are omitted. Quick Tap on those mix rows opens the same activity list instead of cycling one generic mark. Older noticed / not-noticed marks stay readable and are not converted to Not today. Home and 7-day Progress show those items as rows and weekdays as columns (same orientation as Akhlaq): one week of columns, stacked Home bands, and the day-of-month only under each weekday letter. Do not score remembrance. Unanswered is empty, not missed.
 
 ### 4.5 Character & Morals (Akhlaq)
 
@@ -516,7 +516,7 @@ Keep these concepts distinct when both exist:
 
 - compact week grid of saved vs empty days; empty days are visible and not treated as missed
 - tapping a saved day opens a compact, read-only day view grouped by domain washes for the domains and mix currently in focus; unselected mix rows stay stored and can still be edited in Manage past check-ins
-- one Add a response control per page, not per field
+- one Add a Note control per page, not per field
 
 The navigation and wording must make the difference obvious.
 
@@ -700,27 +700,29 @@ Supporting dates/evidence must remain inspectable.
 
 ---
 
-## 11. RESPOND — My Response
+## 11. RESPOND — My Notes
 
-Personal Response is a separate domain from DailyCheckIn.
+Personal Response is a separate domain from DailyCheckIn. The visible destination is **My Notes**.
 
 Definition:
 
 > A Response is an optional, private, user-authored record of what the user chooses to keep in mind, revisit, question, or try after reflection. It may be linked to recorded evidence as its point of origin, without implying causality, recommendation, obligation, or completion.
 
-Frozen V1 wording:
+Visible wording:
 
-- Destination: `My Response`
+- Destination: `My Notes`
 - Description: `A private, optional place to write a note, question, or something you want to keep in mind.`
-- CTA: `Add a response`
+- CTA: `+ Add a Note`
 - Creation prompt: `What, if anything, would you like to note or keep in mind?`
-- Empty state: `You haven’t saved any responses. Creating one is optional.`
-- Save: `Save response`
-- Edit: `Edit response`
-- Archive: `Archive response`
-- Restore: `Restore response`
-- Delete: `Delete response`
+- Empty state: `You haven’t saved any notes. Creating one is optional.`
+- Save: `Save note`
+- Edit: `Edit note`
+- Archive: `Archive`
+- Restore: `Restore`
+- Delete: `Delete`
 - Provenance: `Created while viewing: [origin]`
+
+The My Notes table shows a daily serial `YYMMDD-XX` (restarting from `01` each local day), domain short name or `GEN`, source reference, scrollable note text (linked to origin when applicable), and a checkbox for Delete, Archive, and Action reminder. Action reminder writes a listed domain action with a target date. It is not a score, streak, or obligation.
 
 Do not use system concepts such as Intention, Commitment, Next Step, Improvement, Action Plan, completion, adherence, or success/failure.
 
@@ -738,6 +740,8 @@ PersonalResponse
 - editedAt?
 - archivedAt?
 - provenance?
+- noteCode? (YYMMDD-XX)
+- reminderDateKey?
 ```
 
 Use:
@@ -800,7 +804,7 @@ If evidence becomes unavailable, the Response remains valid. A neutral message m
 
 ### 11.4 Response entry points
 
-Allow restrained `Add a response` entry points from approved reflective/evidence surfaces, such as:
+Allow restrained `+ Add a Note` entry points from approved reflective/evidence surfaces, such as:
 
 - Qur’an PONDER
 - Salah evidence/detail

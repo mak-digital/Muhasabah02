@@ -5,6 +5,7 @@ import 'package:muhasabah02/application/providers.dart';
 import 'package:muhasabah02/data/app_prefs.dart';
 import 'package:muhasabah02/data/memory_repositories.dart';
 import 'package:muhasabah02/domain/copy.dart';
+import 'package:muhasabah02/domain/personal_response.dart';
 import 'package:muhasabah02/domain/monitor_domain.dart';
 import 'package:muhasabah02/presentation/recorded_days/day_evidence_screen.dart';
 
@@ -58,7 +59,11 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Review'));
     await tester.pumpAndSettle();
-    expect(find.text(Copy.reviewThisPeriod), findsOneWidget);
+    expect(find.text(Copy.reviewGuard), findsOneWidget);
+    expect(find.text(Copy.reviewThisPeriod), findsNothing);
+    expect(find.text(Copy.reviewLookCloser), findsNothing);
+    expect(find.text(Copy.reviewPonder), findsNothing);
+    expect(find.text(Copy.reviewYouAlsoRecorded), findsNothing);
     expect(find.text('7 days'), findsWidgets);
     expect(find.text('For the coming days'), findsNothing);
     await tester.ensureVisible(find.byKey(const Key('review-domain-salah')));
@@ -129,13 +134,19 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text(Copy.saveResponse));
     await tester.pumpAndSettle();
-    expect(find.text('A response needs some text.'), findsOneWidget);
+    expect(find.text('A note needs some text.'), findsOneWidget);
     await tester.enterText(find.byType(TextField), 'الحمد لله and ধন্যবাদ');
     await tester.tap(find.text(Copy.saveResponse));
     await tester.pumpAndSettle();
     final saved = await responses.allHealthy();
     expect(saved, hasLength(1));
     expect(saved.single.text, contains('الحمد لله'));
+    expect(saved.single.noteCode, matches(RegExp(r'^\d{6}-01$')));
+    expect(find.text(Copy.noteCodeColumn), findsOneWidget);
+    expect(find.text(Copy.noteContentColumn), findsOneWidget);
+    expect(find.text(Copy.noteDomainSourceColumn), findsOneWidget);
+    expect(find.text(kNoteGeneralDomain), findsOneWidget);
+    expect(find.text(Copy.noteActionReminder), findsOneWidget);
   });
 
   testWidgets('salah late and missed have the same add-response CTA', (

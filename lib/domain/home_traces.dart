@@ -1,3 +1,4 @@
+import 'dhikr_context.dart';
 import 'quran.dart';
 
 class HomeTraceRow {
@@ -1032,6 +1033,7 @@ bool isHajjTrace(String storageKey) => storageKey.startsWith('hajj.');
 bool isFastingTrace(String storageKey) => storageKey.startsWith('fasting.');
 
 bool hidesHomeTraceFactors(String storageKey) =>
+    isDhikrContextTrace(storageKey) ||
     isAkhlaqTrace(storageKey) ||
     isHuquqTrace(storageKey) ||
     isKnowledgeTrace(storageKey) ||

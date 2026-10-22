@@ -9,7 +9,7 @@
 
 Never add spiritual grades, iman/taqwa scores, leaderboards, guilt/streak pressure, automatic religious remedies, worship prescriptions, or Response completion/adherence mechanics.
 
-Salah & Prayer Quality stores the five daily prayers, Jumu‘ah, Tahajjud, and Ishraq as independent recorded choices. It must not score presence of heart, infer missed from unanswered, treat Jumu‘ah as a second congregation field on non-Fridays, or paint voluntary rows missed-red. Salah & Prayer Quality Learn & Practice is a built-in reminder catalog the person may copy into a private register; it is not a khushu’ score, congregation requirement, or daily grade. Unanswered is not missed.
+Salah & Prayer Quality stores the five daily prayers, Jumu‘ah, Tahajjud, Ishraq, and Salat At Tawbah as independent recorded choices. It must not score presence of heart, infer missed from unanswered, treat Jumu‘ah as a second congregation field on non-Fridays, or paint voluntary rows missed-red. Salah & Prayer Quality Learn & Practice is a built-in reminder catalog the person may copy into a private register; it is not a khushu’ score, congregation requirement, or daily grade. Unanswered is not missed.
 
 Qur’an Engagement stores three independent duration rows under one Home wash (ENGAGEMENT with Qur’an): recitation/memorisation/revision, meaning/tafsir plus pondering, and noticed practical relevance. It must not score khushu’, auto-fill one row from another, treat unanswered as not engaged, or duplicate Knowledge residual learning. Qur’an to learn & practice is a built-in verse repository the person may skim and copy into a private register; it is not a recitation streak or a Highly recommended heading.
 

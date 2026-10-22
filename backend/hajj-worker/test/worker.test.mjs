@@ -6,6 +6,7 @@ import {
   fetchAllowlisted,
   handleRequest,
   isolateQuota,
+  liveGateRequired,
   mockOriginMode,
   noteIncoming,
   resetIsolateQuota,
@@ -50,6 +51,8 @@ test('health does not consume quota and advertises no auth users', async () => {
   assert.equal(json.ai, false);
   assert.equal(json.authenticatedUsers, false);
   assert.equal(json.mockOrigin, true);
+  assert.equal(json.gateRequired, false);
+  assert.equal(json.pilotGateConfigured, false);
   assert.match(json.quota, /location-ratelimit/);
   assert.equal(isolateQuota.incoming, 0);
 });
@@ -221,9 +224,13 @@ test('noteIncoming is counted before validation', () => {
   assert.equal(isolateQuota.incoming, 3);
 });
 
-test('production ignores HAJJ_MOCK_ORIGIN', () => {
+test('production and staging ignore HAJJ_MOCK_ORIGIN', () => {
   assert.equal(mockOriginMode({ ENVIRONMENT: 'production', HAJJ_MOCK_ORIGIN: 'ok' }), '');
+  assert.equal(mockOriginMode({ ENVIRONMENT: 'staging', HAJJ_MOCK_ORIGIN: 'ok' }), '');
   assert.equal(mockOriginMode({ ENVIRONMENT: 'local', HAJJ_MOCK_ORIGIN: 'ok' }), 'ok');
+  assert.equal(liveGateRequired({ ENVIRONMENT: 'staging' }), true);
+  assert.equal(liveGateRequired({ ENVIRONMENT: 'production' }), true);
+  assert.equal(liveGateRequired({ ENVIRONMENT: 'test' }), false);
 });
 
 test('off-allowlist redirects are not followed', async () => {
@@ -318,4 +325,53 @@ test('pilot gate rejects callers without the header', async () => {
     globalThis.fetch,
   );
   assert.equal(ok.status, 200);
+});
+
+test('staging requires PILOT_GATE and still uses real adapters', async () => {
+  const staging = {
+    ...env,
+    ENVIRONMENT: 'staging',
+    HAJJ_MOCK_ORIGIN: 'ok',
+    PILOT_GATE: '',
+  };
+  const health = await handleRequest(
+    new Request('https://hajj.local/health'),
+    staging,
+    globalThis.fetch,
+  );
+  const healthJson = await health.json();
+  assert.equal(healthJson.environment, 'staging');
+  assert.equal(healthJson.mockOrigin, false);
+  assert.equal(healthJson.gateRequired, true);
+  assert.equal(healthJson.pilotGateConfigured, false);
+
+  const unset = await handleRequest(request({ season: '1448' }), staging, globalThis.fetch);
+  assert.equal(unset.status, 503);
+
+  const gated = { ...staging, PILOT_GATE: 'staging-gate' };
+  const denied = await handleRequest(request({ season: '1448' }), gated, globalThis.fetch);
+  assert.equal(denied.status, 403);
+
+  let originCalls = 0;
+  const outbound = async (url, init) => {
+    originCalls += 1;
+    assert.equal(init.redirect, 'manual');
+    assert.match(String(url), /haj\.gov\.sa|nusuk\.sa/);
+    return new Response('<html>official</html>', {
+      status: 200,
+      headers: { 'content-type': 'text/html' },
+    });
+  };
+  const allowed = await handleRequest(
+    request({ season: '1448' }, { 'X-Muhasabah-Pilot': 'staging-gate' }),
+    gated,
+    outbound,
+  );
+  assert.equal(allowed.status, 200);
+  assert.ok(originCalls >= 1);
+  const json = await allowed.json();
+  assert.ok(json.sources.every((item) => item.verificationStatus === 'unverified'));
+  assert.ok(json.sources.every((item) => item.origin === 'liveWorker'));
+  assert.ok(json.sources.every((item) => item.provenance === 'liveRetrieval'));
+  assert.ok(json.sources.every((item) => item.uri.startsWith('https://')));
 });

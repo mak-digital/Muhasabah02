@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../application/providers.dart';
 import '../../domain/copy.dart';
-import '../../domain/home_traces.dart';
 import '../../domain/monitor_domain.dart';
 import '../../domain/personal_mix.dart';
 import '../shared/domain_line_icon.dart';
@@ -121,14 +120,16 @@ Future<void> _maybeShowHiddenMixHint({
     messenger.showSnackBar(
       SnackBar(
         content: Text(Copy.mixKeptUntilDomainShown(domain.label)),
-        action: SnackBarAction(
-          label: Copy.showDomainAction(domain.label),
-          onPressed: () async {
-            final next = {...prefs.visibleDomains, domain};
-            await prefs.setVisibleDomains(next);
-            ref.read(prefsTickProvider.notifier).state++;
-          },
-        ),
+        action: isDormantMonitorDomain(domain)
+            ? null
+            : SnackBarAction(
+                label: Copy.showDomainAction(domain.label),
+                onPressed: () async {
+                  final next = {...prefs.visibleDomains, domain};
+                  await prefs.setVisibleDomains(next);
+                  ref.read(prefsTickProvider.notifier).state++;
+                },
+              ),
       ),
     );
     return;

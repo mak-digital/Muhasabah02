@@ -357,7 +357,8 @@ void main() {
     expect(find.text('VOLUNTARY PRAYERS'), findsOneWidget);
     expect(find.text('Tahajjud'), findsOneWidget);
     expect(find.text('Ishraq'), findsOneWidget);
-    expect(find.text('(for the week starting on 31 Aug 2026)'), findsWidgets);
+    expect(find.text('Salat At Tawbah'), findsOneWidget);
+    expect(find.text(_homeWeekRange), findsWidgets);
 
     await tester.tap(find.text('30 days'));
     await tester.pumpAndSettle();
@@ -366,8 +367,9 @@ void main() {
     expect(find.text('Jumu‘ah'), findsOneWidget);
     expect(find.text('Tahajjud'), findsOneWidget);
     expect(find.text('Ishraq'), findsOneWidget);
+    expect(find.text('Salat At Tawbah'), findsOneWidget);
     expect(find.text('FRIDAY PRAYER'), findsOneWidget);
-    expect(find.text('VOLUNTARY PRAYERS'), findsNWidgets(2));
+    expect(find.text('VOLUNTARY PRAYERS'), findsNWidgets(3));
   });
 
   testWidgets('Qur’an 7-day Progress uses Home item rows', (tester) async {

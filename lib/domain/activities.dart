@@ -277,6 +277,10 @@ class ActivityCatalog {
   static const ishraqLaterMorning = 'ishraq.laterMorning';
   static const ishraqPrayed = 'ishraq.prayed';
   static const ishraqNotPrayed = 'ishraq.notPrayed';
+  static const tawbahAfterSlip = 'tawbah.afterSlip';
+  static const tawbahTwoRakahs = 'tawbah.twoRakahs';
+  static const tawbahPrayed = 'tawbah.prayed';
+  static const tawbahNotPrayed = 'tawbah.notPrayed';
 
   static const tahajjud = <ActivityOption>[
     ActivityOption(
@@ -324,6 +328,34 @@ class ActivityCatalog {
     ),
     ActivityOption(
       id: ishraqNotPrayed,
+      label: 'Not Prayed',
+      ternary: TernaryOutcome.negative,
+    ),
+    ActivityOption(
+      id: ActivityIds.unanswered,
+      label: 'Not recorded',
+      ternary: TernaryOutcome.unanswered,
+    ),
+  ];
+
+  static const tawbah = <ActivityOption>[
+    ActivityOption(
+      id: tawbahAfterSlip,
+      label: 'Prayed after a slip I noticed',
+      ternary: TernaryOutcome.positive,
+    ),
+    ActivityOption(
+      id: tawbahTwoRakahs,
+      label: 'Prayed two rak‘ahs',
+      ternary: TernaryOutcome.positive,
+    ),
+    ActivityOption(
+      id: tawbahPrayed,
+      label: 'Prayed',
+      ternary: TernaryOutcome.positive,
+    ),
+    ActivityOption(
+      id: tawbahNotPrayed,
       label: 'Not Prayed',
       ternary: TernaryOutcome.negative,
     ),
@@ -1272,7 +1304,8 @@ class ActivityCatalog {
     if (identical(options, salah) ||
         identical(options, jumuah) ||
         identical(options, tahajjud) ||
-        identical(options, ishraq)) {
+        identical(options, ishraq) ||
+        identical(options, tawbah)) {
       return true;
     }
     for (final dimension in QuranDimension.values) {
@@ -1299,14 +1332,18 @@ class ActivityCatalog {
   static const jumuahKey = 'salah.jumuah';
   static const tahajjudKey = 'salah.tahajjud';
   static const ishraqKey = 'salah.ishraq';
+  static const tawbahKey = 'salah.tawbah';
 
   static List<ActivityOption> forVoluntarySalah(SalahTraceRow row) {
-    return row == SalahTraceRow.tahajjud ? tahajjud : ishraq;
+    return switch (row) {
+      SalahTraceRow.tahajjud => tahajjud,
+      SalahTraceRow.ishraq => ishraq,
+      SalahTraceRow.tawbah => tawbah,
+      _ => const [],
+    };
   }
 
-  static String voluntarySalahKey(SalahTraceRow row) {
-    return row == SalahTraceRow.tahajjud ? tahajjudKey : ishraqKey;
-  }
+  static String voluntarySalahKey(SalahTraceRow row) => 'salah.${row.name}';
 
   static String canonicalVoluntarySalahId(
     TernaryOutcome outcome,
@@ -1314,11 +1351,19 @@ class ActivityCatalog {
   ) {
     if (outcome == TernaryOutcome.unanswered) return ActivityIds.unanswered;
     if (outcome == TernaryOutcome.negative) {
-      return row == SalahTraceRow.tahajjud
-          ? tahajjudNotPrayed
-          : ishraqNotPrayed;
+      return switch (row) {
+        SalahTraceRow.tahajjud => tahajjudNotPrayed,
+        SalahTraceRow.ishraq => ishraqNotPrayed,
+        SalahTraceRow.tawbah => tawbahNotPrayed,
+        _ => ActivityIds.unanswered,
+      };
     }
-    return row == SalahTraceRow.tahajjud ? tahajjudEarlyMid : ishraqPrayed;
+    return switch (row) {
+      SalahTraceRow.tahajjud => tahajjudEarlyMid,
+      SalahTraceRow.ishraq => ishraqPrayed,
+      SalahTraceRow.tawbah => tawbahPrayed,
+      _ => ActivityIds.unanswered,
+    };
   }
 
   static String quranKey(QuranDimension dimension) => 'quran.${dimension.name}';

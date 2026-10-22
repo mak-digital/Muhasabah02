@@ -4,12 +4,17 @@ import { test } from 'node:test';
 const base = process.env.HAJJ_WORKER_URL || 'http://127.0.0.1:8787';
 
 async function workerUp() {
-  try {
-    const res = await fetch(`${base}/health`, { signal: AbortSignal.timeout(2000) });
-    return res.ok;
-  } catch {
-    return false;
+  for (let attempt = 0; attempt < 10; attempt += 1) {
+    try {
+      const res = await fetch(`${base}/health`, {
+        signal: AbortSignal.timeout(2000),
+      });
+      if (res.ok) return true;
+    } catch {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    }
   }
+  return false;
 }
 
 test('wrangler health, allowlist, cache, burst, incoming', async (t) => {
@@ -44,6 +49,8 @@ test('wrangler health, allowlist, cache, burst, incoming', async (t) => {
   const firstJson = await first.json();
   assert.match(String(firstJson.quota.guarantee), /location-ratelimit|isolate-memory/);
   assert.ok(firstJson.sources.every((item) => item.verificationStatus === 'unverified'));
+  assert.ok(firstJson.sources.every((item) => item.origin === 'liveWorker'));
+  assert.ok(firstJson.sources.every((item) => item.provenance === 'liveRetrieval'));
 
   const second = await fetch(`${base}/v1/hajj/sources`, {
     method: 'POST',

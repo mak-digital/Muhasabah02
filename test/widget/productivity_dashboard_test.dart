@@ -9,6 +9,7 @@ import 'package:muhasabah02/domain/copy.dart';
 import 'package:muhasabah02/domain/domain_action.dart';
 import 'package:muhasabah02/domain/monitor_domain.dart';
 import 'package:muhasabah02/domain/productivity_planning.dart';
+import 'package:muhasabah02/presentation/settings/productivity_settings.dart';
 import 'package:muhasabah02/presentation/settings/settings_screen.dart';
 
 import '../support/home_domain_stage.dart';
@@ -23,6 +24,9 @@ ProductivityAction _sample({
   String? parentId,
   List<String> prerequisiteIds = const [],
   List<ProductivitySubtask> subtasks = const [],
+  double hours = 1,
+  double doneHours = 0,
+  String? targetDateKey,
   int sortOrder = 0,
 }) {
   return ProductivityAction(
@@ -35,6 +39,9 @@ ProductivityAction _sample({
     parentId: parentId,
     prerequisiteIds: prerequisiteIds,
     subtasks: subtasks,
+    hours: hours,
+    doneHours: doneHours,
+    targetDateKey: targetDateKey,
     sortOrder: sortOrder,
     synthetic: true,
   );
@@ -84,6 +91,37 @@ Future<void> _openDashboard(
   }
 }
 
+Future<void> _openTodayMenu(WidgetTester tester) async {
+  await tester.ensureVisible(find.byKey(const Key('productivity-today-menu')));
+  await tester.tap(find.byKey(const Key('productivity-today-menu')));
+  await tester.pumpAndSettle();
+}
+
+Future<void> _openProductivitySettings(WidgetTester tester) async {
+  await tester.tap(find.byTooltip('Settings'));
+  await tester.pumpAndSettle();
+  await tester.ensureVisible(find.byKey(const Key('settings-productivity')));
+  await tester.tap(find.byKey(const Key('settings-productivity')));
+  await tester.pumpAndSettle();
+}
+
+Future<void> _chooseTodaySlots(WidgetTester tester, int n) async {
+  await _openProductivitySettings(tester);
+  await tester.tap(find.byKey(const Key('productivity-today-slots')));
+  await tester.pumpAndSettle();
+  await tester.tap(
+    find.descendant(
+      of: find.byType(DropdownMenuItem<int>),
+      matching: find.text('$n'),
+    ),
+  );
+  await tester.pumpAndSettle();
+  await tester.pageBack();
+  await tester.pumpAndSettle();
+  await tester.pageBack();
+  await tester.pumpAndSettle();
+}
+
 void main() {
   testWidgets('W1 shown domain opens the Productivity dashboard', (
     tester,
@@ -92,7 +130,8 @@ void main() {
     expect(find.byKey(const Key('productivity-dashboard')), findsOneWidget);
     expect(find.text('Nothing queued'), findsOneWidget);
     expect(find.text('Today’s Actions (0 of 5)'), findsOneWidget);
-    expect(find.byKey(const Key('productivity-add')), findsOneWidget);
+    expect(find.text(Copy.productivityDailyActions), findsNothing);
+    expect(find.byKey(const Key('productivity-today-menu')), findsOneWidget);
   });
 
   testWidgets('today’s board shows queued actions without empty slots', (
@@ -116,7 +155,7 @@ void main() {
     tester,
   ) async {
     await _openDashboard(tester);
-    await tester.ensureVisible(find.byKey(const Key('productivity-add')));
+    await _openTodayMenu(tester);
     await tester.tap(find.byKey(const Key('productivity-add')));
     await tester.pumpAndSettle();
     await tester.enterText(
@@ -134,7 +173,7 @@ void main() {
     );
     await _openDashboard(tester, store: store);
     for (final title in ['One', 'Two', 'Three']) {
-      await tester.ensureVisible(find.byKey(const Key('productivity-add')));
+      await _openTodayMenu(tester);
       await tester.tap(find.byKey(const Key('productivity-add')));
       await tester.pumpAndSettle();
       await tester.enterText(
@@ -202,18 +241,86 @@ void main() {
       ),
     );
     await _openDashboard(tester, store: store);
-    await tester.tap(find.text('Start'));
+    await tester.tap(find.byKey(const Key('productivity-status-a')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('In progress').last);
     await tester.pumpAndSettle();
     expect(store.store.actions.single.status, ProductivityStatus.inProgress);
-    await tester.tap(find.text('Pause'));
+    await tester.tap(find.byKey(const Key('productivity-status-a')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Paused').last);
     await tester.pumpAndSettle();
     expect(store.store.actions.single.status, ProductivityStatus.paused);
-    await tester.tap(find.text('Resume'));
+    await tester.tap(find.byKey(const Key('productivity-status-a')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('In progress').last);
     await tester.pumpAndSettle();
     expect(store.store.actions.single.status, ProductivityStatus.inProgress);
-    await tester.tap(find.text('Complete'));
+    await tester.tap(find.byKey(const Key('productivity-complete-a')));
     await tester.pumpAndSettle();
     expect(store.store.actions.single.status, ProductivityStatus.completed);
+    expect(store.store.actions.single.percent, 100);
+    expect(store.store.actions.single.today, isTrue);
+    expect(find.byKey(const Key('productivity-action-a')), findsOneWidget);
+  });
+
+  testWidgets('focus percent matches the list status', (tester) async {
+    await _openDashboard(
+      tester,
+      store: MemoryProductivityStoreRepository(
+        store: ProductivityStore(
+          lastRolloverDateKey: '2026-10-18',
+          actions: [
+            _sample(id: 'a', title: 'Ahmad Insurance', hours: 5, doneHours: 5),
+          ],
+        ),
+      ),
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('productivity-focus')),
+        matching: find.text('Current focus (Today’s focus)'),
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('Pause'), findsNothing);
+    expect(find.text('Complete'), findsNothing);
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('productivity-focus')),
+        matching: find.text('0%'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('productivity-focus')),
+        matching: find.text('3 Medium'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('productivity-focus')),
+        matching: find.text('Not started'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('productivity-action-a')),
+        matching: find.text('0%'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('productivity-action-a')),
+        matching: find.text('Not started'),
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('100%'), findsNothing);
   });
 
   testWidgets('W6 expand shows child and grandchild', (tester) async {
@@ -235,12 +342,77 @@ void main() {
         ),
       ),
     );
-    await tester.tap(find.byKey(const Key('productivity-details-p')));
+    expect(find.text('Child row'), findsNothing);
+    await tester.tap(find.byKey(const Key('productivity-expand-p')));
     await tester.pumpAndSettle();
     expect(find.text('Child row'), findsOneWidget);
-    await tester.tap(find.text('Details').last);
+    expect(find.text('Grandchild row'), findsNothing);
+    await tester.tap(find.byKey(const Key('productivity-expand-c')));
     await tester.pumpAndSettle();
     expect(find.text('Grandchild row'), findsOneWidget);
+  });
+
+  testWidgets('expanding one today row does not open another', (tester) async {
+    await _openDashboard(
+      tester,
+      store: MemoryProductivityStoreRepository(
+        store: ProductivityStore(
+          lastRolloverDateKey: '2026-10-18',
+          actions: [
+            _sample(id: 'a', title: 'Alpha', sortOrder: 0),
+            _sample(id: 'b', title: 'Beta', sortOrder: 1),
+            _sample(
+              id: 'ac',
+              title: 'Alpha child',
+              parentId: 'a',
+              today: false,
+            ),
+            _sample(id: 'bc', title: 'Beta child', parentId: 'b', today: false),
+          ],
+        ),
+      ),
+    );
+    await tester.tap(find.byKey(const Key('productivity-expand-a')));
+    await tester.pumpAndSettle();
+    expect(find.text('Alpha child'), findsOneWidget);
+    expect(find.text('Beta child'), findsNothing);
+  });
+
+  testWidgets('arrow reveals sub-activities under that action only', (
+    tester,
+  ) async {
+    await _openDashboard(
+      tester,
+      store: MemoryProductivityStoreRepository(
+        store: ProductivityStore(
+          lastRolloverDateKey: '2026-10-18',
+          actions: [
+            _sample(
+              id: 'a',
+              title: 'Alpha',
+              subtasks: const [
+                ProductivitySubtask(title: 'Draft step', hours: 1, percent: 20),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+    expect(find.text('Draft step'), findsNothing);
+    await tester.tap(find.byKey(const Key('productivity-expand-a')));
+    await tester.pumpAndSettle();
+    expect(find.text('Draft step'), findsOneWidget);
+    expect(
+      find.byKey(const Key('productivity-action-group-a')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('productivity-action-group-a')),
+        matching: find.byKey(const Key('productivity-subtask-row-a-0')),
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('details rolls sub-activity progress onto the parent card', (
@@ -293,6 +465,66 @@ void main() {
     expect(find.text('Outline draft'), findsWidgets);
   });
 
+  testWidgets('six dots save hours and percent on a main action', (
+    tester,
+  ) async {
+    await _openDashboard(
+      tester,
+      store: MemoryProductivityStoreRepository(
+        store: ProductivityStore(
+          lastRolloverDateKey: '2026-10-18',
+          actions: [_sample(id: 'a', title: 'Alpha')],
+        ),
+      ),
+    );
+    await tester.tap(find.byKey(const Key('productivity-details-a')));
+    await tester.pumpAndSettle();
+    expect(find.text('Progress details'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('productivity-hours-inc-a')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('productivity-details-save')));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('1h 15m'), findsWidgets);
+  });
+
+  testWidgets('six dots on a sub-item save share and percent', (tester) async {
+    await _openDashboard(
+      tester,
+      store: MemoryProductivityStoreRepository(
+        store: ProductivityStore(
+          lastRolloverDateKey: '2026-10-18',
+          actions: [
+            _sample(
+              id: 'a',
+              title: 'Alpha',
+              subtasks: const [
+                ProductivitySubtask(
+                  title: 'Draft step',
+                  weight: 100,
+                  percent: 20,
+                  hours: 1,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+    await tester.tap(find.byKey(const Key('productivity-expand-a')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('productivity-subtask-details-a-0')));
+    await tester.pumpAndSettle();
+    expect(find.text('Sub-item progress'), findsOneWidget);
+    expect(find.textContaining('Share of the main action'), findsWidgets);
+    await tester.enterText(
+      find.byKey(const Key('productivity-subtask-title-a-0')),
+      'Named draft',
+    );
+    await tester.tap(find.byKey(const Key('productivity-subtask-save-a-0')));
+    await tester.pumpAndSettle();
+    expect(find.text('Named draft'), findsWidgets);
+  });
+
   testWidgets('W7 MAL can place an item into today', (tester) async {
     final listed = DomainAction(
       id: 'health-clinic-1',
@@ -313,7 +545,7 @@ void main() {
         raw: {listed.id: encodeDomainAction(listed)},
       ),
     );
-    await tester.ensureVisible(find.byKey(const Key('productivity-pick-mal')));
+    await _openTodayMenu(tester);
     await tester.tap(find.byKey(const Key('productivity-pick-mal')));
     await tester.pumpAndSettle();
     await tester.tap(
@@ -344,13 +576,11 @@ void main() {
         ),
       ),
     );
-    await tester.tap(find.byKey(const Key('productivity-today-slots-2')));
-    await tester.pumpAndSettle();
+    await _chooseTodaySlots(tester, 2);
     expect(find.byKey(const Key('productivity-action-a')), findsOneWidget);
     expect(find.byKey(const Key('productivity-action-b')), findsOneWidget);
     expect(find.byKey(const Key('productivity-action-c')), findsNothing);
-    await tester.tap(find.byKey(const Key('productivity-today-slots-5')));
-    await tester.pumpAndSettle();
+    await _chooseTodaySlots(tester, 5);
     expect(find.byKey(const Key('productivity-action-c')), findsOneWidget);
   });
 
@@ -367,7 +597,7 @@ void main() {
       ),
     );
     await _openDashboard(tester, store: store);
-    await tester.tap(find.text('Complete'));
+    await tester.tap(find.byKey(const Key('productivity-complete-a')));
     await tester.pumpAndSettle();
     expect(
       find.byKey(const Key('productivity-register-sheet')),
@@ -377,6 +607,14 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('productivity-register-import')));
     await tester.pumpAndSettle();
+    expect(
+      store.store.actions.firstWhere((action) => action.id == 'a').today,
+      isTrue,
+    );
+    expect(
+      store.store.actions.firstWhere((action) => action.id == 'a').status,
+      ProductivityStatus.completed,
+    );
     expect(
       store.store.actions.firstWhere((action) => action.id == 'p').today,
       isTrue,
@@ -391,7 +629,7 @@ void main() {
       ),
     );
     await _openDashboard(tester, store: store);
-    await tester.tap(find.text('Complete'));
+    await tester.tap(find.byKey(const Key('productivity-complete-a')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('productivity-history')));
     await tester.pumpAndSettle();
@@ -430,12 +668,18 @@ void main() {
         ),
       ),
     );
-    expect(find.byKey(const Key('productivity-carry-notice')), findsOneWidget);
+    expect(find.byKey(const Key('productivity-carry-notice')), findsNothing);
+    expect(find.text('Still open'), findsWidgets);
+    await _openProductivitySettings(tester);
+    expect(find.byType(ProductivitySettingsScreen), findsOneWidget);
+    expect(find.text(Copy.productivityDailyActions), findsOneWidget);
+    expect(find.text(Copy.productivityCarryForwardInfo), findsOneWidget);
+    expect(find.byKey(const Key('productivity-carry-info')), findsOneWidget);
   });
 
   testWidgets('W11 empty state has Add and does not crash', (tester) async {
     await _openDashboard(tester);
-    expect(find.byKey(const Key('productivity-add')), findsOneWidget);
+    expect(find.byKey(const Key('productivity-today-menu')), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -478,9 +722,85 @@ void main() {
         ),
       ),
     );
-    await tester.tap(find.byKey(const Key('productivity-menu-a')));
+    expect(
+      find.byKey(const Key('productivity-priority-chip-a')),
+      findsOneWidget,
+    );
+    expect(find.textContaining('2 High'), findsWidgets);
+  });
+
+  testWidgets('planner shows weekday letters and daily-list priority lines', (
+    tester,
+  ) async {
+    await _openDashboard(
+      tester,
+      store: MemoryProductivityStoreRepository(
+        store: ProductivityStore(
+          lastRolloverDateKey: '2026-10-18',
+          actions: [
+            _sample(
+              id: 'a',
+              title: 'Alpha',
+              priority: ProductivityPriority.critical,
+              targetDateKey: '2026-10-20',
+            ),
+            _sample(
+              id: 'b',
+              title: 'Register only',
+              today: false,
+              priority: ProductivityPriority.low,
+              targetDateKey: '2026-10-21',
+            ),
+          ],
+        ),
+      ),
+    );
+    await tester.tap(find.text('Planner'));
     await tester.pumpAndSettle();
-    expect(find.textContaining('High'), findsWidgets);
+    expect(find.byKey(const Key('productivity-planner')), findsOneWidget);
+    expect(
+      find.byKey(const Key('productivity-planner-weekday-0')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('productivity-planner-mark-2026-10-18-0')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('productivity-planner-mark-2026-10-18-0-start')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('productivity-planner-mark-2026-10-18-0-progress')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('productivity-planner-mark-2026-10-20-0')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('productivity-planner-mark-2026-10-20-0-end')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('productivity-planner-mark-2026-10-21-0')),
+      findsNothing,
+    );
+    expect(find.text('October 2026'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('productivity-planner-next')));
+    await tester.pumpAndSettle();
+    expect(find.text('November 2026'), findsOneWidget);
+    expect(
+      find.byKey(const Key('productivity-planner-mark-2026-10-18-0')),
+      findsNothing,
+    );
+    await tester.tap(find.byKey(const Key('productivity-planner-prev')));
+    await tester.pumpAndSettle();
+    expect(find.text('October 2026'), findsOneWidget);
+    expect(
+      find.byKey(const Key('productivity-planner-mark-2026-10-18-0')),
+      findsOneWidget,
+    );
   });
 
   testWidgets('tablet width shows the side column', (tester) async {

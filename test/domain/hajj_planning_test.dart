@@ -251,4 +251,99 @@ void main() {
       containsPair('schemaVersion', 12),
     );
   });
+
+  test('legacy live rows are reclassified without rewriting user sources', () {
+    final decoded = decodeHajjStore(
+      jsonEncode({
+        'schemaVersion': 1,
+        'standing': {'kind': 'believeDue'},
+        'journeys': [
+          {'id': 'j1', 'lifecycle': 'planning'},
+        ],
+        'activeJourneyId': 'j1',
+        'sources': [
+          {
+            'id': 'src.live.reg.sa.nusuk',
+            'verificationStatus': 'unverified',
+            'provenance': 'userEntered',
+            'retrievalMode': 'liveHttp',
+            'demonstration': false,
+          },
+          {
+            'id': 'src.manual.keep',
+            'title': 'My bookmark',
+            'verificationStatus': 'unverified',
+            'provenance': 'userEntered',
+          },
+          {
+            'id': 'src.demo.reg.sa.hajj.ministry',
+            'verificationStatus': 'unverified',
+            'demonstration': true,
+            'provenance': 'userEntered',
+          },
+          {
+            'id': 'src.live.reg.sa.hajj.ministry',
+            'verificationStatus': 'verifiedByUser',
+            'provenance': 'officialVerified',
+            'retrievalMode': 'liveHttp',
+          },
+        ],
+      }),
+    );
+    expect(decoded.kind, HajjStoreDecodeKind.ok);
+    final store = decoded.store!;
+    expect(store.schemaVersion, 1);
+    expect(store.standing.kind, HajjStandingKind.believeDue);
+    expect(store.journeys.single.id, 'j1');
+    expect(store.sources[0].origin, HajjSourceOrigin.liveWorker);
+    expect(store.sources[0].provenance, HajjProvenanceKind.liveRetrieval);
+    expect(
+      store.sources[0].verificationStatus,
+      HajjVerificationStatus.unverified,
+    );
+    expect(store.sources[1].origin, HajjSourceOrigin.userEntered);
+    expect(store.sources[1].provenance, HajjProvenanceKind.userEntered);
+    expect(store.sources[2].origin, HajjSourceOrigin.demonstration);
+    expect(store.sources[2].provenance, HajjProvenanceKind.userEntered);
+    expect(store.sources[3].origin, HajjSourceOrigin.liveWorker);
+    expect(store.sources[3].provenance, HajjProvenanceKind.officialVerified);
+    expect(
+      store.sources[3].verificationStatus,
+      HajjVerificationStatus.verifiedByUser,
+    );
+  });
+
+  test('Hive rewrite persists origin correction and keeps standing', () async {
+    final dir = await Directory.systemTemp.createTemp('hajj_origin');
+    Hive.init(dir.path);
+    addTearDown(() async {
+      await Hive.close();
+      dir.deleteSync(recursive: true);
+    });
+    final box = await Hive.openBox<String>('hajj_origin');
+    await box.put(
+      kHajjStoreDocumentKey,
+      jsonEncode({
+        'schemaVersion': 1,
+        'standing': {'kind': 'believeDue'},
+        'sources': [
+          {
+            'id': 'src.live.reg.sa.nusuk',
+            'verificationStatus': 'unverified',
+            'provenance': 'userEntered',
+            'retrievalMode': 'liveHttp',
+          },
+        ],
+      }),
+    );
+    final repo = HiveHajjStoreRepository(box);
+    await repo.initializeIfNeeded();
+    expect(repo.store.standing.kind, HajjStandingKind.believeDue);
+    expect(repo.store.sources.single.origin, HajjSourceOrigin.liveWorker);
+    final persisted = jsonDecode(box.get(kHajjStoreDocumentKey)!) as Map;
+    expect(persisted['schemaVersion'], 1);
+    expect((persisted['sources'] as List).first['origin'], 'liveWorker');
+    expect((persisted['sources'] as List).first['provenance'], 'liveRetrieval');
+    expect((persisted['standing'] as Map)['kind'], 'believeDue');
+  });
 }

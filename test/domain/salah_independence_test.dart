@@ -47,9 +47,8 @@ void main() {
   });
 
   test('Jumu‘ah activity list sets congregation from the chosen row', () {
-    final attended = DailyCheckIn.empty(
-      '2026-09-04',
-    ).withJumuahActivity(const RecordedActivity(id: 'congregationOnTime'));
+    final attended = DailyCheckIn.empty('2026-09-04')
+        .withJumuahActivity(const RecordedActivity(id: 'congregationOnTime'));
     expect(attended.jumuah, PrayerStatus.onTime);
     expect(attended.jumuahCongregation, isTrue);
     expect(attended.jumuahActivityId, 'congregationOnTime');
@@ -70,6 +69,7 @@ void main() {
       jumuah: PrayerStatus.onTime,
       tahajjud: TernaryOutcome.positive,
       ishraq: TernaryOutcome.negative,
+      tawbah: TernaryOutcome.positive,
       jumuahCongregation: true,
     );
     expect(record.answeredRecordableCount, 0);
@@ -78,6 +78,7 @@ void main() {
     expect(restored.jumuah, PrayerStatus.onTime);
     expect(restored.tahajjud, TernaryOutcome.positive);
     expect(restored.ishraq, TernaryOutcome.negative);
+    expect(restored.tawbah, TernaryOutcome.positive);
     expect(restored.jumuahCongregation, isTrue);
   });
 
@@ -89,6 +90,7 @@ void main() {
     });
     expect(record.jumuah, PrayerStatus.unanswered);
     expect(record.tahajjud, TernaryOutcome.unanswered);
+    expect(record.tawbah, TernaryOutcome.unanswered);
     expect(record.jumuahCongregation, isFalse);
     expect(record.jumuah, isNot(PrayerStatus.missed));
   });

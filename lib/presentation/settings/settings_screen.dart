@@ -35,6 +35,7 @@ import 'application_reflection_screen.dart';
 import 'faq_screen.dart';
 import 'custom_selection_sets_editor.dart';
 import 'personal_mix_settings.dart';
+import 'productivity_settings.dart';
 import 'reflection_settings.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -117,6 +118,20 @@ class SettingsScreen extends ConsumerWidget {
                       context,
                       MaterialPageRoute<void>(
                         builder: (_) => const CalendarSettingsScreen(),
+                      ),
+                    );
+                  },
+                ),
+                ListTile(
+                  key: const Key('settings-productivity'),
+                  leading: const Icon(Icons.task_alt_outlined),
+                  title: const Text(Copy.productivitySettings),
+                  subtitle: const Text(Copy.productivitySettingsNote),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute<void>(
+                        builder: (_) => const ProductivitySettingsScreen(),
                       ),
                     );
                   },

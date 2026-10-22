@@ -30,10 +30,9 @@ void main() {
   });
 
   test('excused is recorded and is never missed', () {
-    final record = DailyCheckIn.empty('2026-09-03').withSalahActivity(
-      PrayerId.fajr,
-      const RecordedActivity(id: 'excused'),
-    );
+    final record = DailyCheckIn.empty(
+      '2026-09-03',
+    ).withSalahActivity(PrayerId.fajr, const RecordedActivity(id: 'excused'));
     expect(record.prayer(PrayerId.fajr), PrayerStatus.excused);
     expect(record.prayer(PrayerId.fajr).isRecorded, isTrue);
     expect(record.prayer(PrayerId.fajr).isDesirable, isFalse);
@@ -81,70 +80,90 @@ void main() {
     expect(record.hasAnyRecordedEvidence, isTrue);
   });
 
-  test('tahajjud and ishraq lists keep five observational choices', () {
-    expect(
-      ActivityCatalog.tahajjud.map((option) => option.label).toList(),
-      [
+  test(
+    'tahajjud, ishraq, and tawbah lists keep five observational choices',
+    () {
+      expect(ActivityCatalog.tahajjud.map((option) => option.label).toList(), [
         'Prayed early/mid and late at night',
         'Prayed later part of night',
         'Prayed early/mid night',
         'Not Prayed',
         'Not recorded',
-      ],
-    );
-    expect(
-      ActivityCatalog.ishraq.map((option) => option.label).toList(),
-      [
+      ]);
+      expect(ActivityCatalog.ishraq.map((option) => option.label).toList(), [
         'Prayed following Fajr',
         'Prayed later in the morning',
         'Prayed',
         'Not Prayed',
         'Not recorded',
-      ],
-    );
-    expect(
-      SalahActivityMark.colourForId(ActivityCatalog.tahajjudEarlyMidAndLate),
-      SalahActivityMark.congregationOnTime,
-    );
-    expect(
-      SalahActivityMark.colourForId(ActivityCatalog.ishraqFollowingFajr),
-      SalahActivityMark.congregationOnTime,
-    );
-    expect(
-      SalahActivityMark.colourForId(ActivityCatalog.tahajjudLaterPart),
-      SalahActivityMark.joinedCongregationLate,
-    );
-    expect(
-      SalahActivityMark.colourForId(ActivityCatalog.ishraqLaterMorning),
-      SalahActivityMark.joinedCongregationLate,
-    );
-    expect(
-      SalahActivityMark.colourForId(ActivityCatalog.tahajjudEarlyMid),
-      SalahActivityMark.smallCongregation,
-    );
-    expect(
-      SalahActivityMark.colourForId(ActivityCatalog.ishraqPrayed),
-      SalahActivityMark.smallCongregation,
-    );
-    expect(
-      SalahActivityMark.colourForId(ActivityCatalog.tahajjudNotPrayed),
-      SalahActivityMark.aloneOnTime,
-    );
-    expect(
-      SalahActivityMark.colourForId(ActivityCatalog.ishraqNotPrayed),
-      SalahActivityMark.aloneOnTime,
-    );
-    final notPrayed = SalahActivityMark.forVoluntary(
-      record: DailyCheckIn.empty('2026-09-03').withVoluntarySalahActivity(
-        SalahTraceRow.tahajjud,
-        const RecordedActivity(id: ActivityCatalog.tahajjudNotPrayed),
-      ),
-      row: SalahTraceRow.tahajjud,
-      activityColours: true,
-    );
-    expect(notPrayed.kind, MarkerKind.outlined);
-    expect(notPrayed.color, SalahActivityMark.aloneOnTime);
-  });
+      ]);
+      expect(ActivityCatalog.tawbah.map((option) => option.label).toList(), [
+        'Prayed after a slip I noticed',
+        'Prayed two rak‘ahs',
+        'Prayed',
+        'Not Prayed',
+        'Not recorded',
+      ]);
+      expect(
+        SalahActivityMark.colourForId(ActivityCatalog.tahajjudEarlyMidAndLate),
+        SalahActivityMark.congregationOnTime,
+      );
+      expect(
+        SalahActivityMark.colourForId(ActivityCatalog.ishraqFollowingFajr),
+        SalahActivityMark.congregationOnTime,
+      );
+      expect(
+        SalahActivityMark.colourForId(ActivityCatalog.tahajjudLaterPart),
+        SalahActivityMark.joinedCongregationLate,
+      );
+      expect(
+        SalahActivityMark.colourForId(ActivityCatalog.ishraqLaterMorning),
+        SalahActivityMark.joinedCongregationLate,
+      );
+      expect(
+        SalahActivityMark.colourForId(ActivityCatalog.tahajjudEarlyMid),
+        SalahActivityMark.smallCongregation,
+      );
+      expect(
+        SalahActivityMark.colourForId(ActivityCatalog.ishraqPrayed),
+        SalahActivityMark.smallCongregation,
+      );
+      expect(
+        SalahActivityMark.colourForId(ActivityCatalog.tahajjudNotPrayed),
+        SalahActivityMark.aloneOnTime,
+      );
+      expect(
+        SalahActivityMark.colourForId(ActivityCatalog.ishraqNotPrayed),
+        SalahActivityMark.aloneOnTime,
+      );
+      expect(
+        SalahActivityMark.colourForId(ActivityCatalog.tawbahAfterSlip),
+        SalahActivityMark.congregationOnTime,
+      );
+      expect(
+        SalahActivityMark.colourForId(ActivityCatalog.tawbahTwoRakahs),
+        SalahActivityMark.joinedCongregationLate,
+      );
+      expect(
+        SalahActivityMark.colourForId(ActivityCatalog.tawbahPrayed),
+        SalahActivityMark.smallCongregation,
+      );
+      expect(
+        SalahActivityMark.colourForId(ActivityCatalog.tawbahNotPrayed),
+        SalahActivityMark.aloneOnTime,
+      );
+      final notPrayed = SalahActivityMark.forVoluntary(
+        record: DailyCheckIn.empty('2026-09-03').withVoluntarySalahActivity(
+          SalahTraceRow.tahajjud,
+          const RecordedActivity(id: ActivityCatalog.tahajjudNotPrayed),
+        ),
+        row: SalahTraceRow.tahajjud,
+        activityColours: true,
+      );
+      expect(notPrayed.kind, MarkerKind.outlined);
+      expect(notPrayed.color, SalahActivityMark.aloneOnTime);
+    },
+  );
 
   test('voluntary salah stores activity id and twins ternary', () {
     var record = DailyCheckIn.empty('2026-09-03').withVoluntarySalahActivity(
@@ -166,12 +185,23 @@ void main() {
       record.activityFor(ActivityCatalog.ishraqKey).id,
       ActivityCatalog.ishraqNotPrayed,
     );
+    record = record.withVoluntarySalahActivity(
+      SalahTraceRow.tawbah,
+      const RecordedActivity(id: ActivityCatalog.tawbahTwoRakahs),
+    );
+    expect(record.tawbah, TernaryOutcome.positive);
+    expect(
+      record.activityFor(ActivityCatalog.tawbahKey).id,
+      ActivityCatalog.tawbahTwoRakahs,
+    );
+    expect(record.answeredRecordableCount, 0);
   });
 
   test('old ternary voluntary days canonicalise without rewriting ids', () {
     final record = DailyCheckIn.empty('2026-09-03').copyWith(
       tahajjud: TernaryOutcome.positive,
       ishraq: TernaryOutcome.negative,
+      tawbah: TernaryOutcome.negative,
     );
     expect(
       record.activityFor(ActivityCatalog.tahajjudKey).id,
@@ -180,6 +210,10 @@ void main() {
     expect(
       record.activityFor(ActivityCatalog.ishraqKey).id,
       ActivityCatalog.ishraqNotPrayed,
+    );
+    expect(
+      record.activityFor(ActivityCatalog.tawbahKey).id,
+      ActivityCatalog.tawbahNotPrayed,
     );
   });
 
@@ -320,10 +354,8 @@ void main() {
       ).kind,
       MarkerKind.outlined,
     );
-    final legacy = DailyCheckIn.empty('2026-09-03').withHomeTrace(
-      'akhlaq.humility',
-      TernaryOutcome.negative,
-    );
+    final legacy = DailyCheckIn.empty('2026-09-03')
+        .withHomeTrace('akhlaq.humility', TernaryOutcome.negative);
     expect(
       legacy.activityFor('akhlaq.humility').id,
       AkhlaqObservationIds.noSituation,
@@ -379,10 +411,7 @@ void main() {
       MarkerKind.filled,
     );
     var record = DailyCheckIn.empty('2026-09-03');
-    expect(
-      record.activityFor('huquq.parents').id,
-      ActivityIds.unanswered,
-    );
+    expect(record.activityFor('huquq.parents').id, ActivityIds.unanswered);
     record = writeHuquqFollowUp(
       record,
       'huquq.parents',
@@ -400,10 +429,7 @@ void main() {
     expect(capture.occasions, '2');
     expect(capture.timeSpent, '15 min');
     expect(capture.note, 'I called and made du‘a');
-    expect(
-      huquqEvidenceNote(record, 'huquq.parents'),
-      contains('Du‘a'),
-    );
+    expect(huquqEvidenceNote(record, 'huquq.parents'), contains('Du‘a'));
     record = writeHuquqFollowUp(
       record,
       'huquq.parents',
@@ -425,10 +451,8 @@ void main() {
     );
     expect(record.homeTrace('huquq.parents'), TernaryOutcome.unanswered);
     expect(readHuquqFollowUp(record, 'huquq.parents').note, isEmpty);
-    final legacy = DailyCheckIn.empty('2026-09-03').withHomeTrace(
-      'huquq.spouse',
-      TernaryOutcome.negative,
-    );
+    final legacy = DailyCheckIn.empty('2026-09-03')
+        .withHomeTrace('huquq.spouse', TernaryOutcome.negative);
     expect(
       legacy.activityFor('huquq.spouse').id,
       HuquqObservationIds.neglectRecognised,
@@ -437,9 +461,9 @@ void main() {
 
   test('knowledge rows use item-specific wording and salah colour twins', () {
     expect(
-      ActivityCatalog.forHomeTrace(
-        'knowledge.learnedSomethingTrue',
-      ).map((o) => o.id).toList(),
+      ActivityCatalog.forHomeTrace('knowledge.learnedSomethingTrue')
+          .map((o) => o.id)
+          .toList(),
       [
         KnowledgeObservationIds.engaged,
         KnowledgeObservationIds.progress,
@@ -450,7 +474,9 @@ void main() {
       ],
     );
     expect(
-      ActivityCatalog.forHomeTrace('knowledge.learnedSomethingTrue').first.label,
+      ActivityCatalog.forHomeTrace('knowledge.learnedSomethingTrue')
+          .first
+          .label,
       'Learned something new and verified its reliability',
     );
     expect(
@@ -553,10 +579,8 @@ void main() {
       readKnowledgeFollowUp(record, 'knowledge.learnedSomethingTrue').note,
       isEmpty,
     );
-    final legacy = DailyCheckIn.empty('2026-09-03').withHomeTrace(
-      'knowledge.taughtSomeone',
-      TernaryOutcome.negative,
-    );
+    final legacy = DailyCheckIn.empty('2026-09-03')
+        .withHomeTrace('knowledge.taughtSomeone', TernaryOutcome.negative);
     expect(
       legacy.activityFor('knowledge.taughtSomeone').id,
       KnowledgeObservationIds.noSituation,
@@ -564,17 +588,14 @@ void main() {
   });
 
   test('time rows use item-specific wording and salah colour twins', () {
-    expect(
-      ActivityCatalog.forHomeTrace('time.t01').map((o) => o.id).toList(),
-      [
-        TimeObservationIds.acted,
-        TimeObservationIds.partialEffort,
-        TimeObservationIds.lapseRecognised,
-        TimeObservationIds.corrected,
-        TimeObservationIds.noSituation,
-        ActivityIds.unanswered,
-      ],
-    );
+    expect(ActivityCatalog.forHomeTrace('time.t01').map((o) => o.id).toList(), [
+      TimeObservationIds.acted,
+      TimeObservationIds.partialEffort,
+      TimeObservationIds.lapseRecognised,
+      TimeObservationIds.corrected,
+      TimeObservationIds.noSituation,
+      ActivityIds.unanswered,
+    ]);
     expect(
       ActivityCatalog.forHomeTrace('time.t01').first.label,
       'Began an activity with a clear beneficial intention',
@@ -631,10 +652,7 @@ void main() {
     var capture = readTimePractice(record, 'time.t01');
     expect(capture.contextId, 'time.context.worship');
     expect(capture.helpId, 'time.help.clarifiedIntention');
-    expect(
-      timeEvidenceNote(record, 'time.t01'),
-      contains('Worship'),
-    );
+    expect(timeEvidenceNote(record, 'time.t01'), contains('Worship'));
     record = writeTimePractice(
       record,
       'time.t01',
@@ -649,17 +667,11 @@ void main() {
       ).kind,
       MarkerKind.outlined,
     );
-    record = writeTimePractice(
-      record,
-      'time.t01',
-      const TimePracticeCapture(),
-    );
+    record = writeTimePractice(record, 'time.t01', const TimePracticeCapture());
     expect(record.homeTrace('time.t01'), TernaryOutcome.unanswered);
     expect(readTimePractice(record, 'time.t01').note, isEmpty);
-    final legacy = DailyCheckIn.empty('2026-09-03').withHomeTrace(
-      'time.t08',
-      TernaryOutcome.negative,
-    );
+    final legacy = DailyCheckIn.empty('2026-09-03')
+        .withHomeTrace('time.t08', TernaryOutcome.negative);
     expect(
       legacy.activityFor('time.t08').id,
       TimeObservationIds.lapseRecognised,
@@ -699,9 +711,7 @@ void main() {
     var record = writeHealthPractice(
       DailyCheckIn.empty('2026-10-17'),
       'health.illnessCare',
-      const HealthPracticeCapture(
-        primaryId: 'health.illnessCare.noIllness',
-      ),
+      const HealthPracticeCapture(primaryId: 'health.illnessCare.noIllness'),
     );
     expect(record.homeTrace('health.illnessCare'), TernaryOutcome.positive);
     expect(

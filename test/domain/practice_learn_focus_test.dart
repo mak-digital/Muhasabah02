@@ -16,46 +16,49 @@ void main() {
     return PersonalisationResolver(visibleDomains: visible, mix: mix);
   }
 
-  test('post-fard Learn & Practice hides when Salah is not in Domains in Focus', () {
-    final withoutSalah = resolver(
-      visible: {MonitorDomain.quran, MonitorDomain.dhikr},
-      mix: PersonalMix.sameAsDomains,
-    );
-    expect(
-      practiceLearnItemAllowed(
-        domain: MonitorDomain.dhikr,
-        group: kDhikrGroupPost,
-        topic: 'Istighfar three times',
-        subgroup: kDhikrSubHighly,
-        resolver: withoutSalah,
-      ),
-      isFalse,
-    );
-    expect(
-      practiceLearnItemAllowed(
-        domain: MonitorDomain.dhikr,
-        group: kDhikrGroupMorning,
-        topic: 'Ayat al-Kursi in the morning',
-        subgroup: kDhikrSubHighly,
-        resolver: withoutSalah,
-      ),
-      isTrue,
-    );
-    final withSalah = resolver(
-      visible: kBasicDhikrVisibleDomains,
-      mix: PersonalMix.sameAsDomains,
-    );
-    expect(
-      practiceLearnItemAllowed(
-        domain: MonitorDomain.dhikr,
-        group: kDhikrGroupPost,
-        topic: 'Istighfar three times',
-        subgroup: kDhikrSubHighly,
-        resolver: withSalah,
-      ),
-      isTrue,
-    );
-  });
+  test(
+    'post-fard Learn & Practice hides when Salah is not in Domains in Focus',
+    () {
+      final withoutSalah = resolver(
+        visible: {MonitorDomain.quran, MonitorDomain.dhikr},
+        mix: PersonalMix.sameAsDomains,
+      );
+      expect(
+        practiceLearnItemAllowed(
+          domain: MonitorDomain.dhikr,
+          group: kDhikrGroupPost,
+          topic: 'Istighfar three times',
+          subgroup: kDhikrSubHighly,
+          resolver: withoutSalah,
+        ),
+        isFalse,
+      );
+      expect(
+        practiceLearnItemAllowed(
+          domain: MonitorDomain.dhikr,
+          group: kDhikrGroupMorning,
+          topic: 'Ayat al-Kursi in the morning',
+          subgroup: kDhikrSubHighly,
+          resolver: withoutSalah,
+        ),
+        isTrue,
+      );
+      final withSalah = resolver(
+        visible: kBasicDhikrVisibleDomains,
+        mix: PersonalMix.sameAsDomains,
+      );
+      expect(
+        practiceLearnItemAllowed(
+          domain: MonitorDomain.dhikr,
+          group: kDhikrGroupPost,
+          topic: 'Istighfar three times',
+          subgroup: kDhikrSubHighly,
+          resolver: withSalah,
+        ),
+        isTrue,
+      );
+    },
+  );
 
   test('same as domains keeps every Learn & Practice item', () {
     final subject = resolver(
@@ -93,6 +96,7 @@ void main() {
     );
     expect(catalog.any((item) => item.topic == 'Fajr'), isTrue);
     expect(catalog.any((item) => item.topic == 'Tahajjud'), isFalse);
+    expect(catalog.any((item) => item.topic == 'Salat At Tawbah'), isFalse);
     expect(catalog.any((item) => item.topic == 'Jumu‘ah'), isFalse);
     expect(
       focusedPracticeGroups(groups: kPracticeSalahGroups, catalog: catalog),
@@ -145,101 +149,100 @@ void main() {
     );
   });
 
-  test('post-fard Learn stays hidden without Salah even if mix names those rows', () {
-    final subject = resolver(
-      visible: {MonitorDomain.quran, MonitorDomain.dhikr},
-      mix: mixForKind(
-        PersonalMixKind.custom,
-        customKeys: {
-          'dhikr.postFardFajr',
-          'dhikr.morningAdhkar',
-          'dhikr.generalDhikr',
-        },
-      ),
-    );
-    expect(
-      practiceLearnItemAllowed(
-        domain: MonitorDomain.dhikr,
-        group: kDhikrGroupPost,
-        topic: 'Istighfar three times',
-        subgroup: kDhikrSubHighly,
-        resolver: subject,
-      ),
-      isFalse,
-    );
-    expect(
-      practiceLearnItemAllowed(
-        domain: MonitorDomain.dhikr,
-        group: kDhikrGroupMorning,
-        topic: 'Ayat al-Kursi in the morning',
-        subgroup: kDhikrSubHighly,
-        resolver: subject,
-      ),
-      isTrue,
-    );
-  });
+  test(
+    'post-fard Learn stays hidden without Salah even if mix names those rows',
+    () {
+      final subject = resolver(
+        visible: {MonitorDomain.quran, MonitorDomain.dhikr},
+        mix: mixForKind(
+          PersonalMixKind.custom,
+          customKeys: {
+            'dhikr.postFardFajr',
+            'dhikr.morningAdhkar',
+            'dhikr.generalDhikr',
+          },
+        ),
+      );
+      expect(
+        practiceLearnItemAllowed(
+          domain: MonitorDomain.dhikr,
+          group: kDhikrGroupPost,
+          topic: 'Istighfar three times',
+          subgroup: kDhikrSubHighly,
+          resolver: subject,
+        ),
+        isFalse,
+      );
+      expect(
+        practiceLearnItemAllowed(
+          domain: MonitorDomain.dhikr,
+          group: kDhikrGroupMorning,
+          topic: 'Ayat al-Kursi in the morning',
+          subgroup: kDhikrSubHighly,
+          resolver: subject,
+        ),
+        isTrue,
+      );
+    },
+  );
 
-  test('custom mix keeps General Dhikr Learn items and hides other subgroups', () {
-    final subject = resolver(
-      visible: kBasicDhikrVisibleDomains,
-      mix: mixForKind(
-        PersonalMixKind.custom,
-        customKeys: {'dhikr.generalDhikr'},
-      ),
-    );
-    expect(
-      practiceLearnItemAllowed(
-        domain: MonitorDomain.dhikr,
-        group: kDhikrGroupOther,
-        topic: 'La hawla wa la quwwata',
-        subgroup: kDhikrSubGeneral,
-        resolver: subject,
-      ),
-      isTrue,
-    );
-    expect(
-      practiceLearnItemAllowed(
-        domain: MonitorDomain.dhikr,
-        group: kDhikrGroupOther,
-        topic: 'All praise is for Allah',
-        subgroup: kDhikrSubGratitude,
-        resolver: subject,
-      ),
-      isFalse,
-    );
-    expect(
-      practiceLearnItemAllowed(
-        domain: MonitorDomain.dhikr,
-        group: kDhikrGroupMorning,
-        topic: 'Ayat al-Kursi in the morning',
-        subgroup: kDhikrSubHighly,
-        resolver: subject,
-      ),
-      isFalse,
-    );
-    expect(
-      practiceLearnItemAllowed(
-        domain: MonitorDomain.dhikr,
-        group: kDhikrGroupEvening,
-        topic: 'Ayat al-Kursi in the evening',
-        subgroup: kDhikrSubHighly,
-        resolver: subject,
-      ),
-      isFalse,
-    );
-  });
+  test(
+    'custom mix keeps General Dhikr Learn items and hides other subgroups',
+    () {
+      final subject = resolver(
+        visible: kBasicDhikrVisibleDomains,
+        mix: mixForKind(
+          PersonalMixKind.custom,
+          customKeys: {'dhikr.generalDhikr'},
+        ),
+      );
+      expect(
+        practiceLearnItemAllowed(
+          domain: MonitorDomain.dhikr,
+          group: kDhikrGroupOther,
+          topic: 'La hawla wa la quwwata',
+          subgroup: kDhikrSubGeneral,
+          resolver: subject,
+        ),
+        isTrue,
+      );
+      expect(
+        practiceLearnItemAllowed(
+          domain: MonitorDomain.dhikr,
+          group: kDhikrGroupOther,
+          topic: 'All praise is for Allah',
+          subgroup: kDhikrSubGratitude,
+          resolver: subject,
+        ),
+        isFalse,
+      );
+      expect(
+        practiceLearnItemAllowed(
+          domain: MonitorDomain.dhikr,
+          group: kDhikrGroupMorning,
+          topic: 'Ayat al-Kursi in the morning',
+          subgroup: kDhikrSubHighly,
+          resolver: subject,
+        ),
+        isFalse,
+      );
+      expect(
+        practiceLearnItemAllowed(
+          domain: MonitorDomain.dhikr,
+          group: kDhikrGroupEvening,
+          topic: 'Ayat al-Kursi in the evening',
+          subgroup: kDhikrSubHighly,
+          resolver: subject,
+        ),
+        isFalse,
+      );
+    },
+  );
 
   test('custom mix keeps Parents Learn items and hides Neighbours', () {
     final subject = resolver(
-      visible: {
-        MonitorDomain.salah,
-        MonitorDomain.quran,
-        MonitorDomain.huquq,
-      },
-      mix: mixForKind(
-        PersonalMixKind.custom,
-        customKeys: {'huquq.parents'},
-      ),
+      visible: {MonitorDomain.salah, MonitorDomain.quran, MonitorDomain.huquq},
+      mix: mixForKind(PersonalMixKind.custom, customKeys: {'huquq.parents'}),
     );
     expect(practiceLearnShowsDomain(MonitorDomain.huquq, subject), isTrue);
     expect(practiceLearnShowsDomain(MonitorDomain.salah, subject), isFalse);
@@ -327,10 +330,7 @@ void main() {
           visible: kBasicDhikrVisibleDomains,
           mix: mixForKind(
             PersonalMixKind.custom,
-            customKeys: {
-              'dhikr.generalDhikr',
-              'dhikr.gratitudeDhikr',
-            },
+            customKeys: {'dhikr.generalDhikr', 'dhikr.gratitudeDhikr'},
           ),
         ),
       ),
@@ -351,10 +351,7 @@ void main() {
       practiceLearnShowsDomain(
         MonitorDomain.huquq,
         resolver(
-          visible: {
-            ...kBasicDhikrVisibleDomains,
-            MonitorDomain.huquq,
-          },
+          visible: {...kBasicDhikrVisibleDomains, MonitorDomain.huquq},
           mix: PersonalMix.sameAsDomains,
         ),
       ),

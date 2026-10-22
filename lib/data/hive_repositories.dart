@@ -573,6 +573,7 @@ class HiveAppPrefs implements AppPrefs {
   static const _salahActivityColours = 'salah_activity_colours';
   static const _arabicScriptFace = 'arabic_script_face';
   static const _arabicScriptSize = 'arabic_script_size';
+  static const _dhikrCountDefaults = 'dhikr_count_defaults';
 
   bool _flag(String key) => _box.get(key) == 'true';
 
@@ -908,6 +909,26 @@ class HiveAppPrefs implements AppPrefs {
   @override
   Future<void> setArabicScriptSize(double value) =>
       _box.put(_arabicScriptSize, '${clampArabicScriptSize(value)}');
+
+  @override
+  Map<String, int> get dhikrCountDefaults =>
+      decodeDhikrCountDefaults(_box.get(_dhikrCountDefaults));
+
+  @override
+  int? dhikrCountDefaultFor(String activityId) =>
+      dhikrCountDefaults[activityId];
+
+  @override
+  Future<void> setDhikrCountDefault(String activityId, int value) {
+    if (activityId.isEmpty) return Future.value();
+    final clamped = value < 1
+        ? 1
+        : value > 999
+        ? 999
+        : value;
+    final next = {...dhikrCountDefaults, activityId: clamped};
+    return _box.put(_dhikrCountDefaults, encodeDhikrCountDefaults(next));
+  }
 }
 
 class HiveHajjStoreRepository implements HajjStoreRepository {

@@ -1,6 +1,7 @@
 import 'activities.dart';
 import 'copy.dart';
 import 'daily_check_in.dart';
+import 'dhikr_context.dart';
 import 'home_traces.dart';
 import 'monitor_domain.dart';
 import 'huquq_practices.dart';
@@ -151,7 +152,11 @@ QuickTapItem? _itemForMix(MixItem mix, {required bool friday}) {
     domain: mix.domain,
     label: mix.label,
     iconName: _iconName(mix.domain),
-    hint: mix.id.startsWith('dhikr.') ? 'Not a daily target.' : null,
+    hint: isDhikrContextTrace(mix.id)
+        ? 'Opens the activity list. Not a one-tap cycle.'
+        : mix.id.startsWith('dhikr.')
+        ? 'Not a daily target.'
+        : null,
     traceKey: mix.id,
   );
 }
@@ -187,9 +192,11 @@ List<QuickTapChoice> quickTapCatalog(QuickTapItem item) {
           if (!option.isOther) _fromActivity(option),
       ];
     case QuickTapKind.voluntarySalah:
-      final catalog = item.id == ActivityCatalog.tahajjudKey
-          ? ActivityCatalog.tahajjud
-          : ActivityCatalog.ishraq;
+      final row = SalahTraceRow.values.firstWhere(
+        (itemRow) => ActivityCatalog.voluntarySalahKey(itemRow) == item.id,
+        orElse: () => SalahTraceRow.tahajjud,
+      );
+      final catalog = ActivityCatalog.forVoluntarySalah(row);
       return [for (final option in catalog) _fromActivity(option)];
     case QuickTapKind.quran:
       return [
@@ -346,9 +353,10 @@ DailyCheckIn applyQuickTapChoice(
     case QuickTapKind.jumuah:
       return record.withJumuahActivity(RecordedActivity(id: choice.id));
     case QuickTapKind.voluntarySalah:
-      final row = item.id == ActivityCatalog.tahajjudKey
-          ? SalahTraceRow.tahajjud
-          : SalahTraceRow.ishraq;
+      final row = SalahTraceRow.values.firstWhere(
+        (itemRow) => ActivityCatalog.voluntarySalahKey(itemRow) == item.id,
+        orElse: () => SalahTraceRow.tahajjud,
+      );
       return record.withVoluntarySalahActivity(
         row,
         RecordedActivity(id: choice.id),
@@ -359,6 +367,10 @@ DailyCheckIn applyQuickTapChoice(
         RecordedActivity(id: choice.id),
       );
     case QuickTapKind.trace:
+      if (isDhikrContextTrace(item.traceKey!) &&
+          record.dhikrContextFor(item.traceKey!).isNotEmpty) {
+        return record;
+      }
       if (ActivityCatalog.forHomeTrace(item.traceKey!).isNotEmpty) {
         if (isTimeTrace(item.traceKey!)) {
           if (choice.id == ActivityIds.unanswered) {

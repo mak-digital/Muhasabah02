@@ -93,6 +93,7 @@ void main() {
         bundle.sources.every(
           (item) =>
               item.verificationStatus == HajjVerificationStatus.unverified &&
+              item.origin == HajjSourceOrigin.demonstration &&
               item.demonstration,
         ),
         isTrue,

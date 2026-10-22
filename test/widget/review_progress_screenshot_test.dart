@@ -49,7 +49,7 @@ void main() {
     for (var i = 0; i < 20; i++) {
       await tester.pump(const Duration(milliseconds: 40));
     }
-    expect(find.text(Copy.reviewThisPeriod), findsOneWidget);
+    expect(find.text(Copy.reviewGuard), findsOneWidget);
 
     await tester.scrollUntilVisible(
       find.byKey(const Key('review-domain-dhikr')),

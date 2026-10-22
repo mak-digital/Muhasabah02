@@ -10,10 +10,7 @@ import '../../domain/hadith_ref.dart';
 import '../../domain/personal_hadith.dart';
 import '../../domain/practice_hadith_catalog.dart';
 
-Future<void> showBringHadithSheet(
-  BuildContext context, {
-  String initial = '',
-}) {
+Future<void> showBringHadithSheet(BuildContext context, {String initial = ''}) {
   return showModalBottomSheet<void>(
     context: context,
     showDragHandle: true,
@@ -237,137 +234,148 @@ class _BringHadithSheetState extends ConsumerState<BringHadithSheet> {
           maxHeight: MediaQuery.sizeOf(context).height * 0.82,
         ),
         child: SingleChildScrollView(
-        key: const Key('bring-hadith-sheet'),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              Copy.bringHadithTitle,
-              style: Theme.of(context).textTheme.titleMedium
-                  ?.copyWith(fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              Copy.bringHadithSearchHint,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            TextField(
-              key: const Key('bring-hadith-search'),
-              controller: _search,
-              decoration: const InputDecoration(
-                labelText: 'intention, mother, anger',
-              ),
-              textInputAction: TextInputAction.search,
-              onChanged: (_) => setState(() {}),
-            ),
-            if (_search.text.trim().length >= kBringHadithSearchMinChars) ...[
-              const SizedBox(height: 8),
-              _searchResults(),
-            ],
-            const SizedBox(height: 16),
-            Text(
-              Copy.bringHadithOrReference,
-              style: Theme.of(context).textTheme.labelLarge
-                  ?.copyWith(fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              Copy.bringHadithHint,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            TextField(
-              key: const Key('bring-hadith-ref'),
-              controller: _ref,
-              decoration: const InputDecoration(labelText: 'Bukhari 6312'),
-              textInputAction: TextInputAction.next,
-              onChanged: (_) => setState(() {}),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              Copy.bringHadithUrlHint,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            TextField(
-              key: const Key('bring-hadith-url'),
-              controller: _url,
-              decoration: const InputDecoration(
-                labelText: 'sunnah.com/bukhari:6312',
-              ),
-              keyboardType: TextInputType.url,
-              onChanged: (_) => setState(() {}),
-            ),
-            const SizedBox(height: 12),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: FilledButton(
-                key: const Key('bring-hadith-lookup'),
-                onPressed: _lookingUp ? null : _lookUp,
-                child: _lookingUp
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Text(Copy.bringQuranLookUp),
-              ),
-            ),
-            if (_message != null) ...[
-              const SizedBox(height: 8),
+          key: const Key('bring-hadith-sheet'),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
+            children: [
               Text(
-                _message!,
-                key: const Key('bring-hadith-message'),
+                Copy.bringHadithTitle,
+                style: Theme.of(context).textTheme.titleMedium
+                    ?.copyWith(fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                Copy.bringHadithSearchHint,
                 style: Theme.of(context).textTheme.bodySmall,
               ),
-            ],
-            if (_passage != null) ...[
-              const SizedBox(height: 12),
-              if (_passage!.arabic.isNotEmpty)
-                Text(
-                  _passage!.arabic,
-                  key: const Key('bring-hadith-preview-arabic'),
-                  textDirection: TextDirection.rtl,
-                  style: Theme.of(context).textTheme.titleMedium,
+              TextField(
+                key: const Key('bring-hadith-search'),
+                controller: _search,
+                decoration: InputDecoration(
+                  labelText: 'intention, mother, anger',
+                  suffixIcon: _search.text.isEmpty
+                      ? null
+                      : IconButton(
+                          key: const Key('bring-hadith-search-clear'),
+                          tooltip: 'Clear search',
+                          onPressed: () {
+                            _search.clear();
+                            setState(() {});
+                          },
+                          icon: const Icon(Icons.close),
+                        ),
                 ),
-              if (_passage!.translation.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                Text(
-                  _passage!.translation,
-                  key: const Key('bring-hadith-preview-translation'),
-                ),
-              ],
-            ],
-            const SizedBox(height: 16),
-            if (_onLearn) ...[
-              OutlinedButton(
-                key: const Key('bring-hadith-dont-save'),
-                onPressed: _closeWithoutSave,
-                child: const Text(Copy.bringHadithDontSave),
+                textInputAction: TextInputAction.search,
+                onChanged: (_) => setState(() {}),
               ),
-              if (_passage != null) ...[
+              if (_search.text.trim().length >= kBringHadithSearchMinChars) ...[
                 const SizedBox(height: 8),
-                FilledButton(
-                  key: const Key('bring-hadith-save-anyway'),
-                  onPressed: () => _save(referenceOnly: false),
-                  child: const Text(Copy.bringHadithSaveAnyway),
+                _searchResults(),
+              ],
+              const SizedBox(height: 16),
+              Text(
+                Copy.bringHadithOrReference,
+                style: Theme.of(context).textTheme.labelLarge
+                    ?.copyWith(fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                Copy.bringHadithHint,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              TextField(
+                key: const Key('bring-hadith-ref'),
+                controller: _ref,
+                decoration: const InputDecoration(labelText: 'Bukhari 6312'),
+                textInputAction: TextInputAction.next,
+                onChanged: (_) => setState(() {}),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                Copy.bringHadithUrlHint,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              TextField(
+                key: const Key('bring-hadith-url'),
+                controller: _url,
+                decoration: const InputDecoration(
+                  labelText: 'sunnah.com/bukhari:6312',
+                ),
+                keyboardType: TextInputType.url,
+                onChanged: (_) => setState(() {}),
+              ),
+              const SizedBox(height: 12),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: FilledButton(
+                  key: const Key('bring-hadith-lookup'),
+                  onPressed: _lookingUp ? null : _lookUp,
+                  child: _lookingUp
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text(Copy.bringQuranLookUp),
+                ),
+              ),
+              if (_message != null) ...[
+                const SizedBox(height: 8),
+                Text(
+                  _message!,
+                  key: const Key('bring-hadith-message'),
+                  style: Theme.of(context).textTheme.bodySmall,
                 ),
               ],
-            ] else ...[
-              if (_passage != null)
-                FilledButton(
-                  key: const Key('bring-hadith-save'),
-                  onPressed: () => _save(referenceOnly: false),
-                  child: const Text(Copy.bringQuranSave),
-                ),
-              if (_offline)
+              if (_passage != null) ...[
+                const SizedBox(height: 12),
+                if (_passage!.arabic.isNotEmpty)
+                  Text(
+                    _passage!.arabic,
+                    key: const Key('bring-hadith-preview-arabic'),
+                    textDirection: TextDirection.rtl,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                if (_passage!.translation.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    _passage!.translation,
+                    key: const Key('bring-hadith-preview-translation'),
+                  ),
+                ],
+              ],
+              const SizedBox(height: 16),
+              if (_onLearn) ...[
                 OutlinedButton(
-                  key: const Key('bring-hadith-save-ref'),
-                  onPressed: () => _save(referenceOnly: true),
-                  child: const Text(Copy.bringQuranSaveReferenceOnly),
+                  key: const Key('bring-hadith-dont-save'),
+                  onPressed: _closeWithoutSave,
+                  child: const Text(Copy.bringHadithDontSave),
                 ),
+                if (_passage != null) ...[
+                  const SizedBox(height: 8),
+                  FilledButton(
+                    key: const Key('bring-hadith-save-anyway'),
+                    onPressed: () => _save(referenceOnly: false),
+                    child: const Text(Copy.bringHadithSaveAnyway),
+                  ),
+                ],
+              ] else ...[
+                if (_passage != null)
+                  FilledButton(
+                    key: const Key('bring-hadith-save'),
+                    onPressed: () => _save(referenceOnly: false),
+                    child: const Text(Copy.bringQuranSave),
+                  ),
+                if (_offline)
+                  OutlinedButton(
+                    key: const Key('bring-hadith-save-ref'),
+                    onPressed: () => _save(referenceOnly: true),
+                    child: const Text(Copy.bringQuranSaveReferenceOnly),
+                  ),
+              ],
             ],
-          ],
-        ),
+          ),
         ),
       ),
     );

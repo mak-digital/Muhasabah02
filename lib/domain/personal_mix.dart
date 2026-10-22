@@ -372,17 +372,23 @@ String domainsSettingsSubtitle(Set<MonitorDomain> visible, PersonalMix mix) {
 
 String personalMixSummary(PersonalMix mix) => mix.kind.label;
 
-String? personalMixSeasonLine(PersonalMix mix, Set<MonitorDomain> visible) {
+String? personalMixSeasonLine(
+  PersonalMix mix,
+  Set<MonitorDomain> visible, {
+  MonitorDomain? domain,
+}) {
   if (mix.kind == PersonalMixKind.sameAsDomains) return null;
   final keys = resolvePersonalMixKeys(mix, visible);
   if (keys.isEmpty) return null;
   final labels = <String>[];
   for (final item in mixCatalog) {
     if (!keys.contains(item.id)) continue;
+    if (domain != null && item.domain != domain) continue;
     labels.add(item.label);
-    if (labels.length == 8) break;
+    if (domain == null && labels.length == 8) break;
   }
-  final more = keys.length > labels.length;
+  if (labels.isEmpty) return null;
+  final more = domain == null && keys.length > labels.length;
   final joined = labels.join(', ');
   return more ? '$joined…' : joined;
 }

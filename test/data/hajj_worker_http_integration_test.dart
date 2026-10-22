@@ -11,20 +11,24 @@ void main() {
       Platform.environment['HAJJ_WORKER_URL'] ?? 'http://127.0.0.1:8787';
 
   Future<bool> workerUp() async {
-    try {
+    for (var attempt = 0; attempt < 10; attempt++) {
       final client = HttpClient();
-      final request = await client.getUrl(
-        Uri.parse(baseUrl).resolve('/health'),
-      );
-      final response = await request.close().timeout(
-        const Duration(seconds: 2),
-      );
-      await response.drain<void>();
-      client.close(force: true);
-      return response.statusCode == 200;
-    } catch (_) {
-      return false;
+      try {
+        final request = await client.getUrl(
+          Uri.parse(baseUrl).resolve('/health'),
+        );
+        final response = await request.close().timeout(
+          const Duration(seconds: 2),
+        );
+        await response.drain<void>();
+        client.close(force: true);
+        if (response.statusCode == 200) return true;
+      } catch (_) {
+        client.close(force: true);
+        await Future<void>.delayed(const Duration(milliseconds: 500));
+      }
     }
+    return false;
   }
 
   test(
@@ -61,7 +65,10 @@ void main() {
       expect(sources, isNotEmpty);
       expect(
         sources.every(
-          (item) => (item as Map)['verificationStatus'] == 'unverified',
+          (item) =>
+              (item as Map)['verificationStatus'] == 'unverified' &&
+              item['origin'] == 'liveWorker' &&
+              item['provenance'] == 'liveRetrieval',
         ),
         isTrue,
       );

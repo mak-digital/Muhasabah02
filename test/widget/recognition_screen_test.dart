@@ -43,24 +43,15 @@ void main() {
     expect(find.byType(ReviewScreen), findsOneWidget);
   }
 
-  Future<void> openRecognition(
-    WidgetTester tester, {
-    int? periodDays,
-  }) async {
+  Future<void> openRecognition(WidgetTester tester, {int? periodDays}) async {
     await openReview(tester);
     if (periodDays != null) {
       await tester.tap(find.text('$periodDays days'));
       await tester.pumpAndSettle();
     }
-    await tester.scrollUntilVisible(
-      find.text(Copy.recognitionTitle),
-      240,
-      scrollable: find.descendant(
-        of: find.byType(ReviewScreen),
-        matching: find.byType(Scrollable),
-      ).first,
-    );
-    await tester.tap(find.text(Copy.recognitionTitle));
+    Navigator.of(
+      tester.element(find.byType(ReviewScreen)),
+    ).push(MaterialPageRoute<void>(builder: (_) => const RecognitionScreen()));
     await tester.pumpAndSettle();
     expect(find.byType(RecognitionScreen), findsOneWidget);
   }
@@ -84,7 +75,7 @@ void main() {
     );
     await openReview(tester);
     expect(find.text(Copy.recognitionTitle), findsNothing);
-    expect(find.text(Copy.recordedDaysTitle), findsOneWidget);
+    expect(find.text(Copy.recordedDaysTitle), findsNothing);
   });
 
   testWidgets('7-day Recognition shows the 30/90 notice', (tester) async {
@@ -104,34 +95,29 @@ void main() {
     await checkIns.save(DailyCheckIn.empty('2026-06-01'));
     await pumpApp(tester, checkIns: checkIns);
     await openRecognition(tester, periodDays: 30);
-    expect(
-      find.text(Copy.recognitionCoverage(2, 30)),
-      findsOneWidget,
-    );
+    expect(find.text(Copy.recognitionCoverage(2, 30)), findsOneWidget);
     expect(find.byKey(const Key('recognition-no-patterns')), findsOneWidget);
     expect(find.text(Copy.recognitionNoPatternsTitle), findsOneWidget);
     expect(find.textContaining('missed practices'), findsNothing);
   });
 
-  testWidgets('mix with no eligible peer practices shows a distinct empty state', (
-    tester,
-  ) async {
-    await pumpApp(
-      tester,
-      personalMix: mixForKind(
-        PersonalMixKind.custom,
-        customKeys: {'quran.reading', 'salah.fajr'},
-      ),
-    );
-    await openRecognition(tester, periodDays: 30);
-    expect(find.byKey(const Key('recognition-no-eligible')), findsOneWidget);
-    expect(find.text(Copy.recognitionNoEligibleTitle), findsOneWidget);
-    expect(find.byKey(const Key('recognition-no-patterns')), findsNothing);
-    expect(
-      find.text(Copy.recognitionCoverage(0, 30)),
-      findsOneWidget,
-    );
-  });
+  testWidgets(
+    'mix with no eligible peer practices shows a distinct empty state',
+    (tester) async {
+      await pumpApp(
+        tester,
+        personalMix: mixForKind(
+          PersonalMixKind.custom,
+          customKeys: {'quran.reading', 'salah.fajr'},
+        ),
+      );
+      await openRecognition(tester, periodDays: 30);
+      expect(find.byKey(const Key('recognition-no-eligible')), findsOneWidget);
+      expect(find.text(Copy.recognitionNoEligibleTitle), findsOneWidget);
+      expect(find.byKey(const Key('recognition-no-patterns')), findsNothing);
+      expect(find.text(Copy.recognitionCoverage(0, 30)), findsOneWidget);
+    },
+  );
 
   testWidgets('pattern card opens a supporting date', (tester) async {
     final checkIns = MemoryCheckInRepository();

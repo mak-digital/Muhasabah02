@@ -187,6 +187,7 @@ TodayRecordedState _salahRecorded(DailyCheckIn? record, SalahTraceRow row) {
     SalahTraceRow.jumuah => record.jumuah.isRecorded,
     SalahTraceRow.tahajjud => record.tahajjud.isRecorded,
     SalahTraceRow.ishraq => record.ishraq.isRecorded,
+    SalahTraceRow.tawbah => record.tawbah.isRecorded,
     _ => row.prayerId != null && record.prayer(row.prayerId!).isRecorded,
   };
   return stored ? TodayRecordedState.recorded : TodayRecordedState.noResponse;

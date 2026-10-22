@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muhasabah02/data/memory_repositories.dart';
-import 'package:muhasabah02/domain/activities.dart';
 import 'package:muhasabah02/domain/copy.dart';
-import 'package:muhasabah02/domain/home_traces.dart';
 import 'package:muhasabah02/domain/monitor_domain.dart';
 import 'package:muhasabah02/domain/quran.dart';
 
-import '../support/check_in_select.dart';
 import '../support/home_domain_stage.dart';
 import '../support/test_app.dart';
 
@@ -25,7 +22,7 @@ Future<void> expandCheckInBand(
 
 void main() {
   testWidgets('full check-in records the same Home trace rows', (tester) async {
-    tester.view.physicalSize = const Size(390, 2400);
+    tester.view.physicalSize = const Size(390, 3200);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
@@ -244,7 +241,10 @@ void main() {
       scrollable: find.byType(Scrollable).last,
     );
     await tester.pumpAndSettle();
-    expect(find.text('Managed wealth responsibly and lawfully'), findsOneWidget);
+    expect(
+      find.text('Managed wealth responsibly and lawfully'),
+      findsOneWidget,
+    );
     expect(find.text('Gave sadaqah'), findsNothing);
     expect(find.text('Attended to zakat'), findsNothing);
     await showCheckInDomain(tester, MonitorDomain.ummah);
@@ -275,22 +275,17 @@ void main() {
     expect(find.textContaining('Score'), findsNothing);
 
     await showCheckInDomain(tester, MonitorDomain.dhikr);
-    await tester.scrollUntilVisible(
+    await tester.ensureVisible(
       find.byKey(const Key('trace-dhikr.postFardFajr')),
-      -280,
-      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.tap(find.byKey(const Key('trace-dhikr.postFardFajr')));
+    await tester.pumpAndSettle();
+    expect(find.text(Copy.dhikrPerformedHint), findsWidgets);
+    expect(find.text(Copy.howAttentiveWasI.toUpperCase()), findsNothing);
+    await tester.tap(
+      find.byKey(const Key('dhikr-pick-dhikr.postFardFajr.dh.post.istighfar3')),
     );
     await tester.pumpAndSettle();
-
-    await chooseCheckInOption(
-      tester,
-      dropdownKey: const Key('trace-dhikr.postFardFajr'),
-      optionLabel:
-          '${ActivityCatalog.dhikrPostFard.first.label} — Fajr',
-    );
-    await tester.pumpAndSettle();
-    expect(find.text(Copy.howAttentiveWasI.toUpperCase()), findsOneWidget);
-    expect(find.text('HELPING FACTORS'), findsNothing);
     await tester.tap(find.text('Save check-in'));
     await tester.pumpAndSettle();
 
@@ -301,8 +296,8 @@ void main() {
       TernaryOutcome.positive,
     );
     expect(
-      stored.single.activityFor('dhikr.postFardFajr').id,
-      ActivityCatalog.dhikrWithAction,
+      stored.single.dhikrContextFor('dhikr.postFardFajr').single.activityId,
+      'dhikr.postFardFajr.dh.post.istighfar3',
     );
   });
 }

@@ -2,7 +2,17 @@ import 'date_key.dart';
 import 'prayer.dart';
 import 'quran.dart';
 
-enum SalahTraceRow { fajr, dhuhr, asr, maghrib, isha, jumuah, tahajjud, ishraq }
+enum SalahTraceRow {
+  fajr,
+  dhuhr,
+  asr,
+  maghrib,
+  isha,
+  jumuah,
+  tahajjud,
+  ishraq,
+  tawbah,
+}
 
 extension SalahTraceRowX on SalahTraceRow {
   String get id => name;
@@ -16,6 +26,7 @@ extension SalahTraceRowX on SalahTraceRow {
     SalahTraceRow.jumuah => 'Jumu‘ah',
     SalahTraceRow.tahajjud => 'Tahajjud',
     SalahTraceRow.ishraq => 'Ishraq',
+    SalahTraceRow.tawbah => 'Salat At Tawbah',
   };
 
   bool get isObligatory => switch (this) {
@@ -30,7 +41,9 @@ extension SalahTraceRowX on SalahTraceRow {
   bool get isFridayPrayer => this == SalahTraceRow.jumuah;
 
   bool get isVoluntary =>
-      this == SalahTraceRow.tahajjud || this == SalahTraceRow.ishraq;
+      this == SalahTraceRow.tahajjud ||
+      this == SalahTraceRow.ishraq ||
+      this == SalahTraceRow.tawbah;
 
   bool get fridayOnly => this == SalahTraceRow.jumuah;
 
@@ -60,6 +73,12 @@ const obligatorySalahRows = [
   SalahTraceRow.asr,
   SalahTraceRow.maghrib,
   SalahTraceRow.isha,
+];
+
+const kSalahVoluntaryRows = [
+  SalahTraceRow.tahajjud,
+  SalahTraceRow.ishraq,
+  SalahTraceRow.tawbah,
 ];
 
 bool isFridayDateKey(String key) =>

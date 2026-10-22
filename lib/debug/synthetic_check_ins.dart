@@ -230,6 +230,11 @@ DailyCheckIn _day(String key, DateTime date, Random random) {
       (0.84, TernaryOutcome.positive),
       (1.0, TernaryOutcome.negative),
     ]),
+    tawbah: _pick(random, [
+      (0.62, TernaryOutcome.unanswered),
+      (0.86, TernaryOutcome.positive),
+      (1.0, TernaryOutcome.negative),
+    ]),
   );
   if (random.nextDouble() < 0.22) {
     record = record.withSalahFactors(
@@ -337,7 +342,9 @@ DailyCheckIn _day(String key, DateTime date, Random random) {
   );
 
   for (final row in allHomeTraceRows) {
-    if (hadithRetiredHomeRows.any((item) => item.storageKey == row.storageKey)) {
+    if (hadithRetiredHomeRows.any(
+      (item) => item.storageKey == row.storageKey,
+    )) {
       continue;
     }
     final outcome = _pick(random, [

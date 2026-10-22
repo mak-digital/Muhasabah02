@@ -36,7 +36,7 @@ class Copy {
   static const previousDay = 'Previous day';
   static const nextDay = 'Next day';
   static const quickTapNote =
-      'Busy day. Tiles are this season’s mix on domains you show. Each tap steps the same list as check-in. Unticked stays unanswered. After unanswered, your most recorded choice comes first. Reflection can wait.';
+      'Busy day. Tiles are this season’s mix on domains you show. Each tap steps the same list as check-in, except Other Adhkar tiles which open the activity list. Unticked stays unanswered. After unanswered, your most recorded choice comes first. Reflection can wait.';
   static const quickTapEmpty =
       'No mix rows on shown domains. Choose Domains and this season’s mix in Settings.';
   static const quickTapFajrHint = 'On time is not a khushu’ score.';
@@ -72,10 +72,10 @@ class Copy {
       'No saved check-ins in this window. Switch to All to see every saved day.';
   static const recordedDaysTitle = 'Recorded days';
   static const historicalReflectionTitle = 'Historical Reflection';
-  static const myResponse = 'My Response';
+  static const myResponse = 'My Notes';
   static const myResponseDescription =
       'A private, optional place to write a note, question, or something you want to keep in mind.';
-  static const addAResponse = 'Add a response';
+  static const addAResponse = '+ Add a Note';
   static String domainActionsTitle(String domain) =>
       '$domain actions you listed';
   static const washAboutTitle = 'About this list';
@@ -148,12 +148,28 @@ class Copy {
   static const creationPrompt =
       'What, if anything, would you like to note or keep in mind?';
   static const emptyResponses =
-      'You haven’t saved any responses. Creating one is optional.';
-  static const saveResponse = 'Save response';
-  static const editResponse = 'Edit response';
-  static const archiveResponse = 'Archive response';
-  static const restoreResponse = 'Restore response';
-  static const deleteResponse = 'Delete response';
+      'You haven’t saved any notes. Creating one is optional.';
+  static const saveResponse = 'Save note';
+  static const editResponse = 'Edit note';
+  static const archiveResponse = 'Archive';
+  static const restoreResponse = 'Restore';
+  static const deleteResponse = 'Delete';
+  static const noteActionReminder = 'Action reminder';
+  static const noteCodeColumn = 'No.';
+  static const noteDomainColumn = 'Domain';
+  static const noteSourceColumn = 'Source';
+  static const noteDomainSourceColumn = 'Domain / Source';
+  static const noteContentColumn = 'Note';
+  static const noteGeneralDomainHint = 'General / not domain specific';
+  static const noteNothingSelected = 'Select a note first.';
+  static const noteConfirmDelete =
+      'Remove the selected notes from this device? This cannot be undone.';
+  static const noteReminderSaved =
+      'Saved as an action reminder on that domain’s list. Not a score or obligation.';
+  static const noteReminderNeedsDomain =
+      'Choose a domain for the action reminder.';
+  static const noteReminderLimit =
+      'That domain already has five active actions listed.';
   static const ponderPrompt =
       'What do you notice about your recorded Qur’an engagement in this period?';
   static const evidenceUnavailable =
@@ -291,7 +307,8 @@ class Copy {
   static const hadithDurationNote =
       'ENGAGED with Hadith holds four rows: read and/or listened, memorization or revision, study circle or discussion, and lived or noticed in others. The first three use the same duration steps as Qur’an Engagement. Lived /Noticed others is how a teaching reached life today — not a revival score.';
   static String get hajjObservationNote => hajjBriefing.plainText;
-  static String get productivityObservationNote => productivityBriefing.plainText;
+  static String get productivityObservationNote =>
+      productivityBriefing.plainText;
   static const hajjStatusLabel = 'Hajj standing';
   static const hajjStatusNote =
       'This is a lifetime record you set, not a ruling. The app does not decide ability or timing. A journey is optional and separate. Unsure and not applicable stay available.';
@@ -380,6 +397,12 @@ class Copy {
   static const firstLookStartBlank = 'Start with a quiet week';
   static const firstLookShowSample = 'Show sample days';
   static const seePonderExplore = 'SEE → PONDER → EXPLORE';
+  static const dhikrPerformedHint =
+      'Tick the box(s) and change the respective count to actual';
+  static const dhikrPerformedHeading = 'Dhikr performed';
+  static const dhikrPerformedCountHeading = 'Count';
+  static const verifiedWordingAvailable = 'Verified wording available';
+  static const relatedWordingAvailable = 'Related wording available';
   static const sampleDataNotice =
       'Sample/demo records are visible. They stay until you archive them.';
   static const archiveSamplePrompt =
@@ -438,6 +461,14 @@ class Copy {
   static const showFastingRamadanHistoryNote =
       'Ramadan rows appear in Ramadan. Voluntary and make-up rows appear outside it. Turn this on to see both at any time for review or testing. Days that already have a mark still show those rows.';
   static const visibleDomains = 'Domains in Focus';
+  static const productivitySettings = 'Productivity';
+  static const productivitySettingsNote =
+      'Today’s board size and carry-forward';
+  static const productivityDailyActions = 'Daily action(s)';
+  static const productivityDailyActionsNote =
+      'How many rows to show on today’s board (1–5). Extra nominated items stay in the Productivity register. Not a quota.';
+  static const productivityCarryForwardInfo =
+      'Unfinished actions on today’s board move to the next day. That is carry-forward, not a fail.';
   static const activitiesTitle = 'Activities & legend';
   static const activitiesNote =
       'Salah check-in list. Shared mark colour is the default. Optional activity colours name the recorded Salah choice, the Qur’an duration step, post-fard Dhikr remembrance, Character & Morals, Rights of Others, Charity, Knowledge & Beneficial Speech, Time & Barakah, Physical Health & Energy, Wealth & Stewardship, Ummah, and Fasting observations. Not a score.';

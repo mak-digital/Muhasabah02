@@ -212,7 +212,10 @@ void main() {
       tester.getSize(find.byKey(const Key('calendar-today-2026-09-03'))),
       const Size(AppDimensions.todayMarkHalo, AppDimensions.todayMarkHalo),
     );
-    expect(AppDimensions.todayMarkHalo, AppDimensions.progressMarker + AppDimensions.progressMarkerStroke * 1.5);
+    expect(
+      AppDimensions.todayMarkHalo,
+      AppDimensions.progressMarker + AppDimensions.progressMarkerStroke * 1.5,
+    );
     expect(
       tester.getCenter(find.byKey(const Key('calendar-today-2026-09-03'))),
       tester.getCenter(find.byKey(const Key('cell-2026-09-03'))),
@@ -236,5 +239,92 @@ void main() {
           .onPressed,
       isNull,
     );
+  });
+
+  testWidgets(
+    '30-day heading is three lines and summaries sit right of the grid',
+    (tester) async {
+      final now = DateTime(2026, 9, 3);
+      await tester.pumpWidget(
+        harness(
+          SizedBox(
+            width: 400,
+            child: ProgressCalendarSection(
+              title: 'ENGAGEMENT',
+              subtitle: 'Recitation, memorisation and/or revision sitting',
+              periodDays: 30,
+              summaryLines: const [
+                'Recorded on 10 of 30 days',
+                'Activity days 9',
+                'Recorded as not done 1',
+              ],
+              cellBuilder: (context, key) => RecordedStateMarker(
+                color: Colors.teal,
+                kind: MarkerKind.unanswered,
+                semanticLabel: '$key unanswered',
+              ),
+            ),
+          ),
+          now: now,
+        ),
+      );
+      expect(find.text('ENGAGEMENT'), findsOneWidget);
+      expect(find.text('(for 5 Aug 2026 – 3 Sep 2026)'), findsOneWidget);
+      expect(
+        find.text('Recitation, memorisation and/or revision sitting'),
+        findsOneWidget,
+      );
+      expect(find.text('Recorded on 10 of 30 days'), findsOneWidget);
+      expect(find.text('Activity days 9'), findsOneWidget);
+      expect(find.text('Recorded as not done 1'), findsOneWidget);
+      final grid = tester.getRect(find.byKey(const Key('calendar-chunk-0')));
+      final summary = tester.getRect(find.text('Activity days 9'));
+      final wash = tester.getRect(
+        find.byKey(const Key('progress-thirty-summary')),
+      );
+      final heading = tester.getRect(
+        find.text('(for 5 Aug 2026 – 3 Sep 2026)'),
+      );
+      expect(summary.left, greaterThan(grid.center.dx));
+      expect(wash.top, greaterThan(heading.bottom + 8));
+      expect(wash.bottom, closeTo(grid.bottom, 1));
+    },
+  );
+
+  testWidgets('90-day grid stays full width and omits the 30-day summary', (
+    tester,
+  ) async {
+    final now = DateTime(2026, 9, 3);
+    await tester.pumpWidget(
+      harness(
+        SizedBox(
+          width: 420,
+          child: ProgressCalendarSection(
+            title: 'ENGAGEMENT',
+            subtitle: 'Recitation, memorisation and/or revision sitting',
+            periodDays: 90,
+            family: Colors.teal,
+            summaryLines: const [
+              'Recorded on 10 of 90 days',
+              'Activity days 9',
+              'Recorded as not done 1',
+            ],
+            cellBuilder: (context, key) => RecordedStateMarker(
+              color: Colors.teal,
+              kind: MarkerKind.unanswered,
+              semanticLabel: '$key unanswered',
+            ),
+          ),
+        ),
+        now: now,
+      ),
+    );
+    expect(find.text('ENGAGEMENT'), findsOneWidget);
+    expect(find.text('(for 6 Jun 2026 – 3 Sep 2026)'), findsOneWidget);
+    expect(find.text('Activity days 9'), findsNothing);
+    expect(find.text('Recorded as not done 1'), findsNothing);
+    final host = tester.getRect(find.byType(ProgressCalendarSection));
+    final grid = tester.getRect(find.byKey(const Key('calendar-chunk-0')));
+    expect(grid.width, closeTo(host.width, 8));
   });
 }

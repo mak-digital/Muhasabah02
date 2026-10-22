@@ -193,7 +193,8 @@ class DemoHajjOnlineAssistGateway implements HajjOnlineAssistGateway {
                 ? HajjSourceTrustClass.official
                 : HajjSourceTrustClass.secondary,
             verificationStatus: HajjVerificationStatus.unverified,
-            provenance: HajjProvenanceKind.userEntered,
+            origin: HajjSourceOrigin.demonstration,
+            provenance: HajjProvenanceKind.demonstration,
             demonstration: true,
             retrievalMode: HajjSourceRetrievalMode.demonstration,
             notes: kHajjDemoNoLiveVerification,

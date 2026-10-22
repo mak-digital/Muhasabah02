@@ -189,7 +189,7 @@ void main() {
   });
 
   testWidgets(
-    'Tahajjud and Ishraq map performed / not performed / unanswered',
+    'Tahajjud, Ishraq, and Salat At Tawbah map performed / not performed / unanswered',
     (tester) async {
       await pumpHome(
         tester,
@@ -197,11 +197,13 @@ void main() {
           DailyCheckIn.empty('2026-08-31').copyWith(
             tahajjud: TernaryOutcome.positive,
             ishraq: TernaryOutcome.negative,
+            tawbah: TernaryOutcome.positive,
           ),
           DailyCheckIn.empty('2026-09-01')
               .copyWith(tahajjud: TernaryOutcome.unanswered),
         ],
       );
+      expect(find.text('Salat At Tawbah'), findsOneWidget);
       expect(
         tester
             .widget<RecordedStateMarker>(
@@ -225,6 +227,14 @@ void main() {
             )
             .kind,
         MarkerKind.unanswered,
+      );
+      expect(
+        tester
+            .widget<RecordedStateMarker>(
+              find.byKey(const Key('salah-home-tawbah-2026-08-31')),
+            )
+            .kind,
+        MarkerKind.filled,
       );
     },
   );
@@ -302,6 +312,7 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('Ishraq'), findsOneWidget);
+    expect(find.text('Salat At Tawbah'), findsOneWidget);
     expect(find.text('Fajr'), findsNothing);
   });
 

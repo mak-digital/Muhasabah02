@@ -8,6 +8,7 @@ import '../../domain/charity_factors.dart';
 import '../../domain/context_catalog.dart';
 import '../../domain/copy.dart';
 import '../../domain/daily_check_in.dart';
+import '../../domain/dhikr_context.dart';
 import '../../domain/display_calendar.dart';
 import '../../domain/home_traces.dart';
 import '../../domain/huquq_practices.dart';
@@ -106,18 +107,15 @@ class DayEvidenceScreen extends ConsumerWidget {
                             record.jumuah.label,
                         quiet: !record.jumuah.isRecorded,
                       ),
-                    if (allows('salah.${SalahTraceRow.tahajjud.id}'))
-                      EvidenceRow(
-                        name: 'Tahajjud',
-                        value: _voluntaryLabel(record, SalahTraceRow.tahajjud),
-                        quiet: record.tahajjud == TernaryOutcome.unanswered,
-                      ),
-                    if (allows('salah.${SalahTraceRow.ishraq.id}'))
-                      EvidenceRow(
-                        name: 'Ishraq',
-                        value: _voluntaryLabel(record, SalahTraceRow.ishraq),
-                        quiet: record.ishraq == TernaryOutcome.unanswered,
-                      ),
+                    for (final row in kSalahVoluntaryRows)
+                      if (allows('salah.${row.id}'))
+                        EvidenceRow(
+                          name: row.label,
+                          value: _voluntaryLabel(record, row),
+                          quiet:
+                              record.voluntaryOutcome(row) ==
+                              TernaryOutcome.unanswered,
+                        ),
                   ],
                 ),
               if (show(MonitorDomain.quran))
@@ -555,6 +553,18 @@ class DayEvidenceScreen extends ConsumerWidget {
         );
         continue;
       }
+      if (isDhikrContextTrace(row.storageKey)) {
+        final captures = record.dhikrContextFor(row.storageKey);
+        if (captures.isNotEmpty) {
+          children.add(
+            EvidenceRow(
+              name: row.label,
+              value: dhikrContextEvidenceValue(captures),
+            ),
+          );
+          continue;
+        }
+      }
       final outcome = record.homeTrace(row.storageKey);
       final factors = isHuquqTrace(row.storageKey)
           ? huquqEvidenceNote(record, row.storageKey)
@@ -574,11 +584,7 @@ class DayEvidenceScreen extends ConsumerWidget {
           name: row.label,
           value:
               activity?.label ??
-              traceOutcomeLabel(
-                row.storageKey,
-                outcome,
-                includeSubject: false,
-              ),
+              traceOutcomeLabel(row.storageKey, outcome, includeSubject: false),
           quiet: outcome == TernaryOutcome.unanswered,
           note: factors,
         ),
@@ -611,10 +617,7 @@ class DayEvidenceScreen extends ConsumerWidget {
     final activity = record.activityFor(ActivityCatalog.voluntarySalahKey(row));
     final catalog = ActivityCatalog.forVoluntarySalah(row);
     final option = ActivityCatalog.find(catalog, activity.id);
-    return option?.label ??
-        voluntarySalahLabel(
-          row == SalahTraceRow.tahajjud ? record.tahajjud : record.ishraq,
-        );
+    return option?.label ?? voluntarySalahLabel(record.voluntaryOutcome(row));
   }
 
   String _observationLabel(

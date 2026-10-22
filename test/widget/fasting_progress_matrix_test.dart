@@ -41,9 +41,16 @@ void main() {
     expect(find.text(Copy.lunarWhiteDaysNote), findsOneWidget);
     expect(find.byKey(Key('lunar-white-${dateKey(white)}')), findsWidgets);
 
+    await tester.ensureVisible(find.text('30 days'));
+    await tester.tap(find.text('30 days'));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(find.byKey(Key('lunar-white-${dateKey(white)}')), findsWidgets);
+
     await tester.ensureVisible(find.text('90 days'));
     await tester.tap(find.text('90 days'));
     await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
     expect(find.byKey(Key('lunar-white-${dateKey(white)}')), findsWidgets);
   });
 

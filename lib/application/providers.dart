@@ -236,18 +236,43 @@ final checkInsProvider =
 class ResponsesController extends AsyncNotifier<List<PersonalResponse>> {
   @override
   Future<List<PersonalResponse>> build() {
-    return ref.read(responseRepositoryProvider).allHealthy();
+    return _ensureCodes();
+  }
+
+  Future<List<PersonalResponse>> _ensureCodes() async {
+    final repo = ref.read(responseRepositoryProvider);
+    final items = await repo.allHealthy();
+    final assigned = assignMissingNoteCodes(items);
+    for (final item in assigned) {
+      PersonalResponse? original;
+      for (final previous in items) {
+        if (previous.id == item.id) original = previous;
+      }
+      if (original == null || original.noteCode != item.noteCode) {
+        await repo.save(item);
+      }
+    }
+    return assigned;
   }
 
   Future<void> reload() async {
     state = const AsyncLoading();
-    state = await AsyncValue.guard(
-      () => ref.read(responseRepositoryProvider).allHealthy(),
-    );
+    state = await AsyncValue.guard(_ensureCodes);
   }
 
   Future<void> save(PersonalResponse record) async {
-    await ref.read(responseRepositoryProvider).save(record);
+    final repo = ref.read(responseRepositoryProvider);
+    var next = record;
+    if (next.noteCode == null || next.noteCode!.isEmpty) {
+      final existing = await repo.allHealthy();
+      next = next.copyWith(
+        noteCode: formatNoteCode(
+          next.createdAt,
+          nextNoteDailyIndex(existing, next.createdAt),
+        ),
+      );
+    }
+    await repo.save(next);
     await reload();
   }
 
@@ -255,6 +280,14 @@ class ResponsesController extends AsyncNotifier<List<PersonalResponse>> {
     final ok = await ref.read(responseRepositoryProvider).delete(id);
     await reload();
     return ok;
+  }
+
+  Future<void> deleteMany(Iterable<String> ids) async {
+    final repo = ref.read(responseRepositoryProvider);
+    for (final id in ids) {
+      await repo.delete(id);
+    }
+    await reload();
   }
 }
 

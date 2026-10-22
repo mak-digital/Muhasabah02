@@ -129,6 +129,12 @@ export function mockOriginMode(env) {
   return String(env.HAJJ_MOCK_ORIGIN || '');
 }
 
+/** Staging and production require a dashboard secret. local/test do not. */
+export function liveGateRequired(env) {
+  const name = String(env.ENVIRONMENT || '').toLowerCase();
+  return name !== 'local' && name !== 'test';
+}
+
 /**
  * Count every Worker hit except /health. Rejected bodies still count.
  * Synchronous increment is atomic on a single-threaded isolate.
@@ -205,6 +211,8 @@ export async function handleRequest(request, env, outboundFetch) {
       authenticatedUsers: false,
       environment: env.ENVIRONMENT || 'unspecified',
       mockOrigin: Boolean(mockOriginMode(env)),
+      gateRequired: liveGateRequired(env),
+      pilotGateConfigured: Boolean(String(env.PILOT_GATE || '')),
     });
   }
   try {
@@ -220,6 +228,12 @@ export async function handleRequest(request, env, outboundFetch) {
       );
     }
     const gate = String(env.PILOT_GATE || '');
+    if (liveGateRequired(env) && !gate) {
+      throw publicError(
+        503,
+        'Live lookup is not enabled. Offline planning is unchanged.',
+      );
+    }
     if (gate && request.headers.get('X-Muhasabah-Pilot') !== gate) {
       throw publicError(403, 'Live lookup is not enabled for this client.');
     }
@@ -526,7 +540,8 @@ function sourceRecord(adapter, season, mode, body, freshness) {
     retrievedAt: today,
     requirementText: excerpt(adapter, body),
     verificationStatus: 'unverified',
-    provenance: 'userEntered',
+    origin: 'liveWorker',
+    provenance: 'liveRetrieval',
     demonstration: false,
     retrievalMode: mode,
     authenticityStatus: 'officialPortalBookmark',

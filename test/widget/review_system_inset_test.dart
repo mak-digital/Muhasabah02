@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:muhasabah02/domain/copy.dart';
 import 'package:muhasabah02/presentation/progress/optional_domain_progress_screen.dart';
 import 'package:muhasabah02/presentation/progress/salah_progress_screen.dart';
 import 'package:muhasabah02/presentation/recognition/recognition_screen.dart';
@@ -23,10 +22,7 @@ void main() {
     addTearDown(tester.view.resetPadding);
     addTearDown(tester.view.resetViewPadding);
     await tester.pumpWidget(
-      testApp(
-        now: DateTime(2026, 9, 6),
-        visibleDomains: allVisibleDomains(),
-      ),
+      testApp(now: DateTime(2026, 9, 6), visibleDomains: allVisibleDomains()),
     );
     await tester.pumpAndSettle();
     await tester.tap(find.text('Review'));
@@ -74,23 +70,17 @@ void main() {
     await tester.pageBack();
     await tester.pumpAndSettle();
 
-    await tester.scrollUntilVisible(
-      find.text(Copy.recordedDaysTitle),
-      200,
-      scrollable: find.byType(Scrollable).last,
-    );
-    await tester.tap(find.text(Copy.recordedDaysTitle));
+    Navigator.of(
+      tester.element(find.byType(ReviewScreen)),
+    ).push(MaterialPageRoute<void>(builder: (_) => const RecordedDaysScreen()));
     await tester.pumpAndSettle();
     expect(listPadding(tester, find.byType(RecordedDaysScreen)).bottom, 64);
     await tester.pageBack();
     await tester.pumpAndSettle();
 
-    await tester.scrollUntilVisible(
-      find.text('Recognition'),
-      200,
-      scrollable: find.byType(Scrollable).last,
-    );
-    await tester.tap(find.text('Recognition'));
+    Navigator.of(
+      tester.element(find.byType(ReviewScreen)),
+    ).push(MaterialPageRoute<void>(builder: (_) => const RecognitionScreen()));
     await tester.pumpAndSettle();
     expect(listPadding(tester, find.byType(RecognitionScreen)).bottom, 64);
   });

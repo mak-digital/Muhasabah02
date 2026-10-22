@@ -130,7 +130,7 @@ const faqEntries = <FaqEntry>[
   ),
   FaqEntry(
     question: 'Can I hide domains I do not want to monitor?',
-    answer: 'Settings → Preferences → Domains in Focus chooses which domains belong in this profile. The mix on the same screen is a subset: which bands and rows to notice. You can show every domain and every row, or keep a domain or row unselected if it does not apply. The first look is Salah, Qur’an & Dhikr (those three domains). All domains remains one tap. Hidden domains and unselected mix rows keep any saved records. Showing them again does not rewrite those records. Home, Review, Progress, check-in, Quick Tap, and Recorded days follow the mix among shown domains. Manage past check-ins still opens the saved day to edit.',
+    answer: 'Settings → Preferences → Domains in Focus chooses which domains belong in this profile. The mix on the same screen is a subset: which bands and rows to notice. You can show every domain and every row, or keep a domain or row unselected if it does not apply. The first look is Salah, Qur’an & Dhikr (those three domains). All domains remains one tap for the domains that can be used this season. Hajj stays listed there so you can find it, but it is not active in this season. Hidden domains and unselected mix rows keep any saved records. Showing them again does not rewrite those records. Home, Review, Progress, check-in, Quick Tap, and Recorded days follow the mix among shown domains. Manage past check-ins still opens the saved day to edit.',
   ),
   FaqEntry(
     question: 'What is a Personal mix?',
@@ -179,7 +179,7 @@ const faqEntries = <FaqEntry>[
   ),
   FaqEntry(
     question: 'Does Dhikr & Dua score my remembrance?',
-    answer: 'No. After each fard prayer it stores one remembrance observation: remembrance with action, attentive, intentional, brief, or not today. Unanswered stays empty. How attentive was I (reflected on the meaning, aware of what I was saying, or mostly habitual recitation) is optional provenance, not a khushu’ score. Morning, evening, and other remembrance keep their own rows. Colour names the recorded choice when activity colours are on. It does not rank spirituality.\n\nDhikr Learn & Practice is a built-in list of authentic dhikr and dua grouped like Home. You may add one to a private register (Learning, Learnt, Practicing, Habit). It is not a target count. Unanswered is not missed dhikr.',
+    answer: 'No. After each fard prayer, and on Morning, Evening, and Other Adhkar rows, it stores the items you tick as performed, with an optional count. Unselected stays not recorded, not “not today.” Unanswered stays empty. Personal dua records a topic without requiring the words. Colour names the recorded choice when activity colours are on. It does not rank spirituality.\n\nDhikr Learn & Practice is a built-in list of authentic dhikr and dua grouped like Home. You may add one to a private register (Learning, Learnt, Practicing, Habit). It is not a target count. Unanswered is not missed dhikr.',
   ),
   FaqEntry(
     question: 'Does Fasting score my sawm?',
@@ -195,7 +195,7 @@ const faqEntries = <FaqEntry>[
   ),
   FaqEntry(
     question: 'What do Salah activity colours mean?',
-    answer: 'Settings → Preferences → Activities & legend can colour Salah marks, Qur’an duration steps, post-fard Dhikr remembrance, Character & Morals, Rights of Others, Knowledge & Beneficial Speech, Time & Barakah, Physical Health & Energy, Wealth & Stewardship, Ummah, and Fasting observations by the recorded choice. Shared colour remains the default. Remembrance with action and a demonstrated virtue use the same blue as congregation on time. Colour names what was recorded. It does not rank spirituality or tell you what to do next.\n\nSalah & Prayer Quality Learn & Practice is a built-in list of Qur’an verses and authentic hadith grouped like Home (Obligatory Salah, Friday Prayer, Voluntary Prayers). You may add one to a private register (Learning, Learnt, Practicing, Habit). It is not a khushu’ score, congregation requirement, or daily grade. Unanswered is not missed.',
+    answer: 'Settings → Preferences → Activities & legend can colour Salah marks, Qur’an duration steps, post-fard Dhikr remembrance, Character & Morals, Rights of Others, Knowledge & Beneficial Speech, Time & Barakah, Physical Health & Energy, Wealth & Stewardship, Ummah, and Fasting observations by the recorded choice. Shared colour remains the default. Remembrance with action and a demonstrated virtue use the same blue as congregation on time. Colour names what was recorded. It does not rank spirituality or tell you what to do next.\n\nSalah & Prayer Quality Learn & Practice is a built-in list of Qur’an verses and authentic hadith grouped like Home (Obligatory Salah, Friday Prayer, Voluntary Prayers including Tahajjud, Ishraq, and Salat At Tawbah). You may add one to a private register (Learning, Learnt, Practicing, Habit). It is not a khushu’ score, congregation requirement, completed tawbah, or daily grade. Unanswered is not missed.',
   ),
 ];
 

@@ -62,13 +62,28 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.textContaining(Copy.personalMixSeasonPrefix), findsOneWidget);
+    expect(
+      find.textContaining('${Copy.personalMixSeasonPrefix} Fajr'),
+      findsOneWidget,
+    );
     expect(find.text(MonitorDomain.salah.label), findsWidgets);
     expect(find.text('Fajr'), findsWidgets);
     expect(find.text('Tahajjud'), findsNothing);
+    expect(find.text('Salat At Tawbah'), findsNothing);
     expect(find.text(MonitorDomain.akhlaq.label), findsNothing);
     expect(find.text('Charity'), findsNothing);
     expect(find.textContaining('Score'), findsNothing);
+
+    await tester.tap(find.byKey(const Key('home-domain-pill-quran')));
+    await tester.pumpAndSettle();
+    expect(
+      find.textContaining('${Copy.personalMixSeasonPrefix} Fajr'),
+      findsNothing,
+    );
+    expect(
+      find.textContaining('${Copy.personalMixSeasonPrefix} Engagement'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('check-in keeps mix domains first and folds the rest', (

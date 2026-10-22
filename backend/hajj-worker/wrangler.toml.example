@@ -33,5 +33,6 @@ GLOBAL_INCOMING_DAILY = "4000"
 BURST_PER_MINUTE = "5"
 ORIGIN_GETS_PER_ADAPTER_DAILY = "2"
 ORIGIN_GETS_GLOBAL_DAILY = "8"
-# Leave empty in git. Set in the dashboard after approval; never commit the value.
+# Leave empty in git. Production POSTs return 503 until this is set as a
+# dashboard/Wrangler secret after approval. Never commit the value.
 PILOT_GATE = ""

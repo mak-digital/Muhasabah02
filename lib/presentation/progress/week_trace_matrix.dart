@@ -115,14 +115,16 @@ class _WeekMatrixBoardState extends ConsumerState<WeekMatrixBoard> {
             ],
           );
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: 8),
       child: WashPanel(
         color: cardWash,
+        padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             WeekNavStrip(
               label: displayHomeBand(widget.title),
+              subtitle: weekRangeLabel(weekStart, calendar: calendar),
               family: widget.family,
               wash: bandHeadingWash(widget.family, cardWash),
               previousKey: Key('week-matrix-prev-${widget.title}'),
@@ -132,22 +134,11 @@ class _WeekMatrixBoardState extends ConsumerState<WeekMatrixBoard> {
               onPrevious: () => setState(() => _weekOffset--),
               onNext: () => setState(() => _weekOffset++),
               nextEnabled: canGoNext,
+              compact: true,
+              maxLines: 1,
+              subtitleMaxLines: 1,
             ),
             const SizedBox(height: 6),
-            Text(
-              '(for the week starting on ${formatDayMonthYear(weekStart, calendar)})',
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: Color.alphaBlend(
-                  widget.family.withValues(alpha: 0.55),
-                  theme.colorScheme.onSurface,
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
             if (compact)
               Align(alignment: Alignment.centerLeft, child: table)
             else
@@ -231,7 +222,12 @@ class _WeekMatrixBoardState extends ConsumerState<WeekMatrixBoard> {
               ),
               for (final key in dateKeys)
                 Center(
-                  child: _wrapCell(context, key, dateCellKind(key, now), column),
+                  child: _wrapCell(
+                    context,
+                    key,
+                    dateCellKind(key, now),
+                    column,
+                  ),
                 ),
             ],
           ),
@@ -252,27 +248,27 @@ class _WeekMatrixBoardState extends ConsumerState<WeekMatrixBoard> {
     final dow = localizations.narrowWeekdays[date.weekday % 7];
     final style = Theme.of(context).textTheme.labelSmall;
     return Padding(
-        key: kind == DateCellKind.today ? Key('week-matrix-today-$key') : null,
-        padding: const EdgeInsets.only(bottom: 6),
-        child: Column(
-          children: [
-            Text(dow, style: style?.copyWith(fontWeight: FontWeight.w700)),
-            Text(
-              '${displayParts(date, calendar).day}',
-              key: whiteDay ? Key('lunar-white-$key') : null,
-              style: style?.copyWith(
-                fontWeight: whiteDay ? FontWeight.w800 : FontWeight.w600,
-                color: whiteDay
-                    ? MuhasabahColors.wash(
-                        MuhasabahColors.lunarWhiteDayInk,
-                        MuhasabahColors.lunarWhiteDayInkDark,
-                        Theme.of(context).brightness,
-                      )
-                    : Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+      key: kind == DateCellKind.today ? Key('week-matrix-today-$key') : null,
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Column(
+        children: [
+          Text(dow, style: style?.copyWith(fontWeight: FontWeight.w700)),
+          Text(
+            '${displayParts(date, calendar).day}',
+            key: whiteDay ? Key('lunar-white-$key') : null,
+            style: style?.copyWith(
+              fontWeight: whiteDay ? FontWeight.w800 : FontWeight.w600,
+              color: whiteDay
+                  ? MuhasabahColors.wash(
+                      MuhasabahColors.lunarWhiteDayInk,
+                      MuhasabahColors.lunarWhiteDayInkDark,
+                      Theme.of(context).brightness,
+                    )
+                  : Theme.of(context).colorScheme.onSurfaceVariant,
             ),
-          ],
-        ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -292,32 +288,32 @@ class _WeekMatrixBoardState extends ConsumerState<WeekMatrixBoard> {
     return TableRow(
       children: [
         Padding(
-            key: kind == DateCellKind.today
-                ? Key('week-matrix-today-$key')
-                : null,
-            padding: const EdgeInsets.symmetric(vertical: 4),
-            child: Text(
-              dow,
-              style: labelStyle?.copyWith(fontWeight: FontWeight.w700),
-            ),
+          key: kind == DateCellKind.today
+              ? Key('week-matrix-today-$key')
+              : null,
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Text(
+            dow,
+            style: labelStyle?.copyWith(fontWeight: FontWeight.w700),
+          ),
         ),
         Padding(
-            padding: const EdgeInsets.only(right: 6),
-            child: Text(
-              '${displayParts(date, calendar).day}',
-              key: whiteDay ? Key('lunar-white-$key') : null,
-              textAlign: TextAlign.right,
-              style: labelStyle?.copyWith(
-                fontWeight: whiteDay ? FontWeight.w800 : FontWeight.w600,
-                color: whiteDay
-                    ? MuhasabahColors.wash(
-                        MuhasabahColors.lunarWhiteDayInk,
-                        MuhasabahColors.lunarWhiteDayInkDark,
-                        Theme.of(context).brightness,
-                      )
-                    : Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+          padding: const EdgeInsets.only(right: 6),
+          child: Text(
+            '${displayParts(date, calendar).day}',
+            key: whiteDay ? Key('lunar-white-$key') : null,
+            textAlign: TextAlign.right,
+            style: labelStyle?.copyWith(
+              fontWeight: whiteDay ? FontWeight.w800 : FontWeight.w600,
+              color: whiteDay
+                  ? MuhasabahColors.wash(
+                      MuhasabahColors.lunarWhiteDayInk,
+                      MuhasabahColors.lunarWhiteDayInkDark,
+                      Theme.of(context).brightness,
+                    )
+                  : Theme.of(context).colorScheme.onSurfaceVariant,
             ),
+          ),
         ),
         for (final column in widget.columns)
           Center(child: _wrapCell(context, key, kind, column)),
@@ -334,8 +330,7 @@ class _WeekMatrixBoardState extends ConsumerState<WeekMatrixBoard> {
     return decorateWeekMark(
       marker: column.cell(context, key),
       kind: kind,
-      lunarWhiteDay:
-          widget.highlightLunarWhiteDays && isLunarWhiteDayKey(key),
+      lunarWhiteDay: widget.highlightLunarWhiteDays && isLunarWhiteDayKey(key),
     );
   }
 }

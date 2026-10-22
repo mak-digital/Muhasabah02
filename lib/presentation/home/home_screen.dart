@@ -178,7 +178,6 @@ class HomeScreen extends ConsumerWidget {
     final mix = ref.watch(appPrefsProvider).personalMix;
     final resolver = PersonalisationResolver(visibleDomains: visible, mix: mix);
     final mixKeys = resolver.effectiveRowIds;
-    final season = personalMixSeasonLine(mix, visible);
     final homeDomains = resolver.homeDomains;
     void open(Widget page) {
       Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => page));
@@ -189,13 +188,6 @@ class HomeScreen extends ConsumerWidget {
       const SizedBox(height: 12),
       const ReflectionOfTheWeekCard(),
       const SizedBox(height: 12),
-      if (season != null) ...[
-        Text(
-          '${Copy.personalMixSeasonPrefix} $season.',
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
-        const SizedBox(height: 10),
-      ],
       HomeDomainStage(
         domains: homeDomains,
         cardFor: (domain) => _homeDomainCard(

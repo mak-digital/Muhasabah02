@@ -15,14 +15,10 @@ import '../../domain/monitor_domain.dart';
 import '../../domain/other_domains.dart';
 import '../../domain/personal_mix.dart';
 import '../../domain/personalisation_resolver.dart';
-import '../../domain/personal_response.dart';
 import '../../domain/quran.dart';
 import '../../domain/review_period.dart';
 import '../progress/optional_domain_progress_screen.dart';
 import '../progress/salah_progress_screen.dart';
-import '../recognition/recognition_screen.dart';
-import '../recorded_days/recorded_days_screen.dart';
-import '../shared/add_response_button.dart';
 import '../shared/domain_line_icon.dart';
 import '../shared/domain_visual.dart';
 import '../shared/system_insets.dart';
@@ -59,10 +55,6 @@ class ReviewScreen extends ConsumerWidget {
           final brightness = Theme.of(context).brightness;
           final keys = periodDateKeys(period.days, now: now);
           final index = indexByDate(records);
-          var daysRecorded = 0;
-          for (final key in keys) {
-            if (index.containsKey(key)) daysRecorded++;
-          }
           final inPeriod = recordsForKeys(index, keys);
           final salah = salahShare(inPeriod, null);
           final reading = readingShare(inPeriod);
@@ -77,9 +69,6 @@ class ReviewScreen extends ConsumerWidget {
           var fastingDays = 0;
           var charityDays = 0;
           var hadithDays = 0;
-          var conductDays = 0;
-          var gratitudeEntries = 0;
-          var reflectionEntries = 0;
           for (final record in inPeriod) {
             if (record.dhikr.isRecorded ||
                 _hasRecordedTrace(record, dhikrHomeRows)) {
@@ -120,28 +109,6 @@ class ReviewScreen extends ConsumerWidget {
                 _hasRecordedTrace(record, hadithHomeRows)) {
               hadithDays++;
             }
-            if (record.conduct.isRecorded) conductDays++;
-            if (record.gratitudeStatus.hasTextEntry) gratitudeEntries++;
-            if (record.personalReflectionStatus.hasTextEntry) {
-              reflectionEntries++;
-            }
-          }
-          final priorKeys = priorPeriodDateKeys(period.days, now: now);
-          final priorSalah = salahShare(recordsForKeys(index, priorKeys), null);
-          final narrative = period == ReviewPeriod.days90
-              ? classify90DaySalahOrReading(
-                  index: index,
-                  now: now,
-                  shareOf: (items) => salahShare(items, null),
-                )
-              : directionFromShares(
-                  period: period,
-                  current: salah,
-                  prior: priorSalah,
-                );
-          final situationLabels = <String>{};
-          for (final record in inPeriod) {
-            situationLabels.addAll(record.situationNotes.displayLabels);
           }
           final mixKeys = resolver.effectiveRowIds;
           List<HomeTraceRow> rowsFor(
@@ -517,67 +484,10 @@ class ReviewScreen extends ConsumerWidget {
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
-              const SizedBox(height: 12),
-              _PeriodHero(
-                daysRecorded: daysRecorded,
-                periodDays: period.days,
-                contextNotes: situationLabels.isEmpty
-                    ? Copy.reviewNoneRecorded
-                    : situationLabels.join(', '),
-              ),
               if (tiles.isNotEmpty) ...[
                 const _ReviewSectionLabel(Copy.reviewDomainsTap),
                 _DomainMosaic(tiles: tiles),
               ],
-              const _ReviewSectionLabel(Copy.reviewLookCloser),
-              _LookCloserCard(
-                icon: Icons.calendar_view_month_outlined,
-                title: Copy.recordedDaysTitle,
-                body: Copy.historicalReflectionTitle,
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute<void>(
-                    builder: (_) => const RecordedDaysScreen(),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              if (shows(MonitorDomain.quran))
-                _LookCloserCard(
-                  icon: Icons.pattern_outlined,
-                  title: 'Recognition',
-                  body: period.days >= 30
-                      ? '${period.shortLabel} view is available for this window.'
-                      : Copy.reviewRecognitionBody,
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute<void>(
-                      builder: (_) => const RecognitionScreen(),
-                    ),
-                  ),
-                ),
-              if (shows(MonitorDomain.salah)) ...[
-                const _ReviewSectionLabel(Copy.reviewPonder),
-                _PonderCard(text: narrativeCopy(narrative)),
-              ],
-              const SizedBox(height: 8),
-              _AlsoRecordedCard(
-                conductDays: conductDays,
-                gratitudeEntries: gratitudeEntries,
-                reflectionEntries: reflectionEntries,
-                situationNote: situationLabels.isEmpty
-                    ? null
-                    : Copy.situationNotesNote,
-              ),
-              const SizedBox(height: 8),
-              AddResponseButton(
-                filled: true,
-                provenance: ResponseProvenance(
-                  originType: ProvenanceOrigin.periodSummary,
-                  periodDays: period.days,
-                  labelSnapshot: 'Period summary (${period.shortLabel})',
-                ),
-              ),
             ],
           );
         },
@@ -615,90 +525,6 @@ class ReviewScreen extends ConsumerWidget {
           includeStruggleNote: includeStruggleNote,
           itemRowsOn7Days: itemRowsOn7Days,
         ),
-      ),
-    );
-  }
-}
-
-class _PeriodHero extends StatelessWidget {
-  const _PeriodHero({
-    required this.daysRecorded,
-    required this.periodDays,
-    required this.contextNotes,
-  });
-
-  final int daysRecorded;
-  final int periodDays;
-  final String contextNotes;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final muted = theme.textTheme.labelSmall?.copyWith(
-      color: theme.colorScheme.onSurfaceVariant,
-    );
-    return Card(
-      margin: EdgeInsets.zero,
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(Copy.reviewThisPeriod, style: muted),
-            const SizedBox(height: 2),
-            Text(
-              '$daysRecorded of $periodDays days have a record',
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  child: _HeroMeter(
-                    label: Copy.reviewUnansweredDays,
-                    value: '${periodDays - daysRecorded} of $periodDays',
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _HeroMeter(
-                    label: Copy.situationNotesTitle,
-                    value: contextNotes,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _HeroMeter extends StatelessWidget {
-  const _HeroMeter({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    final brightness = Theme.of(context).brightness;
-    return WashPanel(
-      color: MuhasabahColors.wash(
-        MuhasabahColors.summaryWash,
-        MuhasabahColors.summaryWashDark,
-        brightness,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: Theme.of(context).textTheme.labelSmall),
-          const SizedBox(height: 4),
-          Text(value, style: Theme.of(context).textTheme.titleSmall),
-        ],
       ),
     );
   }
@@ -833,154 +659,6 @@ class _ReviewDomainTile extends StatelessWidget {
               ),
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _LookCloserCard extends StatelessWidget {
-  const _LookCloserCard({
-    required this.icon,
-    required this.title,
-    required this.body,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String title;
-  final String body;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Theme.of(context).colorScheme.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(14),
-        side: BorderSide(color: Theme.of(context).dividerColor),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-          child: Row(
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: MuhasabahColors.wash(
-                    MuhasabahColors.summaryWash,
-                    MuhasabahColors.summaryWashDark,
-                    Theme.of(context).brightness,
-                  ),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(icon, size: 20),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: Theme.of(context).textTheme.titleSmall
-                          ?.copyWith(fontWeight: FontWeight.w600),
-                    ),
-                    Text(
-                      body,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                Icons.chevron_right,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _PonderCard extends StatelessWidget {
-  const _PonderCard({required this.text});
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return WashPanel(
-      color: MuhasabahColors.wash(
-        MuhasabahColors.sampleBannerWash,
-        MuhasabahColors.sampleBannerWashDark,
-        Theme.of(context).brightness,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            Copy.reviewWhatRecordsShow.toUpperCase(),
-            style: Theme.of(context).textTheme.labelSmall
-                ?.copyWith(letterSpacing: 0.5, fontWeight: FontWeight.w700),
-          ),
-          const SizedBox(height: 6),
-          Text(text, style: Theme.of(context).textTheme.bodyMedium),
-        ],
-      ),
-    );
-  }
-}
-
-class _AlsoRecordedCard extends StatelessWidget {
-  const _AlsoRecordedCard({
-    required this.conductDays,
-    required this.gratitudeEntries,
-    required this.reflectionEntries,
-    this.situationNote,
-  });
-
-  final int conductDays;
-  final int gratitudeEntries;
-  final int reflectionEntries;
-  final String? situationNote;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: EdgeInsets.zero,
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              Copy.reviewYouAlsoRecorded,
-              style: Theme.of(context).textTheme.titleSmall
-                  ?.copyWith(fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 8),
-            Text('• Character observations: $conductDays days'),
-            Text('• Gratitude entries: $gratitudeEntries'),
-            Text('• Personal-reflection entries: $reflectionEntries'),
-            if (situationNote != null) ...[
-              const SizedBox(height: 8),
-              Text(
-                situationNote!,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ],
         ),
       ),
     );

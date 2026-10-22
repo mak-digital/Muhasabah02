@@ -11,21 +11,15 @@ class AkhlaqFollowUpFields extends StatelessWidget {
     required this.storageKey,
     required this.contextId,
     required this.helpId,
-    required this.note,
     required this.onContextChanged,
     required this.onHelpChanged,
-    required this.onNoteChanged,
-    this.noteController,
   });
 
   final String storageKey;
   final String contextId;
   final String helpId;
-  final String note;
   final ValueChanged<String> onContextChanged;
   final ValueChanged<String> onHelpChanged;
-  final ValueChanged<String> onNoteChanged;
-  final TextEditingController? noteController;
 
   String _safe(String id, List<AkhlaqChoice> choices) {
     if (id == kFactorNotRecorded) return id;
@@ -58,7 +52,10 @@ class AkhlaqFollowUpFields extends StatelessWidget {
             top: 8,
             bottom: 6,
           ),
-          child: Text(Copy.akhlaqWhereDidItHappen.toUpperCase(), style: labelStyle),
+          child: Text(
+            Copy.akhlaqWhereDidItHappen.toUpperCase(),
+            style: labelStyle,
+          ),
         ),
         CheckInSelect<String>(
           depth: CheckInFieldDepth.nested,
@@ -97,35 +94,6 @@ class AkhlaqFollowUpFields extends StatelessWidget {
               CheckInSelectEntry(value: choice.id, label: choice.label),
           ],
           onChanged: onHelpChanged,
-        ),
-        Padding(
-          padding: const EdgeInsets.only(
-            left: checkInNestedIndent,
-            top: 8,
-            bottom: 6,
-          ),
-          child: Text(Copy.akhlaqPrivateStruggleNote.toUpperCase(), style: labelStyle),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(left: checkInNestedIndent),
-          child: noteController == null
-              ? TextFormField(
-                  key: Key('trace-$storageKey-struggle'),
-                  initialValue: note,
-                  maxLines: 3,
-                  decoration: const InputDecoration(
-                    hintText: Copy.akhlaqStruggleFieldHint,
-                  ),
-                  onChanged: onNoteChanged,
-                )
-              : TextField(
-                  controller: noteController,
-                  maxLines: 3,
-                  decoration: const InputDecoration(
-                    hintText: Copy.akhlaqStruggleFieldHint,
-                  ),
-                  onChanged: onNoteChanged,
-                ),
         ),
       ],
     );

@@ -60,20 +60,21 @@ class WeekNavStrip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final labelStyle = (prominentLabel
-            ? theme.textTheme.titleLarge
-            : theme.textTheme.titleMedium)
-        ?.copyWith(
-          fontWeight: FontWeight.w800,
-          letterSpacing: 0.15,
-          height: 1.1,
-          fontSize: prominentLabel
-              ? (compact ? 16 : 20)
-              : compact
-              ? 14
-              : 16,
-          color: family,
-        );
+    final labelStyle =
+        (prominentLabel
+                ? theme.textTheme.titleLarge
+                : theme.textTheme.titleMedium)
+            ?.copyWith(
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.15,
+              height: 1.1,
+              fontSize: prominentLabel
+                  ? (compact ? 16 : 20)
+                  : compact
+                  ? 13
+                  : 15,
+              color: family,
+            );
     final subtitleText = subtitle;
     final labelText = Text(
       label,
@@ -94,11 +95,11 @@ class WeekNavStrip extends StatelessWidget {
                 textAlign: TextAlign.center,
                 maxLines: subtitleMaxLines,
                 overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.bodySmall?.copyWith(
+                style: theme.textTheme.labelSmall?.copyWith(
                   fontWeight: FontWeight.w600,
                   height: 1.1,
-                  fontSize: compact ? 11 : null,
-                  color: family.withValues(alpha: 0.88),
+                  fontSize: compact ? 10.5 : 12,
+                  color: family.withValues(alpha: 0.82),
                 ),
               ),
             ],
@@ -107,18 +108,14 @@ class WeekNavStrip extends StatelessWidget {
     if (mark != null) {
       center = Row(
         mainAxisSize: MainAxisSize.min,
-        children: [
-          mark,
-          const SizedBox(width: 8),
-          center,
-        ],
+        children: [mark, const SizedBox(width: 8), center],
       );
     }
     final row = SizedBox(
       height: compact
-          ? (subtitleText != null ? 40 : 36)
+          ? (subtitleText != null ? 44 : 34)
           : subtitleText != null
-          ? 56
+          ? 52
           : maxLines > 1
           ? 48
           : 40,
@@ -133,18 +130,12 @@ class WeekNavStrip extends StatelessWidget {
           Expanded(
             child: onLabelTap == null
                 ? Center(
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: center,
-                    ),
+                    child: FittedBox(fit: BoxFit.scaleDown, child: center),
                   )
                 : InkWell(
                     onTap: onLabelTap,
                     child: Center(
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: center,
-                      ),
+                      child: FittedBox(fit: BoxFit.scaleDown, child: center),
                     ),
                   ),
           ),
@@ -242,7 +233,7 @@ class HomeWeekChrome extends StatelessWidget {
           Text(
             question!,
             textAlign: TextAlign.center,
-            maxLines: 2,
+            maxLines: 4,
             overflow: TextOverflow.ellipsis,
             style: theme.textTheme.bodySmall?.copyWith(
               fontWeight: FontWeight.w600,

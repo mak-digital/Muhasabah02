@@ -66,6 +66,7 @@ flowchart LR
   "uri": "https://www.haj.gov.sa",
   "verificationStatus": "unverified",
   "demonstration": true,
-  "provenance": "userEntered"
+  "origin": "demonstration",
+  "provenance": "demonstration"
 }
 ```

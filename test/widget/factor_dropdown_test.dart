@@ -223,10 +223,10 @@ void main() {
     expect(find.text('Recorded sitting'), findsNothing);
   });
 
-  testWidgets('post-fard dhikr uses remembrance and attentiveness lists', (
+  testWidgets('post-fard dhikr uses the performed list, not attentiveness', (
     tester,
   ) async {
-    tester.view.physicalSize = const Size(400, 2400);
+    tester.view.physicalSize = const Size(400, 3200);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
@@ -245,43 +245,15 @@ void main() {
     );
     await tester.pumpAndSettle();
     await showCheckInDomain(tester, MonitorDomain.dhikr);
-    await tester.scrollUntilVisible(
+    await tester.ensureVisible(
       find.byKey(const Key('trace-dhikr.postFardFajr')),
-      280,
-      scrollable: find.byType(Scrollable).last,
     );
+    await tester.tap(find.byKey(const Key('trace-dhikr.postFardFajr')));
     await tester.pumpAndSettle();
-
-    await chooseCheckInOption(
-      tester,
-      dropdownKey: const Key('trace-dhikr.postFardFajr'),
-      optionLabel: 'Remembrance with action (I noticed a beneficial response in my behaviour) — Fajr',
-    );
-    expect(find.text('HOW ATTENTIVE WAS I'), findsOneWidget);
+    expect(find.text(Copy.dhikrPerformedHint), findsWidgets);
+    expect(find.text('Istighfar three times'), findsOneWidget);
+    expect(find.text('HOW ATTENTIVE WAS I'), findsNothing);
     expect(find.text('HELPING FACTORS'), findsNothing);
-    expect(find.text('DISTRACTING FACTORS'), findsNothing);
-
-    await tester.tap(find.byKey(const Key('trace-dhikr.postFardFajr-helping')));
-    await tester.pumpAndSettle();
-    expect(find.text('Reflected on the meaning').hitTestable(), findsOneWidget);
-    expect(
-      find.text('Aware of what I was saying').hitTestable(),
-      findsOneWidget,
-    );
-    expect(
-      find.text('Mostly habitual recitation').hitTestable(),
-      findsOneWidget,
-    );
-    await tester.tap(find.text('Not recorded').hitTestable());
-    await tester.pumpAndSettle();
-
-    await chooseCheckInOption(
-      tester,
-      dropdownKey: const Key('trace-dhikr.postFardDhuhr'),
-      optionLabel:
-          'Not today (I did not practise or do not recall doing so) — Dhuhr',
-    );
-    expect(find.text('HOW ATTENTIVE WAS I'), findsWidgets);
     expect(find.text('DISTRACTING FACTORS'), findsNothing);
   });
 
@@ -319,19 +291,75 @@ void main() {
     await chooseCheckInOption(
       tester,
       dropdownKey: const Key('trace-akhlaq.patience'),
-      optionLabel: 'Remained patient when tested — Patience',
+      optionLabel: 'Remained patient when tested',
     );
     expect(
       find.text(Copy.akhlaqWhereDidItHappen.toUpperCase()),
       findsOneWidget,
     );
     expect(find.text(Copy.akhlaqWhatHelped.toUpperCase()), findsOneWidget);
+    expect(
+      find.text(Copy.akhlaqPrivateStruggleNote.toUpperCase()),
+      findsNothing,
+    );
+    expect(find.text(Copy.akhlaqStruggleFieldHint), findsNothing);
     expect(find.text('HELPING FACTORS'), findsNothing);
 
     await tester.tap(find.byKey(const Key('trace-akhlaq.patience-context')));
     await tester.pumpAndSettle();
     expect(find.text('Family / Home').hitTestable(), findsOneWidget);
     await tester.tap(find.text('Not recorded').hitTestable());
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('akhlaq honesty dropdown does not repeat the row title', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(400, 2800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          checkInRepositoryProvider.overrideWithValue(
+            MemoryCheckInRepository(),
+          ),
+          appPrefsProvider.overrideWithValue(
+            MemoryAppPrefs(visibleDomains: allVisibleDomains()),
+          ),
+          nowProvider.overrideWithValue(DateTime(2026, 9, 3)),
+        ],
+        child: MaterialApp(home: CheckInScreen(date: DateTime(2026, 9, 3))),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await showCheckInDomain(tester, MonitorDomain.akhlaq);
+    await tester.tap(find.text('ANGER, HONESTY, FORGIVENESS'));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(
+      find.byKey(const Key('trace-akhlaq.honestyInSmallMatters')),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.byKey(const Key('trace-akhlaq.honestyInSmallMatters')),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      find.text('Acted honestly even in a small matter').hitTestable(),
+      findsOneWidget,
+    );
+    expect(
+      find.text(
+        'Acted honestly even in a small matter — Honesty in small matters',
+      ),
+      findsNothing,
+    );
+    expect(find.text('Unanswered — Honesty in small matters'), findsNothing);
+    await tester.tap(
+      find.text('Acted honestly even in a small matter').hitTestable(),
+    );
     await tester.pumpAndSettle();
   });
 

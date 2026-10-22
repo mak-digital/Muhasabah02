@@ -118,6 +118,64 @@ String formatGregorianAndHijri(DateTime date) {
   return '${formatDayMonthYear(date, DisplayCalendar.gregorian)} · ${formatDayMonthYear(date, DisplayCalendar.islamic)}';
 }
 
+String hijriMonthName(int month) {
+  final index = month.clamp(1, 12) - 1;
+  return _hijriMonths[index];
+}
+
+/// Civil (tabular) Hijri → Gregorian. Sighting may differ by a day.
+DateTime gregorianFromHijri(int year, int month, int day) {
+  final safeMonth = month.clamp(1, 12);
+  final first = _gregorianFromHijriExact(year, safeMonth, 1);
+  final length = hijriMonthLength(year, safeMonth);
+  final safeDay = day.clamp(1, length);
+  if (safeDay == 1) return first;
+  return DateTime(first.year, first.month, first.day + (safeDay - 1));
+}
+
+int hijriMonthLength(int year, int month) {
+  final safeMonth = month.clamp(1, 12);
+  final start = _gregorianFromHijriExact(year, safeMonth, 1);
+  final next = safeMonth == 12
+      ? _gregorianFromHijriExact(year + 1, 1, 1)
+      : _gregorianFromHijriExact(year, safeMonth + 1, 1);
+  final days = next.difference(start).inDays;
+  if (days < 29) return 29;
+  if (days > 30) return 30;
+  return days;
+}
+
+DateTime _gregorianFromHijriExact(int year, int month, int day) {
+  var lo = 1948084;
+  var hi = 2800000;
+  final target = year * 400 + month * 32 + day;
+  while (lo < hi) {
+    final mid = (lo + hi) ~/ 2;
+    final parts = _jdToIslamic(mid);
+    final ord = parts.year * 400 + parts.month * 32 + parts.day;
+    if (ord < target) {
+      lo = mid + 1;
+    } else {
+      hi = mid;
+    }
+  }
+  return _jdToGregorian(lo);
+}
+
+DateTime _jdToGregorian(int jd) {
+  var l = jd + 68569;
+  final n = (4 * l) ~/ 146097;
+  l = l - (146097 * n + 3) ~/ 4;
+  final i = (4000 * (l + 1)) ~/ 1461001;
+  l = l - (1461 * i) ~/ 4 + 31;
+  final j = (80 * l) ~/ 2447;
+  final day = l - (2447 * j) ~/ 80;
+  l = j ~/ 11;
+  final month = j + 2 - (12 * l);
+  final year = 100 * (n - 49) + i + l;
+  return DateTime(year, month, day);
+}
+
 String formatStoredDateKey(String key, DisplayCalendar calendar) {
   return formatDayMonthYear(parseDateKey(key), calendar);
 }

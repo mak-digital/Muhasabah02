@@ -6,6 +6,11 @@ import 'package:muhasabah02/domain/personal_mix.dart';
 void main() {
   test('mix catalog covers salah, quran, traces, and zakat', () {
     expect(mixCatalog.any((item) => item.id == 'salah.fajr'), isTrue);
+    expect(mixCatalog.any((item) => item.id == 'salah.tawbah'), isTrue);
+    expect(
+      mixCatalog.firstWhere((item) => item.id == 'salah.tawbah').label,
+      'Salat At Tawbah',
+    );
     expect(mixCatalog.any((item) => item.id == 'quran.reading'), isTrue);
     expect(
       mixCatalog.any((item) => item.id == 'akhlaq.heldBackFromAHabit'),

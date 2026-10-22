@@ -25,6 +25,20 @@ class ProgressChromeScope extends InheritedWidget {
       collapseMarks != oldWidget.collapseMarks;
 }
 
+PreferredSizeWidget progressAppBar(BuildContext context, String title) {
+  return AppBar(
+    toolbarHeight: 48,
+    titleSpacing: 0,
+    title: Text(
+      title,
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
+      style: Theme.of(context).textTheme.titleMedium
+          ?.copyWith(fontWeight: FontWeight.w700, height: 1.15),
+    ),
+  );
+}
+
 /// Pins the focus question and 7/30/90 selector while calendars scroll.
 class ProgressReviewFrame extends StatefulWidget {
   const ProgressReviewFrame({
@@ -69,19 +83,22 @@ class _ProgressReviewFrameState extends State<ProgressReviewFrame> {
           Material(
             color: theme.scaffoldBackgroundColor,
             child: Padding(
-              padding: EdgeInsets.fromLTRB(pad.left, pad.top, pad.right, 8),
+              padding: EdgeInsets.fromLTRB(pad.left, 4, pad.right, 6),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (question != null && question.isNotEmpty) ...[
                     Text(
                       question,
-                      style: theme.textTheme.bodyMedium?.copyWith(
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodySmall?.copyWith(
                         fontStyle: FontStyle.italic,
-                        height: 1.35,
+                        height: 1.25,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 6),
                   ],
                   PeriodSelector(
                     days: widget.days,
@@ -107,7 +124,7 @@ class _ProgressReviewFrameState extends State<ProgressReviewFrame> {
                   },
                   child: widget.marks,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
                 ...widget.children,
               ],
             ),

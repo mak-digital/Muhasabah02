@@ -8,6 +8,8 @@ import '../../domain/huquq_practices.dart';
 import '../../domain/knowledge_practices.dart';
 import '../../domain/copy.dart';
 import '../../domain/daily_check_in.dart';
+import '../../domain/dhikr_context.dart';
+import 'dhikr_context_editor.dart';
 import '../../domain/date_key.dart';
 import '../../domain/display_calendar.dart';
 import '../../domain/factor_groups.dart';
@@ -125,17 +127,33 @@ Future<void> showHomeTraceRecordSheet({
                         '${row.label} · ${_visibleDate(ref, dateKey)}',
                       ),
                       const SizedBox(height: 4),
-                      const Text(Copy.seePonderExplore),
-                      const SizedBox(height: 8),
-                      const CheckInRowLabel('What happened?'),
-                      if (catalog.isNotEmpty)
+                      if (!isDhikrContextTrace(row.storageKey)) ...[
+                        const Text(Copy.seePonderExplore),
+                        const SizedBox(height: 8),
+                        const CheckInRowLabel('What happened?'),
+                      ],
+                      if (isDhikrContextTrace(row.storageKey))
+                        DhikrContextEditor(
+                          key: Key('dhikr-context-sheet-${row.storageKey}'),
+                          rowKey: row.storageKey,
+                          label: row.label,
+                          record:
+                              _recordFor(ref, dateKey, record) ??
+                              DailyCheckIn.empty(dateKey),
+                          compact: true,
+                          dropdownKey: dropdownKey,
+                          onChanged: (next) async {
+                            await _save(ref, next);
+                            setSheet(() {});
+                          },
+                        )
+                      else if (catalog.isNotEmpty)
                         ActivityPicker(
                           statusKeyPrefix: 'trace-${row.storageKey}',
                           options: catalog,
                           selectedId: selectedId,
                           namedSubject:
                               isDhikrPostFardTrace(row.storageKey) ||
-                                  isAkhlaqTrace(row.storageKey) ||
                                   isHuquqTrace(row.storageKey) ||
                                   isKnowledgeTrace(row.storageKey) ||
                                   isTimeTrace(row.storageKey) ||
@@ -605,7 +623,6 @@ Future<void> showHomeTraceRecordSheet({
                           storageKey: row.storageKey,
                           contextId: selectedFactorId(factors.supportIds),
                           helpId: selectedFactorId(factors.challengeIds),
-                          note: factors.otherText ?? '',
                           onContextChanged: (id) async {
                             final base =
                                 _recordFor(ref, dateKey, record) ??
@@ -644,25 +661,6 @@ Future<void> showHomeTraceRecordSheet({
                                 next.homeTraceFactors[row.storageKey] ??
                                 const SalahFactorCapture();
                             setSheet(() {});
-                            await _save(ref, next);
-                          },
-                          onNoteChanged: (value) async {
-                            final base =
-                                _recordFor(ref, dateKey, record) ??
-                                DailyCheckIn.empty(dateKey);
-                            final next = writeAkhlaqFollowUp(
-                              base,
-                              row.storageKey,
-                              AkhlaqFollowUpCapture(
-                                primaryId: selectedId,
-                                contextId: selectedFactorId(factors.supportIds),
-                                helpId: selectedFactorId(factors.challengeIds),
-                                note: value,
-                              ),
-                            );
-                            factors =
-                                next.homeTraceFactors[row.storageKey] ??
-                                const SalahFactorCapture();
                             await _save(ref, next);
                           },
                         ),
@@ -1008,24 +1006,26 @@ Future<void> showHomeTraceRecordSheet({
                             );
                           },
                         ),
-                      const SizedBox(height: 12),
-                      OutlinedButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                          openDayEvidence(context, dateKey);
-                        },
-                        child: const Text('Open recorded evidence'),
-                      ),
-                      AddResponseButton(
-                        provenance: ResponseProvenance(
-                          originType: ProvenanceOrigin.progressDate,
-                          domain: row.storageKey.split('.').first,
-                          subject: row.storageKey,
-                          dateKey: dateKey,
-                          evidenceId: '$dateKey:${row.storageKey}',
-                          labelSnapshot: '${row.label} on $dateKey',
+                      if (!isDhikrContextTrace(row.storageKey)) ...[
+                        const SizedBox(height: 12),
+                        OutlinedButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            openDayEvidence(context, dateKey);
+                          },
+                          child: const Text('Open recorded evidence'),
                         ),
-                      ),
+                        AddResponseButton(
+                          provenance: ResponseProvenance(
+                            originType: ProvenanceOrigin.progressDate,
+                            domain: row.storageKey.split('.').first,
+                            subject: row.storageKey,
+                            dateKey: dateKey,
+                            evidenceId: '$dateKey:${row.storageKey}',
+                            labelSnapshot: '${row.label} on $dateKey',
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),

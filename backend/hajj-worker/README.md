@@ -14,10 +14,20 @@ cd backend/hajj-worker
 npm install
 npm test
 copy wrangler.local.toml.example wrangler.toml
-npx wrangler dev --local --ip 127.0.0.1 --port 8787
+npm run dev
 ```
 
+`npm run dev` binds **127.0.0.1:8787** only (not the LAN). From an emulator or USB device:
+
+```
+adb reverse tcp:8787 tcp:8787
+```
+
+Then run Flutter with `--dart-define=HAJJ_LIVE_BASE_URL=http://127.0.0.1:8787`. Debug Android may use HTTP to `127.0.0.1` / `localhost` / `10.0.2.2`; release stays HTTPS.
+
 Then `flutter test test/data/hajj_worker_http_integration_test.dart`. Stop wrangler when finished. Do not `wrangler deploy`.
+
+If `wrangler` prints Ready but `/health` hangs, leftover `workerd.exe` processes are usually still bound to port 8787 after a killed parent. Stop every `workerd` from this folder, confirm the port is free, then start `npm run dev` again. Do not treat log “Ready on” as proof the port answers; wait for `GET /health` HTTP 200.
 
 ## Do not
 
@@ -28,7 +38,9 @@ Then `flutter test test/data/hajj_worker_http_integration_test.dart`. Stop wrang
 - Log request bodies, names, or reflections.
 - Add retries, polling, or Cron.
 
-Cost, Free-plan ceilings, quota behaviour, and MAU estimates: `docs/hajj/CLOUDFLARE_COST_CONTROL.md`.
+Cost, Free-plan ceilings, quota behaviour, and MAU estimates: `docs/hajj/CLOUDFLARE_COST_CONTROL.md`.  
+Staging (not deployed): `docs/hajj/PHASE_3B2E_STAGING_READINESS.md`.  
+Account `workers.dev` subdomain: **`muhasabah-dev`** (do not register or rename). Intended hostname: `https://muhasabah-hajj-sources-staging.muhasabah-dev.workers.dev`.
 
 ## After approval
 

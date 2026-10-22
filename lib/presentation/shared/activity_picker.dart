@@ -232,7 +232,8 @@ class ActivityPicker extends ConsumerWidget {
         identical(options, ActivityCatalog.salah) ||
         identical(options, ActivityCatalog.jumuah) ||
         identical(options, ActivityCatalog.tahajjud) ||
-        identical(options, ActivityCatalog.ishraq);
+        identical(options, ActivityCatalog.ishraq) ||
+        identical(options, ActivityCatalog.tawbah);
     final durationList = ActivityCatalog.isDurationCatalog(options);
     final livedList = identical(options, ActivityCatalog.hadithLivedNoticed);
     final dhikrList = ActivityCatalog.isDhikrPostFardCatalog(options);
@@ -306,6 +307,7 @@ class ActivityPicker extends ConsumerWidget {
   }
 
   String _namedLabel(String label) {
+    if (ActivityCatalog.isAkhlaqObservationCatalog(options)) return label;
     final subject = namedSubject;
     if (subject == null || subject.isEmpty) return label;
     return '$label — $subject';

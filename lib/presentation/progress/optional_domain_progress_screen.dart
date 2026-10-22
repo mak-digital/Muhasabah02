@@ -6,6 +6,7 @@ import '../../domain/activities.dart';
 import '../../domain/analytics.dart';
 import '../../domain/copy.dart';
 import '../../domain/daily_check_in.dart';
+import '../../domain/date_key.dart';
 import '../../domain/home_traces.dart';
 import '../../domain/hajj_planning.dart';
 import '../../domain/domain_briefing.dart';
@@ -78,7 +79,7 @@ class _OptionalDomainProgressScreenState
     final async = ref.watch(checkInsProvider);
     final progressTitle = '$title Progress';
     return Scaffold(
-      appBar: AppBar(title: Text(progressTitle)),
+      appBar: progressAppBar(context, progressTitle),
       body: async.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) =>
@@ -264,6 +265,18 @@ class _OptionalDomainProgressScreenState
     ReviewPeriod period,
     DateTime now,
   ) {
+    final keys = periodDateKeys(period.days, now: now);
+    var recordedDays = 0;
+    var activityDays = 0;
+    var notDoneDays = 0;
+    for (final key in keys) {
+      final outcome =
+          index[key]?.homeTrace(row.storageKey) ?? TernaryOutcome.unanswered;
+      if (!outcome.isRecorded) continue;
+      recordedDays++;
+      if (outcome == TernaryOutcome.positive) activityDays++;
+      if (outcome == TernaryOutcome.negative) notDoneDays++;
+    }
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: WashPanel(
@@ -277,6 +290,12 @@ class _OptionalDomainProgressScreenState
           periodDays: period.days,
           family: family,
           highlightLunarWhiteDays: highlightLunarWhiteDays,
+          summaryLines: progressThirtyDaySummary(
+            periodDays: period.days,
+            recordedDays: recordedDays,
+            activityDays: activityDays,
+            notDoneDays: notDoneDays,
+          ),
           cellBuilder: (context, key) {
             final record = index[key];
             final outcome =

@@ -120,7 +120,8 @@ void main() {
       tester
           .widget<WashPanel>(find.byKey(const Key('salah-practice-panel')))
           .color,
-      domainColorIdentity(MonitorDomain.salah).practiceWashFor(Brightness.light),
+      domainColorIdentity(MonitorDomain.salah)
+          .practiceWashFor(Brightness.light),
     );
     expect(
       tester.getSize(find.byKey(const Key('salah-actions-panel'))).height,
@@ -149,9 +150,7 @@ void main() {
     expect(find.text('HIGHLY RECOMMENDED'), findsNothing);
     expect(find.text(Copy.practiceSalahNote), findsOneWidget);
     expect(find.text(Copy.openPracticeSalahRegister), findsOneWidget);
-    final about = tester.getRect(
-      find.byKey(const Key('salah-practice-about')),
-    );
+    final about = tester.getRect(find.byKey(const Key('salah-practice-about')));
     final registerBtn = tester.getRect(
       find.byKey(const Key('salah-practice-open-register')),
     );
@@ -174,17 +173,13 @@ void main() {
     );
     expect(
       find.byKey(
-        Key(
-          'salah-practice-source-wash-${kPracticeSalahCatalog.first.id}',
-        ),
+        Key('salah-practice-source-wash-${kPracticeSalahCatalog.first.id}'),
       ),
       findsOneWidget,
     );
     expect(find.byKey(const Key('arabic-script-face')), findsNothing);
     expect(
-      find.byKey(
-        Key('salah-script-smaller-${kPracticeSalahCatalog.first.id}'),
-      ),
+      find.byKey(Key('salah-script-smaller-${kPracticeSalahCatalog.first.id}')),
       findsOneWidget,
     );
 
@@ -485,14 +480,8 @@ void main() {
     final quranBring = tester.getRect(
       find.byKey(const Key('quran-practice-bring')),
     );
-    expect(
-      (quranRegister.center.dy - quranBring.center.dy).abs(),
-      lessThan(1),
-    );
-    expect(
-      find.text('1 of ${kPracticeQuranCatalog.length}'),
-      findsOneWidget,
-    );
+    expect((quranRegister.center.dy - quranBring.center.dy).abs(), lessThan(1));
+    expect(find.text('1 of ${kPracticeQuranCatalog.length}'), findsOneWidget);
     expect(find.byKey(const Key('arabic-script-face')), findsOneWidget);
     await tester.tap(find.byKey(const Key('arabic-script-larger')));
     await tester.pumpAndSettle();
@@ -611,7 +600,10 @@ void main() {
       await tester.tap(find.text(Copy.practiceHadithTitle));
       await tester.pumpAndSettle();
       expect(find.text(Copy.practiceHadithNote), findsOneWidget);
-      expect(find.byKey(const Key('hadith-practice-source-wash')), findsOneWidget);
+      expect(
+        find.byKey(const Key('hadith-practice-source-wash')),
+        findsOneWidget,
+      );
       expect(
         find.text('1 of ${kPracticeHadithCatalog.length}'),
         findsOneWidget,
@@ -678,7 +670,8 @@ void main() {
       tester
           .widget<WashPanel>(find.byKey(const Key('dhikr-practice-panel')))
           .color,
-      domainColorIdentity(MonitorDomain.dhikr).practiceWashFor(Brightness.light),
+      domainColorIdentity(MonitorDomain.dhikr)
+          .practiceWashFor(Brightness.light),
     );
     expect(
       tester
@@ -713,9 +706,7 @@ void main() {
     );
     expect(
       find.byKey(
-        Key(
-          'dhikr-practice-source-wash-${kPracticeDhikrCatalog.first.id}',
-        ),
+        Key('dhikr-practice-source-wash-${kPracticeDhikrCatalog.first.id}'),
       ),
       findsOneWidget,
     );
@@ -1071,12 +1062,16 @@ void main() {
     expect(find.text('1 of 5'), findsOneWidget);
     final chrome = tester
         .widget<Material>(
-          find.ancestor(
-            of: find.byKey(
-              Key('health-practice-item-${kPracticeHealthCatalog.first.id}'),
-            ),
-            matching: find.byType(Material),
-          ).first,
+          find
+              .ancestor(
+                of: find.byKey(
+                  Key(
+                    'health-practice-item-${kPracticeHealthCatalog.first.id}',
+                  ),
+                ),
+                matching: find.byType(Material),
+              )
+              .first,
         )
         .color;
     final source = tester
@@ -1142,7 +1137,10 @@ void main() {
     await tester.tap(find.byKey(Key('health-practice-item-${movement.id}')));
     await tester.pumpAndSettle();
     expect(find.text(movement.arabic), findsOneWidget);
-    expect(find.byKey(Key('health-practice-next-${movement.id}')), findsOneWidget);
+    expect(
+      find.byKey(Key('health-practice-next-${movement.id}')),
+      findsOneWidget,
+    );
   });
 
   testWidgets('Wealth Home lists grouped reminders, actions, and notes', (
@@ -1402,38 +1400,40 @@ void main() {
     expect((await register.allHealthy()).single.domain, MonitorDomain.charity);
   });
 
-  testWidgets('Learn & Practice follows Domains in Focus and the personal mix', (
-    tester,
-  ) async {
-    tester.view.physicalSize = const Size(400, 8000);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
-    await tester.pumpWidget(
-      testApp(
-        now: DateTime(2026, 10, 7),
-        visibleDomains: kBasicDhikrVisibleDomains,
-        personalMix: mixForKind(PersonalMixKind.firstLook),
-      ),
-    );
-    await tester.pumpAndSettle();
-    expect(find.byKey(const Key('salah-practice-wash')), findsOneWidget);
-    expect(find.byKey(const Key('huquq-practice-wash')), findsNothing);
+  testWidgets(
+    'Learn & Practice follows Domains in Focus and the personal mix',
+    (tester) async {
+      tester.view.physicalSize = const Size(400, 8000);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      await tester.pumpWidget(
+        testApp(
+          now: DateTime(2026, 10, 7),
+          visibleDomains: kBasicDhikrVisibleDomains,
+          personalMix: mixForKind(PersonalMixKind.firstLook),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('salah-practice-wash')), findsOneWidget);
+      expect(find.byKey(const Key('huquq-practice-wash')), findsNothing);
 
-    await tester.tap(find.text(Copy.practiceSalahTitle));
-    await tester.pumpAndSettle();
-    expect(find.text(displayHomeBand(kSalahObligatoryBand)), findsWidgets);
-    expect(find.text(displayHomeBand(kSalahVoluntaryBand)), findsNothing);
-    expect(find.text('Fajr'), findsWidgets);
-    expect(find.text('Tahajjud'), findsNothing);
+      await tester.tap(find.text(Copy.practiceSalahTitle));
+      await tester.pumpAndSettle();
+      expect(find.text(displayHomeBand(kSalahObligatoryBand)), findsWidgets);
+      expect(find.text(displayHomeBand(kSalahVoluntaryBand)), findsNothing);
+      expect(find.text('Fajr'), findsWidgets);
+      expect(find.text('Tahajjud'), findsNothing);
+      expect(find.text('Salat At Tawbah'), findsNothing);
 
-    await showHomeDomain(tester, MonitorDomain.dhikr);
-    await tester.tap(find.text(Copy.practiceDhikrTitle));
-    await tester.pumpAndSettle();
-    expect(find.text(displayHomeBand(kDhikrGroupPost)), findsWidgets);
-    expect(find.text(displayHomeBand(kDhikrGroupMorning)), findsWidgets);
-    expect(find.text(displayHomeBand(kDhikrGroupEvening)), findsNothing);
-  });
+      await showHomeDomain(tester, MonitorDomain.dhikr);
+      await tester.tap(find.text(Copy.practiceDhikrTitle));
+      await tester.pumpAndSettle();
+      expect(find.text(displayHomeBand(kDhikrGroupPost)), findsWidgets);
+      expect(find.text(displayHomeBand(kDhikrGroupMorning)), findsWidgets);
+      expect(find.text(displayHomeBand(kDhikrGroupEvening)), findsNothing);
+    },
+  );
 
   testWidgets('Dhikr Learn & Practice follows mix rows under Other Adhkar', (
     tester,
@@ -1456,7 +1456,10 @@ void main() {
     expect(find.byKey(const Key('dhikr-practice-wash')), findsOneWidget);
     await tester.tap(find.text(Copy.practiceDhikrTitle));
     await tester.pumpAndSettle();
-    expect(find.byKey(Key('dhikr-practice-group-$kDhikrGroupOther')), findsOneWidget);
+    expect(
+      find.byKey(Key('dhikr-practice-group-$kDhikrGroupOther')),
+      findsOneWidget,
+    );
     expect(find.text(displayHomeBand(kDhikrGroupMorning)), findsNothing);
     expect(find.text(displayHomeBand(kDhikrGroupEvening)), findsNothing);
     expect(find.text(displayHomeBand(kDhikrSubGeneral)), findsWidgets);
@@ -1464,54 +1467,58 @@ void main() {
     expect(find.text(displayHomeBand(kDhikrSubTravel)), findsNothing);
   });
 
-  testWidgets('Dhikr Learn hides post-fard when Salah is not in Domains in Focus', (
-    tester,
-  ) async {
-    tester.view.physicalSize = const Size(400, 8000);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
-    final prefs = MemoryAppPrefs(
-      visibleDomains: {MonitorDomain.quran, MonitorDomain.dhikr},
-      personalMix: PersonalMix.sameAsDomains,
-    );
-    await tester.pumpWidget(
-      testApp(now: DateTime(2026, 10, 7), prefs: prefs),
-    );
-    await tester.pumpAndSettle();
-    await showHomeDomain(tester, MonitorDomain.dhikr);
-    await tester.tap(find.text(Copy.practiceDhikrTitle));
-    await tester.pumpAndSettle();
-    expect(
-      find.byKey(Key('dhikr-practice-group-$kDhikrGroupPost')),
-      findsNothing,
-    );
-    expect(
-      find.byKey(Key('dhikr-practice-group-$kDhikrGroupMorning')),
-      findsOneWidget,
-    );
-    expect(
-      find.byKey(Key('dhikr-practice-group-$kDhikrGroupEvening')),
-      findsOneWidget,
-    );
-    expect(
-      find.byKey(Key('dhikr-practice-group-$kDhikrGroupOther')),
-      findsOneWidget,
-    );
-
-    await prefs.setVisibleDomains(kBasicDhikrVisibleDomains);
-    ProviderScope.containerOf(
-      tester.element(find.byType(MaterialApp)),
-    ).read(prefsTickProvider.notifier).state++;
-    await tester.pumpAndSettle();
-    await showHomeDomain(tester, MonitorDomain.dhikr);
-    if (find.byKey(const Key('dhikr-practice-group-$kDhikrGroupMorning')).evaluate().isEmpty) {
+  testWidgets(
+    'Dhikr Learn hides post-fard when Salah is not in Domains in Focus',
+    (tester) async {
+      tester.view.physicalSize = const Size(400, 8000);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final prefs = MemoryAppPrefs(
+        visibleDomains: {MonitorDomain.quran, MonitorDomain.dhikr},
+        personalMix: PersonalMix.sameAsDomains,
+      );
+      await tester.pumpWidget(
+        testApp(now: DateTime(2026, 10, 7), prefs: prefs),
+      );
+      await tester.pumpAndSettle();
+      await showHomeDomain(tester, MonitorDomain.dhikr);
       await tester.tap(find.text(Copy.practiceDhikrTitle));
       await tester.pumpAndSettle();
-    }
-    expect(
-      find.byKey(Key('dhikr-practice-group-$kDhikrGroupPost')),
-      findsOneWidget,
-    );
-  });
+      expect(
+        find.byKey(Key('dhikr-practice-group-$kDhikrGroupPost')),
+        findsNothing,
+      );
+      expect(
+        find.byKey(Key('dhikr-practice-group-$kDhikrGroupMorning')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(Key('dhikr-practice-group-$kDhikrGroupEvening')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(Key('dhikr-practice-group-$kDhikrGroupOther')),
+        findsOneWidget,
+      );
+
+      await prefs.setVisibleDomains(kBasicDhikrVisibleDomains);
+      ProviderScope.containerOf(tester.element(find.byType(MaterialApp)))
+          .read(prefsTickProvider.notifier)
+          .state++;
+      await tester.pumpAndSettle();
+      await showHomeDomain(tester, MonitorDomain.dhikr);
+      if (find
+          .byKey(const Key('dhikr-practice-group-$kDhikrGroupMorning'))
+          .evaluate()
+          .isEmpty) {
+        await tester.tap(find.text(Copy.practiceDhikrTitle));
+        await tester.pumpAndSettle();
+      }
+      expect(
+        find.byKey(Key('dhikr-practice-group-$kDhikrGroupPost')),
+        findsOneWidget,
+      );
+    },
+  );
 }

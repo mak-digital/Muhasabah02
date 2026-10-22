@@ -212,6 +212,8 @@ void main() {
       bundle.sources.every(
         (item) =>
             item.verificationStatus == HajjVerificationStatus.unverified &&
+            item.origin == HajjSourceOrigin.liveWorker &&
+            item.provenance == HajjProvenanceKind.liveRetrieval &&
             item.deadline == null &&
             !item.demonstration,
       ),
@@ -241,6 +243,7 @@ void main() {
       'demonstration': true,
     });
     expect(source.retrievalMode, HajjSourceRetrievalMode.unknown);
+    expect(source.origin, HajjSourceOrigin.demonstration);
     const store = HajjStore();
     expect(store.schemaVersion, 1);
   });

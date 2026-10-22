@@ -133,8 +133,8 @@ class _ResponseEditorScreenState extends ConsumerState<ResponseEditorScreen> {
       if (!mounted) return;
       setState(() {
         _error = error == ResponseTextError.empty
-            ? 'A response needs some text.'
-            : 'This response is over the length limit.';
+            ? 'A note needs some text.'
+            : 'This note is over the length limit.';
       });
       return;
     }
@@ -233,7 +233,7 @@ class ResponseDetailScreen extends ConsumerWidget {
       error: (_, _) => const Scaffold(
         body: EmptyState(
           title: Copy.myResponse,
-          message: 'Could not open this response.',
+          message: 'Could not open this note.',
         ),
       ),
       data: (items) {
@@ -306,7 +306,7 @@ class ResponseDetailScreen extends ConsumerWidget {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text(
-                          'Delete failed. The response is still listed.',
+                          'Delete failed. The note is still listed.',
                         ),
                       ),
                     );

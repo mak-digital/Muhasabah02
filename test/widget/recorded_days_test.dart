@@ -7,6 +7,8 @@ import 'package:muhasabah02/domain/monitor_domain.dart';
 import 'package:muhasabah02/domain/personal_mix.dart';
 import 'package:muhasabah02/domain/quran.dart';
 import 'package:muhasabah02/presentation/recorded_days/day_evidence_screen.dart';
+import 'package:muhasabah02/presentation/recorded_days/recorded_days_screen.dart';
+import 'package:muhasabah02/presentation/review/review_screen.dart';
 
 import '../support/test_app.dart';
 
@@ -26,12 +28,9 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Review'));
     await tester.pumpAndSettle();
-    await tester.scrollUntilVisible(
-      find.text(Copy.recordedDaysTitle),
-      180,
-      scrollable: find.byType(Scrollable).last,
-    );
-    await tester.tap(find.text(Copy.recordedDaysTitle));
+    Navigator.of(
+      tester.element(find.byType(ReviewScreen)),
+    ).push(MaterialPageRoute<void>(builder: (_) => const RecordedDaysScreen()));
     await tester.pumpAndSettle();
 
     expect(find.text(Copy.recordedDaysGuard), findsOneWidget);
@@ -90,12 +89,9 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('Review'));
       await tester.pumpAndSettle();
-      await tester.scrollUntilVisible(
-        find.text(Copy.recordedDaysTitle),
-        180,
-        scrollable: find.byType(Scrollable).last,
+      Navigator.of(tester.element(find.byType(ReviewScreen))).push(
+        MaterialPageRoute<void>(builder: (_) => const RecordedDaysScreen()),
       );
-      await tester.tap(find.text(Copy.recordedDaysTitle));
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('recorded-day-2026-09-03')));
       await tester.pumpAndSettle();

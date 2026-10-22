@@ -178,6 +178,8 @@ enum HajjProvenanceKind {
   userEntered,
   aiInterpretation,
   appEstimate,
+  liveRetrieval,
+  demonstration,
 }
 
 extension HajjProvenanceKindX on HajjProvenanceKind {
@@ -186,6 +188,8 @@ extension HajjProvenanceKindX on HajjProvenanceKind {
     HajjProvenanceKind.userEntered => 'User-entered, unverified',
     HajjProvenanceKind.aiInterpretation => 'AI interpretation',
     HajjProvenanceKind.appEstimate => 'App planning estimate',
+    HajjProvenanceKind.liveRetrieval => 'Live Worker retrieval',
+    HajjProvenanceKind.demonstration => 'Demonstration catalog',
   };
 
   static HajjProvenanceKind fromId(String? id) {
@@ -195,6 +199,57 @@ extension HajjProvenanceKindX on HajjProvenanceKind {
       orElse: () => HajjProvenanceKind.userEntered,
     );
   }
+}
+
+enum HajjSourceOrigin { userEntered, demonstration, liveWorker }
+
+extension HajjSourceOriginX on HajjSourceOrigin {
+  String get label => switch (this) {
+    HajjSourceOrigin.userEntered => 'Entered by you',
+    HajjSourceOrigin.demonstration => 'Demonstration catalog',
+    HajjSourceOrigin.liveWorker => 'Retrieved by live Worker',
+  };
+
+  static HajjSourceOrigin fromId(String? id) {
+    if (id == null || id.isEmpty) return HajjSourceOrigin.userEntered;
+    return HajjSourceOrigin.values.firstWhere(
+      (item) => item.name == id,
+      orElse: () => HajjSourceOrigin.userEntered,
+    );
+  }
+}
+
+/// Infers origin for schema v1 records that predate the `origin` field.
+/// Live Worker rows are recognised by `src.live.` ids or live HTTP retrieval,
+/// not by rewriting every `userEntered` source.
+HajjSourceOrigin inferHajjSourceOrigin({
+  required String id,
+  required bool demonstration,
+  required HajjSourceRetrievalMode retrievalMode,
+  String? originId,
+}) {
+  if (originId != null && originId.isNotEmpty) {
+    return HajjSourceOriginX.fromId(originId);
+  }
+  if (demonstration) return HajjSourceOrigin.demonstration;
+  if (id.startsWith('src.live.')) return HajjSourceOrigin.liveWorker;
+  if (retrievalMode == HajjSourceRetrievalMode.liveHttp) {
+    return HajjSourceOrigin.liveWorker;
+  }
+  return HajjSourceOrigin.userEntered;
+}
+
+/// Fixes the known live-row mislabel (`userEntered`) without touching
+/// genuine manual sources or user-reviewed provenance.
+HajjProvenanceKind correctMislabelledLiveProvenance({
+  required HajjSourceOrigin origin,
+  required HajjProvenanceKind provenance,
+}) {
+  if (origin == HajjSourceOrigin.liveWorker &&
+      provenance == HajjProvenanceKind.userEntered) {
+    return HajjProvenanceKind.liveRetrieval;
+  }
+  return provenance;
 }
 
 enum HajjSourceTrustClass { official, secondary, userNote, unknown }
@@ -427,6 +482,7 @@ class HajjOfficialSource {
     this.requirementText,
     this.deadline,
     this.appliesToPathwayIds = const [],
+    this.origin = HajjSourceOrigin.userEntered,
     this.provenance = HajjProvenanceKind.userEntered,
     this.demonstration = false,
     this.retrievalMode = HajjSourceRetrievalMode.unknown,
@@ -451,6 +507,7 @@ class HajjOfficialSource {
   final String? requirementText;
   final String? deadline;
   final List<String> appliesToPathwayIds;
+  final HajjSourceOrigin origin;
   final HajjProvenanceKind provenance;
   final bool demonstration;
   final HajjSourceRetrievalMode retrievalMode;
@@ -474,6 +531,7 @@ class HajjOfficialSource {
     String? requirementText,
     String? deadline,
     List<String>? appliesToPathwayIds,
+    HajjSourceOrigin? origin,
     HajjProvenanceKind? provenance,
     bool? demonstration,
     HajjSourceRetrievalMode? retrievalMode,
@@ -498,6 +556,7 @@ class HajjOfficialSource {
       requirementText: requirementText ?? this.requirementText,
       deadline: deadline ?? this.deadline,
       appliesToPathwayIds: appliesToPathwayIds ?? this.appliesToPathwayIds,
+      origin: origin ?? this.origin,
       provenance: provenance ?? this.provenance,
       demonstration: demonstration ?? this.demonstration,
       retrievalMode: retrievalMode ?? this.retrievalMode,
@@ -524,6 +583,7 @@ class HajjOfficialSource {
     if (requirementText != null) 'requirementText': requirementText,
     if (deadline != null) 'deadline': deadline,
     'appliesToPathwayIds': appliesToPathwayIds,
+    'origin': origin.name,
     'provenance': provenance.name,
     'demonstration': demonstration,
     'retrievalMode': retrievalMode.name,
@@ -534,8 +594,19 @@ class HajjOfficialSource {
   };
 
   factory HajjOfficialSource.fromJson(Map<String, dynamic> json) {
+    final id = _optString(json, 'id') ?? '';
+    final demonstration = json['demonstration'] == true;
+    final retrievalMode = HajjSourceRetrievalModeX.fromId(
+      _optString(json, 'retrievalMode'),
+    );
+    final origin = inferHajjSourceOrigin(
+      id: id,
+      demonstration: demonstration,
+      retrievalMode: retrievalMode,
+      originId: _optString(json, 'origin'),
+    );
     return HajjOfficialSource(
-      id: _optString(json, 'id') ?? '',
+      id: id,
       title: _optString(json, 'title'),
       uri: _optString(json, 'uri'),
       citation: _optString(json, 'citation'),
@@ -552,11 +623,13 @@ class HajjOfficialSource {
       requirementText: _optString(json, 'requirementText'),
       deadline: _optString(json, 'deadline'),
       appliesToPathwayIds: _stringList(json['appliesToPathwayIds']),
-      provenance: HajjProvenanceKindX.fromId(_optString(json, 'provenance')),
-      demonstration: json['demonstration'] == true,
-      retrievalMode: HajjSourceRetrievalModeX.fromId(
-        _optString(json, 'retrievalMode'),
+      origin: origin,
+      provenance: correctMislabelledLiveProvenance(
+        origin: origin,
+        provenance: HajjProvenanceKindX.fromId(_optString(json, 'provenance')),
       ),
+      demonstration: demonstration,
+      retrievalMode: retrievalMode,
       authenticityStatus: _optString(json, 'authenticityStatus'),
       freshnessStatus: _optString(json, 'freshnessStatus'),
       applicabilityStatus: _optString(json, 'applicabilityStatus'),

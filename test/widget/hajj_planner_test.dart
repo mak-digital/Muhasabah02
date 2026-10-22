@@ -418,6 +418,7 @@ void main() {
     await tester.tap(find.text(Copy.hajjSourcesSection));
     await tester.pumpAndSettle();
     expect(find.textContaining('Unverified'), findsWidgets);
+    expect(find.textContaining('Demonstration catalog'), findsWidgets);
     await tester.scrollUntilVisible(
       find.byKey(const Key('hajj-consent-ai')),
       -240,

@@ -18,6 +18,7 @@ ProductivityAction _action({
   double doneHours = 0,
   bool synthetic = true,
   DateTime? createdAt,
+  String? targetDateKey,
   int sortOrder = 0,
 }) {
   return ProductivityAction(
@@ -31,6 +32,7 @@ ProductivityAction _action({
     prerequisiteIds: prerequisiteIds,
     hours: hours,
     doneHours: doneHours,
+    targetDateKey: targetDateKey,
     sortOrder: sortOrder,
     synthetic: synthetic,
   );
@@ -123,7 +125,7 @@ void main() {
     expect(next?.id, 'r');
   });
 
-  test('D7 D8 carry-forward keeps unfinished and drops completed', () {
+  test('D7 D8 carry-forward keeps unfinished and completed until moved', () {
     final store = ProductivityStore(
       lastRolloverDateKey: '2026-10-17',
       actions: [
@@ -142,7 +144,7 @@ void main() {
       now: DateTime(2026, 10, 18),
     );
     expect(actionById(next, 'open')?.today, isTrue);
-    expect(actionById(next, 'done')?.today, isFalse);
+    expect(actionById(next, 'done')?.today, isTrue);
     expect(next.events.single.kind, 'carriedForward');
   });
 
@@ -206,26 +208,27 @@ void main() {
     ]);
   });
 
-  test(
-    'completed today action leaves the board as pending stay selectable',
-    () {
-      var store = ProductivityStore(
-        actions: [
-          _action(id: 'done', title: 'Done', today: true),
-          _action(id: 'wait', title: 'Wait', today: false),
-        ],
-      );
-      store = markProductivityStatus(
-        store,
-        actionById(store, 'done')!,
-        ProductivityStatus.completed,
-        now: DateTime(2026, 10, 18, 12),
-      );
-      expect(actionById(store, 'done')?.today, isFalse);
-      expect(actionById(store, 'done')?.listing, ProductivityListing.completed);
-      expect(pendingRegisterActions(store).single.id, 'wait');
-    },
-  );
+  test('completed today action stays on the board until moved off', () {
+    var store = ProductivityStore(
+      actions: [
+        _action(id: 'done', title: 'Done', today: true),
+        _action(id: 'wait', title: 'Wait', today: false),
+      ],
+    );
+    store = markProductivityStatus(
+      store,
+      actionById(store, 'done')!,
+      ProductivityStatus.completed,
+      now: DateTime(2026, 10, 18, 12),
+    );
+    expect(actionById(store, 'done')?.today, isTrue);
+    expect(actionById(store, 'done')?.listing, ProductivityListing.completed);
+    expect(actionById(store, 'done')?.percent, 100);
+    expect(actionById(store, 'done')?.status, ProductivityStatus.completed);
+    expect(pendingRegisterActions(store).single.id, 'wait');
+    store = setTodayFlag(store, 'done', false);
+    expect(actionById(store, 'done')?.today, isFalse);
+  });
 
   test('sub-activity weights roll up to the parent percent', () {
     final action = _action(id: 'p', title: 'Parent').copyWith(
@@ -245,6 +248,144 @@ void main() {
       ),
       ProductivityPace.ahead,
     );
+  });
+
+  test('status and percent stay aligned across focus, list and details', () {
+    var store = ProductivityStore(
+      actions: [
+        _action(id: 'a', title: 'Ahmad Insurance', today: true, hours: 5),
+      ],
+    );
+    store = applyActionProgress(store, store.actions.single, percent: 100);
+    expect(actionById(store, 'a')?.percent, 100);
+    expect(actionById(store, 'a')?.status, ProductivityStatus.completed);
+
+    store = markProductivityStatus(
+      store,
+      actionById(store, 'a')!,
+      ProductivityStatus.notStarted,
+      now: DateTime(2026, 10, 18, 12),
+    );
+    expect(actionById(store, 'a')?.status, ProductivityStatus.notStarted);
+    expect(actionById(store, 'a')?.percent, 0);
+
+    store = applyActionProgress(store, actionById(store, 'a')!, percent: 40);
+    expect(actionById(store, 'a')?.status, ProductivityStatus.inProgress);
+    expect(actionById(store, 'a')?.percent, 40);
+
+    final healed = ProductivityAction.fromJson({
+      'id': 'b',
+      'title': 'Ahmad Insurance',
+      'status': 'notStarted',
+      'hours': 5,
+      'doneHours': 5,
+      'createdAt': '2026-10-18T09:00:00.000',
+      'today': true,
+    });
+    expect(healed.status, ProductivityStatus.notStarted);
+    expect(healed.percent, 0);
+  });
+
+  test('planner lines follow displayed daily actions and tentative dates', () {
+    final displayed = [
+      _action(
+        id: 'a',
+        title: 'Shown',
+        today: true,
+        priority: ProductivityPriority.critical,
+        createdAt: DateTime(2026, 10, 18),
+        targetDateKey: '2026-10-20',
+      ),
+      _action(
+        id: 'paused',
+        title: 'Paused row',
+        today: true,
+        status: ProductivityStatus.paused,
+        priority: ProductivityPriority.high,
+        createdAt: DateTime(2026, 10, 19),
+      ),
+      _action(
+        id: 'done',
+        title: 'Closed row',
+        today: true,
+        status: ProductivityStatus.completed,
+        priority: ProductivityPriority.medium,
+        createdAt: DateTime(2026, 10, 18),
+        targetDateKey: '2026-10-18',
+        doneHours: 1,
+      ),
+    ];
+    final marks = plannerLinesForDisplayedActions(
+      displayed,
+      now: DateTime(2026, 10, 19),
+    );
+    expect(marks['2026-10-18'], [
+      const PlannerDayMark(
+        priority: ProductivityPriority.critical,
+        isStart: true,
+        isProgress: true,
+      ),
+      const PlannerDayMark(
+        priority: ProductivityPriority.medium,
+        isStart: true,
+        isEnd: true,
+        isProgress: true,
+      ),
+    ]);
+    expect(marks['2026-10-19'], [
+      const PlannerDayMark(priority: ProductivityPriority.critical),
+      const PlannerDayMark(
+        priority: ProductivityPriority.high,
+        isStart: true,
+        isEnd: true,
+        isProgress: true,
+      ),
+    ]);
+    expect(marks['2026-10-20'], [
+      const PlannerDayMark(
+        priority: ProductivityPriority.critical,
+        isEnd: true,
+      ),
+    ]);
+    expect(marks.containsKey('2026-10-21'), isFalse);
+    expect(
+      plannerProgressDateKey(
+        startKey: '2026-10-18',
+        endKey: '2026-10-22',
+        percent: 50,
+      ),
+      '2026-10-20',
+    );
+    expect(
+      plannerLinesForDisplayedActions(const [], now: DateTime(2026, 10, 19)),
+      isEmpty,
+    );
+  });
+
+  test('compact labels shorten long hex ids', () {
+    expect(
+      compactProductivityLabel('Wealth · b1c84c098a644ebc481bec5277e29e19'),
+      'Wealth · b1c84c…',
+    );
+  });
+
+  test('progress details store hours, percent and target on the action', () {
+    var store = ProductivityStore(
+      actions: [_action(id: 'a', title: 'Alpha', today: true)],
+    );
+    store = applyActionProgress(
+      store,
+      store.actions.single,
+      hours: 2.5,
+      percent: 40,
+      targetAt: DateTime(2026, 10, 21, 16, 30),
+    );
+    final action = actionById(store, 'a')!;
+    expect(action.hours, 2.5);
+    expect(action.percent, 40);
+    expect(action.status, ProductivityStatus.inProgress);
+    expect(action.targetAt, DateTime(2026, 10, 21, 16, 30));
+    expect(action.targetDateKey, '2026-10-21');
   });
 
   test('rename changes only the title', () {

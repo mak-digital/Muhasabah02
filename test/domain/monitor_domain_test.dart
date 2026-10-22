@@ -255,7 +255,7 @@ void main() {
       ActivityCatalog.forHomeTrace('dhikr.postFardFajr').first.id,
       ActivityCatalog.dhikrWithAction,
     );
-    expect(hidesHomeTraceFactors('dhikr.postFardFajr'), isFalse);
+    expect(hidesHomeTraceFactors('dhikr.postFardFajr'), isTrue);
     expect(hidesHomeTraceFactors(hadithEncounterKey), isFalse);
     expect(
       homeTraceRowByKey('hadith.livedSunnah')?.label,
