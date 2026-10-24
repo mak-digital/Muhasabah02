@@ -138,7 +138,10 @@ Future<void> _showSalahActivitySheet({
                 ] else
                   const SizedBox(height: 8),
                 ActivityPicker(
-                  options: ActivityCatalog.salah,
+                  options: ActivityCatalog.obligatorySalahOptions(
+                    gender: ref.read(appPrefsProvider).worshipListGender,
+                    selectedId: selected.id,
+                  ),
                   selectedId: selected.id,
                   statusKeyPrefix: 'today-salah-${prayer.name}',
                   onSelected: (option) async {
@@ -240,7 +243,10 @@ Future<void> _showJumuahSheet({
                 ),
                 const SizedBox(height: 8),
                 ActivityPicker(
-                  options: ActivityCatalog.jumuah,
+                  options: ActivityCatalog.jumuahOptions(
+                    gender: ref.read(appPrefsProvider).worshipListGender,
+                    selectedId: current.jumuahActivityId,
+                  ),
                   selectedId: current.jumuahActivityId,
                   statusKeyPrefix: 'today-salah-jumuah',
                   onSelected: (option) async {

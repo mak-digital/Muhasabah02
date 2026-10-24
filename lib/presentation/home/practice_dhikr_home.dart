@@ -443,20 +443,17 @@ class PracticeCharityWash extends StatelessWidget {
   }
 }
 
-ButtonStyle get _compactOutlineStyle => OutlinedButton.styleFrom(
-  visualDensity: VisualDensity.compact,
-  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-  minimumSize: const Size.fromHeight(32),
-  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-);
-
 ButtonStyle get _slimRegisterStyle => OutlinedButton.styleFrom(
   visualDensity: VisualDensity.compact,
   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
   minimumSize: const Size.fromHeight(28),
   maximumSize: const Size(double.infinity, 28),
   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-  textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, height: 1.1),
+  textStyle: const TextStyle(
+    fontSize: 12,
+    fontWeight: FontWeight.w600,
+    height: 1.1,
+  ),
 );
 
 void _reveal(BuildContext context) {
@@ -508,7 +505,10 @@ class _PracticeGroupedLearnWashState
       spec.domain,
     );
     final identity = domainColorIdentity(spec.domain);
-    final wash = identity.practiceWashFor(Theme.of(context).brightness);
+    final wash = identity.practiceWashFor(
+      Theme.of(context).brightness,
+      context,
+    );
     final addedFill = Theme.of(context).colorScheme.secondaryContainer;
     final addedInk = Theme.of(context).colorScheme.onSecondaryContainer;
 
@@ -638,8 +638,7 @@ class _PracticeGroupedLearnWashState
           domain: widget.spec.domain,
           items: cluster,
           addLabel: widget.spec.addLabel,
-          alreadyFor: (row) =>
-              practiceHadithAlreadyRegistered(records, row.id),
+          alreadyFor: (row) => practiceHadithAlreadyRegistered(records, row.id),
           onAdd: _add,
           onOpen: _collapseAbout,
           addedFill: addedFill,
@@ -658,7 +657,7 @@ class _PracticeGroupedLearnWashState
           band: group,
           family: domainColorIdentity(widget.spec.domain).family,
           baseWash: domainColorIdentity(widget.spec.domain)
-              .washFor(Theme.of(context).brightness),
+              .washFor(Theme.of(context).brightness, context),
         ),
         children: children,
       ),

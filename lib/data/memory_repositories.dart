@@ -21,18 +21,14 @@ class MemoryCheckInRepository implements CheckInRepository {
 
   @override
   Future<List<DailyCheckIn>> allHealthy() async {
-    _corrupt.clear();
-    final healthy = <DailyCheckIn>[];
-    for (final entry in _raw.entries) {
-      final parsed = decodeCheckIn(entry.value);
-      if (parsed.corrupt || parsed.record == null) {
-        _corrupt.add(entry.key);
-      } else {
-        healthy.add(parsed.record!);
-      }
-    }
-    healthy.sort((a, b) => b.dateKey.compareTo(a.dateKey));
-    return healthy;
+    final batch = await decodeStoredCheckIns(
+      keys: _raw.keys,
+      read: (key) => _raw['$key'],
+    );
+    _corrupt
+      ..clear()
+      ..addAll(batch.corruptKeys);
+    return batch.healthy;
   }
 
   @override
@@ -181,9 +177,10 @@ class MemoryDomainActionRepository implements DomainActionRepository {
 }
 
 class MemoryDevFeedbackRepository implements DevFeedbackRepository {
-  MemoryDevFeedbackRepository({Map<String, String>? raw, int nextSerial = 1})
-    : _raw = raw ?? {},
-      _nextSerial = nextSerial;
+  MemoryDevFeedbackRepository({
+    Map<String, String>? raw,
+    this._nextSerial = 1,
+  }) : _raw = raw ?? {};
 
   final Map<String, String> _raw;
   final List<String> _corrupt = [];

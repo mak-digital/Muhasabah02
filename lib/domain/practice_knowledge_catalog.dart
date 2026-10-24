@@ -24,8 +24,7 @@ final List<PracticeDhikrItem> kPracticeKnowledgeCatalog = [
     transliteration: 'Wa qul rabbi zidnī ʿilmā.',
     translation: 'And say: My Lord, increase me in knowledge.',
     source: 'Qur’an 20:114',
-    detail:
-        'A single new fact is enough. Not hours studied. Qur’an and Hadith have their own cards.',
+    detail: 'A single new fact is enough. Not hours studied. Qur’an and Hadith have their own cards.',
   ),
   _item(
     id: 'kn.seeking.learned.96_1',
@@ -46,8 +45,7 @@ final List<PracticeDhikrItem> kPracticeKnowledgeCatalog = [
     arabic: 'يَرْفَعِ اللَّهُ الَّذِينَ آمَنُوا مِنكُمْ وَالَّذِينَ أُوتُوا الْعِلْمَ دَرَجَاتٍ',
     transliteration:
         'Yarfaʿi llāhu lladhīna āmanū minkum wa-lladhīna ūtū l-ʿilma darajāt.',
-    translation:
-        'Allah will raise those who have believed among you and those who were given knowledge, by degrees.',
+    translation: 'Allah will raise those who have believed among you and those who were given knowledge, by degrees.',
     source: 'Qur’an 58:11',
     detail: 'A single new fact is enough. The app never congratulates anyone for being learned.',
   ),
@@ -67,15 +65,11 @@ final List<PracticeDhikrItem> kPracticeKnowledgeCatalog = [
     group: kKnowledgeGroupSeeking,
     topic: 'Beneficial reading (not Qur’an or Hadith)',
     text: 'The Prophet ﷺ said:',
-    arabic:
-        'مَنْ سَلَكَ طَرِيقًا يَلْتَمِسُ فِيهِ عِلْمًا سَهَّلَ اللَّهُ لَهُ بِهِ طَرِيقًا إِلَى الْجَنَّةِ',
-    transliteration:
-        'Man salaka ṭarīqan yaltamisu fīhi ʿilman sahhala Allāhu lahu bihi ṭarīqan ilā l-jannah.',
-    translation:
-        'Whoever travels a path seeking knowledge, Allah makes easy for him a path to Paradise.',
+    arabic: 'مَنْ سَلَكَ طَرِيقًا يَلْتَمِسُ فِيهِ عِلْمًا سَهَّلَ اللَّهُ لَهُ بِهِ طَرِيقًا إِلَى الْجَنَّةِ',
+    transliteration: 'Man salaka ṭarīqan yaltamisu fīhi ʿilman sahhala Allāhu lahu bihi ṭarīqan ilā l-jannah.',
+    translation: 'Whoever travels a path seeking knowledge, Allah makes easy for him a path to Paradise.',
     source: 'Ṣaḥīḥ Muslim 2699',
-    detail:
-        'Book, article, or lecture — not a Qur’an or Hadith sitting. Not a study-hour badge.',
+    detail: 'Book, article, or lecture — not a Qur’an or Hadith sitting. Not a study-hour badge.',
   ),
   _item(
     id: 'kn.seeking.reading.20_114',
@@ -93,8 +87,10 @@ final List<PracticeDhikrItem> kPracticeKnowledgeCatalog = [
     group: kKnowledgeGroupSeeking,
     topic: 'Beneficial reading (not Qur’an or Hadith)',
     text: 'Are those who know equal to those who do not know:',
-    arabic: 'قُلْ هَلْ يَسْتَوِي الَّذِينَ يَعْلَمُونَ وَالَّذِينَ لَا يَعْلَمُونَ',
-    transliteration: 'Qul hal yastawī lladhīna yaʿlamūna wa-lladhīna lā yaʿlamūn.',
+    arabic:
+        'قُلْ هَلْ يَسْتَوِي الَّذِينَ يَعْلَمُونَ وَالَّذِينَ لَا يَعْلَمُونَ',
+    transliteration:
+        'Qul hal yastawī lladhīna yaʿlamūna wa-lladhīna lā yaʿlamūn.',
     translation: 'Say: Are those who know equal to those who do not know?',
     source: 'Qur’an 39:9',
     detail: 'Not hours studied. Not congratulations for being learned.',
@@ -116,12 +112,10 @@ final List<PracticeDhikrItem> kPracticeKnowledgeCatalog = [
     topic: 'Asked to remove ignorance',
     text: 'If you do not know, ask:',
     arabic: 'فَاسْأَلُوا أَهْلَ الذِّكْرِ إِن كُنتُمْ لَا تَعْلَمُونَ',
-    transliteration:
-        'Fa-sʾalū ahla dh-dhikri in kuntum lā taʿlamūn.',
+    transliteration: 'Fa-sʾalū ahla dh-dhikri in kuntum lā taʿlamūn.',
     translation: 'So ask the people of reminder if you do not know.',
     source: 'Qur’an 16:43',
-    detail:
-        'Asking is noticing, not a scholar requirement. Unanswered is not ignorance.',
+    detail: 'Asking is noticing, not a scholar requirement. Unanswered is not ignorance.',
   ),
   _item(
     id: 'kn.seeking.asked.21_7',
@@ -161,15 +155,12 @@ final List<PracticeDhikrItem> kPracticeKnowledgeCatalog = [
     group: kKnowledgeGroupSharing,
     topic: 'Taught someone',
     text: 'The Prophet ﷺ said:',
-    arabic:
-        'مَنْ دَعَا إِلَى هُدًى كَانَ لَهُ مِنَ الْأَجْرِ مِثْلُ أُجُورِ مَنْ تَبِعَهُ',
+    arabic: 'مَنْ دَعَا إِلَى هُدًى كَانَ لَهُ مِنَ الْأَجْرِ مِثْلُ أُجُورِ مَنْ تَبِعَهُ',
     transliteration:
         'Man daʿā ilā hudan kāna lahu mina l-ajri mithlu ujūri man tabiʿah.',
-    translation:
-        'Whoever calls to guidance will have a reward like the rewards of those who follow it.',
+    translation: 'Whoever calls to guidance will have a reward like the rewards of those who follow it.',
     source: 'Ṣaḥīḥ Muslim 2674',
-    detail:
-        'Even one fact to a child or colleague. Not a teaching rank. Debate is not engagement.',
+    detail: 'Even one fact to a child or colleague. Not a teaching rank. Debate is not engagement.',
   ),
   _item(
     id: 'kn.sharing.taught.bukhari_5027',
@@ -201,7 +192,8 @@ final List<PracticeDhikrItem> kPracticeKnowledgeCatalog = [
     arabic: 'ادْعُ إِلَىٰ سَبِيلِ رَبِّكَ بِالْحِكْمَةِ وَالْمَوْعِظَةِ الْحَسَنَةِ',
     transliteration:
         'Udʿu ilā sabīli rabbika bi-l-ḥikmati wa-l-mawʿiẓati l-ḥasanah.',
-    translation: 'Invite to the way of your Lord with wisdom and good instruction.',
+    translation:
+        'Invite to the way of your Lord with wisdom and good instruction.',
     source: 'Qur’an 16:125',
     detail: 'Even one fact. Not a teaching rank.',
   ),
@@ -214,8 +206,7 @@ final List<PracticeDhikrItem> kPracticeKnowledgeCatalog = [
     transliteration: 'Ad-dīnu n-naṣīḥah.',
     translation: 'The religion is sincere advice.',
     source: 'Ṣaḥīḥ Muslim 55',
-    detail:
-        'Sincere advice as an observation, not an achievement. Controversial content is not logged here.',
+    detail: 'Sincere advice as an observation, not an achievement. Controversial content is not logged here.',
   ),
   _item(
     id: 'kn.sharing.advice.7_68',
@@ -224,8 +215,7 @@ final List<PracticeDhikrItem> kPracticeKnowledgeCatalog = [
     text: 'I am delivering to you the messages of my Lord, and I am a trustworthy adviser to you:',
     arabic: 'أُبَلِّغُكُمْ رِسَالَاتِ رَبِّي وَأَنَا لَكُمْ نَاصِحٌ أَمِينٌ',
     transliteration: 'Uballighukum risālāti rabbī wa-anā lakum nāṣiḥun amīn.',
-    translation:
-        'I convey to you the messages of my Lord, and I am to you a trustworthy adviser.',
+    translation: 'I convey to you the messages of my Lord, and I am to you a trustworthy adviser.',
     source: 'Qur’an 7:68',
     detail: 'Sincere advice as an observation. Controversial content is not logged here.',
   ),
@@ -246,10 +236,8 @@ final List<PracticeDhikrItem> kPracticeKnowledgeCatalog = [
     topic: 'Sincere advice',
     text: 'The Messenger of Allah ﷺ said:',
     arabic: 'الدِّينُ النَّصِيحَةُ لِلَّهِ وَلِكِتَابِهِ وَلِرَسُولِهِ وَلِأَئِمَّةِ الْمُسْلِمِينَ وَعَامَّتِهِمْ',
-    transliteration:
-        'Ad-dīnu n-naṣīḥatu li-llāhi wa-li-kitābihi wa-li-rasūlihi wa-li-aʾimmati l-muslimīna wa-ʿāmmatihim.',
-    translation:
-        'The religion is sincere advice: for Allah, His Book, His Messenger, the leaders of the Muslims, and their common folk.',
+    transliteration: 'Ad-dīnu n-naṣīḥatu li-llāhi wa-li-kitābihi wa-li-rasūlihi wa-li-aʾimmati l-muslimīna wa-ʿāmmatihim.',
+    translation: 'The religion is sincere advice: for Allah, His Book, His Messenger, the leaders of the Muslims, and their common folk.',
     source: 'Ṣaḥīḥ Muslim 55',
     detail: 'Sincere advice as an observation. Controversial content is not logged here.',
   ),
@@ -258,15 +246,11 @@ final List<PracticeDhikrItem> kPracticeKnowledgeCatalog = [
     group: kKnowledgeGroupSharing,
     topic: 'Wrote or created something beneficial',
     text: 'The Prophet ﷺ said that when a person dies, deeds end except three:',
-    arabic:
-        'إِذَا مَاتَ الْإِنْسَانُ انْقَطَعَ عَنْهُ عَمَلُهُ إِلَّا مِنْ ثَلَاثَةٍ: إِلَّا مِنْ صَدَقَةٍ جَارِيَةٍ، أَوْ عِلْمٍ يُنْتَفَعُ بِهِ، أَوْ وَلَدٍ صَالِحٍ يَدْعُو لَهُ',
-    transliteration:
-        'Idhā māta l-insānu inqaṭaʿa ʿanhu ʿamaluhu illā min thalāthah: illā min ṣadaqatin jāriyah, aw ʿilmin yuntafaʿu bih, aw waladin ṣāliḥin yadʿū lah.',
-    translation:
-        'When a person dies, his deeds are cut off except from three: ongoing charity, knowledge that is benefited from, or a righteous child who prays for him.',
+    arabic: 'إِذَا مَاتَ الْإِنْسَانُ انْقَطَعَ عَنْهُ عَمَلُهُ إِلَّا مِنْ ثَلَاثَةٍ: إِلَّا مِنْ صَدَقَةٍ جَارِيَةٍ، أَوْ عِلْمٍ يُنْتَفَعُ بِهِ، أَوْ وَلَدٍ صَالِحٍ يَدْعُو لَهُ',
+    transliteration: 'Idhā māta l-insānu inqaṭaʿa ʿanhu ʿamaluhu illā min thalāthah: illā min ṣadaqatin jāriyah, aw ʿilmin yuntafaʿu bih, aw waladin ṣāliḥin yadʿū lah.',
+    translation: 'When a person dies, his deeds are cut off except from three: ongoing charity, knowledge that is benefited from, or a righteous child who prays for him.',
     source: 'Ṣaḥīḥ Muslim 1631',
-    detail:
-        'Beneficial knowledge that remains. Not a publication score, and not congratulations for being learned.',
+    detail: 'Beneficial knowledge that remains. Not a publication score, and not congratulations for being learned.',
   ),
   _item(
     id: 'kn.sharing.created.2_269',
@@ -310,8 +294,7 @@ final List<PracticeDhikrItem> kPracticeKnowledgeCatalog = [
     transliteration: 'Wa-lladhīna hum ʿani l-laghwi muʿriḍūn.',
     translation: 'And those who turn away from idle talk.',
     source: 'Qur’an 23:3',
-    detail:
-        'Usefulness of words — gossip, argument, excessive joking. Not Character & Morals’ tone.',
+    detail: 'Usefulness of words — gossip, argument, excessive joking. Not Character & Morals’ tone.',
   ),
   _item(
     id: 'kn.speech.heldback.17_53',
@@ -330,10 +313,8 @@ final List<PracticeDhikrItem> kPracticeKnowledgeCatalog = [
     topic: 'Held back useless speech',
     text: 'The Messenger of Allah ﷺ said:',
     arabic: 'مَنْ كَانَ يُؤْمِنُ بِاللَّهِ وَالْيَوْمِ الْآخِرِ فَلْيَقُلْ خَيْرًا أَوْ لِيَصْمُتْ',
-    transliteration:
-        'Man kāna yuʾminu bi-llāhi wa-l-yawmi l-ākhiri fal-yaqul khayran aw li-yaṣmut.',
-    translation:
-        'Whoever believes in Allah and the Last Day, let him speak good or remain silent.',
+    transliteration: 'Man kāna yuʾminu bi-llāhi wa-l-yawmi l-ākhiri fal-yaqul khayran aw li-yaṣmut.',
+    translation: 'Whoever believes in Allah and the Last Day, let him speak good or remain silent.',
     source: 'Ṣaḥīḥ al-Bukhārī 6018',
     detail: 'Usefulness of words — gossip, argument, excessive joking.',
   ),
@@ -344,8 +325,7 @@ final List<PracticeDhikrItem> kPracticeKnowledgeCatalog = [
     text: 'The Messenger of Allah ﷺ said:',
     arabic: 'مِنْ حُسْنِ إِسْلَامِ الْمَرْءِ تَرْكُهُ مَا لَا يَعْنِيهِ',
     transliteration: 'Min ḥusni islāmi l-marʾi tarkuhu mā lā yaʿnīh.',
-    translation:
-        'Part of the excellence of a person’s Islam is leaving what does not concern him.',
+    translation: 'Part of the excellence of a person’s Islam is leaving what does not concern him.',
     source: 'Jāmiʿ al-Tirmidhī 2317',
     detail: 'Usefulness of words. Not Character & Morals’ tone.',
   ),

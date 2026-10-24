@@ -34,10 +34,12 @@ final List<PracticeDhikrItem> kPracticeUmmahCatalog = [
     group: kUmmahGroupMasjid,
     topic: 'Masjid class or gathering (not the fard)',
     text: 'And established prayer, and gave zakat:',
-    arabic: 'وَأَقَامَ الصَّلَاةَ وَآتَى الزَّكَاةَ وَلَمْ يَخْشَ إِلَّا اللَّهَ',
+    arabic:
+        'وَأَقَامَ الصَّلَاةَ وَآتَى الزَّكَاةَ وَلَمْ يَخْشَ إِلَّا اللَّهَ',
     transliteration:
         'Wa-aqāma ṣ-ṣalāta wa-ātā z-zakāta wa-lam yakhsha illā llāh.',
-    translation: 'And who establishes prayer and gives zakat and fears none but Allah.',
+    translation:
+        'And who establishes prayer and gives zakat and fears none but Allah.',
     source: 'Qur’an 9:18',
     detail: 'A class or gathering, not the fard. Private, not a public masjid check-in.',
   ),
@@ -47,24 +49,22 @@ final List<PracticeDhikrItem> kPracticeUmmahCatalog = [
     topic: 'Masjid class or gathering (not the fard)',
     text: 'The Messenger of Allah ﷺ said:',
     arabic: 'مَنْ غَدَا إِلَى الْمَسْجِدِ أَوْ رَاحَ أَعَدَّ اللَّهُ لَهُ نُزُلَهُ مِنَ الْجَنَّةِ كُلَّمَا غَدَا أَوْ رَاحَ',
-    transliteration:
-        'Man ghadā ilā l-masjidi aw rāḥa aʿadda llāhu lahu nuzulahu mina l-jannati kullamā ghadā aw rāḥ.',
-    translation:
-        'Whoever goes to the mosque in the morning or the evening, Allah prepares for him a lodging in Paradise whenever he goes.',
+    transliteration: 'Man ghadā ilā l-masjidi aw rāḥa aʿadda llāhu lahu nuzulahu mina l-jannati kullamā ghadā aw rāḥ.',
+    translation: 'Whoever goes to the mosque in the morning or the evening, Allah prepares for him a lodging in Paradise whenever he goes.',
     source: 'Ṣaḥīḥ al-Bukhārī 662',
-    detail: 'A class or gathering, not the fard or Jumu‘ah. Not a public check-in.',
+    detail:
+        'A class or gathering, not the fard or Jumu‘ah. Not a public check-in.',
   ),
   _item(
     id: 'um.masjid.class.2_114',
     group: kUmmahGroupMasjid,
     topic: 'Masjid class or gathering (not the fard)',
-    text: 'Who is more unjust than one who prevents Allah’s name in His mosques:',
-    arabic:
-        'وَمَنْ أَظْلَمُ مِمَّن مَّنَعَ مَسَاجِدَ اللَّهِ أَن يُذْكَرَ فِيهَا اسْمُهُ',
+    text:
+        'Who is more unjust than one who prevents Allah’s name in His mosques:',
+    arabic: 'وَمَنْ أَظْلَمُ مِمَّن مَّنَعَ مَسَاجِدَ اللَّهِ أَن يُذْكَرَ فِيهَا اسْمُهُ',
     transliteration:
         'Wa-man aẓlamu mimman manaʿa masājida llāhi an yudhkara fīhā smuh.',
-    translation:
-        'And who is more unjust than one who prevents the mosques of Allah from having His name remembered in them.',
+    translation: 'And who is more unjust than one who prevents the mosques of Allah from having His name remembered in them.',
     source: 'Qur’an 2:114',
     detail: 'A class or gathering. Isolation is not a failing.',
   ),
@@ -86,12 +86,9 @@ final List<PracticeDhikrItem> kPracticeUmmahCatalog = [
     group: kUmmahGroupWitness,
     topic: 'Da’wah by character',
     text: 'Let there be a community calling to good:',
-    arabic:
-        'وَلْتَكُن مِّنكُمْ أُمَّةٌ يَدْعُونَ إِلَى الْخَيْرِ وَيَأْمُرُونَ بِالْمَعْرُوفِ وَيَنْهَوْنَ عَنِ الْمُنكَرِ',
-    transliteration:
-        'Wa-l-takun minkum ummatun yadʿūna ilā l-khayri wa-yaʾmurūna bi-l-maʿrūfi wa-yanhawna ʿani l-munkar.',
-    translation:
-        'And let there be from you a community inviting to good, enjoining what is right, and forbidding what is wrong.',
+    arabic: 'وَلْتَكُن مِّنكُمْ أُمَّةٌ يَدْعُونَ إِلَى الْخَيْرِ وَيَأْمُرُونَ بِالْمَعْرُوفِ وَيَنْهَوْنَ عَنِ الْمُنكَرِ',
+    transliteration: 'Wa-l-takun minkum ummatun yadʿūna ilā l-khayri wa-yaʾmurūna bi-l-maʿrūfi wa-yanhawna ʿani l-munkar.',
+    translation: 'And let there be from you a community inviting to good, enjoining what is right, and forbidding what is wrong.',
     source: 'Qur’an 3:104',
     detail: 'By character, not argument. Sectarian rants are not logged here.',
   ),
@@ -100,11 +97,11 @@ final List<PracticeDhikrItem> kPracticeUmmahCatalog = [
     group: kUmmahGroupWitness,
     topic: 'Da’wah by character',
     text: 'Who is better in speech than one who calls to Allah:',
-    arabic: 'وَمَنْ أَحْسَنُ قَوْلًا مِّمَّن دَعَا إِلَى اللَّهِ وَعَمِلَ صَالِحًا',
+    arabic:
+        'وَمَنْ أَحْسَنُ قَوْلًا مِّمَّن دَعَا إِلَى اللَّهِ وَعَمِلَ صَالِحًا',
     transliteration:
         'Wa-man aḥsanu qawlan mimman daʿā ilā llāhi wa-ʿamila ṣāliḥā.',
-    translation:
-        'And who is better in speech than one who calls to Allah and does righteous work.',
+    translation: 'And who is better in speech than one who calls to Allah and does righteous work.',
     source: 'Qur’an 41:33',
     detail: 'By character, not debate. Not Character & Morals’ virtue list.',
   ),
@@ -136,12 +133,9 @@ final List<PracticeDhikrItem> kPracticeUmmahCatalog = [
     group: kUmmahGroupSolidarity,
     topic: 'Supported the oppressed',
     text: 'Why should you not fight for the oppressed:',
-    arabic:
-        'وَمَا لَكُمْ لَا تُقَاتِلُونَ فِي سَبِيلِ اللَّهِ وَالْمُسْتَضْعَفِينَ مِنَ الرِّجَالِ وَالنِّسَاءِ وَالْوِلْدَانِ',
-    transliteration:
-        'Wa-mā lakum lā tuqātilūna fī sabīli llāhi wa-l-mustaḍʿafīna mina r-rijāli wa-n-nisāʾi wa-l-wildān.',
-    translation:
-        'And what is [the matter] with you that you do not fight in the way of Allah, and for the oppressed among men, women, and children.',
+    arabic: 'وَمَا لَكُمْ لَا تُقَاتِلُونَ فِي سَبِيلِ اللَّهِ وَالْمُسْتَضْعَفِينَ مِنَ الرِّجَالِ وَالنِّسَاءِ وَالْوِلْدَانِ',
+    transliteration: 'Wa-mā lakum lā tuqātilūna fī sabīli llāhi wa-l-mustaḍʿafīna mina r-rijāli wa-n-nisāʾi wa-l-wildān.',
+    translation: 'And what is [the matter] with you that you do not fight in the way of Allah, and for the oppressed among men, women, and children.',
     source: 'Qur’an 4:75',
     detail: 'Dua, awareness, or material help. Not a political rant. Safety comes first.',
   ),
@@ -152,8 +146,7 @@ final List<PracticeDhikrItem> kPracticeUmmahCatalog = [
     text: 'The Messenger of Allah ﷺ said:',
     arabic: 'الْمُسْلِمُ أَخُو الْمُسْلِمِ، لَا يَظْلِمُهُ وَلَا يَخْذُلُهُ',
     transliteration: 'Al-muslimu akhū l-muslim, lā yaẓlimuhu wa-lā yakhdhuluh.',
-    translation:
-        'The Muslim is the brother of the Muslim. He does not wrong him or forsake him.',
+    translation: 'The Muslim is the brother of the Muslim. He does not wrong him or forsake him.',
     source: 'Ṣaḥīḥ Muslim 2564',
     detail: 'Support you noticed. Not Charity’s giving row.',
   ),
@@ -198,8 +191,7 @@ final List<PracticeDhikrItem> kPracticeUmmahCatalog = [
     arabic: 'إِنَّ هَٰذِهِ أُمَّتُكُمْ أُمَّةً وَاحِدَةً وَأَنَا رَبُّكُمْ فَاعْبُدُونِ',
     transliteration:
         'Inna hādhihi ummatukum ummatan wāḥidatan wa-anā rabbukum fa-ʿbudūn.',
-    translation:
-        'Indeed this, your community, is one community, and I am your Lord, so worship Me.',
+    translation: 'Indeed this, your community, is one community, and I am your Lord, so worship Me.',
     source: 'Qur’an 21:92',
     detail: 'The Ummah is global, not an ethnic group.',
   ),
@@ -211,8 +203,7 @@ final List<PracticeDhikrItem> kPracticeUmmahCatalog = [
     arabic: 'لَا يُؤْمِنُ أَحَدُكُمْ حَتَّى يُحِبَّ لِأَخِيهِ مَا يُحِبُّ لِنَفْسِهِ',
     transliteration:
         'Lā yuʾminu aḥadukum ḥattā yuḥibba li-akhīhi mā yuḥibbu li-nafsih.',
-    translation:
-        'None of you believes until he loves for his brother what he loves for himself.',
+    translation: 'None of you believes until he loves for his brother what he loves for himself.',
     source: 'Ṣaḥīḥ al-Bukhārī 13',
     detail: 'Working for unity. Isolation is not a failing.',
   ),
@@ -235,10 +226,8 @@ final List<PracticeDhikrItem> kPracticeUmmahCatalog = [
     topic: 'Prayed for the Ummah',
     text: 'Our Lord, forgive me and my parents and the believers:',
     arabic: 'رَبَّنَا اغْفِرْ لِي وَلِوَالِدَيَّ وَلِلْمُؤْمِنِينَ يَوْمَ يَقُومُ الْحِسَابُ',
-    transliteration:
-        'Rabbanā ighfir lī wa-li-wālidayya wa-li-l-muʾminīna yawma yaqūmu l-ḥisāb.',
-    translation:
-        'Our Lord, forgive me and my parents and the believers on the Day the account is established.',
+    transliteration: 'Rabbanā ighfir lī wa-li-wālidayya wa-li-l-muʾminīna yawma yaqūmu l-ḥisāb.',
+    translation: 'Our Lord, forgive me and my parents and the believers on the Day the account is established.',
     source: 'Qur’an 14:41',
     detail: 'Dua for the Ummah. Isolation is not a failing.',
   ),
@@ -248,10 +237,8 @@ final List<PracticeDhikrItem> kPracticeUmmahCatalog = [
     topic: 'Prayed for the Ummah',
     text: 'The Messenger of Allah ﷺ said:',
     arabic: 'مَا مِنْ عَبْدٍ مُسْلِمٍ يَدْعُو لِأَخِيهِ بِظَهْرِ الْغَيْبِ إِلَّا قَالَ الْمَلَكُ: وَلَكَ بِمِثْلٍ',
-    transliteration:
-        'Mā min ʿabdin muslimin yadʿū li-akhīhi bi-ẓahri l-ghaybi illā qāla l-malak: wa-laka bi-mithl.',
-    translation:
-        'There is no Muslim who prays for his brother in his absence except that the angel says: And for you the same.',
+    transliteration: 'Mā min ʿabdin muslimin yadʿū li-akhīhi bi-ẓahri l-ghaybi illā qāla l-malak: wa-laka bi-mithl.',
+    translation: 'There is no Muslim who prays for his brother in his absence except that the angel says: And for you the same.',
     source: 'Ṣaḥīḥ Muslim 2732',
     detail: 'Dua for the Ummah, especially in crisis.',
   ),
@@ -261,10 +248,8 @@ final List<PracticeDhikrItem> kPracticeUmmahCatalog = [
     topic: 'Prayed for the Ummah',
     text: 'Our Lord, do not burden us as You burdened those before us:',
     arabic: 'رَبَّنَا وَلَا تَحْمِلْ عَلَيْنَا إِصْرًا كَمَا حَمَلْتَهُ عَلَى الَّذِينَ مِن قَبْلِنَا',
-    transliteration:
-        'Rabbanā wa-lā taḥmil ʿalaynā iṣran kamā ḥamaltahu ʿalā lladhīna min qablinā.',
-    translation:
-        'Our Lord, do not burden us with a load as You burdened those before us.',
+    transliteration: 'Rabbanā wa-lā taḥmil ʿalaynā iṣran kamā ḥamaltahu ʿalā lladhīna min qablinā.',
+    translation: 'Our Lord, do not burden us with a load as You burdened those before us.',
     source: 'Qur’an 2:286',
     detail: 'Dua for the Ummah. Introversion is not a failing.',
   ),
@@ -287,8 +272,7 @@ final List<PracticeDhikrItem> kPracticeUmmahCatalog = [
     arabic: 'كُلُوا وَاشْرَبُوا مِن رِّزْقِ اللَّهِ وَلَا تَعْثَوْا فِي الْأَرْضِ مُفْسِدِينَ',
     transliteration:
         'Kulū wa-shrabū min rizqi llāhi wa-lā taʿthaw fī l-arḍi mufsidīn.',
-    translation:
-        'Eat and drink from the provision of Allah, and do not act wickedly on the earth, spreading corruption.',
+    translation: 'Eat and drink from the provision of Allah, and do not act wickedly on the earth, spreading corruption.',
     source: 'Qur’an 2:60',
     detail: 'The earth is a trust. Not an environmental score.',
   ),
@@ -300,8 +284,7 @@ final List<PracticeDhikrItem> kPracticeUmmahCatalog = [
     arabic: 'ظَهَرَ الْفَسَادُ فِي الْبَرِّ وَالْبَحْرِ بِمَا كَسَبَتْ أَيْدِي النَّاسِ',
     transliteration:
         'Ẓahara l-fasādu fī l-barri wa-l-baḥri bi-mā kasabat aydī n-nās.',
-    translation:
-        'Corruption has appeared on land and sea because of what people’s hands have earned.',
+    translation: 'Corruption has appeared on land and sea because of what people’s hands have earned.',
     source: 'Qur’an 30:41',
     detail: 'The earth is a trust. Not a public campaign log.',
   ),
@@ -310,12 +293,9 @@ final List<PracticeDhikrItem> kPracticeUmmahCatalog = [
     group: kUmmahGroupEarth,
     topic: 'Cared for the earth',
     text: 'The Messenger of Allah ﷺ said:',
-    arabic:
-        'إِنْ قَامَتِ السَّاعَةُ وَفِي يَدِ أَحَدِكُمْ فَسِيلَةٌ، فَإِنِ اسْتَطَاعَ أَنْ لَا تَقُومَ حَتَّى يَغْرِسَهَا فَلْيَغْرِسْهَا',
-    transliteration:
-        'In qāmati s-sāʿatu wa-fī yadi aḥadikum fasīlah, fa-ini staṭāʿa an lā taqūma ḥattā yaghrisahā fal-yaghris-hā.',
-    translation:
-        'If the Hour is established and one of you has a seedling in his hand, if he can plant it before it is established, let him plant it.',
+    arabic: 'إِنْ قَامَتِ السَّاعَةُ وَفِي يَدِ أَحَدِكُمْ فَسِيلَةٌ، فَإِنِ اسْتَطَاعَ أَنْ لَا تَقُومَ حَتَّى يَغْرِسَهَا فَلْيَغْرِسْهَا',
+    transliteration: 'In qāmati s-sāʿatu wa-fī yadi aḥadikum fasīlah, fa-ini staṭāʿa an lā taqūma ḥattā yaghrisahā fal-yaghris-hā.',
+    translation: 'If the Hour is established and one of you has a seedling in his hand, if he can plant it before it is established, let him plant it.',
     source: 'Musnad Aḥmad 12902',
     detail: 'The earth is a trust. Not an environmental score.',
   ),

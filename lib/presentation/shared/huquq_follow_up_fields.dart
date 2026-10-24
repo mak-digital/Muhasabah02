@@ -70,7 +70,10 @@ class HuquqFollowUpFields extends StatelessWidget {
             top: 8,
             bottom: 6,
           ),
-          child: Text(Copy.huquqNatureOfEngagement.toUpperCase(), style: labelStyle),
+          child: Text(
+            Copy.huquqNatureOfEngagement.toUpperCase(),
+            style: labelStyle,
+          ),
         ),
         CheckInSelect<String>(
           depth: CheckInFieldDepth.nested,
@@ -93,7 +96,10 @@ class HuquqFollowUpFields extends StatelessWidget {
             top: 8,
             bottom: 6,
           ),
-          child: Text(Copy.huquqOutcomeObserved.toUpperCase(), style: labelStyle),
+          child: Text(
+            Copy.huquqOutcomeObserved.toUpperCase(),
+            style: labelStyle,
+          ),
         ),
         CheckInSelect<String>(
           depth: CheckInFieldDepth.nested,
@@ -116,7 +122,10 @@ class HuquqFollowUpFields extends StatelessWidget {
             top: 8,
             bottom: 6,
           ),
-          child: Text(Copy.huquqOptionalQuantity.toUpperCase(), style: labelStyle),
+          child: Text(
+            Copy.huquqOptionalQuantity.toUpperCase(),
+            style: labelStyle,
+          ),
         ),
         Padding(
           padding: const EdgeInsets.only(left: checkInNestedIndent),
@@ -163,7 +172,10 @@ class HuquqFollowUpFields extends StatelessWidget {
             top: 8,
             bottom: 6,
           ),
-          child: Text(Copy.huquqPrivateReflection.toUpperCase(), style: labelStyle),
+          child: Text(
+            Copy.huquqPrivateReflection.toUpperCase(),
+            style: labelStyle,
+          ),
         ),
         Padding(
           padding: const EdgeInsets.only(left: checkInNestedIndent),

@@ -25,7 +25,10 @@ Future<void> showCheckInDomain(WidgetTester tester, MonitorDomain domain) {
 Future<void> expandActiveDomainMix(WidgetTester tester) async {
   final header = find.byKey(const Key('today-active-domain-mix'));
   if (header.evaluate().isEmpty) return;
-  if (find.byKey(const Key('today-active-domain-mix-chips')).evaluate().isNotEmpty) {
+  if (find
+      .byKey(const Key('today-active-domain-mix-chips'))
+      .evaluate()
+      .isNotEmpty) {
     return;
   }
   await tester.ensureVisible(header);

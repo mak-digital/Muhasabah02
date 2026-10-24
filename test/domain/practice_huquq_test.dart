@@ -19,22 +19,16 @@ void main() {
       ),
       isTrue,
     );
-    expect(
-      kPracticeHuquqCatalog.map((item) => item.group).toSet(),
-      {
-        kHuquqGroupHousehold,
-        kHuquqGroupExtended,
-        kHuquqGroupNeighbours,
-        kHuquqGroupPeople,
-        kHuquqGroupRepair,
-        kHuquqGroupHardship,
-      },
-    );
+    expect(kPracticeHuquqCatalog.map((item) => item.group).toSet(), {
+      kHuquqGroupHousehold,
+      kHuquqGroupExtended,
+      kHuquqGroupNeighbours,
+      kHuquqGroupPeople,
+      kHuquqGroupRepair,
+      kHuquqGroupHardship,
+    });
     expect(kPracticeHuquqCatalog.first.group, kHuquqGroupHousehold);
-    expect(
-      kPracticeHuquqGroups,
-      bandsFor(huquqHomeRows),
-    );
+    expect(kPracticeHuquqGroups, bandsFor(huquqHomeRows));
     expect(
       kPracticeHuquqCatalog.map((item) => item.topic).toSet(),
       huquqHomeRows.map((row) => row.label).toSet(),
@@ -57,9 +51,6 @@ void main() {
     expect(record.domain, MonitorDomain.huquq);
     expect(record.group, kHuquqGroupHousehold);
     expect(record.status, PracticeHadithStatus.learning);
-    expect(
-      practiceRecordsForDomain([record], MonitorDomain.akhlaq),
-      isEmpty,
-    );
+    expect(practiceRecordsForDomain([record], MonitorDomain.akhlaq), isEmpty);
   });
 }

@@ -16,6 +16,7 @@ import 'package:muhasabah02/domain/prayer.dart';
 import 'package:muhasabah02/domain/quran.dart';
 import 'package:muhasabah02/domain/quran_duration.dart';
 import 'package:muhasabah02/domain/quick_tap.dart';
+import 'package:muhasabah02/domain/worship_list_gender.dart';
 
 void main() {
   final fajr = quickTapItemsFor({'salah.fajr'}).single;
@@ -94,6 +95,31 @@ void main() {
       ActivityIds.unanswered,
     ]);
     expect(record.prayer(PrayerId.fajr), PrayerStatus.unanswered);
+  });
+
+  test('male quick tap skips Excused on obligatory Salah', () {
+    var record = DailyCheckIn.empty('2026-09-14');
+    final seen = <String>[];
+    for (var i = 0; i < 8; i++) {
+      final next = nextQuickTapChoice(
+        record,
+        fajr,
+        gender: WorshipListGender.male,
+      );
+      seen.add(next.id);
+      record = applyQuickTapChoice(record, fajr, next);
+    }
+    expect(seen, [
+      'congregationOnTime',
+      'joinedCongregationLate',
+      'smallCongregation',
+      'aloneOnTime',
+      'prayedLate',
+      'missedMadeUp',
+      'missed',
+      ActivityIds.unanswered,
+    ]);
+    expect(seen.contains('excused'), isFalse);
   });
 
   test(

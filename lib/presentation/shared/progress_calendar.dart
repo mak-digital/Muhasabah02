@@ -7,8 +7,10 @@ import '../../domain/date_key.dart';
 import '../../domain/display_calendar.dart';
 import '../../domain/first_day_of_week.dart';
 import '../../domain/weekly_calendar.dart';
+import '../../domain/thirty_day_trend.dart';
 import 'today_mark_halo.dart';
 import 'lunar_white_day_highlight.dart';
+import 'thirty_day_trend_chart.dart';
 import 'ui_bits.dart';
 
 Color monthDayCellWash({
@@ -263,6 +265,7 @@ class ProgressCalendarSection extends ConsumerStatefulWidget {
     this.subtitle,
     this.belowTitle,
     this.summaryLines = const [],
+    this.trend,
     this.family,
     this.highlightLunarWhiteDays = false,
   });
@@ -272,6 +275,7 @@ class ProgressCalendarSection extends ConsumerStatefulWidget {
   final String? subtitle;
   final Widget? belowTitle;
   final List<String> summaryLines;
+  final ThirtyDayTrendSeries? trend;
   final int periodDays;
   final Color? family;
   final bool highlightLunarWhiteDays;
@@ -285,6 +289,9 @@ class ProgressCalendarSection extends ConsumerStatefulWidget {
 class _ProgressCalendarSectionState
     extends ConsumerState<ProgressCalendarSection> {
   var _periodsBack = 0;
+  final _boardKey = GlobalKey();
+  final _washKey = GlobalKey();
+  final _washLink = LayerLink();
 
   @override
   Widget build(BuildContext context) {
@@ -303,7 +310,9 @@ class _ProgressCalendarSectionState
         '(for ${formatDayMonthYear(parseDateKey(keys.first), calendar)} – ${formatDayMonthYear(parseDateKey(keys.last), calendar)})';
     final showThirtySummary =
         widget.periodDays == 30 &&
-        (widget.summaryLines.isNotEmpty || widget.belowTitle != null);
+        (widget.summaryLines.isNotEmpty ||
+            widget.belowTitle != null ||
+            widget.trend != null);
     final localizations = MaterialLocalizations.of(context);
     final firstDay = ref
         .read(appPrefsProvider)
@@ -390,6 +399,7 @@ class _ProgressCalendarSectionState
                 AppDimensions.progressCalendarHeaderHeight +
                 kCalendarWeekdayCount * rowHeight;
             return SizedBox(
+              key: _boardKey,
               height: boardHeight,
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -401,7 +411,7 @@ class _ProgressCalendarSectionState
                       padding: const EdgeInsets.only(
                         top: AppDimensions.progressCalendarHeaderHeight,
                       ),
-                      child: _summaryWash(theme),
+                      child: _summaryWash(theme, now),
                     ),
                   ),
                 ],
@@ -409,20 +419,75 @@ class _ProgressCalendarSectionState
             );
           },
         ),
+        if (!long &&
+            widget.periodDays == 30 &&
+            widget.trend != null &&
+            widget.belowTitle != null) ...[
+          const SizedBox(height: 6),
+          KeyedSubtree(
+            key: const Key('progress-below-title'),
+            child: widget.belowTitle!,
+          ),
+        ],
       ],
     );
   }
 
-  Widget _summaryWash(ThemeData theme) {
+  Widget _summaryWash(ThemeData theme, DateTime now) {
     final ink = theme.textTheme.bodySmall?.copyWith(fontSize: 11, height: 1.35);
-    return WashPanel(
-      key: const Key('progress-thirty-summary'),
-      color: Color.alphaBlend(
-        (widget.family ?? theme.colorScheme.primary).withValues(alpha: 0.12),
-        theme.colorScheme.surface,
-      ),
-      padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
-      child: SingleChildScrollView(
+    final trend = widget.periodDays == 30 ? widget.trend : null;
+    Widget child;
+    if (trend != null && trend.catalog.isNotEmpty) {
+      final todayKey = dateKey(now);
+      final windows = [
+        measureTrendWindow(
+          keys: shiftedPeriodDateKeys(
+            30,
+            now: now,
+            periodsBack: _periodsBack + 2,
+          ),
+          todayKey: todayKey,
+          idForDate: trend.idForDate,
+          optionIds: trend.optionIds,
+        ),
+        measureTrendWindow(
+          keys: shiftedPeriodDateKeys(
+            30,
+            now: now,
+            periodsBack: _periodsBack + 1,
+          ),
+          todayKey: todayKey,
+          idForDate: trend.idForDate,
+          optionIds: trend.optionIds,
+        ),
+        measureTrendWindow(
+          keys: shiftedPeriodDateKeys(30, now: now, periodsBack: _periodsBack),
+          todayKey: todayKey,
+          idForDate: trend.idForDate,
+          optionIds: trend.optionIds,
+        ),
+      ];
+      final selected = selectFiveTrendOptionIds(
+        optionIds: trend.optionIds,
+        windows: windows,
+      );
+      child = Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            child: ThirtyDayTrendChart(
+              series: trend,
+              windows: windows,
+              selectedIds: selected,
+              calendar: ref.read(appPrefsProvider).displayCalendar,
+              anchorKey: _washKey,
+              washLink: _washLink,
+            ),
+          ),
+        ],
+      );
+    } else {
+      child = SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -439,6 +504,24 @@ class _ProgressCalendarSectionState
               ),
             if (widget.belowTitle != null) widget.belowTitle!,
           ],
+        ),
+      );
+    }
+    return KeyedSubtree(
+      key: const Key('progress-thirty-summary'),
+      child: CompositedTransformTarget(
+        link: _washLink,
+        child: WashPanel(
+          key: _washKey,
+          color: Color.alphaBlend(
+            (widget.family ?? theme.colorScheme.primary).withValues(
+              alpha: 0.12,
+            ),
+            theme.colorScheme.surface,
+          ),
+          padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+          clipBehavior: trend != null ? Clip.none : Clip.antiAlias,
+          child: child,
         ),
       ),
     );

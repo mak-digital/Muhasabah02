@@ -97,7 +97,14 @@ class RecordedDaysScreen extends ConsumerWidget {
       padding: const EdgeInsets.only(bottom: 4),
       child: Row(
         children: [
-          Icon(Icons.circle, size: 8, color: MuhasabahColors.salahFamily),
+          Icon(
+            Icons.circle,
+            size: 8,
+            color: MuhasabahWashTheme.harmonizeFamilyOf(
+              context,
+              MuhasabahColors.salahFamily,
+            ),
+          ),
           const SizedBox(width: 4),
           Text(Copy.recordedDaysSavedLegend, style: muted),
           const SizedBox(width: 12),
@@ -204,6 +211,7 @@ class RecordedDaysScreen extends ConsumerWidget {
       MuhasabahColors.salahWash,
       MuhasabahColors.salahWashDark,
       brightness,
+      context,
     );
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 2),

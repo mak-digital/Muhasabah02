@@ -9,12 +9,23 @@ import '../../domain/domain_action.dart';
 import '../../domain/ids.dart';
 import '../../domain/monitor_domain.dart';
 import '../../domain/personal_response.dart';
+import '../registry/registry_filter_note.dart';
+import '../registry/registry_table.dart';
 import '../shared/ui_bits.dart';
 import 'note_source.dart';
 import 'response_editor_screen.dart';
 
 class ResponseListScreen extends ConsumerStatefulWidget {
-  const ResponseListScreen({super.key});
+  const ResponseListScreen({
+    super.key,
+    this.embedded = false,
+    this.activeDomains,
+    this.filterNote,
+  });
+
+  final bool embedded;
+  final Set<MonitorDomain>? activeDomains;
+  final String? filterNote;
 
   @override
   ConsumerState<ResponseListScreen> createState() => _ResponseListScreenState();
@@ -211,60 +222,84 @@ class _ResponseListScreenState extends ConsumerState<ResponseListScreen> {
     _toast(Copy.noteReminderSaved);
   }
 
+  bool _inScope(PersonalResponse item) {
+    final domains = widget.activeDomains;
+    if (domains == null) return true;
+    final domain = noteMonitorDomain(item);
+    if (domain == null) return true;
+    return domains.contains(domain);
+  }
+
   @override
   Widget build(BuildContext context) {
     final async = ref.watch(responsesProvider);
-    return Scaffold(
-      appBar: AppBar(title: const Text(Copy.myResponse)),
-      body: async.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => const EmptyState(
-          title: Copy.myResponse,
-          message: 'Saved notes could not be listed. Existing records were left unchanged.',
-        ),
-        data: (items) {
-          if (items.isEmpty) {
-            return ListView(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-              children: [
-                _intro(),
-                const SizedBox(height: 12),
-                _actionBar(const [], includeRestore: false),
-                const SizedBox(height: 20),
-                Text(
-                  Copy.emptyResponses,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    height: 1.4,
+    final body = async.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (_, _) => const EmptyState(
+        title: Copy.myResponse,
+        message: 'Saved notes could not be listed. Existing records were left unchanged.',
+      ),
+      data: (stored) {
+        final items = [
+          for (final item in stored)
+            if (_inScope(item)) item,
+        ];
+        if (items.isEmpty) {
+          return RegistryPageBody(
+            top: [
+              _intro(),
+              const SizedBox(height: 12),
+              _actionBar(const [], archived: false),
+            ],
+            empty: Text(
+              Copy.emptyResponses,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                height: 1.4,
+              ),
+            ),
+            bottom: widget.filterNote == null
+                ? null
+                : RegistryFilterNote(
+                    key: const Key('registry-filter-note-notes'),
+                    text: widget.filterNote!,
                   ),
-                ),
-              ],
-            );
-          }
-          final active = items.where((item) => !item.isArchived).toList();
-          final archived = items.where((item) => item.isArchived).toList();
-          return ListView(
-            primary: false,
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+          );
+        }
+        final active = items.where((item) => !item.isArchived).toList();
+        final archived = items.where((item) => item.isArchived).toList();
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               _intro(),
               const SizedBox(height: 12),
-              _actionBar(items, includeRestore: false),
+              _actionBar(active, archived: false),
               const SizedBox(height: 12),
-              _table(active),
+              Expanded(flex: archived.isEmpty ? 1 : 3, child: _table(active)),
               if (archived.isNotEmpty) ...[
-                const SizedBox(height: 20),
+                const SizedBox(height: 12),
                 const SectionHeader('Archived'),
                 const SizedBox(height: 8),
-                _actionBar(items, includeRestore: true),
+                _actionBar(archived, archived: true),
                 const SizedBox(height: 12),
-                _table(archived),
+                Expanded(flex: 2, child: _table(archived)),
               ],
+              if (widget.filterNote != null)
+                RegistryFilterNote(
+                  key: const Key('registry-filter-note-notes'),
+                  text: widget.filterNote!,
+                ),
             ],
-          );
-        },
-      ),
+          ),
+        );
+      },
+    );
+    if (widget.embedded) return body;
+    return Scaffold(
+      appBar: AppBar(title: const Text(Copy.myResponse)),
+      body: body,
     );
   }
 
@@ -273,6 +308,7 @@ class _ResponseListScreenState extends ConsumerState<ResponseListScreen> {
       MuhasabahColors.salahWash,
       MuhasabahColors.salahWashDark,
       Theme.of(context).brightness,
+      context,
     );
   }
 
@@ -287,60 +323,38 @@ class _ResponseListScreenState extends ConsumerState<ResponseListScreen> {
     );
   }
 
-  ButtonStyle get _washButtonStyle {
-    return TextButton.styleFrom(
-      backgroundColor: _wash,
-      foregroundColor: Theme.of(context).colorScheme.onSurface,
-      elevation: 0,
-      shadowColor: Colors.transparent,
-      side: BorderSide.none,
-      visualDensity: VisualDensity.compact,
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      minimumSize: const Size(0, 32),
-      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-    );
-  }
-
-  Widget _washButton({
-    Key? key,
-    required String label,
-    required VoidCallback onPressed,
-  }) {
-    return TextButton(
-      key: key,
-      onPressed: onPressed,
-      style: _washButtonStyle,
-      child: Text(label),
-    );
-  }
-
-  Widget _actionBar(
-    List<PersonalResponse> items, {
-    required bool includeRestore,
-  }) {
-    return Wrap(
-      spacing: 6,
-      runSpacing: 6,
+  Widget _actionBar(List<PersonalResponse> items, {required bool archived}) {
+    return RegistryWashButtonRow(
       children: [
-        _washButton(label: Copy.addAResponse, onPressed: _openEditor),
-        _washButton(
+        if (!archived)
+          RegistryWashButton(
+            label: Copy.addAResponse,
+            wash: _wash,
+            onPressed: _openEditor,
+          ),
+        RegistryWashButton(
           label: Copy.deleteResponse,
+          wash: _wash,
           onPressed: () => _deleteSelected(items),
         ),
-        _washButton(
-          label: Copy.archiveResponse,
-          onPressed: () => _archiveSelected(items),
-        ),
-        if (includeRestore)
-          _washButton(
+        if (!archived)
+          RegistryWashButton(
+            label: Copy.archiveResponse,
+            wash: _wash,
+            onPressed: () => _archiveSelected(items),
+          ),
+        if (archived)
+          RegistryWashButton(
             label: Copy.restoreResponse,
+            wash: _wash,
             onPressed: () => _restoreSelected(items),
           ),
-        _washButton(
-          key: const Key('note-action-reminder'),
+        RegistryWashButton(
+          key: Key(
+            archived ? 'note-action-reminder-archived' : 'note-action-reminder',
+          ),
           label: Copy.noteActionReminder,
+          wash: _wash,
           onPressed: () => _setActionReminder(items),
         ),
       ],
@@ -353,34 +367,22 @@ class _ResponseListScreenState extends ConsumerState<ResponseListScreen> {
 
   Widget _table(List<PersonalResponse> rows) {
     if (rows.isEmpty) {
-      return Text(
-        Copy.emptyResponses,
-        style: Theme.of(context).textTheme.bodySmall,
+      return Align(
+        alignment: Alignment.topLeft,
+        child: Text(
+          Copy.emptyResponses,
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
       );
     }
     final ids = {for (final row in rows) row.id};
     final allSelected = ids.every(_selected.contains);
     final theme = Theme.of(context);
-    return Material(
-      color: theme.colorScheme.surface,
-      clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: _wash, width: 1.5),
-      ),
-      child: Column(
-        children: [
-          _headerRow(theme, allSelected, ids),
-          for (var i = 0; i < rows.length; i++) ...[
-            Divider(
-              height: 1,
-              thickness: 1,
-              color: _wash.withValues(alpha: 0.9),
-            ),
-            _dataRow(theme, rows[i]),
-          ],
-        ],
-      ),
+    return RegistryStickyTable(
+      wash: _wash,
+      header: _headerRow(theme, allSelected, ids),
+      itemCount: rows.length,
+      itemBuilder: (context, index) => _dataRow(theme, rows[index]),
     );
   }
 

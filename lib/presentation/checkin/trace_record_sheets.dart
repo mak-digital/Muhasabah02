@@ -152,16 +152,6 @@ Future<void> showHomeTraceRecordSheet({
                           statusKeyPrefix: 'trace-${row.storageKey}',
                           options: catalog,
                           selectedId: selectedId,
-                          namedSubject:
-                              isDhikrPostFardTrace(row.storageKey) ||
-                                  isHuquqTrace(row.storageKey) ||
-                                  isKnowledgeTrace(row.storageKey) ||
-                                  isTimeTrace(row.storageKey) ||
-                                  isHealthTrace(row.storageKey) ||
-                                  isWealthTrace(row.storageKey) ||
-                                  isUmmahTrace(row.storageKey)
-                              ? row.label
-                              : null,
                           onSelected: (option) async {
                             selectedId = option.id;
                             outcome =

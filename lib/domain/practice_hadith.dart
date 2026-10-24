@@ -1,6 +1,6 @@
 import 'monitor_domain.dart';
 
-const int kPracticeHadithSchemaVersion = 1;
+const int kPracticeHadithSchemaVersion = 3;
 
 enum PracticeHadithStatus { learning, learnt, practicing, habit }
 
@@ -51,10 +51,12 @@ class PracticeHadithItem {
 
   final String id;
   final String topic;
+
   /// Framing of the teaching in English.
   final String text;
   final String arabic;
   final String transliteration;
+
   /// English of the core words (supplication or key wording).
   final String translation;
   final String source;
@@ -75,6 +77,9 @@ class PracticeHadithRecord {
     this.arabic = '',
     this.transliteration = '',
     this.translation = '',
+    this.archivedAt,
+    this.sharedDateKeys = const [],
+    this.mapFillId,
     this.schemaVersion = kPracticeHadithSchemaVersion,
   });
 
@@ -90,9 +95,21 @@ class PracticeHadithRecord {
   final MonitorDomain domain;
   final String group;
   final PracticeHadithStatus status;
+  final DateTime? archivedAt;
+  final List<String> sharedDateKeys;
+  final String? mapFillId;
   final int schemaVersion;
 
-  PracticeHadithRecord copyWith({PracticeHadithStatus? status}) {
+  bool get isArchived => archivedAt != null;
+
+  PracticeHadithRecord copyWith({
+    PracticeHadithStatus? status,
+    DateTime? archivedAt,
+    bool clearArchivedAt = false,
+    List<String>? sharedDateKeys,
+    String? mapFillId,
+    bool clearMapFillId = false,
+  }) {
     return PracticeHadithRecord(
       id: id,
       catalogId: catalogId,
@@ -106,6 +123,9 @@ class PracticeHadithRecord {
       domain: domain,
       group: group,
       status: status ?? this.status,
+      archivedAt: clearArchivedAt ? null : archivedAt ?? this.archivedAt,
+      sharedDateKeys: sharedDateKeys ?? this.sharedDateKeys,
+      mapFillId: clearMapFillId ? null : mapFillId ?? this.mapFillId,
       schemaVersion: schemaVersion,
     );
   }
@@ -125,6 +145,9 @@ class PracticeHadithRecord {
       'domain': domain.id,
       'group': group,
       'status': status.name,
+      if (archivedAt != null) 'archivedAt': archivedAt!.toIso8601String(),
+      if (sharedDateKeys.isNotEmpty) 'sharedDateKeys': sharedDateKeys,
+      if (mapFillId != null && mapFillId!.isNotEmpty) 'mapFillId': mapFillId,
     };
   }
 
@@ -158,12 +181,24 @@ class PracticeHadithRecord {
       translation: json['translation'] is String
           ? json['translation'] as String
           : '',
-      domain: MonitorDomain.values
+      domain:
+          MonitorDomain.values
               .where((value) => value.id == json['domain'])
               .firstOrNull ??
           MonitorDomain.hadith,
       group: json['group'] is String ? json['group'] as String : '',
       status: PracticeHadithStatusX.fromId(json['status'] as String?),
+      archivedAt: json['archivedAt'] is String
+          ? DateTime.tryParse(json['archivedAt'] as String)
+          : null,
+      sharedDateKeys: [
+        if (json['sharedDateKeys'] is List)
+          for (final value in json['sharedDateKeys'] as List)
+            if (value is String && value.isNotEmpty) value,
+      ],
+      mapFillId: json['mapFillId'] is String
+          ? json['mapFillId'] as String
+          : null,
       schemaVersion: json['schemaVersion'] is int
           ? json['schemaVersion'] as int
           : kPracticeHadithSchemaVersion,
@@ -185,6 +220,43 @@ bool practiceHadithAlreadyRegistered(
   String catalogId,
 ) {
   return registeredPracticeHadithIds(records).contains(catalogId);
+}
+
+PracticeHadithRecord? practiceHadithForCatalog(
+  List<PracticeHadithRecord> records,
+  String catalogId,
+) {
+  PracticeHadithRecord? archived;
+  for (final record in records) {
+    if (record.catalogId != catalogId) continue;
+    if (!record.isArchived) return record;
+    archived ??= record;
+  }
+  return archived;
+}
+
+PracticeHadithRecord recordAfterShare(
+  PracticeHadithRecord record,
+  String todayKey,
+) {
+  final status = record.status == PracticeHadithStatus.learning
+      ? PracticeHadithStatus.learnt
+      : record.status;
+  return record.copyWith(
+    status: status,
+    sharedDateKeys: [...record.sharedDateKeys, todayKey],
+    mapFillId: 'shared',
+  );
+}
+
+String hadithShareBody(PracticeHadithItem item) {
+  return [
+    item.topic,
+    if (item.arabic.trim().isNotEmpty) item.arabic.trim(),
+    if (item.transliteration.trim().isNotEmpty) item.transliteration.trim(),
+    if (item.translation.trim().isNotEmpty) item.translation.trim(),
+    if (item.source.trim().isNotEmpty) item.source.trim(),
+  ].join('\n\n');
 }
 
 PracticeHadithRecord recordFromCatalog({

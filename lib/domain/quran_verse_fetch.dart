@@ -7,10 +7,7 @@ class QuranVerseFetchException implements Exception {
 }
 
 class FetchedQuranPassage {
-  const FetchedQuranPassage({
-    required this.arabic,
-    required this.translation,
-  });
+  const FetchedQuranPassage({required this.arabic, required this.translation});
 
   final String arabic;
   final String translation;
@@ -34,15 +31,19 @@ class QuranComVerseFetch implements QuranVerseFetch {
     if (get == null) {
       throw const QuranVerseFetchException();
     }
-    final uri = Uri.https('api.quran.com', '/api/v4/verses/by_chapter/${range.surah}', {
-      'language': 'en',
-      'words': 'false',
-      'translations': '20',
-      'from': '${range.start}',
-      'to': '${range.end}',
-      'per_page': '${range.verseCount}',
-      'fields': 'text_uthmani',
-    });
+    final uri = Uri.https(
+      'api.quran.com',
+      '/api/v4/verses/by_chapter/${range.surah}',
+      {
+        'language': 'en',
+        'words': 'false',
+        'translations': '20',
+        'from': '${range.start}',
+        'to': '${range.end}',
+        'per_page': '${range.verseCount}',
+        'fields': 'text_uthmani',
+      },
+    );
     try {
       final raw = await get(uri);
       return parseQuranComVersesResponse(raw, range);

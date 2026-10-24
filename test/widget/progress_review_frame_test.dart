@@ -39,21 +39,18 @@ void main() {
     expect(find.byType(PeriodSelector), findsOneWidget);
     expect(find.text(Copy.progressMarksTitle), findsOneWidget);
     expect(find.text('Prayed on time'), findsOneWidget);
-    expect(
-      find.text(MonitorDomain.salah.focusQuestion!),
-      findsOneWidget,
-    );
+    expect(find.text(MonitorDomain.salah.focusQuestion!), findsOneWidget);
 
     final pinnedTop = tester.getTopLeft(find.byType(PeriodSelector)).dy;
-    await tester.drag(verticalList(find.byType(SalahProgressScreen)), const Offset(0, -420));
+    await tester.drag(
+      verticalList(find.byType(SalahProgressScreen)),
+      const Offset(0, -420),
+    );
     await tester.pumpAndSettle();
 
     expect(find.byType(PeriodSelector), findsOneWidget);
     expect(tester.getTopLeft(find.byType(PeriodSelector)).dy, pinnedTop);
-    expect(
-      find.text(MonitorDomain.salah.focusQuestion!),
-      findsOneWidget,
-    );
+    expect(find.text(MonitorDomain.salah.focusQuestion!), findsOneWidget);
   });
 
   testWidgets('Salah Review marks collapse on period change and reopen', (
@@ -77,7 +74,9 @@ void main() {
     await openSalahProgress(tester);
     expect(find.text('Prayed on time'), findsOneWidget);
 
-    await tester.tap(find.byKey(const Key('progress-cell-salah-fajr-2026-09-06')));
+    await tester.tap(
+      find.byKey(const Key('progress-cell-salah-fajr-2026-09-06')),
+    );
     await tester.pumpAndSettle();
     expect(find.byType(CheckInScreen), findsOneWidget);
 

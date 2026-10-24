@@ -173,7 +173,8 @@ final List<BringQuranIndexItem> kBringQuranIndex = [
     start: 63,
     topic: 'Servants of the Most Merciful',
     keywords: 'humble earth walk speech',
-    preview: 'The servants of the Most Merciful walk upon the earth in humility.',
+    preview:
+        'The servants of the Most Merciful walk upon the earth in humility.',
   ),
   _v(
     surah: 29,
@@ -274,7 +275,8 @@ final List<BringQuranIndexItem> kBringQuranIndex = [
     end: 3,
     topic: 'Time',
     keywords: 'asr time loss faith patience',
-    preview: 'By time, mankind is in loss — except those who believe and do right.',
+    preview:
+        'By time, mankind is in loss — except those who believe and do right.',
   ),
   _v(
     surah: 112,

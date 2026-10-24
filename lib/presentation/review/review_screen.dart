@@ -3,19 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/theme.dart';
 import '../../application/providers.dart';
-import '../../domain/analytics.dart';
 import '../../domain/copy.dart';
-import '../../domain/daily_check_in.dart';
 import '../../domain/date_key.dart';
 import '../../domain/display_calendar.dart';
 import '../../domain/home_traces.dart';
 import '../../domain/hajj_planning.dart';
 import '../../domain/fasting_practices.dart';
 import '../../domain/monitor_domain.dart';
-import '../../domain/other_domains.dart';
 import '../../domain/personal_mix.dart';
 import '../../domain/personalisation_resolver.dart';
-import '../../domain/quran.dart';
 import '../../domain/review_period.dart';
 import '../progress/optional_domain_progress_screen.dart';
 import '../progress/salah_progress_screen.dart';
@@ -34,6 +30,7 @@ class ReviewScreen extends ConsumerWidget {
     final period = ref.watch(reviewPeriodProvider);
     final now = ref.watch(nowProvider);
     final async = ref.watch(checkInsProvider);
+    final snapshot = ref.watch(reviewPeriodSnapshotProvider);
     ref.watch(hajjStoreTickProvider);
     ref.watch(productivityStoreTickProvider);
     return Scaffold(
@@ -44,7 +41,10 @@ class ReviewScreen extends ConsumerWidget {
           title: Copy.reviewTitle,
           message: 'Period summary could not be built from stored records.',
         ),
-        data: (records) {
+        data: (_) {
+          if (snapshot == null) {
+            return const Center(child: CircularProgressIndicator());
+          }
           ref.watch(prefsTickProvider);
           final mix = ref.watch(appPrefsProvider).personalMix;
           final resolver = PersonalisationResolver(
@@ -53,63 +53,22 @@ class ReviewScreen extends ConsumerWidget {
           );
           final calendar = ref.watch(appPrefsProvider).displayCalendar;
           final brightness = Theme.of(context).brightness;
-          final keys = periodDateKeys(period.days, now: now);
-          final index = indexByDate(records);
-          final inPeriod = recordsForKeys(index, keys);
-          final salah = salahShare(inPeriod, null);
-          final reading = readingShare(inPeriod);
-          var dhikrDays = 0;
-          var akhlaqDays = 0;
-          var huquqDays = 0;
-          var knowledgeDays = 0;
-          var timeDays = 0;
-          var healthDays = 0;
-          var wealthDays = 0;
-          var ummahDays = 0;
-          var fastingDays = 0;
-          var charityDays = 0;
-          var hadithDays = 0;
-          for (final record in inPeriod) {
-            if (record.dhikr.isRecorded ||
-                _hasRecordedTrace(record, dhikrHomeRows)) {
-              dhikrDays++;
-            }
-            if (_hasRecordedTrace(record, akhlaqAllHomeRows) ||
-                (record.akhlaqStruggleNote != null &&
-                    record.akhlaqStruggleNote!.trim().isNotEmpty)) {
-              akhlaqDays++;
-            }
-            if (_hasRecordedTrace(record, huquqHomeRows)) {
-              huquqDays++;
-            }
-            if (_hasRecordedTrace(record, knowledgeHomeRows)) {
-              knowledgeDays++;
-            }
-            if (_hasRecordedTrace(record, timeHomeRows)) {
-              timeDays++;
-            }
-            if (_hasRecordedTrace(record, healthHomeRows)) {
-              healthDays++;
-            }
-            if (_hasRecordedTrace(record, wealthAllHomeRows)) {
-              wealthDays++;
-            }
-            if (_hasRecordedTrace(record, ummahAllHomeRows)) {
-              ummahDays++;
-            }
-            if (record.fasting.isRecorded ||
-                _hasRecordedTrace(record, fastingHomeRows)) {
-              fastingDays++;
-            }
-            if (record.charity.isRecorded ||
-                _hasRecordedTrace(record, charityHomeRows)) {
-              charityDays++;
-            }
-            if (record.hadith.isRecorded ||
-                _hasRecordedTrace(record, hadithHomeRows)) {
-              hadithDays++;
-            }
-          }
+          final summary = snapshot;
+          final keys = summary.keys;
+          final inPeriod = summary.inPeriod;
+          final salah = summary.salah;
+          final reading = summary.reading;
+          final hadithDays = summary.recordedDays(MonitorDomain.hadith);
+          final dhikrDays = summary.recordedDays(MonitorDomain.dhikr);
+          final fastingDays = summary.recordedDays(MonitorDomain.fasting);
+          final akhlaqDays = summary.recordedDays(MonitorDomain.akhlaq);
+          final huquqDays = summary.recordedDays(MonitorDomain.huquq);
+          final knowledgeDays = summary.recordedDays(MonitorDomain.knowledge);
+          final timeDays = summary.recordedDays(MonitorDomain.time);
+          final healthDays = summary.recordedDays(MonitorDomain.health);
+          final wealthDays = summary.recordedDays(MonitorDomain.wealth);
+          final ummahDays = summary.recordedDays(MonitorDomain.ummah);
+          final charityDays = summary.recordedDays(MonitorDomain.charity);
           final mixKeys = resolver.effectiveRowIds;
           List<HomeTraceRow> rowsFor(
             MonitorDomain domain,
@@ -133,6 +92,7 @@ class ReviewScreen extends ConsumerWidget {
                   MuhasabahColors.salahWash,
                   MuhasabahColors.salahWashDark,
                   brightness,
+                  context,
                 ),
                 onTap: () => Navigator.push(
                   context,
@@ -152,6 +112,7 @@ class ReviewScreen extends ConsumerWidget {
                   MuhasabahColors.quranWash,
                   MuhasabahColors.quranWashDark,
                   brightness,
+                  context,
                 ),
                 onTap: () => Navigator.push(
                   context,
@@ -170,6 +131,7 @@ class ReviewScreen extends ConsumerWidget {
                   MuhasabahColors.hadithWash,
                   MuhasabahColors.hadithWashDark,
                   brightness,
+                  context,
                 ),
                 onTap: () => _openTraceProgress(
                   context,
@@ -191,6 +153,7 @@ class ReviewScreen extends ConsumerWidget {
                   MuhasabahColors.dhikrWash,
                   MuhasabahColors.dhikrWashDark,
                   brightness,
+                  context,
                 ),
                 onTap: () => _openTraceProgress(
                   context,
@@ -212,6 +175,7 @@ class ReviewScreen extends ConsumerWidget {
                   MuhasabahColors.fastingWash,
                   MuhasabahColors.fastingWashDark,
                   brightness,
+                  context,
                 ),
                 onTap: () => _openTraceProgress(
                   context,
@@ -243,6 +207,7 @@ class ReviewScreen extends ConsumerWidget {
                   MuhasabahColors.akhlaqWash,
                   MuhasabahColors.akhlaqWashDark,
                   brightness,
+                  context,
                 ),
                 onTap: () => _openTraceProgress(
                   context,
@@ -265,6 +230,7 @@ class ReviewScreen extends ConsumerWidget {
                   MuhasabahColors.huquqWash,
                   MuhasabahColors.huquqWashDark,
                   brightness,
+                  context,
                 ),
                 onTap: () => _openTraceProgress(
                   context,
@@ -286,6 +252,7 @@ class ReviewScreen extends ConsumerWidget {
                   MuhasabahColors.knowledgeWash,
                   MuhasabahColors.knowledgeWashDark,
                   brightness,
+                  context,
                 ),
                 onTap: () => _openTraceProgress(
                   context,
@@ -307,6 +274,7 @@ class ReviewScreen extends ConsumerWidget {
                   MuhasabahColors.timeWash,
                   MuhasabahColors.timeWashDark,
                   brightness,
+                  context,
                 ),
                 onTap: () => _openTraceProgress(
                   context,
@@ -327,6 +295,7 @@ class ReviewScreen extends ConsumerWidget {
                   MuhasabahColors.healthWash,
                   MuhasabahColors.healthWashDark,
                   brightness,
+                  context,
                 ),
                 onTap: () => _openTraceProgress(
                   context,
@@ -347,6 +316,7 @@ class ReviewScreen extends ConsumerWidget {
                   MuhasabahColors.wealthWash,
                   MuhasabahColors.wealthWashDark,
                   brightness,
+                  context,
                 ),
                 onTap: () => _openTraceProgress(
                   context,
@@ -367,6 +337,7 @@ class ReviewScreen extends ConsumerWidget {
                   MuhasabahColors.ummahWash,
                   MuhasabahColors.ummahWashDark,
                   brightness,
+                  context,
                 ),
                 onTap: () => _openTraceProgress(
                   context,
@@ -388,6 +359,7 @@ class ReviewScreen extends ConsumerWidget {
                   MuhasabahColors.productivityWash,
                   MuhasabahColors.productivityWashDark,
                   brightness,
+                  context,
                 ),
                 onTap: () => _openTraceProgress(
                   context,
@@ -412,6 +384,7 @@ class ReviewScreen extends ConsumerWidget {
                   MuhasabahColors.hajjWash,
                   MuhasabahColors.hajjWashDark,
                   brightness,
+                  context,
                 ),
                 onTap: () => _openTraceProgress(
                   context,
@@ -434,6 +407,7 @@ class ReviewScreen extends ConsumerWidget {
                   MuhasabahColors.charityWash,
                   MuhasabahColors.charityWashDark,
                   brightness,
+                  context,
                 ),
                 onTap: () => _openTraceProgress(
                   context,
@@ -663,11 +637,4 @@ class _ReviewDomainTile extends StatelessWidget {
       ),
     );
   }
-}
-
-bool _hasRecordedTrace(DailyCheckIn record, List<HomeTraceRow> rows) {
-  for (final row in rows) {
-    if (record.homeTrace(row.storageKey).isRecorded) return true;
-  }
-  return false;
 }

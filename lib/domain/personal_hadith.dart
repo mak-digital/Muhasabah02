@@ -41,7 +41,9 @@ class PersonalHadith {
     return PracticeHadithItem(
       id: id,
       topic: ref.citation,
-      text: wordsPending ? kPersonalHadithWordsPending : kPersonalHadithBroughtNote,
+      text: wordsPending
+          ? kPersonalHadithWordsPending
+          : kPersonalHadithBroughtNote,
       arabic: arabic,
       transliteration: '',
       translation: translation,

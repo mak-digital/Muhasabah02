@@ -19,23 +19,30 @@ class DomainColorIdentity {
   final Color washLight;
   final Color washDark;
 
-  Color washFor(Brightness brightness) =>
-      MuhasabahColors.wash(washLight, washDark, brightness);
+  Color washFor(Brightness brightness, [BuildContext? context]) =>
+      MuhasabahColors.wash(washLight, washDark, brightness, context);
+
+  Color familyFor(BuildContext context) {
+    final theme = Theme.of(context).extension<MuhasabahWashTheme>();
+    return theme?.harmonizeFamily(family) ?? family;
+  }
 
   /// Same Learn & Practice panel on every domain. Distinct from the domain
   /// week/actions wash. Colour still does not grade learning.
-  Color practiceWashFor(Brightness brightness) =>
+  Color practiceWashFor(Brightness brightness, [BuildContext? context]) =>
       MuhasabahColors.wash(
         MuhasabahColors.practiceWash,
         MuhasabahColors.practiceWashDark,
         brightness,
+        context,
       );
 
   /// Slightly cooler mix so developer notes are not the same wash as actions.
-  Color notesWashFor(Brightness brightness) => Color.alphaBlend(
-    MuhasabahColors.journal.withValues(alpha: 0.28),
-    washFor(brightness),
-  );
+  Color notesWashFor(Brightness brightness, [BuildContext? context]) =>
+      Color.alphaBlend(
+        MuhasabahColors.journal.withValues(alpha: 0.28),
+        washFor(brightness, context),
+      );
 }
 
 /// Today overview tile name. Presentation-only; not [MonitorDomain.shortLabel].

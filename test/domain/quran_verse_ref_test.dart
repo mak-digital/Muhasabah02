@@ -23,18 +23,36 @@ void main() {
       parseQuranVerseInput('https://quran.com/2/255').range?.verseKey,
       '2:255',
     );
-    expect(parseQuranVerseInput('quran.com/2/255-257').range?.verseKey, '2:255-257');
-    expect(parseQuranVerseInput('quran.com/2?startingVerse=255').range?.verseKey, '2:255');
+    expect(
+      parseQuranVerseInput('quran.com/2/255-257').range?.verseKey,
+      '2:255-257',
+    );
+    expect(
+      parseQuranVerseInput('quran.com/2?startingVerse=255').range?.verseKey,
+      '2:255',
+    );
   });
 
   test('rejects invalid, whole-surah, and long passages', () {
     expect(parseQuranVerseInput('').status, QuranVerseParseStatus.empty);
-    expect(parseQuranVerseInput('al-baqarah/255').status, QuranVerseParseStatus.invalid);
-    expect(parseQuranVerseInput('quran.com/2').status, QuranVerseParseStatus.invalid);
+    expect(
+      parseQuranVerseInput('al-baqarah/255').status,
+      QuranVerseParseStatus.invalid,
+    );
+    expect(
+      parseQuranVerseInput('quran.com/2').status,
+      QuranVerseParseStatus.invalid,
+    );
     expect(parseQuranVerseInput('2:999').status, QuranVerseParseStatus.invalid);
-    expect(parseQuranVerseInput('2:1-20').status, QuranVerseParseStatus.tooLong);
+    expect(
+      parseQuranVerseInput('2:1-20').status,
+      QuranVerseParseStatus.tooLong,
+    );
     expect(parseQuranVerseInput('2:255-261').range?.verseCount, 7);
-    expect(parseQuranVerseInput('2:255-262').status, QuranVerseParseStatus.tooLong);
+    expect(
+      parseQuranVerseInput('2:255-262').status,
+      QuranVerseParseStatus.tooLong,
+    );
     expect(parseQuranVerseInput('2:255–257').range?.verseCount, 3);
     expect(parseQuranVerseInput('2:255-262').range, isNull);
   });

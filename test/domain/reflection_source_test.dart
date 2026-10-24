@@ -15,9 +15,9 @@ void main() {
 
   test('hadith citations prefer the first named collection', () {
     expect(
-      reflectionSourceUris(
-        'Ṣaḥīḥ al-Bukhārī 527; Ṣaḥīḥ Muslim 85',
-      ).map((uri) => uri.toString()).toList(),
+      reflectionSourceUris('Ṣaḥīḥ al-Bukhārī 527; Ṣaḥīḥ Muslim 85')
+          .map((uri) => uri.toString())
+          .toList(),
       ['https://sunnah.com/bukhari:527', 'https://sunnah.com/muslim:85'],
     );
     expect(
@@ -32,15 +32,15 @@ void main() {
 
   test('mixed Qur’an and hadith citations keep both pages', () {
     expect(
-      reflectionSourceUris(
-        'Qur’an 2:255; Sunan an-Nasāʾī 7280',
-      ).map((uri) => uri.toString()).toList(),
+      reflectionSourceUris('Qur’an 2:255; Sunan an-Nasāʾī 7280')
+          .map((uri) => uri.toString())
+          .toList(),
       ['https://quran.com/2/255', 'https://sunnah.com/nasai:7280'],
     );
     expect(
-      reflectionSourceUris(
-        'Ṣaḥīḥ al-Bukhārī 2311; Qur’an 2:255',
-      ).map((uri) => uri.toString()).toList(),
+      reflectionSourceUris('Ṣaḥīḥ al-Bukhārī 2311; Qur’an 2:255')
+          .map((uri) => uri.toString())
+          .toList(),
       ['https://sunnah.com/bukhari:2311', 'https://quran.com/2/255'],
     );
   });
@@ -50,9 +50,7 @@ void main() {
   });
 
   test('each source part keeps its own page label', () {
-    final pages = reflectionSourcePages(
-      'Qur’an 2:255; Sunan an-Nasāʾī 7280',
-    );
+    final pages = reflectionSourcePages('Qur’an 2:255; Sunan an-Nasāʾī 7280');
     expect(pages, hasLength(2));
     expect(pages.first.label, 'Qur’an 2:255');
     expect(pages.last.label, 'Sunan an-Nasāʾī 7280');

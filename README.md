@@ -38,6 +38,7 @@ Home is a colour-family Summary Dashboard in this order: Start today’s check-i
 ## Known limitations
 
 - No production Play signing key is configured in this repository.
+- Android Impeller is turned off so the first screen can appear after idle. Flutter may remove that opt-out in a later SDK.
 - Hive stores JSON documents on-device; this is not claimed as encryption-at-rest.
 - Delete removes the app-managed record only; it is not forensic secure erasure.
 - Nested `muhasabah02/` copy, zip, and text dump in the tree are leftover artifacts and are not the application source.

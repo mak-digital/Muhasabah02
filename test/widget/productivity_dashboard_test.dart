@@ -830,6 +830,6 @@ void main() {
       find.byKey(const Key('domain-visible-productivity')),
     );
     expect(tile.value, isFalse);
-    expect(tile.onChanged, isNotNull);
+    expect(tile.onChanged, isNull);
   });
 }

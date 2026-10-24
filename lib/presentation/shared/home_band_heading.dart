@@ -20,7 +20,7 @@ class HomeBandHeading extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: bandHeadingWash(family, baseWash),
+        color: bandHeadingWash(family, baseWash, context),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Padding(

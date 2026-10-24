@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../application/providers.dart';
 import '../../domain/copy.dart';
+import '../../domain/hadith_archive.dart';
 import '../../domain/reflection_source.dart';
 import '../../domain/first_day_of_week.dart';
 import '../../domain/monitor_domain.dart';
@@ -87,11 +88,16 @@ class ReflectionOfTheWeekCard extends ConsumerWidget {
     final prefs = ref.watch(appPrefsProvider);
     final cadence = prefs.quotationCadence;
     final now = ref.watch(nowProvider);
+    final skipHadithKeys = archivedHadithCitationKeys(
+      records: ref.watch(practiceHadithProvider).value ?? const [],
+      archivedCatalogIds: prefs.archivedPracticeHadithCatalogIds,
+    );
     final quote = quoteFor(
       now: now,
       cadence: cadence,
       holdPeriod: prefs.reflectionHoldPeriod,
       holdIndex: prefs.reflectionHoldIndex,
+      skipHadithKeys: skipHadithKeys,
     );
     if (quote == null) return const SizedBox.shrink();
     final title = cadence == QuotationCadence.daily
@@ -106,9 +112,10 @@ class ReflectionOfTheWeekCard extends ConsumerWidget {
       ),
     );
     Future<void> step(int delta) async {
-      final nextIndex = stepReflectionCatalog(
+      final nextIndex = stepReflectionCatalogSkipping(
         reflectionCatalogIndex(quote),
         delta,
+        skipHadithKeys: skipHadithKeys,
       );
       await prefs.setReflectionHold(
         period: reflectionPeriodKey(now, cadence),
@@ -180,9 +187,8 @@ class ReflectionOfTheWeekCard extends ConsumerWidget {
                 onPressed: () => showReflectionSource(context, ref, quote),
                 child: Text(
                   quote.source,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    decoration: TextDecoration.underline,
-                  ),
+                  style: Theme.of(context).textTheme.bodySmall
+                      ?.copyWith(decoration: TextDecoration.underline),
                 ),
               ),
             ),
@@ -212,7 +218,8 @@ class ReflectionOfTheWeekCard extends ConsumerWidget {
                           builder: (_) => ResponseEditorScreen(
                             initialText: '${quote.text}\n\n— ${quote.source}',
                             provenance: ResponseProvenance(
-                              originType: ProvenanceOrigin.weeklyReflectionQuote,
+                              originType:
+                                  ProvenanceOrigin.weeklyReflectionQuote,
                               domain: quote.domain.name,
                               labelSnapshot: '$title · ${quote.source}',
                             ),
@@ -263,9 +270,7 @@ class PatternEvidenceScreen extends StatelessWidget {
               onTap: () {
                 Navigator.of(context).push(
                   MaterialPageRoute<void>(
-                    builder: (_) => DayEvidenceScreen(
-                      dateKey: key,
-                    ),
+                    builder: (_) => DayEvidenceScreen(dateKey: key),
                   ),
                 );
               },

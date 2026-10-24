@@ -69,7 +69,9 @@ class _BringQuranVerseSheetState extends ConsumerState<BringQuranVerseSheet> {
 
   bool _alreadyOnLearn(QuranVerseRange range) {
     final shelf = ref.read(personalQuranVerseProvider).value ?? const [];
-    final pending = shelf.where((v) => v.verseKey == range.verseKey && v.wordsPending);
+    final pending = shelf.where(
+      (v) => v.verseKey == range.verseKey && v.wordsPending,
+    );
     if (pending.isNotEmpty) return false;
     return quranVerseKeyTaken(
       verseKey: range.verseKey,
@@ -165,7 +167,9 @@ class _BringQuranVerseSheetState extends ConsumerState<BringQuranVerseSheet> {
             wordsPending: referenceOnly || passage == null,
           )
         : existing.first.copyWith(
-            arabic: referenceOnly ? existing.first.arabic : (passage?.arabic ?? ''),
+            arabic: referenceOnly
+                ? existing.first.arabic
+                : (passage?.arabic ?? ''),
             translation: referenceOnly
                 ? existing.first.translation
                 : (passage?.translation ?? ''),
@@ -238,135 +242,135 @@ class _BringQuranVerseSheetState extends ConsumerState<BringQuranVerseSheet> {
           maxHeight: MediaQuery.sizeOf(context).height * 0.82,
         ),
         child: SingleChildScrollView(
-        key: const Key('bring-quran-sheet'),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              Copy.bringQuranVerseTitle,
-              style: Theme.of(context).textTheme.titleMedium
-                  ?.copyWith(fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              Copy.bringQuranSearchHint,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            TextField(
-              key: const Key('bring-quran-search'),
-              controller: _search,
-              decoration: const InputDecoration(
-                labelText: 'kursi, parents, ease',
-              ),
-              textInputAction: TextInputAction.search,
-              onChanged: (_) => setState(() {}),
-            ),
-            if (_search.text.trim().length >= kBringQuranSearchMinChars) ...[
-              const SizedBox(height: 8),
-              _searchResults(),
-            ],
-            const SizedBox(height: 16),
-            Text(
-              Copy.bringQuranOrReference,
-              style: Theme.of(context).textTheme.labelLarge
-                  ?.copyWith(fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              Copy.bringQuranVerseHint,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            TextField(
-              key: const Key('bring-quran-ref'),
-              controller: _ref,
-              decoration: const InputDecoration(labelText: '2:255'),
-              textInputAction: TextInputAction.next,
-              onChanged: (_) => setState(() {}),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              Copy.bringQuranUrlHint,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            TextField(
-              key: const Key('bring-quran-url'),
-              controller: _url,
-              decoration: const InputDecoration(labelText: 'quran.com/2/255'),
-              keyboardType: TextInputType.url,
-              onChanged: (_) => setState(() {}),
-            ),
-            const SizedBox(height: 12),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: FilledButton(
-                key: const Key('bring-quran-lookup'),
-                onPressed: _lookingUp ? null : _lookUp,
-                child: _lookingUp
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Text(Copy.bringQuranLookUp),
-              ),
-            ),
-            if (_message != null) ...[
-              const SizedBox(height: 8),
+          key: const Key('bring-quran-sheet'),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
+            children: [
               Text(
-                _message!,
-                key: const Key('bring-quran-message'),
+                Copy.bringQuranVerseTitle,
+                style: Theme.of(context).textTheme.titleMedium
+                    ?.copyWith(fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                Copy.bringQuranSearchHint,
                 style: Theme.of(context).textTheme.bodySmall,
               ),
-            ],
-            if (_passage != null) ...[
-              const SizedBox(height: 12),
-              if (_passage!.arabic.isNotEmpty)
-                Text(
-                  _passage!.arabic,
-                  key: const Key('bring-quran-preview-arabic'),
-                  textDirection: TextDirection.rtl,
-                  style: Theme.of(context).textTheme.titleMedium,
+              TextField(
+                key: const Key('bring-quran-search'),
+                controller: _search,
+                decoration: const InputDecoration(
+                  labelText: 'kursi, parents, ease',
                 ),
-              if (_passage!.translation.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                Text(
-                  _passage!.translation,
-                  key: const Key('bring-quran-preview-translation'),
-                ),
-              ],
-            ],
-            const SizedBox(height: 16),
-            if (_onLearn) ...[
-              OutlinedButton(
-                key: const Key('bring-quran-dont-save'),
-                onPressed: _closeWithoutSave,
-                child: const Text(Copy.bringQuranDontSave),
+                textInputAction: TextInputAction.search,
+                onChanged: (_) => setState(() {}),
               ),
-              if (_passage != null) ...[
+              if (_search.text.trim().length >= kBringQuranSearchMinChars) ...[
                 const SizedBox(height: 8),
-                FilledButton(
-                  key: const Key('bring-quran-save-anyway'),
-                  onPressed: () => _save(referenceOnly: false),
-                  child: const Text(Copy.bringQuranSaveAnyway),
+                _searchResults(),
+              ],
+              const SizedBox(height: 16),
+              Text(
+                Copy.bringQuranOrReference,
+                style: Theme.of(context).textTheme.labelLarge
+                    ?.copyWith(fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                Copy.bringQuranVerseHint,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              TextField(
+                key: const Key('bring-quran-ref'),
+                controller: _ref,
+                decoration: const InputDecoration(labelText: '2:255'),
+                textInputAction: TextInputAction.next,
+                onChanged: (_) => setState(() {}),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                Copy.bringQuranUrlHint,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              TextField(
+                key: const Key('bring-quran-url'),
+                controller: _url,
+                decoration: const InputDecoration(labelText: 'quran.com/2/255'),
+                keyboardType: TextInputType.url,
+                onChanged: (_) => setState(() {}),
+              ),
+              const SizedBox(height: 12),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: FilledButton(
+                  key: const Key('bring-quran-lookup'),
+                  onPressed: _lookingUp ? null : _lookUp,
+                  child: _lookingUp
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text(Copy.bringQuranLookUp),
+                ),
+              ),
+              if (_message != null) ...[
+                const SizedBox(height: 8),
+                Text(
+                  _message!,
+                  key: const Key('bring-quran-message'),
+                  style: Theme.of(context).textTheme.bodySmall,
                 ),
               ],
-            ] else ...[
-              if (_passage != null)
-                FilledButton(
-                  key: const Key('bring-quran-save'),
-                  onPressed: () => _save(referenceOnly: false),
-                  child: const Text(Copy.bringQuranSave),
-                ),
-              if (_offline)
+              if (_passage != null) ...[
+                const SizedBox(height: 12),
+                if (_passage!.arabic.isNotEmpty)
+                  Text(
+                    _passage!.arabic,
+                    key: const Key('bring-quran-preview-arabic'),
+                    textDirection: TextDirection.rtl,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                if (_passage!.translation.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    _passage!.translation,
+                    key: const Key('bring-quran-preview-translation'),
+                  ),
+                ],
+              ],
+              const SizedBox(height: 16),
+              if (_onLearn) ...[
                 OutlinedButton(
-                  key: const Key('bring-quran-save-ref'),
-                  onPressed: () => _save(referenceOnly: true),
-                  child: const Text(Copy.bringQuranSaveReferenceOnly),
+                  key: const Key('bring-quran-dont-save'),
+                  onPressed: _closeWithoutSave,
+                  child: const Text(Copy.bringQuranDontSave),
                 ),
+                if (_passage != null) ...[
+                  const SizedBox(height: 8),
+                  FilledButton(
+                    key: const Key('bring-quran-save-anyway'),
+                    onPressed: () => _save(referenceOnly: false),
+                    child: const Text(Copy.bringQuranSaveAnyway),
+                  ),
+                ],
+              ] else ...[
+                if (_passage != null)
+                  FilledButton(
+                    key: const Key('bring-quran-save'),
+                    onPressed: () => _save(referenceOnly: false),
+                    child: const Text(Copy.bringQuranSave),
+                  ),
+                if (_offline)
+                  OutlinedButton(
+                    key: const Key('bring-quran-save-ref'),
+                    onPressed: () => _save(referenceOnly: true),
+                    child: const Text(Copy.bringQuranSaveReferenceOnly),
+                  ),
+              ],
             ],
-          ],
-        ),
+          ),
         ),
       ),
     );

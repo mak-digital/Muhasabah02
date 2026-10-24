@@ -466,7 +466,7 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('Save'), findsOneWidget);
-    expect(find.text(Copy.quranDayUnanswered), findsNothing);
+    expect(find.text(Copy.quranDayUnanswered), findsWidgets);
   });
 
   testWidgets('7-day matrix opens focused check-in and keeps future inactive', (

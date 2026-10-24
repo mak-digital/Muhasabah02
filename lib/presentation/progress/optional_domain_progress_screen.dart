@@ -15,6 +15,7 @@ import '../../domain/review_period.dart';
 import '../checkin/check_in_screen.dart';
 import '../checkin/trace_record_sheets.dart';
 import '../shared/progress_calendar.dart';
+import '../shared/thirty_day_trend_chart.dart';
 import '../shared/salah_activity_mark.dart';
 import '../shared/domain_briefing_note.dart';
 import '../shared/state_marker.dart';
@@ -295,6 +296,13 @@ class _OptionalDomainProgressScreenState
             recordedDays: recordedDays,
             activityDays: activityDays,
             notDoneDays: notDoneDays,
+          ),
+          trend: thirtyDaySeriesOrNull(
+            periodDays: period.days,
+            activityLabel: row.label,
+            catalog: ActivityCatalog.forHomeTrace(row.storageKey),
+            activityColours: ref.watch(appPrefsProvider).salahActivityColours,
+            idForDate: (key) => index[key]?.activityFor(row.storageKey).id,
           ),
           cellBuilder: (context, key) {
             final record = index[key];

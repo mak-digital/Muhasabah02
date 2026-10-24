@@ -87,10 +87,10 @@ class _OptionalDomainHomeCardState
     final weekStart = addCalendarDays(thisWeekStart, _weekOffset * 7);
     final keys = weekDateKeys(weekStart);
     final index = {for (final record in widget.records) record.dateKey: record};
-    final wash = MuhasabahColors.wash(
+    final wash = MuhasabahColors.themeWash(
+      context,
       widget.washLight,
       widget.washDark,
-      Theme.of(context).brightness,
     );
     final localizations = MaterialLocalizations.of(context);
     var visibleRows = widget.rows;
@@ -295,7 +295,8 @@ class _OptionalDomainHomeCardState
     required List<String> keys,
     required Map<String, DailyCheckIn> index,
   }) {
-    final bandWash = widget.family.withValues(alpha: 0.12);
+    final family = MuhasabahWashTheme.harmonizeFamilyOf(context, widget.family);
+    final bandWash = family.withValues(alpha: 0.12);
     return DecoratedBox(
       decoration: BoxDecoration(
         color: bandWash,

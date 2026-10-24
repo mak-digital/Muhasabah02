@@ -15,15 +15,16 @@ import '../../domain/charity_practices.dart';
 import '../../domain/ummah_practices.dart';
 import '../../domain/wealth_practices.dart';
 import '../../domain/time_practices.dart';
+import '../../domain/app_appearance.dart';
 import '../../domain/copy.dart';
 import '../../domain/display_calendar.dart';
 import '../../domain/first_day_of_week.dart';
+import '../../domain/worship_list_gender.dart';
 import '../../domain/monitor_domain.dart';
 import '../../domain/personal_mix.dart';
 import '../../domain/quotation_cadence.dart';
 import '../../domain/quran_stage.dart';
-import '../history/history_screen.dart';
-import '../response/response_list_screen.dart';
+import '../registry/registry_screen.dart';
 import '../shared/domain_line_icon.dart';
 import '../shared/domain_visual.dart';
 import '../shared/quran_stage_mark.dart';
@@ -105,6 +106,19 @@ class SettingsScreen extends ConsumerWidget {
                       context,
                       MaterialPageRoute<void>(
                         builder: (_) => const FirstDayOfWeekSettingsScreen(),
+                      ),
+                    );
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.person_outline),
+                  title: const Text(Copy.worshipListGender),
+                  subtitle: Text(prefs.worshipListGender.label),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute<void>(
+                        builder: (_) => const WorshipListGenderSettingsScreen(),
                       ),
                     );
                   },
@@ -282,7 +296,7 @@ class SettingsScreen extends ConsumerWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute<void>(
-                        builder: (_) => const HistoryScreen(),
+                        builder: (_) => const RegistryScreen(initialTab: 4),
                       ),
                     );
                   },
@@ -295,7 +309,7 @@ class SettingsScreen extends ConsumerWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute<void>(
-                        builder: (_) => const ResponseListScreen(),
+                        builder: (_) => const RegistryScreen(initialTab: 3),
                       ),
                     );
                   },
@@ -335,13 +349,7 @@ class SettingsScreen extends ConsumerWidget {
   }
 }
 
-String _themeLabel(int index) {
-  return switch (index) {
-    1 => 'Light',
-    2 => 'Dark',
-    _ => Copy.appearanceNote,
-  };
-}
+String _themeLabel(int index) => AppAppearanceX.fromPrefIndex(index).label;
 
 class ActivitiesSettingsScreen extends ConsumerWidget {
   const ActivitiesSettingsScreen({super.key});
@@ -726,15 +734,20 @@ class AppearanceSettingsScreen extends ConsumerWidget {
           Card(
             child: RadioGroup<int>(
               groupValue: current,
-              onChanged: (value) {
+              onChanged: (value) async {
                 if (value == null) return;
-                ref.read(themeModePrefProvider.notifier).state = value;
+                final look = AppAppearanceX.fromPrefIndex(value);
+                await ref.read(appPrefsProvider).setAppearance(look);
+                ref.read(themeModePrefProvider.notifier).state = look.prefIndex;
+                ref.read(prefsTickProvider.notifier).state++;
               },
-              child: const Column(
+              child: Column(
                 children: [
-                  RadioListTile<int>(title: Text('System'), value: 0),
-                  RadioListTile<int>(title: Text('Light'), value: 1),
-                  RadioListTile<int>(title: Text('Dark'), value: 2),
+                  for (final look in AppAppearance.values)
+                    RadioListTile<int>(
+                      title: Text(look.label),
+                      value: look.prefIndex,
+                    ),
                 ],
               ),
             ),
@@ -927,6 +940,52 @@ class FirstDayOfWeekSettingsScreen extends ConsumerWidget {
                     RadioListTile<FirstDayOfWeekPref>(
                       title: Text(
                         option == FirstDayOfWeekPref.monday
+                            ? '${option.label} (default)'
+                            : option.label,
+                      ),
+                      value: option,
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class WorshipListGenderSettingsScreen extends ConsumerWidget {
+  const WorshipListGenderSettingsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(prefsTickProvider);
+    final current = ref.watch(appPrefsProvider).worshipListGender;
+    return Scaffold(
+      appBar: AppBar(title: const Text(Copy.worshipListGender)),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          Text(
+            Copy.worshipListGenderNote,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          const SizedBox(height: 12),
+          Card(
+            child: RadioGroup<WorshipListGender>(
+              groupValue: current,
+              onChanged: (value) async {
+                if (value == null) return;
+                await ref.read(appPrefsProvider).setWorshipListGender(value);
+                ref.read(prefsTickProvider.notifier).state++;
+              },
+              child: Column(
+                children: [
+                  for (final option in WorshipListGender.values)
+                    RadioListTile<WorshipListGender>(
+                      title: Text(
+                        option == WorshipListGender.unanswered
                             ? '${option.label} (default)'
                             : option.label,
                       ),

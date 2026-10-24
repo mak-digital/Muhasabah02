@@ -6,6 +6,7 @@ import '../data/app_prefs.dart';
 import '../data/memory_repositories.dart';
 import '../data/quran_verse_http.dart';
 import '../data/repositories.dart';
+import '../domain/app_appearance.dart';
 import '../domain/daily_check_in.dart';
 import '../domain/date_key.dart';
 import '../domain/dev_feedback.dart';
@@ -25,6 +26,7 @@ import '../domain/productivity_planning.dart';
 import '../domain/hajj_source_catalog.dart';
 import '../domain/quran_verse_fetch.dart';
 import '../domain/review_period.dart';
+import '../domain/review_period_snapshot.dart';
 
 final appPrefsProvider = Provider<AppPrefs>((ref) => MemoryAppPrefs());
 
@@ -193,6 +195,17 @@ final reviewPeriodProvider = StateProvider<ReviewPeriod>(
   (ref) => ReviewPeriod.days7,
 );
 
+/// Cached Review totals. Recomputes only when records, period, or now change.
+final reviewPeriodSnapshotProvider = Provider<ReviewPeriodSnapshot?>((ref) {
+  final records = ref.watch(checkInsProvider).value;
+  if (records == null) return null;
+  return buildReviewPeriodSnapshot(
+    records: records,
+    now: ref.watch(nowProvider),
+    period: ref.watch(reviewPeriodProvider),
+  );
+});
+
 final prefsTickProvider = StateProvider<int>((ref) => 0);
 
 /// Last Home domain shown in this app session. Not stored. Not a score.
@@ -201,7 +214,9 @@ final homeDomainStageProvider = StateProvider<MonitorDomain?>((ref) => null);
 /// Last full-check-in domain shown in this app session. Not stored. Not a score.
 final checkInDomainStageProvider = StateProvider<MonitorDomain?>((ref) => null);
 
-final themeModePrefProvider = StateProvider<int>((ref) => 0);
+final themeModePrefProvider = StateProvider<int>((ref) {
+  return ref.read(appPrefsProvider).appearance.prefIndex;
+});
 
 class CheckInsController extends AsyncNotifier<List<DailyCheckIn>> {
   @override

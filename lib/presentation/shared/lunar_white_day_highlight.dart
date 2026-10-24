@@ -13,11 +13,16 @@ class LunarWhiteDayHighlight extends StatelessWidget {
   final Widget child;
   final bool dense;
 
-  static BoxDecoration decoration(Brightness brightness, {bool dense = false}) {
+  static BoxDecoration decoration(
+    Brightness brightness, {
+    bool dense = false,
+    BuildContext? context,
+  }) {
     final color = MuhasabahColors.wash(
       MuhasabahColors.lunarWhiteDayWash,
       MuhasabahColors.lunarWhiteDayWashDark,
       brightness,
+      context,
     );
     if (dense) {
       return BoxDecoration(color: color, shape: BoxShape.circle);
@@ -31,6 +36,7 @@ class LunarWhiteDayHighlight extends StatelessWidget {
           MuhasabahColors.lunarWhiteDayRing,
           MuhasabahColors.lunarWhiteDayRingDark,
           brightness,
+          context,
         ),
       ),
     );
@@ -50,7 +56,11 @@ class LunarWhiteDayHighlight extends StatelessWidget {
           children: [
             IgnorePointer(
               child: DecoratedBox(
-                decoration: decoration(brightness, dense: true),
+                decoration: decoration(
+                  brightness,
+                  dense: true,
+                  context: context,
+                ),
                 child: const SizedBox.expand(),
               ),
             ),
@@ -62,7 +72,7 @@ class LunarWhiteDayHighlight extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 3),
       child: DecoratedBox(
-        decoration: decoration(brightness),
+        decoration: decoration(brightness, context: context),
         child: child,
       ),
     );

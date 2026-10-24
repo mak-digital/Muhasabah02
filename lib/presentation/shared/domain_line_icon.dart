@@ -1,17 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../../app/theme.dart';
 import '../../domain/monitor_domain.dart';
 import 'domain_visual.dart';
 
 /// Outlined domain mark. Colour still names the domain; this shape names it
 /// at small sizes. Not a score.
 class DomainLineIcon extends StatelessWidget {
-  const DomainLineIcon(
-    this.domain, {
-    super.key,
-    this.size = 22,
-    this.color,
-  });
+  const DomainLineIcon(this.domain, {super.key, this.size = 22, this.color});
 
   final MonitorDomain domain;
   final double size;
@@ -19,7 +15,10 @@ class DomainLineIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ink = color ?? domainColorIdentity(domain).family;
+    final ink = MuhasabahWashTheme.harmonizeFamilyOf(
+      context,
+      color ?? domainColorIdentity(domain).family,
+    );
     return ExcludeSemantics(
       child: CustomPaint(
         key: Key('domain-line-icon-${domain.id}'),
@@ -187,17 +186,11 @@ class _DomainLinePainter extends CustomPainter {
         ..moveTo(10.2, 21)
         ..lineTo(13.8, 21)
         ..moveTo(12, 3)
-        ..arcToPoint(
-          const Offset(15.4, 13.6),
-          radius: const Radius.circular(6),
-        )
+        ..arcToPoint(const Offset(15.4, 13.6), radius: const Radius.circular(6))
         ..cubicTo(14.8, 14.1, 14, 15.1, 14, 16.5)
         ..lineTo(10, 16.5)
         ..cubicTo(10, 15.1, 9.2, 14.1, 8.6, 13.6)
-        ..arcToPoint(
-          const Offset(12, 3),
-          radius: const Radius.circular(6),
-        )
+        ..arcToPoint(const Offset(12, 3), radius: const Radius.circular(6))
         ..close(),
       paint,
     );
@@ -289,10 +282,7 @@ class _DomainLinePainter extends CustomPainter {
           largeArc: true,
           clockwise: false,
         )
-        ..arcToPoint(
-          const Offset(16, 5.2),
-          radius: const Radius.circular(7),
-        )
+        ..arcToPoint(const Offset(16, 5.2), radius: const Radius.circular(7))
         ..close(),
       paint,
     );

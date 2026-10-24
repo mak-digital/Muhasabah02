@@ -68,8 +68,18 @@ bool usesCompactHomeWeek(MonitorDomain domain) {
   }
 }
 
-/// Listed in Domains in Focus, not selectable and not on Home this season.
-const kDormantMonitorDomains = {MonitorDomain.hajj};
+/// Live this season: Salah, Qur’an, Hadith, Dhikr, Fasting, Character,
+/// Rights, and Charity. Listed in Domains in Focus, not selectable, and not
+/// on Home, Review, or check-in until a later season. Saved records stay.
+const kDormantMonitorDomains = {
+  MonitorDomain.knowledge,
+  MonitorDomain.time,
+  MonitorDomain.health,
+  MonitorDomain.wealth,
+  MonitorDomain.ummah,
+  MonitorDomain.hajj,
+  MonitorDomain.productivity,
+};
 
 bool isDormantMonitorDomain(MonitorDomain domain) =>
     kDormantMonitorDomains.contains(domain);
@@ -178,8 +188,7 @@ extension MonitorDomainX on MonitorDomain {
     MonitorDomain.fasting =>
       'Did I notice fasting, worship, and balance without scoring sawm?',
     MonitorDomain.hajj => 'Have I named how Hajj stands with me — as I see it, not as the app decides?',
-    MonitorDomain.productivity =>
-      'Which actions did I choose to move today?',
+    MonitorDomain.productivity => 'Which actions did I choose to move today?',
     _ => null,
   };
 }

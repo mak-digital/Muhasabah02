@@ -5,19 +5,15 @@ import 'package:muhasabah02/domain/prayer.dart';
 
 void main() {
   test('sameCheckInContent ignores savedAt', () {
-    final first = DailyCheckIn.empty('2026-09-03').withPrayer(
-      PrayerId.fajr,
-      PrayerStatus.onTime,
-    );
+    final first = DailyCheckIn.empty('2026-09-03')
+        .withPrayer(PrayerId.fajr, PrayerStatus.onTime);
     final later = first.copyWith(savedAt: DateTime(2026, 9, 3, 12));
     expect(sameCheckInContent(first, later), isTrue);
     expect(
       sameCheckInContent(
         first,
-        DailyCheckIn.empty('2026-09-03').withPrayer(
-          PrayerId.dhuhr,
-          PrayerStatus.late,
-        ),
+        DailyCheckIn.empty('2026-09-03')
+            .withPrayer(PrayerId.dhuhr, PrayerStatus.late),
       ),
       isFalse,
     );

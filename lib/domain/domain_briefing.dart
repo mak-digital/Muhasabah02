@@ -217,7 +217,7 @@ const fastingBriefing = DomainBriefing(
     'The app does not judge validity, exemption, make-up, or fidyah. An exemption is not a failure. Fasting today can be edited after iftar; it is not auto-completed.',
     'Necessary work, care, rest, and recreation are not automatically waste. There is no screen-time monitoring.',
     'Salah validity and khushu’ are not measured here. Extra worship has no rak‘ah or minute quota. Menstruation and other valid limits are not presented as failure.',
-    'Weekly sunnah, White Days, and make-up keep their existing rows. Post-Ramadan may note Shawwal planning; an actual make-up stays on Make-up Fast.',
+    'Weekly sunnah, White Days, and make-up keep their existing rows and record fasting-day distinctions, not a yes/no mark. Post-Ramadan may note a Shawwal or other voluntary fast, or make-up planning; an actual make-up stays on Make-up Fast.',
     'Progress highlighting civil Hijri 13–15 is orientation only. Extreme fasting outside Ramadan is not encouraged.',
   ],
 );

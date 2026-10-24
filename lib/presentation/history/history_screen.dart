@@ -10,12 +10,17 @@ import '../../domain/display_calendar.dart';
 import '../../domain/first_day_of_week.dart';
 import '../../domain/weekly_calendar.dart';
 import '../checkin/check_in_screen.dart';
+import '../registry/registry_filter_note.dart';
+import '../registry/registry_table.dart';
 import '../shared/ui_bits.dart';
 
 class HistoryScreen extends ConsumerStatefulWidget {
-  const HistoryScreen({super.key});
+  const HistoryScreen({super.key, this.embedded = false, this.filterNote});
 
   static const routeName = '/history';
+
+  final bool embedded;
+  final String? filterNote;
 
   @override
   ConsumerState<HistoryScreen> createState() => _HistoryScreenState();
@@ -27,45 +32,93 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   @override
   Widget build(BuildContext context) {
     final async = ref.watch(checkInsProvider);
-    return Scaffold(
-      appBar: AppBar(title: const Text(Copy.historyTitle)),
-      body: async.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => const EmptyState(
-          title: Copy.historyTitle,
-          message: 'Past check-ins could not be listed.',
-        ),
-        data: (records) {
-          if (records.isEmpty) {
-            return EmptyState(
-              title: Copy.historyTitle,
-              message: 'No saved check-ins yet. You can start today’s check-in from Home.',
-              action: FilledButton(
-                onPressed: () {
-                  refreshNowIfLocalDateChanged(ref);
-                  Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => CheckInScreen(date: ref.read(nowProvider)),
-                    ),
-                  );
-                },
-                child: const Text(Copy.homeCheckIn),
-              ),
-            );
-          }
-          ref.watch(prefsTickProvider);
-          final now = ref.watch(nowProvider);
-          final visible = _filtered(records, now);
+    final body = async.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (_, _) => const EmptyState(
+        title: Copy.historyTitle,
+        message: 'Past check-ins could not be listed.',
+      ),
+      data: (records) {
+        if (records.isEmpty) {
           return ListView(
             primary: false,
-            physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
             children: [
+              if (widget.embedded) ...[
+                Text(
+                  Copy.historyTitle,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 8),
+              ],
+              EmptyState(
+                title: Copy.historyTitle,
+                message: 'No saved check-ins yet. You can start today’s check-in from Home.',
+                action: FilledButton(
+                  onPressed: () {
+                    refreshNowIfLocalDateChanged(ref);
+                    Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) =>
+                            CheckInScreen(date: ref.read(nowProvider)),
+                      ),
+                    );
+                  },
+                  child: const Text(Copy.homeCheckIn),
+                ),
+              ),
+              if (widget.filterNote != null)
+                RegistryFilterNote(
+                  key: const Key('registry-filter-note-history'),
+                  text: widget.filterNote!,
+                ),
+            ],
+          );
+        }
+        ref.watch(prefsTickProvider);
+        final now = ref.watch(nowProvider);
+        final visible = _filtered(records, now);
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (widget.embedded) ...[
+                Text(
+                  Copy.historyTitle,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 8),
+              ],
               Text(
                 Copy.historyGuard,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
+              ),
+              const SizedBox(height: 10),
+              RegistryWashButtonRow(
+                children: [
+                  RegistryWashButton(
+                    key: const Key('registry-history-checkin'),
+                    label: Copy.homeCheckIn,
+                    wash: MuhasabahColors.wash(
+                      MuhasabahColors.salahWash,
+                      MuhasabahColors.salahWashDark,
+                      Theme.of(context).brightness,
+                      context,
+                    ),
+                    onPressed: () {
+                      refreshNowIfLocalDateChanged(ref);
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) =>
+                              CheckInScreen(date: ref.read(nowProvider)),
+                        ),
+                      );
+                    },
+                  ),
+                ],
               ),
               const SizedBox(height: 10),
               Wrap(
@@ -90,20 +143,35 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                 ],
               ),
               const SizedBox(height: 8),
-              if (visible.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.only(top: 24),
-                  child: EmptyState(
-                    title: Copy.historyTitle,
-                    message: Copy.historyEmptyFilter,
-                  ),
-                )
-              else
-                ..._weekGroupedTiles(context, visible),
+              Expanded(
+                child: visible.isEmpty
+                    ? const Padding(
+                        padding: EdgeInsets.only(top: 24),
+                        child: EmptyState(
+                          title: Copy.historyTitle,
+                          message: Copy.historyEmptyFilter,
+                        ),
+                      )
+                    : ListView(
+                        primary: false,
+                        padding: EdgeInsets.zero,
+                        children: _weekGroupedTiles(context, visible),
+                      ),
+              ),
+              if (widget.filterNote != null)
+                RegistryFilterNote(
+                  key: const Key('registry-filter-note-history'),
+                  text: widget.filterNote!,
+                ),
             ],
-          );
-        },
-      ),
+          ),
+        );
+      },
+    );
+    if (widget.embedded) return body;
+    return Scaffold(
+      appBar: AppBar(title: const Text(Copy.historyTitle)),
+      body: body,
     );
   }
 
@@ -286,6 +354,7 @@ class _HistoryDayRow extends StatelessWidget {
       MuhasabahColors.salahWash,
       MuhasabahColors.salahWashDark,
       brightness,
+      context,
     );
     return InkWell(
       key: Key('history-day-${record.dateKey}'),
@@ -309,7 +378,10 @@ class _HistoryDayRow extends StatelessWidget {
                     localizations.narrowWeekdays[date.weekday % 7],
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
                       fontWeight: FontWeight.w700,
-                      color: MuhasabahColors.salahFamily,
+                      color: MuhasabahWashTheme.harmonizeFamilyOf(
+                        context,
+                        MuhasabahColors.salahFamily,
+                      ),
                     ),
                   ),
                   Text(
@@ -347,6 +419,7 @@ class _HistoryDayRow extends StatelessWidget {
                     MuhasabahColors.sampleBannerWash,
                     MuhasabahColors.sampleBannerWashDark,
                     brightness,
+                    context,
                   ),
                   borderRadius: BorderRadius.circular(8),
                 ),

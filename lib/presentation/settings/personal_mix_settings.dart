@@ -24,7 +24,8 @@ class PersonalMixEditor extends ConsumerWidget {
     ];
     final hidden = [
       for (final domain in MonitorDomain.values)
-        if (!visible.contains(domain)) domain,
+        if (!visible.contains(domain) && !isDormantMonitorDomain(domain))
+          domain,
     ];
 
     Future<void> save(PersonalMix next) async {

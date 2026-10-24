@@ -14,7 +14,8 @@ enum ActionChipTone { later, week, soon, pastTarget, done, deleted }
 
 extension ActionStatusListing on ActionStatus {
   bool get isOpen => this == ActionStatus.open;
-  bool get isSettled => this == ActionStatus.done || this == ActionStatus.deleted;
+  bool get isSettled =>
+      this == ActionStatus.done || this == ActionStatus.deleted;
 }
 
 class DomainAction {

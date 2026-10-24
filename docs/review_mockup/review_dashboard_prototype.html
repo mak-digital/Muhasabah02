@@ -12,7 +12,6 @@
       --line: #c5d0d4;
       --paper: #faf8f4;
       --teal: #2f6f73;
-      --teal-ink: #f4fbfb;
       --salah: #d7eceb; --salah-ink: #2f6f73;
       --quran: #d7e4f2; --quran-ink: #355a7c;
       --hadith: #d4e2ee; --hadith-ink: #3a5c72;
@@ -27,9 +26,11 @@
       --warn: #fff8e8;
       --dot: #9aa8ad;
       --fill: #2f6f73;
-      --outline: #5b8a8c;
+      --slip: #c4a078;
       --radius: 14px;
+      --scale: 1;
     }
+    html { font-size: calc(16px * var(--scale)); }
     * { box-sizing: border-box; }
     body {
       margin: 0;
@@ -37,146 +38,146 @@
       background: var(--bg);
       color: var(--ink);
     }
-    button, select { font: inherit; }
+    button, select, input, textarea { font: inherit; }
     .banner {
-      background: #3d4a4e;
-      color: #f4f1ea;
-      font-size: 12px;
-      letter-spacing: .04em;
-      text-align: center;
-      padding: 8px 12px;
+      background: #3d4a4e; color: #f4f1ea; font-size: 0.75rem;
+      letter-spacing: .04em; text-align: center; padding: 8px 12px;
     }
-    .banner strong { letter-spacing: 0; }
-    .shell {
-      max-width: 1180px;
-      margin: 0 auto;
-      padding: 16px 16px 40px;
-    }
-    .toolbar {
-      display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
-      margin: 12px 0 16px;
-    }
-    .toolbar label { font-size: 12px; color: var(--muted); font-weight: 650; }
+    .shell { max-width: 1180px; margin: 0 auto; padding: 16px 16px 40px; }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 12px 0 16px; }
+    .toolbar label { font-size: 0.75rem; color: var(--muted); font-weight: 650; }
     .layout { display: grid; grid-template-columns: 1fr; gap: 16px; }
     @media (min-width: 980px) {
       .layout { grid-template-columns: minmax(0, 1.2fr) minmax(320px, .8fr); align-items: start; }
-      .phone-only { display: none; }
     }
     .phone-frame {
-      width: 100%;
-      max-width: 420px;
-      margin: 0 auto;
-      background: var(--paper);
-      border-radius: 28px;
-      box-shadow: 0 16px 40px rgba(0,0,0,.12);
-      overflow: hidden;
-      border: 1px solid var(--line);
+      width: 100%; max-width: 420px; margin: 0 auto;
+      background: var(--paper); border-radius: 28px;
+      box-shadow: 0 16px 40px rgba(0,0,0,.12); overflow: hidden; border: 1px solid var(--line);
     }
-    @media (min-width: 980px) {
-      .phone-frame { max-width: none; border-radius: 18px; }
-    }
-    .status { display: flex; justify-content: space-between; padding: 8px 18px 0; font-size: 12px; color: var(--muted); }
-    .appbar {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 8px 16px 6px;
-    }
-    .appbar h1 { font-size: 20px; margin: 0; }
+    @media (min-width: 980px) { .phone-frame { max-width: none; border-radius: 18px; } }
+    .status { display: flex; justify-content: space-between; padding: 8px 18px 0; font-size: 0.75rem; color: var(--muted); }
+    .appbar { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px 6px; gap: 8px; }
+    .appbar h1 { font-size: 1.25rem; margin: 0; }
     .body { padding: 0 16px 88px; }
     .period { display: flex; gap: 6px; margin-bottom: 8px; }
     .chip {
       flex: 1; border: 1px solid var(--line); background: #fff; border-radius: 999px;
-      padding: 8px 6px; font-size: 12px; cursor: pointer;
+      padding: 8px 6px; font-size: 0.75rem; cursor: pointer;
     }
     .chip[aria-pressed="true"] { background: var(--salah); border-color: #b7d4d2; font-weight: 700; }
-    .range { text-align: center; font-size: 12px; color: var(--muted); margin: 0 0 8px; }
-    .blurb { font-size: 13px; color: var(--muted); line-height: 1.45; margin: 0 0 12px; }
+    .range { text-align: center; font-size: 0.75rem; color: var(--muted); margin: 0 0 8px; }
+    .blurb { font-size: 0.8125rem; color: var(--muted); line-height: 1.45; margin: 0 0 12px; }
     .nav-dates { display: flex; justify-content: center; gap: 8px; margin-bottom: 12px; }
     .ghost {
       border: 1px solid var(--line); background: #fff; border-radius: 8px;
-      padding: 4px 10px; font-size: 12px; cursor: pointer; color: var(--ink);
+      padding: 4px 10px; font-size: 0.75rem; cursor: pointer; color: var(--ink);
     }
-    .hero {
-      background: #eef2f4; border-radius: var(--radius); padding: 12px;
-      margin-bottom: 12px;
-    }
-    .hero .kicker { font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+    .hero { background: #eef2f4; border-radius: var(--radius); padding: 12px; margin-bottom: 12px; }
+    .hero .kicker { font-size: 0.6875rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
     .hero .stats { display: flex; gap: 12px; margin-top: 6px; }
-    .hero .stat b { display: block; font-size: 22px; }
-    .hero .stat span { font-size: 11px; color: var(--muted); }
+    .hero .stat b { display: block; font-size: 1.375rem; }
+    .hero .stat span { font-size: 0.6875rem; color: var(--muted); }
     .strip { display: flex; gap: 3px; margin-top: 10px; flex-wrap: wrap; }
     .cell {
       width: 14px; height: 14px; border-radius: 3px; border: 1px dashed var(--dot);
-      background: transparent;
+      background: transparent; padding: 0; cursor: pointer;
     }
     .cell.saved { background: var(--fill); border-style: solid; border-color: var(--fill); }
+    .cell.slip { background: var(--slip); border-style: solid; border-color: var(--slip); }
+    .cell.unanswered { background: #fff; border-style: solid; border-color: var(--dot); }
     .cell.none { background: transparent; }
     .cell.picked { outline: 2px solid #c9a227; outline-offset: 1px; }
-    .legend { display: flex; gap: 12px; font-size: 11px; color: var(--muted); margin-top: 8px; }
+    .legend { display: flex; flex-wrap: wrap; gap: 8px 12px; font-size: 0.6875rem; color: var(--muted); margin-top: 8px; }
     .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
-    h2.sec {
-      font-size: 11px; letter-spacing: .06em; text-transform: uppercase;
-      color: var(--muted); margin: 16px 0 8px;
-    }
-    .card {
-      border-radius: var(--radius); padding: 12px; margin-bottom: 8px; cursor: pointer;
-      border: 1px solid transparent;
-    }
-    .card:focus-visible { outline: 2px solid var(--teal); }
+    h2.sec { font-size: 0.6875rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 16px 0 8px; }
+    .card { border-radius: var(--radius); padding: 12px; margin-bottom: 8px; border: 1px solid transparent; }
+    .card:focus-within { outline: 2px solid var(--teal); outline-offset: 2px; }
     .card .top { display: flex; justify-content: space-between; gap: 8px; align-items: flex-start; }
-    .card h3 { margin: 0; font-size: 15px; }
-    .card .obs { margin: 8px 0 0; font-size: 13px; line-height: 1.4; }
+    .card h3 { margin: 0; font-size: 0.9375rem; }
+    .card .when { margin: 2px 0 0; font-size: 0.6875rem; color: var(--muted); }
+    .card .obs { margin: 8px 0 0; font-size: 0.8125rem; line-height: 1.4; }
     .card .viz { margin-top: 8px; min-height: 36px; }
+    .expand {
+      border: 1px solid rgba(0,0,0,.18); background: #fff; border-radius: 999px;
+      padding: 4px 10px; font-size: 0.6875rem; cursor: pointer; white-space: nowrap;
+    }
     .bars { display: flex; align-items: flex-end; gap: 3px; height: 42px; }
     .bars span { flex: 1; background: currentColor; opacity: .85; border-radius: 3px 3px 0 0; min-height: 2px; }
     .bars span.gap { background: transparent; border: 1px dashed currentColor; opacity: .4; }
-    .pills { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
-    .pill { font-size: 11px; background: rgba(255,255,255,.55); border-radius: 999px; padding: 2px 8px; }
-    .details { display: none; margin-top: 10px; padding-top: 10px; border-top: 1px dashed rgba(0,0,0,.15); font-size: 13px; }
-    .card.open .details { display: block; }
-    .actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
-    .actions button {
-      border: 1px solid rgba(0,0,0,.18); background: #fff; border-radius: 8px;
-      padding: 6px 10px; font-size: 12px; cursor: pointer;
-    }
-    .cat { display: flex; gap: 4px; height: 10px; border-radius: 99px; overflow: hidden; background: rgba(255,255,255,.5); margin-top: 8px; }
+    .cat-wrap { display: flex; flex-direction: column; gap: 4px; }
+    .cat { display: flex; gap: 4px; height: 10px; border-radius: 99px; overflow: hidden; background: rgba(255,255,255,.5); }
     .cat b { display: block; height: 100%; }
-    .note {
-      background: var(--warn); border-radius: 10px; padding: 10px 12px;
-      font-size: 13px; line-height: 1.45; margin: 8px 0;
+    .cat-legend { display: flex; flex-wrap: wrap; gap: 6px; font-size: 0.6875rem; color: var(--muted); }
+    .details { margin-top: 10px; padding-top: 10px; border-top: 1px dashed rgba(0,0,0,.15); font-size: 0.8125rem; }
+    .actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+    .actions button, .linkish {
+      border: 1px solid rgba(0,0,0,.18); background: #fff; border-radius: 8px;
+      padding: 6px 10px; font-size: 0.75rem; cursor: pointer;
     }
+    .obs-link {
+      display: block; width: 100%; text-align: left; margin: 6px 0;
+      border: 1px solid var(--line); background: #fff; border-radius: 10px;
+      padding: 8px 10px; cursor: pointer;
+    }
+    .obs-link:focus-visible { outline: 2px solid var(--teal); }
+    .note { background: var(--warn); border-radius: 10px; padding: 10px 12px; font-size: 0.8125rem; line-height: 1.45; margin: 8px 0; }
     .cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
-    .cal .dow { font-size: 10px; text-align: center; color: var(--muted); font-weight: 700; }
+    .cal .dow { font-size: 0.625rem; text-align: center; color: var(--muted); font-weight: 700; }
     .day {
       aspect-ratio: 1; border-radius: 8px; border: 1px dashed var(--dot);
-      background: #fff; font-size: 11px; cursor: pointer;
+      background: #fff; font-size: 0.6875rem; cursor: pointer;
     }
     .day.saved { background: var(--salah); border-style: solid; border-color: #b7d4d2; }
+    .day.slip { background: #f3e4d6; border-style: solid; border-color: var(--slip); }
+    .day.unanswered { background: #fff; border-style: solid; border-color: var(--dot); }
     .day.picked { box-shadow: 0 0 0 2px #c9a227; }
+    .weeks { display: flex; flex-direction: column; gap: 6px; }
+    .week-row {
+      display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center;
+      border: 1px solid var(--line); background: #fff; border-radius: 10px;
+      padding: 8px 10px; cursor: pointer; text-align: left;
+    }
+    .week-row[aria-pressed="true"] { box-shadow: 0 0 0 2px #c9a227; }
+    .week-meta { font-size: 0.75rem; }
+    .week-meta b { display: block; }
+    .week-dots { display: flex; gap: 3px; }
     .sheet {
       display: none; margin-top: 10px; background: #fff; border: 1px solid var(--line);
-      border-radius: 12px; padding: 12px; font-size: 13px;
+      border-radius: 12px; padding: 12px; font-size: 0.8125rem;
     }
     .sheet.show { display: block; }
     .sheet h4 { margin: 0 0 6px; }
     .row { display: flex; justify-content: space-between; gap: 8px; padding: 4px 0; border-bottom: 1px solid #eee; }
-    .bottom {
-      position: sticky; bottom: 0; display: flex; background: #fff;
-      border-top: 1px solid var(--line);
-    }
-    .bottom button {
-      flex: 1; border: 0; background: transparent; padding: 12px 8px 14px;
-      font-size: 11px; color: var(--muted); cursor: pointer;
-    }
+    .bottom { position: sticky; bottom: 0; display: flex; background: #fff; border-top: 1px solid var(--line); }
+    .bottom button { flex: 1; border: 0; background: transparent; padding: 12px 8px 14px; font-size: 0.6875rem; color: var(--muted); cursor: pointer; }
     .bottom button.on { color: var(--teal); font-weight: 700; }
-    .home-stub { display: none; padding: 24px 16px 88px; }
-    .home-stub p { color: var(--muted); }
+    .home-stub, .panel { display: none; padding: 0 16px 88px; }
+    .home-stub p, .panel p { color: var(--muted); }
     .wide-side { background: var(--paper); border-radius: 18px; padding: 16px; border: 1px solid var(--line); }
     .hidden { display: none !important; }
     .empty { text-align: center; padding: 28px 12px; color: var(--muted); }
-    .kbd { font-size: 11px; color: var(--muted); }
+    .list { list-style: none; margin: 0; padding: 0; }
+    .list li {
+      border: 1px solid var(--line); background: #fff; border-radius: 10px;
+      padding: 10px; margin-bottom: 8px;
+    }
+    .list .meta { font-size: 0.6875rem; color: var(--muted); }
+    textarea, input[type="text"], input[type="search"] {
+      width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 8px;
+    }
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0); border: 0;
+    }
+    .skip {
+      position: absolute; left: -999px; top: 8px; background: #fff; padding: 8px;
+    }
+    .skip:focus { left: 8px; z-index: 4; }
   </style>
 </head>
 <body>
+  <a class="skip" href="#reviewMain">Skip to Review content</a>
   <div class="banner">PHASE R0 MOCKUP · <strong>SYNTHETIC DEMONSTRATION DATA</strong> · not connected to Hive · Flutter screens unchanged</div>
   <div class="shell">
     <div class="toolbar">
@@ -193,17 +194,24 @@
           <option value="empty">No records</option>
         </select>
       </label>
-      <span class="kbd">Period chips, domain cards, and calendar days are keyboard-focusable.</span>
+      <label>Text size
+        <select id="scaleSel">
+          <option value="1">1.0</option>
+          <option value="1.3">1.3</option>
+          <option value="1.5">1.5</option>
+        </select>
+      </label>
     </div>
     <div class="layout" id="layout">
       <div class="phone-frame" id="phone">
         <div class="status"><span>10:36</span><span>Review prototype</span></div>
         <div class="appbar">
           <h1 id="screenTitle">Review</h1>
+          <button type="button" class="ghost hidden" id="backReview">Back to Review</button>
         </div>
         <div id="reviewView">
-          <div class="body">
-            <div class="period" role="tablist" aria-label="Period">
+          <div class="body" id="reviewMain">
+            <div class="period" role="tablist" aria-label="Review period">
               <button class="chip" data-days="7" aria-pressed="false">7 days</button>
               <button class="chip" data-days="30" aria-pressed="true">30 days</button>
               <button class="chip" data-days="90" aria-pressed="false">90 days</button>
@@ -220,28 +228,30 @@
                 <div class="stat"><b id="daysN">0</b><span>days with a saved check-in</span></div>
                 <div class="stat"><b id="domN">0</b><span>domains with any mark</span></div>
               </div>
-              <div class="strip" id="heroStrip" aria-label="Days with a saved check-in"></div>
-              <div class="legend"><span><i style="background:#2f6f73"></i>Saved</span><span><i style="border:1px dashed #9aa8ad;background:transparent"></i>No check-in</span></div>
+              <div class="strip" id="heroStrip"></div>
+              <div class="legend" id="kindLegend"></div>
             </section>
             <h2 class="sec">Activity by date</h2>
-            <p class="blurb" style="margin-top:0">Filled = a check-in exists that day. Empty outline = no check-in. This is not a fasting or salah calendar.</p>
+            <p class="blurb" style="margin-top:0">Filled = recorded activity. Tan = recorded non-participation. Solid outline = saved day with unanswered rows. Dashed = no check-in. This is not a fasting or salah calendar.</p>
             <div id="compareNote" class="note hidden"></div>
             <h2 class="sec">Domain observations</h2>
             <div id="cards"></div>
             <h2 class="sec">Reflection insights</h2>
-            <div class="note" id="insights"></div>
-            <h2 class="sec">History in this window</h2>
-            <p class="blurb" style="margin-top:0">Saved check-ins only. Empty days stay visible on the calendar above. Tap a day to inspect; Edit opens the existing record (no duplicate).</p>
-            <div class="cal" id="cal"></div>
-            <div class="sheet" id="sheet"></div>
+            <div id="insights"></div>
+            <h2 class="sec" id="calHeading">History in this window</h2>
+            <p class="blurb" style="margin-top:0" id="calBlurb"></p>
+            <div id="cal"></div>
+            <div class="sheet" id="sheet" role="region" aria-live="polite"></div>
             <div class="actions" style="margin-top:12px">
-              <button type="button" id="openResponses">My Response list</button>
+              <button type="button" id="openHistory">All saved days</button>
+              <button type="button" id="openResponses">My Response</button>
               <button type="button" id="addResponse">Add a response from this period</button>
             </div>
-            <div class="sheet" id="responseSheet"></div>
           </div>
         </div>
-        <div class="home-stub" id="homeView">
+        <div class="panel" id="historyView" hidden aria-hidden="true"></div>
+        <div class="panel" id="responseView" hidden aria-hidden="true"></div>
+        <div class="home-stub" id="homeView" hidden aria-hidden="true">
           <p>Home stays the daily recording surface (week grids, check-in, Quick tap). This stub only shows the proposed two-item navigation. Production Home is unchanged.</p>
         </div>
         <nav class="bottom" aria-label="Proposed navigation">
@@ -251,7 +261,7 @@
       </div>
       <aside class="wide-side" id="wideAside">
         <h2 class="sec" style="margin-top:0">Larger-screen companion</h2>
-        <p class="blurb">On a wide layout the calendar and record preview sit beside the cards. Production Flutter would use the same widgets, not a second data source.</p>
+        <p class="blurb">Calendar, week selection, and record preview sit beside the cards. Production Flutter would use the same widgets, not a second data source.</p>
         <div id="widePreview"></div>
       </aside>
     </div>
@@ -263,7 +273,21 @@
   let offset = 0;
   let density = "typical";
   let picked = null;
+  let pickedWeek = null;
   let openCard = "salah";
+  let screen = "review";
+  let historyFilter = "";
+  let responseTab = "active";
+  let editingId = null;
+  let draft = "";
+
+  const RESPONSES = [
+    { id: "r1", text: "I notice midweek reading often looks different from Fridays.", archived: false, created: "2026-10-09", provenance: "Qur’an · 30-day Review" },
+    { id: "r2", text: "Fajr and Isha were recorded independently more often than I expected.", archived: false, created: "2026-09-11", provenance: "Salah Progress · 2026-09-11" },
+    { id: "r3", text: "A note kept after looking at Rights of Others on a sparse week.", archived: true, created: "2026-08-02", provenance: "Huquq · 90-day Review" }
+  ];
+
+  function dayWord(n) { return n === 1 ? "day" : "days"; }
 
   const DOMAINS = [
     { id: "salah", title: "Salah & Prayer Quality", color: "var(--salah)", ink: "var(--salah-ink)" },
@@ -284,13 +308,9 @@
   }
   function addDays(d, n) { const x = new Date(d); x.setDate(x.getDate() + n); return x; }
   function parseIso(s) { const [y,m,da] = s.split("-").map(Number); return new Date(y, m - 1, da); }
-  function fmt(d) {
-    return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
-  }
-  function hash(s) {
-    let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
-    return Math.abs(h);
-  }
+  function fmt(d) { return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }); }
+  function hash(s) { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return Math.abs(h); }
+  function mondayOf(d) { const x = new Date(d); const day = (x.getDay() + 6) % 7; x.setDate(x.getDate() - day); return x; }
 
   function windowKeys() {
     const end = addDays(TODAY, offset);
@@ -298,22 +318,24 @@
     for (let i = days - 1; i >= 0; i--) keys.push(iso(addDays(end, -i)));
     return keys;
   }
-
   function priorKeys() {
     const end = addDays(TODAY, offset - days);
     const keys = [];
     for (let i = days - 1; i >= 0; i--) keys.push(iso(addDays(end, -i)));
     return keys;
   }
+  function allTimeKeys() {
+    const keys = [];
+    for (let i = 179; i >= 0; i--) keys.push(iso(addDays(TODAY, -i)));
+    return keys;
+  }
 
   function recordFor(key) {
     if (density === "empty") return null;
     const n = hash(key);
-    if (density === "sparse") {
-      if (n % 7 !== 0) return null;
-    } else if (n % 11 === 0) return null;
-    const salah = ["congregation", "late", "home", "unanswered"];
-    const prayers = ["Fajr","Dhuhr","Asr","Maghrib","Isha"].map((name, i) => {
+    if (density === "sparse") { if (n % 7 !== 0) return null; }
+    else if (n % 11 === 0) return null;
+    const prayers = ["Fajr","Dhuhr","Asr","Maghrib","Isha"].map((name) => {
       const k = hash(key + name) % 10;
       let mark = "unanswered";
       if (k < 5) mark = "congregation";
@@ -321,152 +343,223 @@
       else if (k < 8) mark = "late";
       return { name, mark };
     });
-    const quran = {
-      engage: n % 5 === 0 ? "none" : (n % 3 === 0 ? ">20" : "<20"),
-      understand: n % 4 === 0 ? "none" : "<20",
-      apply: n % 6 === 0 ? "noticed" : "none"
+    const fasting = n % 19 === 0 ? "prefer-not"
+      : (key.endsWith("-13") || key.endsWith("-14") || key.endsWith("-15") ? "white-days"
+      : (n % 17 === 0 ? "voluntary" : "none"));
+    return {
+      key, prayers,
+      quran: { engage: n % 5 === 0 ? "none" : (n % 3 === 0 ? ">20" : "<20"), apply: n % 6 === 0 ? "noticed" : "none" },
+      dhikr: { post: n % 3 !== 0, morn: n % 4 === 0, eve: n % 5 === 0 },
+      fasting, akhlaq: ["practised","struggled","lapse","unanswered"][n % 4],
+      huquq: ["practised","neglect","unanswered"][n % 3],
+      charity: n % 5 === 0, ummah: n % 6 === 0, hadith: n % 4 === 0,
+      prod: n % 3 === 0 ? "moved" : "none"
     };
-    const dhikr = { post: n % 3 !== 0, morn: n % 4 === 0, eve: n % 5 === 0 };
-    const fasting = key.endsWith("-13") || key.endsWith("-14") || key.endsWith("-15")
-      ? "white-days" : (n % 17 === 0 ? "voluntary" : "none");
-    const akhlaq = ["practised","struggled","lapse","unanswered"][n % 4];
-    const huquq = ["practised","neglect","unanswered"][n % 3];
-    const charity = n % 5 === 0;
-    const ummah = n % 6 === 0;
-    const hadith = n % 4 === 0;
-    const prod = n % 3 === 0 ? "moved" : "none";
-    return { key, prayers, quran, dhikr, fasting, akhlaq, huquq, charity, ummah, hadith, prod };
   }
-
   function records(keys) { return keys.map(recordFor).filter(Boolean); }
 
-  function barsHtml(values, ink) {
+  function dayKind(key) {
+    const r = recordFor(key);
+    if (!r) return "none";
+    const activity = r.prayers.some((p) => p.mark === "congregation") || r.quran.engage !== "none" || r.dhikr.post || r.hadith || r.charity || r.ummah || r.prod === "moved" || r.akhlaq === "practised" || r.huquq === "practised" || (r.fasting !== "none" && r.fasting !== "prefer-not");
+    const slip = r.prayers.some((p) => p.mark === "late" || p.mark === "home") || r.akhlaq === "lapse" || r.huquq === "neglect" || r.fasting === "prefer-not";
+    if (activity) return "saved";
+    if (slip) return "slip";
+    return "unanswered";
+  }
+
+  function kindLegend() {
+    return '<span><i style="background:#2f6f73"></i>Recorded activity</span>' +
+      '<span><i style="background:#c4a078"></i>Recorded non-participation</span>' +
+      '<span><i style="border:1px solid #9aa8ad;background:#fff"></i>Unanswered on a saved day</span>' +
+      '<span><i style="border:1px dashed #9aa8ad;background:transparent"></i>No check-in</span>';
+  }
+
+  function barsHtml(values, ink, label) {
     const max = Math.max(1, ...values.map((v) => v.n));
-    return '<div class="bars" style="color:' + ink + '">' + values.map((v) => {
-      const h = v.n <= 0 ? 6 : Math.max(6, Math.round((v.n / max) * 42));
-      return '<span class="' + (v.gap ? "gap" : "") + '" style="height:' + h + 'px" title="' + v.label + '"></span>';
-    }).join("") + "</div>";
+    const summary = values.map((v) => v.label + " " + v.n).join("; ");
+    return '<div class="bars" style="color:' + ink + '" role="img" aria-label="' + label + ': ' + summary + '">' +
+      values.map((v) => {
+        const h = v.n <= 0 ? 6 : Math.max(6, Math.round((v.n / max) * 42));
+        return '<span class="' + (v.gap ? "gap" : "") + '" style="height:' + h + 'px" title="' + v.label + '"></span>';
+      }).join("") + "</div>";
   }
-
-  function catHtml(parts) {
+  function catHtml(parts, label) {
     const total = parts.reduce((a, p) => a + p.n, 0) || 1;
-    return '<div class="cat">' + parts.map((p) =>
-      '<b style="width:' + ((p.n / total) * 100) + '%;background:' + p.color + '" title="' + p.label + '"></b>'
-    ).join("") + "</div>";
+    const summary = parts.map((p) => p.label + " " + p.n).join("; ");
+    return '<div class="cat-wrap"><div class="cat" role="img" aria-label="' + label + ': ' + summary + '">' +
+      parts.map((p) => '<b style="width:' + ((p.n / total) * 100) + '%;background:' + p.color + '"></b>').join("") +
+      '</div><div class="cat-legend">' + parts.map((p) => p.label + " (" + p.n + ")").join(" · ") + "</div></div>";
   }
 
-  function cardModel(id, recs, keys) {
+  function lastDate(recs, pred) {
+    const hit = [...recs].reverse().find(pred);
+    return hit ? hit.key : null;
+  }
+
+  function cardModel(id, recs, keys, rangeText) {
     const saved = recs.length;
     if (id === "salah") {
-      let cong = 0, recorded = 0, unansweredSlots = 0;
+      let cong = 0, recorded = 0, slip = 0;
       recs.forEach((r) => r.prayers.forEach((p) => {
-        if (p.mark === "unanswered") unansweredSlots++;
-        else { recorded++; if (p.mark === "congregation") cong++; }
+        if (p.mark === "unanswered") return;
+        recorded++;
+        if (p.mark === "congregation") cong++;
+        if (p.mark === "late" || p.mark === "home") slip++;
       }));
-      unansweredSlots += (keys.length - recs.length) * 5;
+      const date = lastDate(recs, (r) => r.prayers.some((p) => p.mark !== "unanswered"));
       return {
-        obs: saved === 0
-          ? "Not enough recorded information for Salah in this window."
-          : "Congregation on time on " + cong + " of " + recorded + " recorded prayer rows. Unanswered rows are not counted as missed.",
-        viz: barsHtml(recs.slice(-14).map((r) => ({ n: r.prayers.filter((p) => p.mark === "congregation").length, label: r.key })), "var(--salah-ink)"),
-        extra: "Marks use existing prayer activity codes. Denominator is recorded rows only. Comparison window must have enough recorded rows (today: 4 of 7, 15 of 30)."
+        obs: saved === 0 ? "Not enough recorded information for Salah in this window."
+          : "Congregation on time on " + cong + " of " + recorded + " recorded prayer rows. " + slip + " rows name late or at home. Unanswered rows are not counted as missed.",
+        viz: barsHtml(recs.slice(-10).map((r) => ({ n: r.prayers.filter((p) => p.mark === "congregation").length, label: r.key })), "var(--salah-ink)", "Salah congregation counts"),
+        extra: "Denominator is recorded rows only. Comparison needs enough recorded rows (4 of 7, 15 of 30).",
+        date: date, rangeText
       };
     }
     if (id === "quran") {
       const engage = recs.filter((r) => r.quran.engage !== "none").length;
-      const apply = recs.filter((r) => r.quran.apply === "noticed").length;
+      const date = lastDate(recs, (r) => r.quran.engage !== "none");
       return {
-        obs: saved === 0
-          ? "Not enough recorded information for Qur’an in this window."
-          : "Read and/or listened recorded on " + engage + " of " + keys.length + " days in view. Unanswered is empty, not “not engaged”.",
+        obs: saved === 0 ? "Not enough recorded information for Qur’an in this window."
+          : "Read and/or listened recorded on " + engage + " of " + keys.length + " " + dayWord(keys.length) + " in view. Unanswered is empty, not “not engaged”.",
         viz: catHtml([
           { n: recs.filter((r) => r.quran.engage === ">20").length, color: "#355a7c", label: ">20 min" },
           { n: recs.filter((r) => r.quran.engage === "<20").length, color: "#7aa0c4", label: "<20 min" },
           { n: keys.length - engage, color: "#d7dbe0", label: "No duration recorded" }
-        ]),
-        extra: "Three independent notice rows share duration lists. Practical relevance (" + apply + " days) is not a deed score. Private reflection text is not shown here."
+        ], "Qur’an duration mix"),
+        extra: "Three independent notice rows. Private reflection text is not shown.",
+        date, rangeText
       };
     }
     if (id === "hadith") {
       const n = recs.filter((r) => r.hadith).length;
       return {
-        obs: n === 0 ? "No Hadith observation in this window." : "Lived / noticed or duration recorded on " + n + " days.",
-        viz: barsHtml(keys.slice(-12).map((k) => { const r = recordFor(k); return { n: r && r.hadith ? 1 : 0, gap: !r || !r.hadith, label: k }; }), "var(--hadith-ink)"),
-        extra: "Encounter duration and Lived/Noticed stay independent. Unanswered is not neglect of sunnah."
+        obs: n === 0 ? "No Hadith observation in this window."
+          : "Lived / noticed or duration recorded on " + n + " " + dayWord(n) + ".",
+        viz: barsHtml(keys.slice(-10).map((k) => { const r = recordFor(k); return { n: r && r.hadith ? 1 : 0, gap: !r || !r.hadith, label: k }; }), "var(--hadith-ink)", "Hadith presence"),
+        extra: "Unanswered is not neglect of sunnah.",
+        date: lastDate(recs, (r) => r.hadith), rangeText
       };
     }
     if (id === "dhikr") {
       const post = recs.filter((r) => r.dhikr.post).length;
-      const morn = recs.filter((r) => r.dhikr.morn).length;
       return {
-        obs: saved === 0 ? "Not enough recorded information for Dhikr." : "Post-fard remembrance ticked on " + post + " saved days; morning set on " + morn + ".",
+        obs: saved === 0 ? "Not enough recorded information for Dhikr."
+          : "Post-fard remembrance ticked on " + post + " saved " + dayWord(post) + ".",
         viz: catHtml([
           { n: post, color: "#3f7d6a", label: "Post-fard" },
-          { n: morn, color: "#7bb39a", label: "Morning" },
+          { n: recs.filter((r) => r.dhikr.morn).length, color: "#7bb39a", label: "Morning" },
           { n: recs.filter((r) => r.dhikr.eve).length, color: "#b7d8c8", label: "Evening" }
-        ]),
-        extra: "Uses dhikrContext practised ticks rolled to homeTraces. Counts are notices, not targets. Dua words are never shown."
+        ], "Dhikr ticks"),
+        extra: "Counts are notices, not targets. Dua words are never shown.",
+        date: lastDate(recs, (r) => r.dhikr.post || r.dhikr.morn), rangeText
       };
     }
     if (id === "fasting") {
-      const vol = recs.filter((r) => r.fasting !== "none").length;
+      const vol = recs.filter((r) => r.fasting === "voluntary" || r.fasting === "white-days").length;
+      const pref = recs.filter((r) => r.fasting === "prefer-not").length;
       return {
-        obs: "Voluntary or White-Day observation on " + vol + " days. This is not assessed as daily fasting.",
-        viz: barsHtml(keys.map((k) => { const r = recordFor(k); const on = r && r.fasting !== "none"; return { n: on ? 1 : 0, gap: !on, label: k }; }).slice(-16), "var(--fasting-ink)"),
-        extra: "Ramadan rows are civil-Hijri gated. Prefer-not and unanswered are not missed sawm. No validity ruling."
+        obs: "Voluntary or White-Day observation on " + vol + " " + dayWord(vol) + ". Prefer-not recorded on " + pref + ". This is not assessed as daily fasting.",
+        viz: barsHtml(keys.slice(-12).map((k) => { const r = recordFor(k); const on = r && r.fasting !== "none" && r.fasting !== "prefer-not"; return { n: on ? 1 : 0, gap: !on, label: k }; }), "var(--fasting-ink)", "Fasting observations"),
+        extra: "Prefer-not and unanswered are not missed sawm. No validity ruling.",
+        date: lastDate(recs, (r) => r.fasting !== "none"), rangeText
       };
     }
     if (id === "akhlaq") {
-      const parts = [
-        { n: recs.filter((r) => r.akhlaq === "practised").length, color: "#6a4a7c", label: "Virtue noticed" },
-        { n: recs.filter((r) => r.akhlaq === "struggled").length, color: "#a07cb0", label: "Difficulty" },
-        { n: recs.filter((r) => r.akhlaq === "lapse").length, color: "#d2b8dc", label: "Lapse recognised" },
-        { n: keys.length - recs.length + recs.filter((r) => r.akhlaq === "unanswered").length, color: "#ece8e1", label: "Unanswered / no check-in" }
-      ];
+      const virtue = recs.filter((r) => r.akhlaq === "practised").length;
+      const lapse = recs.filter((r) => r.akhlaq === "lapse").length;
       return {
-        obs: saved === 0 ? "Not enough recorded information for Character & Morals." : "Virtue noticed on " + parts[0].n + " saved days. This is not a character grade.",
-        viz: catHtml(parts),
-        extra: "Codes practised / struggled / lapse_recognised / corrected / no_situation. Unanswered is not a relapse."
+        obs: saved === 0 ? "Not enough recorded information for Character & Morals."
+          : "Virtue noticed on " + virtue + " saved " + dayWord(virtue) + ". Lapse recognised on " + lapse + ". This is not a character grade.",
+        viz: catHtml([
+          { n: virtue, color: "#6a4a7c", label: "Virtue noticed" },
+          { n: recs.filter((r) => r.akhlaq === "struggled").length, color: "#a07cb0", label: "Difficulty" },
+          { n: lapse, color: "#d2b8dc", label: "Lapse recognised" },
+          { n: recs.filter((r) => r.akhlaq === "unanswered").length, color: "#ece8e1", label: "Unanswered" }
+        ], "Character marks"),
+        extra: "Unanswered is not a relapse.",
+        date: lastDate(recs, (r) => r.akhlaq !== "unanswered"), rangeText
       };
     }
     if (id === "huquq") {
       const p = recs.filter((r) => r.huquq === "practised").length;
+      const n = recs.filter((r) => r.huquq === "neglect").length;
       return {
-        obs: saved === 0 ? "Not enough recorded information for Rights of Others." : "A right attended on " + p + " saved days. Neglect recognised is not a verdict on a relationship.",
+        obs: saved === 0 ? "Not enough recorded information for Rights of Others."
+          : "A right attended on " + p + " saved " + dayWord(p) + ". Neglect recognised on " + n + ". That is not a verdict on a relationship.",
         viz: catHtml([
           { n: p, color: "#7a5434", label: "Attended" },
-          { n: recs.filter((r) => r.huquq === "neglect").length, color: "#c4a078", label: "Neglect recognised" },
-          { n: keys.length - recs.length, color: "#ece8e1", label: "No check-in" }
-        ]),
-        extra: "No amounts. Care-in-hardship stays observational. Reconciliation is never pressured."
+          { n: n, color: "#c4a078", label: "Neglect recognised" },
+          { n: recs.filter((r) => r.huquq === "unanswered").length, color: "#ece8e1", label: "Unanswered" }
+        ], "Rights marks"),
+        extra: "No amounts. Reconciliation is never pressured.",
+        date: lastDate(recs, (r) => r.huquq !== "unanswered"), rangeText
       };
     }
     if (id === "charity") {
       const n = recs.filter((r) => r.charity).length;
       return {
-        obs: n === 0 ? "No Charity observation in this window." : "A giving or care observation on " + n + " days. Amounts are not stored and are not a merit score.",
-        viz: barsHtml(keys.slice(-14).map((k) => { const r = recordFor(k); return { n: r && r.charity ? 1 : 0, gap: !(r && r.charity), label: k }; }), "var(--charity-ink)"),
-        extra: "Zakat is a status (due / planned / paid), not a second score. Smile-as-sadaqah stays a notice."
+        obs: n === 0 ? "No Charity observation in this window."
+          : "A giving or care observation on " + n + " " + dayWord(n) + ". Amounts are not stored and are not a merit score.",
+        viz: barsHtml(keys.slice(-10).map((k) => { const r = recordFor(k); return { n: r && r.charity ? 1 : 0, gap: !(r && r.charity), label: k }; }), "var(--charity-ink)", "Charity presence"),
+        extra: "Zakat is a status, not a second score.",
+        date: lastDate(recs, (r) => r.charity), rangeText
       };
     }
     if (id === "ummah") {
       const n = recs.filter((r) => r.ummah).length;
       return {
-        obs: n === 0 ? "No Ummah observation in this window." : "Masjid, witness, or solidarity recorded on " + n + " days. Remote is not stored as physical presence.",
-        viz: barsHtml(keys.slice(-14).map((k) => { const r = recordFor(k); return { n: r && r.ummah ? 1 : 0, gap: !(r && r.ummah), label: k }; }), "var(--ummah-ink)"),
-        extra: "Not a public check-in. Isolation is not a failing."
+        obs: n === 0 ? "No Ummah observation in this window."
+          : "Masjid, witness, or solidarity recorded on " + n + " " + dayWord(n) + ".",
+        viz: barsHtml(keys.slice(-10).map((k) => { const r = recordFor(k); return { n: r && r.ummah ? 1 : 0, gap: !(r && r.ummah), label: k }; }), "var(--ummah-ink)", "Ummah presence"),
+        extra: "Remote is not stored as physical presence. Isolation is not a failing.",
+        date: lastDate(recs, (r) => r.ummah), rangeText
       };
     }
     const n = recs.filter((r) => r.prod === "moved").length;
     return {
-      obs: "Listed actions moved on " + n + " saved days. Effort vs plan is not a worship grade.",
+      obs: "Listed actions moved on " + n + " saved " + dayWord(n) + ". Effort vs plan is not a worship grade.",
       viz: catHtml([
         { n: n, color: "#3a5e46", label: "Moved" },
         { n: recs.length - n, color: "#9cbc9f", label: "Saved, no action move" },
         { n: keys.length - recs.length, color: "#ece8e1", label: "No check-in" }
-      ]),
-      extra: "Uses Productivity store + optional home traces. Hajj standing stays on its own dashboard."
+      ], "Productivity presence"),
+      extra: "Uses the Productivity store. Hajj standing stays on its own dashboard.",
+      date: lastDate(recs, (r) => r.prod === "moved"), rangeText
     };
+  }
+
+  function weekGroups(keys) {
+    const groups = [];
+    keys.forEach((k) => {
+      const start = iso(mondayOf(parseIso(k)));
+      let g = groups.find((x) => x.start === start);
+      if (!g) { g = { start, keys: [] }; groups.push(g); }
+      g.keys.push(k);
+    });
+    return groups;
+  }
+
+  function showScreen(name) {
+    screen = name;
+    [
+      ["reviewView", name === "review"],
+      ["historyView", name === "history"],
+      ["responseView", name === "responses"],
+      ["homeView", name === "home"]
+    ].forEach(([id, on]) => {
+      const el = document.getElementById(id);
+      el.style.display = on ? "block" : "none";
+      el.hidden = !on;
+      el.setAttribute("aria-hidden", String(!on));
+    });
+    document.getElementById("backReview").classList.toggle("hidden", name === "review" || name === "home");
+    document.getElementById("navReview").classList.toggle("on", name !== "home");
+    document.getElementById("navHome").classList.toggle("on", name === "home");
+    document.getElementById("screenTitle").textContent =
+      name === "home" ? "Home" : name === "history" ? "All saved days" : name === "responses" ? "My Response" : "Review";
+    if (name === "history") renderHistory();
+    if (name === "responses") renderResponses();
   }
 
   function render() {
@@ -474,7 +567,8 @@
     const recs = records(keys);
     const start = parseIso(keys[0]);
     const end = parseIso(keys[keys.length - 1]);
-    document.getElementById("rangeLabel").textContent = fmt(start) + " – " + fmt(end) + "  ·  compared with the previous " + days + " days";
+    const rangeText = fmt(start) + " – " + fmt(end);
+    document.getElementById("rangeLabel").textContent = rangeText + "  ·  compared with the previous " + days + " " + dayWord(days);
     document.querySelectorAll(".chip").forEach((c) => c.setAttribute("aria-pressed", c.dataset.days === String(days) ? "true" : "false"));
     document.getElementById("daysN").textContent = recs.length;
     const domCount = DOMAINS.filter((d) => recs.some((r) => {
@@ -490,21 +584,30 @@
       return r.prod === "moved";
     })).length;
     document.getElementById("domN").textContent = recs.length ? domCount : 0;
+    document.getElementById("kindLegend").innerHTML = kindLegend();
 
     const strip = document.getElementById("heroStrip");
-    strip.innerHTML = keys.map((k) => {
-      const on = !!recordFor(k);
-      return '<button type="button" class="cell ' + (on ? "saved" : "none") + (k === picked ? " picked" : "") + '" data-day="' + k + '" title="' + k + '"></button>';
-    }).join("");
+    if (days === 90) {
+      strip.setAttribute("aria-label", "Weeks with saved check-ins");
+      strip.innerHTML = weekGroups(keys).map((g) => {
+        const saved = g.keys.filter((k) => recordFor(k)).length;
+        return '<button type="button" class="cell ' + (saved ? "saved" : "none") + (pickedWeek === g.start ? " picked" : "") + '" data-week="' + g.start + '" title="' + g.start + " · " + saved + ' saved" aria-label="Week of ' + g.start + ', ' + saved + ' saved days"></button>';
+      }).join("");
+    } else {
+      strip.setAttribute("aria-label", "Days in this window");
+      strip.innerHTML = keys.map((k) => {
+        const kind = dayKind(k);
+        return '<button type="button" class="cell ' + kind + (k === picked ? " picked" : "") + '" data-day="' + k + '" title="' + k + " · " + kind + '" aria-label="' + k + ", " + kind + '"></button>';
+      }).join("");
+    }
 
     const prior = records(priorKeys());
     const cmp = document.getElementById("compareNote");
+    cmp.classList.remove("hidden");
     if (recs.length < 4 || prior.length < 4) {
-      cmp.classList.remove("hidden");
-      cmp.textContent = "Not enough recorded information to describe a change versus the previous " + days + " days (" + prior.length + " saved days then, " + recs.length + " now).";
+      cmp.textContent = "Not enough recorded information to describe a change versus the previous " + days + " " + dayWord(days) + " (" + prior.length + " saved " + dayWord(prior.length) + " then, " + recs.length + " now).";
     } else {
-      cmp.classList.remove("hidden");
-      cmp.textContent = "Previous comparable window had " + prior.length + " saved days; this window has " + recs.length + ". Shares use recorded rows only — not a spiritual trend.";
+      cmp.textContent = "Previous comparable window had " + prior.length + " saved " + dayWord(prior.length) + "; this window has " + recs.length + ". Shares use recorded rows only — not a spiritual trend.";
     }
 
     const cards = document.getElementById("cards");
@@ -512,41 +615,84 @@
       cards.innerHTML = '<div class="empty">No saved check-ins in this window. Home remains the place to record today. Empty is not missed.</div>';
     } else {
       cards.innerHTML = DOMAINS.map((d) => {
-        const m = cardModel(d.id, recs, keys);
+        const m = cardModel(d.id, recs, keys, rangeText);
         const open = openCard === d.id;
-        return '<article class="card' + (open ? " open" : "") + '" style="background:' + d.color + '" data-card="' + d.id + '" tabindex="0" aria-expanded="' + open + '">' +
-          '<div class="top"><h3>' + d.title + '</h3><span class="pill">' + (open ? "Hide" : "Show") + '</span></div>' +
-          '<div class="viz">' + m.viz + '</div>' +
-          '<p class="obs">' + m.obs + '</p>' +
-          '<div class="details"><p>' + m.extra + '</p>' +
-          '<div class="actions"><button type="button" data-hist="' + d.id + '">View historical records</button>' +
-          '<button type="button" data-edit="' + d.id + '">View / Edit a record</button></div></div></article>';
+        const when = m.date ? ("In " + rangeText + " · last recorded " + m.date) : ("In " + rangeText + " · no recorded mark");
+        return '<article class="card" style="background:' + d.color + '" data-card="' + d.id + '">' +
+          '<div class="top"><div><h3 id="h-' + d.id + '">' + d.title + '</h3><p class="when">' + when + "</p></div>" +
+          '<button type="button" class="expand" data-expand="' + d.id + '" aria-expanded="' + open + '" aria-controls="d-' + d.id + '">' +
+          (open ? "Hide details" : "Show details") + "</button></div>" +
+          '<div class="viz">' + m.viz + "</div>" +
+          '<p class="obs">' + m.obs + "</p>" +
+          '<div class="details" id="d-' + d.id + '"' + (open ? "" : " hidden") + ' aria-hidden="' + (!open) + '">' +
+          (open
+            ? "<p>" + m.extra + "</p>" +
+              '<div class="actions"><button type="button" data-hist="' + d.id + '">View historical records</button>' +
+              '<button type="button" data-edit="' + d.id + '">View / Edit a record</button></div>'
+            : "") +
+          "</div></article>";
       }).join("");
     }
 
     const ins = document.getElementById("insights");
     if (recs.length === 0) {
-      ins.textContent = "Not enough recorded information to describe this period.";
-    } else if (recs.length === 1) {
-      ins.textContent = "One saved day is not a trend. That day can still be opened and amended.";
+      ins.innerHTML = '<div class="note">Not enough recorded information to describe this period.</div>';
     } else {
-      ins.textContent = "Qur’an engagement was recorded on " + recs.filter((r) => r.quran.engage !== "none").length +
-        " days in this period. Charity observations on " + recs.filter((r) => r.charity).length +
-        " days. These counts describe records, not acceptance or rank.";
+      const qDays = recs.filter((r) => r.quran.engage !== "none").map((r) => r.key);
+      const cDays = recs.filter((r) => r.charity).map((r) => r.key);
+      const lapseDays = recs.filter((r) => r.akhlaq === "lapse").map((r) => r.key);
+      ins.innerHTML =
+        '<button type="button" class="obs-link" data-jump-domain="quran" data-jump-day="' + (qDays.slice(-1)[0] || "") + '">Qur’an engagement was recorded on ' + qDays.length + " " + dayWord(qDays.length) + " in this period. Open Qur’an and the most recent of those days.</button>" +
+        '<button type="button" class="obs-link" data-jump-domain="charity" data-jump-day="' + (cDays.slice(-1)[0] || "") + '">Charity observations on ' + cDays.length + " " + dayWord(cDays.length) + ". These counts describe records, not acceptance.</button>" +
+        (lapseDays.length ? '<button type="button" class="obs-link" data-jump-domain="akhlaq" data-jump-day="' + lapseDays.slice(-1)[0] + '">Lapse recognised on ' + lapseDays.length + " saved " + dayWord(lapseDays.length) + ". Open Character & Morals for that date. This is not a grade.</button>" : "");
     }
 
-    const cal = document.getElementById("cal");
-    const startPad = parseIso(keys[0]).getDay();
-    const pads = (startPad + 6) % 7;
-    const heads = ["M","T","W","T","F","S","S"].map((d) => '<div class="dow">' + d + "</div>").join("");
-    const blanks = Array.from({ length: pads }, () => "<div></div>").join("");
-    cal.innerHTML = heads + blanks + keys.map((k) => {
-      const on = !!recordFor(k);
-      return '<button type="button" class="day' + (on ? " saved" : "") + (k === picked ? " picked" : "") + '" data-day="' + k + '">' + Number(k.slice(-2)) + "</button>";
-    }).join("");
-
+    document.getElementById("calHeading").textContent = days === 90 ? "Weeks in this 90-day window" : "History in this window";
+    document.getElementById("calBlurb").textContent = days === 90
+      ? "Each row is one week. Select a week, then a day. Empty weeks stay visible. Edit opens the existing record."
+      : "Empty days stay visible. Tap a day to inspect; Edit opens the existing record (no duplicate).";
+    renderCalendar(keys);
     renderSheet();
     document.getElementById("widePreview").innerHTML = document.getElementById("sheet").innerHTML || "<p class='blurb'>Select a calendar day to preview the record here.</p>";
+  }
+
+  function renderCalendar(keys) {
+    const cal = document.getElementById("cal");
+    if (days === 90) {
+      const groups = weekGroups(keys);
+      cal.className = "weeks";
+      cal.innerHTML = groups.map((g) => {
+        const end = addDays(parseIso(g.start), 6);
+        const saved = g.keys.filter((k) => recordFor(k)).length;
+        const open = pickedWeek === g.start;
+        const dots = g.keys.map((k) => '<i class="cell ' + dayKind(k) + '" title="' + k + '"></i>').join("");
+        return '<button type="button" class="week-row" data-week="' + g.start + '" aria-pressed="' + open + '" aria-expanded="' + open + '">' +
+          '<span class="week-meta"><b>' + fmt(parseIso(g.start)) + " – " + fmt(end) + "</b>" + saved + " saved of " + g.keys.length + "</span>" +
+          '<span class="week-dots" aria-hidden="true">' + dots + "</span></button>" +
+          (open ? '<div class="cal" style="margin:6px 0 10px">' +
+            ["M","T","W","T","F","S","S"].map((d) => '<div class="dow">' + d + "</div>").join("") +
+            g.keys.map((k) => {
+              const kind = dayKind(k);
+              return '<button type="button" class="day ' + kind + (k === picked ? " picked" : "") + '" data-day="' + k + '" aria-label="' + k + ", " + kind + '">' + Number(k.slice(-2)) + "</button>";
+            }).join("") + "</div>" : "");
+      }).join("");
+      return;
+    }
+    cal.className = "cal";
+    const startPad = (parseIso(keys[0]).getDay() + 6) % 7;
+    const heads = ["M","T","W","T","F","S","S"].map((d) => '<div class="dow">' + d + "</div>").join("");
+    const blanks = Array.from({ length: startPad }, () => "<div></div>").join("");
+    cal.innerHTML = heads + blanks + keys.map((k) => {
+      const kind = dayKind(k);
+      return '<button type="button" class="day ' + kind + (k === picked ? " picked" : "") + '" data-day="' + k + '" aria-label="' + k + ", " + kind + '">' + Number(k.slice(-2)) + "</button>";
+    }).join("");
+  }
+
+  function markLabel(mark) {
+    if (mark === "congregation") return "congregation (recorded activity)";
+    if (mark === "late") return "late (recorded)";
+    if (mark === "home") return "at home (recorded)";
+    return "unanswered";
   }
 
   function renderSheet() {
@@ -559,11 +705,12 @@
         '<div class="actions"><button type="button" id="editPicked">View / Edit record</button></div>';
       return;
     }
-    const salah = rec.prayers.map((p) => p.name + ": " + p.mark).join(" · ");
+    const salah = rec.prayers.map((p) => p.name + ": " + markLabel(p.mark)).join(" · ");
     el.innerHTML = "<h4>" + picked + " · saved check-in</h4>" +
       '<div class="row"><span>Salah</span><span>' + salah + "</span></div>" +
       '<div class="row"><span>Qur’an duration</span><span>' + rec.quran.engage + "</span></div>" +
-      '<div class="row"><span>Dhikr ticks</span><span>' + (rec.dhikr.post ? "post-fard " : "") + (rec.dhikr.morn ? "morning" : "") + "</span></div>" +
+      '<div class="row"><span>Fasting</span><span>' + rec.fasting + "</span></div>" +
+      '<div class="row"><span>Character</span><span>' + rec.akhlaq + "</span></div>" +
       '<div class="row"><span>Private dua / journal</span><span>Hidden in summaries</span></div>' +
       '<div class="actions"><button type="button" id="editPicked">View / Edit this record</button>' +
       '<button type="button" id="respondPicked">Add a response from this day</button>' +
@@ -571,18 +718,70 @@
       "<p class='blurb'>Edit reopens the existing DailyCheckIn for this dateKey. It does not insert a second row.</p>";
   }
 
+  function renderHistory() {
+    const keys = allTimeKeys().filter((k) => recordFor(k)).reverse();
+    const q = historyFilter.trim().toLowerCase();
+    const shown = keys.filter((k) => !q || k.includes(q) || fmt(parseIso(k)).toLowerCase().includes(q));
+    document.getElementById("historyView").innerHTML =
+      '<p class="blurb">All saved days across a 180-day synthetic archive. This is a Review panel, not a fourth tab. Filter by date. Empty days are omitted here; they remain on the period calendar.</p>' +
+      '<label>Filter dates <input type="search" id="histFilter" value="' + historyFilter.replace(/"/g, "&quot;") + '" placeholder="2026-09 or 12 Sep"></label>' +
+      "<p class='meta'>" + shown.length + " of " + keys.length + " saved days</p>" +
+      '<ul class="list">' + shown.map((k) => {
+        const r = recordFor(k);
+        const kind = dayKind(k);
+        return "<li><div class='meta'>" + k + " · " + kind + "</div><div>" + r.prayers.filter((p) => p.mark !== "unanswered").length + " recorded Salah rows</div>" +
+          '<div class="actions"><button type="button" data-day="' + k + '">Open record</button></div></li>';
+      }).join("") + "</ul>";
+    const input = document.getElementById("histFilter");
+    input.oninput = (e) => { historyFilter = e.target.value; renderHistory(); };
+  }
+
+  function renderResponses() {
+    const items = RESPONSES.filter((r) => responseTab === "archived" ? r.archived : !r.archived);
+    document.getElementById("responseView").innerHTML =
+      '<p class="blurb">Independent notes with provenance. Text stays local. This is not a ruling. Archive hides an entry without deleting it.</p>' +
+      '<div class="period" role="tablist" aria-label="Response lists">' +
+      '<button class="chip" data-rtab="active" aria-pressed="' + (responseTab === "active") + '">Active (' + RESPONSES.filter((r) => !r.archived).length + ")</button>" +
+      '<button class="chip" data-rtab="archived" aria-pressed="' + (responseTab === "archived") + '">Archived (' + RESPONSES.filter((r) => r.archived).length + ")</button></div>" +
+      '<label>New or edited note<textarea id="respDraft" rows="3">' + draft.replace(/</g, "&lt;") + "</textarea></label>" +
+      '<div class="actions"><button type="button" id="saveResp">' + (editingId ? "Save edit" : "Add response") + "</button>" +
+      (editingId ? '<button type="button" id="cancelEdit">Cancel edit</button>' : "") + "</div>" +
+      '<ul class="list">' + items.map((r) =>
+        "<li><div class='meta'>" + r.created + " · " + r.provenance + "</div><p>" + r.text + "</p>" +
+        '<div class="actions"><button type="button" data-redit="' + r.id + '">Edit</button>' +
+        (r.archived
+          ? '<button type="button" data-restore="' + r.id + '">Restore</button>'
+          : '<button type="button" data-archive="' + r.id + '">Archive</button>') +
+        "</div></li>"
+      ).join("") + (items.length ? "" : "<li>No entries in this list.</li>") + "</ul>";
+    document.getElementById("respDraft").oninput = (e) => { draft = e.target.value; };
+  }
+
   document.body.addEventListener("click", (e) => {
-    const chip = e.target.closest(".chip");
-    if (chip) { days = Number(chip.dataset.days); picked = null; render(); return; }
-    const card = e.target.closest(".card");
-    if (card && !e.target.closest("button")) {
-      openCard = openCard === card.dataset.card ? null : card.dataset.card;
+    const chip = e.target.closest(".chip[data-days]");
+    if (chip) { days = Number(chip.dataset.days); picked = null; pickedWeek = null; showScreen("review"); render(); return; }
+    const expand = e.target.closest("[data-expand]");
+    if (expand) {
+      const id = expand.dataset.expand;
+      openCard = openCard === id ? null : id;
       render();
       return;
     }
     const hist = e.target.closest("[data-hist]");
     if (hist) {
-      document.getElementById("cal").scrollIntoView({ behavior: "smooth", block: "start" });
+      openCard = hist.dataset.hist;
+      document.getElementById("calHeading").scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
+    const jump = e.target.closest("[data-jump-domain]");
+    if (jump) {
+      openCard = jump.dataset.jumpDomain;
+      if (jump.dataset.jumpDay) {
+        picked = jump.dataset.jumpDay;
+        pickedWeek = iso(mondayOf(parseIso(picked)));
+      }
+      render();
+      document.getElementById("h-" + openCard)?.scrollIntoView({ behavior: "smooth", block: "start" });
       return;
     }
     const edit = e.target.closest("[data-edit], #editPicked");
@@ -591,50 +790,84 @@
       alert("Prototype: would open CheckInScreen(date: " + day + ") — the existing document. No duplicate insert.");
       return;
     }
+    const weekBtn = e.target.closest("[data-week]");
+    if (weekBtn) {
+      pickedWeek = pickedWeek === weekBtn.dataset.week ? null : weekBtn.dataset.week;
+      picked = null;
+      render();
+      return;
+    }
     const dayBtn = e.target.closest("[data-day]");
-    if (dayBtn) { picked = dayBtn.dataset.day; render(); return; }
-    if (e.target.id === "respondPicked" || e.target.id === "addResponse") {
-      document.getElementById("responseSheet").classList.add("show");
-      document.getElementById("responseSheet").innerHTML = "<h4>Add a response</h4><p>Provenance: period summary (" + days + " days) or day " + (picked || "unspecified") + ". Text stays local. This is not a ruling.</p>";
+    if (dayBtn) {
+      picked = dayBtn.dataset.day;
+      if (screen === "history") showScreen("review");
+      render();
+      document.getElementById("sheet").scrollIntoView({ behavior: "smooth", block: "nearest" });
       return;
     }
-    if (e.target.id === "openResponses") {
-      document.getElementById("responseSheet").classList.add("show");
-      document.getElementById("responseSheet").innerHTML = "<h4>My Response</h4><p>Independent notes list (active / archived) would appear here — same ResponseListScreen content, not a new store.</p>";
+    if (e.target.id === "openHistory") { showScreen("history"); return; }
+    if (e.target.id === "openResponses" || e.target.id === "respondPicked" || e.target.id === "addResponse") {
+      if (e.target.id === "addResponse" || e.target.id === "respondPicked") {
+        editingId = null;
+        draft = "";
+        const prov = e.target.id === "respondPicked"
+          ? ("Day " + picked + " · Review")
+          : (days + "-day Review");
+        window._nextProvenance = prov;
+      }
+      showScreen("responses");
       return;
     }
+    const rtab = e.target.closest("[data-rtab]");
+    if (rtab) { responseTab = rtab.dataset.rtab; renderResponses(); return; }
+    if (e.target.id === "saveResp") {
+      const text = (document.getElementById("respDraft") || {}).value || "";
+      if (!text.trim()) return;
+      if (editingId) {
+        const item = RESPONSES.find((r) => r.id === editingId);
+        if (item) item.text = text.trim();
+      } else {
+        RESPONSES.unshift({
+          id: "r" + Date.now(),
+          text: text.trim(),
+          archived: false,
+          created: iso(TODAY),
+          provenance: window._nextProvenance || (days + "-day Review")
+        });
+      }
+      editingId = null; draft = ""; window._nextProvenance = null;
+      responseTab = "active";
+      renderResponses();
+      return;
+    }
+    if (e.target.id === "cancelEdit") { editingId = null; draft = ""; renderResponses(); return; }
+    const redit = e.target.closest("[data-redit]");
+    if (redit) {
+      const item = RESPONSES.find((r) => r.id === redit.dataset.redit);
+      editingId = item.id; draft = item.text; renderResponses(); return;
+    }
+    const arch = e.target.closest("[data-archive]");
+    if (arch) { RESPONSES.find((r) => r.id === arch.dataset.archive).archived = true; renderResponses(); return; }
+    const rest = e.target.closest("[data-restore]");
+    if (rest) { RESPONSES.find((r) => r.id === rest.dataset.restore).archived = false; renderResponses(); return; }
     if (e.target.id === "removePicked") {
       alert("Prototype: History remove confirmation for " + picked + ". Production keeps the confirm-and-delete path.");
     }
   });
 
-  document.getElementById("prevWin").onclick = () => { offset -= days; render(); };
-  document.getElementById("nextWin").onclick = () => { if (offset + days <= 0) { offset += days; render(); } };
-  document.getElementById("densitySel").onchange = (e) => { density = e.target.value; picked = null; render(); };
+  document.getElementById("prevWin").onclick = () => { offset -= days; picked = null; pickedWeek = null; render(); };
+  document.getElementById("nextWin").onclick = () => { if (offset + days <= 0) { offset += days; picked = null; pickedWeek = null; render(); } };
+  document.getElementById("densitySel").onchange = (e) => { density = e.target.value; picked = null; pickedWeek = null; render(); };
+  document.getElementById("scaleSel").onchange = (e) => { document.documentElement.style.setProperty("--scale", e.target.value); };
   document.getElementById("layoutSel").onchange = (e) => {
     document.getElementById("layout").style.gridTemplateColumns = e.target.value === "wide" ? "minmax(0,1.2fr) minmax(320px,.8fr)" : "1fr";
     document.getElementById("phone").style.maxWidth = e.target.value === "phone" ? "420px" : "none";
   };
-  document.getElementById("navHome").onclick = () => {
-    document.getElementById("homeView").style.display = "block";
-    document.getElementById("reviewView").style.display = "none";
-    document.getElementById("navHome").classList.add("on");
-    document.getElementById("navReview").classList.remove("on");
-    document.getElementById("screenTitle").textContent = "Home";
-  };
-  document.getElementById("navReview").onclick = () => {
-    document.getElementById("homeView").style.display = "none";
-    document.getElementById("reviewView").style.display = "block";
-    document.getElementById("navReview").classList.add("on");
-    document.getElementById("navHome").classList.remove("on");
-    document.getElementById("screenTitle").textContent = "Review";
-  };
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" && document.activeElement.classList.contains("card")) {
-      document.activeElement.click();
-    }
-  });
+  document.getElementById("navHome").onclick = () => showScreen("home");
+  document.getElementById("navReview").onclick = () => { showScreen("review"); render(); };
+  document.getElementById("backReview").onclick = () => { showScreen("review"); render(); };
   render();
+  showScreen("review");
 })();
 </script>
 </body>

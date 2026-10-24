@@ -17,26 +17,24 @@ import '../../domain/practice_quran_catalog.dart';
 import '../../domain/reflection_catalog.dart';
 import 'bring_hadith_sheet.dart';
 import 'bring_quran_verse_sheet.dart';
+import 'hadith_map_sheet.dart';
 import '../shared/activity_picker.dart';
 import '../shared/domain_visual.dart';
 import '../shared/ui_bits.dart';
 import '../shared/week_nav_strip.dart';
 import 'reflection_home_cards.dart';
 
-ButtonStyle get _compactOutlineStyle => OutlinedButton.styleFrom(
-  visualDensity: VisualDensity.compact,
-  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-  minimumSize: const Size.fromHeight(32),
-  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-);
-
 ButtonStyle get _slimRegisterStyle => OutlinedButton.styleFrom(
   visualDensity: VisualDensity.compact,
   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
   minimumSize: const Size.fromHeight(28),
   maximumSize: const Size(double.infinity, 28),
-  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-  textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, height: 1.1),
+  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+  textStyle: const TextStyle(
+    fontSize: 11,
+    fontWeight: FontWeight.w600,
+    height: 1.1,
+  ),
 );
 
 class PracticeAboutRegisterRow extends StatelessWidget {
@@ -226,7 +224,10 @@ class _PracticeHadithWashState extends ConsumerState<PracticeHadithWash> {
     final item = practiceHadithAt(prefs.practiceHadithBrowseIndex, extra);
     final already = practiceHadithAlreadyRegistered(records, item.id);
     final identity = domainColorIdentity(widget.domain);
-    final wash = identity.practiceWashFor(Theme.of(context).brightness);
+    final wash = identity.practiceWashFor(
+      Theme.of(context).brightness,
+      context,
+    );
     final addedFill = Theme.of(context).colorScheme.secondaryContainer;
     final addedInk = Theme.of(context).colorScheme.onSecondaryContainer;
     final ink = already ? addedInk : null;
@@ -237,7 +238,7 @@ class _PracticeHadithWashState extends ConsumerState<PracticeHadithWash> {
     );
     final chrome = already
         ? addedFill
-        : weekNavStripWash(identity.family, wash);
+        : weekNavStripWash(identity.family, wash, context);
     final sourceWash = Color.alphaBlend(
       Theme.of(context).colorScheme.surface.withValues(alpha: 0.78),
       wash,
@@ -280,7 +281,6 @@ class _PracticeHadithWashState extends ConsumerState<PracticeHadithWash> {
               register: Row(
                 children: [
                   Expanded(
-                    flex: 3,
                     child: OutlinedButton(
                       key: const Key('hadith-practice-open-register'),
                       style: _slimRegisterStyle,
@@ -302,9 +302,8 @@ class _PracticeHadithWashState extends ConsumerState<PracticeHadithWash> {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 6),
+                  const SizedBox(width: 4),
                   Expanded(
-                    flex: 2,
                     child: OutlinedButton(
                       key: const Key('hadith-practice-bring'),
                       style: _slimRegisterStyle,
@@ -314,6 +313,23 @@ class _PracticeHadithWashState extends ConsumerState<PracticeHadithWash> {
                       },
                       child: const Text(
                         Copy.bringHadith,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: OutlinedButton(
+                      key: const Key('hadith-practice-map'),
+                      style: _slimRegisterStyle,
+                      onPressed: () {
+                        _collapseAbout();
+                        showHadithMapSheet(context, ref);
+                      },
+                      child: const Text(
+                        Copy.hadithMap,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         textAlign: TextAlign.center,
@@ -488,7 +504,10 @@ class _PracticeQuranWashState extends ConsumerState<PracticeQuranWash> {
     final item = practiceQuranAt(prefs.practiceQuranBrowseIndex, extra);
     final already = practiceHadithAlreadyRegistered(records, item.id);
     final identity = domainColorIdentity(widget.domain);
-    final wash = identity.practiceWashFor(Theme.of(context).brightness);
+    final wash = identity.practiceWashFor(
+      Theme.of(context).brightness,
+      context,
+    );
     final addedFill = Theme.of(context).colorScheme.secondaryContainer;
     final addedInk = Theme.of(context).colorScheme.onSecondaryContainer;
     final ink = already ? addedInk : null;
@@ -499,7 +518,7 @@ class _PracticeQuranWashState extends ConsumerState<PracticeQuranWash> {
     );
     final chrome = already
         ? addedFill
-        : weekNavStripWash(identity.family, wash);
+        : weekNavStripWash(identity.family, wash, context);
     final sourceWash = Color.alphaBlend(
       Theme.of(context).colorScheme.surface.withValues(alpha: 0.78),
       wash,
@@ -772,27 +791,38 @@ class PracticeRegisterStatusSelect extends StatelessWidget {
     required this.value,
     required this.onChanged,
     this.dropdownKey,
+    this.compact = false,
+    this.fillWash,
   });
 
   final MonitorDomain domain;
   final PracticeHadithStatus value;
   final ValueChanged<PracticeHadithStatus> onChanged;
   final Key? dropdownKey;
+  final bool compact;
+  final Color? fillWash;
 
   @override
   Widget build(BuildContext context) {
     final identity = domainColorIdentity(domain);
-    final wash = identity.washFor(Theme.of(context).brightness);
-    final fill = Color.lerp(wash, identity.family, switch (value) {
-      PracticeHadithStatus.learning => 0.08,
-      PracticeHadithStatus.learnt => 0.28,
-      PracticeHadithStatus.practicing => 0.48,
-      PracticeHadithStatus.habit => 0.68,
-    })!;
+    final wash =
+        fillWash ??
+        (compact
+            ? identity.practiceWashFor(Theme.of(context).brightness, context)
+            : identity.washFor(Theme.of(context).brightness, context));
+    final fill = compact
+        ? wash
+        : Color.lerp(wash, identity.familyFor(context), switch (value) {
+            PracticeHadithStatus.learning => 0.08,
+            PracticeHadithStatus.learnt => 0.28,
+            PracticeHadithStatus.practicing => 0.48,
+            PracticeHadithStatus.habit => 0.68,
+          })!;
     return CheckInSelect<PracticeHadithStatus>(
       dropdownKey: dropdownKey,
       value: value,
       sortLabels: false,
+      compact: compact,
       fillColor: fill,
       entries: [
         for (final status in PracticeHadithStatus.values)
@@ -905,16 +935,11 @@ class PracticeArabicScriptBar extends ConsumerWidget {
         isExpanded: true,
         isDense: compact,
         value: prefs.arabicScriptFace,
-        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-          color: inkColor,
-          fontSize: compact ? 12 : null,
-        ),
+        style: Theme.of(context).textTheme.labelLarge
+            ?.copyWith(color: inkColor, fontSize: compact ? 12 : null),
         items: [
           for (final option in ArabicScriptFace.values)
-            DropdownMenuItem(
-              value: option,
-              child: Text(option.label),
-            ),
+            DropdownMenuItem(value: option, child: Text(option.label)),
         ],
         onChanged: (next) async {
           if (next == null) return;
@@ -954,7 +979,9 @@ class PracticeArabicScriptBar extends ConsumerWidget {
     if (compact) {
       return Row(
         children: [
-          Expanded(child: Center(child: SizedBox(width: 108, child: face))),
+          Expanded(
+            child: Center(child: SizedBox(width: 108, child: face)),
+          ),
           Expanded(
             child: Center(
               child: Row(
@@ -1076,10 +1103,10 @@ class _PracticeTopicSkimCardState extends State<PracticeTopicSkimCard> {
     final canNext = _index < items.length - 1;
     final prefix = widget.specKeyPrefix;
     final identity = domainColorIdentity(widget.domain);
-    final wash = identity.washFor(Theme.of(context).brightness);
+    final wash = identity.washFor(Theme.of(context).brightness, context);
     final chrome = already
-        ? widget.addedFill ?? weekNavStripWash(identity.family, wash)
-        : weekNavStripWash(identity.family, wash);
+        ? widget.addedFill ?? weekNavStripWash(identity.family, wash, context)
+        : weekNavStripWash(identity.family, wash, context);
     final sourceWash = Color.alphaBlend(
       Theme.of(context).colorScheme.surface.withValues(alpha: 0.78),
       wash,
@@ -1104,10 +1131,8 @@ class _PracticeTopicSkimCardState extends State<PracticeTopicSkimCard> {
             },
             title: Text(
               item.topic,
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: ink,
-                fontWeight: FontWeight.w600,
-              ),
+              style: Theme.of(context).textTheme.labelLarge
+                  ?.copyWith(color: ink, fontWeight: FontWeight.w600),
             ),
             children: [
               PracticeSkimSourceBox(

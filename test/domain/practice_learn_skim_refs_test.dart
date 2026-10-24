@@ -15,10 +15,7 @@ import 'package:muhasabah02/domain/practice_wealth_catalog.dart';
 import 'package:muhasabah02/domain/reflection_source.dart';
 
 void main() {
-  void expectThreeToFivePerTopic(
-    String name,
-    List<PracticeDhikrItem> catalog,
-  ) {
+  void expectThreeToFivePerTopic(String name, List<PracticeDhikrItem> catalog) {
     test('$name Learn topics have 3–5 source refs', () {
       final keys = <String>{};
       for (final item in catalog) {
@@ -36,10 +33,7 @@ void main() {
         catalog.every((item) => reflectionSourceUris(item.source).isNotEmpty),
         isTrue,
       );
-      expect(
-        catalog.map((item) => item.id).toSet().length,
-        catalog.length,
-      );
+      expect(catalog.map((item) => item.id).toSet().length, catalog.length);
     });
   }
 
@@ -56,10 +50,11 @@ void main() {
 
   test('Hajj Learn catalog spans Learn, Readiness, and After Hajj', () {
     expect(kPracticeHajjCatalog.length, 4);
-    expect(
-      kPracticeHajjCatalog.map((item) => item.group).toSet(),
-      {kHajjLearnBand, kHajjReadinessBand, kHajjAfterBand},
-    );
+    expect(kPracticeHajjCatalog.map((item) => item.group).toSet(), {
+      kHajjLearnBand,
+      kHajjReadinessBand,
+      kHajjAfterBand,
+    });
     expect(
       kPracticeHajjCatalog.every(
         (item) => reflectionSourceUris(item.source).isNotEmpty,
@@ -73,10 +68,7 @@ void main() {
   });
 
   test('Fasting Learn bank is 20–30 verified refs without a five-cap', () {
-    expect(
-      kPracticeFastingCatalog.length,
-      inInclusiveRange(20, 30),
-    );
+    expect(kPracticeFastingCatalog.length, inInclusiveRange(20, 30));
     expect(
       kPracticeFastingCatalog.every(
         (item) => reflectionSourceUris(item.source).isNotEmpty,

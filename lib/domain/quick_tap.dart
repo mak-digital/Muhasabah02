@@ -17,6 +17,7 @@ import 'personal_mix.dart';
 import 'prayer.dart';
 import 'quran.dart';
 import 'salah_extras.dart';
+import 'worship_list_gender.dart';
 
 enum QuickTapKind { salah, jumuah, voluntarySalah, quran, trace, zakat }
 
@@ -179,16 +180,26 @@ String _iconName(MonitorDomain domain) => switch (domain) {
   MonitorDomain.charity => 'volunteer_activism',
 };
 
-List<QuickTapChoice> quickTapCatalog(QuickTapItem item) {
+List<QuickTapChoice> quickTapCatalog(
+  QuickTapItem item, {
+  WorshipListGender gender = WorshipListGender.unanswered,
+  String? selectedId,
+}) {
   switch (item.kind) {
     case QuickTapKind.salah:
       return [
-        for (final option in ActivityCatalog.salah)
+        for (final option in ActivityCatalog.obligatorySalahOptions(
+          gender: gender,
+          selectedId: selectedId,
+        ))
           if (!option.isOther) _fromActivity(option),
       ];
     case QuickTapKind.jumuah:
       return [
-        for (final option in ActivityCatalog.jumuah)
+        for (final option in ActivityCatalog.jumuahOptions(
+          gender: gender,
+          selectedId: selectedId,
+        ))
           if (!option.isOther) _fromActivity(option),
       ];
     case QuickTapKind.voluntarySalah:
@@ -244,8 +255,10 @@ List<QuickTapChoice> quickTapCycle(
   QuickTapItem item, {
   List<DailyCheckIn> history = const [],
   String? excludeDateKey,
+  WorshipListGender gender = WorshipListGender.unanswered,
+  String? selectedId,
 }) {
-  final catalog = quickTapCatalog(item);
+  final catalog = quickTapCatalog(item, gender: gender, selectedId: selectedId);
   final recorded = [
     for (final choice in catalog)
       if (choice.mark != QuickTapMark.unanswered) choice,
@@ -291,17 +304,20 @@ QuickTapChoice readQuickTapChoice(
   DailyCheckIn record,
   QuickTapItem item, {
   List<DailyCheckIn> history = const [],
+  WorshipListGender gender = WorshipListGender.unanswered,
 }) {
   final id = readQuickTapChoiceId(record, item);
   final cycle = quickTapCycle(
     item,
     history: history,
     excludeDateKey: record.dateKey,
+    gender: gender,
+    selectedId: id,
   );
   for (final choice in cycle) {
     if (choice.id == id) return choice;
   }
-  for (final choice in quickTapCatalog(item)) {
+  for (final choice in quickTapCatalog(item, gender: gender, selectedId: id)) {
     if (choice.id == id) return choice;
   }
   return cycle.last;
@@ -327,13 +343,16 @@ QuickTapChoice nextQuickTapChoice(
   DailyCheckIn record,
   QuickTapItem item, {
   List<DailyCheckIn> history = const [],
+  WorshipListGender gender = WorshipListGender.unanswered,
 }) {
+  final current = readQuickTapChoiceId(record, item);
   final cycle = quickTapCycle(
     item,
     history: history,
     excludeDateKey: record.dateKey,
+    gender: gender,
+    selectedId: current,
   );
-  final current = readQuickTapChoiceId(record, item);
   var index = cycle.indexWhere((choice) => choice.id == current);
   if (index < 0) index = cycle.length - 1;
   return cycle[(index + 1) % cycle.length];

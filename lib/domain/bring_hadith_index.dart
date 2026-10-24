@@ -22,7 +22,8 @@ class BringHadithIndexItem {
   HadithRef get ref => HadithRef(slug: slug, number: number);
 
   String get searchText =>
-      '$topic $keywords $preview ${ref.citation} ${ref.hadithKey}'.toLowerCase();
+      '$topic $keywords $preview ${ref.citation} ${ref.hadithKey}'
+          .toLowerCase();
 }
 
 BringHadithIndexItem _h({
@@ -71,7 +72,8 @@ final List<BringHadithIndexItem> kBringHadithIndex = [
     number: 10,
     topic: 'The Muslim',
     keywords: 'tongue hand harm safety neighbour speech',
-    preview: 'The Muslim is the one from whose tongue and hand people are safe.',
+    preview:
+        'The Muslim is the one from whose tongue and hand people are safe.',
   ),
   _h(
     slug: 'bukhari',
@@ -106,7 +108,8 @@ final List<BringHadithIndexItem> kBringHadithIndex = [
     number: 2646,
     topic: 'Seeking knowledge',
     keywords: 'ilm study learn path jannah ease',
-    preview: 'Whoever takes a path to knowledge, Allah eases a path to the Garden.',
+    preview:
+        'Whoever takes a path to knowledge, Allah eases a path to the Garden.',
   ),
   _h(
     slug: 'bukhari',
@@ -141,7 +144,8 @@ final List<BringHadithIndexItem> kBringHadithIndex = [
     number: 2548,
     topic: 'Mother',
     keywords: 'parents mother father family birr kindness',
-    preview: 'Your mother, then your mother, then your mother, then your father.',
+    preview:
+        'Your mother, then your mother, then your mother, then your father.',
   ),
   _h(
     slug: 'bukhari',
@@ -218,7 +222,8 @@ final List<BringHadithIndexItem> kBringHadithIndex = [
     number: 6136,
     topic: 'Honour the guest',
     keywords: 'guest hospitality neighbour last day',
-    preview: 'Whoever believes in Allah and the Last Day, let him honour his guest.',
+    preview:
+        'Whoever believes in Allah and the Last Day, let him honour his guest.',
   ),
   _h(
     slug: 'bukhari',

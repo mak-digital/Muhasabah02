@@ -64,7 +64,8 @@ void main() {
         ],
       );
       expect(
-        helpingFactorsForHomeTrace('dhikr.postFardFajr').map((factor) => factor.id),
+        helpingFactorsForHomeTrace('dhikr.postFardFajr')
+            .map((factor) => factor.id),
         [
           DhikrAttentivenessCatalog.reflectedMeaning,
           DhikrAttentivenessCatalog.aware,

@@ -29,12 +29,12 @@ final List<PracticeDhikrItem> kPracticeTimeCatalog = [
     id: 'tm.intention.worthwhile.98_5',
     group: kTimeIntentionBand,
     topic: 'Began with a worthwhile intention',
-    text: 'They were not commanded except to worship Allah, sincere in religion:',
-    arabic: 'وَمَا أُمِرُوا إِلَّا لِيَعْبُدُوا اللَّهَ مُخْلِصِينَ لَهُ الدِّينَ',
-    transliteration:
-        'Wa-mā umirū illā li-yaʿbudū llāha mukhliṣīna lahu d-dīn.',
-    translation:
-        'And they were not commanded except to worship Allah, sincere to Him in religion.',
+    text:
+        'They were not commanded except to worship Allah, sincere in religion:',
+    arabic:
+        'وَمَا أُمِرُوا إِلَّا لِيَعْبُدُوا اللَّهَ مُخْلِصِينَ لَهُ الدِّينَ',
+    transliteration: 'Wa-mā umirū illā li-yaʿbudū llāha mukhliṣīna lahu d-dīn.',
+    translation: 'And they were not commanded except to worship Allah, sincere to Him in religion.',
     source: 'Qur’an 98:5',
     detail: 'Whether you remembered an intention, not whether it was accepted.',
   ),
@@ -44,10 +44,8 @@ final List<PracticeDhikrItem> kPracticeTimeCatalog = [
     topic: 'Began with a worthwhile intention',
     text: 'My prayer, my rites, my living and my dying are for Allah:',
     arabic: 'قُلْ إِنَّ صَلَاتِي وَنُسُكِي وَمَحْيَايَ وَمَمَاتِي لِلَّهِ رَبِّ الْعَالَمِينَ',
-    transliteration:
-        'Qul inna ṣalātī wa-nusukī wa-maḥyāya wa-mamātī li-llāhi rabbi l-ʿālamīn.',
-    translation:
-        'Say: Indeed my prayer, my rites, my living and my dying are for Allah, Lord of the worlds.',
+    transliteration: 'Qul inna ṣalātī wa-nusukī wa-maḥyāya wa-mamātī li-llāhi rabbi l-ʿālamīn.',
+    translation: 'Say: Indeed my prayer, my rites, my living and my dying are for Allah, Lord of the worlds.',
     source: 'Qur’an 6:162',
     detail: 'The app records whether you remembered an intention. Not a spiritual grade.',
   ),
@@ -57,10 +55,8 @@ final List<PracticeDhikrItem> kPracticeTimeCatalog = [
     topic: 'Began with a worthwhile intention',
     text: 'The Messenger of Allah ﷺ said:',
     arabic: 'إِنَّ اللَّهَ لَا يَنْظُرُ إِلَى أَجْسَامِكُمْ وَلَا إِلَى صُوَرِكُمْ وَلَكِنْ يَنْظُرُ إِلَى قُلُوبِكُمْ وَأَعْمَالِكُمْ',
-    transliteration:
-        'Inna llāha lā yanẓuru ilā ajsāmikum wa-lā ilā ṣuwarikum wa-lākin yanẓuru ilā qulūbikum wa-aʿmālikum.',
-    translation:
-        'Allah does not look at your bodies or your forms, but He looks at your hearts and your deeds.',
+    transliteration: 'Inna llāha lā yanẓuru ilā ajsāmikum wa-lā ilā ṣuwarikum wa-lākin yanẓuru ilā qulūbikum wa-aʿmālikum.',
+    translation: 'Allah does not look at your bodies or your forms, but He looks at your hearts and your deeds.',
     source: 'Ṣaḥīḥ Muslim 2564',
     detail: 'Whether you remembered an intention, not whether it was accepted.',
   ),
@@ -103,9 +99,9 @@ final List<PracticeDhikrItem> kPracticeTimeCatalog = [
     topic: 'Chose what mattered first',
     text: 'The Messenger of Allah ﷺ said:',
     arabic: 'نِعْمَتَانِ مَغْبُونٌ فِيهِمَا كَثِيرٌ مِنَ النَّاسِ: الصِّحَّةُ وَالْفَرَاغُ',
-    transliteration:
-        'Niʿmatāni maghbūnun fīhimā kathīrun mina n-nās: aṣ-ṣiḥḥatu wa-l-farāgh.',
-    translation: 'Two blessings which many people squander: health and free time.',
+    transliteration: 'Niʿmatāni maghbūnun fīhimā kathīrun mina n-nās: aṣ-ṣiḥḥatu wa-l-farāgh.',
+    translation:
+        'Two blessings which many people squander: health and free time.',
     source: 'Ṣaḥīḥ al-Bukhārī 6412',
     detail: 'Priority among responsibilities. Not a productivity rank.',
   ),
@@ -172,11 +168,11 @@ final List<PracticeDhikrItem> kPracticeTimeCatalog = [
     group: kTimeAttentionBand,
     topic: 'Put aside a digital distraction',
     text: 'Men whom neither commerce nor sale distracts:',
-    arabic: 'رِجَالٌ لَّا تُلْهِيهِمْ تِجَارَةٌ وَلَا بَيْعٌ عَن ذِكْرِ اللَّهِ',
+    arabic:
+        'رِجَالٌ لَّا تُلْهِيهِمْ تِجَارَةٌ وَلَا بَيْعٌ عَن ذِكْرِ اللَّهِ',
     transliteration:
         'Rijālun lā tulhīhim tijāratun wa-lā bayʿun ʿan dhikri llāh.',
-    translation:
-        'Men whom neither commerce nor sale distracts from the remembrance of Allah.',
+    translation: 'Men whom neither commerce nor sale distracts from the remembrance of Allah.',
     source: 'Qur’an 24:37',
     detail: 'Digital interruption as you report it. Not a screen-time tracker.',
   ),
@@ -185,11 +181,10 @@ final List<PracticeDhikrItem> kPracticeTimeCatalog = [
     group: kTimeAttentionBand,
     topic: 'Put aside a digital distraction',
     text: 'Let not your wealth and children distract you from the remembrance of Allah:',
-    arabic: 'لَا تُلْهِكُمْ أَمْوَالُكُمْ وَلَا أَوْلَادُكُمْ عَن ذِكْرِ اللَّهِ',
-    transliteration:
-        'Lā tulhikum amwālukum wa-lā awlādukum ʿan dhikri llāh.',
-    translation:
-        'Let not your wealth and your children distract you from remembrance of Allah.',
+    arabic:
+        'لَا تُلْهِكُمْ أَمْوَالُكُمْ وَلَا أَوْلَادُكُمْ عَن ذِكْرِ اللَّهِ',
+    transliteration: 'Lā tulhikum amwālukum wa-lā awlādukum ʿan dhikri llāh.',
+    translation: 'Let not your wealth and your children distract you from remembrance of Allah.',
     source: 'Qur’an 63:9',
     detail: 'Digital interruption as you report it. Not Physical Health’s sleep log.',
   ),
@@ -200,8 +195,7 @@ final List<PracticeDhikrItem> kPracticeTimeCatalog = [
     text: 'The Messenger of Allah ﷺ said:',
     arabic: 'مِنْ حُسْنِ إِسْلَامِ الْمَرْءِ تَرْكُهُ مَا لَا يَعْنِيهِ',
     transliteration: 'Min ḥusni islāmi l-marʾi tarkuhu mā lā yaʿnīh.',
-    translation:
-        'Part of the excellence of a person’s Islam is leaving what does not concern him.',
+    translation: 'Part of the excellence of a person’s Islam is leaving what does not concern him.',
     source: 'Jāmiʿ al-Tirmidhī 2317',
     detail: 'Digital interruption as you report it. Not a screen-time tracker.',
   ),
@@ -245,9 +239,9 @@ final List<PracticeDhikrItem> kPracticeTimeCatalog = [
     topic: 'Took a step on something delayed',
     text: 'The Messenger of Allah ﷺ said:',
     arabic: 'نِعْمَتَانِ مَغْبُونٌ فِيهِمَا كَثِيرٌ مِنَ النَّاسِ: الصِّحَّةُ وَالْفَرَاغُ',
-    transliteration:
-        'Niʿmatāni maghbūnun fīhimā kathīrun mina n-nās: aṣ-ṣiḥḥatu wa-l-farāgh.',
-    translation: 'Two blessings which many people squander: health and free time.',
+    transliteration: 'Niʿmatāni maghbūnun fīhimā kathīrun mina n-nās: aṣ-ṣiḥḥatu wa-l-farāgh.',
+    translation:
+        'Two blessings which many people squander: health and free time.',
     source: 'Ṣaḥīḥ al-Bukhārī 6412',
     detail: 'A step on something postponed. Not a backlog score.',
   ),
@@ -279,10 +273,8 @@ final List<PracticeDhikrItem> kPracticeTimeCatalog = [
     topic: 'Used time for something beneficial',
     text: 'Whoever does righteousness, male or female, while a believer:',
     arabic: 'مَنْ عَمِلَ صَالِحًا مِّن ذَكَرٍ أَوْ أُنثَىٰ وَهُوَ مُؤْمِنٌ فَلَنُحْيِيَنَّهُ حَيَاةً طَيِّبَةً',
-    transliteration:
-        'Man ʿamila ṣāliḥan min dhakarin aw unthā wa-huwa muʾminun fa-la-nuḥyiyannahu ḥayātan ṭayyibah.',
-    translation:
-        'Whoever does righteousness, whether male or female, while a believer — We will surely cause him to live a good life.',
+    transliteration: 'Man ʿamila ṣāliḥan min dhakarin aw unthā wa-huwa muʾminun fa-la-nuḥyiyannahu ḥayātan ṭayyibah.',
+    translation: 'Whoever does righteousness, whether male or female, while a believer — We will surely cause him to live a good life.',
     source: 'Qur’an 16:97',
     detail: 'A beneficial use you noticed. Not a claim of barakah.',
   ),
@@ -316,8 +308,7 @@ final List<PracticeDhikrItem> kPracticeTimeCatalog = [
     arabic: 'وَقَضَىٰ رَبُّكَ أَلَّا تَعْبُدُوا إِلَّا إِيَّاهُ وَبِالْوَالِدَيْنِ إِحْسَانًا',
     transliteration:
         'Wa-qaḍā rabbuka allā taʿbudū illā iyyāhu wa-bi-l-wālidayni iḥsānā.',
-    translation:
-        'Your Lord has decreed that you worship none but Him, and that you be kind to parents.',
+    translation: 'Your Lord has decreed that you worship none but Him, and that you be kind to parents.',
     source: 'Qur’an 17:23',
     detail: 'Time given to a legitimate need. Not Rights of Others’ ledger.',
   ),
@@ -362,8 +353,7 @@ final List<PracticeDhikrItem> kPracticeTimeCatalog = [
     arabic: 'وَمِن رَّحْمَتِهِ جَعَلَ لَكُمُ اللَّيْلَ وَالنَّهَارَ لِتَسْكُنُوا فِيهِ',
     transliteration:
         'Wa-min raḥmatihi jaʿala lakumu l-layla wa-n-nahāra li-taskunū fīh.',
-    translation:
-        'And of His mercy He made for you the night and the day, that you may rest therein.',
+    translation: 'And of His mercy He made for you the night and the day, that you may rest therein.',
     source: 'Qur’an 28:73',
     detail: 'Recovery you allowed. Sleep amount stays on Physical Health.',
   ),
@@ -372,10 +362,12 @@ final List<PracticeDhikrItem> kPracticeTimeCatalog = [
     group: kTimeBalanceBand,
     topic: 'Took needed rest',
     text: 'He made the night a covering, and sleep a rest:',
-    arabic: 'وَهُوَ الَّذِي جَعَلَ لَكُمُ اللَّيْلَ لِبَاسًا وَالنَّوْمَ سُبَاتًا',
+    arabic:
+        'وَهُوَ الَّذِي جَعَلَ لَكُمُ اللَّيْلَ لِبَاسًا وَالنَّوْمَ سُبَاتًا',
     transliteration:
         'Wa-huwa lladhī jaʿala lakumu l-layla libāsan wa-n-nawma subātā.',
-    translation: 'It is He who made the night a covering for you, and sleep a rest.',
+    translation:
+        'It is He who made the night a covering for you, and sleep a rest.',
     source: 'Qur’an 25:47',
     detail: 'Recovery you allowed. Not a sleep-hour badge.',
   ),
@@ -385,10 +377,8 @@ final List<PracticeDhikrItem> kPracticeTimeCatalog = [
     topic: 'Took needed rest',
     text: 'The Messenger of Allah ﷺ said:',
     arabic: 'إِنَّ لِرَبِّكَ عَلَيْكَ حَقًّا، وَلِنَفْسِكَ عَلَيْكَ حَقًّا، وَلِأَهْلِكَ عَلَيْكَ حَقًّا',
-    transliteration:
-        'Inna li-rabbika ʿalayka ḥaqqā, wa-li-nafsika ʿalayka ḥaqqā, wa-li-ahlika ʿalayka ḥaqqā.',
-    translation:
-        'Your Lord has a right over you, your self has a right over you, and your family has a right over you.',
+    transliteration: 'Inna li-rabbika ʿalayka ḥaqqā, wa-li-nafsika ʿalayka ḥaqqā, wa-li-ahlika ʿalayka ḥaqqā.',
+    translation: 'Your Lord has a right over you, your self has a right over you, and your family has a right over you.',
     source: 'Ṣaḥīḥ al-Bukhārī 1968',
     detail: 'Recovery you allowed. Sleep stays on Physical Health.',
   ),

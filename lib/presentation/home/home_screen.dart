@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/theme.dart';
 import '../../application/providers.dart';
+import '../../debug/startup_probe.dart';
 import '../../debug/synthetic_check_in_seeder.dart';
 import '../../domain/copy.dart';
 import '../../domain/daily_check_in.dart';
@@ -12,10 +13,9 @@ import '../../domain/personal_mix.dart';
 import '../../domain/personalisation_resolver.dart';
 import '../../domain/salah_extras.dart';
 import '../../domain/sample_retirement.dart';
-import '../history/history_screen.dart';
+import '../registry/registry_screen.dart';
 import '../review/review_screen.dart';
 import '../response/response_editor_screen.dart';
-import '../response/response_list_screen.dart';
 import '../settings/settings_screen.dart';
 import 'first_look_door_screen.dart';
 import '../shared/brand_title.dart';
@@ -36,6 +36,14 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final checkIns = ref.watch(checkInsProvider);
+    if (checkIns.isLoading) {
+      StartupProbe.mark('home_checkins_loading');
+    } else if (checkIns.hasValue) {
+      StartupProbe.mark('home_checkins_ready');
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        StartupProbe.mark('home_first_input_frame');
+      });
+    }
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: BrandTitle.toolbarHeight,
@@ -108,68 +116,84 @@ class HomeScreen extends ConsumerWidget {
             now: ref.watch(nowProvider),
             dismissed: prefs.archivePromptDismissed,
           );
-          return ListView(
-            primary: false,
-            physics: const AlwaysScrollableScrollPhysics(),
-            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
-            children: [
-              if (offerArchive) ...[
-                const SizedBox(height: 8),
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(Copy.archiveSamplePrompt),
-                        const SizedBox(height: 8),
-                        Wrap(
-                          spacing: 8,
-                          children: [
-                            FilledButton(
-                              onPressed: () async {
-                                await const SyntheticCheckInSeeder().clearFrom(
-                                  ref.read(checkInRepositoryProvider),
-                                  responses: ref.read(
-                                    responseRepositoryProvider,
-                                  ),
-                                );
-                                await prefs.setSampleRemovedByUser(true);
-                                await prefs.setArchivePromptDismissed(true);
-                                await ref
-                                    .read(checkInsProvider.notifier)
-                                    .reload();
-                                await ref
-                                    .read(responsesProvider.notifier)
-                                    .reload();
-                              },
-                              child: const Text('Archive sample records'),
-                            ),
-                            TextButton(
-                              onPressed: () async {
-                                await prefs.setArchivePromptDismissed(true);
-                                ref.read(prefsTickProvider.notifier).state++;
-                              },
-                              child: const Text('Keep sample records'),
-                            ),
-                          ],
-                        ),
-                      ],
+          return Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (offerArchive) ...[
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(Copy.archiveSamplePrompt),
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            children: [
+                              FilledButton(
+                                onPressed: () async {
+                                  await const SyntheticCheckInSeeder()
+                                      .clearFrom(
+                                        ref.read(checkInRepositoryProvider),
+                                        responses: ref.read(
+                                          responseRepositoryProvider,
+                                        ),
+                                      );
+                                  await prefs.setSampleRemovedByUser(true);
+                                  await prefs.setArchivePromptDismissed(true);
+                                  await ref
+                                      .read(checkInsProvider.notifier)
+                                      .reload();
+                                  await ref
+                                      .read(responsesProvider.notifier)
+                                      .reload();
+                                },
+                                child: const Text('Archive sample records'),
+                              ),
+                              TextButton(
+                                onPressed: () async {
+                                  await prefs.setArchivePromptDismissed(true);
+                                  ref.read(prefsTickProvider.notifier).state++;
+                                },
+                                child: const Text('Keep sample records'),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                ],
+                TodayOverview(records: records),
+                const SizedBox(height: 12),
+                Expanded(
+                  child: ListView(
+                    key: const Key('home-scroll'),
+                    primary: false,
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    padding: const EdgeInsets.only(bottom: 28),
+                    children: _dashboardScroll(
+                      context,
+                      records: records,
+                      ref: ref,
                     ),
                   ),
                 ),
               ],
-              const SizedBox(height: 8),
-              ..._dashboard(context, records: records, ref: ref),
-            ],
+            ),
           );
         },
       ),
     );
   }
 
-  List<Widget> _dashboard(
+  List<Widget> _dashboardScroll(
     BuildContext context, {
     required List<DailyCheckIn> records,
     required WidgetRef ref,
@@ -184,8 +208,6 @@ class HomeScreen extends ConsumerWidget {
     }
 
     return [
-      TodayOverview(records: records),
-      const SizedBox(height: 12),
       const ReflectionOfTheWeekCard(),
       const SizedBox(height: 12),
       HomeDomainStage(
@@ -444,7 +466,20 @@ class AppShell extends ConsumerStatefulWidget {
 class AppShellState extends ConsumerState<AppShell> {
   int index = 0;
 
-  void select(int value) => setState(() => index = value);
+  /// Visited tabs only. Same in debug and release; not an Impeller workaround.
+  final _opened = <int>{0};
+
+  void select(int value) {
+    setState(() {
+      _opened.add(value);
+      index = value;
+    });
+  }
+
+  Widget _tab(int slot, Widget child) {
+    if (_opened.contains(slot)) return child;
+    return const SizedBox.shrink();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -453,14 +488,15 @@ class AppShellState extends ConsumerState<AppShell> {
     if (!prefs.applicationReflectionAcknowledged) {
       return const FirstLookDoorScreen();
     }
-    final pages = const [
-      HomeScreen(),
-      ReviewScreen(),
-      HistoryScreen(),
-      ResponseListScreen(),
-    ];
     return Scaffold(
-      body: IndexedStack(index: index, children: pages),
+      body: IndexedStack(
+        index: index,
+        children: [
+          const HomeScreen(),
+          _tab(1, const ReviewScreen()),
+          _tab(2, const RegistryScreen()),
+        ],
+      ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: index,
         onDestinationSelected: select,
@@ -476,14 +512,9 @@ class AppShellState extends ConsumerState<AppShell> {
             label: 'Review',
           ),
           NavigationDestination(
-            icon: Icon(Icons.manage_history_outlined),
-            selectedIcon: Icon(Icons.manage_history),
-            label: 'History',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.edit_note_outlined),
-            selectedIcon: Icon(Icons.edit_note),
-            label: Copy.myResponse,
+            icon: Icon(Icons.inventory_2_outlined),
+            selectedIcon: Icon(Icons.inventory_2),
+            label: Copy.registryTab,
           ),
         ],
       ),

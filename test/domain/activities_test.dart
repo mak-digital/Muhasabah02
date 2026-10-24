@@ -11,6 +11,7 @@ import 'package:muhasabah02/domain/home_traces.dart';
 import 'package:muhasabah02/domain/prayer.dart';
 import 'package:muhasabah02/domain/quran.dart';
 import 'package:muhasabah02/domain/salah_extras.dart';
+import 'package:muhasabah02/domain/worship_list_gender.dart';
 import 'package:muhasabah02/presentation/shared/salah_activity_mark.dart';
 import 'package:muhasabah02/presentation/shared/state_marker.dart';
 
@@ -27,6 +28,41 @@ void main() {
       const RecordedActivity(id: ActivityIds.unanswered),
     );
     expect(record.prayer(PrayerId.dhuhr), PrayerStatus.unanswered);
+  });
+
+  test('filtered male Salah list keeps catalog order', () {
+    final filtered = ActivityCatalog.obligatorySalahOptions(
+      gender: WorshipListGender.male,
+    );
+    expect(ActivityCatalog.preservePickerOrder(filtered), isTrue);
+    expect(ActivityCatalog.isObligatorySalahCatalog(filtered), isTrue);
+    expect(filtered.first.id, 'congregationOnTime');
+  });
+
+  test('male worship list hides Excused unless it is already selected', () {
+    expect(
+      ActivityCatalog.obligatorySalahOptions(gender: WorshipListGender.male)
+          .any((option) => option.id == ActivityCatalog.salahExcusedId),
+      isFalse,
+    );
+    expect(
+      ActivityCatalog.obligatorySalahOptions(gender: WorshipListGender.female)
+          .any((option) => option.id == ActivityCatalog.salahExcusedId),
+      isTrue,
+    );
+    expect(
+      ActivityCatalog.obligatorySalahOptions(
+        gender: WorshipListGender.unanswered,
+      ).any((option) => option.id == ActivityCatalog.salahExcusedId),
+      isTrue,
+    );
+    expect(
+      ActivityCatalog.jumuahOptions(
+        gender: WorshipListGender.male,
+        selectedId: ActivityCatalog.salahExcusedId,
+      ).any((option) => option.id == ActivityCatalog.salahExcusedId),
+      isTrue,
+    );
   });
 
   test('excused is recorded and is never missed', () {

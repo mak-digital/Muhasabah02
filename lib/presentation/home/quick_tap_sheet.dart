@@ -13,6 +13,7 @@ import '../../domain/monitor_domain.dart';
 import '../../domain/personalisation_resolver.dart';
 import '../../domain/quick_tap.dart';
 import '../../domain/salah_extras.dart';
+import '../../domain/worship_list_gender.dart';
 import '../checkin/trace_record_sheets.dart';
 import '../shared/domain_action_frame.dart';
 import '../shared/domain_line_icon.dart';
@@ -27,6 +28,17 @@ Future<void> showQuickTapSheet(BuildContext context, WidgetRef ref) {
   refreshNowIfLocalDateChanged(ref);
   final sessionDateKey = dateKey(ref.read(nowProvider));
   final systemBottom = presentingSystemBottom(context);
+  final prefs = ref.read(appPrefsProvider);
+  final domains = PersonalisationResolver(
+    visibleDomains: prefs.visibleDomains,
+    mix: prefs.personalMix,
+  ).homeDomains;
+  final focused = domains.isEmpty
+      ? null
+      : domains[homeDomainStageIndex(
+          domains,
+          ref.read(homeDomainStageProvider),
+        )];
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
@@ -38,6 +50,7 @@ Future<void> showQuickTapSheet(BuildContext context, WidgetRef ref) {
         child: QuickTapSheet(
           dateKey: sessionDateKey,
           systemBottom: systemBottom,
+          focusedDomain: focused,
         ),
       );
     },
@@ -49,10 +62,12 @@ class QuickTapSheet extends ConsumerStatefulWidget {
     super.key,
     required this.dateKey,
     this.systemBottom = 0,
+    this.focusedDomain,
   });
 
   final String dateKey;
   final double systemBottom;
+  final MonitorDomain? focusedDomain;
 
   @override
   ConsumerState<QuickTapSheet> createState() => _QuickTapSheetState();
@@ -60,7 +75,9 @@ class QuickTapSheet extends ConsumerStatefulWidget {
 
 class _QuickTapSheetState extends ConsumerState<QuickTapSheet> {
   final Set<String> _expandedDomainIds = {};
+  final GlobalKey _focusedPanelKey = GlobalKey();
   bool _seededExpansion = false;
+  bool _scrolledToFocus = false;
   bool _noteOpen = false;
   late String _dateKey;
 
@@ -73,9 +90,34 @@ class _QuickTapSheetState extends ConsumerState<QuickTapSheet> {
   void _seedExpansion(List<(MonitorDomain, List<QuickTapItem>)> sections) {
     if (_seededExpansion) return;
     _seededExpansion = true;
+    if (sections.isEmpty) return;
     if (sections.length == 1) {
       _expandedDomainIds.add(sections.single.$1.id);
+      return;
     }
+    final focused = widget.focusedDomain;
+    if (focused == null) return;
+    for (final section in sections) {
+      if (section.$1 == focused) {
+        _expandedDomainIds.add(focused.id);
+        return;
+      }
+    }
+  }
+
+  void _scrollFocusedDomainIntoView() {
+    if (_scrolledToFocus) return;
+    _scrolledToFocus = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final target = _focusedPanelKey.currentContext;
+      if (target == null || !target.mounted) return;
+      Scrollable.ensureVisible(
+        target,
+        alignment: 0.08,
+        duration: Duration.zero,
+      );
+    });
   }
 
   void _shiftDay(int days) {
@@ -100,6 +142,7 @@ class _QuickTapSheetState extends ConsumerState<QuickTapSheet> {
       friday: isFridayDateKey(key),
     );
     _seedExpansion(sections);
+    _scrollFocusedDomainIntoView();
     final records = ref.watch(checkInsProvider).value ?? const <DailyCheckIn>[];
     DailyCheckIn day = DailyCheckIn.empty(key);
     for (final record in records) {
@@ -130,8 +173,9 @@ class _QuickTapSheetState extends ConsumerState<QuickTapSheet> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(10, 6, 4, 0),
+                  padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
                   child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Expanded(
                         child: Text(
@@ -139,42 +183,47 @@ class _QuickTapSheetState extends ConsumerState<QuickTapSheet> {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w800,
+                            fontWeight: FontWeight.w700,
                             height: 1.1,
-                            fontSize: 16,
+                            fontSize: 14,
                             color: family,
                           ),
                         ),
                       ),
-                      Flexible(
-                        child: InkWell(
-                          key: const Key('quick-tap-note-toggle'),
-                          onTap: () => setState(() => _noteOpen = !_noteOpen),
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(4, 2, 4, 2),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Flexible(
-                                  child: Text(
-                                    Copy.quickTapNoteTitle,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: theme.textTheme.labelSmall?.copyWith(
-                                      fontWeight: FontWeight.w800,
-                                      letterSpacing: 0.2,
-                                      color: family,
+                      Expanded(
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: InkWell(
+                            key: const Key('quick-tap-note-toggle'),
+                            onTap: () => setState(() => _noteOpen = !_noteOpen),
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(minHeight: 32),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Flexible(
+                                    child: Text(
+                                      Copy.quickTapNoteTitle,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: theme.textTheme.titleMedium
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w700,
+                                            height: 1.1,
+                                            fontSize: 14,
+                                            color: family,
+                                          ),
                                     ),
                                   ),
-                                ),
-                                Icon(
-                                  _noteOpen
-                                      ? Icons.expand_less
-                                      : Icons.expand_more,
-                                  size: 18,
-                                  color: family,
-                                ),
-                              ],
+                                  Icon(
+                                    _noteOpen
+                                        ? Icons.expand_less
+                                        : Icons.expand_more,
+                                    size: 20,
+                                    color: family,
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
@@ -217,7 +266,7 @@ class _QuickTapSheetState extends ConsumerState<QuickTapSheet> {
               ],
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           Expanded(
             child: sections.isEmpty
                 ? Text(
@@ -227,52 +276,80 @@ class _QuickTapSheetState extends ConsumerState<QuickTapSheet> {
                       height: 1.4,
                     ),
                   )
-                : CustomScrollView(
-                    slivers: [
-                      for (final section in sections)
-                        SliverToBoxAdapter(
-                          child: _QuickTapDomainPanel(
-                            domain: section.$1,
-                            items: section.$2,
-                            today: day,
-                            records: records,
-                            expanded: _expandedDomainIds.contains(
-                              section.$1.id,
-                            ),
-                            onToggle: () {
-                              setState(() {
-                                final id = section.$1.id;
-                                if (!_expandedDomainIds.add(id)) {
-                                  _expandedDomainIds.remove(id);
-                                }
-                              });
-                            },
-                            onTap: (item) async {
-                              if (item.traceKey != null &&
-                                  isDhikrContextTrace(item.traceKey!)) {
-                                final row = homeTraceRowByKey(item.traceKey!);
-                                if (row != null) {
-                                  await showHomeTraceRecordSheet(
-                                    context: context,
-                                    ref: ref,
-                                    row: row,
-                                    dateKey: key,
-                                    record: day,
-                                  );
-                                  return;
-                                }
-                              }
-                              final next = nextQuickTapChoice(
-                                day,
-                                item,
-                                history: records,
-                              );
-                              await ref
-                                  .read(checkInsProvider.notifier)
-                                  .save(applyQuickTapChoice(day, item, next));
-                            },
-                          ),
+                : ListView(
+                    children: [
+                      Material(
+                        key: const Key('quick-tap-domain-group'),
+                        color: scheme.surface,
+                        clipBehavior: Clip.antiAlias,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          side: BorderSide(color: scheme.outlineVariant),
                         ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            for (var i = 0; i < sections.length; i++)
+                              _QuickTapDomainPanel(
+                                key: sections[i].$1 == widget.focusedDomain
+                                    ? _focusedPanelKey
+                                    : null,
+                                domain: sections[i].$1,
+                                items: sections[i].$2,
+                                today: day,
+                                records: records,
+                                gender: prefs.worshipListGender,
+                                showDivider: i > 0,
+                                expanded: _expandedDomainIds.contains(
+                                  sections[i].$1.id,
+                                ),
+                                onToggle: () {
+                                  setState(() {
+                                    final id = sections[i].$1.id;
+                                    if (_expandedDomainIds.contains(id)) {
+                                      _expandedDomainIds.remove(id);
+                                    } else {
+                                      _expandedDomainIds
+                                        ..clear()
+                                        ..add(id);
+                                    }
+                                  });
+                                },
+                                onTap: (item) async {
+                                  if (item.traceKey != null &&
+                                      isDhikrContextTrace(item.traceKey!)) {
+                                    final row = homeTraceRowByKey(
+                                      item.traceKey!,
+                                    );
+                                    if (row != null) {
+                                      await showHomeTraceRecordSheet(
+                                        context: context,
+                                        ref: ref,
+                                        row: row,
+                                        dateKey: key,
+                                        record: day,
+                                      );
+                                      return;
+                                    }
+                                  }
+                                  final next = nextQuickTapChoice(
+                                    day,
+                                    item,
+                                    history: records,
+                                    gender: ref
+                                        .read(appPrefsProvider)
+                                        .worshipListGender,
+                                  );
+                                  await ref
+                                      .read(checkInsProvider.notifier)
+                                      .save(
+                                        applyQuickTapChoice(day, item, next),
+                                      );
+                                },
+                              ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
           ),
@@ -285,11 +362,22 @@ class _QuickTapSheetState extends ConsumerState<QuickTapSheet> {
 String? _oftenHint(
   DailyCheckIn today,
   QuickTapItem item,
-  List<DailyCheckIn> records,
-) {
-  final current = readQuickTapChoice(today, item, history: records);
+  List<DailyCheckIn> records, {
+  required WorshipListGender gender,
+}) {
+  final current = readQuickTapChoice(
+    today,
+    item,
+    history: records,
+    gender: gender,
+  );
   if (current.mark != QuickTapMark.unanswered) return null;
-  final next = nextQuickTapChoice(today, item, history: records);
+  final next = nextQuickTapChoice(
+    today,
+    item,
+    history: records,
+    gender: gender,
+  );
   final counts = quickTapHistoryCounts(
     item,
     history: records,
@@ -301,10 +389,13 @@ String? _oftenHint(
 
 class _QuickTapDomainPanel extends StatelessWidget {
   const _QuickTapDomainPanel({
+    super.key,
     required this.domain,
     required this.items,
     required this.today,
     required this.records,
+    required this.gender,
+    required this.showDivider,
     required this.expanded,
     required this.onToggle,
     required this.onTap,
@@ -314,6 +405,8 @@ class _QuickTapDomainPanel extends StatelessWidget {
   final List<QuickTapItem> items;
   final DailyCheckIn today;
   final List<DailyCheckIn> records;
+  final WorshipListGender gender;
+  final bool showDivider;
   final bool expanded;
   final VoidCallback onToggle;
   final ValueChanged<QuickTapItem> onTap;
@@ -321,51 +414,65 @@ class _QuickTapDomainPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final identity = domainColorIdentity(domain);
-    final wash = identity.washFor(theme.brightness);
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Material(
-        key: Key('quick-tap-domain-${domain.id}'),
-        color: wash,
-        borderRadius: BorderRadius.circular(16),
-        clipBehavior: Clip.antiAlias,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            InkWell(
-              key: Key('quick-tap-domain-toggle-${domain.id}'),
-              onTap: onToggle,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
-                child: Row(
-                  children: [
-                    DomainLineIcon(domain, size: 16, color: identity.family),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        domain.shortLabel.toUpperCase(),
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          letterSpacing: 0.4,
-                          fontWeight: FontWeight.w800,
-                          color: identity.family,
-                        ),
+    final family = identity.familyFor(context);
+    final panelWash = Color.alphaBlend(
+      family.withValues(alpha: 0.08),
+      scheme.surface,
+    );
+    return KeyedSubtree(
+      key: Key('quick-tap-domain-${domain.id}'),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (showDivider) Divider(height: 1, color: scheme.outlineVariant),
+          InkWell(
+            key: Key('quick-tap-domain-toggle-${domain.id}'),
+            onTap: onToggle,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 44),
+              child: Row(
+                children: [
+                  ColoredBox(
+                    key: Key('quick-tap-domain-rail-${domain.id}'),
+                    color: family,
+                    child: const SizedBox(width: 4, height: 44),
+                  ),
+                  const SizedBox(width: 8),
+                  DomainLineIcon(domain, size: 16, color: identity.family),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      domain.shortLabel,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                        height: 1.1,
+                        color: scheme.onSurface,
                       ),
                     ),
-                    Icon(
-                      expanded ? Icons.expand_less : Icons.expand_more,
-                      color: identity.family,
-                    ),
-                  ],
-                ),
+                  ),
+                  Icon(
+                    expanded ? Icons.expand_less : Icons.expand_more,
+                    size: 18,
+                    color: scheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: 8),
+                ],
               ),
             ),
-            if (expanded)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
+          ),
+          if (expanded)
+            ColoredBox(
+              color: panelWash,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(12, 8, 10, 10),
                 child: LayoutBuilder(
                   builder: (context, constraints) {
-                    const gap = 8.0;
+                    const gap = 6.0;
                     final width = (constraints.maxWidth - gap) / 2;
                     return Wrap(
                       key: Key('quick-tap-domain-tiles-${domain.id}'),
@@ -377,7 +484,7 @@ class _QuickTapDomainPanel extends StatelessWidget {
                             constraints: BoxConstraints(
                               minWidth: width,
                               maxWidth: width,
-                              minHeight: width * 0.78,
+                              minHeight: 52,
                             ),
                             child: _QuickTapTile(
                               item: item,
@@ -385,8 +492,14 @@ class _QuickTapDomainPanel extends StatelessWidget {
                                 today,
                                 item,
                                 history: records,
+                                gender: gender,
                               ),
-                              often: _oftenHint(today, item, records),
+                              often: _oftenHint(
+                                today,
+                                item,
+                                records,
+                                gender: gender,
+                              ),
                               onTap: () => onTap(item),
                             ),
                           ),
@@ -395,8 +508,8 @@ class _QuickTapDomainPanel extends StatelessWidget {
                   },
                 ),
               ),
-          ],
-        ),
+            ),
+        ],
       ),
     );
   }
@@ -420,17 +533,18 @@ class _QuickTapTile extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final identity = domainColorIdentity(item.domain);
-    final wash = identity.washFor(theme.brightness);
+    final family = identity.familyFor(context);
+    final wash = identity.washFor(theme.brightness, context);
     final unanswered = choice.mark == QuickTapMark.unanswered;
     final fill = unanswered
         ? Color.alphaBlend(scheme.surface.withValues(alpha: 0.45), wash)
-        : Color.alphaBlend(identity.family.withValues(alpha: 0.28), wash);
+        : Color.alphaBlend(family.withValues(alpha: 0.28), wash);
     final kind = switch (choice.mark) {
       QuickTapMark.unanswered => MarkerKind.unanswered,
       QuickTapMark.noticed => MarkerKind.filled,
       QuickTapMark.slip => MarkerKind.missed,
     };
-    final markColor = _markColor(identity);
+    final markColor = _markColor(family);
     final caption = unanswered ? 'Not recorded' : choice.label;
     final oftenHint = often;
     return DomainActionFrame(
@@ -438,44 +552,47 @@ class _QuickTapTile extends StatelessWidget {
       semanticLabel: '${item.label}. $caption',
       excludeChildSemantics: true,
       color: fill,
-      radius: 14,
+      radius: 10,
       outlined: true,
-      minHeight: 44,
+      minHeight: 52,
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(8, 6, 8, 6),
+        padding: const EdgeInsets.fromLTRB(8, 7, 8, 7),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                DomainLineIcon(item.domain, size: 16, color: identity.family),
-                const Spacer(),
+                Expanded(
+                  child: Text(
+                    item.label,
+                    softWrap: true,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 12,
+                      height: 1.2,
+                      color: family,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 4),
                 RecordedStateMarker(
                   color: markColor,
                   kind: kind,
                   semanticLabel: caption,
-                  size: 14,
+                  size: 12,
                 ),
               ],
             ),
-            const SizedBox(height: 8),
-            Text(
-              item.label,
-              softWrap: true,
-              style: theme.textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w800,
-                height: 1.2,
-                color: identity.family,
-              ),
-            ),
-            const SizedBox(height: 1),
+            const SizedBox(height: 2),
             Text(
               caption,
               softWrap: true,
               style: theme.textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w600,
+                fontSize: 11,
                 height: 1.2,
                 color: unanswered
                     ? scheme.onSurfaceVariant
@@ -514,9 +631,9 @@ class _QuickTapTile extends StatelessWidget {
     );
   }
 
-  Color _markColor(DomainColorIdentity identity) {
+  Color _markColor(Color family) {
     if (choice.mark == QuickTapMark.unanswered) {
-      return identity.family.withValues(alpha: 0.4);
+      return family.withValues(alpha: 0.4);
     }
     switch (item.kind) {
       case QuickTapKind.salah:
@@ -533,9 +650,9 @@ class _QuickTapTile extends StatelessWidget {
         if (colour != MuhasabahColors.mark) return colour;
         return choice.mark == QuickTapMark.slip
             ? MuhasabahColors.missedEarth
-            : identity.family;
+            : family;
       case QuickTapKind.zakat:
-        return identity.family;
+        return family;
     }
   }
 }

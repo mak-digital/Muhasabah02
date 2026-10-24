@@ -1,11 +1,17 @@
+import 'dart:async';
+
 import 'package:hive_flutter/hive_flutter.dart';
 
+import 'privacy_log.dart';
+
 import '../data/app_prefs.dart';
+import '../domain/app_appearance.dart';
 import '../domain/arabic_script.dart';
 import '../domain/custom_selection_set.dart';
 import '../domain/daily_check_in.dart';
 import '../domain/display_calendar.dart';
 import '../domain/first_day_of_week.dart';
+import '../domain/worship_list_gender.dart';
 import '../domain/home_traces.dart';
 import '../domain/monitor_domain.dart';
 import '../domain/personal_aspiration.dart';
@@ -44,20 +50,14 @@ class HiveCheckInRepository implements CheckInRepository {
 
   @override
   Future<List<DailyCheckIn>> allHealthy() async {
-    _corrupt.clear();
-    final healthy = <DailyCheckIn>[];
-    for (final key in _box.keys) {
-      final raw = _box.get(key);
-      if (raw == null) continue;
-      final parsed = decodeCheckIn(raw);
-      if (parsed.corrupt || parsed.record == null) {
-        _corrupt.add('$key');
-      } else {
-        healthy.add(parsed.record!);
-      }
-    }
-    healthy.sort((a, b) => b.dateKey.compareTo(a.dateKey));
-    return healthy;
+    final batch = await decodeStoredCheckIns(
+      keys: _box.keys,
+      read: (key) => _box.get(key),
+    );
+    _corrupt
+      ..clear()
+      ..addAll(batch.corruptKeys);
+    return batch.healthy;
   }
 
   @override
@@ -553,6 +553,8 @@ class HiveAppPrefs implements AppPrefs {
   static const _archiveDismissed = 'archive_prompt_dismissed';
   static const _applicationAck = 'application_reflection_ack';
   static const _firstDayOfWeek = 'first_day_of_week';
+  static const _appearance = 'appearance';
+  static const _worshipListGender = 'worship_list_gender';
   static const _displayCalendar = 'display_calendar';
   static const _visibleDomains = 'visible_domains';
   static const _personalMix = 'personal_mix';
@@ -565,6 +567,7 @@ class HiveAppPrefs implements AppPrefs {
   static const _weeklyJournals = 'weekly_journals';
   static const _hadithFocus = 'hadith_memorisation_focus';
   static const _practiceHadithIndex = 'practice_hadith_browse_index';
+  static const _archivedPracticeHadith = 'archived_practice_hadith_catalog_ids';
   static const _practiceQuranIndex = 'practice_quran_browse_index';
   static const _ramadanOffset = 'ramadan_calendar_offset_days';
   static const _fastingRamadanHistory = 'show_fasting_ramadan_history';
@@ -595,6 +598,13 @@ class HiveAppPrefs implements AppPrefs {
   @override
   FirstDayOfWeekPref get firstDayOfWeek =>
       FirstDayOfWeekPrefX.fromId(_box.get(_firstDayOfWeek));
+
+  @override
+  AppAppearance get appearance => AppAppearanceX.fromId(_box.get(_appearance));
+
+  @override
+  WorshipListGender get worshipListGender =>
+      WorshipListGenderX.fromId(_box.get(_worshipListGender));
 
   @override
   DisplayCalendar get displayCalendar =>
@@ -629,6 +639,14 @@ class HiveAppPrefs implements AppPrefs {
   @override
   Future<void> setFirstDayOfWeek(FirstDayOfWeekPref value) =>
       _box.put(_firstDayOfWeek, value.id);
+
+  @override
+  Future<void> setAppearance(AppAppearance value) =>
+      _box.put(_appearance, value.id);
+
+  @override
+  Future<void> setWorshipListGender(WorshipListGender value) =>
+      _box.put(_worshipListGender, value.id);
 
   @override
   Future<void> setDisplayCalendar(DisplayCalendar value) =>
@@ -834,6 +852,14 @@ class HiveAppPrefs implements AppPrefs {
       _box.put(_practiceHadithIndex, '$value');
 
   @override
+  Set<String> get archivedPracticeHadithCatalogIds =>
+      decodeStringIdSet(_box.get(_archivedPracticeHadith));
+
+  @override
+  Future<void> setArchivedPracticeHadithCatalogIds(Set<String> value) =>
+      _box.put(_archivedPracticeHadith, encodeStringIdSet(value));
+
+  @override
   int get practiceQuranBrowseIndex =>
       int.tryParse(_box.get(_practiceQuranIndex) ?? '') ?? 0;
 
@@ -1034,6 +1060,8 @@ class HiveProductivityStoreRepository implements ProductivityStoreRepository {
   }
 }
 
+Future<void> _yieldToUi() => Future<void>.delayed(Duration.zero);
+
 Future<
   ({
     HiveCheckInRepository checkIns,
@@ -1050,22 +1078,42 @@ Future<
 >
 openHiveRepositories() async {
   await Hive.initFlutter();
-  final checkIns = await Hive.openBox<String>(checkInsBoxName);
-  final responses = await Hive.openBox<String>(responsesBoxName);
-  final prefs = await Hive.openBox<String>(prefsBoxName);
-  final domainActions = await Hive.openBox<String>(domainActionsBoxName);
-  final devFeedback = await Hive.openBox<String>(devFeedbackBoxName);
-  final practiceHadith = await Hive.openBox<String>(practiceHadithBoxName);
-  final personalQuran = await Hive.openBox<String>(personalQuranBoxName);
-  final personalHadith = await Hive.openBox<String>(personalHadithBoxName);
-  final hajjBox = await Hive.openBox<String>(hajjStoreBoxName);
-  final productivityBox = await Hive.openBox<String>(kProductivityStoreBoxName);
+  logAppEvent('hive_init');
+  await _yieldToUi();
+  Future<Box<String>> openNamed(String name) async {
+    if (Hive.isBoxOpen(name)) {
+      return Hive.box<String>(name);
+    }
+    try {
+      final box = await Hive.openBox<String>(name)
+          .timeout(const Duration(seconds: 6));
+      await _yieldToUi();
+      return box;
+    } on TimeoutException {
+      logAppEvent('persistence_box_timeout');
+      rethrow;
+    }
+  }
+
+  final checkIns = await openNamed(checkInsBoxName);
+  final responses = await openNamed(responsesBoxName);
+  final prefs = await openNamed(prefsBoxName);
+  final domainActions = await openNamed(domainActionsBoxName);
+  final devFeedback = await openNamed(devFeedbackBoxName);
+  final practiceHadith = await openNamed(practiceHadithBoxName);
+  final personalQuran = await openNamed(personalQuranBoxName);
+  final personalHadith = await openNamed(personalHadithBoxName);
+  final hajjBox = await openNamed(hajjStoreBoxName);
+  final productivityBox = await openNamed(kProductivityStoreBoxName);
   final hivePrefs = HiveAppPrefs(prefs);
   await hivePrefs.discardLegacyHajjStatus();
+  await _yieldToUi();
   final hajj = HiveHajjStoreRepository(hajjBox);
   await hajj.initializeIfNeeded();
+  await _yieldToUi();
   final productivity = HiveProductivityStoreRepository(productivityBox);
   await productivity.initializeIfNeeded();
+  await _yieldToUi();
   return (
     checkIns: HiveCheckInRepository(checkIns),
     responses: HiveResponseRepository(responses),

@@ -48,10 +48,7 @@ void main() {
     tester,
   ) async {
     await pumpQuranLearn(tester);
-    expect(
-      find.text('1 of ${kPracticeQuranCatalog.length}'),
-      findsOneWidget,
-    );
+    expect(find.text('1 of ${kPracticeQuranCatalog.length}'), findsOneWidget);
     await tester.ensureVisible(find.byKey(const Key('quran-practice-bring')));
     await tester.tap(find.byKey(const Key('quran-practice-bring')));
     await tester.pumpAndSettle();
@@ -104,10 +101,7 @@ void main() {
     await tester.tap(find.byKey(const Key('bring-quran-save-anyway')));
     await tester.pumpAndSettle();
     expect(find.text(Copy.bringQuranKeptOnLearn), findsOneWidget);
-    expect(
-      find.text('1 of ${kPracticeQuranCatalog.length}'),
-      findsOneWidget,
-    );
+    expect(find.text('1 of ${kPracticeQuranCatalog.length}'), findsOneWidget);
   });
 
   testWidgets('a passage longer than 7 verses is refused', (tester) async {
@@ -161,7 +155,10 @@ void main() {
     await tester.ensureVisible(find.byKey(const Key('quran-practice-bring')));
     await tester.tap(find.byKey(const Key('quran-practice-bring')));
     await tester.pumpAndSettle();
-    await tester.enterText(find.byKey(const Key('bring-quran-search')), 'kursi');
+    await tester.enterText(
+      find.byKey(const Key('bring-quran-search')),
+      'kursi',
+    );
     await tester.pumpAndSettle();
     await tester.ensureVisible(find.byKey(const Key('bring-quran-hit-2-255')));
     await tester.tap(find.byKey(const Key('bring-quran-hit-2-255')));
@@ -172,13 +169,12 @@ void main() {
     await tester.tap(find.byKey(const Key('bring-quran-dont-save')));
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('bring-quran-sheet')), findsNothing);
-    expect(
-      find.text('1 of ${kPracticeQuranCatalog.length}'),
-      findsOneWidget,
-    );
+    expect(find.text('1 of ${kPracticeQuranCatalog.length}'), findsOneWidget);
   });
 
-  testWidgets('citation chrome can bring the open Qur’an verse', (tester) async {
+  testWidgets('citation chrome can bring the open Qur’an verse', (
+    tester,
+  ) async {
     await pumpQuranLearn(tester);
     await tester.ensureVisible(find.byKey(const Key('quran-practice-source')));
     await tester.tap(find.byKey(const Key('quran-practice-source')));

@@ -18,18 +18,18 @@ import '../../domain/domain_briefing.dart';
 import '../../domain/factor_groups.dart';
 import '../../domain/home_traces.dart';
 import '../../domain/monitor_domain.dart';
-import '../../domain/other_domains.dart';
 import '../../domain/personal_mix.dart';
 import '../../domain/personalisation_resolver.dart';
 import '../../domain/prayer.dart';
 import '../../domain/quran.dart';
 import '../../domain/recorded_context.dart';
+import '../../domain/personal_response.dart';
 import '../../domain/salah_extras.dart';
 import '../../domain/salah_factors.dart';
-import '../../domain/situation_notes.dart';
 import '../../domain/health_practices.dart';
 import '../../domain/charity_practices.dart';
 import '../../domain/fasting_practices.dart';
+import '../shared/add_response_button.dart';
 import '../shared/hajj_standing_editor.dart';
 import '../../domain/ummah_practices.dart';
 import '../../domain/wealth_practices.dart';
@@ -47,6 +47,28 @@ import '../shared/home_band_heading.dart';
 import '../shared/ui_bits.dart';
 
 enum CheckInFocus { full, salah, quran, traces }
+
+void openTodaysCheckInFromHome(BuildContext context, WidgetRef ref) {
+  refreshNowIfLocalDateChanged(ref);
+  final prefs = ref.read(appPrefsProvider);
+  final domains = PersonalisationResolver(
+    visibleDomains: prefs.visibleDomains,
+    mix: prefs.personalMix,
+  ).homeDomains;
+  if (domains.isNotEmpty) {
+    final focused =
+        domains[homeDomainStageIndex(
+          domains,
+          ref.read(homeDomainStageProvider),
+        )];
+    ref.read(checkInDomainStageProvider.notifier).state = focused;
+  }
+  Navigator.of(context).push(
+    MaterialPageRoute<void>(
+      builder: (_) => CheckInScreen(date: ref.read(nowProvider)),
+    ),
+  );
+}
 
 void openFocusedCheckIn(
   BuildContext context, {
@@ -119,9 +141,6 @@ class CheckInScreen extends ConsumerStatefulWidget {
 
 class _CheckInScreenState extends ConsumerState<CheckInScreen> {
   late DailyCheckIn _draft;
-  late final TextEditingController _gratitude;
-  late final TextEditingController _reflection;
-  late final TextEditingController _situationCustom;
   late final TextEditingController _akhlaqStruggle;
   final Map<String, TextEditingController> _custom = {};
   var _loaded = false;
@@ -149,9 +168,6 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
     super.initState();
     _openedDateKey = dateKey(widget.date ?? ref.read(nowClockProvider)());
     _draft = DailyCheckIn.empty(_openedDateKey);
-    _gratitude = TextEditingController();
-    _reflection = TextEditingController();
-    _situationCustom = TextEditingController();
     _akhlaqStruggle = TextEditingController();
     _briefingOpen = widget.focusBand == null && widget.focusRowId == null;
     Future<void>.microtask(_hydrate);
@@ -193,9 +209,6 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
               )
             : existing;
         _draft = merged;
-        _gratitude.text = merged.gratitudeText ?? '';
-        _reflection.text = merged.personalReflectionText ?? '';
-        _situationCustom.text = merged.situationNotes.customText ?? '';
         _akhlaqStruggle.text = merged.akhlaqStruggleNote ?? '';
       }
     });
@@ -207,9 +220,6 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
 
   @override
   void dispose() {
-    _gratitude.dispose();
-    _reflection.dispose();
-    _situationCustom.dispose();
     _akhlaqStruggle.dispose();
     _focusListController.dispose();
     for (final c in _custom.values) {
@@ -387,9 +397,7 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
           ),
         ],
         const SizedBox(height: 12),
-        _otherCard(),
-        const SizedBox(height: 12),
-        _situationNotesCard(),
+        _checkInNoteAction(),
       ],
     );
   }
@@ -460,6 +468,7 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
         MuhasabahColors.salahWash,
         MuhasabahColors.salahWashDark,
         Theme.of(context).brightness,
+        context,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -554,7 +563,10 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
           ),
           const SizedBox(height: 6),
           ActivityPicker(
-            options: ActivityCatalog.salah,
+            options: ActivityCatalog.obligatorySalahOptions(
+              gender: ref.watch(appPrefsProvider).worshipListGender,
+              selectedId: selected.id,
+            ),
             selectedId: selected.id,
             statusKeyPrefix: 'salah-${id.name}',
             onSelected: (option) => setState(() {
@@ -627,7 +639,10 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
             ),
           const SizedBox(height: 6),
           ActivityPicker(
-            options: ActivityCatalog.jumuah,
+            options: ActivityCatalog.jumuahOptions(
+              gender: ref.watch(appPrefsProvider).worshipListGender,
+              selectedId: selected.id,
+            ),
             selectedId: selected.id,
             statusKeyPrefix: 'salah-jumuah',
             enabled: friday,
@@ -755,6 +770,7 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
         MuhasabahColors.quranWash,
         MuhasabahColors.quranWashDark,
         Theme.of(context).brightness,
+        context,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -799,6 +815,7 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
                 MuhasabahColors.quranWash,
                 MuhasabahColors.quranWashDark,
                 Theme.of(context).brightness,
+                context,
               ),
             ),
             const SizedBox(height: 8),
@@ -1155,16 +1172,6 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
             options: catalog,
             selectedId: selected.id,
             statusKeyPrefix: 'trace-$key',
-            namedSubject:
-                isDhikrPostFardTrace(key) ||
-                    isHuquqTrace(key) ||
-                    isKnowledgeTrace(key) ||
-                    isTimeTrace(key) ||
-                    isHealthTrace(key) ||
-                    isWealthTrace(key) ||
-                    isUmmahTrace(key)
-                ? row.label
-                : null,
             onSelected: (option) => setState(() {
               if (isTimeTrace(key)) {
                 if (option.id == ActivityIds.unanswered) {
@@ -1729,128 +1736,40 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
     );
   }
 
-  Widget _otherCard() {
-    return WashPanel(
-      color: MuhasabahColors.wash(
-        MuhasabahColors.dhikrWash,
-        MuhasabahColors.dhikrWashDark,
-        Theme.of(context).brightness,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const CheckInDomainTitle('Other observations'),
-          const SizedBox(height: 12),
-          const CheckInRowLabel('Dhikr / Istighfar'),
-          ActivityPicker(
-            options: ActivityCatalog.dhikr,
-            selectedId: _draft.activityFor(ActivityCatalog.dhikrKey).id,
-            statusKeyPrefix: 'other-dhikr',
-            onSelected: (option) => setState(() {
-              _draft = _draft
-                  .copyWith(dhikr: option.dhikr ?? DhikrStatus.unanswered)
-                  .withActivity(
-                    ActivityCatalog.dhikrKey,
-                    RecordedActivity(id: option.id),
-                  );
-            }),
+  Widget _checkInNoteAction() {
+    final prefs = ref.watch(appPrefsProvider);
+    final resolver = PersonalisationResolver(
+      visibleDomains: prefs.visibleDomains,
+      mix: prefs.personalMix,
+    );
+    final domains = resolver.homeDomains;
+    final remembered = ref.watch(checkInDomainStageProvider);
+    final domain = domains.isEmpty
+        ? MonitorDomain.salah
+        : domains[homeDomainStageIndex(domains, remembered)];
+    final shown = formatStoredDateKey(_openedDateKey, prefs.displayCalendar);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          Copy.checkInAddNoteNote,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            height: 1.35,
           ),
-          const SizedBox(height: 16),
-          const CheckInRowLabel('Gratitude'),
-          CheckInSelect<EntryStatus>(
-            dropdownKey: const Key('gratitude-status'),
-            value: _draft.gratitudeStatus,
-            entries: const [
-              CheckInSelectEntry(
-                value: EntryStatus.recorded,
-                label: 'Wrote an entry',
-              ),
-              CheckInSelectEntry(
-                value: EntryStatus.noneToday,
-                label: 'No entry today',
-              ),
-              CheckInSelectEntry(
-                value: EntryStatus.unanswered,
-                label: 'Not recorded',
-              ),
-            ],
-            onChanged: (status) => setState(() {
-              if (status == EntryStatus.recorded) {
-                _draft = _draft.copyWith(gratitudeStatus: EntryStatus.recorded);
-              } else if (status == EntryStatus.noneToday) {
-                _draft = _draft.copyWith(
-                  gratitudeStatus: EntryStatus.noneToday,
-                  clearGratitudeText: true,
-                );
-                _gratitude.clear();
-              } else {
-                _draft = _draft.copyWith(
-                  gratitudeStatus: EntryStatus.unanswered,
-                );
-              }
-            }),
+        ),
+        const SizedBox(height: 8),
+        AddResponseButton(
+          key: const Key('checkin-add-note'),
+          filled: true,
+          provenance: ResponseProvenance(
+            originType: ProvenanceOrigin.completedCheckIn,
+            dateKey: _openedDateKey,
+            domain: domain.id,
+            labelSnapshot: '${domain.shortLabel} check-in · $shown',
           ),
-          if (_draft.gratitudeStatus == EntryStatus.recorded)
-            Padding(
-              padding: const EdgeInsets.only(top: 8, left: checkInValueIndent),
-              child: TextField(
-                controller: _gratitude,
-                maxLines: 4,
-                decoration: const InputDecoration(
-                  hintText: 'Optional private gratitude notes',
-                ),
-              ),
-            ),
-          const SizedBox(height: 16),
-          const CheckInRowLabel(Copy.personalReflection),
-          CheckInSelect<EntryStatus>(
-            dropdownKey: const Key('personal-reflection-status'),
-            value: _draft.personalReflectionStatus,
-            entries: const [
-              CheckInSelectEntry(
-                value: EntryStatus.recorded,
-                label: 'Wrote an entry',
-              ),
-              CheckInSelectEntry(
-                value: EntryStatus.noneToday,
-                label: 'No entry today',
-              ),
-              CheckInSelectEntry(
-                value: EntryStatus.unanswered,
-                label: 'Not recorded',
-              ),
-            ],
-            onChanged: (status) => setState(() {
-              if (status == EntryStatus.recorded) {
-                _draft = _draft.copyWith(
-                  personalReflectionStatus: EntryStatus.recorded,
-                );
-              } else if (status == EntryStatus.noneToday) {
-                _draft = _draft.copyWith(
-                  personalReflectionStatus: EntryStatus.noneToday,
-                  clearPersonalReflectionText: true,
-                );
-                _reflection.clear();
-              } else {
-                _draft = _draft.copyWith(
-                  personalReflectionStatus: EntryStatus.unanswered,
-                );
-              }
-            }),
-          ),
-          if (_draft.personalReflectionStatus == EntryStatus.recorded)
-            Padding(
-              padding: const EdgeInsets.only(top: 8, left: checkInValueIndent),
-              child: TextField(
-                controller: _reflection,
-                maxLines: 4,
-                decoration: const InputDecoration(
-                  hintText: 'Optional private reflection',
-                ),
-              ),
-            ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -2061,6 +1980,7 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
         washLight,
         washDark,
         Theme.of(context).brightness,
+        context,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -2135,78 +2055,6 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
     );
   }
 
-  Widget _situationNotesCard() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              Copy.situationNotesTitle,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              Copy.situationNotesNote,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                for (final option in SituationNoteCatalog.options)
-                  if (option.id != 'custom')
-                    FilterChip(
-                      label: Text(option.label),
-                      selected: _draft.situationNotes.ids.contains(option.id),
-                      onSelected: (selected) {
-                        final ids = [..._draft.situationNotes.ids];
-                        if (selected) {
-                          if (!ids.contains(option.id)) ids.add(option.id);
-                        } else {
-                          ids.remove(option.id);
-                        }
-                        setState(() {
-                          _draft = _draft.copyWith(
-                            situationNotes: SituationNotes(
-                              ids: ids,
-                              customText: _situationCustom.text.trim().isEmpty
-                                  ? null
-                                  : _situationCustom.text.trim(),
-                            ),
-                          );
-                        });
-                      },
-                    ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              key: const Key('checkin-situation-custom'),
-              controller: _situationCustom,
-              maxLines: 2,
-              decoration: const InputDecoration(
-                hintText: 'Custom note (optional)',
-              ),
-              onChanged: (value) {
-                setState(() {
-                  _draft = _draft.copyWith(
-                    situationNotes: SituationNotes(
-                      ids: _draft.situationNotes.ids,
-                      customText: value.trim().isEmpty ? null : value.trim(),
-                    ),
-                  );
-                });
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Future<void> _save() async {
     if (_saving || !_loaded) return;
     final next = _pendingRecord();
@@ -2233,26 +2081,7 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
   }
 
   DailyCheckIn _pendingRecord() {
-    var next = _draft;
-    if (next.gratitudeStatus == EntryStatus.recorded) {
-      next = next.copyWith(
-        gratitudeText: _gratitude.text.trim().isEmpty ? null : _gratitude.text,
-      );
-    }
-    if (next.personalReflectionStatus == EntryStatus.recorded) {
-      next = next.copyWith(
-        personalReflectionText: _reflection.text.trim().isEmpty
-            ? null
-            : _reflection.text,
-      );
-    }
-    return next.copyWith(
-      situationNotes: SituationNotes(
-        ids: next.situationNotes.ids,
-        customText: _situationCustom.text.trim().isEmpty
-            ? null
-            : _situationCustom.text.trim(),
-      ),
+    return _draft.copyWith(
       akhlaqStruggleNote: _akhlaqStruggle.text.trim().isEmpty
           ? null
           : _akhlaqStruggle.text.trim(),

@@ -13,6 +13,7 @@ import 'prayer.dart';
 import 'quran.dart';
 import 'quran_duration.dart';
 import 'salah_extras.dart';
+import 'worship_list_gender.dart';
 
 class ActivityIds {
   static const unanswered = 'unanswered';
@@ -268,6 +269,30 @@ class ActivityCatalog {
       prayerStatus: PrayerStatus.other,
     ),
   ];
+
+  static const salahExcusedId = 'excused';
+
+  static List<ActivityOption> obligatorySalahOptions({
+    required WorshipListGender gender,
+    String? selectedId,
+  }) => _withoutExcusedIfMale(salah, gender, selectedId);
+
+  static List<ActivityOption> jumuahOptions({
+    required WorshipListGender gender,
+    String? selectedId,
+  }) => _withoutExcusedIfMale(jumuah, gender, selectedId);
+
+  static List<ActivityOption> _withoutExcusedIfMale(
+    List<ActivityOption> catalog,
+    WorshipListGender gender,
+    String? selectedId,
+  ) {
+    if (gender.showsObligatorySalahExcused) return catalog;
+    return [
+      for (final option in catalog)
+        if (option.id != salahExcusedId || option.id == selectedId) option,
+    ];
+  }
 
   static const tahajjudEarlyMidAndLate = 'tahajjud.earlyMidAndLate';
   static const tahajjudLaterPart = 'tahajjud.laterPart';
@@ -1300,9 +1325,20 @@ class ActivityCatalog {
     return null;
   }
 
+  static bool isObligatorySalahCatalog(List<ActivityOption> options) {
+    if (identical(options, salah) || identical(options, jumuah)) return true;
+    if (options.isEmpty) return false;
+    final allowed = {
+      for (final option in [...salah, ...jumuah]) option.id,
+    };
+    for (final option in options) {
+      if (!allowed.contains(option.id)) return false;
+    }
+    return options.any((option) => option.id == 'congregationOnTime');
+  }
+
   static bool preservePickerOrder(List<ActivityOption> options) {
-    if (identical(options, salah) ||
-        identical(options, jumuah) ||
+    if (isObligatorySalahCatalog(options) ||
         identical(options, tahajjud) ||
         identical(options, ishraq) ||
         identical(options, tawbah)) {

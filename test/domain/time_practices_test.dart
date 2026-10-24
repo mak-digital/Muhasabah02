@@ -7,48 +7,45 @@ import 'package:muhasabah02/domain/quran.dart';
 import 'package:muhasabah02/domain/time_practices.dart';
 
 void main() {
-  test(
-    'Time V1 catalogue is eight independent practices in daily-life order',
-    () {
-      expect(timePractices.length, 8);
-      expect(timePractices.map((item) => item.practiceId).toList(), [
-        'time_t01',
-        'time_t02',
-        'time_t03',
-        'time_t04',
-        'time_t05',
-        'time_t06',
-        'time_t07',
-        'time_t08',
-      ]);
-      expect(timePractices.map((item) => item.sectionId).toSet(), {
-        kTimeIntentionSectionId,
-        kTimeAttentionSectionId,
-        kTimeActionSectionId,
-        kTimeBalanceSectionId,
-      });
-      expect(
-        timeHomeRows.map((row) => row.storageKey),
-        timePractices.map((item) => item.storageKey),
-      );
-      expect(
-        [
-          for (final row in timeHomeRows)
-            ActivityCatalog.forHomeTrace(row.storageKey).first.label,
-        ],
-        [
-          'Began an activity with a clear beneficial intention',
-          'Prioritised an important responsibility or beneficial activity',
-          'Gave meaningful attention to a task, person or act of worship',
-          'Put away or silenced a digital device when attention was needed',
-          'Completed a responsibility or task I had been unnecessarily delaying',
-          'Used time meaningfully for worship, responsibility, learning or useful work',
-          'Gave appropriate attention to someone who needed it',
-          'Took appropriate rest or recovery when needed',
-        ],
-      );
-    },
-  );
+  test('Time V1 catalogue is eight independent practices in daily-life order', () {
+    expect(timePractices.length, 8);
+    expect(timePractices.map((item) => item.practiceId).toList(), [
+      'time_t01',
+      'time_t02',
+      'time_t03',
+      'time_t04',
+      'time_t05',
+      'time_t06',
+      'time_t07',
+      'time_t08',
+    ]);
+    expect(timePractices.map((item) => item.sectionId).toSet(), {
+      kTimeIntentionSectionId,
+      kTimeAttentionSectionId,
+      kTimeActionSectionId,
+      kTimeBalanceSectionId,
+    });
+    expect(
+      timeHomeRows.map((row) => row.storageKey),
+      timePractices.map((item) => item.storageKey),
+    );
+    expect(
+      [
+        for (final row in timeHomeRows)
+          ActivityCatalog.forHomeTrace(row.storageKey).first.label,
+      ],
+      [
+        'Began an activity with a clear beneficial intention',
+        'Prioritised an important responsibility or beneficial activity',
+        'Gave meaningful attention to a task, person or act of worship',
+        'Put away or silenced a digital device when attention was needed',
+        'Completed a responsibility or task I had been unnecessarily delaying',
+        'Used time meaningfully for worship, responsibility, learning or useful work',
+        'Gave appropriate attention to someone who needed it',
+        'Took appropriate rest or recovery when needed',
+      ],
+    );
+  });
 
   test('unanswered stays distinct from an explicit Time observation', () {
     const empty = TimePracticeCapture();

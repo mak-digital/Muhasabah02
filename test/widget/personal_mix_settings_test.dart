@@ -34,7 +34,9 @@ void main() {
     expect(find.text(Copy.personalMixShortListNote), findsOneWidget);
     expect(find.text(Copy.mixNotShownInDomains), findsOneWidget);
     expect(find.byKey(const Key('mix-domain-dhikr')), findsOneWidget);
-    expect(find.byKey(const Key('mix-domain-hajj')), findsOneWidget);
+    expect(find.byKey(const Key('mix-domain-hajj')), findsNothing);
+    expect(find.byKey(const Key('mix-domain-knowledge')), findsNothing);
+    expect(find.byKey(const Key('mix-domain-productivity')), findsNothing);
     await tester.ensureVisible(find.text(PersonalMixKind.worship.label));
     await tester.tap(find.text(PersonalMixKind.worship.label));
     await tester.pump();

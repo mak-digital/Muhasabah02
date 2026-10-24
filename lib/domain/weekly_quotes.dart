@@ -1,3 +1,4 @@
+import 'hadith_archive.dart';
 import 'monitor_domain.dart';
 import 'quotation_cadence.dart';
 import 'reflection_catalog.dart';
@@ -28,28 +29,58 @@ int stepReflectionCatalog(int current, int delta) {
   return ((current + delta) % n + n) % n;
 }
 
+int stepReflectionCatalogSkipping(
+  int current,
+  int delta, {
+  Set<String> skipHadithKeys = const {},
+}) {
+  final usable = usableReflectionQuotes(skipHadithKeys);
+  if (usable.isEmpty) return stepReflectionCatalog(current, delta);
+  final currentQuote = kReflectionQuotes[wrapReflectionIndex(current)];
+  var start = usable.indexWhere(
+    (quote) =>
+        quote.text == currentQuote.text && quote.source == currentQuote.source,
+  );
+  if (start < 0) start = 0;
+  final next = usable[(start + delta) % usable.length];
+  return reflectionCatalogIndex(next);
+}
+
+int wrapReflectionIndex(int index) {
+  final n = kReflectionQuotes.length;
+  if (n <= 0) return 0;
+  return ((index % n) + n) % n;
+}
+
 ReflectionQuote? quoteFor({
   required DateTime now,
   required QuotationCadence cadence,
   String? holdPeriod,
   int? holdIndex,
+  Set<String> skipHadithKeys = const {},
 }) {
   if (cadence == QuotationCadence.hidden) return null;
+  final usable = usableReflectionQuotes(skipHadithKeys);
   final period = reflectionPeriodKey(now, cadence);
   if (holdPeriod == period &&
       holdIndex != null &&
       holdIndex >= 0 &&
       holdIndex < kReflectionQuotes.length) {
-    return kReflectionQuotes[holdIndex];
+    final held = kReflectionQuotes[holdIndex];
+    if (!reflectionHadithIsArchived(held, skipHadithKeys) ||
+        usable.length == kReflectionQuotes.length) {
+      return held;
+    }
   }
   final day = _utcDayBucket(now);
   final bucket = cadence == QuotationCadence.daily ? day : day ~/ 7;
   final domains = MonitorDomain.values;
   final domain = domains[bucket % domains.length];
-  final pool = [
-    for (final quote in kReflectionQuotes)
+  final domainPool = [
+    for (final quote in usable)
       if (quote.domain == domain) quote,
   ];
+  final pool = domainPool.isEmpty ? usable : domainPool;
   if (pool.isEmpty) return kReflectionQuotes[bucket % kReflectionQuotes.length];
   return pool[bucket % pool.length];
 }

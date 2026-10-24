@@ -46,9 +46,47 @@ void main() {
         kFastingRamadanPrepKey,
         kFastingPostRamadanKey,
       ]);
-      expect(ActivityCatalog.forHomeTrace(kFastingWeeklySunnahKey), isEmpty);
-      expect(ActivityCatalog.forHomeTrace(kFastingMonthlyKey), isEmpty);
-      expect(ActivityCatalog.forHomeTrace(kFastingMakeupKey), isEmpty);
+      expect(
+        ActivityCatalog.forHomeTrace(kFastingWeeklySunnahKey)
+            .map((item) => item.label),
+        [
+          'Not recorded',
+          "Completed today's fast",
+          'Fasting today; not yet completed',
+          'Could not (health, travel, or duties)',
+          'Interrupted or ended early',
+          'Intended, did not fast',
+          'Not a weekly sunnah day I keep',
+          'Prefer not to record',
+        ],
+      );
+      expect(
+        ActivityCatalog.forHomeTrace(kFastingMonthlyKey).map((item) => item.id),
+        [
+          ActivityIds.unanswered,
+          'fasting.monthly.completed',
+          'fasting.monthly.inProgress',
+          'fasting.monthly.constrained',
+          'fasting.monthly.interrupted',
+          'fasting.monthly.intendedDidNot',
+          'fasting.monthly.noSituation',
+          FastingObservationIds.preferNot,
+        ],
+      );
+      expect(
+        ActivityCatalog.forHomeTrace(kFastingMakeupKey)
+            .map((item) => item.label),
+        [
+          'Not recorded',
+          'Completed a make-up fast',
+          'Make-up fasting today; not yet completed',
+          'Could not (health, travel, or duties)',
+          'Interrupted or ended early',
+          'Intended a make-up, did not fast',
+          'No make-up intended today',
+          'Prefer not to record',
+        ],
+      );
       expect(
         ActivityCatalog.forHomeTrace(kFastingRamadanObservedKey)
             .map((item) => item.label),
@@ -63,11 +101,62 @@ void main() {
         ],
       );
       expect(
-        ActivityCatalog.forHomeTrace(kFastingPostRamadanKey).first.label,
-        'Not recorded',
+        ActivityCatalog.forHomeTrace(kFastingRamadanPrepKey)
+            .map((item) => item.id),
+        isNot(contains('fasting.ramadanPrep.voluntaryFast')),
+      );
+      expect(
+        fastingPrimaryLabel(
+          kFastingRamadanPrepKey,
+          'fasting.ramadanPrep.voluntaryFast',
+        ),
+        'I practised voluntary fasting where appropriate, including Sha‘ban',
+      );
+      expect(
+        ActivityCatalog.forHomeTrace(kFastingPostRamadanKey)
+            .map((item) => item.label),
+        [
+          'Not recorded',
+          'Observed a Shawwal or other voluntary fast',
+          'Maintained Qur’an, Salah, or remembrance',
+          'Continued a beneficial habit from Ramadan',
+          'Reviewed or planned make-up',
+          'Reflected and named a next step',
+          'No particular post-Ramadan action today',
+          'Prefer not to record',
+        ],
       );
     },
   );
+
+  test('voluntary fasting-day kinds stay distinct', () {
+    expect(
+      fastingKindFor('fasting.weeklySunnah.completed'),
+      FastingResponseKind.acted,
+    );
+    expect(
+      fastingKindFor('fasting.monthly.noSituation'),
+      FastingResponseKind.noSituation,
+    );
+    expect(
+      fastingKindFor('fasting.makeup.constrained'),
+      FastingResponseKind.constrained,
+    );
+    expect(
+      fastingKindFor('fasting.makeup.intendedDidNot'),
+      FastingResponseKind.difficulty,
+    );
+    final record = writeFastingPractice(
+      DailyCheckIn.empty('2026-02-20'),
+      kFastingMakeupKey,
+      const FastingPracticeCapture(primaryId: 'fasting.makeup.completed'),
+    );
+    expect(
+      record.activityFor(kFastingMakeupKey).id,
+      'fasting.makeup.completed',
+    );
+    expect(record.homeTrace(kFastingMakeupKey).isRecorded, isTrue);
+  });
 
   test('not recorded stays distinct from prefer not and exemption', () {
     var record = writeFastingPractice(

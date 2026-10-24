@@ -20,7 +20,10 @@ void main() {
       isTrue,
     );
     final sources = kPracticeQuranCatalog.map((item) => item.source).toSet();
-    expect(sources, containsAll(['Qur’an 1:1–7', 'Qur’an 2:255', 'Qur’an 2:284–286']));
+    expect(
+      sources,
+      containsAll(['Qur’an 1:1–7', 'Qur’an 2:255', 'Qur’an 2:284–286']),
+    );
     expect(sources, contains('Qur’an 112:1–4'));
     expect(
       kPracticeQuranCatalog.map((item) => item.topic),
@@ -33,7 +36,8 @@ void main() {
     expect(Copy.practiceQuranNote.toLowerCase(), isNot(contains('highly')));
     expect(
       kPracticeQuranCatalog.every(
-        (item) => !item.sourceDetail.toLowerCase().contains('highly recommended'),
+        (item) =>
+            !item.sourceDetail.toLowerCase().contains('highly recommended'),
       ),
       isTrue,
     );
@@ -61,10 +65,7 @@ void main() {
     );
     expect(record.domain, MonitorDomain.quran);
     expect(record.catalogId, item.id);
-    expect(
-      practiceRecordsForDomain([record], MonitorDomain.hadith),
-      isEmpty,
-    );
+    expect(practiceRecordsForDomain([record], MonitorDomain.hadith), isEmpty);
     expect(practiceQuranAt(kPracticeQuranCatalog.length).id, item.id);
   });
 }

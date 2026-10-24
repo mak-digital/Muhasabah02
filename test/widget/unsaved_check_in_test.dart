@@ -11,7 +11,9 @@ import 'package:muhasabah02/domain/copy.dart';
 import 'package:muhasabah02/domain/daily_check_in.dart';
 import 'package:muhasabah02/domain/other_domains.dart';
 import 'package:muhasabah02/domain/prayer.dart';
+import 'package:muhasabah02/domain/personal_response.dart';
 import 'package:muhasabah02/presentation/checkin/check_in_screen.dart';
+import 'package:muhasabah02/presentation/response/response_editor_screen.dart';
 
 import '../support/check_in_select.dart';
 import '../support/controllable_check_in_repository.dart';
@@ -24,6 +26,7 @@ void main() {
     DateTime? now,
     MemoryCheckInRepository? checkIns,
     CheckInRepository? checkInRepository,
+    MemoryResponseRepository? responses,
   }) async {
     tester.view.physicalSize = const Size(400, 3600);
     tester.view.devicePixelRatio = 1;
@@ -35,6 +38,7 @@ void main() {
         now: now ?? (clock == null ? DateTime(2026, 9, 3) : null),
         checkIns: checkIns,
         checkInRepository: checkInRepository,
+        responses: responses,
         visibleDomains: allVisibleDomains(),
       ),
     );
@@ -51,7 +55,7 @@ void main() {
     await chooseCheckInOption(
       tester,
       dropdownKey: const Key('salah-fajr'),
-      optionLabel: 'Prayed alone on time',
+      optionLabel: 'Alone on time',
     );
     await tester.pumpAndSettle();
   }
@@ -99,7 +103,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text(Copy.unsavedCheckInTitle), findsNothing);
     expect(find.byType(CheckInScreen), findsOneWidget);
-    expect(find.text('Prayed alone on time'), findsWidgets);
+    expect(find.text('Alone on time'), findsWidgets);
   });
 
   testWidgets('Discard does not persist', (tester) async {
@@ -220,8 +224,7 @@ void main() {
     final checkIns = MemoryCheckInRepository();
     await checkIns.save(sampleDay('2026-09-03'));
     await pumpHome(tester, checkIns: checkIns, now: DateTime(2026, 9, 6));
-    await tester.tap(find.text('History'));
-    await tester.pumpAndSettle();
+    await openRegistryTab(tester, tab: const Key('registry-tab-history'));
     await tester.tap(find.byKey(const Key('history-day-2026-09-03')));
     await tester.pumpAndSettle();
     await chooseCheckInOption(
@@ -314,7 +317,7 @@ void main() {
       await dirtyFajr(tester);
       repo.hydrateGate!.complete();
       await tester.pumpAndSettle();
-      expect(find.text('Prayed alone on time'), findsWidgets);
+      expect(find.text('Alone on time'), findsWidgets);
       await tester.ensureVisible(find.text('Save check-in'));
       await tester.tap(find.text('Save check-in'));
       await tester.pumpAndSettle();
@@ -346,10 +349,16 @@ void main() {
     );
   });
 
-  Future<void> enterCustomNote(WidgetTester tester, String text) async {
-    final field = find.byKey(const Key('checkin-situation-custom'));
+  testWidgets('check-in Add a Note saves to My Notes for that day', (
+    tester,
+  ) async {
+    final responses = MemoryResponseRepository();
+    await pumpHome(tester, responses: responses);
+    await openFull(tester);
+    expect(find.text('Other observations'), findsNothing);
+    expect(find.text(Copy.situationNotesTitle), findsNothing);
     await tester.scrollUntilVisible(
-      field,
+      find.byKey(const Key('checkin-add-note')),
       400,
       scrollable: find
           .descendant(
@@ -358,55 +367,48 @@ void main() {
           )
           .first,
     );
-    await tester.enterText(field, text);
-    await tester.pump();
-  }
-
-  testWidgets('custom notes alone activate draft protection', (tester) async {
-    await pumpHome(tester);
-    await openFull(tester);
-    await enterCustomNote(tester, 'only notes');
-    await tester.pageBack();
+    await tester.tap(find.byKey(const Key('checkin-add-note')));
     await tester.pumpAndSettle();
-    expect(find.text(Copy.unsavedCheckInTitle), findsOneWidget);
+    expect(find.byType(ResponseEditorScreen), findsOneWidget);
+    await tester.enterText(find.byType(TextField), 'Check-in note for the day');
+    await tester.tap(find.text(Copy.saveResponse));
+    await tester.pumpAndSettle();
+    final saved = await responses.allHealthy();
+    expect(saved, hasLength(1));
+    expect(saved.single.text, 'Check-in note for the day');
+    expect(
+      saved.single.provenance?.originType,
+      ProvenanceOrigin.completedCheckIn,
+    );
+    expect(saved.single.provenance?.dateKey, '2026-09-03');
     expect(find.byType(CheckInScreen), findsOneWidget);
   });
 
-  testWidgets('reverting custom notes restores a clean Back', (tester) async {
+  testWidgets('opening Add a Note does not dirty the check-in', (tester) async {
     await pumpHome(tester);
     await openFull(tester);
-    await enterCustomNote(tester, 'only notes');
-    await enterCustomNote(tester, '');
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('checkin-add-note')),
+      400,
+      scrollable: find
+          .descendant(
+            of: find.byType(CheckInScreen),
+            matching: find.byType(Scrollable),
+          )
+          .first,
+    );
+    await tester.tap(find.byKey(const Key('checkin-add-note')));
+    await tester.pumpAndSettle();
     await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(find.byType(ResponseEditorScreen), findsNothing);
+    await tester.tap(find.byType(BackButton));
     await tester.pumpAndSettle();
     expect(find.byType(CheckInScreen), findsNothing);
     expect(find.text(Copy.unsavedCheckInTitle), findsNothing);
   });
 
-  testWidgets(
-    'IME dismiss then Back still protects a custom-note draft',
-    (tester) async {
-      await pumpHome(tester);
-      await openFull(tester);
-      await enterCustomNote(tester, 'only notes');
-      expect(
-        tester.testTextInput.hasAnyClients,
-        isTrue,
-      );
-      tester.testTextInput.hide();
-      FocusManager.instance.primaryFocus?.unfocus();
-      await tester.pump();
-      expect(find.text(Copy.unsavedCheckInTitle), findsNothing);
-      expect(find.byType(CheckInScreen), findsOneWidget);
-      await tester.pageBack();
-      await tester.pumpAndSettle();
-      expect(find.text(Copy.unsavedCheckInTitle), findsOneWidget);
-    },
-  );
-
-  testWidgets('situation note and draft dialog stay above keyboard inset', (
-    tester,
-  ) async {
+  testWidgets('draft dialog stays above keyboard inset', (tester) async {
     tester.view.physicalSize = const Size(400, 900);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -417,17 +419,6 @@ void main() {
     await tester.pumpAndSettle();
     await openFull(tester);
     await dirtyFajr(tester);
-    await tester.scrollUntilVisible(
-      find.byKey(const Key('checkin-situation-custom')),
-      400,
-      scrollable: find
-          .descendant(
-            of: find.byType(CheckInScreen),
-            matching: find.byType(Scrollable),
-          )
-          .first,
-    );
-    expect(find.byKey(const Key('checkin-situation-custom')), findsOneWidget);
     tester.view.padding = const FakeViewPadding(bottom: 48);
     tester.view.viewPadding = const FakeViewPadding(bottom: 48);
     tester.view.viewInsets = const FakeViewPadding(bottom: 280);

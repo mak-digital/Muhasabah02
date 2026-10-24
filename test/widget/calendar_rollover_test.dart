@@ -5,7 +5,6 @@ import 'package:muhasabah02/domain/copy.dart';
 import 'package:muhasabah02/domain/daily_check_in.dart';
 import 'package:muhasabah02/domain/activities.dart';
 import 'package:muhasabah02/domain/date_key.dart';
-import 'package:muhasabah02/domain/monitor_domain.dart';
 import 'package:muhasabah02/domain/personal_mix.dart';
 import 'package:muhasabah02/domain/prayer.dart';
 import 'package:muhasabah02/presentation/checkin/check_in_screen.dart';
@@ -48,6 +47,18 @@ void main() {
     );
     ink.onTap!.call();
     await tester.pumpAndSettle();
+  }
+
+  /// Salah starts expanded when it is the Home-stage domain. Tapping the
+  /// domain header collapses it (accordion). Only tap if Fajr is not built.
+  Future<void> ensureQuickTapFajrVisible(WidgetTester tester) async {
+    final fajr = find.byKey(const Key('quick-tap-salah.fajr'));
+    if (fajr.evaluate().isEmpty) {
+      await tester.tap(find.byKey(const Key('quick-tap-domain-toggle-salah')));
+      await tester.pumpAndSettle();
+    }
+    expect(fajr, findsOneWidget);
+    await tester.ensureVisible(fajr);
   }
 
   Future<void> openProgressFajrCell(WidgetTester tester, String dateKey) async {
@@ -228,8 +239,7 @@ void main() {
 
     await tester.tap(find.text(Copy.quickTap));
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('quick-tap-domain-toggle-salah')));
-    await tester.pumpAndSettle();
+    await ensureQuickTapFajrVisible(tester);
     await tester.tap(find.byKey(const Key('quick-tap-salah.fajr')));
     await tester.pumpAndSettle();
     expect(await checkIns.getByDate('2026-09-23'), isNotNull);
@@ -254,8 +264,7 @@ void main() {
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const Key('quick-tap-domain-toggle-salah')));
-    await tester.pumpAndSettle();
+    await ensureQuickTapFajrVisible(tester);
     await tester.tap(find.byKey(const Key('quick-tap-salah.fajr')));
     await tester.pumpAndSettle();
     expect(await checkIns.getByDate('2026-09-22'), isNotNull);
@@ -276,7 +285,7 @@ void main() {
     await chooseCheckInOption(
       tester,
       dropdownKey: const Key('salah-fajr'),
-      optionLabel: 'Prayed alone on time',
+      optionLabel: 'Alone on time',
     );
 
     clock = DateTime(2026, 9, 23, 0, 3);

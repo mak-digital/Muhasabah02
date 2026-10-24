@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import '../domain/app_appearance.dart';
 import '../domain/arabic_script.dart';
 import '../domain/custom_selection_set.dart';
 import '../domain/display_calendar.dart';
@@ -10,6 +11,7 @@ import '../domain/personal_aspiration.dart';
 import '../domain/personal_baseline.dart';
 import '../domain/personal_mix.dart';
 import '../domain/quotation_cadence.dart';
+import '../domain/worship_list_gender.dart';
 
 abstract class AppPrefs {
   bool get sampleSeeded;
@@ -17,6 +19,8 @@ abstract class AppPrefs {
   bool get archivePromptDismissed;
   bool get applicationReflectionAcknowledged;
   FirstDayOfWeekPref get firstDayOfWeek;
+  AppAppearance get appearance;
+  WorshipListGender get worshipListGender;
   DisplayCalendar get displayCalendar;
   Set<MonitorDomain> get visibleDomains;
   PersonalMix get personalMix;
@@ -29,6 +33,7 @@ abstract class AppPrefs {
   String weeklyJournal(String weekKey);
   HadithMemorisationFocus get hadithMemorisationFocus;
   int get practiceHadithBrowseIndex;
+  Set<String> get archivedPracticeHadithCatalogIds;
   int get practiceQuranBrowseIndex;
   int get ramadanCalendarOffsetDays;
   bool get showFastingRamadanHistory;
@@ -45,6 +50,8 @@ abstract class AppPrefs {
   Future<void> setArchivePromptDismissed(bool value);
   Future<void> setApplicationReflectionAcknowledged(bool value);
   Future<void> setFirstDayOfWeek(FirstDayOfWeekPref value);
+  Future<void> setAppearance(AppAppearance value);
+  Future<void> setWorshipListGender(WorshipListGender value);
   Future<void> setDisplayCalendar(DisplayCalendar value);
   Future<void> setVisibleDomains(Set<MonitorDomain> value);
   Future<void> setPersonalMix(PersonalMix value);
@@ -66,6 +73,7 @@ abstract class AppPrefs {
   Future<void> setWeeklyJournal(String weekKey, String text);
   Future<void> setHadithMemorisationFocus(HadithMemorisationFocus value);
   Future<void> setPracticeHadithBrowseIndex(int value);
+  Future<void> setArchivedPracticeHadithCatalogIds(Set<String> value);
   Future<void> setPracticeQuranBrowseIndex(int value);
   Future<void> setRamadanCalendarOffsetDays(int value);
   Future<void> setShowFastingRamadanHistory(bool value);
@@ -84,6 +92,8 @@ class MemoryAppPrefs implements AppPrefs {
     this.archivePromptDismissed = false,
     this.applicationReflectionAcknowledged = true,
     this.firstDayOfWeek = FirstDayOfWeekPref.monday,
+    this.appearance = AppAppearance.system,
+    this.worshipListGender = WorshipListGender.unanswered,
     this.displayCalendar = DisplayCalendar.gregorian,
     Set<MonitorDomain>? visibleDomains,
     PersonalMix? personalMix,
@@ -93,6 +103,7 @@ class MemoryAppPrefs implements AppPrefs {
     this.reflectionHoldIndex,
     this.hadithMemorisationFocus = HadithMemorisationFocus.unanswered,
     this.practiceHadithBrowseIndex = 0,
+    Set<String>? archivedPracticeHadithCatalogIds,
     this.practiceQuranBrowseIndex = 0,
     this.ramadanCalendarOffsetDays = 0,
     this.showFastingRamadanHistory = false,
@@ -116,6 +127,9 @@ class MemoryAppPrefs implements AppPrefs {
            customSelectionSets ?? CustomSelectionSetsRecord.empty(),
        dhikrCountDefaults = Map<String, int>.from(
          dhikrCountDefaults ?? const {},
+       ),
+       archivedPracticeHadithCatalogIds = Set<String>.from(
+         archivedPracticeHadithCatalogIds ?? const {},
        );
 
   @override
@@ -129,6 +143,12 @@ class MemoryAppPrefs implements AppPrefs {
 
   @override
   FirstDayOfWeekPref firstDayOfWeek;
+
+  @override
+  AppAppearance appearance;
+
+  @override
+  WorshipListGender worshipListGender;
 
   @override
   DisplayCalendar displayCalendar;
@@ -159,6 +179,9 @@ class MemoryAppPrefs implements AppPrefs {
 
   @override
   int practiceHadithBrowseIndex;
+
+  @override
+  Set<String> archivedPracticeHadithCatalogIds;
 
   @override
   int practiceQuranBrowseIndex;
@@ -220,6 +243,13 @@ class MemoryAppPrefs implements AppPrefs {
   @override
   Future<void> setFirstDayOfWeek(FirstDayOfWeekPref value) async =>
       firstDayOfWeek = value;
+
+  @override
+  Future<void> setAppearance(AppAppearance value) async => appearance = value;
+
+  @override
+  Future<void> setWorshipListGender(WorshipListGender value) async =>
+      worshipListGender = value;
 
   @override
   Future<void> setDisplayCalendar(DisplayCalendar value) async =>
@@ -392,6 +422,10 @@ class MemoryAppPrefs implements AppPrefs {
       practiceHadithBrowseIndex = value;
 
   @override
+  Future<void> setArchivedPracticeHadithCatalogIds(Set<String> value) async =>
+      archivedPracticeHadithCatalogIds = Set<String>.from(value);
+
+  @override
   Future<void> setPracticeQuranBrowseIndex(int value) async =>
       practiceQuranBrowseIndex = value;
 
@@ -481,6 +515,25 @@ Map<String, String> decodeJournals(String? raw) {
 }
 
 String encodeJournals(Map<String, String> value) => jsonEncode(value);
+
+Set<String> decodeStringIdSet(String? raw) {
+  if (raw == null || raw.isEmpty) return {};
+  try {
+    final decoded = jsonDecode(raw);
+    if (decoded is! List) return {};
+    return {
+      for (final item in decoded)
+        if (item is String && item.isNotEmpty) item,
+    };
+  } catch (_) {
+    return {};
+  }
+}
+
+String encodeStringIdSet(Set<String> value) => jsonEncode([
+  for (final item in value)
+    if (item.isNotEmpty) item,
+]);
 
 Map<String, int> decodeDhikrCountDefaults(String? raw) {
   if (raw == null || raw.isEmpty) return {};

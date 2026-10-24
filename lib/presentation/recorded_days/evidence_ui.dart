@@ -145,6 +145,7 @@ class EvidenceGuard extends StatelessWidget {
                   MuhasabahColors.sampleBannerWash,
                   MuhasabahColors.sampleBannerWashDark,
                   Theme.of(context).brightness,
+                  context,
                 ),
                 borderRadius: BorderRadius.circular(8),
               ),

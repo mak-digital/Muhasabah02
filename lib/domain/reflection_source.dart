@@ -16,10 +16,7 @@ List<Uri> reflectionSourceUris(String source) {
 }
 
 List<ReflectionSourcePage> reflectionSourcePages(String source) {
-  return [
-    for (final part in source.split(';'))
-      ..._pagesForPart(part.trim()),
-  ];
+  return [for (final part in source.split(';')) ..._pagesForPart(part.trim())];
 }
 
 List<ReflectionSourcePage> _pagesForPart(String part) {
@@ -36,9 +33,8 @@ List<ReflectionSourcePage> _pagesForPart(String part) {
 }
 
 Uri? _quranUri(String source) {
-  final match = RegExp(
-    r"Qur['’]an\s+(\d+)\s*:\s*(\d+)(?:\s*[–—-]\s*(\d+))?",
-  ).firstMatch(source);
+  final match = RegExp(r"Qur['’]an\s+(\d+)\s*:\s*(\d+)(?:\s*[–—-]\s*(\d+))?")
+      .firstMatch(source);
   if (match == null) return null;
   final surah = match.group(1)!;
   final start = match.group(2)!;

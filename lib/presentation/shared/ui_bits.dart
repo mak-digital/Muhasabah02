@@ -8,18 +8,20 @@ class WashPanel extends StatelessWidget {
     required this.color,
     required this.child,
     this.padding = const EdgeInsets.all(18),
+    this.clipBehavior = Clip.antiAlias,
   });
 
   final Color color;
   final Widget child;
   final EdgeInsetsGeometry padding;
+  final Clip clipBehavior;
 
   @override
   Widget build(BuildContext context) {
     return Material(
       color: color,
       borderRadius: BorderRadius.circular(18),
-      clipBehavior: Clip.antiAlias,
+      clipBehavior: clipBehavior,
       child: Padding(padding: padding, child: child),
     );
   }

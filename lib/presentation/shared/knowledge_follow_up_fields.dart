@@ -189,10 +189,7 @@ class KnowledgeFollowUpFields extends StatelessWidget {
       value: value,
       sortLabels: false,
       entries: [
-        CheckInSelectEntry(
-          value: kFactorNotRecorded,
-          label: notRecordedLabel,
-        ),
+        CheckInSelectEntry(value: kFactorNotRecorded, label: notRecordedLabel),
         for (final choice in choices)
           CheckInSelectEntry(value: choice.id, label: choice.label),
       ],

@@ -87,12 +87,6 @@ const fastingVoluntaryStorageKeys = <String>{
   kFastingPostRamadanKey,
 };
 
-const fastingTernaryStorageKeys = <String>{
-  kFastingWeeklySunnahKey,
-  kFastingMonthlyKey,
-  kFastingMakeupKey,
-};
-
 int clampRamadanCalendarOffsetDays(int value) {
   if (value < -1) return -1;
   if (value > 1) return 1;
@@ -106,8 +100,7 @@ bool isFastingVoluntaryTrace(String storageKey) =>
     fastingVoluntaryStorageKeys.contains(storageKey);
 
 bool isFastingPracticeTrace(String storageKey) =>
-    storageKey.startsWith('fasting.') &&
-    !fastingTernaryStorageKeys.contains(storageKey);
+    storageKey.startsWith('fasting.');
 
 const fastingLegendLabels = <String, String>{
   FastingObservationIds.acted: 'Beneficial fasting or worship observed',
@@ -172,6 +165,24 @@ const _fastingKindById = <String, FastingResponseKind>{
       FastingResponseKind.partial,
   'fasting.ramadanPractice.identifiedImprovement': FastingResponseKind.partial,
   'fasting.ramadanPractice.noStep': FastingResponseKind.difficulty,
+  'fasting.weeklySunnah.completed': FastingResponseKind.acted,
+  'fasting.weeklySunnah.inProgress': FastingResponseKind.partial,
+  'fasting.weeklySunnah.constrained': FastingResponseKind.constrained,
+  'fasting.weeklySunnah.interrupted': FastingResponseKind.difficulty,
+  'fasting.weeklySunnah.intendedDidNot': FastingResponseKind.difficulty,
+  'fasting.weeklySunnah.noSituation': FastingResponseKind.noSituation,
+  'fasting.monthly.completed': FastingResponseKind.acted,
+  'fasting.monthly.inProgress': FastingResponseKind.partial,
+  'fasting.monthly.constrained': FastingResponseKind.constrained,
+  'fasting.monthly.interrupted': FastingResponseKind.difficulty,
+  'fasting.monthly.intendedDidNot': FastingResponseKind.difficulty,
+  'fasting.monthly.noSituation': FastingResponseKind.noSituation,
+  'fasting.makeup.completed': FastingResponseKind.acted,
+  'fasting.makeup.inProgress': FastingResponseKind.partial,
+  'fasting.makeup.constrained': FastingResponseKind.constrained,
+  'fasting.makeup.interrupted': FastingResponseKind.difficulty,
+  'fasting.makeup.intendedDidNot': FastingResponseKind.difficulty,
+  'fasting.makeup.noSituation': FastingResponseKind.noSituation,
   'fasting.ramadanPrep.plan': FastingResponseKind.acted,
   'fasting.ramadanPrep.voluntaryFast': FastingResponseKind.acted,
   'fasting.ramadanPrep.studyArrangements': FastingResponseKind.partial,
@@ -351,52 +362,66 @@ const _fastingResponseLabels = <String, List<(String, String)>>{
       'I recognised a needed change but took no step today',
     ),
   ],
+  kFastingWeeklySunnahKey: [
+    ('fasting.weeklySunnah.completed', "Completed today's fast"),
+    ('fasting.weeklySunnah.inProgress', 'Fasting today; not yet completed'),
+    (
+      'fasting.weeklySunnah.constrained',
+      'Could not (health, travel, or duties)',
+    ),
+    ('fasting.weeklySunnah.interrupted', 'Interrupted or ended early'),
+    ('fasting.weeklySunnah.intendedDidNot', 'Intended, did not fast'),
+    ('fasting.weeklySunnah.noSituation', 'Not a weekly sunnah day I keep'),
+  ],
+  kFastingMonthlyKey: [
+    ('fasting.monthly.completed', "Completed today's fast"),
+    ('fasting.monthly.inProgress', 'Fasting today; not yet completed'),
+    ('fasting.monthly.constrained', 'Could not (health, travel, or duties)'),
+    ('fasting.monthly.interrupted', 'Interrupted or ended early'),
+    ('fasting.monthly.intendedDidNot', 'Intended, did not fast'),
+    ('fasting.monthly.noSituation', 'Not a White Day today'),
+  ],
+  kFastingMakeupKey: [
+    ('fasting.makeup.completed', 'Completed a make-up fast'),
+    ('fasting.makeup.inProgress', 'Make-up fasting today; not yet completed'),
+    ('fasting.makeup.constrained', 'Could not (health, travel, or duties)'),
+    ('fasting.makeup.interrupted', 'Interrupted or ended early'),
+    ('fasting.makeup.intendedDidNot', 'Intended a make-up, did not fast'),
+    ('fasting.makeup.noSituation', 'No make-up intended today'),
+  ],
   kFastingRamadanPrepKey: [
-    (
-      'fasting.ramadanPrep.plan',
-      'I prepared a realistic worship and responsibilities plan',
-    ),
-    (
-      'fasting.ramadanPrep.voluntaryFast',
-      'I practised voluntary fasting where appropriate, including Sha‘ban',
-    ),
+    ('fasting.ramadanPrep.plan', 'Prepared a worship and duties plan'),
     (
       'fasting.ramadanPrep.studyArrangements',
-      'I prepared Qur’an study, prayer or learning arrangements',
+      'Prepared Qur’an, prayer, or learning arrangements',
     ),
     (
       'fasting.ramadanPrep.adjustedRoutines',
-      'I adjusted sleep, meals, work or family routines in advance',
+      'Adjusted sleep, meals, work, or family routines',
     ),
     (
       'fasting.ramadanPrep.identifiedNotActed',
-      'I identified preparations but have not yet acted',
+      'Identified preparations, not yet acted',
     ),
-    (
-      'fasting.ramadanPrep.noParticular',
-      'No particular preparation action today',
-    ),
+    ('fasting.ramadanPrep.noParticular', 'No particular preparation today'),
   ],
   kFastingPostRamadanKey: [
     (
       'fasting.postRamadan.shawwalOrVoluntary',
-      'I observed a voluntary fast, including a Shawwal fast where applicable',
+      'Observed a Shawwal or other voluntary fast',
     ),
     (
       'fasting.postRamadan.maintainedPractice',
-      'I maintained a sustainable Qur’an, Salah or remembrance practice',
+      'Maintained Qur’an, Salah, or remembrance',
     ),
     (
       'fasting.postRamadan.continuedHabit',
-      'I continued a beneficial habit or service begun in Ramadan',
+      'Continued a beneficial habit from Ramadan',
     ),
-    (
-      'fasting.postRamadan.reviewedMakeup',
-      'I reviewed outstanding make-up obligations or planned appropriate action',
-    ),
+    ('fasting.postRamadan.reviewedMakeup', 'Reviewed or planned make-up'),
     (
       'fasting.postRamadan.reflectedNextStep',
-      'I reflected on Ramadan and identified a practical next step',
+      'Reflected and named a next step',
     ),
     (
       'fasting.postRamadan.noParticular',
@@ -445,11 +470,18 @@ List<ActivityOption> get fastingLegendCatalog => [
 FastingResponseKind? fastingKindFor(String activityId) =>
     _fastingKindById[activityId];
 
+const _fastingRetiredLabels = <String, String>{
+  'fasting.ramadanPrep.voluntaryFast':
+      'I practised voluntary fasting where appropriate, including Sha‘ban',
+};
+
 String fastingPrimaryLabel(String storageKey, String activityId) {
   for (final option in fastingCatalogFor(storageKey)) {
     if (option.id == activityId) return option.label;
   }
-  return fastingLegendLabels[activityId] ?? 'Not recorded';
+  return _fastingRetiredLabels[activityId] ??
+      fastingLegendLabels[activityId] ??
+      'Not recorded';
 }
 
 FastingPracticeCapture readFastingPractice(

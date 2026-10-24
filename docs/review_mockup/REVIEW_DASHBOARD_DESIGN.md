@@ -34,24 +34,42 @@ The dashboard helps the owner **see what they recorded**, notice **where they ra
 
 ### D. Domain infographic cards
 
-Collapsed: name, compact viz unique to that domain, one descriptive observation.
+Collapsed (must be useful without expanding):
 
-Expanded (`ExpansionTile` / `AnimatedCrossFade` in Flutter): chart explanation, category breakdown, View historical records (scrolls to calendar, filtered mentally by domain), View/Edit a record.
+- Domain name
+- Compact domain-specific infographic plus a text legend
+- One evidence-based observation (recorded counts only)
+- Period range and last recorded date (or “no recorded mark”)
+- Show details control (`aria-expanded` / `aria-controls`)
+
+Expanded (`ExpansionTile` / `AnimatedCrossFade` in Flutter): chart explanation, category breakdown, View historical records (scrolls to calendar), View/Edit a record. Extra copy is omitted from the DOM while collapsed.
 
 Cards use existing domain washes. Meaning is also in labels, not colour alone.
 
 ### E. Historical calendar / timeline
 
-- Every day in the window (empty visible)
-- Tap → sheet: domain marks for that `dateKey`
+- **7 / 30:** every day in the window (empty visible)
+- **90:** compact weekly aggregation. Select a week, then inspect that week’s days. Do not present a dense 90-cell phone calendar as the primary control
+- Day kinds stay distinct: recorded activity, explicit recorded non-participation, unanswered on a saved day, no saved record
+- Tap a day → sheet: domain marks for that `dateKey`
 - View/Edit → `CheckInScreen(date:)` for that key (upsert, no second row)
 - Remove with the existing confirm dialog
 - Private dua / journal / gratitude **text never rendered** in the sheet summary
+- **All saved days:** Review panel with date filter and open-record. Not a fourth bottom tab
 
-### F. Reflection insights
+### F. My Response (inside Review)
 
-- Count-based sentences: “Qur’an engagement was recorded on four days in this period.”
-- No “Your Qur’an performance is 57%.”
+Functional prototype of the existing Response store, not a stub sheet only:
+
+- Active and Archived lists
+- Add, edit, archive, restore
+- Provenance retained (period or day)
+- Synthetic text only in the mockup
+
+### G. Reflection insights
+
+- Count-based sentences that open the matching domain and a recorded date
+- No “Your Qur’an performance is 57%.” No streaks, rankings, or merit
 - Optional previous-window comparison only when adequacy is met
 - Recognition patterns (30/90) fold here as a secondary disclosure, not a trophy
 
@@ -59,7 +77,7 @@ Cards use existing domain washes. Meaning is also in labels, not colour alone.
 
 Bottom: Home | Review. Home is a stub. Production Home unchanged.
 
-My Response: list + add with period or day provenance, inside Review.
+My Response: full list (active / archived) + add with period or day provenance, inside Review. All saved days is a Review panel, not a tab.
 
 ## Interaction model (Flutter-compatible)
 

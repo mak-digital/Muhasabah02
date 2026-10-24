@@ -41,7 +41,8 @@ void main() {
     );
     expect(
       kPracticeWealthCatalog.any(
-        (item) => item.sourceDetail.contains('Giving and zakat stay on Charity'),
+        (item) =>
+            item.sourceDetail.contains('Giving and zakat stay on Charity'),
       ),
       isTrue,
     );

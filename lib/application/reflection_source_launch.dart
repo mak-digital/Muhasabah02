@@ -3,8 +3,10 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../domain/reflection_source.dart';
 
-typedef ReflectionUrlLaunch =
-    Future<bool> Function(Uri uri, {required LaunchMode mode});
+typedef ReflectionUrlLaunch = Future<bool> Function(
+  Uri uri, {
+  required LaunchMode mode,
+});
 
 final reflectionUrlLaunchProvider = Provider<ReflectionUrlLaunch>((ref) {
   return (uri, {required mode}) => launchUrl(uri, mode: mode);
@@ -20,10 +22,7 @@ Future<bool> launchReflectionSource(
   return false;
 }
 
-Future<bool> launchReflectionUri(
-  Uri uri,
-  ReflectionUrlLaunch launch,
-) async {
+Future<bool> launchReflectionUri(Uri uri, ReflectionUrlLaunch launch) async {
   for (final mode in _launchModesFor(uri)) {
     try {
       if (await launch(uri, mode: mode)) return true;
@@ -41,8 +40,5 @@ List<LaunchMode> _launchModesFor(Uri uri) {
       LaunchMode.inAppBrowserView,
     ];
   }
-  return const [
-    LaunchMode.inAppBrowserView,
-    LaunchMode.externalApplication,
-  ];
+  return const [LaunchMode.inAppBrowserView, LaunchMode.externalApplication];
 }

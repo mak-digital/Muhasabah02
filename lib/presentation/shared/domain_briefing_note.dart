@@ -38,7 +38,9 @@ class DomainBriefingNote extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final body = compact ? theme.textTheme.bodySmall : theme.textTheme.bodyMedium;
+    final body = compact
+        ? theme.textTheme.bodySmall
+        : theme.textTheme.bodyMedium;
     final label = theme.textTheme.labelSmall?.copyWith(
       fontWeight: FontWeight.w600,
       color: theme.colorScheme.onSurfaceVariant,
@@ -68,7 +70,10 @@ class DomainBriefingNote extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(group.title, style: label?.copyWith(color: theme.colorScheme.onSurface)),
+                  Text(
+                    group.title,
+                    style: label?.copyWith(color: theme.colorScheme.onSurface),
+                  ),
                   const SizedBox(height: 6),
                   _bullets(group.items, body),
                 ],
@@ -103,7 +108,9 @@ class DomainBriefingNote extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text('•  ', style: style?.copyWith(height: 1.45)),
-                Expanded(child: Text(items[i], style: style?.copyWith(height: 1.45))),
+                Expanded(
+                  child: Text(items[i], style: style?.copyWith(height: 1.45)),
+                ),
               ],
             ),
           ),

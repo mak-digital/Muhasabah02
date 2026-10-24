@@ -39,7 +39,7 @@ Requirements:
 - No telemetry, ads, cloud AI, or remote analytics in core functionality.
 - Preserve a sound existing architecture when working in an established repository.
 - Date keys remain Gregorian `YYYY-MM-DD`. Settings → Preferences → Calendar may show Gregorian or civil Islamic (Hijri) dates without rewriting records.
-- Settings → Preferences → **Domains in Focus** may hide domains from Home, Review, and today’s check-in without deleting stored records. The first look is **Salah, Qur’an & Dhikr**: Salah & Prayer Quality, Qur’an Engagement, and Dhikr & Dua. Hadith & Living Sunnah, Character & Morals (Akhlaq), Rights of Others (Huquq al-Ibad), Charity, Knowledge & Beneficial Speech, Time & Barakah, Physical Health & Energy, Wealth & Stewardship, Ummah, and Fasting stay available there; they are not on that preset. **Hajj** stays listed on that screen so it can be found, but it is dormant for the time being: not selectable, not on All domains, and not on Home, Review, or today’s check-in. **Productivity** is selectable there (not on the first-look preset) and opens as a Home dashboard, not a new app rail. Saved Hajj records are not deleted. Stored All or custom sets are not rewritten, except Hajj is omitted from the working shown set while it is dormant. Sick visit, sick contact, and support under stress sit on Rights of Others as Care in hardship. Opt-in domains stay off that preset. When shown, they use the same full week matrices as the other domains (Hajj uses lifetime standing, not a daily week matrix). Check-in later bands start closed. The same screen holds **this season’s mix**: one saved set of domains, bands, and rows to notice. The mix is a subset of the domains shown on that screen (bands and rows). A domain or row that does not apply can stay unselected; saved records are not rewritten. It is not a score, a programme, or a second hide-list. Named starting points copy a set; Custom is the same mix after editing; Same as Domains follows visibility. Completing the first door sets **First season** (obligatory Salah, selected Qur’an Journey dimensions, and two Dhikr rows). Unset stored mix remains Same as Domains. Mix rows on a hidden domain are kept and appear on Home, Review, Progress, check-in, and Quick Tap only when that domain is shown. The mix does not rewrite records. Unanswered mix rows are not missed. The first screen is a three-sentence door (private recorder; empty is not missed; short first season). Application Reflection stays in Settings → About. Sample days are not auto-seeded; the door asks once (quiet week or sample days).
+- Settings → Preferences → **Domains in Focus** may hide domains from Home, Review, and today’s check-in without deleting stored records. The first look is **Salah, Qur’an & Dhikr**: Salah & Prayer Quality, Qur’an Engagement, and Dhikr & Dua. Hadith & Living Sunnah, Character & Morals (Akhlaq), Rights of Others (Huquq al-Ibad), Charity, and Fasting stay available there; they are not on that preset. **Knowledge & Beneficial Speech, Time & Barakah, Physical Health & Energy, Wealth & Stewardship, Ummah, Hajj, and Productivity** stay listed on that screen so they can be found, but they are dormant this season: not selectable, not on All domains, and not on Home, Review, or today’s check-in. Saved records in those domains are not deleted. Stored All or custom sets are not rewritten, except dormant domains are omitted from the working shown set. Sick visit, sick contact, and support under stress sit on Rights of Others as Care in hardship. Opt-in domains stay off that preset. When shown, they use the same full week matrices as the other domains (Hajj uses lifetime standing, not a daily week matrix). Check-in later bands start closed. The same screen holds **this season’s mix**: one saved set of domains, bands, and rows to notice. The mix is a subset of the domains shown on that screen (bands and rows). A domain or row that does not apply can stay unselected; saved records are not rewritten. It is not a score, a programme, or a second hide-list. Named starting points copy a set; Custom is the same mix after editing; Same as Domains follows visibility. Completing the first door sets **First season** (obligatory Salah, selected Qur’an Journey dimensions, and two Dhikr rows). Unset stored mix remains Same as Domains. Mix rows on a hidden domain are kept and appear on Home, Review, Progress, check-in, and Quick Tap only when that domain is shown. The mix does not rewrite records. Unanswered mix rows are not missed. The first screen is a three-sentence door (private recorder; empty is not missed; short first season). Application Reflection stays in Settings → About. Sample days are not auto-seeded; the door asks once (quiet week or sample days).
 - Prefer feature-oriented layers such as `domain/`, `data/`, `application/`, `presentation/` when compatible with the codebase.
 - Avoid new dependencies unless they materially reduce risk or complexity.
 
@@ -64,8 +64,14 @@ REVIEW
 ├── Progress details
 │   ├── Salah & Prayer Quality
 │   └── Qur’an Engagement
-├── Recorded days
-└── My Notes
+└── Recorded days
+
+REGISTRY
+├── Action Register (visible domains ∩ mix)
+├── Hadith Register (user practice list)
+├── Note to Developer (visible domains ∩ mix)
+├── My Notes (visible domains ∩ mix; GEN always shown)
+└── History (every saved check-in day)
 ```
 
 Evidence exploration may lead to Recorded Context, Recognition, supporting dates, Historical Reflection, and optional Response creation.
@@ -101,7 +107,7 @@ At minimum distinguish:
 
 Never infer `missed` from absence.
 
-Salah check-in uses a fixed activity list (congregation on time, joined congregation late, small congregation, alone on time, excused, prayed late, missed then made up, missed, no answer recorded, other). **Friday Prayer** is one Jumu‘ah row with that same list and Friday wording (for example prayed late (alone)); it is not a second “Friday congregation” field. **Tahajjud**, **Ishraq**, and **Salat At Tawbah** use their own five-choice lists (night timing / morning timing / turning-back extra / prayed / not prayed / not recorded), not the obligatory Salah list and not missed-red. Recording Salat At Tawbah is observational only: the app does not prescribe tawbah or treat a mark as completed tawbah. **Not Prayed** is a solid empty circle (the activity colour as the border, no fill). Settings → Preferences → **Activities & legend** may colour Salah, Jumu‘ah, Tahajjud, Ishraq, and Salat At Tawbah marks by that recorded choice, starting with congregation-on-time blue for the first option. Shared mark colour remains the default. Colour names the choice; it does not rank spirituality or prescribe a next step. Voluntary rows stay off the recordable-field count. Unanswered is not missed.
+Salah check-in uses a fixed activity list (congregation on time, joined congregation late, small congregation, alone on time, excused, prayed late, missed then made up, missed, no answer recorded, other). Settings → Preferences → **Salah list for me** may record Female, Male, Prefer not to say, or Not recorded (default). This only changes whether **Excused** appears on obligatory Salah and Jumu‘ah. It is not a ruling, a public profile, or a score. Not recorded and Prefer not to say keep Excused visible. Male hides Excused on those two lists (a stored Excused mark still displays until the day is edited). Excused remains recorded and is never treated as missed. Voluntary prayers are unchanged. **Friday Prayer** is one Jumu‘ah row with that same list and Friday wording (for example prayed late (alone)); it is not a second “Friday congregation” field. **Tahajjud**, **Ishraq**, and **Salat At Tawbah** use their own five-choice lists (night timing / morning timing / turning-back extra / prayed / not prayed / not recorded), not the obligatory Salah list and not missed-red. Recording Salat At Tawbah is observational only: the app does not prescribe tawbah or treat a mark as completed tawbah. **Not Prayed** is a solid empty circle (the activity colour as the border, no fill). Settings → Preferences → **Activities & legend** may colour Salah, Jumu‘ah, Tahajjud, Ishraq, and Salat At Tawbah marks by that recorded choice, starting with congregation-on-time blue for the first option. Shared mark colour remains the default. Colour names the choice; it does not rank spirituality or prescribe a next step. Voluntary rows stay off the recordable-field count. Unanswered is not missed.
 
 Do not record or score presence of heart as a grade.
 
@@ -164,7 +170,7 @@ Four observational rows under one **ENGAGED with Hadith** wash. Older eight-row 
 
 Duration rows twin Qur’an sitting marks (including 3–5 minutes as an empty light-green circle when activity colours are on). Lived / Noticed is one observation, not a revival programme. Unanswered is not a failed revival.
 
-Home and **7-day Progress** show those items as rows and weekdays as columns (same orientation as Dhikr and Akhlaq). 30-day and 90-day stay one calendar per row. **Hadith to learn & practice** is a collapsed Home wash (same shape as listed actions): previous/next through a built-in catalog of daily-practice hadith and related supplications, + add Hadith copies the shown item into a private register (date added, source, content, topic, Learning / Learnt / Practicing / Living it, select and delete). A catalog item already in the register is shown with a different wash and cannot be added again. This is not a checklist, score, or revival programme, and it does not fill Living Sunnah.
+Home and **7-day Progress** show those items as rows and weekdays as columns (same orientation as Dhikr and Akhlaq). 30-day and 90-day stay one calendar per row. **Hadith to learn & practice** is a collapsed Home wash (same shape as listed actions): previous/next through a built-in catalog of daily-practice hadith and related supplications, + add Hadith copies the shown item into a private register (date added, source, content, topic, Learning / Learnt / Practicing / Living it, select, archive, and delete the private copy). Archive never removes the built-in catalog item; matching Home daily/weekly reflections are skipped when another quote is available. A catalog item already in the register is shown with a different wash and cannot be added again. This is not a checklist, score, or revival programme, and it does not fill Living Sunnah.
 
 Do not:
 
@@ -422,7 +428,7 @@ Presentation order places Fasting immediately after Dhikr & Dua. Stored domain i
 Two Home sections:
 
 - **Ramadan fasting & excellence** (civil Hijri month 9, with a ±1 day moon-sighting offset in Settings → Calendar): Observed the Ramadan fast; Guarded my speech and conduct; Protected attention and time; Engaged meaningfully with the Qur’an; Brought greater attention to obligatory Salah; Made room for extra worship; Supported worship through balanced daily habits; Put Ramadan learning into practice. These eight rows are hidden outside Ramadan unless Settings → Calendar → Show all Fasting rows for review is on, or that day already has a Ramadan mark.
-- **Voluntary and make-up**: Weekly Sunnah Fast; White Days (Ayyam Al-Bid); Make-up Fast; Ramadan Preparation; Post-Ramadan Activities. These five rows are hidden during Ramadan unless that review switch is on, or that day already has a voluntary or make-up mark. Weekly sunnah, White Days, and make-up keep existing storage keys and ternary noticing. Preparation and post-Ramadan use item-specific observations. An actual make-up stays on Make-up Fast; post-Ramadan may note Shawwal planning only.
+- **Voluntary and make-up**: Weekly Sunnah Fast; White Days (Ayyam Al-Bid); Make-up Fast; Ramadan Preparation; Post-Ramadan Activities. These five rows are hidden during Ramadan unless that review switch is on, or that day already has a voluntary or make-up mark. Weekly sunnah, White Days, and make-up keep existing storage keys and use item-specific fasting-day observations (completed, still fasting, could not because of health/travel/duties, interrupted, intended but did not, no situation for that row, prefer not to record, unanswered/`null`). Preparation and post-Ramadan also use item-specific observations. A voluntary fast is recorded on Weekly Sunnah or White Days, not on Preparation. An actual make-up stays on Make-up Fast; post-Ramadan may note a Shawwal or other voluntary fast, or make-up planning only. Older ternary weekly/White Day/make-up days are not rewritten; until edited, the picker shows unanswered rather than assuming a completed fast.
 
 Ramadan and catalog rows default to not recorded/`null`, with a separate prefer not to record state. The app does not judge validity, exemption, make-up, or fidyah. Exemption is not failure. “Fasting today” is not auto-completed after iftar. Unanswered is not a missed fast.
 
@@ -438,7 +444,7 @@ A Hajj journey is optional and separately stored. Hajj Home is a lifetime planni
 
 Home also lists **Hajj Learn & Practice** at all times, independent of standing or journey: Qur’an verses and authentic hadith grouped as Learn, Readiness, and After Hajj, collapsed to title, with citation pages and a private register (Learning, Learnt, Practicing, Habit). A separate readiness-learning list (conditions, rites, Ihram, Tawaf and Sa‘i, Arafat/Muzdalifah/Mina, practical care, safety, du‘a) uses self-reported states only. It is not a due-date, countdown, or trophy.
 
-Productivity is a selectable Home domain (off on Salah, Qur’an & Dhikr). It uses its own store (`muhasabah_productivity_v1`, schema 1), not a DailyCheckIn field. Home shows one dashboard: a user-chosen 1–5 of today’s focus (hard cap 5), effort vs plan (not a score), carry-forward of unfinished work, and a Master List that copies open listed-actions from other domains into the Productivity register. Extra Productivity items stay in that register and are not shown on the today board. Tablet layout (≥ 720 lp) keeps hours and status on the card body and a side column for calendar, time, notice, quick add, and the priority guide. Hajj stays independent and dormant. Learn & Practice is not part of this domain.
+Productivity is dormant this season (listed in Domains in Focus, not selectable). It uses its own store (`muhasabah_productivity_v1`, schema 1), not a DailyCheckIn field. When later re-enabled it is off on Salah, Qur’an & Dhikr. Home shows one dashboard: a user-chosen 1–5 of today’s focus (hard cap 5), effort vs plan (not a score), carry-forward of unfinished work, and a Master List that copies open listed-actions from other domains into the Productivity register. Extra Productivity items stay in that register and are not shown on the today board. Tablet layout (≥ 720 lp) keeps hours and status on the card body and a side column for calendar, time, notice, quick add, and the priority guide. Hajj stays independent and dormant. Learn & Practice is not part of this domain.
 
 ### 4.14 Charity
 
@@ -454,12 +460,12 @@ Home also lists **Charity Learn & Practice**: Qur’an verses and authentic hadi
 
 ### 4.15 Other established domains
 
-If present in an existing implementation, retain factual recording for domains such as:
+If present in an existing implementation, retain factual recording for stored fields such as:
 
 - gratitude
 - personal reflection
 
-Do not remove valid established domains merely because Progress emphasizes Salah and Qur’an.
+Do not present those as check-in editors. A check-in may open **Add a Note**, which saves to My Notes with that day’s provenance. Stored DailyCheckIn gratitude, personal reflection, dhikr-other, and context-note values stay as they are; saving a check-in must not wipe them. Do not remove valid established stored fields merely because Progress emphasizes Salah and Qur’an.
 
 ### 4.16 Persistence boundary
 
@@ -710,7 +716,7 @@ Definition:
 
 Visible wording:
 
-- Destination: `My Notes`
+- Destination: Registry → `My Notes`
 - Description: `A private, optional place to write a note, question, or something you want to keep in mind.`
 - CTA: `+ Add a Note`
 - Creation prompt: `What, if anything, would you like to note or keep in mind?`
@@ -866,7 +872,7 @@ Use a coherent design system with:
 - domain accents
 - recorded-state styles
 - selected-state styles
-- light/dark theme equivalents
+- light/dark theme equivalents, plus named Warm paper, Quiet slate, and Midnight looks (paper and chrome only; not a score; Salah activity colours stay observational)
 - consistent interaction states
 
 Prefer:

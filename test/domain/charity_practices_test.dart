@@ -17,7 +17,8 @@ void main() {
       'charity.financialStress',
     ]);
     expect(
-      ActivityCatalog.forHomeTrace('charity.voluntary').map((item) => item.label),
+      ActivityCatalog.forHomeTrace('charity.voluntary')
+          .map((item) => item.label),
       [
         'Not recorded',
         'Gave voluntary charity',
@@ -57,10 +58,8 @@ void main() {
   });
 
   test('legacy noticed without an activity id is not remapped', () {
-    final legacy = DailyCheckIn.empty('2026-10-17').withHomeTrace(
-      'charity.voluntary',
-      TernaryOutcome.positive,
-    );
+    final legacy = DailyCheckIn.empty('2026-10-17')
+        .withHomeTrace('charity.voluntary', TernaryOutcome.positive);
     expect(legacy.activityFor('charity.voluntary').id, ActivityIds.unanswered);
   });
 

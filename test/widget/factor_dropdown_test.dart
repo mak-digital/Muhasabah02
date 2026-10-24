@@ -42,7 +42,7 @@ void main() {
     await chooseCheckInOption(
       tester,
       dropdownKey: const Key('salah-fajr'),
-      optionLabel: 'Prayed alone on time',
+      optionLabel: 'Alone on time',
     );
     expect(find.text('HELPING FACTORS'), findsOneWidget);
     expect(find.text('DISTRACTING FACTORS'), findsNothing);
@@ -106,7 +106,7 @@ void main() {
     await chooseCheckInOption(
       tester,
       dropdownKey: const Key('quran-reading'),
-      optionLabel: 'Engaged 5–10 minutes — Engagement',
+      optionLabel: 'Engaged 5–10 mins',
     );
     expect(find.text('HELPING FACTORS'), findsOneWidget);
     expect(find.text('DISTRACTING FACTORS'), findsNothing);
@@ -114,7 +114,7 @@ void main() {
     await chooseCheckInOption(
       tester,
       dropdownKey: const Key('quran-reading'),
-      optionLabel: 'I did not notice this today — Engagement',
+      optionLabel: 'Did not notice',
     );
     expect(find.text('HELPING FACTORS'), findsNothing);
     expect(find.text('DISTRACTING FACTORS'), findsOneWidget);
@@ -122,7 +122,7 @@ void main() {
     await chooseCheckInOption(
       tester,
       dropdownKey: const Key('quran-reading'),
-      optionLabel: 'No answer recorded — Engagement',
+      optionLabel: 'No answer recorded',
     );
     expect(find.text('HELPING FACTORS'), findsNothing);
     expect(find.text('DISTRACTING FACTORS'), findsNothing);
@@ -130,7 +130,7 @@ void main() {
     await chooseCheckInOption(
       tester,
       dropdownKey: const Key('quran-reading'),
-      optionLabel: 'Engaged 5–10 minutes — Engagement',
+      optionLabel: 'Engaged 5–10 mins',
     );
     final readingChoice = tester.getTopLeft(
       find.byKey(const Key('quran-reading')),
@@ -169,7 +169,7 @@ void main() {
     await chooseCheckInOption(
       tester,
       dropdownKey: const Key('salah-dhuhr'),
-      optionLabel: 'Prayed alone on time',
+      optionLabel: 'Alone on time',
     );
     await tester.tap(find.byKey(const Key('salah-dhuhr-helping')));
     await tester.pumpAndSettle();
@@ -212,7 +212,7 @@ void main() {
     await chooseCheckInOption(
       tester,
       dropdownKey: const Key('trace-charity.voluntary'),
-      optionLabel: 'Gave voluntary charity',
+      optionLabel: 'Did this',
     );
     expect(
       find.text('Gave voluntary charity — Voluntary Charity'),
@@ -291,7 +291,7 @@ void main() {
     await chooseCheckInOption(
       tester,
       dropdownKey: const Key('trace-akhlaq.patience'),
-      optionLabel: 'Remained patient when tested',
+      optionLabel: 'Did this',
     );
     expect(
       find.text(Copy.akhlaqWhereDidItHappen.toUpperCase()),
@@ -346,10 +346,7 @@ void main() {
       find.byKey(const Key('trace-akhlaq.honestyInSmallMatters')),
     );
     await tester.pumpAndSettle();
-    expect(
-      find.text('Acted honestly even in a small matter').hitTestable(),
-      findsOneWidget,
-    );
+    expect(find.text('Did this').hitTestable(), findsOneWidget);
     expect(
       find.text(
         'Acted honestly even in a small matter — Honesty in small matters',
@@ -357,9 +354,7 @@ void main() {
       findsNothing,
     );
     expect(find.text('Unanswered — Honesty in small matters'), findsNothing);
-    await tester.tap(
-      find.text('Acted honestly even in a small matter').hitTestable(),
-    );
+    await tester.tap(find.text('Did this').hitTestable());
     await tester.pumpAndSettle();
   });
 
@@ -397,7 +392,7 @@ void main() {
     await chooseCheckInOption(
       tester,
       dropdownKey: const Key('trace-huquq.parents'),
-      optionLabel: 'Honoured my parents through care, respect, contact or du‘a — Parents',
+      optionLabel: 'Did this',
     );
     expect(
       find.text(Copy.huquqNatureOfEngagement.toUpperCase()),
@@ -447,7 +442,7 @@ void main() {
     await chooseCheckInOption(
       tester,
       dropdownKey: const Key('trace-knowledge.learnedSomethingTrue'),
-      optionLabel: 'Learned something new and verified its reliability — Learned something true',
+      optionLabel: 'Did this',
     );
     expect(
       find.text(Copy.knowledgeTypeOfKnowledge.toUpperCase()),
@@ -502,7 +497,7 @@ void main() {
     await chooseCheckInOption(
       tester,
       dropdownKey: const Key('trace-time.t01'),
-      optionLabel: 'Began an activity with a clear beneficial intention — Began with a worthwhile intention',
+      optionLabel: 'Did this',
     );
     expect(find.text(Copy.timeActivityContext.toUpperCase()), findsOneWidget);
     expect(find.text(Copy.timeMainChallenge.toUpperCase()), findsOneWidget);
@@ -550,8 +545,7 @@ void main() {
     await chooseCheckInOption(
       tester,
       dropdownKey: const Key('trace-health.sleepQuality'),
-      optionLabel:
-          'I slept well and felt reasonably refreshed. — Sleep quality',
+      optionLabel: 'Did this',
     );
     expect(find.text('PRIVATE REFLECTION'), findsNothing);
     expect(find.text('HELPING FACTORS'), findsNothing);
@@ -592,7 +586,7 @@ void main() {
     await chooseCheckInOption(
       tester,
       dropdownKey: const Key('trace-wealth.halalEarning'),
-      optionLabel: 'My income or work today came from a source I reasonably understand to be lawful. — Earned from a halal source',
+      optionLabel: 'Did this',
     );
     expect(find.text('PRIVATE REFLECTION'), findsNothing);
     expect(find.text('HELPING FACTORS'), findsNothing);
@@ -636,7 +630,7 @@ void main() {
     await chooseCheckInOption(
       tester,
       dropdownKey: const Key('trace-ummah.masjidAttendance'),
-      optionLabel: 'I participated remotely in a masjid-led learning or community gathering. — Masjid class or gathering (not the fard)',
+      optionLabel: 'Tried, incomplete',
     );
     expect(find.text('PRIVATE REFLECTION'), findsNothing);
     expect(find.text('HELPING FACTORS'), findsNothing);

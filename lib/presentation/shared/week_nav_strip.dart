@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 
+import '../../app/theme.dart';
 import '../../domain/copy.dart';
 
-Color weekNavStripWash(Color family, Color cardWash) {
-  return Color.alphaBlend(family.withValues(alpha: 0.22), cardWash);
+Color weekNavStripWash(Color family, Color cardWash, [BuildContext? context]) {
+  final ink = MuhasabahWashTheme.harmonizeFamilyOf(context, family);
+  return Color.alphaBlend(ink.withValues(alpha: 0.22), cardWash);
 }
 
 /// Stronger shade of the same family, used only on band headings.
-Color bandHeadingWash(Color family, Color base) {
-  return Color.alphaBlend(family.withValues(alpha: 0.32), base);
+Color bandHeadingWash(Color family, Color base, [BuildContext? context]) {
+  final ink = MuhasabahWashTheme.harmonizeFamilyOf(context, family);
+  return Color.alphaBlend(ink.withValues(alpha: 0.32), base);
 }
 
 class WeekNavStrip extends StatelessWidget {
@@ -60,6 +63,7 @@ class WeekNavStrip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final family = MuhasabahWashTheme.harmonizeFamilyOf(context, this.family);
     final labelStyle =
         (prominentLabel
                 ? theme.textTheme.titleLarge
@@ -125,6 +129,7 @@ class WeekNavStrip extends StatelessWidget {
             key: previousKey,
             icon: Icons.chevron_left_rounded,
             tooltip: previousTooltip,
+            family: family,
             onPressed: previousEnabled ? onPrevious : null,
           ),
           Expanded(
@@ -143,6 +148,7 @@ class WeekNavStrip extends StatelessWidget {
             key: nextKey,
             icon: Icons.chevron_right_rounded,
             tooltip: nextTooltip,
+            family: family,
             onPressed: nextEnabled ? onNext : null,
           ),
         ],
@@ -161,6 +167,7 @@ class WeekNavStrip extends StatelessWidget {
     required Key? key,
     required IconData icon,
     required String tooltip,
+    required Color family,
     required VoidCallback? onPressed,
   }) {
     final size = compact ? 32.0 : 40.0;
@@ -213,6 +220,7 @@ class HomeWeekChrome extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final family = MuhasabahWashTheme.harmonizeFamilyOf(context, this.family);
     final titleBlock = Column(
       children: [
         Text(
@@ -258,8 +266,8 @@ class HomeWeekChrome extends StatelessWidget {
         const SizedBox(height: 6),
         WeekNavStrip(
           label: weekLabel,
-          family: family,
-          wash: weekNavStripWash(family, cardWash),
+          family: this.family,
+          wash: weekNavStripWash(this.family, cardWash, context),
           onPrevious: onPreviousWeek,
           onNext: onNextWeek,
           nextEnabled: nextWeekEnabled,
@@ -290,6 +298,7 @@ class CurrentWeekGutter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final family = MuhasabahWashTheme.harmonizeFamilyOf(context, this.family);
     final ink = enabled ? family : family.withValues(alpha: 0.45);
     return SizedBox(
       width: width,
@@ -297,7 +306,7 @@ class CurrentWeekGutter extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.only(right: 4),
         child: Material(
-          color: weekNavStripWash(family, cardWash),
+          color: weekNavStripWash(this.family, cardWash, context),
           borderRadius: BorderRadius.circular(8),
           clipBehavior: Clip.hardEdge,
           child: GestureDetector(

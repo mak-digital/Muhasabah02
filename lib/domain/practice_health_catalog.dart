@@ -33,12 +33,9 @@ final List<PracticeDhikrItem> kPracticeHealthCatalog = [
     group: kHealthGroupSleep,
     topic: 'Sleep quality',
     text: 'Sleep itself is named among His signs:',
-    arabic:
-        'وَمِنْ آيَاتِهِ مَنَامُكُم بِاللَّيْلِ وَالنَّهَارِ وَابْتِغَاؤُكُم مِّن فَضْلِهِ',
-    transliteration:
-        'Wa-min āyātihi manāmukum bi-l-layli wa-n-nahāri wa-btighāʾukum min faḍlih.',
-    translation:
-        'And of His signs is your sleep by night and day, and your seeking of His bounty.',
+    arabic: 'وَمِنْ آيَاتِهِ مَنَامُكُم بِاللَّيْلِ وَالنَّهَارِ وَابْتِغَاؤُكُم مِّن فَضْلِهِ',
+    transliteration: 'Wa-min āyātihi manāmukum bi-l-layli wa-n-nahāri wa-btighāʾukum min faḍlih.',
+    translation: 'And of His signs is your sleep by night and day, and your seeking of His bounty.',
     source: 'Qur’an 30:23',
     detail: 'A sign, not a sleep-score. Indirect to how the rest felt.',
   ),
@@ -53,7 +50,8 @@ final List<PracticeDhikrItem> kPracticeHealthCatalog = [
     translation:
         'Then He sent down upon you, after the distress, security — a slumber.',
     source: 'Qur’an 3:154',
-    detail: 'Indirect: calm rest as a mercy. Not a grade of how deeply you slept.',
+    detail:
+        'Indirect: calm rest as a mercy. Not a grade of how deeply you slept.',
   ),
   _item(
     id: 'hl.sleep.quality.8_11',
@@ -97,12 +95,10 @@ final List<PracticeDhikrItem> kPracticeHealthCatalog = [
     group: kHealthGroupSleep,
     topic: 'Sleep amount',
     text: 'Night and day made so you may rest therein:',
-    arabic:
-        'وَمِن رَّحْمَتِهِ جَعَلَ لَكُمُ اللَّيْلَ وَالنَّهَارَ لِتَسْكُنُوا فِيهِ',
+    arabic: 'وَمِن رَّحْمَتِهِ جَعَلَ لَكُمُ اللَّيْلَ وَالنَّهَارَ لِتَسْكُنُوا فِيهِ',
     transliteration:
         'Wa-min raḥmatihi jaʿala lakumu l-layla wa-n-nahāra li-taskunū fīh.',
-    translation:
-        'And of His mercy He made for you the night and the day, that you may rest therein.',
+    translation: 'And of His mercy He made for you the night and the day, that you may rest therein.',
     source: 'Qur’an 28:73',
     detail: 'Indirect: rest has a share of the day. Not a timetable.',
   ),
@@ -113,7 +109,8 @@ final List<PracticeDhikrItem> kPracticeHealthCatalog = [
     text: 'The night made so you may rest in it:',
     arabic: 'اللَّهُ الَّذِي جَعَلَ لَكُمُ اللَّيْلَ لِتَسْكُنُوا فِيهِ',
     transliteration: 'Allāhu lladhī jaʿala lakumu l-layla li-taskunū fīh.',
-    translation: 'Allah is He who made for you the night that you may rest therein.',
+    translation:
+        'Allah is He who made for you the night that you may rest therein.',
     source: 'Qur’an 40:61',
     detail: 'Rest in the night, not an hour badge.',
   ),
@@ -122,12 +119,9 @@ final List<PracticeDhikrItem> kPracticeHealthCatalog = [
     group: kHealthGroupSleep,
     topic: 'Sleep amount',
     text: 'Night for rest, day for seeing:',
-    arabic:
-        'هُوَ الَّذِي جَعَلَ لَكُمُ اللَّيْلَ لِتَسْكُنُوا فِيهِ وَالنَّهَارَ مُبْصِرًا',
-    transliteration:
-        'Huwa lladhī jaʿala lakumu l-layla li-taskunū fīhi wa-n-nahāra mubṣirā.',
-    translation:
-        'He is the One who made the night for you to rest in, and the day sight-giving.',
+    arabic: 'هُوَ الَّذِي جَعَلَ لَكُمُ اللَّيْلَ لِتَسْكُنُوا فِيهِ وَالنَّهَارَ مُبْصِرًا',
+    transliteration: 'Huwa lladhī jaʿala lakumu l-layla li-taskunū fīhi wa-n-nahāra mubṣirā.',
+    translation: 'He is the One who made the night for you to rest in, and the day sight-giving.',
     source: 'Qur’an 10:67',
     detail: 'Indirect balance of rest and work. Not Time & Barakah’s needed rest row.',
   ),
@@ -140,7 +134,8 @@ final List<PracticeDhikrItem> kPracticeHealthCatalog = [
     transliteration: 'Inna li-jasadika ʿalayka ḥaqqā.',
     translation: 'Your body has a right over you.',
     source: 'Ṣaḥīḥ al-Bukhārī 1975',
-    detail: 'A right of rest, not a sleep-hour target or a failing of the body.',
+    detail:
+        'A right of rest, not a sleep-hour target or a failing of the body.',
   ),
   _item(
     id: 'hl.strength.movement',
@@ -158,12 +153,9 @@ final List<PracticeDhikrItem> kPracticeHealthCatalog = [
     group: kHealthGroupStrength,
     topic: 'Movement for worship and service',
     text: 'Bow, prostrate, worship, and do good:',
-    arabic:
-        'يَا أَيُّهَا الَّذِينَ آمَنُوا ارْكَعُوا وَاسْجُدُوا وَاعْبُدُوا رَبَّكُمْ وَافْعَلُوا الْخَيْرَ',
-    transliteration:
-        'Yā ayyuhā lladhīna āmanū rkaʿū wa-sjudū wa-ʿbudū rabbakum wa-fʿalū l-khayr.',
-    translation:
-        'O you who believe, bow and prostrate and worship your Lord, and do good.',
+    arabic: 'يَا أَيُّهَا الَّذِينَ آمَنُوا ارْكَعُوا وَاسْجُدُوا وَاعْبُدُوا رَبَّكُمْ وَافْعَلُوا الْخَيْرَ',
+    transliteration: 'Yā ayyuhā lladhīna āmanū rkaʿū wa-sjudū wa-ʿbudū rabbakum wa-fʿalū l-khayr.',
+    translation: 'O you who believe, bow and prostrate and worship your Lord, and do good.',
     source: 'Qur’an 22:77',
     detail: 'Movement in worship and service. Not a gym score.',
   ),
@@ -172,12 +164,9 @@ final List<PracticeDhikrItem> kPracticeHealthCatalog = [
     group: kHealthGroupStrength,
     topic: 'Movement for worship and service',
     text: 'The Messenger of Allah ﷺ said:',
-    arabic:
-        'مَنْ غَدَا إِلَى الْمَسْجِدِ أَوْ رَاحَ، أَعَدَّ اللَّهُ لَهُ نُزُلَهُ مِنَ الْجَنَّةِ كُلَّمَا غَدَا أَوْ رَاحَ',
-    transliteration:
-        'Man ghadā ilā l-masjidi aw rāḥa, aʿadda Allāhu lahu nuzulahu mina l-jannati kullamā ghadā aw rāḥ.',
-    translation:
-        'Whoever goes to the mosque in the morning or the evening, Allah prepares for him a lodging in Paradise whenever he goes.',
+    arabic: 'مَنْ غَدَا إِلَى الْمَسْجِدِ أَوْ رَاحَ، أَعَدَّ اللَّهُ لَهُ نُزُلَهُ مِنَ الْجَنَّةِ كُلَّمَا غَدَا أَوْ رَاحَ',
+    transliteration: 'Man ghadā ilā l-masjidi aw rāḥa, aʿadda Allāhu lahu nuzulahu mina l-jannati kullamā ghadā aw rāḥ.',
+    translation: 'Whoever goes to the mosque in the morning or the evening, Allah prepares for him a lodging in Paradise whenever he goes.',
     source: 'Ṣaḥīḥ al-Bukhārī 662',
     detail: 'Indirect: walking as worship. Not a step-count.',
   ),
@@ -219,11 +208,9 @@ final List<PracticeDhikrItem> kPracticeHealthCatalog = [
     group: kHealthGroupStrength,
     topic: 'Energy for ibadah',
     text: 'The Messenger of Allah ﷺ said:',
-    arabic:
-        'أَحَبُّ الْأَعْمَالِ إِلَى اللَّهِ أَدْوَمُهَا وَإِنْ قَلَّ',
+    arabic: 'أَحَبُّ الْأَعْمَالِ إِلَى اللَّهِ أَدْوَمُهَا وَإِنْ قَلَّ',
     transliteration: 'Aḥabbu l-aʿmāli ilā Allāhi adwamuhā wa-in qall.',
-    translation:
-        'The most beloved of deeds to Allah are the most regular, even if they are few.',
+    translation: 'The most beloved of deeds to Allah are the most regular, even if they are few.',
     source: 'Ṣaḥīḥ al-Bukhārī 6465',
     detail: 'Steady capacity, not a burst of energy as a score.',
   ),
@@ -277,10 +264,10 @@ final List<PracticeDhikrItem> kPracticeHealthCatalog = [
     group: kHealthGroupSustenance,
     topic: 'Nutrition',
     text: 'The Messenger of Allah ﷺ said:',
-    arabic:
-        'مَا مَلَأَ آدَمِيٌّ وِعَاءً شَرًّا مِنْ بَطْنٍ',
+    arabic: 'مَا مَلَأَ آدَمِيٌّ وِعَاءً شَرًّا مِنْ بَطْنٍ',
     transliteration: 'Mā malaʾa ādamiyyun wiʿāʾan sharran min baṭn.',
-    translation: 'A human being does not fill any vessel worse than the stomach.',
+    translation:
+        'A human being does not fill any vessel worse than the stomach.',
     source: 'Sunan al-Tirmidhī 2380',
     detail: 'Enough to stand, not a weight or calorie log.',
   ),
@@ -300,8 +287,7 @@ final List<PracticeDhikrItem> kPracticeHealthCatalog = [
     group: kHealthGroupSustenance,
     topic: 'Hydration',
     text: 'Water from the sky for you to drink:',
-    arabic:
-        'هُوَ الَّذِي أَنزَلَ مِنَ السَّمَاءِ مَاءً لَّكُم مِّنْهُ شَرَابٌ',
+    arabic: 'هُوَ الَّذِي أَنزَلَ مِنَ السَّمَاءِ مَاءً لَّكُم مِّنْهُ شَرَابٌ',
     transliteration:
         'Huwa lladhī anzala mina s-samāʾi māʾan lakum minhu sharāb.',
     translation:
@@ -358,8 +344,7 @@ final List<PracticeDhikrItem> kPracticeHealthCatalog = [
     group: kHealthGroupIllness,
     topic: 'Sought care in illness',
     text: 'The Messenger of Allah ﷺ said:',
-    arabic:
-        'مَا أَنزَلَ اللَّهُ دَاءً إِلَّا أَنزَلَ لَهُ شِفَاءً',
+    arabic: 'مَا أَنزَلَ اللَّهُ دَاءً إِلَّا أَنزَلَ لَهُ شِفَاءً',
     transliteration: 'Mā anzala Allāhu dāʾan illā anzala lahu shifāʾ.',
     translation: 'Allah has not sent down a disease except that He has also sent down its cure.',
     source: 'Ṣaḥīḥ al-Bukhārī 5678',
@@ -414,12 +399,9 @@ final List<PracticeDhikrItem> kPracticeHealthCatalog = [
     group: kHealthGroupIllness,
     topic: 'Avoided a harm to the body',
     text: 'Intoxicants and gambling are defilement:',
-    arabic:
-        'إِنَّمَا الْخَمْرُ وَالْمَيْسِرُ وَالْأَنصَابُ وَالْأَزْلَامُ رِجْسٌ مِّنْ عَمَلِ الشَّيْطَانِ فَاجْتَنِبُوهُ',
-    transliteration:
-        'Innamā l-khamru wa-l-maysiru wa-l-anṣābu wa-l-azlāmu rijsun min ʿamali sh-shayṭāni fa-jtanibūh.',
-    translation:
-        'Intoxicants, gambling, stone altars, and divining arrows are defilement from the work of Satan, so avoid them.',
+    arabic: 'إِنَّمَا الْخَمْرُ وَالْمَيْسِرُ وَالْأَنصَابُ وَالْأَزْلَامُ رِجْسٌ مِّنْ عَمَلِ الشَّيْطَانِ فَاجْتَنِبُوهُ',
+    transliteration: 'Innamā l-khamru wa-l-maysiru wa-l-anṣābu wa-l-azlāmu rijsun min ʿamali sh-shayṭāni fa-jtanibūh.',
+    translation: 'Intoxicants, gambling, stone altars, and divining arrows are defilement from the work of Satan, so avoid them.',
     source: 'Qur’an 5:90',
     detail: 'Indirect: a harm you kept from the body. Not a public confession.',
   ),

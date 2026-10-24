@@ -85,10 +85,11 @@ class _WeekMatrixBoardState extends ConsumerState<WeekMatrixBoard> {
     final canGoNext = !weekStart.isAfter(today);
     final compact = !widget.itemAsRows && widget.columns.length <= 2;
     final theme = Theme.of(context);
+    final family = MuhasabahWashTheme.harmonizeFamilyOf(context, widget.family);
     final cardWash =
         widget.wash ??
         Color.alphaBlend(
-          widget.family.withValues(alpha: 0.16),
+          family.withValues(alpha: 0.16),
           theme.colorScheme.surface,
         );
     final table = widget.itemAsRows
@@ -126,7 +127,7 @@ class _WeekMatrixBoardState extends ConsumerState<WeekMatrixBoard> {
               label: displayHomeBand(widget.title),
               subtitle: weekRangeLabel(weekStart, calendar: calendar),
               family: widget.family,
-              wash: bandHeadingWash(widget.family, cardWash),
+              wash: bandHeadingWash(widget.family, cardWash, context),
               previousKey: Key('week-matrix-prev-${widget.title}'),
               nextKey: Key('week-matrix-next-${widget.title}'),
               previousTooltip: 'Previous period',
@@ -263,6 +264,7 @@ class _WeekMatrixBoardState extends ConsumerState<WeekMatrixBoard> {
                       MuhasabahColors.lunarWhiteDayInk,
                       MuhasabahColors.lunarWhiteDayInkDark,
                       Theme.of(context).brightness,
+                      context,
                     )
                   : Theme.of(context).colorScheme.onSurfaceVariant,
             ),
@@ -310,6 +312,7 @@ class _WeekMatrixBoardState extends ConsumerState<WeekMatrixBoard> {
                       MuhasabahColors.lunarWhiteDayInk,
                       MuhasabahColors.lunarWhiteDayInkDark,
                       Theme.of(context).brightness,
+                      context,
                     )
                   : Theme.of(context).colorScheme.onSurfaceVariant,
             ),
@@ -469,7 +472,11 @@ class _HomeStyleWeekMatrixState extends ConsumerState<HomeStyleWeekMatrix> {
         WeekNavStrip(
           label: weekRangeLabel(weekStart, calendar: calendar),
           family: widget.family,
-          wash: weekNavStripWash(widget.family, theme.colorScheme.surface),
+          wash: weekNavStripWash(
+            widget.family,
+            theme.colorScheme.surface,
+            context,
+          ),
           previousKey: Key('week-matrix-prev-${widget.navId}'),
           nextKey: Key('week-matrix-next-${widget.navId}'),
           previousTooltip: 'Previous period',
@@ -543,6 +550,7 @@ class _HomeStyleWeekMatrixState extends ConsumerState<HomeStyleWeekMatrix> {
                     MuhasabahColors.lunarWhiteDayInk,
                     MuhasabahColors.lunarWhiteDayInkDark,
                     Theme.of(context).brightness,
+                    context,
                   )
                 : Theme.of(context).colorScheme.onSurfaceVariant,
           ),
@@ -562,7 +570,8 @@ class _HomeStyleWeekMatrixState extends ConsumerState<HomeStyleWeekMatrix> {
     required List<String> dateKeys,
     required DateTime now,
   }) {
-    final bandWash = widget.family.withValues(alpha: 0.12);
+    final family = MuhasabahWashTheme.harmonizeFamilyOf(context, widget.family);
+    final bandWash = family.withValues(alpha: 0.12);
     return DecoratedBox(
       decoration: BoxDecoration(
         color: bandWash,

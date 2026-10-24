@@ -60,11 +60,12 @@ class TodayDomainWorkspacePage extends ConsumerWidget {
       }
     }
     final identity = domainColorIdentity(domain);
+    final family = identity.familyFor(context);
     final title = todayDomainLabel(domain);
     final weekday = weekdayNameForDate(workspace.dateKey);
     final dateLine = formatDayMonthYear(now, prefs.displayCalendar);
     final theme = Theme.of(context);
-    final wash = identity.washFor(theme.brightness);
+    final wash = identity.washFor(theme.brightness, context);
     return Scaffold(
       key: Key('today-workspace-${domain.id}'),
       appBar: AppBar(title: const SizedBox.shrink()),
@@ -78,7 +79,7 @@ class TodayDomainWorkspacePage extends ConsumerWidget {
               child: Row(
                 children: [
                   ColoredBox(
-                    color: identity.family,
+                    color: family,
                     child: const SizedBox(width: 4, height: 36),
                   ),
                   const SizedBox(width: 12),
@@ -230,7 +231,7 @@ class _TodayWorkspaceRow extends StatelessWidget {
     final theme = Theme.of(context);
     final label = todayRowLabel(row);
     final caption = compact ? Copy.todayRecorded : Copy.todayNoResponseYet;
-    final identity = domainColorIdentity(row.domain);
+    final family = domainColorIdentity(row.domain).familyFor(context);
     final spoken = compact
         ? '$label, response recorded'
         : '$label, no response yet';
@@ -252,7 +253,7 @@ class _TodayWorkspaceRow extends StatelessWidget {
                 children: [
                   RecordedStateMarker(
                     key: Key('today-row-marker-${row.mixId}'),
-                    color: identity.family,
+                    color: family,
                     kind: MarkerKind.filled,
                     semanticLabel: caption,
                     size: 18,
@@ -301,7 +302,7 @@ class _TodayWorkspaceRow extends StatelessWidget {
                   ),
                   RecordedStateMarker(
                     key: Key('today-row-marker-${row.mixId}'),
-                    color: identity.family,
+                    color: family,
                     kind: MarkerKind.outlined,
                     semanticLabel: caption,
                     size: 18,

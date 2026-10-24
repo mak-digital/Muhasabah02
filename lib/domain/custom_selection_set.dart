@@ -105,11 +105,7 @@ CustomSlotStatus customSlotStatus({
   required PersonalMix workingMix,
 }) {
   if (activeSlotId != slot.id) return CustomSlotStatus.saved;
-  if (sameCustomFilter(
-    slot: slot,
-    domains: workingDomains,
-    mix: workingMix,
-  )) {
+  if (sameCustomFilter(slot: slot, domains: workingDomains, mix: workingMix)) {
     return CustomSlotStatus.active;
   }
   return CustomSlotStatus.modified;
@@ -145,9 +141,7 @@ CustomSelectionSetsRecord decodeCustomSelectionSets(String? raw) {
         byId[id] = CustomSelectionSet(
           id: id,
           name: sanitizeCustomSlotName('${item['name'] ?? ''}'),
-          domains: decodeVisibleDomains(
-            domainsRaw is String ? domainsRaw : '',
-          ),
+          domains: decodeVisibleDomains(domainsRaw is String ? domainsRaw : ''),
           mix: decodePersonalMix(item['mix'] is String ? item['mix'] : null),
         );
       }
@@ -166,8 +160,7 @@ CustomSelectionSetsRecord decodeCustomSelectionSets(String? raw) {
 
 String encodeCustomSelectionSets(CustomSelectionSetsRecord record) {
   final slots = [
-    for (var id = 1; id <= kCustomSelectionSetCount; id++)
-      record.slotById(id),
+    for (var id = 1; id <= kCustomSelectionSetCount; id++) record.slotById(id),
   ];
   return jsonEncode({
     'v': 1,

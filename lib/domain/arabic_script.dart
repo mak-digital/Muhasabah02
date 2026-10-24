@@ -23,7 +23,9 @@ extension ArabicScriptFaceX on ArabicScriptFace {
   };
 
   static ArabicScriptFace fromId(String? id) {
-    return ArabicScriptFace.values.where((value) => value.id == id).firstOrNull ??
+    return ArabicScriptFace.values
+            .where((value) => value.id == id)
+            .firstOrNull ??
         ArabicScriptFace.uthmani;
   }
 }

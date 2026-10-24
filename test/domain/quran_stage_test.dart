@@ -368,9 +368,7 @@ void main() {
       QuranDimension.meaning,
       QuranDimension.tafsir,
     ]);
-    expect(QuranJourneyRow.reflected.dimensions, [
-      QuranDimension.reflection,
-    ]);
+    expect(QuranJourneyRow.reflected.dimensions, [QuranDimension.reflection]);
     expect(QuranJourneyRow.applied.dimensions, applicationHomeRows);
   });
 

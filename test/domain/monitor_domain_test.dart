@@ -188,12 +188,29 @@ void main() {
     );
     expect(
       selectableMonitorDomains().contains(MonitorDomain.productivity),
-      isTrue,
+      isFalse,
     );
     expect(kBasicDhikrVisibleDomains.contains(MonitorDomain.hajj), isFalse);
     expect(isDormantMonitorDomain(MonitorDomain.hajj), isTrue);
+    expect(isDormantMonitorDomain(MonitorDomain.knowledge), isTrue);
+    expect(isDormantMonitorDomain(MonitorDomain.time), isTrue);
+    expect(isDormantMonitorDomain(MonitorDomain.health), isTrue);
+    expect(isDormantMonitorDomain(MonitorDomain.wealth), isTrue);
+    expect(isDormantMonitorDomain(MonitorDomain.ummah), isTrue);
+    expect(isDormantMonitorDomain(MonitorDomain.productivity), isTrue);
     expect(isDormantMonitorDomain(MonitorDomain.fasting), isFalse);
+    expect(isDormantMonitorDomain(MonitorDomain.akhlaq), isFalse);
     expect(selectableMonitorDomains().contains(MonitorDomain.hajj), isFalse);
+    expect(selectableMonitorDomains(), {
+      MonitorDomain.salah,
+      MonitorDomain.quran,
+      MonitorDomain.hadith,
+      MonitorDomain.dhikr,
+      MonitorDomain.fasting,
+      MonitorDomain.akhlaq,
+      MonitorDomain.huquq,
+      MonitorDomain.charity,
+    });
     expect(
       decodeVisibleDomains(encodeVisibleDomains(MonitorDomain.values.toSet()))
           .contains(MonitorDomain.hajj),

@@ -21,6 +21,7 @@ import '../checkin/check_in_screen.dart';
 import '../checkin/trace_record_sheets.dart';
 import '../progress/week_trace_matrix.dart';
 import '../shared/progress_calendar.dart';
+import '../shared/thirty_day_trend_chart.dart';
 import '../shared/salah_activity_mark.dart';
 import '../shared/state_marker.dart';
 import '../shared/ui_bits.dart';
@@ -152,6 +153,7 @@ class SalahProgressScreen extends ConsumerWidget {
             MuhasabahColors.salahObligatoryBand,
             MuhasabahColors.salahObligatoryBandDark,
             brightness,
+            context,
           ),
           columns: [
             for (final prayer in obligatory)
@@ -171,6 +173,7 @@ class SalahProgressScreen extends ConsumerWidget {
             MuhasabahColors.salahFridayBand,
             MuhasabahColors.salahFridayBandDark,
             brightness,
+            context,
           ),
           columns: [
             WeekMatrixColumn(
@@ -195,6 +198,7 @@ class SalahProgressScreen extends ConsumerWidget {
             MuhasabahColors.salahVoluntaryBand,
             MuhasabahColors.salahVoluntaryBandDark,
             brightness,
+            context,
           ),
           columns: [
             for (final row in voluntary)
@@ -247,6 +251,14 @@ class SalahProgressScreen extends ConsumerWidget {
             activityDays: activityDays,
             notDoneDays: notDoneDays,
           ),
+          trend: thirtyDaySeriesOrNull(
+            periodDays: period.days,
+            activityLabel: prayer.label,
+            catalog: ActivityCatalog.salah,
+            activityColours: ref.watch(appPrefsProvider).salahActivityColours,
+            idForDate: (key) =>
+                index[key]?.activityFor(ActivityCatalog.salahKey(prayer)).id,
+          ),
           cellBuilder: (context, key) =>
               _dayMarker(context, ref, now, prayer, key, index[key]),
         ),
@@ -268,11 +280,13 @@ class SalahProgressScreen extends ConsumerWidget {
             MuhasabahColors.salahFridayBand,
             MuhasabahColors.salahFridayBandDark,
             brightness,
+            context,
           )
         : MuhasabahColors.wash(
             MuhasabahColors.salahVoluntaryBand,
             MuhasabahColors.salahVoluntaryBandDark,
             brightness,
+            context,
           );
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
@@ -283,6 +297,23 @@ class SalahProgressScreen extends ConsumerWidget {
           subtitle: displayHomeBand(salahHomeBand(row)),
           periodDays: period.days,
           family: MuhasabahColors.salahFamily,
+          trend: thirtyDaySeriesOrNull(
+            periodDays: period.days,
+            activityLabel: row.label,
+            catalog: row.isVoluntary
+                ? ActivityCatalog.forVoluntarySalah(row)
+                : ActivityCatalog.jumuah,
+            activityColours: ref.watch(appPrefsProvider).salahActivityColours,
+            idForDate: (key) {
+              if (row.fridayOnly && !isFridayDateKey(key)) return null;
+              if (row.isVoluntary) {
+                return index[key]
+                    ?.activityFor(ActivityCatalog.voluntarySalahKey(row))
+                    .id;
+              }
+              return index[key]?.activityFor(ActivityCatalog.jumuahKey).id;
+            },
+          ),
           cellBuilder: (context, key) =>
               _extraMarker(context, ref, now, row, key, index[key]),
         ),
@@ -535,6 +566,7 @@ class QuranProgressScreen extends ConsumerWidget {
             MuhasabahColors.quranWash,
             MuhasabahColors.quranWashDark,
             brightness,
+            context,
           ),
           columns: [
             for (final dimension in entry.$2)
@@ -627,6 +659,17 @@ class QuranProgressScreen extends ConsumerWidget {
                 recordedDays: recordedDays,
                 activityDays: positiveDays,
                 notDoneDays: negativeDays,
+              ),
+              trend: thirtyDaySeriesOrNull(
+                periodDays: period.days,
+                activityLabel: dimension.label,
+                catalog: ActivityCatalog.forQuran(dimension),
+                activityColours: ref
+                    .watch(appPrefsProvider)
+                    .salahActivityColours,
+                idForDate: (key) => index[key]
+                    ?.activityFor(ActivityCatalog.quranKey(dimension))
+                    .id,
               ),
               belowTitle: dimension == QuranDimension.consciousApplication
                   ? Text(

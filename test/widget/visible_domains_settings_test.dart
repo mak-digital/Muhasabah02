@@ -50,22 +50,27 @@ void main() {
         find.byKey(const Key('domain-visible-knowledge')),
       );
       expect(knowledgeTile.value, isFalse);
+      expect(knowledgeTile.onChanged, isNull);
       final timeTile = tester.widget<CheckboxListTile>(
         find.byKey(const Key('domain-visible-time')),
       );
       expect(timeTile.value, isFalse);
+      expect(timeTile.onChanged, isNull);
       final healthTile = tester.widget<CheckboxListTile>(
         find.byKey(const Key('domain-visible-health')),
       );
       expect(healthTile.value, isFalse);
+      expect(healthTile.onChanged, isNull);
       final wealthTile = tester.widget<CheckboxListTile>(
         find.byKey(const Key('domain-visible-wealth')),
       );
       expect(wealthTile.value, isFalse);
+      expect(wealthTile.onChanged, isNull);
       final ummahTile = tester.widget<CheckboxListTile>(
         find.byKey(const Key('domain-visible-ummah')),
       );
       expect(ummahTile.value, isFalse);
+      expect(ummahTile.onChanged, isNull);
       expect(find.text('Family & Community Care'), findsNothing);
       final hadithTile = tester.widget<CheckboxListTile>(
         find.byKey(const Key('domain-visible-hadith')),
@@ -99,6 +104,22 @@ void main() {
         tester
             .widget<CheckboxListTile>(
               find.byKey(const Key('domain-visible-hajj')),
+            )
+            .value,
+        isFalse,
+      );
+      expect(
+        tester
+            .widget<CheckboxListTile>(
+              find.byKey(const Key('domain-visible-knowledge')),
+            )
+            .value,
+        isFalse,
+      );
+      expect(
+        tester
+            .widget<CheckboxListTile>(
+              find.byKey(const Key('domain-visible-productivity')),
             )
             .value,
         isFalse,

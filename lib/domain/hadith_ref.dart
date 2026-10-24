@@ -30,8 +30,7 @@ enum HadithParseStatus { empty, ok, invalid }
 class HadithParseResult {
   const HadithParseResult._(this.status, [this.ref]);
 
-  const HadithParseResult.ok(HadithRef ref)
-    : this._(HadithParseStatus.ok, ref);
+  const HadithParseResult.ok(HadithRef ref) : this._(HadithParseStatus.ok, ref);
 
   const HadithParseResult.empty() : this._(HadithParseStatus.empty);
 
@@ -53,8 +52,15 @@ String? hadithCollectionSlug(String part) {
   if (part.contains('Aḥmad') || part.contains('Ahmad')) return 'ahmad';
   final lower = part.toLowerCase().trim();
   return switch (lower) {
-    'bukhari' || 'adab' || 'muslim' || 'abudawud' || 'tirmidhi' || 'nasai' ||
-    'ibnmajah' || 'malik' || 'ahmad' => lower,
+    'bukhari' ||
+    'adab' ||
+    'muslim' ||
+    'abudawud' ||
+    'tirmidhi' ||
+    'nasai' ||
+    'ibnmajah' ||
+    'malik' ||
+    'ahmad' => lower,
     _ => null,
   };
 }

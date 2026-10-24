@@ -51,14 +51,15 @@ void main() {
     expect(catalog.last.ternary, TernaryOutcome.unanswered);
 
     var record = DailyCheckIn.empty('2026-10-17');
-    expect(readHealthPractice(record, 'health.sleepQuality').isPrimaryRecorded, isFalse);
+    expect(
+      readHealthPractice(record, 'health.sleepQuality').isPrimaryRecorded,
+      isFalse,
+    );
 
     record = writeHealthPractice(
       record,
       'health.sleepQuality',
-      const HealthPracticeCapture(
-        primaryId: HealthObservationIds.preferNot,
-      ),
+      const HealthPracticeCapture(primaryId: HealthObservationIds.preferNot),
     );
     expect(record.homeTrace('health.sleepQuality').isRecorded, isTrue);
     expect(
@@ -79,9 +80,8 @@ void main() {
       healthKindFor('health.sleepQuality.sleptPoorly'),
       HealthResponseKind.difficulty,
     );
-    final option = ActivityCatalog.forHomeTrace(
-      'health.sleepQuality',
-    ).firstWhere((item) => item.id == 'health.sleepQuality.sleptPoorly');
+    final option = ActivityCatalog.forHomeTrace('health.sleepQuality')
+        .firstWhere((item) => item.id == 'health.sleepQuality.sleptPoorly');
     expect(option.ternary, TernaryOutcome.positive);
     expect(
       healthKindFor('health.sleepAmount.necessaryDuties'),

@@ -19,14 +19,11 @@ void main() {
       ),
       isTrue,
     );
-    expect(
-      kPracticeKnowledgeCatalog.map((item) => item.group).toSet(),
-      {
-        kKnowledgeGroupSeeking,
-        kKnowledgeGroupSharing,
-        kKnowledgeGroupSpeech,
-      },
-    );
+    expect(kPracticeKnowledgeCatalog.map((item) => item.group).toSet(), {
+      kKnowledgeGroupSeeking,
+      kKnowledgeGroupSharing,
+      kKnowledgeGroupSpeech,
+    });
     expect(kPracticeKnowledgeCatalog.first.group, kKnowledgeGroupSeeking);
     expect(kPracticeKnowledgeGroups, bandsFor(knowledgeHomeRows));
     expect(
@@ -44,7 +41,8 @@ void main() {
   test('Knowledge reminders stay residual of Qur’an, Hadith, and Akhlaq', () {
     expect(
       kPracticeKnowledgeCatalog.any(
-        (item) => item.sourceDetail.contains('Qur’an and Hadith have their own'),
+        (item) =>
+            item.sourceDetail.contains('Qur’an and Hadith have their own'),
       ),
       isTrue,
     );
@@ -72,9 +70,6 @@ void main() {
     expect(record.domain, MonitorDomain.knowledge);
     expect(record.group, kKnowledgeGroupSeeking);
     expect(record.status, PracticeHadithStatus.learning);
-    expect(
-      practiceRecordsForDomain([record], MonitorDomain.huquq),
-      isEmpty,
-    );
+    expect(practiceRecordsForDomain([record], MonitorDomain.huquq), isEmpty);
   });
 }

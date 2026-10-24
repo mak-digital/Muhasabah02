@@ -1872,8 +1872,9 @@ class _ProductivityDashboardState extends ConsumerState<ProductivityDashboard> {
       for (final action in store.masterList)
         if (action.status.isOpen) action,
     ];
-    final selected = [for (final action in store.visibleTodayActions) action.id]
-        .toSet();
+    final selected = {
+      for (final action in store.visibleTodayActions) action.id,
+    };
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,

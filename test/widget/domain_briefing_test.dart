@@ -23,10 +23,7 @@ void main() {
       huquqBriefing.groups.first.items.first,
       'Parents — kind speech, presence, service, dua',
     );
-    expect(
-      huquqBriefing.plainText,
-      contains('Safety and justice come first'),
-    );
+    expect(huquqBriefing.plainText, contains('Safety and justice come first'));
     expect(huquqBriefing.plainText, contains('A step toward reconciliation'));
     expect(huquqBriefing.lead.last, contains('Learn & Practice'));
     expect(briefingForDomain(MonitorDomain.huquq), same(huquqBriefing));
@@ -38,9 +35,7 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    await tester.pumpWidget(
-      testApp(visibleDomains: allVisibleDomains()),
-    );
+    await tester.pumpWidget(testApp(visibleDomains: allVisibleDomains()));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Start today’s check-in'));
     await tester.pumpAndSettle();

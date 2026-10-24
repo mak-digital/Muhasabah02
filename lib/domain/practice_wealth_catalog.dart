@@ -31,9 +31,9 @@ final List<PracticeDhikrItem> kPracticeWealthCatalog = [
     group: kWealthGroupEarning,
     topic: 'Earned from a halal source',
     text: 'Eat of what is on the earth, lawful and good:',
-    arabic: 'يَا أَيُّهَا النَّاسُ كُلُوا مِمَّا فِي الْأَرْضِ حَلَالًا طَيِّبًا',
-    transliteration:
-        'Yā ayyuhā n-nāsu kulū mimmā fī l-arḍi ḥalālan ṭayyibā.',
+    arabic:
+        'يَا أَيُّهَا النَّاسُ كُلُوا مِمَّا فِي الْأَرْضِ حَلَالًا طَيِّبًا',
+    transliteration: 'Yā ayyuhā n-nāsu kulū mimmā fī l-arḍi ḥalālan ṭayyibā.',
     translation: 'O mankind, eat of what is on the earth, lawful and good.',
     source: 'Qur’an 2:168',
     detail: 'A halal source you noticed. Amounts are not recorded. Poverty is not a failing.',
@@ -46,9 +46,11 @@ final List<PracticeDhikrItem> kPracticeWealthCatalog = [
     arabic: 'يَا أَيُّهَا الَّذِينَ آمَنُوا كُلُوا مِن طَيِّبَاتِ مَا رَزَقْنَاكُمْ',
     transliteration:
         'Yā ayyuhā lladhīna āmanū kulū min ṭayyibāti mā razaqnākum.',
-    translation: 'O you who believe, eat of the good things We have provided you.',
+    translation:
+        'O you who believe, eat of the good things We have provided you.',
     source: 'Qur’an 2:172',
-    detail: 'A halal source you noticed. Wealth is not a sign of Allah’s pleasure.',
+    detail:
+        'A halal source you noticed. Wealth is not a sign of Allah’s pleasure.',
   ),
   _item(
     id: 'wl.earning.halal.bukhari_2072',
@@ -56,10 +58,8 @@ final List<PracticeDhikrItem> kPracticeWealthCatalog = [
     topic: 'Earned from a halal source',
     text: 'The Messenger of Allah ﷺ said:',
     arabic: 'مَا أَكَلَ أَحَدٌ طَعَامًا قَطُّ خَيْرًا مِنْ أَنْ يَأْكُلَ مِنْ عَمَلِ يَدِهِ',
-    transliteration:
-        'Mā akala aḥadun ṭaʿāman qaṭṭu khayran min an yaʾkula min ʿamali yadih.',
-    translation:
-        'No one has ever eaten better food than that which he eats from the work of his own hands.',
+    transliteration: 'Mā akala aḥadun ṭaʿāman qaṭṭu khayran min an yaʾkula min ʿamali yadih.',
+    translation: 'No one has ever eaten better food than that which he eats from the work of his own hands.',
     source: 'Ṣaḥīḥ al-Bukhārī 2072',
     detail: 'Work of the hands as you noticed it. Amounts are not recorded.',
   ),
@@ -82,7 +82,8 @@ final List<PracticeDhikrItem> kPracticeWealthCatalog = [
     arabic: 'يَا أَيُّهَا الَّذِينَ آمَنُوا اتَّقُوا اللَّهَ وَذَرُوا مَا بَقِيَ مِنَ الرِّبَا',
     transliteration:
         'Yā ayyuhā lladhīna āmanū ittaqū llāha wa-dharū mā baqiya mina r-ribā.',
-    translation: 'O you who believe, fear Allah and give up what remains of riba.',
+    translation:
+        'O you who believe, fear Allah and give up what remains of riba.',
     source: 'Qur’an 2:278',
     detail: 'Staying clear of riba as you report it. Not a credit-score.',
   ),
@@ -94,7 +95,8 @@ final List<PracticeDhikrItem> kPracticeWealthCatalog = [
     arabic: 'يَا أَيُّهَا الَّذِينَ آمَنُوا لَا تَأْكُلُوا الرِّبَا أَضْعَافًا مُّضَاعَفَةً',
     transliteration:
         'Yā ayyuhā lladhīna āmanū lā taʾkulū r-ribā aḍʿāfan muḍāʿafah.',
-    translation: 'O you who believe, do not consume riba, doubled and multiplied.',
+    translation:
+        'O you who believe, do not consume riba, doubled and multiplied.',
     source: 'Qur’an 3:130',
     detail: 'Staying clear of riba as you report it. Amounts are not recorded.',
   ),
@@ -105,8 +107,7 @@ final List<PracticeDhikrItem> kPracticeWealthCatalog = [
     text: 'The Messenger of Allah ﷺ cursed the one who consumes riba:',
     arabic: 'لَعَنَ رَسُولُ اللَّهِ ﷺ آكِلَ الرِّبَا وَمُوكِلَهُ',
     transliteration: 'Laʿana rasūlu llāhi ākila r-ribā wa-mūkilah.',
-    translation:
-        'The Messenger of Allah ﷺ cursed the one who consumes riba and the one who pays it.',
+    translation: 'The Messenger of Allah ﷺ cursed the one who consumes riba and the one who pays it.',
     source: 'Ṣaḥīḥ Muslim 1598',
     detail: 'Staying clear of riba as you report it. Not inferred from wealth.',
   ),
@@ -140,7 +141,8 @@ final List<PracticeDhikrItem> kPracticeWealthCatalog = [
     text: 'Do not be excessive. He does not love the excessive:',
     arabic: 'وَآتُوا حَقَّهُ يَوْمَ حَصَادِهِ ۖ وَلَا تُسْرِفُوا',
     transliteration: 'Wa-ātū ḥaqqahu yawma ḥaṣādih. Wa-lā tusrifū.',
-    translation: 'And give its due on the day of its harvest, and do not be excessive.',
+    translation:
+        'And give its due on the day of its harvest, and do not be excessive.',
     source: 'Qur’an 6:141',
     detail: 'Avoiding waste is stewardship. Zakat stays on Charity.',
   ),
@@ -149,12 +151,9 @@ final List<PracticeDhikrItem> kPracticeWealthCatalog = [
     group: kWealthGroupRestraint,
     topic: 'Avoided waste',
     text: 'Those who, when they spend, are neither wasteful nor stingy:',
-    arabic:
-        'وَالَّذِينَ إِذَا أَنفَقُوا لَمْ يُسْرِفُوا وَلَمْ يَقْتُرُوا وَكَانَ بَيْنَ ذَٰلِكَ قَوَامًا',
-    transliteration:
-        'Wa-lladhīna idhā anfaqū lam yusrifū wa-lam yaqturū wa-kāna bayna dhālika qawāmā.',
-    translation:
-        'And those who, when they spend, are neither wasteful nor stingy, but hold a just balance between.',
+    arabic: 'وَالَّذِينَ إِذَا أَنفَقُوا لَمْ يُسْرِفُوا وَلَمْ يَقْتُرُوا وَكَانَ بَيْنَ ذَٰلِكَ قَوَامًا',
+    transliteration: 'Wa-lladhīna idhā anfaqū lam yusrifū wa-lam yaqturū wa-kāna bayna dhālika qawāmā.',
+    translation: 'And those who, when they spend, are neither wasteful nor stingy, but hold a just balance between.',
     source: 'Qur’an 25:67',
     detail: 'Avoiding waste is stewardship. Amounts are not recorded.',
   ),
@@ -166,11 +165,9 @@ final List<PracticeDhikrItem> kPracticeWealthCatalog = [
     arabic: 'يَا أَيُّهَا الَّذِينَ آمَنُوا لَا تَأْكُلُوا أَمْوَالَكُم بَيْنَكُم بِالْبَاطِلِ',
     transliteration:
         'Yā ayyuhā lladhīna āmanū lā taʾkulū amwālakum baynakum bi-l-bāṭil.',
-    translation:
-        'O you who believe, do not consume one another’s wealth among you unjustly.',
+    translation: 'O you who believe, do not consume one another’s wealth among you unjustly.',
     source: 'Qur’an 4:29',
-    detail:
-        'Stewardship as you report it. Not a legal ruling or automatic ḥalāl certification. Amounts are not recorded.',
+    detail: 'Stewardship as you report it. Not a legal ruling or automatic ḥalāl certification. Amounts are not recorded.',
   ),
   _item(
     id: 'wl.management.4_58',
@@ -178,13 +175,10 @@ final List<PracticeDhikrItem> kPracticeWealthCatalog = [
     topic: 'Managed wealth responsibly and lawfully',
     text: 'Render trusts to those to whom they are due:',
     arabic: 'إِنَّ اللَّهَ يَأْمُرُكُمْ أَن تُؤَدُّوا الْأَمَانَاتِ إِلَىٰ أَهْلِهَا',
-    transliteration:
-        'Inna llāha yaʾmurukum an tuʾaddū l-amānāti ilā ahlihā.',
-    translation:
-        'Indeed, Allah commands you to render trusts to those to whom they are due.',
+    transliteration: 'Inna llāha yaʾmurukum an tuʾaddū l-amānāti ilā ahlihā.',
+    translation: 'Indeed, Allah commands you to render trusts to those to whom they are due.',
     source: 'Qur’an 4:58',
-    detail:
-        'A trust you noticed. Not a bank log. Giving and zakat stay on Charity.',
+    detail: 'A trust you noticed. Not a bank log. Giving and zakat stay on Charity.',
   ),
   _item(
     id: 'wl.management.23_8',
@@ -193,10 +187,10 @@ final List<PracticeDhikrItem> kPracticeWealthCatalog = [
     text: 'Those who keep their trusts and their covenant:',
     arabic: 'وَالَّذِينَ هُمْ لِأَمَانَاتِهِمْ وَعَهْدِهِمْ رَاعُونَ',
     transliteration: 'Wa-lladhīna hum li-amānātihim wa-ʿahdihim rāʿūn.',
-    translation: 'And those who are keepers of their trusts and their covenant.',
+    translation:
+        'And those who are keepers of their trusts and their covenant.',
     source: 'Qur’an 23:8',
-    detail:
-        'Stewardship of what was entrusted. Poverty and debt are not failings. Amounts are not recorded.',
+    detail: 'Stewardship of what was entrusted. Poverty and debt are not failings. Amounts are not recorded.',
   ),
 ];
 

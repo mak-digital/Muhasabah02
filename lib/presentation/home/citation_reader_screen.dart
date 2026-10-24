@@ -17,11 +17,10 @@ import '../../domain/reflection_source.dart';
 import 'bring_hadith_sheet.dart';
 import 'bring_quran_verse_sheet.dart';
 
-typedef CitationPageBuilder =
-    Widget Function({
-      required List<ReflectionSourcePage> pages,
-      required String title,
-    });
+typedef CitationPageBuilder = Widget Function({
+  required List<ReflectionSourcePage> pages,
+  required String title,
+});
 
 typedef CitationShare = Future<void> Function(String title, Uri uri);
 
@@ -200,29 +199,30 @@ class _CitationReaderScreenState extends ConsumerState<CitationReaderScreen> {
       params = const PlatformWebViewControllerCreationParams();
     }
 
-    final controller = WebViewController.fromPlatformCreationParams(
-      params,
-      onPermissionRequest: (request) {
-        request.grant();
-      },
-    )
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onPageStarted: (_) {
-            if (mounted && !_closed) setState(() => _loading = true);
-          },
-          onPageFinished: (_) {
-            if (mounted && !_closed) setState(() => _loading = false);
-            unawaited(_improvePageAudio());
-          },
-          onWebResourceError: (_) {
-            if (mounted && !_closed) setState(() => _loading = false);
-          },
-        ),
-      )
-      ..setUserAgent(_kCitationChromeUa)
-      ..loadRequest(widget.pages.first.uri);
+    final controller =
+        WebViewController.fromPlatformCreationParams(
+            params,
+            onPermissionRequest: (request) {
+              request.grant();
+            },
+          )
+          ..setJavaScriptMode(JavaScriptMode.unrestricted)
+          ..setNavigationDelegate(
+            NavigationDelegate(
+              onPageStarted: (_) {
+                if (mounted && !_closed) setState(() => _loading = true);
+              },
+              onPageFinished: (_) {
+                if (mounted && !_closed) setState(() => _loading = false);
+                unawaited(_improvePageAudio());
+              },
+              onWebResourceError: (_) {
+                if (mounted && !_closed) setState(() => _loading = false);
+              },
+            ),
+          )
+          ..setUserAgent(_kCitationChromeUa)
+          ..loadRequest(widget.pages.first.uri);
 
     final platform = controller.platform;
     if (platform is AndroidWebViewController) {
@@ -357,7 +357,9 @@ class _CitationReaderScreenState extends ConsumerState<CitationReaderScreen> {
             IconButton(
               key: const Key('citation-play-recitation'),
               tooltip: _playing ? Copy.pauseRecitation : Copy.playRecitation,
-              onPressed: _loadingAudio ? null : () => unawaited(_toggleRecitation()),
+              onPressed: _loadingAudio
+                  ? null
+                  : () => unawaited(_toggleRecitation()),
               icon: _loadingAudio
                   ? const SizedBox(
                       width: 22,
@@ -365,7 +367,9 @@ class _CitationReaderScreenState extends ConsumerState<CitationReaderScreen> {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : Icon(
-                      _playing ? Icons.pause_circle_filled : Icons.play_circle_filled,
+                      _playing
+                          ? Icons.pause_circle_filled
+                          : Icons.play_circle_filled,
                     ),
             ),
             Expanded(
@@ -390,10 +394,8 @@ class _CitationReaderScreenState extends ConsumerState<CitationReaderScreen> {
           key: const Key('citation-bring-quran'),
           onPressed: range == null
               ? null
-              : () => showBringQuranVerseSheet(
-                    context,
-                    initial: range.verseKey,
-                  ),
+              : () =>
+                    showBringQuranVerseSheet(context, initial: range.verseKey),
           child: const Text(Copy.bringThisVerseIntoLearn),
         ),
       ),
@@ -410,10 +412,7 @@ class _CitationReaderScreenState extends ConsumerState<CitationReaderScreen> {
           key: const Key('citation-bring-hadith'),
           onPressed: hadith == null
               ? null
-              : () => showBringHadithSheet(
-                    context,
-                    initial: hadith.hadithKey,
-                  ),
+              : () => showBringHadithSheet(context, initial: hadith.hadithKey),
           child: const Text(Copy.bringThisHadithIntoLearn),
         ),
       ),
@@ -430,7 +429,9 @@ class _CitationReaderScreenState extends ConsumerState<CitationReaderScreen> {
             IconButton(
               key: const Key('citation-prev-page'),
               tooltip: Copy.previousCitationPage,
-              onPressed: _index == 0 ? null : () => unawaited(_goTo(_index - 1)),
+              onPressed: _index == 0
+                  ? null
+                  : () => unawaited(_goTo(_index - 1)),
               icon: const Icon(Icons.chevron_left_rounded),
             ),
             Expanded(
@@ -438,9 +439,8 @@ class _CitationReaderScreenState extends ConsumerState<CitationReaderScreen> {
                 Copy.citationPageIndex(_index + 1, widget.pages.length),
                 key: const Key('citation-page-index'),
                 textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
+                style: Theme.of(context).textTheme.labelMedium
+                    ?.copyWith(fontWeight: FontWeight.w700),
               ),
             ),
             IconButton(

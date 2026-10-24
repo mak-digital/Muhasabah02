@@ -25,7 +25,7 @@ void main() {
     await chooseCheckInOption(
       tester,
       dropdownKey: const Key('salah-fajr'),
-      optionLabel: 'Prayed alone on time',
+      optionLabel: 'Alone on time',
     );
     await tester.pumpAndSettle();
     await tester.ensureVisible(find.text('Save check-in'));
@@ -41,8 +41,7 @@ void main() {
     await checkIns.save(sampleDay('2026-09-01'));
     await tester.pumpWidget(testApp(checkIns: checkIns));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('History'));
-    await tester.pumpAndSettle();
+    await openRegistryTab(tester, tab: const Key('registry-tab-history'));
     expect(find.text(Copy.historyTitle), findsOneWidget);
     expect(find.textContaining('Score'), findsNothing);
     expect(find.text('1 Sep 2026'), findsOneWidget);
@@ -116,8 +115,7 @@ void main() {
     expect(find.text(Copy.addAResponse), findsNothing);
     await tester.pageBack();
     await tester.pumpAndSettle();
-    await tester.tap(find.text(Copy.myResponse));
-    await tester.pumpAndSettle();
+    await openRegistryTab(tester, tab: const Key('registry-tab-notes'));
     expect(find.textContaining(Copy.emptyResponses), findsOneWidget);
     expect(find.text(Copy.addAResponse), findsWidgets);
   });
@@ -128,8 +126,7 @@ void main() {
     final responses = MemoryResponseRepository();
     await tester.pumpWidget(testApp(responses: responses));
     await tester.pumpAndSettle();
-    await tester.tap(find.text(Copy.myResponse));
-    await tester.pumpAndSettle();
+    await openRegistryTab(tester, tab: const Key('registry-tab-notes'));
     await tester.tap(find.text(Copy.addAResponse).first);
     await tester.pumpAndSettle();
     await tester.tap(find.text(Copy.saveResponse));

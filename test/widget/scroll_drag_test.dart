@@ -55,12 +55,25 @@ void main() {
     await tester.pumpAndSettle();
 
     final scrollable = tester.state<ScrollableState>(
-      find.byType(Scrollable).first,
+      find.descendant(
+        of: find.byKey(const Key('home-scroll')),
+        matching: find.byType(Scrollable),
+      ),
     );
     expect(scrollable.position.maxScrollExtent, greaterThan(0));
+    expect(find.text(Copy.homeCheckIn), findsOneWidget);
+    expect(find.text(Copy.activeDomainAndMix), findsOneWidget);
 
-    await tester.drag(find.text(Copy.homeCheckIn), const Offset(0, -400));
+    await tester.drag(
+      find.descendant(
+        of: find.byKey(const Key('home-scroll')),
+        matching: find.byType(Scrollable),
+      ),
+      const Offset(0, -400),
+    );
     await tester.pumpAndSettle();
     expect(scrollable.position.pixels, greaterThan(0));
+    expect(find.text(Copy.homeCheckIn), findsOneWidget);
+    expect(find.text(Copy.activeDomainAndMix), findsOneWidget);
   });
 }

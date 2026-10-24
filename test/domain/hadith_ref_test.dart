@@ -80,7 +80,10 @@ void main() {
       practiceHadithAt(kPracticeHadithCatalog.length, extra).id,
       'uh.muslim.1',
     );
-    expect(kPracticeHadithCatalog.any((item) => item.id == 'uh.muslim.1'), isFalse);
+    expect(
+      kPracticeHadithCatalog.any((item) => item.id == 'uh.muslim.1'),
+      isFalse,
+    );
   });
 
   test('topic and keyword search filters the on-device hadith list', () {
@@ -95,9 +98,6 @@ void main() {
       filterBringHadithIndex('mother').map((item) => item.topic),
       contains('Mother'),
     );
-    expect(
-      filterBringHadithIndex('xyznotatopic'),
-      isEmpty,
-    );
+    expect(filterBringHadithIndex('xyznotatopic'), isEmpty);
   });
 }

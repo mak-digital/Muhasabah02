@@ -2,6 +2,7 @@ import 'domain_briefing.dart';
 
 class Copy {
   static const appName = 'Private Muhasabah';
+  static const openingYourRecord = 'Opening your record';
   static const appSlogan = 'Your record, not a ruling.';
   static const appNotice = 'Notice your day to improve. Keep it yours.';
   static const homeCheckIn = 'Start today’s check-in';
@@ -43,6 +44,29 @@ class Copy {
   static const homeReview = 'Review recorded experience';
   static const homeManage = 'Manage past check-ins';
   static const reviewTitle = 'Review';
+  static const registryTab = 'Registry';
+  static const registryTitle = 'Registry';
+  static const registryTabActions = 'Action Register';
+  static const registryTabHadith = 'Hadith Register';
+  static const registryTabDeveloper = 'Note to Developer';
+  static const registryTabHistory = 'History';
+  static const registryTabActionsShort = 'Actions';
+  static const registryTabHadithShort = 'Hadith';
+  static const registryTabDeveloperShort = 'Developer';
+  static const hadithTopicColumn = 'Topic / Added';
+  static const hadithSourceColumn = 'Source';
+  static const hadithStatusColumn = 'Practice';
+  static const hadithSharedColumn = 'Shared';
+  static const developerDomainDateColumn = 'Domain / Date';
+  static String registryFilterNote({
+    required String mixLabel,
+    required String domains,
+  }) =>
+      'Showing $mixLabel: $domains. Other saved items stay on this device until those domains are in focus.';
+  static const registryHistoryFilterNote =
+      'Every saved check-in day is listed. Domain and mix filters apply on the other Registry tabs.';
+  static const registryHadithHidden =
+      'Hadith is not in your current domains and mix. Saved register items stay on this device.';
   static const historyTitle = 'Manage past check-ins';
   static const historyGuard =
       'Edit a saved day, or remove the app’s record. This is not a score. Recorded days is the read-only view.';
@@ -96,6 +120,7 @@ class Copy {
       'Remove the selected actions from this device? This cannot be undone.';
   static const actionConfirmPermanentDeleteAction = 'Remove';
   static const addAction = '+ add Action';
+  static const addReminder = 'Add Reminder';
   static const saveListedAction = 'Save action';
   static const actionField = 'Action';
   static const actionTargetDate = 'Target date';
@@ -107,6 +132,8 @@ class Copy {
   static const actionClosed = 'Closed';
   static const actionDeleted = 'Deleted';
   static const actionStatusColumn = 'Active / Closed / Deleted';
+  static const actionDomainDateColumn = 'Domain / Target';
+  static const actionStatusShort = 'Status';
   static const parkSettledAction = 'Move off this list';
   static const actionEmpty = 'No active actions listed.';
   static const actionNeedsText = 'Write the action before adding it.';
@@ -420,7 +447,8 @@ class Copy {
   static const dataManagement = 'Developer & sample data';
   static const appearancePreferences = 'Preferences';
   static const appearance = 'Appearance';
-  static const appearanceNote = 'System, light, dark';
+  static const appearanceNote =
+      'System, light, dark, plus three named looks. Not a score.';
   static const textSize = 'Text size';
   static const textSizeNote = 'Follows device scale';
   static const arabicScript = 'Arabic script';
@@ -448,6 +476,9 @@ class Copy {
   static const firstDayOfWeek = 'First day of week';
   static const firstDayOfWeekNote =
       'Changes how weeks are shown. Saved records are not altered.';
+  static const worshipListGender = 'Salah list for me';
+  static const worshipListGenderNote =
+      'This only changes whether Excused appears on obligatory Salah and Jumu‘ah. It is not a ruling, a profile, or a score. Not recorded keeps every choice visible. Excused is for days when those prayers are not required (such as hayd or nifas). Saved days are not rewritten.';
   static const calendar = 'Calendar';
   static const calendarNote =
       'Changes how dates are shown. Uses the civil Islamic calendar when Islamic is selected; moon sighting may differ by a day. Saved records are not altered.';
@@ -506,7 +537,7 @@ class Copy {
   static const selectAllDomains = 'All domains';
   static const basicDhikrDomains = 'Salah, Qur’an & Dhikr';
   static const basicDhikrDomainsNote =
-      'Shows Salah & Prayer Quality, Qur’an Engagement, and Dhikr & Dua. Hadith & Living Sunnah, Rights of Others, Charity, Knowledge & Beneficial Speech, Time & Barakah, Physical Health & Energy, Wealth & Stewardship, Ummah, Character & Morals (Akhlaq), Fasting, and Hajj stay hidden unless you add them.';
+      'Shows Salah & Prayer Quality, Qur’an Engagement, and Dhikr & Dua. Hadith & Living Sunnah, Rights of Others, Charity, Character & Morals (Akhlaq), and Fasting stay hidden unless you add them. Knowledge, Time, Health, Wealth, Ummah, Hajj, and Productivity stay listed but are not active this season.';
   static const customSelectionSets = 'Custom selection sets';
   static const customSelectionSetsNote =
       'Save this screen’s domains and mix into Custom #1, #2 or #3. Activate a set to use it. Overlap is allowed. Saved days are not changed.';
@@ -552,6 +583,8 @@ class Copy {
   static const situationNotesTitle = 'Context notes';
   static const situationNotesNote =
       'Optional. You authored these. They are not causes and are not interpreted automatically.';
+  static const checkInAddNoteNote =
+      'Optional. Saved in My Notes, linked to this check-in day. Not a score.';
   static const hadithMemorisationFocus = 'Current Memorisation Focus';
   static String practiceLearnTitle(String domainShort) =>
       'LEARN & PRACTICE ($domainShort)';
@@ -622,18 +655,58 @@ class Copy {
   static const addPracticeHadith = '+ add Hadith';
   static String openPracticeLearnRegister(String domainShort) =>
       'Learn & Practice ($domainShort) Register';
-  static String get openPracticeHadithRegister =>
-      openPracticeLearnRegister('Hadith');
+  static String get openPracticeHadithRegister => 'Hadith Register';
   static String practiceLearnRegisterTitle(String domainShort) =>
       'Learn & Practice ($domainShort) Register';
   static String get practiceHadithRegisterTitle =>
       practiceLearnRegisterTitle('Hadith');
   static const practiceHadithRegisterNote =
-      'Your list. Date added, source, content, topic, and whether you are learning it, have learnt it, are practicing it, or living it. Select and delete if it should not stay here. This does not fill Living Sunnah.';
+      'Your list. Date added, source, content, topic, and whether you are learning it, have learnt it, are practicing it, or living it. Archive marks a hadith so Home reflection can skip it when another quote is available. The built-in list is never removed. Select and delete only the private copy on this device if it should not stay here. This does not fill Living Sunnah.';
   static const practiceHadithRegisterEmpty = 'No hadith in the register.';
   static const practiceHadithAlreadyAdded = 'Already in your register';
-  static const bringHadith = 'Bring a hadith';
-  static const bringHadithTitle = 'Bring a hadith into Learn';
+  static const bringHadith = 'Fetch a Hadith';
+  static const hadithMap = 'Hadith Map';
+  static const hadithMapNote =
+      'The map always shows the full unique list. Week or month is only a count in the table below; it does not hide marks. Shape is the topic family. Fill is how you have met it, not a grade. A tick marks Shared. Gold is a recently fetched copy.';
+  static const hadithMapColourCoding = 'Colour coding';
+  static const hadithMapTopicShapes = 'Topic shapes';
+  static const hadithMapByTopic = 'By topic';
+  static const hadithMapCounts = 'HADITH COUNTS';
+  static const hadithMapMetHistory = 'Met history';
+  static const hadithMapThisPeriod = 'this period';
+  static const hadithMapNew = 'New';
+  static const hadithMapNotMet = 'Not met';
+  static const hadithMapShared = 'Shared';
+  static const hadithMapWeek = 'w';
+  static const hadithMapMonth = 'm';
+  static const hadithMapChoose = 'Tap a mark to read it.';
+  static const playHadith = 'Play';
+  static const pauseHadith = 'Pause';
+  static const hadithPlayCouldNotStart =
+      'This device has no speaking voice for playback.';
+  static String hadithMapFullTitle(int count) =>
+      'FULL MAP $count Unique Hadiths';
+  static String hadithMapFamilyLabel(String id) => switch (id) {
+    'prayer' => 'Prayer',
+    'fasting' => 'Fasting',
+    'dhikr' => 'Dhikr',
+    'character' => 'Character',
+    'family' => 'Family',
+    'knowledge' => 'Knowledge',
+    'travel' => 'Travel',
+    'daily' => 'Daily life',
+    'charity' => 'Charity',
+    _ => 'Daily life',
+  };
+  static String hadithMapFillLabel(String id) => switch (id) {
+    'recentlyFetched' => hadithMapNew,
+    'notMet' => hadithMapNotMet,
+    'learning' => practiceStatusLearning,
+    'shared' => hadithMapShared,
+    'living' => practiceHadithStatusHabit,
+    _ => hadithMapNotMet,
+  };
+  static const bringHadithTitle = 'Fetch a Hadith into Learn';
   static const bringHadithSearchHint =
       'Search by topic or a few words — for example intention, mother, anger.';
   static const bringHadithSearchEmpty =
@@ -666,8 +739,10 @@ class Copy {
   static const practiceHadithStatusHabit = 'Living it';
   static const practiceDhikrStatusHabit = 'Habit';
   static const practiceHadithConfirmDelete =
-      'Remove the selected hadith from this device? This cannot be undone.';
+      'Remove the selected private copies from this device? The built-in hadith list stays. This cannot be undone.';
   static const practiceHadithNothingSelected = 'Select a hadith first.';
+  static const practiceHadithArchiveHint =
+      'Archived hadith stay in the built-in list. Matching daily or weekly reflections are skipped when another quote is available.';
   static String get practiceDhikrTitle => practiceLearnTitle('Dhikr');
   static const practiceDhikrNote =
       'Widely used authentic dhikr and dua, grouped by occasion. Highly recommended post-prayer, morning, and evening sets are listed together first. Add one if you want to learn it and bring it into practice. This is not a target, score, or prescription.';
@@ -874,6 +949,6 @@ class Copy {
   static const reflectionSourceReturn = 'Close, or use Back, to return here.';
   static const reflectionSourceCouldNotOpen =
       'Nothing on this device could open that citation. The reference stays here.';
-  static const saveQuoteToResponse = 'Save to my response';
+  static const saveQuoteToResponse = 'Save to My Notes';
   static const youRecordedColon = 'You recorded:';
 }

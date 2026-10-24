@@ -26,12 +26,9 @@ final List<PracticeDhikrItem> kPracticeCharityCatalog = [
     group: kCharityGroupGiving,
     topic: 'Voluntary Charity',
     text: 'The example of those who spend their wealth in Allah’s way:',
-    arabic:
-        'مَّثَلُ الَّذِينَ يُنفِقُونَ أَمْوَالَهُمْ فِي سَبِيلِ اللَّهِ كَمَثَلِ حَبَّةٍ أَنبَتَتْ سَبْعَ سَنَابِلَ',
-    transliteration:
-        'Mathalu lladhīna yunfiqūna amwālahum fī sabīli llāhi ka-mathali ḥabbatin anbatat sabʿa sanābil.',
-    translation:
-        'The example of those who spend their wealth in the way of Allah is that of a grain that sprouts seven ears.',
+    arabic: 'مَّثَلُ الَّذِينَ يُنفِقُونَ أَمْوَالَهُمْ فِي سَبِيلِ اللَّهِ كَمَثَلِ حَبَّةٍ أَنبَتَتْ سَبْعَ سَنَابِلَ',
+    transliteration: 'Mathalu lladhīna yunfiqūna amwālahum fī sabīli llāhi ka-mathali ḥabbatin anbatat sabʿa sanābil.',
+    translation: 'The example of those who spend their wealth in the way of Allah is that of a grain that sprouts seven ears.',
     source: 'Qur’an 2:261',
     detail: 'Voluntary giving you noticed. Amounts are not recorded. Not a most-generous badge.',
   ),
@@ -41,10 +38,8 @@ final List<PracticeDhikrItem> kPracticeCharityCatalog = [
     topic: 'Voluntary Charity',
     text: 'Those who spend by night and by day:',
     arabic: 'الَّذِينَ يُنفِقُونَ أَمْوَالَهُم بِاللَّيْلِ وَالنَّهَارِ سِرًّا وَعَلَانِيَةً',
-    transliteration:
-        'Alladhīna yunfiqūna amwālahum bi-l-layli wa-n-nahāri sirran wa-ʿalāniyah.',
-    translation:
-        'Those who spend their wealth by night and by day, secretly and publicly.',
+    transliteration: 'Alladhīna yunfiqūna amwālahum bi-l-layli wa-n-nahāri sirran wa-ʿalāniyah.',
+    translation: 'Those who spend their wealth by night and by day, secretly and publicly.',
     source: 'Qur’an 2:274',
     detail: 'A gift you noticed. Poverty is not a failing. There is no leaderboard.',
   ),
@@ -78,8 +73,7 @@ final List<PracticeDhikrItem> kPracticeCharityCatalog = [
     arabic: 'وَآتَى الْمَالَ عَلَىٰ حُبِّهِ ذَوِي الْقُرْبَىٰ وَالْيَتَامَىٰ وَالْمَسَاكِينَ',
     transliteration:
         'Wa-ātā l-māla ʿalā ḥubbihi dhawī l-qurbā wa-l-yatāmā wa-l-masākīn.',
-    translation:
-        'And gives wealth, despite love for it, to relatives, orphans, and the needy.',
+    translation: 'And gives wealth, despite love for it, to relatives, orphans, and the needy.',
     source: 'Qur’an 2:177',
     detail: 'A gift or extra support. Ordinary household nafaqa stays on Rights of Others.',
   ),
@@ -89,10 +83,8 @@ final List<PracticeDhikrItem> kPracticeCharityCatalog = [
     topic: 'Family Support',
     text: 'The Messenger of Allah ﷺ said:',
     arabic: 'دِينَارٌ أَنْفَقْتَهُ فِي سَبِيلِ اللَّهِ، وَدِينَارٌ أَنْفَقْتَهُ فِي رَقَبَةٍ، وَدِينَارٌ تَصَدَّقْتَ بِهِ عَلَى مِسْكِينٍ، وَدِينَارٌ أَنْفَقْتَهُ عَلَى أَهْلِكَ، أَعْظَمُهَا أَجْرًا الَّذِي أَنْفَقْتَهُ عَلَى أَهْلِكَ',
-    transliteration:
-        'Dīnārun anfaqtahu fī sabīli llāh, wa-dīnārun anfaqtahu fī raqabah, wa-dīnārun taṣaddaqta bihi ʿalā miskīn, wa-dīnārun anfaqtahu ʿalā ahlik — aʿẓamuhā ajran alladhī anfaqtahu ʿalā ahlik.',
-    translation:
-        'A dinar you spend in Allah’s way, a dinar to free a slave, a dinar you give to a needy person, and a dinar you spend on your family — the greatest in reward is the one you spend on your family.',
+    transliteration: 'Dīnārun anfaqtahu fī sabīli llāh, wa-dīnārun anfaqtahu fī raqabah, wa-dīnārun taṣaddaqta bihi ʿalā miskīn, wa-dīnārun anfaqtahu ʿalā ahlik — aʿẓamuhā ajran alladhī anfaqtahu ʿalā ahlik.',
+    translation: 'A dinar you spend in Allah’s way, a dinar to free a slave, a dinar you give to a needy person, and a dinar you spend on your family — the greatest in reward is the one you spend on your family.',
     source: 'Ṣaḥīḥ Muslim 995',
     detail: 'A gift or extra support. Ordinary household nafaqa stays on Rights of Others.',
   ),
@@ -103,7 +95,8 @@ final List<PracticeDhikrItem> kPracticeCharityCatalog = [
     text: 'Give the relative his right:',
     arabic: 'وَآتِ ذَا الْقُرْبَىٰ حَقَّهُ وَالْمِسْكِينَ وَابْنَ السَّبِيلِ',
     transliteration: 'Wa-āti dhā l-qurbā ḥaqqahu wa-l-miskīna wa-bna s-sabīl.',
-    translation: 'And give the relative his right, and the needy, and the traveller.',
+    translation:
+        'And give the relative his right, and the needy, and the traveller.',
     source: 'Qur’an 17:26',
     detail: 'A gift or extra support. Amounts are not recorded.',
   ),
@@ -126,7 +119,8 @@ final List<PracticeDhikrItem> kPracticeCharityCatalog = [
     arabic: 'يَا أَيُّهَا الَّذِينَ آمَنُوا أَنفِقُوا مِن طَيِّبَاتِ مَا كَسَبْتُمْ',
     transliteration:
         'Yā ayyuhā lladhīna āmanū anfiqū min ṭayyibāti mā kasabtum.',
-    translation: 'O you who believe, spend from the good things you have earned.',
+    translation:
+        'O you who believe, spend from the good things you have earned.',
     source: 'Qur’an 2:267',
     detail: 'Community giving you noticed. Amounts are not recorded.',
   ),
@@ -148,8 +142,7 @@ final List<PracticeDhikrItem> kPracticeCharityCatalog = [
     text: 'The Messenger of Allah ﷺ said:',
     arabic: 'الْمُسْلِمُ أَخُو الْمُسْلِمِ، لَا يَظْلِمُهُ وَلَا يُسْلِمُهُ',
     transliteration: 'Al-muslimu akhū l-muslim, lā yaẓlimuhu wa-lā yuslimuh.',
-    translation:
-        'The Muslim is the brother of the Muslim. He does not wrong him or abandon him.',
+    translation: 'The Muslim is the brother of the Muslim. He does not wrong him or abandon him.',
     source: 'Ṣaḥīḥ al-Bukhārī 2442',
     detail: 'Community giving you noticed. Not a public campaign log.',
   ),
@@ -170,10 +163,8 @@ final List<PracticeDhikrItem> kPracticeCharityCatalog = [
     topic: 'Educational Support',
     text: 'He gives wisdom to whom He wills:',
     arabic: 'يُؤْتِي الْحِكْمَةَ مَن يَشَاءُ ۚ وَمَن يُؤْتَ الْحِكْمَةَ فَقَدْ أُوتِيَ خَيْرًا كَثِيرًا',
-    transliteration:
-        'Yuʾtī l-ḥikmata man yashāʾ. Wa-man yuʾta l-ḥikmata fa-qad ūtiya khayran kathīrā.',
-    translation:
-        'He gives wisdom to whom He wills, and whoever is given wisdom has been given much good.',
+    transliteration: 'Yuʾtī l-ḥikmata man yashāʾ. Wa-man yuʾta l-ḥikmata fa-qad ūtiya khayran kathīrā.',
+    translation: 'He gives wisdom to whom He wills, and whoever is given wisdom has been given much good.',
     source: 'Qur’an 2:269',
     detail: 'Support for learning you noticed. Not a scholarship score.',
   ),
@@ -217,10 +208,8 @@ final List<PracticeDhikrItem> kPracticeCharityCatalog = [
     topic: 'Emergency Support',
     text: 'And to the needy, and those who ask, and to free a slave:',
     arabic: 'وَآتَى الْمَالَ عَلَىٰ حُبِّهِ ذَوِي الْقُرْبَىٰ وَالْيَتَامَىٰ وَالْمَسَاكِينَ وَابْنَ السَّبِيلِ وَالسَّائِلِينَ وَفِي الرِّقَابِ',
-    transliteration:
-        'Wa-ātā l-māla ʿalā ḥubbihi dhawī l-qurbā wa-l-yatāmā wa-l-masākīna wa-bna s-sabīli wa-s-sāʾilīna wa-fī r-riqāb.',
-    translation:
-        'And gives wealth, despite love for it, to relatives, orphans, the needy, the traveller, those who ask, and for freeing slaves.',
+    transliteration: 'Wa-ātā l-māla ʿalā ḥubbihi dhawī l-qurbā wa-l-yatāmā wa-l-masākīna wa-bna s-sabīli wa-s-sāʾilīna wa-fī r-riqāb.',
+    translation: 'And gives wealth, despite love for it, to relatives, orphans, the needy, the traveller, those who ask, and for freeing slaves.',
     source: 'Qur’an 2:177',
     detail: 'Emergency care you noticed. Amounts are not recorded.',
   ),
@@ -233,7 +222,8 @@ final List<PracticeDhikrItem> kPracticeCharityCatalog = [
     transliteration: 'Aṭʿimū l-jāʾiʿa wa-ʿūdū l-marīḍ.',
     translation: 'Feed the hungry and visit the sick.',
     source: 'Ṣaḥīḥ al-Bukhārī 5653',
-    detail: 'Emergency care you noticed. Illness visits stay on Rights of Others.',
+    detail:
+        'Emergency care you noticed. Illness visits stay on Rights of Others.',
   ),
   _item(
     id: 'ch.care.emergency.90_13',
@@ -242,7 +232,8 @@ final List<PracticeDhikrItem> kPracticeCharityCatalog = [
     text: 'It is the freeing of a slave, or feeding on a day of hunger:',
     arabic: 'فَكُّ رَقَبَةٍ أَوْ إِطْعَامٌ فِي يَوْمٍ ذِي مَسْغَبَةٍ',
     transliteration: 'Fakku raqabah. Aw iṭʿāmun fī yawmin dhī masghabah.',
-    translation: 'It is the freeing of a slave, or feeding on a day of severe hunger.',
+    translation:
+        'It is the freeing of a slave, or feeding on a day of severe hunger.',
     source: 'Qur’an 90:13–14',
     detail: 'Emergency care you noticed. Amounts are not recorded.',
   ),
@@ -275,10 +266,8 @@ final List<PracticeDhikrItem> kPracticeCharityCatalog = [
     topic: 'Support Under Financial Stress',
     text: 'The Messenger of Allah ﷺ said:',
     arabic: 'مَنْ نَفَّسَ عَنْ مُؤْمِنٍ كُرْبَةً مِنْ كُرَبِ الدُّنْيَا نَفَّسَ اللَّهُ عَنْهُ كُرْبَةً مِنْ كُرَبِ يَوْمِ الْقِيَامَةِ',
-    transliteration:
-        'Man naffasa ʿan muʾminin kurbatan min kurabi d-dunyā naffasa llāhu ʿanhu kurbatan min kurabi yawmi l-qiyāmah.',
-    translation:
-        'Whoever relieves a believer of a distress of this world, Allah will relieve him of a distress of the Day of Rising.',
+    transliteration: 'Man naffasa ʿan muʾminin kurbatan min kurabi d-dunyā naffasa llāhu ʿanhu kurbatan min kurabi yawmi l-qiyāmah.',
+    translation: 'Whoever relieves a believer of a distress of this world, Allah will relieve him of a distress of the Day of Rising.',
     source: 'Ṣaḥīḥ Muslim 2699',
     detail: 'Support in hardship you noticed. Debt is not a failing.',
   ),
@@ -291,7 +280,8 @@ final List<PracticeDhikrItem> kPracticeCharityCatalog = [
     transliteration: 'Wa-taʿāwanū ʿalā l-birri wa-t-taqwā.',
     translation: 'Help one another in righteousness and taqwa.',
     source: 'Qur’an 5:2',
-    detail: 'Support in hardship you noticed. There is no zakat calculator here.',
+    detail:
+        'Support in hardship you noticed. There is no zakat calculator here.',
   ),
 ];
 

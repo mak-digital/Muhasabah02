@@ -17,15 +17,12 @@ void main() {
       ),
       isTrue,
     );
-    expect(
-      kPracticeAkhlaqCatalog.map((item) => item.group).toSet(),
-      {
-        kAkhlaqGroupVirtues,
-        kAkhlaqGroupAnger,
-        kAkhlaqGroupModesty,
-        kAkhlaqGroupRestraint,
-      },
-    );
+    expect(kPracticeAkhlaqCatalog.map((item) => item.group).toSet(), {
+      kAkhlaqGroupVirtues,
+      kAkhlaqGroupAnger,
+      kAkhlaqGroupModesty,
+      kAkhlaqGroupRestraint,
+    });
     expect(kPracticeAkhlaqCatalog.first.group, kAkhlaqGroupVirtues);
   });
 
@@ -39,9 +36,6 @@ void main() {
     expect(record.domain, MonitorDomain.akhlaq);
     expect(record.group, kAkhlaqGroupVirtues);
     expect(record.status, PracticeHadithStatus.learning);
-    expect(
-      practiceRecordsForDomain([record], MonitorDomain.dhikr),
-      isEmpty,
-    );
+    expect(practiceRecordsForDomain([record], MonitorDomain.dhikr), isEmpty);
   });
 }

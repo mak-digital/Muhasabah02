@@ -70,4 +70,26 @@ void main() {
     expect(find.byKey(const Key('checkin-domain-pill-salah')), findsNothing);
     expect(find.text('SALAH & PRAYER QUALITY'), findsOneWidget);
   });
+
+  testWidgets('Start today’s check-in opens the Home domain in view', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(400, 2400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      testApp(now: DateTime(2026, 9, 3), visibleDomains: allVisibleDomains()),
+    );
+    await tester.pumpAndSettle();
+    await showHomeDomain(tester, MonitorDomain.fasting);
+    expect(find.text('Fasting'), findsWidgets);
+
+    await tester.tap(find.byKey(const Key('home-check-in')));
+    await tester.pumpAndSettle();
+    expect(find.byType(CheckInScreen), findsOneWidget);
+    expect(find.text('FASTING'), findsOneWidget);
+    expect(find.text('SALAH & PRAYER QUALITY'), findsNothing);
+  });
 }

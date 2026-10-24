@@ -130,10 +130,7 @@ const huquqOutcomes = <HuquqChoice>[
     id: 'huquq.outcome.noOutcomeConfirmed',
     label: 'No outcome confirmed',
   ),
-  HuquqChoice(
-    id: 'huquq.outcome.preferNotToSay',
-    label: 'Prefer not to say',
-  ),
+  HuquqChoice(id: 'huquq.outcome.preferNotToSay', label: 'Prefer not to say'),
 ];
 
 const huquqLegendLabels = <String, String>{
@@ -259,7 +256,8 @@ const _huquqResponseLabels = <String, List<String>>{
 
 List<ActivityOption> huquqCatalogFor(String storageKey) {
   final labels =
-      _huquqResponseLabels[storageKey] ?? _huquqResponseLabels['huquq.parents']!;
+      _huquqResponseLabels[storageKey] ??
+      _huquqResponseLabels['huquq.parents']!;
   return [
     ActivityOption(
       id: HuquqObservationIds.practised,
@@ -348,10 +346,7 @@ String encodeHuquqQuantity(String occasions, String timeSpent) {
   );
 }
 
-HuquqFollowUpCapture readHuquqFollowUp(
-  DailyCheckIn record,
-  String storageKey,
-) {
+HuquqFollowUpCapture readHuquqFollowUp(DailyCheckIn record, String storageKey) {
   final activity = record.activityFor(storageKey);
   final factors =
       record.homeTraceFactors[storageKey] ?? const SalahFactorCapture();

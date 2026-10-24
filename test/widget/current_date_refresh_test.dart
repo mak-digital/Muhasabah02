@@ -177,21 +177,27 @@ void main() {
       final first = probe.now;
 
       clock = DateTime(2026, 9, 23, 0, 3);
-      await tester.pump(delayUntilNextLocalMidnight(DateTime(2026, 9, 22, 23, 58)));
+      await tester.pump(
+        delayUntilNextLocalMidnight(DateTime(2026, 9, 22, 23, 58)),
+      );
       await tester.pump();
 
       expect(dateKey(probe.now!), '2026-09-23');
       expect(probe.now, isNot(same(first)));
     });
 
-    testWidgets('same-date timer fire does not invalidate twice', (tester) async {
+    testWidgets('same-date timer fire does not invalidate twice', (
+      tester,
+    ) async {
       var clock = DateTime(2026, 9, 22, 23, 58);
       final probe = _NowProbe();
       await tester.pumpWidget(_clockApp(() => clock, probe: probe));
       await tester.pump();
 
       clock = DateTime(2026, 9, 23, 0, 3);
-      await tester.pump(delayUntilNextLocalMidnight(DateTime(2026, 9, 22, 23, 58)));
+      await tester.pump(
+        delayUntilNextLocalMidnight(DateTime(2026, 9, 22, 23, 58)),
+      );
       await tester.pump();
       final refreshed = probe.now;
 

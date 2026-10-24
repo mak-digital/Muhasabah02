@@ -80,8 +80,12 @@ void main() {
       lessThan(56),
     );
     expect(find.byKey(const Key('today-domain-salah')), findsNothing);
-    final dateBottom = tester.getBottomLeft(find.byKey(const Key('today-weekday-date'))).dy;
-    final actions = tester.getRect(find.byKey(const Key('today-entry-actions')));
+    final dateBottom = tester
+        .getBottomLeft(find.byKey(const Key('today-weekday-date')))
+        .dy;
+    final actions = tester.getRect(
+      find.byKey(const Key('today-entry-actions')),
+    );
     final checkIn = tester.getRect(find.byKey(const Key('home-check-in')));
     final quickTap = tester.getRect(find.byKey(const Key('home-quick-tap')));
     expect(actions.top, greaterThan(dateBottom));
@@ -94,7 +98,9 @@ void main() {
       1.5,
     );
     expect(
-      tester.widget<Material>(find.byKey(const Key('home-quick-tap'))).elevation,
+      tester
+          .widget<Material>(find.byKey(const Key('home-quick-tap')))
+          .elevation,
       1.5,
     );
     await expandActiveDomainMix(tester);
@@ -141,9 +147,7 @@ void main() {
     expect(akhlaq.dx, greaterThan(dhikr.dx));
   });
 
-  testWidgets('Today tiles show Salah, Qur’an and Dhikr', (
-    tester,
-  ) async {
+  testWidgets('Today tiles show Salah, Qur’an and Dhikr', (tester) async {
     await pumpHome(tester, now: DateTime(2026, 9, 22));
     await expandActiveDomainMix(tester);
     expect(
@@ -281,9 +285,8 @@ void main() {
   ) async {
     final checkIns = MemoryCheckInRepository();
     await checkIns.save(
-      DailyCheckIn.empty(
-        '2026-09-22',
-      ).withPrayer(PrayerId.fajr, PrayerStatus.onTime),
+      DailyCheckIn.empty('2026-09-22')
+          .withPrayer(PrayerId.fajr, PrayerStatus.onTime),
     );
     await pumpHome(
       tester,
@@ -295,7 +298,10 @@ void main() {
       ),
       visibleDomains: {MonitorDomain.salah, MonitorDomain.quran},
     );
-    expect(find.byKey(const Key('today-active-domain-mix-total')), findsOneWidget);
+    expect(
+      find.byKey(const Key('today-active-domain-mix-total')),
+      findsOneWidget,
+    );
     expect(find.text('1 of 3 recorded'), findsOneWidget);
     expect(find.textContaining('%'), findsNothing);
     expect(find.textContaining('Score'), findsNothing);
@@ -330,11 +336,7 @@ void main() {
     await checkIns.save(
       DailyCheckIn.empty('2026-09-22').copyWith(synthetic: true),
     );
-    await pumpHome(
-      tester,
-      now: DateTime(2026, 9, 22),
-      checkIns: checkIns,
-    );
+    await pumpHome(tester, now: DateTime(2026, 9, 22), checkIns: checkIns);
     final notice = tester.getRect(find.byKey(const Key('sample-data-notice')));
     final date = tester.getRect(find.byKey(const Key('today-weekday-date')));
     final quickTap = tester.getRect(find.byKey(const Key('home-quick-tap')));

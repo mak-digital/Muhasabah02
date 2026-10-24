@@ -22,8 +22,7 @@ void main() {
       testApp(checkIns: checkIns, now: DateTime(2026, 9, 6)),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text('History'));
-    await tester.pumpAndSettle();
+    await openRegistryTab(tester, tab: const Key('registry-tab-history'));
 
     expect(find.text(Copy.historyGuard), findsOneWidget);
     expect(find.text(Copy.historyTapToEdit), findsWidgets);

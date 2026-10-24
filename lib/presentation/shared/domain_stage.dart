@@ -90,11 +90,7 @@ class DomainStage extends ConsumerWidget {
                 physics: const AlwaysScrollableScrollPhysics(),
                 keyboardDismissBehavior:
                     ScrollViewKeyboardDismissBehavior.onDrag,
-                children: [
-                  ...aboveCard,
-                  card,
-                  ...belowCard,
-                ],
+                children: [...aboveCard, card, ...belowCard],
               ),
             ),
           ],
@@ -103,12 +99,7 @@ class DomainStage extends ConsumerWidget {
     }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        ...header,
-        ...aboveCard,
-        card,
-        ...belowCard,
-      ],
+      children: [...header, ...aboveCard, card, ...belowCard],
     );
   }
 
@@ -117,11 +108,7 @@ class DomainStage extends ConsumerWidget {
     ref.read(stageProvider.notifier).state = domains[index];
   }
 
-  Widget _chrome(
-    BuildContext context,
-    WidgetRef ref, {
-    required int index,
-  }) {
+  Widget _chrome(BuildContext context, WidgetRef ref, {required int index}) {
     final previous = index > 0 ? domains[index - 1] : null;
     final next = index < domains.length - 1 ? domains[index + 1] : null;
     final identity = domainColorIdentity(domains[index]);
@@ -136,7 +123,8 @@ class DomainStage extends ConsumerWidget {
       family: identity.family,
       wash: weekNavStripWash(
         identity.family,
-        identity.washFor(theme.brightness),
+        identity.washFor(theme.brightness, context),
+        context,
       ),
       previousKey: Key('$keyPrefix-prev'),
       nextKey: Key('$keyPrefix-next'),
@@ -153,11 +141,7 @@ class DomainStage extends ConsumerWidget {
     );
   }
 
-  Widget _pills(
-    BuildContext context,
-    WidgetRef ref, {
-    required int index,
-  }) {
+  Widget _pills(BuildContext context, WidgetRef ref, {required int index}) {
     final scheme = Theme.of(context).colorScheme;
     return Semantics(
       container: true,

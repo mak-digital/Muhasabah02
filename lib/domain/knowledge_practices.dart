@@ -88,8 +88,7 @@ class KnowledgeFollowUpCapture {
 const knowledgeAreas = <KnowledgeChoice>[
   KnowledgeChoice(
     id: 'knowledge.area.religiousOutsideQuranHadith',
-    label:
-        'Religious knowledge outside separately tracked Qur’an and Hadith study',
+    label: 'Religious knowledge outside separately tracked Qur’an and Hadith study',
   ),
   KnowledgeChoice(
     id: 'knowledge.area.scienceTechnology',
@@ -260,8 +259,7 @@ const knowledgeQuantities = <KnowledgeChoice>[
 
 const knowledgeLegendLabels = <String, String>{
   KnowledgeObservationIds.engaged: 'Relevant beneficial activity recorded',
-  KnowledgeObservationIds.progress:
-      'Partial or developing engagement recorded',
+  KnowledgeObservationIds.progress: 'Partial or developing engagement recorded',
   KnowledgeObservationIds.gapRecognised:
       'Uncertainty, limitation or shortcoming identified',
   KnowledgeObservationIds.corrected:
@@ -362,10 +360,7 @@ List<ActivityOption> knowledgeCatalogFor(String storageKey) {
 }
 
 List<ActivityOption> get knowledgeLegendCatalog => [
-  for (final id in [
-    ...KnowledgeObservationIds.ordered,
-    ActivityIds.unanswered,
-  ])
+  for (final id in [...KnowledgeObservationIds.ordered, ActivityIds.unanswered])
     ActivityOption(
       id: id,
       label: knowledgeLegendLabels[id] ?? id,
@@ -500,10 +495,7 @@ DailyCheckIn writeKnowledgeFollowUp(
   final packed = encodeKnowledgeExtras(capture);
   var next = record.withHomeTraceActivity(
     storageKey,
-    RecordedActivity(
-      id: capture.primaryId,
-      customText: packed,
-    ),
+    RecordedActivity(id: capture.primaryId, customText: packed),
   );
   if (!capture.isPrimaryRecorded) {
     return next.withHomeTraceFactors(storageKey, const SalahFactorCapture());

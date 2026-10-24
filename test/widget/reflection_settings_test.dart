@@ -134,10 +134,11 @@ void main() {
     final prefs = MemoryAppPrefs();
     final now = DateTime(2026, 10, 8);
     final first = quoteFor(now: now, cadence: QuotationCadence.weekly)!;
-    final second = kReflectionQuotes[stepReflectionCatalog(
-      reflectionCatalogIndex(first),
-      1,
-    )];
+    final second =
+        kReflectionQuotes[stepReflectionCatalog(
+          reflectionCatalogIndex(first),
+          1,
+        )];
 
     await tester.pumpWidget(testApp(now: now, prefs: prefs));
     await tester.pumpAndSettle();

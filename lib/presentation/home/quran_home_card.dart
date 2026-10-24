@@ -62,6 +62,7 @@ class _QuranHomeCardState extends ConsumerState<QuranHomeCard> {
       MuhasabahColors.quranWash,
       MuhasabahColors.quranWashDark,
       brightness,
+      context,
     );
     final localizations = MaterialLocalizations.of(context);
 
@@ -150,9 +151,7 @@ class _QuranHomeCardState extends ConsumerState<QuranHomeCard> {
                   children: [
                     for (final key in keys)
                       Expanded(
-                        child: Center(
-                          child: _compactCell(key, index[key]),
-                        ),
+                        child: Center(child: _compactCell(key, index[key])),
                       ),
                   ],
                 )
@@ -194,9 +193,7 @@ class _QuranHomeCardState extends ConsumerState<QuranHomeCard> {
           ),
           for (final key in keys)
             Expanded(
-              child: Center(
-                child: _cell(dimension, key, index[key], colours),
-              ),
+              child: Center(child: _cell(dimension, key, index[key], colours)),
             ),
         ],
       ),
@@ -269,10 +266,7 @@ class _QuranHomeCardState extends ConsumerState<QuranHomeCard> {
         ActivityIds.unanswered;
     return RecordedStateMarker(
       key: Key('quran-home-${dimension.name}-$key'),
-      kind: SalahActivityMark.quranDurationKind(
-        id,
-        activityColours: colours,
-      ),
+      kind: SalahActivityMark.quranDurationKind(id, activityColours: colours),
       color: SalahActivityMark.quranDurationColour(id, colours: colours),
       semanticLabel: '$key ${dimension.label} ${outcome.legendLabel}',
     );

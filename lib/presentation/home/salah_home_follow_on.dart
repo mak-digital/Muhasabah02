@@ -169,7 +169,7 @@ class _SalahActionsWashState extends ConsumerState<_SalahActionsWash> {
     final salah = actionsForDomain(actions, domain);
     final strip = actionStripForHome(salah);
     final identity = domainColorIdentity(domain);
-    final wash = identity.washFor(Theme.of(context).brightness);
+    final wash = identity.washFor(Theme.of(context).brightness, context);
     return WashPanel(
       key: followOnKey(domain, 'actions-panel'),
       color: wash,
@@ -439,11 +439,13 @@ class _SalahActionsWashState extends ConsumerState<_SalahActionsWash> {
         MuhasabahColors.summaryWash,
         MuhasabahColors.summaryWashDark,
         brightness,
+        context,
       ),
       ActionChipTone.done => MuhasabahColors.wash(
         MuhasabahColors.salahVoluntaryBand,
         MuhasabahColors.salahVoluntaryBandDark,
         brightness,
+        context,
       ),
       ActionChipTone.pastTarget => MuhasabahColors.missedEarth.withValues(
         alpha: brightness == Brightness.dark ? 0.45 : 0.28,
@@ -452,16 +454,19 @@ class _SalahActionsWashState extends ConsumerState<_SalahActionsWash> {
         MuhasabahColors.todayMarkWash,
         MuhasabahColors.todayMarkWashDark,
         brightness,
+        context,
       ),
       ActionChipTone.week => MuhasabahColors.wash(
         MuhasabahColors.salahFridayBand,
         MuhasabahColors.salahFridayBandDark,
         brightness,
+        context,
       ),
       ActionChipTone.later => MuhasabahColors.wash(
         MuhasabahColors.summaryWash,
         MuhasabahColors.summaryWashDark,
         brightness,
+        context,
       ),
     };
   }
@@ -896,7 +901,7 @@ class _SalahDeveloperNotesWashState
   @override
   Widget build(BuildContext context) {
     final identity = domainColorIdentity(widget.domain);
-    final wash = identity.notesWashFor(Theme.of(context).brightness);
+    final wash = identity.notesWashFor(Theme.of(context).brightness, context);
     return WashPanel(
       key: followOnKey(widget.domain, 'feedback-panel'),
       color: wash,

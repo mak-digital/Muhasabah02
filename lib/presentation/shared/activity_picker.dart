@@ -10,6 +10,7 @@ import '../../domain/factor_groups.dart';
 import '../../domain/home_traces.dart';
 import '../../domain/quran.dart';
 import '../../domain/salah_factors.dart';
+import '../../domain/thirty_day_trend.dart';
 import 'domain_line_icon.dart';
 import 'domain_visual.dart';
 import 'salah_activity_mark.dart';
@@ -106,6 +107,7 @@ class CheckInSelect<T> extends StatelessWidget {
     this.depth = CheckInFieldDepth.value,
     this.sortLabels = true,
     this.fillColor,
+    this.compact = false,
   });
 
   final T value;
@@ -116,15 +118,28 @@ class CheckInSelect<T> extends StatelessWidget {
   final CheckInFieldDepth depth;
   final bool sortLabels;
   final Color? fillColor;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final nested = depth == CheckInFieldDepth.nested;
-    final indent = nested ? checkInNestedIndent : checkInValueIndent;
+    final indent = compact
+        ? 0.0
+        : nested
+        ? checkInNestedIndent
+        : checkInValueIndent;
     final fill =
         fillColor ?? scheme.surface.withValues(alpha: nested ? 0.52 : 0.9);
     final ink = nested ? scheme.onSurfaceVariant : scheme.onSurface;
+    final labelStyle = compact
+        ? Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: ink,
+            fontSize: 11,
+            height: 1.2,
+            fontWeight: FontWeight.w600,
+          )
+        : Theme.of(context).textTheme.bodyMedium?.copyWith(color: ink);
     final sorted = [...entries];
     if (sortLabels) {
       sorted.sort(
@@ -134,9 +149,9 @@ class CheckInSelect<T> extends StatelessWidget {
     Widget labelFor(CheckInSelectEntry<T> entry) {
       final text = Text(
         entry.label,
-        maxLines: 6,
+        maxLines: compact ? 1 : 6,
         overflow: TextOverflow.ellipsis,
-        style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: ink),
+        style: labelStyle,
       );
       final swatch = entry.swatch;
       if (swatch == null) return text;
@@ -160,10 +175,14 @@ class CheckInSelect<T> extends StatelessWidget {
         child: Material(
           color: fill,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-            side: BorderSide(
-              color: scheme.outlineVariant.withValues(alpha: nested ? 0.7 : 1),
-            ),
+            borderRadius: BorderRadius.circular(compact ? 8 : 10),
+            side: compact
+                ? BorderSide.none
+                : BorderSide(
+                    color: scheme.outlineVariant.withValues(
+                      alpha: nested ? 0.7 : 1,
+                    ),
+                  ),
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<T>(
@@ -173,10 +192,11 @@ class CheckInSelect<T> extends StatelessWidget {
               itemHeight: null,
               value: value,
               menuMaxHeight: 560,
-              style: Theme.of(context).textTheme.bodyMedium
-                  ?.copyWith(color: ink),
+              style: labelStyle,
               iconEnabledColor: scheme.onSurfaceVariant,
-              padding: const EdgeInsets.fromLTRB(12, 8, 8, 8),
+              padding: compact
+                  ? const EdgeInsets.fromLTRB(6, 2, 2, 2)
+                  : const EdgeInsets.fromLTRB(12, 8, 8, 8),
               items: [
                 for (final entry in sorted)
                   DropdownMenuItem<T>(
@@ -215,7 +235,6 @@ class ActivityPicker extends ConsumerWidget {
     required this.onSelected,
     this.statusKeyPrefix,
     this.enabled = true,
-    this.namedSubject,
   });
 
   final List<ActivityOption> options;
@@ -223,14 +242,12 @@ class ActivityPicker extends ConsumerWidget {
   final ValueChanged<ActivityOption> onSelected;
   final String? statusKeyPrefix;
   final bool enabled;
-  final String? namedSubject;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(prefsTickProvider);
     final salahList =
-        identical(options, ActivityCatalog.salah) ||
-        identical(options, ActivityCatalog.jumuah) ||
+        ActivityCatalog.isObligatorySalahCatalog(options) ||
         identical(options, ActivityCatalog.tahajjud) ||
         identical(options, ActivityCatalog.ishraq) ||
         identical(options, ActivityCatalog.tawbah);
@@ -277,7 +294,11 @@ class ActivityPicker extends ConsumerWidget {
         for (final option in shown)
           CheckInSelectEntry(
             value: option.id,
-            label: _namedLabel(option.label),
+            label: compactChoiceLabel(
+              option.label,
+              stripCatalogRowName: durationList,
+              optionId: option.id,
+            ),
             itemKey: _keyFor(option),
             swatch: swatches ? SalahActivityMark.colourForId(option.id) : null,
           ),
@@ -304,13 +325,6 @@ class ActivityPicker extends ConsumerWidget {
       return Key('$statusKeyPrefix-unanswered');
     }
     return Key('$statusKeyPrefix-${option.id}');
-  }
-
-  String _namedLabel(String label) {
-    if (ActivityCatalog.isAkhlaqObservationCatalog(options)) return label;
-    final subject = namedSubject;
-    if (subject == null || subject.isEmpty) return label;
-    return '$label — $subject';
   }
 }
 

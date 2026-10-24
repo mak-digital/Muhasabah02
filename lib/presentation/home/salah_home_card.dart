@@ -55,10 +55,10 @@ class _SalahHomeCardState extends ConsumerState<SalahHomeCard> {
     final keys = weekDateKeys(weekStart);
     final index = {for (final record in widget.records) record.dateKey: record};
     final brightness = Theme.of(context).brightness;
-    final wash = MuhasabahColors.wash(
+    final wash = MuhasabahColors.themeWash(
+      context,
       MuhasabahColors.salahWash,
       MuhasabahColors.salahWashDark,
-      brightness,
     );
     final localizations = MaterialLocalizations.of(context);
     final display = widget.displayRows ?? SalahTraceRow.values;
@@ -273,7 +273,7 @@ class _SalahHomeCardState extends ConsumerState<SalahHomeCard> {
     required List<String> keys,
     required Map<String, DailyCheckIn> index,
   }) {
-    final bandWash = MuhasabahColors.wash(light, dark, brightness);
+    final bandWash = MuhasabahColors.wash(light, dark, brightness, context);
     return DecoratedBox(
       decoration: BoxDecoration(
         color: bandWash,

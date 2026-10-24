@@ -195,10 +195,7 @@ const _ummahResponseLabels = <String, List<(String, String)>>{
     ),
   ],
   'ummah.earthCare': [
-    (
-      'ummah.earthCare.reducedWaste',
-      'I reduced avoidable waste or pollution.',
-    ),
+    ('ummah.earthCare.reducedWaste', 'I reduced avoidable waste or pollution.'),
     (
       'ummah.earthCare.conservedResources',
       'I conserved water, energy or other resources.',
@@ -211,10 +208,7 @@ const _ummahResponseLabels = <String, List<(String, String)>>{
       'ummah.earthCare.didNotAct',
       'I noticed an opportunity to reduce harm but did not act today.',
     ),
-    (
-      'ummah.earthCare.noOpportunity',
-      'I had no relevant opportunity today.',
-    ),
+    ('ummah.earthCare.noOpportunity', 'I had no relevant opportunity today.'),
   ],
 };
 
@@ -227,11 +221,7 @@ TernaryOutcome _ternaryForKind(UmmahResponseKind kind) {
 
 ActivityOption _option(String id, String label) {
   final kind = ummahKindFor(id) ?? UmmahResponseKind.unanswered;
-  return ActivityOption(
-    id: id,
-    label: label,
-    ternary: _ternaryForKind(kind),
-  );
+  return ActivityOption(id: id, label: label, ternary: _ternaryForKind(kind));
 }
 
 List<ActivityOption> ummahCatalogFor(String storageKey) {
@@ -259,7 +249,8 @@ List<ActivityOption> get ummahLegendCatalog => [
     ),
 ];
 
-UmmahResponseKind? ummahKindFor(String activityId) => _ummahKindById[activityId];
+UmmahResponseKind? ummahKindFor(String activityId) =>
+    _ummahKindById[activityId];
 
 String ummahPrimaryLabel(String storageKey, String activityId) {
   for (final option in ummahCatalogFor(storageKey)) {
@@ -268,10 +259,7 @@ String ummahPrimaryLabel(String storageKey, String activityId) {
   return ummahLegendLabels[activityId] ?? 'Unanswered';
 }
 
-UmmahPracticeCapture readUmmahPractice(
-  DailyCheckIn record,
-  String storageKey,
-) {
+UmmahPracticeCapture readUmmahPractice(DailyCheckIn record, String storageKey) {
   return UmmahPracticeCapture(primaryId: record.activityFor(storageKey).id);
 }
 

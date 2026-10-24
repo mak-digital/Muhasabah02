@@ -92,10 +92,7 @@ const _charityResponseLabels = <String, List<(String, String)>>{
   'charity.voluntary': [
     ('charity.voluntary.gave', 'Gave voluntary charity'),
     ('charity.voluntary.intended', 'Intended or arranged to give'),
-    (
-      'charity.voluntary.didNotGive',
-      'Had an opportunity but did not give',
-    ),
+    ('charity.voluntary.didNotGive', 'Had an opportunity but did not give'),
     ('charity.voluntary.noOpportunity', 'No relevant opportunity today'),
   ],
   'charity.householdGiving': [
@@ -107,25 +104,13 @@ const _charityResponseLabels = <String, List<(String, String)>>{
       'charity.householdGiving.practicalCare',
       'Provided practical assistance or care',
     ),
-    (
-      'charity.householdGiving.didNotAct',
-      'Recognised a need but did not act',
-    ),
+    ('charity.householdGiving.didNotAct', 'Recognised a need but did not act'),
     ('charity.householdGiving.noNeed', 'No relevant need today'),
   ],
   'charity.community': [
-    (
-      'charity.community.contributed',
-      'Contributed money or useful items',
-    ),
-    (
-      'charity.community.volunteered',
-      'Volunteered time, skills or effort',
-    ),
-    (
-      'charity.community.didNotAct',
-      'Intended to help but did not act',
-    ),
+    ('charity.community.contributed', 'Contributed money or useful items'),
+    ('charity.community.volunteered', 'Volunteered time, skills or effort'),
+    ('charity.community.didNotAct', 'Intended to help but did not act'),
     ('charity.community.noOpportunity', 'No relevant opportunity today'),
   ],
   'charity.educational': [
@@ -150,10 +135,7 @@ const _charityResponseLabels = <String, List<(String, String)>>{
     ('charity.emergency.noEmergency', 'No emergency encountered today'),
   ],
   'charity.financialStress': [
-    (
-      'charity.financialStress.relief',
-      'Provided financial or material relief',
-    ),
+    ('charity.financialStress.relief', 'Provided financial or material relief'),
     (
       'charity.financialStress.accessAssistance',
       'Helped someone access assistance',
@@ -162,10 +144,7 @@ const _charityResponseLabels = <String, List<(String, String)>>{
       'charity.financialStress.practicalEmotional',
       'Offered practical or emotional support',
     ),
-    (
-      'charity.financialStress.didNotAct',
-      'Recognised a need but did not act',
-    ),
+    ('charity.financialStress.didNotAct', 'Recognised a need but did not act'),
     ('charity.financialStress.noSituation', 'No relevant situation today'),
   ],
 };
@@ -179,11 +158,7 @@ TernaryOutcome _ternaryForKind(CharityResponseKind kind) {
 
 ActivityOption _option(String id, String label) {
   final kind = charityKindFor(id) ?? CharityResponseKind.unanswered;
-  return ActivityOption(
-    id: id,
-    label: label,
-    ternary: _ternaryForKind(kind),
-  );
+  return ActivityOption(id: id, label: label, ternary: _ternaryForKind(kind));
 }
 
 List<ActivityOption> charityCatalogFor(String storageKey) {

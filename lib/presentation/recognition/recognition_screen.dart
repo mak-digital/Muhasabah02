@@ -136,9 +136,8 @@ class RecognitionScreen extends ConsumerWidget {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute<void>(
-                                    builder: (_) => DayEvidenceScreen(
-                                      dateKey: date,
-                                    ),
+                                      builder: (_) =>
+                                          DayEvidenceScreen(dateKey: date),
                                     ),
                                   );
                                 },

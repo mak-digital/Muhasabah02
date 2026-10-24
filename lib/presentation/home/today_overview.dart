@@ -107,10 +107,10 @@ class _SampleDataNotice extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       key: const Key('sample-data-notice'),
-      color: MuhasabahColors.wash(
+      color: MuhasabahColors.themeWash(
+        context,
         MuhasabahColors.sampleBannerWash,
         MuhasabahColors.sampleBannerWashDark,
-        Theme.of(context).brightness,
       ),
       borderRadius: BorderRadius.circular(10),
       child: Padding(
@@ -241,14 +241,7 @@ class TodayEntryActions extends ConsumerWidget {
             label: Copy.homeCheckIn,
             wash: checkInWash,
             ink: scheme.primary,
-            onTap: () {
-              refreshNowIfLocalDateChanged(ref);
-              Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => CheckInScreen(date: ref.read(nowProvider)),
-                ),
-              );
-            },
+            onTap: () => openTodaysCheckInFromHome(context, ref),
           ),
         ),
         const SizedBox(width: 8),
@@ -340,7 +333,7 @@ class _TodayDomainTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final identity = domainColorIdentity(item.domain);
     final brightness = Theme.of(context).brightness;
-    final wash = identity.washFor(brightness);
+    final wash = identity.washFor(brightness, context);
     final label = todayDomainLabel(item.domain);
     final status = Copy.mixRowsRecorded(
       item.recordedMixCount,
@@ -351,7 +344,7 @@ class _TodayDomainTile extends StatelessWidget {
       semanticLabel: '$label. $status',
       excludeChildSemantics: true,
       color: wash,
-      railColor: identity.family,
+      railColor: identity.familyFor(context),
       onTap: () {
         refreshNowIfLocalDateChanged(ref);
         openTodayDomainWorkspace(context, item.domain);
@@ -360,7 +353,11 @@ class _TodayDomainTile extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
         child: Row(
           children: [
-            DomainLineIcon(item.domain, size: 18, color: identity.family),
+            DomainLineIcon(
+              item.domain,
+              size: 18,
+              color: identity.familyFor(context),
+            ),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
@@ -370,7 +367,7 @@ class _TodayDomainTile extends StatelessWidget {
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.w800,
                   height: 1.15,
-                  color: identity.family,
+                  color: identity.familyFor(context),
                 ),
               ),
             ),
@@ -385,7 +382,7 @@ class _TodayDomainTile extends StatelessWidget {
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w800,
                     height: 1.1,
-                    color: identity.family,
+                    color: identity.familyFor(context),
                   ),
                 ),
                 Text(
@@ -396,7 +393,7 @@ class _TodayDomainTile extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                     height: 1.1,
                     color: Color.alphaBlend(
-                      identity.family.withValues(alpha: 0.55),
+                      identity.familyFor(context).withValues(alpha: 0.55),
                       Theme.of(context).colorScheme.onSurface,
                     ),
                   ),

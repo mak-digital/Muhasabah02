@@ -52,6 +52,7 @@ class TodayMarkHalo extends StatelessWidget {
         MuhasabahColors.todayMarkWash,
         MuhasabahColors.todayMarkWashDark,
         brightness,
+        context,
       ),
       child: child,
     );

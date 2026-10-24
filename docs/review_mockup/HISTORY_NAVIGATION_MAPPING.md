@@ -13,7 +13,7 @@ Proposed shell (after approval): Home · Review.
 | Existing function | Where it lives today | Proposed place on Review | Notes / trade-off |
 |---|---|---|---|
 | List saved check-ins newest-first in week groups | History list | Calendar + optional week-grouped list under “History in this window” | Empty days **shown** on calendar (today History hides them). Need a toggle “Saved only” to match old list density |
-| Filter All / 30 / 90 | History chips | Period chips (7/30/90) + **All saved days** control | **7-day is new** on this list. All-time is **not** a Review period — keep an explicit All mode or History remains a push route |
+| Filter All / 30 / 90 | History chips | Period chips (7/30/90) + **All saved days** Review panel (date filter, open record) | **7-day is new** on the period calendar. All-time is **not** a Review period chip. Mockup demonstrates the panel; production can push existing `HistoryScreen` |
 | Empty state + start today’s check-in | History empty | Review empty copy + Home | Preserve “start today from Home” |
 | Guard copy (`Copy.historyGuard`) | History header | Day sheet + calendar intro | Keep: edit does not duplicate |
 | Edit check-in | Row / sheet → `CheckInScreen(date: parseDateKey)` | Day sheet **View / Edit this record**; domain card **View / Edit a record** | Same constructor; upsert by `dateKey` |
@@ -24,7 +24,7 @@ Proposed shell (after approval): Home · Review.
 
 **Must not drop:** All-time list, confirm-remove, edit-in-place, empty History CTA.
 
-**If All-time is too cramped on the dashboard:** keep `HistoryScreen` as a push from Review (“All saved days”) **without** a fourth tab. That is the recommended fallback.
+**If All-time is too cramped on the dashboard:** keep `HistoryScreen` as a push from Review (“All saved days”) **without** a fourth tab. The refined mockup uses that panel pattern (filter + open record, then back to Review).
 
 ---
 
@@ -78,14 +78,14 @@ Do not retitle Ponder as “you are improving spiritually.” Keep `PeriodNarrat
 
 | Function | Today | Proposed |
 |---|---|---|
-| Independent notes list | Tab 3 | Review: **My Response list** control → same screen pushed, or a sheet listing titles |
-| FAB add response | Tab 3 | **Add a response from this period** |
-| Provenance display | Subtitle | Unchanged model |
-| Archive section | List | Must remain on the list screen |
-| Editor / detail | Push routes | Unchanged |
+| Independent notes list | Tab 3 | Review: **My Response** → active list with provenance |
+| FAB add response | Tab 3 | **Add a response from this period** (and from a day sheet) |
+| Provenance display | Subtitle | Unchanged model; mockup stamps period or day on add |
+| Archive section | List | **Archived** chip; archive / restore without delete |
+| Editor / detail | Push routes | Mockup in-place edit; production can keep editor routes |
 | Add from Review / Recorded Days | Existing buttons | Footer + day sheet |
 
-**Trade-off:** burying the full list inside Review can hide archived notes. Mitigation: the list control opens the **existing** `ResponseListScreen` (not a truncated sheet). The mockup sheet is a prototype of that push.
+**Trade-off:** burying the full list inside Review can hide archived notes. Mitigation: Active / Archived chips on the same panel, or push the **existing** `ResponseListScreen`. Do not add a fourth bottom tab.
 
 ---
 

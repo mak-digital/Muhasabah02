@@ -7,10 +7,7 @@ class HadithFetchException implements Exception {
 }
 
 class FetchedHadith {
-  const FetchedHadith({
-    required this.arabic,
-    required this.translation,
-  });
+  const FetchedHadith({required this.arabic, required this.translation});
 
   final String arabic;
   final String translation;

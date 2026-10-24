@@ -27,8 +27,12 @@ void main() {
     );
     expect(find.textContaining('Qur’an ›'), findsNothing);
 
-    final prevBefore = tester.getRect(find.byKey(const Key('home-domain-prev')));
-    final nextBefore = tester.getRect(find.byKey(const Key('home-domain-next')));
+    final prevBefore = tester.getRect(
+      find.byKey(const Key('home-domain-prev')),
+    );
+    final nextBefore = tester.getRect(
+      find.byKey(const Key('home-domain-next')),
+    );
     expect(prevBefore.width, nextBefore.width);
     expect(prevBefore.height, nextBefore.height);
     expect(prevBefore.height, lessThanOrEqualTo(36));
@@ -77,10 +81,7 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
 
     await tester.pumpWidget(
-      testApp(
-        now: DateTime(2026, 9, 3),
-        visibleDomains: {MonitorDomain.salah},
-      ),
+      testApp(now: DateTime(2026, 9, 3), visibleDomains: {MonitorDomain.salah}),
     );
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('home-domain-next')), findsNothing);

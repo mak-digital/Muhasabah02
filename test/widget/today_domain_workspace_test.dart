@@ -10,7 +10,6 @@ import 'package:muhasabah02/domain/copy.dart';
 import 'package:muhasabah02/domain/daily_check_in.dart';
 import 'package:muhasabah02/domain/date_key.dart';
 import 'package:muhasabah02/domain/dhikr_context.dart';
-import 'package:muhasabah02/domain/home_traces.dart';
 import 'package:muhasabah02/domain/monitor_domain.dart';
 import 'package:muhasabah02/domain/personal_mix.dart';
 import 'package:muhasabah02/domain/practice_dhikr_catalog.dart';
@@ -249,7 +248,7 @@ void main() {
     await chooseCheckInOption(
       tester,
       dropdownKey: const Key('today-salah-fajr'),
-      optionLabel: 'Prayed alone on time',
+      optionLabel: 'Alone on time',
     );
     await tester.pumpAndSettle();
     expect(
@@ -278,7 +277,7 @@ void main() {
     await chooseCheckInOption(
       tester,
       dropdownKey: const Key('today-quran-reading'),
-      optionLabel: 'Engaged more than 20 minutes — Engagement',
+      optionLabel: 'Engaged >20 mins',
     );
     await tester.pumpAndSettle();
     expect(
@@ -289,7 +288,7 @@ void main() {
     await chooseCheckInOption(
       tester,
       dropdownKey: const Key('today-quran-reading'),
-      optionLabel: 'I did not notice this today — Engagement',
+      optionLabel: 'Did not notice',
     );
     await tester.pumpAndSettle();
     expect(
@@ -914,7 +913,7 @@ void main() {
     await chooseCheckInOption(
       tester,
       dropdownKey: const Key('today-salah-fajr'),
-      optionLabel: 'Prayed alone on time',
+      optionLabel: 'Alone on time',
     );
     await tester.tap(find.byType(ModalBarrier).last);
     await tester.pumpAndSettle();

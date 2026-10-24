@@ -193,11 +193,7 @@ TernaryOutcome _ternaryForKind(WealthResponseKind kind) {
 
 ActivityOption _option(String id, String label) {
   final kind = wealthKindFor(id) ?? WealthResponseKind.unanswered;
-  return ActivityOption(
-    id: id,
-    label: label,
-    ternary: _ternaryForKind(kind),
-  );
+  return ActivityOption(id: id, label: label, ternary: _ternaryForKind(kind));
 }
 
 List<ActivityOption> wealthCatalogFor(String storageKey) {
@@ -239,9 +235,7 @@ WealthPracticeCapture readWealthPractice(
   DailyCheckIn record,
   String storageKey,
 ) {
-  return WealthPracticeCapture(
-    primaryId: record.activityFor(storageKey).id,
-  );
+  return WealthPracticeCapture(primaryId: record.activityFor(storageKey).id);
 }
 
 DailyCheckIn writeWealthPractice(

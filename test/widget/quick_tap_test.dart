@@ -7,6 +7,7 @@ import 'package:muhasabah02/domain/copy.dart';
 import 'package:muhasabah02/domain/daily_check_in.dart';
 import 'package:muhasabah02/domain/dhikr_context.dart';
 import 'package:muhasabah02/domain/display_calendar.dart';
+import 'package:muhasabah02/domain/fasting_practices.dart';
 import 'package:muhasabah02/domain/monitor_domain.dart';
 import 'package:muhasabah02/domain/personal_mix.dart';
 import 'package:muhasabah02/domain/prayer.dart';
@@ -17,6 +18,7 @@ import 'package:muhasabah02/presentation/shared/salah_activity_mark.dart';
 import 'package:muhasabah02/presentation/shared/state_marker.dart';
 import 'package:muhasabah02/presentation/shared/system_insets.dart';
 
+import '../support/home_domain_stage.dart';
 import '../support/test_app.dart';
 
 void main() {
@@ -28,8 +30,9 @@ void main() {
     DateTime? now,
     double textScale = 1,
     double systemBottom = 0,
+    MonitorDomain? homeDomain,
   }) async {
-    tester.view.physicalSize = const Size(400, 1200);
+    tester.view.physicalSize = Size(400, homeDomain == null ? 1200 : 2400);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
@@ -50,6 +53,9 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+    if (homeDomain != null) {
+      await showHomeDomain(tester, homeDomain);
+    }
     await tester.ensureVisible(find.text(Copy.quickTap));
     await tester.tap(find.text(Copy.quickTap));
     await tester.pumpAndSettle();
@@ -86,9 +92,9 @@ void main() {
     final checkIns = MemoryCheckInRepository();
     await pumpQuickTap(tester, checkIns: checkIns);
     expect(find.text(Copy.quickTapNote), findsNothing);
+    expect(find.byKey(const Key('quick-tap-domain-group')), findsOneWidget);
     expect(find.byKey(const Key('quick-tap-domain-salah')), findsOneWidget);
-    expect(find.byKey(const Key('quick-tap-salah.fajr')), findsNothing);
-    await expandQuickTapDomain(tester, MonitorDomain.salah);
+    expect(find.text('SALAH'), findsNothing);
     expect(find.byKey(const Key('quick-tap-salah.fajr')), findsOneWidget);
     expect(find.byKey(const Key('quick-tap-dhikr.generalDhikr')), findsNothing);
     await tester.tap(find.byKey(const Key('quick-tap-salah.fajr')));
@@ -128,6 +134,7 @@ void main() {
     );
     expect(fajrMark.kind, MarkerKind.filled);
     expect(fajrMark.color, SalahActivityMark.congregationOnTime);
+    expect(fajrMark.size, 12);
     final salahWash = domainColorIdentity(MonitorDomain.salah)
         .washFor(Brightness.light);
     final quranWash = domainColorIdentity(MonitorDomain.quran)
@@ -136,15 +143,21 @@ void main() {
         .washFor(Brightness.light);
     expect(
       tester
-          .widget<Material>(find.byKey(const Key('quick-tap-domain-salah')))
+          .widget<ColoredBox>(
+            find.byKey(const Key('quick-tap-domain-rail-salah')),
+          )
           .color,
-      salahWash,
+      domainColorIdentity(MonitorDomain.salah).family,
     );
-    expect(tileFill(tester, 'salah.fajr').color, isNot(salahWash));
     expect(
-      tileFill(tester, 'salah.fajr').color,
-      isNot(ThemeData.light().colorScheme.surface),
+      tester
+          .widget<Material>(find.byKey(const Key('quick-tap-domain-group')))
+          .color,
+      Theme.of(tester.element(find.byType(QuickTapSheet))).colorScheme.surface,
     );
+    final fajrFill = tileFill(tester, 'salah.fajr').color;
+    expect(fajrFill, isNot(salahWash));
+    expect(fajrFill, isNot(ThemeData.light().colorScheme.surface));
     final scrollable = find.descendant(
       of: find.byType(QuickTapSheet),
       matching: find.byType(Scrollable),
@@ -162,18 +175,18 @@ void main() {
     );
     expect(
       tester
-          .widget<Material>(find.byKey(const Key('quick-tap-domain-quran')))
+          .widget<ColoredBox>(
+            find.byKey(const Key('quick-tap-domain-rail-quran')),
+          )
           .color,
-      quranWash,
+      domainColorIdentity(MonitorDomain.quran).family,
     );
-    expect(tileFill(tester, 'quran.reading').color, isNot(quranWash));
-    expect(
-      tileFill(tester, 'quran.reading').color,
-      isNot(tileFill(tester, 'salah.fajr').color),
-    );
+    final quranFill = tileFill(tester, 'quran.reading').color;
+    expect(quranFill, isNot(quranWash));
+    expect(quranFill, isNot(fajrFill));
     final quranShape =
         tileFill(tester, 'quran.reading').shape! as RoundedRectangleBorder;
-    expect(quranShape.borderRadius, BorderRadius.circular(14));
+    expect(quranShape.borderRadius, BorderRadius.circular(10));
     await tester.scrollUntilVisible(
       find.byKey(const Key('quick-tap-domain-toggle-dhikr')),
       300,
@@ -187,9 +200,11 @@ void main() {
     );
     expect(
       tester
-          .widget<Material>(find.byKey(const Key('quick-tap-domain-dhikr')))
+          .widget<ColoredBox>(
+            find.byKey(const Key('quick-tap-domain-rail-dhikr')),
+          )
           .color,
-      dhikrWash,
+      domainColorIdentity(MonitorDomain.dhikr).family,
     );
     expect(tileFill(tester, 'dhikr.morningAdhkar').color, isNot(dhikrWash));
     expect(quranWash, isNot(salahWash));
@@ -223,9 +238,11 @@ void main() {
         .washFor(Brightness.light);
     expect(
       tester
-          .widget<Material>(find.byKey(const Key('quick-tap-domain-salah')))
+          .widget<ColoredBox>(
+            find.byKey(const Key('quick-tap-domain-rail-salah')),
+          )
           .color,
-      salahWash,
+      domainColorIdentity(MonitorDomain.salah).family,
     );
     expect(
       tileFill(tester, 'salah.dhuhr').color,
@@ -244,7 +261,7 @@ void main() {
     );
     expect(marker.kind, MarkerKind.missed);
     expect(marker.color, SalahActivityMark.colourForId('missed'));
-    expect(marker.size, 14);
+    expect(marker.size, 12);
     expect(
       tester
           .widget<Text>(
@@ -483,20 +500,50 @@ void main() {
     );
   });
 
-  testWidgets('Quick Tap keeps mix domain decks collapsed until opened', (
-    tester,
-  ) async {
+  testWidgets('Quick Tap opens the Home domain in view', (tester) async {
     await pumpQuickTap(tester);
+    expect(find.byKey(const Key('quick-tap-domain-group')), findsOneWidget);
     expect(find.byKey(const Key('quick-tap-domain-salah')), findsOneWidget);
     expect(find.byKey(const Key('quick-tap-domain-quran')), findsOneWidget);
     expect(find.byKey(const Key('quick-tap-domain-dhikr')), findsOneWidget);
-    expect(find.byKey(const Key('quick-tap-domain-tiles-salah')), findsNothing);
+    expect(find.text('Salah'), findsWidgets);
+    expect(find.text('SALAH'), findsNothing);
+    expect(
+      find.byKey(const Key('quick-tap-domain-tiles-salah')),
+      findsOneWidget,
+    );
     expect(find.byKey(const Key('quick-tap-domain-tiles-quran')), findsNothing);
-    expect(find.byKey(const Key('quick-tap-salah.fajr')), findsNothing);
-    await expandQuickTapDomain(tester, MonitorDomain.salah);
     expect(find.byKey(const Key('quick-tap-salah.fajr')), findsOneWidget);
-    expect(find.byKey(const Key('quick-tap-domain-tiles-quran')), findsNothing);
-    expect(find.byKey(const Key('quick-tap-quran.reading')), findsNothing);
+    await expandQuickTapDomain(tester, MonitorDomain.quran);
+    expect(find.byKey(const Key('quick-tap-domain-tiles-salah')), findsNothing);
+    expect(find.byKey(const Key('quick-tap-salah.fajr')), findsNothing);
+    expect(find.byKey(const Key('quick-tap-quran.reading')), findsOneWidget);
+  });
+
+  testWidgets('Quick Tap focuses Fasting when Home is on Fasting', (
+    tester,
+  ) async {
+    await pumpQuickTap(
+      tester,
+      visibleDomains: allVisibleDomains(),
+      personalMix: mixForKind(
+        PersonalMixKind.custom,
+        customKeys: {
+          'salah.fajr',
+          'quran.reading',
+          kFastingWeeklySunnahKey,
+          kFastingMonthlyKey,
+          kFastingMakeupKey,
+        },
+      ),
+      homeDomain: MonitorDomain.fasting,
+    );
+    expect(
+      find.byKey(const Key('quick-tap-domain-tiles-fasting')),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('quick-tap-domain-tiles-salah')), findsNothing);
+    expect(find.byKey(const Key('quick-tap-salah.fajr')), findsNothing);
   });
 
   testWidgets('a single Quick Tap domain opens its cards by default', (
@@ -548,6 +595,35 @@ void main() {
     expect(header.left - sheet.left, lessThan(24));
     expect(sheet.right - header.right, lessThan(24));
     expect(header.height, lessThan(96));
+    final title = tester.widget<Text>(
+      find.descendant(
+        of: find.byKey(const Key('quick-tap-header')),
+        matching: find.text(Copy.quickTapTitle),
+      ),
+    );
+    final busy = tester.widget<Text>(
+      find.descendant(
+        of: find.byKey(const Key('quick-tap-note-toggle')),
+        matching: find.text(Copy.quickTapNoteTitle),
+      ),
+    );
+    expect(title.style?.fontSize, 14);
+    expect(busy.style?.fontSize, 14);
+    expect(title.style?.fontWeight, busy.style?.fontWeight);
+    final titleBox = tester.getRect(
+      find.descendant(
+        of: find.byKey(const Key('quick-tap-header')),
+        matching: find.text(Copy.quickTapTitle),
+      ),
+    );
+    final busyBox = tester.getRect(
+      find.byKey(const Key('quick-tap-note-toggle')),
+    );
+    expect(titleBox.center.dy, closeTo(busyBox.center.dy, 2));
+    expect(
+      titleBox.left - header.left,
+      closeTo(header.right - busyBox.right, 2),
+    );
     expect(
       tester
           .widget<IconButton>(find.byKey(const Key('quick-tap-next-day')))

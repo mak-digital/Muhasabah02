@@ -307,11 +307,7 @@ TernaryOutcome _ternaryForKind(HealthResponseKind kind) {
 
 ActivityOption _option(String id, String label) {
   final kind = healthKindFor(id) ?? HealthResponseKind.unanswered;
-  return ActivityOption(
-    id: id,
-    label: label,
-    ternary: _ternaryForKind(kind),
-  );
+  return ActivityOption(id: id, label: label, ternary: _ternaryForKind(kind));
 }
 
 List<ActivityOption> healthCatalogFor(String storageKey) {
@@ -354,9 +350,7 @@ HealthPracticeCapture readHealthPractice(
   DailyCheckIn record,
   String storageKey,
 ) {
-  return HealthPracticeCapture(
-    primaryId: record.activityFor(storageKey).id,
-  );
+  return HealthPracticeCapture(primaryId: record.activityFor(storageKey).id);
 }
 
 DailyCheckIn writeHealthPractice(

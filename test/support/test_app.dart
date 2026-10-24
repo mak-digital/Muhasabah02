@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:muhasabah02/app/app.dart';
 import 'package:muhasabah02/application/device_unlock.dart';
 import 'package:muhasabah02/application/providers.dart';
 import 'package:muhasabah02/application/reflection_source_launch.dart';
 import 'package:muhasabah02/domain/copy.dart';
 import 'package:muhasabah02/presentation/home/citation_reader_screen.dart';
+import 'package:muhasabah02/presentation/home/hadith_map_sheet.dart';
 import 'package:muhasabah02/data/app_prefs.dart';
 import 'package:muhasabah02/data/memory_repositories.dart';
 import 'package:muhasabah02/data/repositories.dart';
@@ -61,6 +63,8 @@ Widget testApp({
   DeviceUnlock? deviceUnlock,
   ReflectionUrlLaunch? reflectionUrlLaunch,
   CitationPageBuilder? citationPageBuilder,
+  HadithTextShare? hadithTextShare,
+  HadithSpeech? hadithSpeech,
 }) {
   return ProviderScope(
     overrides: [
@@ -129,6 +133,9 @@ Widget testApp({
       citationPageBuilderProvider.overrideWithValue(
         citationPageBuilder ?? fakeCitationPage,
       ),
+      if (hadithTextShare != null)
+        hadithTextShareProvider.overrideWithValue(hadithTextShare),
+      hadithSpeechProvider.overrideWithValue(hadithSpeech ?? HadithSpeech()),
     ],
     child: const MuhasabahApp(),
   );
@@ -139,6 +146,20 @@ Widget fakeCitationPage({
   required String title,
 }) {
   return _FakeCitationPage(pages: pages, title: title);
+}
+
+Future<void> openRegistryTab(WidgetTester tester, {required Key tab}) async {
+  await tester.tap(
+    find.descendant(
+      of: find.byType(NavigationBar),
+      matching: find.text(Copy.registryTab),
+    ),
+  );
+  await tester.pumpAndSettle();
+  final finder = find.byKey(tab);
+  await tester.ensureVisible(finder);
+  await tester.tap(finder);
+  await tester.pumpAndSettle();
 }
 
 class FailingQuranVerseFetch implements QuranVerseFetch {

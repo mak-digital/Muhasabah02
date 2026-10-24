@@ -1,7 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muhasabah02/domain/monitor_domain.dart';
+import 'package:muhasabah02/domain/hadith_archive.dart';
 import 'package:muhasabah02/domain/practice_hadith.dart';
 import 'package:muhasabah02/domain/practice_hadith_catalog.dart';
+import 'package:muhasabah02/domain/quotation_cadence.dart';
+import 'package:muhasabah02/domain/weekly_quotes.dart';
 
 void main() {
   test('catalog ids are unique and wrap', () {
@@ -37,6 +40,15 @@ void main() {
     expect(record.topic, item.topic);
     expect(record.source, item.source);
     expect(record.status, PracticeHadithStatus.learning);
+    expect(record.sharedDateKeys, isEmpty);
+    final shared = recordAfterShare(record, '2026-10-23');
+    expect(shared.status, PracticeHadithStatus.learnt);
+    expect(shared.sharedDateKeys, ['2026-10-23']);
+    final parsed = PracticeHadithRecord.fromJson(record.toJson());
+    expect(parsed.sharedDateKeys, isEmpty);
+    expect(PracticeHadithRecord.fromJson(shared.toJson()).sharedDateKeys, [
+      '2026-10-23',
+    ]);
     expect(practiceHadithAlreadyRegistered([record], item.id), isTrue);
     expect(
       practiceHadithAlreadyRegistered([record], kPracticeHadithCatalog[1].id),
@@ -54,9 +66,56 @@ void main() {
       PracticeHadithStatus.habit.labelFor(MonitorDomain.hadith),
       'Living it',
     );
-    expect(
-      PracticeHadithStatus.habit.labelFor(MonitorDomain.dhikr),
-      'Habit',
-    );
+    expect(PracticeHadithStatus.habit.labelFor(MonitorDomain.dhikr), 'Habit');
   });
+
+  test(
+    'archive keeps the catalog and skips matching reflections when possible',
+    () {
+      final item = kPracticeHadithCatalog.first;
+      final record = recordFromCatalog(
+        item: item,
+        id: 'r-archive',
+        addedDateKey: '2026-10-22',
+      ).copyWith(archivedAt: DateTime(2026, 10, 22));
+      expect(
+        kPracticeHadithCatalog.any((entry) => entry.id == item.id),
+        isTrue,
+      );
+      expect(practiceHadithById(item.id)?.source, item.source);
+      final keys = archivedHadithCitationKeys(
+        records: [record],
+        archivedCatalogIds: {item.id},
+      );
+      final matching = ReflectionQuote(
+        domain: MonitorDomain.hadith,
+        text: item.translation,
+        source: item.source,
+        sourceDetail: item.sourceDetail,
+      );
+      expect(reflectionHadithIsArchived(matching, keys), isTrue);
+      final verse = kReflectionQuotes.firstWhere((quote) => quote.isQuran);
+      expect(reflectionHadithIsArchived(verse, keys), isFalse);
+
+      final hadithQuote = kReflectionQuotes.firstWhere(
+        (quote) => !quote.isQuran,
+      );
+      final skip = hadithArchiveKeys(catalogId: '', source: hadithQuote.source);
+      final now = DateTime(2026, 9, 3);
+      final calendar = quoteFor(now: now, cadence: QuotationCadence.weekly)!;
+      final skipped = quoteFor(
+        now: now,
+        cadence: QuotationCadence.weekly,
+        skipHadithKeys: skip,
+      )!;
+      if (!calendar.isQuran &&
+          hadithArchiveKeys(
+            catalogId: '',
+            source: calendar.source,
+          ).any(skip.contains)) {
+        expect(skipped.source, isNot(calendar.source));
+      }
+      expect(kPracticeHadithCatalog.length, 52);
+    },
+  );
 }

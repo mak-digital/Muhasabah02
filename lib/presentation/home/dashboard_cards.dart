@@ -85,6 +85,7 @@ class DashboardNavCard extends StatelessWidget {
         MuhasabahColors.summaryWash,
         MuhasabahColors.summaryWashDark,
         brightness,
+        context,
       ),
       borderRadius: BorderRadius.circular(16),
       clipBehavior: Clip.antiAlias,

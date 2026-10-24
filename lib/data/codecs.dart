@@ -32,6 +32,48 @@ class ParsedResponse {
   factory ParsedResponse.corrupt() => const ParsedResponse._(corrupt: true);
 }
 
+const kCheckInDecodeYieldEvery = 24;
+
+Future<void> yieldToEventLoop() => Future<void>.delayed(Duration.zero);
+
+class DecodedCheckInBatch {
+  const DecodedCheckInBatch({required this.healthy, required this.corruptKeys});
+
+  final List<DailyCheckIn> healthy;
+  final List<String> corruptKeys;
+}
+
+/// Decodes stored check-in JSON, newest date first. Corrupt keys are listed
+/// and omitted. Yields to the event loop every [yieldEvery] keys.
+Future<DecodedCheckInBatch> decodeStoredCheckIns({
+  required Iterable<Object?> keys,
+  required String? Function(Object? key) read,
+  Future<void> Function() yieldToUi = yieldToEventLoop,
+  int yieldEvery = kCheckInDecodeYieldEvery,
+}) async {
+  final healthy = <DailyCheckIn>[];
+  final corruptKeys = <String>[];
+  var n = 0;
+  for (final key in keys) {
+    final raw = read(key);
+    if (raw == null) {
+      n++;
+      if (yieldEvery > 0 && n % yieldEvery == 0) await yieldToUi();
+      continue;
+    }
+    final parsed = decodeCheckIn(raw);
+    if (parsed.corrupt || parsed.record == null) {
+      corruptKeys.add('$key');
+    } else {
+      healthy.add(parsed.record!);
+    }
+    n++;
+    if (yieldEvery > 0 && n % yieldEvery == 0) await yieldToUi();
+  }
+  healthy.sort((a, b) => b.dateKey.compareTo(a.dateKey));
+  return DecodedCheckInBatch(healthy: healthy, corruptKeys: corruptKeys);
+}
+
 ParsedCheckIn decodeCheckIn(String raw) {
   try {
     final decoded = jsonDecode(raw);

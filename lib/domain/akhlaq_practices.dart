@@ -48,10 +48,16 @@ class AkhlaqFollowUpCapture {
 const akhlaqContexts = <AkhlaqChoice>[
   AkhlaqChoice(id: 'akhlaq.context.familyHome', label: 'Family / Home'),
   AkhlaqChoice(id: 'akhlaq.context.workStudy', label: 'Work / Study'),
-  AkhlaqChoice(id: 'akhlaq.context.friendsCommunity', label: 'Friends / Community'),
+  AkhlaqChoice(
+    id: 'akhlaq.context.friendsCommunity',
+    label: 'Friends / Community',
+  ),
   AkhlaqChoice(id: 'akhlaq.context.online', label: 'Online'),
   AkhlaqChoice(id: 'akhlaq.context.public', label: 'Public'),
-  AkhlaqChoice(id: 'akhlaq.context.privatePersonal', label: 'Private / Personal'),
+  AkhlaqChoice(
+    id: 'akhlaq.context.privatePersonal',
+    label: 'Private / Personal',
+  ),
   AkhlaqChoice(id: 'akhlaq.context.preferNotToSay', label: 'Prefer not to say'),
 ];
 
@@ -60,10 +66,7 @@ const akhlaqHelps = <AkhlaqChoice>[
     id: 'akhlaq.help.pausingBeforeReacting',
     label: 'Pausing before reacting',
   ),
-  AkhlaqChoice(
-    id: 'akhlaq.help.rememberingAllah',
-    label: 'Remembering Allah',
-  ),
+  AkhlaqChoice(id: 'akhlaq.help.rememberingAllah', label: 'Remembering Allah'),
   AkhlaqChoice(
     id: 'akhlaq.help.consideringRights',
     label: 'Considering another person\'s rights',
@@ -233,10 +236,7 @@ List<ActivityOption> akhlaqCatalogFor(String storageKey) {
 }
 
 List<ActivityOption> get akhlaqLegendCatalog => [
-  for (final id in [
-    ...AkhlaqObservationIds.ordered,
-    ActivityIds.unanswered,
-  ])
+  for (final id in [...AkhlaqObservationIds.ordered, ActivityIds.unanswered])
     ActivityOption(
       id: id,
       label: akhlaqLegendLabels[id] ?? id,

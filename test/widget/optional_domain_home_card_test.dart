@@ -37,14 +37,20 @@ void main() {
     expect(find.text('Fajr'), findsOneWidget);
     expect(find.text('Morning Adhkar'), findsOneWidget);
     expect(find.text('General Dhikr'), findsOneWidget);
-    expect(find.byKey(const Key('home-compact-dhikr-2026-09-03')), findsNothing);
+    expect(
+      find.byKey(const Key('home-compact-dhikr-2026-09-03')),
+      findsNothing,
+    );
   });
 
   testWidgets('Knowledge Home shows item rows like Akhlaq', (tester) async {
     await pumpHome(tester, domain: MonitorDomain.knowledge);
     expect(find.text('SEEKING TRUTH'), findsOneWidget);
     expect(find.text('Learned something true'), findsOneWidget);
-    expect(find.text('Beneficial reading (not Qur’an or Hadith)'), findsOneWidget);
+    expect(
+      find.text('Beneficial reading (not Qur’an or Hadith)'),
+      findsOneWidget,
+    );
     expect(find.text('Asked to remove ignorance'), findsOneWidget);
     expect(find.text('SHARING'), findsOneWidget);
     expect(find.text('Taught someone'), findsOneWidget);
@@ -52,7 +58,10 @@ void main() {
     expect(find.text('Wrote or created something beneficial'), findsOneWidget);
     expect(find.text('BENEFICIAL SPEECH'), findsOneWidget);
     expect(find.text('Held back useless speech'), findsOneWidget);
-    expect(find.byKey(const Key('home-compact-knowledge-2026-09-03')), findsNothing);
+    expect(
+      find.byKey(const Key('home-compact-knowledge-2026-09-03')),
+      findsNothing,
+    );
     expect(
       find.byKey(const Key('home-knowledge.learnedSomethingTrue-2026-09-03')),
       findsOneWidget,
@@ -111,24 +120,25 @@ void main() {
     );
   });
 
-  testWidgets('today mark halo is circular and only a little larger than the mark', (
-    tester,
-  ) async {
-    await pumpHome(tester, domain: MonitorDomain.fasting);
-    final halo = find.byKey(
-      const Key('home-today-fasting.weeklySunnah-2026-09-03'),
-    );
-    expect(halo, findsOneWidget);
-    expect(
-      tester.getSize(halo),
-      const Size(AppDimensions.todayMarkHalo, AppDimensions.todayMarkHalo),
-    );
-    final cell = tester.getSize(
-      find.byKey(const Key('home-fasting.weeklySunnah-2026-09-03')),
-    );
-    expect(cell.height, greaterThan(AppDimensions.todayMarkHalo));
-    expect(cell.width, greaterThan(AppDimensions.todayMarkHalo));
-  });
+  testWidgets(
+    'today mark halo is circular and only a little larger than the mark',
+    (tester) async {
+      await pumpHome(tester, domain: MonitorDomain.fasting);
+      final halo = find.byKey(
+        const Key('home-today-fasting.weeklySunnah-2026-09-03'),
+      );
+      expect(halo, findsOneWidget);
+      expect(
+        tester.getSize(halo),
+        const Size(AppDimensions.todayMarkHalo, AppDimensions.todayMarkHalo),
+      );
+      final cell = tester.getSize(
+        find.byKey(const Key('home-fasting.weeklySunnah-2026-09-03')),
+      );
+      expect(cell.height, greaterThan(AppDimensions.todayMarkHalo));
+      expect(cell.width, greaterThan(AppDimensions.todayMarkHalo));
+    },
+  );
 
   testWidgets('Dhikr Home cell opens that day’s entry ready to save', (
     tester,

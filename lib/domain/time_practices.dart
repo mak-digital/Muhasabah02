@@ -134,14 +134,8 @@ const timeContexts = <TimeChoice>[
     id: 'time.context.communityService',
     label: 'Community or service',
   ),
-  TimeChoice(
-    id: 'time.context.household',
-    label: 'Household responsibilities',
-  ),
-  TimeChoice(
-    id: 'time.context.restRecreation',
-    label: 'Rest or recreation',
-  ),
+  TimeChoice(id: 'time.context.household', label: 'Household responsibilities'),
+  TimeChoice(id: 'time.context.restRecreation', label: 'Rest or recreation'),
   TimeChoice(id: 'time.context.other', label: 'Other'),
   TimeChoice(
     id: 'time.context.preferNotToSpecify',
@@ -235,10 +229,7 @@ const timeOutcomes = <TimeChoice>[
     id: 'time.outcome.needAddressed',
     label: 'Someone\'s need addressed',
   ),
-  TimeChoice(
-    id: 'time.outcome.restTaken',
-    label: 'Rest or recovery taken',
-  ),
+  TimeChoice(id: 'time.outcome.restTaken', label: 'Rest or recovery taken'),
   TimeChoice(
     id: 'time.outcome.postponedAppropriately',
     label: 'Activity appropriately postponed',
@@ -345,8 +336,7 @@ const timePractices = <TimePractice>[
     band: kTimeIntentionBand,
     sectionQuestion: 'Did I approach my time with purpose?',
     label: 'Began with a worthwhile intention',
-    detail:
-        'Recognised a beneficial purpose before starting an activity, whether worship, work, study, family care or daily responsibility.',
+    detail: 'Recognised a beneficial purpose before starting an activity, whether worship, work, study, family care or daily responsibility.',
     matrixColumn: 'Intention',
   ),
   TimePractice(
@@ -356,8 +346,7 @@ const timePractices = <TimePractice>[
     band: kTimeIntentionBand,
     sectionQuestion: 'Did I approach my time with purpose?',
     label: 'Chose what mattered first',
-    detail:
-        'Identified an important responsibility or beneficial activity and gave it appropriate priority over something less important.',
+    detail: 'Identified an important responsibility or beneficial activity and gave it appropriate priority over something less important.',
     matrixColumn: 'Priority',
   ),
   TimePractice(
@@ -367,8 +356,7 @@ const timePractices = <TimePractice>[
     band: kTimeAttentionBand,
     sectionQuestion: 'Did I give proper attention to what mattered?',
     label: 'Gave focused attention',
-    detail:
-        'Stayed meaningfully engaged with a task, conversation, learning activity or act of worship, or returned attention after noticing it had wandered.',
+    detail: 'Stayed meaningfully engaged with a task, conversation, learning activity or act of worship, or returned attention after noticing it had wandered.',
     matrixColumn: 'Focus',
   ),
   TimePractice(
@@ -378,8 +366,7 @@ const timePractices = <TimePractice>[
     band: kTimeAttentionBand,
     sectionQuestion: 'Did I give proper attention to what mattered?',
     label: 'Put aside a digital distraction',
-    detail:
-        'Resisted or interrupted unnecessary scrolling, notifications, device checking or other digital interruptions.',
+    detail: 'Resisted or interrupted unnecessary scrolling, notifications, device checking or other digital interruptions.',
     matrixColumn: 'Digital',
   ),
   TimePractice(
@@ -389,8 +376,7 @@ const timePractices = <TimePractice>[
     band: kTimeActionBand,
     sectionQuestion: 'Did I turn available time into beneficial action?',
     label: 'Took a step on something delayed',
-    detail:
-        'Started or advanced a worthwhile task that had been unnecessarily postponed.',
+    detail: 'Started or advanced a worthwhile task that had been unnecessarily postponed.',
     matrixColumn: 'Delayed',
   ),
   TimePractice(
@@ -400,8 +386,7 @@ const timePractices = <TimePractice>[
     band: kTimeActionBand,
     sectionQuestion: 'Did I turn available time into beneficial action?',
     label: 'Used time for something beneficial',
-    detail:
-        'Consciously used an opportunity for learning, service, useful work, worship or another legitimate benefit.',
+    detail: 'Consciously used an opportunity for learning, service, useful work, worship or another legitimate benefit.',
     matrixColumn: 'Benefit',
   ),
   TimePractice(
@@ -412,8 +397,7 @@ const timePractices = <TimePractice>[
     sectionQuestion:
         'Did I respect the rights of others and my own need for recovery?',
     label: 'Gave someone needed attention',
-    detail:
-        'Made appropriate time for a family member, colleague, neighbour or another person with a legitimate need.',
+    detail: 'Made appropriate time for a family member, colleague, neighbour or another person with a legitimate need.',
     matrixColumn: 'Others',
   ),
   TimePractice(
@@ -424,8 +408,7 @@ const timePractices = <TimePractice>[
     sectionQuestion:
         'Did I respect the rights of others and my own need for recovery?',
     label: 'Took needed rest',
-    detail:
-        'Allowed suitable sleep, recovery or restorative breaks rather than unnecessarily neglecting the body\'s needs. Intentional rest is not wasted time.',
+    detail: 'Allowed suitable sleep, recovery or restorative breaks rather than unnecessarily neglecting the body\'s needs. Intentional rest is not wasted time.',
     matrixColumn: 'Rest',
   ),
 ];

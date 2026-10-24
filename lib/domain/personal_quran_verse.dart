@@ -44,7 +44,9 @@ class PersonalQuranVerse {
     return PracticeHadithItem(
       id: id,
       topic: range.citation,
-      text: wordsPending ? kPersonalQuranWordsPending : kPersonalQuranBroughtNote,
+      text: wordsPending
+          ? kPersonalQuranWordsPending
+          : kPersonalQuranBroughtNote,
       arabic: arabic,
       transliteration: '',
       translation: translation,
