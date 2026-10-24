@@ -18,6 +18,7 @@ import '../checkin/trace_record_sheets.dart';
 import '../shared/domain_action_frame.dart';
 import '../shared/domain_line_icon.dart';
 import '../shared/domain_visual.dart';
+import '../shared/ui_bits.dart';
 import '../shared/progress_calendar.dart';
 import '../shared/salah_activity_mark.dart';
 import '../shared/state_marker.dart';
@@ -253,11 +254,11 @@ class _QuickTapSheetState extends ConsumerState<QuickTapSheet> {
                   Padding(
                     key: const Key('quick-tap-note'),
                     padding: const EdgeInsets.fromLTRB(10, 0, 10, 8),
-                    child: Text(
+                    child: BalancedProse(
                       Copy.quickTapNote,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: scheme.onSurfaceVariant,
-                        height: 1.3,
+                        height: 1.45,
                       ),
                     ),
                   )

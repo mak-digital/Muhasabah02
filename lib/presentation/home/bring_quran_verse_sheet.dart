@@ -8,7 +8,10 @@ import '../../domain/date_key.dart';
 import '../../domain/personal_quran_verse.dart';
 import '../../domain/practice_quran_catalog.dart';
 import '../../domain/quran_verse_fetch.dart';
+import '../../domain/monitor_domain.dart';
 import '../../domain/quran_verse_ref.dart';
+import '../shared/domain_visual.dart';
+import '../shared/ui_bits.dart';
 
 Future<void> showBringQuranVerseSheet(
   BuildContext context, {
@@ -326,17 +329,25 @@ class _BringQuranVerseSheetState extends ConsumerState<BringQuranVerseSheet> {
               if (_passage != null) ...[
                 const SizedBox(height: 12),
                 if (_passage!.arabic.isNotEmpty)
-                  Text(
-                    _passage!.arabic,
-                    key: const Key('bring-quran-preview-arabic'),
-                    textDirection: TextDirection.rtl,
-                    style: Theme.of(context).textTheme.titleMedium,
+                  PracticeScriptPane(
+                    wash: domainColorIdentity(MonitorDomain.quran)
+                        .washFor(Theme.of(context).brightness, context),
+                    child: Text(
+                      _passage!.arabic,
+                      key: const Key('bring-quran-preview-arabic'),
+                      textAlign: TextAlign.right,
+                      textDirection: TextDirection.rtl,
+                      style: Theme.of(context).textTheme.titleMedium
+                          ?.copyWith(height: 1.9),
+                    ),
                   ),
                 if (_passage!.translation.isNotEmpty) ...[
                   const SizedBox(height: 8),
-                  Text(
+                  BalancedProse(
                     _passage!.translation,
                     key: const Key('bring-quran-preview-translation'),
+                    style: Theme.of(context).textTheme.bodyMedium
+                        ?.copyWith(height: 1.45),
                   ),
                 ],
               ],

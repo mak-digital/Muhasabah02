@@ -74,13 +74,14 @@ class SalahProgressScreen extends ConsumerWidget {
             marks: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                BalancedProse(
                   colours
                       ? Copy.salahMarkActivityNote
                       : period.days == 7
                       ? 'The card wash identifies the band, not spiritual rank. Marks share one colour. Shape encodes the recorded state. Rows are prayers; columns are weekdays.'
                       : 'The card wash identifies the prayer, not spiritual rank. Marks share one colour. Shape encodes the recorded state. Jumu‘ah is Friday-only; other days are blank, not unanswered.',
-                  style: Theme.of(context).textTheme.bodySmall,
+                  style: Theme.of(context).textTheme.bodySmall
+                      ?.copyWith(height: 1.45),
                 ),
                 const SizedBox(height: 12),
                 Wrap(
@@ -493,11 +494,12 @@ class QuranProgressScreen extends ConsumerWidget {
             marks: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                BalancedProse(
                   period.days == 7
                       ? 'Each row is a stored Qur’an activity in this season’s mix. Columns are weekdays. Tap a cell to open that row’s check-in. Marks share one colour.'
                       : 'Each calendar is one stored row. Titles name the check-in band. Rows are weekdays; columns are weeks. The card wash identifies the row, not rank. Marks share one colour.',
-                  style: Theme.of(context).textTheme.bodySmall,
+                  style: Theme.of(context).textTheme.bodySmall
+                      ?.copyWith(height: 1.45),
                 ),
                 const SizedBox(height: 12),
                 Wrap(

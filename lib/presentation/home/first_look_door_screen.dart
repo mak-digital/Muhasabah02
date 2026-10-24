@@ -7,6 +7,7 @@ import '../../domain/copy.dart';
 import '../../domain/personal_mix.dart';
 import '../shared/brand_mark.dart';
 import '../shared/brand_title.dart';
+import '../shared/ui_bits.dart';
 
 class FirstLookDoorScreen extends ConsumerStatefulWidget {
   const FirstLookDoorScreen({super.key});
@@ -72,19 +73,28 @@ class FirstLookDoorScreenState extends ConsumerState<FirstLookDoorScreen> {
             style: Theme.of(context).textTheme.bodyLarge,
           ),
           const SizedBox(height: 16),
-          Text(
+          BalancedProse(
             Copy.firstLookDoorPrivate,
-            style: Theme.of(context).textTheme.bodyLarge,
+            style: Theme.of(context).textTheme.bodyLarge
+                ?.copyWith(height: 1.45),
           ),
           const SizedBox(height: 16),
-          Text(
+          BalancedProse(
             Copy.firstLookDoorEmpty,
-            style: Theme.of(context).textTheme.bodyLarge,
+            style: Theme.of(context).textTheme.bodyLarge
+                ?.copyWith(height: 1.45),
           ),
           const SizedBox(height: 16),
-          Text(
+          BalancedProse(
             Copy.firstLookDoorSeason,
-            style: Theme.of(context).textTheme.bodyLarge,
+            style: Theme.of(context).textTheme.bodyLarge
+                ?.copyWith(height: 1.45),
+          ),
+          const SizedBox(height: 16),
+          BalancedProse(
+            Copy.firstLookDoorSample,
+            style: Theme.of(context).textTheme.bodyLarge
+                ?.copyWith(height: 1.45),
           ),
         ],
       ),

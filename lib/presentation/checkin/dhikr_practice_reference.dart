@@ -7,6 +7,7 @@ import '../../domain/dhikr_source_registry.dart';
 import '../../domain/practice_dhikr_catalog.dart';
 import '../../domain/monitor_domain.dart';
 import '../home/practice_hadith_home.dart';
+import '../shared/domain_visual.dart';
 import '../shared/system_insets.dart';
 
 Future<void> openDhikrPracticeReference(
@@ -74,6 +75,8 @@ class DhikrPracticeReferencePage extends ConsumerWidget {
               arabic: source.arabic,
               transliteration: source.transliteration,
               translation: source.meaning,
+              wash: domainColorIdentity(MonitorDomain.dhikr)
+                  .washFor(Theme.of(context).brightness, context),
               showScriptControls: false,
             ),
             const SizedBox(height: 12),
@@ -101,6 +104,8 @@ class DhikrPracticeReferencePage extends ConsumerWidget {
               arabic: practice.arabic,
               transliteration: practice.transliteration,
               translation: practice.translation,
+              wash: domainColorIdentity(MonitorDomain.dhikr)
+                  .washFor(Theme.of(context).brightness, context),
               showScriptControls: false,
             ),
             const SizedBox(height: 8),

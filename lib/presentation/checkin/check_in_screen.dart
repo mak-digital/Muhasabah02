@@ -790,15 +790,17 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
-              children: const [
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(Copy.quranCheckInIntro),
+              children: [
+                BalancedProse(
+                  Copy.quranCheckInIntro,
+                  style: Theme.of(context).textTheme.bodySmall
+                      ?.copyWith(height: 1.45),
                 ),
-                SizedBox(height: 8),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(Copy.quranCheckInFactorsIntro),
+                const SizedBox(height: 8),
+                BalancedProse(
+                  Copy.quranCheckInFactorsIntro,
+                  style: Theme.of(context).textTheme.bodySmall
+                      ?.copyWith(height: 1.45),
                 ),
               ],
             ),
@@ -1997,22 +1999,26 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
               },
             )
           else
-            Text(
+            BalancedProse(
               extraNote ??
                   'Same rows as Home. Independent. Missing is not missed.',
+              style: Theme.of(context).textTheme.bodyMedium
+                  ?.copyWith(height: 1.45),
             ),
           if (title == MonitorDomain.akhlaq.label) ...[
             const SizedBox(height: 8),
-            Text(
+            BalancedProse(
               Copy.akhlaqCheckInNote,
-              style: Theme.of(context).textTheme.bodySmall,
+              style: Theme.of(context).textTheme.bodySmall
+                  ?.copyWith(height: 1.45),
             ),
           ],
           if (title == MonitorDomain.huquq.label) ...[
             const SizedBox(height: 8),
-            Text(
+            BalancedProse(
               Copy.huquqCheckInNote,
-              style: Theme.of(context).textTheme.bodySmall,
+              style: Theme.of(context).textTheme.bodySmall
+                  ?.copyWith(height: 1.45),
             ),
           ],
           const SizedBox(height: 12),

@@ -48,7 +48,7 @@ void main() {
     await tester.tap(find.text('Manual baseline'));
     await tester.pumpAndSettle();
     expect(find.text(manualBaselineHint), findsOneWidget);
-    expect(find.textContaining('See FAQ 03 for details'), findsOneWidget);
+    expect(find.textContaining('See FAQ 21 for details'), findsOneWidget);
     await tester.tap(find.text('Cancel'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Create current snapshot baseline'));

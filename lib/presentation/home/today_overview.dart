@@ -14,6 +14,7 @@ import '../checkin/check_in_screen.dart';
 import '../shared/domain_action_frame.dart';
 import '../shared/domain_line_icon.dart';
 import '../shared/domain_visual.dart';
+import '../shared/ui_bits.dart';
 import '../shared/progress_calendar.dart';
 import 'quick_tap_sheet.dart';
 import 'today_domain_workspace.dart';
@@ -85,7 +86,7 @@ class TodayOverview extends ConsumerWidget {
         const TodayEntryActions(),
         const SizedBox(height: 12),
         if (workspace.domains.isEmpty)
-          Text(
+          BalancedProse(
             Copy.todayEmpty,
             key: const Key('today-empty'),
             style: theme.textTheme.bodySmall?.copyWith(
@@ -115,9 +116,9 @@ class _SampleDataNotice extends StatelessWidget {
       borderRadius: BorderRadius.circular(10),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-        child: Text(
+        child: BalancedProse(
           Copy.sampleDataNotice,
-          style: Theme.of(context).textTheme.labelSmall?.copyWith(height: 1.25),
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(height: 1.35),
         ),
       ),
     );

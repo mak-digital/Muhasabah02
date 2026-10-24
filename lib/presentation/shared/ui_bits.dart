@@ -2,6 +2,84 @@ import 'package:flutter/material.dart';
 
 import 'brand_mark.dart';
 
+/// Prose that fills a bounded text box evenly.
+///
+/// Uses justified wrapping only when the parent gives a finite width, so it
+/// does not overflow in unbounded [Row]s or stretch short titles.
+class BalancedProse extends StatelessWidget {
+  const BalancedProse(this.data, {super.key, this.style, this.title = false});
+
+  final String data;
+  final TextStyle? style;
+  final bool title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      data,
+      style: style,
+      textAlign: title ? TextAlign.start : TextAlign.justify,
+      softWrap: true,
+      overflow: TextOverflow.visible,
+    );
+  }
+}
+
+/// Outer wash for Hadith/Qur’an/Dhikr reading panes.
+const kPracticeSkimBodyHeight = 196.0;
+const kPracticeScriptPaneMinHeight = 104.0;
+
+Color practiceReadingWash(BuildContext context, Color domainWash) {
+  final scheme = Theme.of(context).colorScheme;
+  return Color.alphaBlend(
+    domainWash.withValues(alpha: 0.34),
+    scheme.surfaceContainerHigh,
+  );
+}
+
+/// Distinct inner pane for Arabic script so it does not sit on the page wash.
+class PracticeScriptPane extends StatelessWidget {
+  const PracticeScriptPane({
+    super.key,
+    required this.child,
+    this.ink,
+    this.wash,
+  });
+
+  final Widget child;
+  final Color? ink;
+  final Color? wash;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final tint = wash ?? scheme.primaryContainer;
+    final fill = Color.alphaBlend(tint.withValues(alpha: 0.78), scheme.surface);
+    final edge = Color.alphaBlend(
+      (ink ?? scheme.primary).withValues(alpha: 0.28),
+      tint,
+    );
+    return Material(
+      key: const Key('practice-script-pane'),
+      color: fill,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: edge.withValues(alpha: 0.9)),
+      ),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(
+          minHeight: kPracticeScriptPaneMinHeight,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(14, 16, 14, 18),
+          child: Align(alignment: Alignment.centerRight, child: child),
+        ),
+      ),
+    );
+  }
+}
+
 class WashPanel extends StatelessWidget {
   const WashPanel({
     super.key,
@@ -97,10 +175,11 @@ class SectionHeader extends StatelessWidget {
           if (subtitle != null)
             Padding(
               padding: const EdgeInsets.only(top: 2),
-              child: Text(
+              child: BalancedProse(
                 subtitle!,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
+                  height: 1.45,
                 ),
               ),
             ),
@@ -131,7 +210,10 @@ class CollapsingIntroNote extends StatelessWidget {
       title: title,
       expanded: expanded,
       onExpansionChanged: onExpansionChanged,
-      child: Text(note, style: Theme.of(context).textTheme.bodySmall),
+      child: BalancedProse(
+        note,
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(height: 1.45),
+      ),
     );
   }
 }
@@ -168,7 +250,7 @@ class CollapsingNoteTile extends StatelessWidget {
           style: Theme.of(context).textTheme.labelSmall
               ?.copyWith(fontWeight: FontWeight.w700, letterSpacing: 0.3),
         ),
-        children: [Align(alignment: Alignment.centerLeft, child: child)],
+        children: [SizedBox(width: double.infinity, child: child)],
       ),
     );
   }

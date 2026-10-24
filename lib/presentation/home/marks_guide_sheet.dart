@@ -21,6 +21,7 @@ import '../../domain/domain_briefing.dart';
 import '../shared/domain_briefing_note.dart';
 import '../shared/salah_activity_mark.dart';
 import '../shared/state_marker.dart';
+import '../shared/ui_bits.dart';
 
 Future<void> showMarksGuide(BuildContext context) {
   return showModalBottomSheet<void>(
@@ -60,7 +61,11 @@ Future<void> showMarksGuide(BuildContext context) {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(Copy.marksGuideIntro),
+                        BalancedProse(
+                          Copy.marksGuideIntro,
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(height: 1.45),
+                        ),
                         const SizedBox(height: 16),
                         Text(
                           MonitorDomain.salah.label,
@@ -154,9 +159,10 @@ Future<void> showMarksGuide(BuildContext context) {
                           ),
                         ],
                         const SizedBox(height: 8),
-                        Text(
+                        BalancedProse(
                           Copy.quranStageNote,
-                          style: Theme.of(context).textTheme.bodySmall,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(height: 1.45),
                         ),
                         const SizedBox(height: 8),
                         if (colours)
@@ -207,9 +213,10 @@ Future<void> showMarksGuide(BuildContext context) {
                         const SizedBox(height: 8),
                         DomainBriefingNote(hadithBriefing, compact: true),
                         const SizedBox(height: 8),
-                        Text(
+                        BalancedProse(
                           Copy.hadithDurationNote,
-                          style: Theme.of(context).textTheme.bodySmall,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(height: 1.45),
                         ),
                         const SizedBox(height: 8),
                         if (colours) ...[
@@ -280,9 +287,10 @@ Future<void> showMarksGuide(BuildContext context) {
                           ),
                         ],
                         const SizedBox(height: 8),
-                        Text(
+                        BalancedProse(
                           Copy.dhikrPostFardNote,
-                          style: Theme.of(context).textTheme.bodySmall,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(height: 1.45),
                         ),
                         const SizedBox(height: 8),
                         if (colours)
@@ -331,9 +339,10 @@ Future<void> showMarksGuide(BuildContext context) {
                         const SizedBox(height: 8),
                         DomainBriefingNote(akhlaqBriefing, compact: true),
                         const SizedBox(height: 8),
-                        Text(
+                        BalancedProse(
                           Copy.akhlaqCheckInNote,
-                          style: Theme.of(context).textTheme.bodySmall,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(height: 1.45),
                         ),
                         const SizedBox(height: 8),
                         if (colours)
@@ -380,9 +389,10 @@ Future<void> showMarksGuide(BuildContext context) {
                         const SizedBox(height: 8),
                         DomainBriefingNote(huquqBriefing, compact: true),
                         const SizedBox(height: 8),
-                        Text(
+                        BalancedProse(
                           Copy.huquqCheckInNote,
-                          style: Theme.of(context).textTheme.bodySmall,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(height: 1.45),
                         ),
                         const SizedBox(height: 8),
                         if (colours)
@@ -418,9 +428,10 @@ Future<void> showMarksGuide(BuildContext context) {
                         const SizedBox(height: 8),
                         DomainBriefingNote(charityBriefing, compact: true),
                         const SizedBox(height: 8),
-                        Text(
+                        BalancedProse(
                           Copy.charityCheckInNote,
-                          style: Theme.of(context).textTheme.bodySmall,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(height: 1.45),
                         ),
                         const SizedBox(height: 8),
                         if (colours)
@@ -467,9 +478,10 @@ Future<void> showMarksGuide(BuildContext context) {
                         const SizedBox(height: 8),
                         DomainBriefingNote(knowledgeBriefing, compact: true),
                         const SizedBox(height: 8),
-                        Text(
+                        BalancedProse(
                           Copy.knowledgeCheckInNote,
-                          style: Theme.of(context).textTheme.bodySmall,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(height: 1.45),
                         ),
                         const SizedBox(height: 8),
                         if (colours)
@@ -516,9 +528,10 @@ Future<void> showMarksGuide(BuildContext context) {
                         const SizedBox(height: 8),
                         DomainBriefingNote(timeBriefing, compact: true),
                         const SizedBox(height: 8),
-                        Text(
+                        BalancedProse(
                           Copy.timeCheckInNote,
-                          style: Theme.of(context).textTheme.bodySmall,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(height: 1.45),
                         ),
                         const SizedBox(height: 8),
                         if (colours)
@@ -565,9 +578,10 @@ Future<void> showMarksGuide(BuildContext context) {
                         const SizedBox(height: 8),
                         DomainBriefingNote(healthBriefing, compact: true),
                         const SizedBox(height: 8),
-                        Text(
+                        BalancedProse(
                           Copy.healthCheckInNote,
-                          style: Theme.of(context).textTheme.bodySmall,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(height: 1.45),
                         ),
                         const SizedBox(height: 8),
                         if (colours)
@@ -614,9 +628,10 @@ Future<void> showMarksGuide(BuildContext context) {
                         const SizedBox(height: 8),
                         DomainBriefingNote(wealthBriefing, compact: true),
                         const SizedBox(height: 8),
-                        Text(
+                        BalancedProse(
                           Copy.wealthCheckInNote,
-                          style: Theme.of(context).textTheme.bodySmall,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(height: 1.45),
                         ),
                         const SizedBox(height: 8),
                         if (colours)
@@ -663,9 +678,10 @@ Future<void> showMarksGuide(BuildContext context) {
                         const SizedBox(height: 8),
                         DomainBriefingNote(ummahBriefing, compact: true),
                         const SizedBox(height: 8),
-                        Text(
+                        BalancedProse(
                           Copy.ummahCheckInNote,
-                          style: Theme.of(context).textTheme.bodySmall,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(height: 1.45),
                         ),
                         const SizedBox(height: 8),
                         if (colours)
@@ -725,8 +741,10 @@ Future<void> showMarksGuide(BuildContext context) {
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
                         const SizedBox(height: 8),
-                        const Text(
+                        BalancedProse(
                           'Missing records are not treated as missed. Symbols indicate recorded states only. Marks share one colour unless Settings → Preferences → Activities & legend uses activity colours. Colour does not rank spirituality. The card wash identifies the domain. Factors you noticed are stored as provenance; they do not explain causes and do not change completion.',
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(height: 1.45),
                         ),
                       ],
                     ),

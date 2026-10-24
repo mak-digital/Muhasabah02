@@ -1,6 +1,8 @@
 import 'activities.dart';
 import 'charity_practices.dart';
+import 'dhikr_context.dart';
 import 'health_practices.dart';
+import 'quran.dart';
 import 'ummah_practices.dart';
 import 'wealth_practices.dart';
 
@@ -35,16 +37,29 @@ TrendWindowStats measureTrendWindow({
   required String todayKey,
   required String? Function(String dateKey) idForDate,
   required Iterable<String> optionIds,
+  Iterable<String> Function(String dateKey)? hitsForDate,
+  bool Function(String dateKey)? dayAnswered,
 }) {
   final hits = {for (final id in optionIds) id: 0};
   var denom = 0;
   for (final key in keys) {
     if (key.compareTo(todayKey) > 0) continue;
-    final id = idForDate(key);
-    if (!isChartableResponseId(id)) continue;
+    final ids = <String>[];
+    if (hitsForDate != null) {
+      for (final id in hitsForDate(key)) {
+        if (isChartableResponseId(id)) ids.add(id);
+      }
+    } else {
+      final id = idForDate(key);
+      if (isChartableResponseId(id)) ids.add(id!);
+    }
+    final answered = dayAnswered?.call(key) ?? ids.isNotEmpty;
+    if (!answered) continue;
     denom++;
-    if (hits.containsKey(id)) {
-      hits[id!] = hits[id]! + 1;
+    for (final id in ids) {
+      if (hits.containsKey(id)) {
+        hits[id] = hits[id]! + 1;
+      }
     }
   }
   return TrendWindowStats(
@@ -112,6 +127,26 @@ List<ActivityOption> chartableCatalog(List<ActivityOption> catalog) {
   return [
     for (final option in catalog)
       if (!option.isUnanswered) option,
+  ];
+}
+
+/// Performed-list formulas for a Dhikr row. Unanswered is omitted.
+List<ActivityOption> dhikrContextTrendCatalog(String rowKey) {
+  return [
+    for (final item in dhikrContextItemsFor(rowKey))
+      ActivityOption(
+        id: item.id,
+        label: item.label,
+        ternary: TernaryOutcome.positive,
+      ),
+  ];
+}
+
+List<String> practisedDhikrTrendIds(List<DhikrContextCapture> captures) {
+  return [
+    for (final capture in captures)
+      if (capture.response == DhikrContextResponse.practised)
+        capture.activityId,
   ];
 }
 

@@ -26,6 +26,7 @@ void main() {
     expect(huquqBriefing.plainText, contains('Safety and justice come first'));
     expect(huquqBriefing.plainText, contains('A step toward reconciliation'));
     expect(huquqBriefing.lead.last, contains('Learn & Practice'));
+    expect(huquqBriefing.lead.last, contains('not a daily grade'));
     expect(briefingForDomain(MonitorDomain.huquq), same(huquqBriefing));
   });
 

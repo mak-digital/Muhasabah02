@@ -9,6 +9,7 @@ import '../../domain/domain_action.dart';
 import '../../domain/ids.dart';
 import '../../domain/monitor_domain.dart';
 import '../../domain/registry_scope.dart';
+import '../shared/ui_bits.dart';
 import 'registry_filter_note.dart';
 import 'registry_table.dart';
 
@@ -53,9 +54,9 @@ class _ActionRegisterPageState extends ConsumerState<ActionRegisterPage> {
           style: Theme.of(context).textTheme.titleMedium,
         ),
         const SizedBox(height: 4),
-        Text(
+        BalancedProse(
           Copy.actionRegisterNote,
-          style: Theme.of(context).textTheme.bodySmall,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(height: 1.45),
         ),
         const SizedBox(height: 12),
         RegistryWashButtonRow(

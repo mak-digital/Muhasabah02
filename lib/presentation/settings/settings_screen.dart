@@ -364,9 +364,10 @@ class ActivitiesSettingsScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Text(
+          BalancedProse(
             Copy.activitiesNote,
-            style: Theme.of(context).textTheme.bodyMedium,
+            style: Theme.of(context).textTheme.bodyMedium
+                ?.copyWith(height: 1.45),
           ),
           const SizedBox(height: 12),
           Text(
@@ -397,7 +398,7 @@ class ActivitiesSettingsScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 8),
-          Text(
+          BalancedProse(
             Copy.salahMarkActivityNote,
             style: Theme.of(context).textTheme.bodySmall,
           ),
@@ -445,7 +446,7 @@ class ActivitiesSettingsScreen extends ConsumerWidget {
               style: Theme.of(context).textTheme.titleSmall,
             ),
             const SizedBox(height: 8),
-            Text(
+            BalancedProse(
               Copy.dhikrPostFardNote,
               style: Theme.of(context).textTheme.bodySmall,
             ),
@@ -471,7 +472,7 @@ class ActivitiesSettingsScreen extends ConsumerWidget {
               style: Theme.of(context).textTheme.titleSmall,
             ),
             const SizedBox(height: 8),
-            Text(
+            BalancedProse(
               Copy.akhlaqCheckInNote,
               style: Theme.of(context).textTheme.bodySmall,
             ),
@@ -497,7 +498,7 @@ class ActivitiesSettingsScreen extends ConsumerWidget {
               style: Theme.of(context).textTheme.titleSmall,
             ),
             const SizedBox(height: 8),
-            Text(
+            BalancedProse(
               Copy.huquqCheckInNote,
               style: Theme.of(context).textTheme.bodySmall,
             ),
@@ -523,9 +524,10 @@ class ActivitiesSettingsScreen extends ConsumerWidget {
               style: Theme.of(context).textTheme.titleSmall,
             ),
             const SizedBox(height: 8),
-            Text(
+            BalancedProse(
               Copy.charityCheckInNote,
-              style: Theme.of(context).textTheme.bodySmall,
+              style: Theme.of(context).textTheme.bodySmall
+                  ?.copyWith(height: 1.45),
             ),
             const SizedBox(height: 8),
             for (final option in charityLegendCatalog)
@@ -549,7 +551,7 @@ class ActivitiesSettingsScreen extends ConsumerWidget {
               style: Theme.of(context).textTheme.titleSmall,
             ),
             const SizedBox(height: 8),
-            Text(
+            BalancedProse(
               Copy.knowledgeCheckInNote,
               style: Theme.of(context).textTheme.bodySmall,
             ),
@@ -575,7 +577,7 @@ class ActivitiesSettingsScreen extends ConsumerWidget {
               style: Theme.of(context).textTheme.titleSmall,
             ),
             const SizedBox(height: 8),
-            Text(
+            BalancedProse(
               Copy.timeCheckInNote,
               style: Theme.of(context).textTheme.bodySmall,
             ),
@@ -601,7 +603,7 @@ class ActivitiesSettingsScreen extends ConsumerWidget {
               style: Theme.of(context).textTheme.titleSmall,
             ),
             const SizedBox(height: 8),
-            Text(
+            BalancedProse(
               Copy.healthCheckInNote,
               style: Theme.of(context).textTheme.bodySmall,
             ),
@@ -627,7 +629,7 @@ class ActivitiesSettingsScreen extends ConsumerWidget {
               style: Theme.of(context).textTheme.titleSmall,
             ),
             const SizedBox(height: 8),
-            Text(
+            BalancedProse(
               Copy.wealthCheckInNote,
               style: Theme.of(context).textTheme.bodySmall,
             ),
@@ -653,7 +655,7 @@ class ActivitiesSettingsScreen extends ConsumerWidget {
               style: Theme.of(context).textTheme.titleSmall,
             ),
             const SizedBox(height: 8),
-            Text(
+            BalancedProse(
               Copy.ummahCheckInNote,
               style: Theme.of(context).textTheme.bodySmall,
             ),
@@ -726,7 +728,7 @@ class AppearanceSettingsScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Text(
+          BalancedProse(
             Copy.appearanceNote,
             style: Theme.of(context).textTheme.bodyMedium,
           ),
@@ -768,7 +770,7 @@ class TextSizeSettingsScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Text(
+          BalancedProse(
             Copy.textSizeNote,
             style: Theme.of(context).textTheme.titleMedium,
           ),
@@ -796,7 +798,7 @@ class ArabicScriptSettingsScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Text(
+          BalancedProse(
             Copy.arabicScriptNote,
             style: Theme.of(context).textTheme.bodyMedium,
           ),
@@ -837,14 +839,18 @@ class ArabicScriptSettingsScreen extends ConsumerWidget {
               ref.read(prefsTickProvider.notifier).state++;
             },
           ),
-          Text(
-            'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ',
-            textAlign: TextAlign.right,
-            textDirection: TextDirection.rtl,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontFamily: prefs.arabicScriptFace.family,
-              fontSize: size,
-              height: 1.85,
+          PracticeScriptPane(
+            wash: domainColorIdentity(MonitorDomain.quran)
+                .washFor(Theme.of(context).brightness, context),
+            child: Text(
+              'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ',
+              textAlign: TextAlign.right,
+              textDirection: TextDirection.rtl,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontFamily: prefs.arabicScriptFace.family,
+                fontSize: size,
+                height: 1.85,
+              ),
             ),
           ),
         ],
@@ -921,7 +927,7 @@ class FirstDayOfWeekSettingsScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Text(
+          BalancedProse(
             Copy.firstDayOfWeekNote,
             style: Theme.of(context).textTheme.bodyMedium,
           ),
@@ -967,7 +973,7 @@ class WorshipListGenderSettingsScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Text(
+          BalancedProse(
             Copy.worshipListGenderNote,
             style: Theme.of(context).textTheme.bodyMedium,
           ),
@@ -1014,7 +1020,7 @@ class CalendarSettingsScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Text(
+          BalancedProse(
             Copy.calendarNote,
             style: Theme.of(context).textTheme.bodyMedium,
           ),
@@ -1043,7 +1049,7 @@ class CalendarSettingsScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 16),
-          Text(
+          BalancedProse(
             Copy.ramadanCalendarOffsetNote,
             style: Theme.of(context).textTheme.bodyMedium,
           ),
@@ -1108,7 +1114,7 @@ class VisibleDomainsSettingsScreen extends ConsumerWidget {
       body: ListView(
         padding: pageListPadding(context),
         children: [
-          Text(
+          BalancedProse(
             Copy.shownDomainsNote,
             style: Theme.of(context).textTheme.bodyMedium,
           ),
@@ -1154,7 +1160,7 @@ class VisibleDomainsSettingsScreen extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 8),
-          Text(
+          BalancedProse(
             Copy.basicDhikrDomainsNote,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,

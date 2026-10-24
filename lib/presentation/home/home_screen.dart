@@ -251,9 +251,9 @@ class HomeScreen extends ConsumerWidget {
         child: const Text(Copy.addAResponse),
       ),
       const SizedBox(height: 16),
-      Text(
+      BalancedProse(
         'A private place to record, review, and respond — without scores or prescriptions. The card wash identifies the domain, not spiritual rank. Marks share one colour. ${Copy.unansweredNotMissed}',
-        style: Theme.of(context).textTheme.bodySmall,
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(height: 1.45),
       ),
     ];
   }

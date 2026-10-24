@@ -343,6 +343,8 @@ class _HadithMapSheetState extends ConsumerState<HadithMapSheet> {
                       transliteration: selected.item.transliteration,
                       translation: selected.item.translation,
                       ink: scheme.onSurface,
+                      wash: domainColorIdentity(MonitorDomain.hadith)
+                          .washFor(Theme.of(context).brightness, context),
                       showScriptControls: false,
                     ),
                     const SizedBox(height: 2),

@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muhasabah02/domain/date_key.dart';
+import 'package:muhasabah02/domain/dhikr_context.dart';
 import 'package:muhasabah02/domain/thirty_day_trend.dart';
 
 void main() {
@@ -207,5 +208,33 @@ void main() {
       ),
       'Difficulty recognised',
     );
+  });
+
+  test('morning and evening adhkar have chartable performed-list catalogs', () {
+    expect(dhikrContextTrendCatalog(kDhikrMorningKey), isNotEmpty);
+    expect(dhikrContextTrendCatalog(kDhikrEveningKey), isNotEmpty);
+    expect(dhikrContextTrendCatalog(kDhikrGeneralKey), isNotEmpty);
+    expect(dhikrContextTrendCatalog('dhikr.postFardFajr'), isNotEmpty);
+  });
+
+  test('checklist days can count more than one practised formula', () {
+    final morning = dhikrContextItemsFor(kDhikrMorningKey);
+    final a = morning.first.id;
+    final b = morning[1].id;
+    final stats = measureTrendWindow(
+      keys: const ['2026-10-01', '2026-10-02', '2026-10-03'],
+      todayKey: '2026-10-23',
+      optionIds: [a, b],
+      idForDate: (_) => null,
+      hitsForDate: (key) => switch (key) {
+        '2026-10-01' => [a, b],
+        '2026-10-02' => const <String>[],
+        _ => [a],
+      },
+      dayAnswered: (key) => key != '2026-10-02',
+    );
+    expect(stats.denom, 2);
+    expect(stats.countFor(a), 2);
+    expect(stats.countFor(b), 1);
   });
 }

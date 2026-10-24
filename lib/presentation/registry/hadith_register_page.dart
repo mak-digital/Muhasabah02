@@ -73,9 +73,10 @@ class _HadithRegisterPageState extends ConsumerState<HadithRegisterPage> {
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 4),
-          Text(
+          BalancedProse(
             shown ? Copy.practiceHadithRegisterNote : Copy.registryHadithHidden,
-            style: Theme.of(context).textTheme.bodySmall,
+            style: Theme.of(context).textTheme.bodySmall
+                ?.copyWith(height: 1.45),
           ),
           if (shown) ...[
             const SizedBox(height: 12),
@@ -308,6 +309,8 @@ class _HadithRegisterPageState extends ConsumerState<HadithRegisterPage> {
                     arabic: core.arabic,
                     transliteration: core.transliteration,
                     translation: core.translation,
+                    wash: domainColorIdentity(MonitorDomain.hadith)
+                        .washFor(Theme.of(context).brightness, context),
                   ),
                 ],
               ),

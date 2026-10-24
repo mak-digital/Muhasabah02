@@ -52,7 +52,7 @@ class DomainBriefingNote extends StatelessWidget {
       children: [
         for (var i = 0; i < briefing.lead.length; i++) ...[
           if (i > 0) const SizedBox(height: 8),
-          Text(briefing.lead[i], style: body?.copyWith(height: 1.45)),
+          BalancedProse(briefing.lead[i], style: body?.copyWith(height: 1.45)),
         ],
         if (briefing.examplesTitle != null) ...[
           const SizedBox(height: 10),
@@ -91,7 +91,7 @@ class DomainBriefingNote extends StatelessWidget {
         ],
         for (final line in briefing.closing) ...[
           const SizedBox(height: 8),
-          Text(line, style: body?.copyWith(height: 1.45)),
+          BalancedProse(line, style: body?.copyWith(height: 1.45)),
         ],
       ],
     );
@@ -109,7 +109,10 @@ class DomainBriefingNote extends StatelessWidget {
               children: [
                 Text('•  ', style: style?.copyWith(height: 1.45)),
                 Expanded(
-                  child: Text(items[i], style: style?.copyWith(height: 1.45)),
+                  child: BalancedProse(
+                    items[i],
+                    style: style?.copyWith(height: 1.45),
+                  ),
                 ),
               ],
             ),

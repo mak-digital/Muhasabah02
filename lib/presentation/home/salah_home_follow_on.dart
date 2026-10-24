@@ -680,7 +680,7 @@ class _ActionRegisterSheetState extends ConsumerState<_ActionRegisterSheet> {
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 4),
-          const Text(Copy.actionRegisterNote),
+          const BalancedProse(Copy.actionRegisterNote),
           const SizedBox(height: 12),
           if (rows.isEmpty)
             const Text(Copy.actionRegisterEmpty)
@@ -1102,7 +1102,7 @@ class _NotesRegisterSheetState extends ConsumerState<_NotesRegisterSheet> {
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 4),
-          const Text(Copy.notesRegisterNote),
+          const BalancedProse(Copy.notesRegisterNote),
           const SizedBox(height: 12),
           if (notes.isEmpty)
             const Text(Copy.notesRegisterEmpty)

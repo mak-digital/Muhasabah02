@@ -725,9 +725,10 @@ class _PracticeGroupedRegisterSheetState
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 8),
-          Text(
+          BalancedProse(
             widget.spec.registerNote,
-            style: Theme.of(context).textTheme.bodySmall,
+            style: Theme.of(context).textTheme.bodySmall
+                ?.copyWith(height: 1.45),
           ),
           Row(
             children: [
@@ -807,6 +808,11 @@ class _PracticeGroupedRegisterSheetState
                                   arabic: record.arabic,
                                   transliteration: record.transliteration,
                                   translation: record.translation,
+                                  wash: domainColorIdentity(widget.spec.domain)
+                                      .washFor(
+                                        Theme.of(context).brightness,
+                                        context,
+                                      ),
                                 ),
                                 PracticeRegisterStatusSelect(
                                   dropdownKey: Key(

@@ -8,7 +8,10 @@ import '../../domain/bring_hadith_index.dart';
 import '../../domain/hadith_fetch.dart';
 import '../../domain/hadith_ref.dart';
 import '../../domain/personal_hadith.dart';
+import '../../domain/monitor_domain.dart';
 import '../../domain/practice_hadith_catalog.dart';
+import '../shared/domain_visual.dart';
+import '../shared/ui_bits.dart';
 
 Future<void> showBringHadithSheet(BuildContext context, {String initial = ''}) {
   return showModalBottomSheet<void>(
@@ -331,17 +334,25 @@ class _BringHadithSheetState extends ConsumerState<BringHadithSheet> {
               if (_passage != null) ...[
                 const SizedBox(height: 12),
                 if (_passage!.arabic.isNotEmpty)
-                  Text(
-                    _passage!.arabic,
-                    key: const Key('bring-hadith-preview-arabic'),
-                    textDirection: TextDirection.rtl,
-                    style: Theme.of(context).textTheme.titleMedium,
+                  PracticeScriptPane(
+                    wash: domainColorIdentity(MonitorDomain.hadith)
+                        .washFor(Theme.of(context).brightness, context),
+                    child: Text(
+                      _passage!.arabic,
+                      key: const Key('bring-hadith-preview-arabic'),
+                      textAlign: TextAlign.right,
+                      textDirection: TextDirection.rtl,
+                      style: Theme.of(context).textTheme.titleMedium
+                          ?.copyWith(height: 1.9),
+                    ),
                   ),
                 if (_passage!.translation.isNotEmpty) ...[
                   const SizedBox(height: 8),
-                  Text(
+                  BalancedProse(
                     _passage!.translation,
                     key: const Key('bring-hadith-preview-translation'),
+                    style: Theme.of(context).textTheme.bodyMedium
+                        ?.copyWith(height: 1.45),
                   ),
                 ],
               ],

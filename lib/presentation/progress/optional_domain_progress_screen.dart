@@ -7,7 +7,9 @@ import '../../domain/analytics.dart';
 import '../../domain/copy.dart';
 import '../../domain/daily_check_in.dart';
 import '../../domain/date_key.dart';
+import '../../domain/dhikr_context.dart';
 import '../../domain/home_traces.dart';
+import '../../domain/thirty_day_trend.dart';
 import '../../domain/hajj_planning.dart';
 import '../../domain/domain_briefing.dart';
 import '../../domain/quran.dart';
@@ -114,16 +116,21 @@ class _OptionalDomainProgressScreenState
             marks: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'The card wash identifies the domain, not rank. Marks share one colour. Missing records are not treated as missed.',
-                  style: Theme.of(context).textTheme.bodySmall,
+                BalancedProse(
+                  'Wash names the domain, not rank. Marks share one colour. Empty is not missed.',
+                  style: Theme.of(context).textTheme.bodySmall
+                      ?.copyWith(height: 1.45),
                 ),
                 if (briefing != null) ...[
                   const SizedBox(height: 8),
                   DomainBriefingNote(briefing, compact: true),
                 ] else if (note != null && note!.isNotEmpty) ...[
                   const SizedBox(height: 8),
-                  Text(note!, style: Theme.of(context).textTheme.bodySmall),
+                  BalancedProse(
+                    note!,
+                    style: Theme.of(context).textTheme.bodySmall
+                        ?.copyWith(height: 1.45),
+                  ),
                 ],
                 if (highlightLunarWhiteDays) ...[
                   const SizedBox(height: 8),
@@ -258,6 +265,36 @@ class _OptionalDomainProgressScreenState
     );
   }
 
+  ThirtyDayTrendSeries? _trendForRow(
+    HomeTraceRow row,
+    Map<String, DailyCheckIn> index,
+    ReviewPeriod period,
+    WidgetRef ref,
+  ) {
+    final colours = ref.watch(appPrefsProvider).salahActivityColours;
+    if (isDhikrContextTrace(row.storageKey)) {
+      return thirtyDaySeriesOrNull(
+        periodDays: period.days,
+        activityLabel: row.label,
+        catalog: dhikrContextTrendCatalog(row.storageKey),
+        activityColours: colours,
+        idForDate: (_) => null,
+        hitsForDate: (key) => practisedDhikrTrendIds(
+          index[key]?.dhikrContextFor(row.storageKey) ?? const [],
+        ),
+        dayAnswered: (key) =>
+            index[key]?.dhikrContextFor(row.storageKey).isNotEmpty ?? false,
+      );
+    }
+    return thirtyDaySeriesOrNull(
+      periodDays: period.days,
+      activityLabel: row.label,
+      catalog: ActivityCatalog.forHomeTrace(row.storageKey),
+      activityColours: colours,
+      idForDate: (key) => index[key]?.activityFor(row.storageKey).id,
+    );
+  }
+
   Widget _rowCard(
     BuildContext context,
     WidgetRef ref,
@@ -297,13 +334,7 @@ class _OptionalDomainProgressScreenState
             activityDays: activityDays,
             notDoneDays: notDoneDays,
           ),
-          trend: thirtyDaySeriesOrNull(
-            periodDays: period.days,
-            activityLabel: row.label,
-            catalog: ActivityCatalog.forHomeTrace(row.storageKey),
-            activityColours: ref.watch(appPrefsProvider).salahActivityColours,
-            idForDate: (key) => index[key]?.activityFor(row.storageKey).id,
-          ),
+          trend: _trendForRow(row, index, period, ref),
           cellBuilder: (context, key) {
             final record = index[key];
             final outcome =

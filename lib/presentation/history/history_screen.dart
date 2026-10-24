@@ -90,10 +90,11 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                 ),
                 const SizedBox(height: 8),
               ],
-              Text(
+              BalancedProse(
                 Copy.historyGuard,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  height: 1.45,
                 ),
               ),
               const SizedBox(height: 10),

@@ -100,13 +100,22 @@ class PracticeSkimSourceBox extends StatelessWidget {
     final indexStyle = Theme.of(context).textTheme.labelSmall?.copyWith(
       color: ink ?? Theme.of(context).colorScheme.onSurfaceVariant,
     );
+    final scheme = Theme.of(context).colorScheme;
     return Column(
       children: [
-        ColoredBox(
+        Material(
           key: sourceWashKey,
           color: sourceWash,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(
+              color: scheme.outlineVariant.withValues(alpha: 0.85),
+            ),
+          ),
+          clipBehavior: Clip.antiAlias,
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(8, 4, 8, 6),
+            padding: const EdgeInsets.fromLTRB(8, 6, 8, 8),
             child: Column(
               children: [
                 Row(
@@ -126,7 +135,7 @@ class PracticeSkimSourceBox extends StatelessWidget {
                     ),
                     Expanded(
                       child: SizedBox(
-                        height: 148,
+                        height: kPracticeSkimBodyHeight,
                         child: Scrollbar(
                           controller: scroll,
                           thumbVisibility: true,
@@ -388,6 +397,10 @@ class _PracticeHadithWashState extends ConsumerState<PracticeHadithWash> {
                       transliteration: item.transliteration,
                       translation: item.translation,
                       ink: ink,
+                      wash: identity.washFor(
+                        Theme.of(context).brightness,
+                        context,
+                      ),
                       showScriptControls: false,
                     ),
                     citation: PracticeCitationLink(
@@ -653,6 +666,10 @@ class _PracticeQuranWashState extends ConsumerState<PracticeQuranWash> {
                       transliteration: item.transliteration,
                       translation: item.translation,
                       ink: ink,
+                      wash: identity.washFor(
+                        Theme.of(context).brightness,
+                        context,
+                      ),
                       showScriptControls: false,
                     ),
                     citation: PracticeCitationLink(
@@ -841,6 +858,7 @@ class PracticeRemembranceCore extends ConsumerWidget {
     required this.transliteration,
     required this.translation,
     this.ink,
+    this.wash,
     this.textKey,
     this.showScriptControls = true,
   });
@@ -850,6 +868,7 @@ class PracticeRemembranceCore extends ConsumerWidget {
   final String transliteration;
   final String translation;
   final Color? ink;
+  final Color? wash;
   final Key? textKey;
   final bool showScriptControls;
 
@@ -867,24 +886,28 @@ class PracticeRemembranceCore extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (contextText.isNotEmpty) ...[
-          Text(contextText, style: small),
+          BalancedProse(contextText, style: small?.copyWith(height: 1.45)),
           const SizedBox(height: 6),
         ],
         if (arabic.isNotEmpty) ...[
           if (showScriptControls) ...[
             PracticeArabicScriptBar(ink: ink),
-            const SizedBox(height: 4),
+            const SizedBox(height: 6),
           ],
-          Text(
-            arabic,
-            textAlign: TextAlign.right,
-            textDirection: TextDirection.rtl,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: ink,
-              height: 1.85,
-              fontSize: size,
-              fontFamily: face.family,
-              fontWeight: FontWeight.w500,
+          PracticeScriptPane(
+            ink: ink,
+            wash: wash,
+            child: Text(
+              arabic,
+              textAlign: TextAlign.right,
+              textDirection: TextDirection.rtl,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: ink,
+                height: 2.0,
+                fontSize: size,
+                fontFamily: face.family,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
           const SizedBox(height: 6),
@@ -897,7 +920,11 @@ class PracticeRemembranceCore extends ConsumerWidget {
           const SizedBox(height: 4),
         ],
         if (translation.isNotEmpty)
-          Text(key: textKey, translation, style: body?.copyWith(height: 1.4)),
+          BalancedProse(
+            key: textKey,
+            translation,
+            style: body?.copyWith(height: 1.45),
+          ),
       ],
     );
   }
@@ -1161,6 +1188,7 @@ class _PracticeTopicSkimCardState extends State<PracticeTopicSkimCard> {
                   transliteration: item.transliteration,
                   translation: item.translation,
                   ink: ink,
+                  wash: wash,
                   showScriptControls: false,
                 ),
                 citation: PracticeCitationLink(
@@ -1242,9 +1270,10 @@ class _PracticeHadithRegisterSheetState
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 8),
-          Text(
+          BalancedProse(
             Copy.practiceHadithRegisterNote,
-            style: Theme.of(context).textTheme.bodySmall,
+            style: Theme.of(context).textTheme.bodySmall
+                ?.copyWith(height: 1.45),
           ),
           const SizedBox(height: 8),
           Row(
@@ -1328,6 +1357,12 @@ class _PracticeHadithRegisterSheetState
                                       .transliteration,
                                   translation: practiceHadithCore(record)
                                       .translation,
+                                  wash:
+                                      domainColorIdentity(MonitorDomain.hadith)
+                                          .washFor(
+                                            Theme.of(context).brightness,
+                                            context,
+                                          ),
                                 ),
                                 PracticeRegisterStatusSelect(
                                   dropdownKey: Key(
@@ -1438,9 +1473,10 @@ class _PracticeQuranRegisterSheetState
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 8),
-          Text(
+          BalancedProse(
             Copy.practiceQuranRegisterNote,
-            style: Theme.of(context).textTheme.bodySmall,
+            style: Theme.of(context).textTheme.bodySmall
+                ?.copyWith(height: 1.45),
           ),
           const SizedBox(height: 8),
           Row(
@@ -1524,6 +1560,11 @@ class _PracticeQuranRegisterSheetState
                                       .transliteration,
                                   translation: practiceHadithCore(record)
                                       .translation,
+                                  wash: domainColorIdentity(MonitorDomain.quran)
+                                      .washFor(
+                                        Theme.of(context).brightness,
+                                        context,
+                                      ),
                                 ),
                                 PracticeRegisterStatusSelect(
                                   dropdownKey: Key(

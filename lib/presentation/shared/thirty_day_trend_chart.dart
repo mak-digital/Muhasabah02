@@ -27,11 +27,15 @@ class ThirtyDayTrendSeries {
     required this.activityLabel,
     required this.catalog,
     required this.idForDate,
+    this.hitsForDate,
+    this.dayAnswered,
   });
 
   final String activityLabel;
   final List<ThirtyDayTrendOption> catalog;
   final String? Function(String dateKey) idForDate;
+  final Iterable<String> Function(String dateKey)? hitsForDate;
+  final bool Function(String dateKey)? dayAnswered;
 
   List<String> get optionIds => [for (final option in catalog) option.id];
 
@@ -49,6 +53,8 @@ ThirtyDayTrendSeries? thirtyDaySeriesOrNull({
   required List<ActivityOption> catalog,
   required String? Function(String dateKey) idForDate,
   required bool activityColours,
+  Iterable<String> Function(String dateKey)? hitsForDate,
+  bool Function(String dateKey)? dayAnswered,
 }) {
   if (periodDays != 30) return null;
   if (chartableCatalog(catalog).isEmpty) return null;
@@ -57,22 +63,38 @@ ThirtyDayTrendSeries? thirtyDaySeriesOrNull({
     catalog: catalog,
     idForDate: idForDate,
     activityColours: activityColours,
+    hitsForDate: hitsForDate,
+    dayAnswered: dayAnswered,
   );
 }
+
+const _dhikrTrendPalette = <Color>[
+  Color(0xFF3F7D6A),
+  Color(0xFF2F6F73),
+  Color(0xFF4F7C6B),
+  Color(0xFF8A7048),
+  Color(0xFF5C6E7A),
+];
 
 ThirtyDayTrendSeries seriesFromActivityCatalog({
   required String activityLabel,
   required List<ActivityOption> catalog,
   required String? Function(String dateKey) idForDate,
   required bool activityColours,
+  Iterable<String> Function(String dateKey)? hitsForDate,
+  bool Function(String dateKey)? dayAnswered,
 }) {
   final usable = chartableCatalog(catalog);
   final seen = <int>{};
   final options = <ThirtyDayTrendOption>[];
-  for (final option in usable) {
-    final color = activityColours
+  for (var i = 0; i < usable.length; i++) {
+    final option = usable[i];
+    var color = activityColours
         ? SalahActivityMark.colourForId(option.id)
         : MuhasabahColors.mark;
+    if (activityColours && color == MuhasabahColors.mark) {
+      color = _dhikrTrendPalette[i % _dhikrTrendPalette.length];
+    }
     final value = color.toARGB32();
     final stripe = activityColours
         ? seen.contains(value)
@@ -91,6 +113,8 @@ ThirtyDayTrendSeries seriesFromActivityCatalog({
     activityLabel: activityLabel,
     catalog: options,
     idForDate: idForDate,
+    hitsForDate: hitsForDate,
+    dayAnswered: dayAnswered,
   );
 }
 

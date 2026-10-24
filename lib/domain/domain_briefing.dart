@@ -43,7 +43,7 @@ class DomainBriefing {
 const huquqBriefing = DomainBriefing(
   lead: [
     'This records rights others have over you — whether you attended to a right you owe, or neglected it. It is not a chore list, a relationship score, or a ledger of what they owe you.',
-    'Rows match Home. Unanswered is not neglect. Learn & Practice reminders on Home are not a daily grade.',
+    'Rows match Home. Empty is not neglect. Learn & Practice is a reminder list, not a daily grade.',
   ],
   examplesTitle: 'Attending can look like',
   groups: [
@@ -99,15 +99,13 @@ const huquqBriefing = DomainBriefing(
 
 const akhlaqBriefing = DomainBriefing(
   lead: [
-    'Notice what you did. This is not a verdict of being a good or bad person, a character score, or a performance review.',
+    'Notice what you did in yourself. Not a good/bad verdict, a character score, or a performance review.',
   ],
   items: [
     'Record only yourself — not someone else’s flaw.',
     'Patience may be silence or firmness.',
-    'Guarded how I spoke is tone and modesty; Knowledge’s held-back speech is whether the words were useful.',
-    'Thankfulness in how I acted is character; Gratitude Dhikr is remembrance.',
-    'Held back from a habit I am trying to leave is noticed restraint. The habit is not named.',
-    'Unanswered is not a relapse, a sin, or a failing.',
+    'Guarded speech is tone. Thankfulness in action is character; Gratitude Dhikr is remembrance.',
+    'Held back from a habit is noticed restraint. The habit is not named. Empty is not a relapse.',
   ],
   closing: ['Perfection is not expected.'],
 );
@@ -197,28 +195,25 @@ const ummahBriefing = DomainBriefing(
 
 const hadithBriefing = DomainBriefing(
   lead: [
-    'Qur’an Engagement has its own card. This is the Prophet’s teaching ﷺ: engaged with Hadith (read and/or listened), memorization or revision, study circle or discussion, and whether a teaching was lived or noticed in others.',
+    'The Prophet’s teaching ﷺ — separate from Qur’an Engagement. Four rows: read/listened, memorization or revision, study circle, and lived or noticed in others.',
   ],
   items: [
-    'Under ENGAGED with Hadith, read and/or listened, memorization or revision, and study circle or discussion use the same duration steps as Qur’an Engagement. Time is observational, not a grade.',
-    'Lived /Noticed others is one observation of living or noticing a hadith, not a revival programme or a completed sunnah checklist.',
-    'Character & Morals stays who you were. The same afternoon may be both. The app does not fill this from Akhlaq.',
-    'Hadith to learn & practice is a built-in list you may add to a private register. It is not a daily grade, checklist, or revival programme.',
-    'Unanswered is not a failed revival.',
+    'The first three rows use the same duration steps as Qur’an. Time is observational, not a grade.',
+    'Lived/noticed is one observation, not a revival programme or a completed sunnah checklist.',
+    'Character stays who you were. The same afternoon may be both. The app does not fill this from Character.',
+    'Learn & Practice is a private register you may add to. Empty is not a failed revival.',
   ],
 );
 
 const fastingBriefing = DomainBriefing(
   lead: [
-    'Two sections: Ramadan fasting & excellence, and voluntary and make-up. Not recorded is empty, not a missed fast. Prefer not to record is a privacy choice.',
+    'Ramadan noticing, then voluntary and make-up. Empty is not a missed fast. Prefer not to record is a privacy choice.',
   ],
   items: [
-    'Ramadan rows appear on civil Ramadan dates; voluntary and make-up rows appear outside it. Settings → Calendar can shift Ramadan by a day for local moon sighting, or show all Fasting rows for review.',
-    'The app does not judge validity, exemption, make-up, or fidyah. An exemption is not a failure. Fasting today can be edited after iftar; it is not auto-completed.',
-    'Necessary work, care, rest, and recreation are not automatically waste. There is no screen-time monitoring.',
-    'Salah validity and khushu’ are not measured here. Extra worship has no rak‘ah or minute quota. Menstruation and other valid limits are not presented as failure.',
-    'Weekly sunnah, White Days, and make-up keep their existing rows and record fasting-day distinctions, not a yes/no mark. Post-Ramadan may note a Shawwal or other voluntary fast, or make-up planning; an actual make-up stays on Make-up Fast.',
-    'Progress highlighting civil Hijri 13–15 is orientation only. Extreme fasting outside Ramadan is not encouraged.',
+    'Ramadan rows appear on civil Ramadan dates; voluntary rows appear outside it. Calendar can shift Ramadan by a day for local moon sighting.',
+    'The app does not judge validity, exemption, make-up, or fidyah. An exemption is not a failure. Fasting today is not auto-completed after iftar.',
+    'Weekly sunnah, White Days, and make-up use fasting-day distinctions, not a yes/no mark. A Shawwal fast is voluntary; an actual make-up stays on Make-up Fast.',
+    'Civil Hijri 13–15 on Progress is orientation only. Extreme fasting outside Ramadan is not encouraged.',
   ],
 );
 
@@ -246,15 +241,12 @@ const productivityBriefing = DomainBriefing(
 
 const charityBriefing = DomainBriefing(
   lead: [
-    'This is giving and care you noticed — privately. Amounts, recipient names, and financial circumstances are not recorded. Ordinary household nafaqa stays on Rights of Others.',
+    'Giving and care you noticed — privately. No amounts, names, or circumstances. Ordinary household nafaqa stays on Rights of Others.',
   ],
   items: [
-    'Voluntary charity, family support, and community support are independent of Zakat.',
-    'Zakat is a status you name, not a calculator and not a daily missed obligation.',
-    'A smile is sadaqah. Poverty is not a failing.',
-    'Prefer not to record is a privacy choice, distinct from not recorded.',
-    'No relevant opportunity is not withheld charity.',
-    'There is no charity leaderboard and no most-generous badge.',
+    'Voluntary giving is independent of Zakat. Zakat is a status you name, not a calculator.',
+    'A smile is sadaqah. Poverty is not a failing. There is no generosity rank.',
+    'Prefer not to record is not empty. No relevant opportunity is not withheld charity.',
   ],
 );
 

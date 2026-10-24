@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:muhasabah02/data/memory_repositories.dart';
 import 'package:muhasabah02/domain/copy.dart';
+import 'package:muhasabah02/domain/daily_check_in.dart';
+import 'package:muhasabah02/domain/dhikr_context.dart';
 import 'package:muhasabah02/domain/monitor_domain.dart';
 import 'package:muhasabah02/presentation/checkin/check_in_screen.dart';
 import 'package:muhasabah02/presentation/progress/optional_domain_progress_screen.dart';
+import 'package:muhasabah02/presentation/shared/ui_bits.dart';
 
 import '../support/test_app.dart';
 
@@ -16,8 +20,37 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
+    final checkIns = MemoryCheckInRepository();
+    final morningId = dhikrContextItemsFor(kDhikrMorningKey).first.id;
+    final eveningId = dhikrContextItemsFor(kDhikrEveningKey).first.id;
+    final otherId = dhikrContextItemsFor(kDhikrOtherKey).first.id;
+    await checkIns.save(
+      DailyCheckIn.empty('2026-09-06')
+          .withDhikrContextCaptures(kDhikrMorningKey, [
+            DhikrContextCapture(
+              activityId: morningId,
+              response: DhikrContextResponse.practised,
+            ),
+          ])
+          .withDhikrContextCaptures(kDhikrEveningKey, [
+            DhikrContextCapture(
+              activityId: eveningId,
+              response: DhikrContextResponse.practised,
+            ),
+          ])
+          .withDhikrContextCaptures(kDhikrOtherKey, [
+            DhikrContextCapture(
+              activityId: otherId,
+              response: DhikrContextResponse.practised,
+            ),
+          ]),
+    );
     await tester.pumpWidget(
-      testApp(now: DateTime(2026, 9, 6), visibleDomains: allVisibleDomains()),
+      testApp(
+        checkIns: checkIns,
+        now: DateTime(2026, 9, 6),
+        visibleDomains: allVisibleDomains(),
+      ),
     );
     await tester.pumpAndSettle();
     await tester.tap(find.text('Review'));
@@ -57,6 +90,66 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Fajr'), findsOneWidget);
     expect(find.text('Faj'), findsNothing);
+    await tester.scrollUntilVisible(
+      find.text('Morning Adhkar'),
+      240,
+      scrollable: find.byType(Scrollable).last,
+    );
+    final morningCard = find.ancestor(
+      of: find.text('Morning Adhkar'),
+      matching: find.byType(WashPanel),
+    );
+    expect(
+      find.descendant(
+        of: morningCard,
+        matching: find.byKey(const Key('progress-thirty-summary')),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: morningCard, matching: find.text('A')),
+      findsWidgets,
+    );
+    await tester.scrollUntilVisible(
+      find.text('Evening Adhkar'),
+      240,
+      scrollable: find.byType(Scrollable).last,
+    );
+    final eveningCard = find.ancestor(
+      of: find.text('Evening Adhkar'),
+      matching: find.byType(WashPanel),
+    );
+    expect(
+      find.descendant(
+        of: eveningCard,
+        matching: find.byKey(const Key('progress-thirty-summary')),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: eveningCard, matching: find.text('A')),
+      findsWidgets,
+    );
+    await tester.scrollUntilVisible(
+      find.text('Other Adhkars'),
+      240,
+      scrollable: find.byType(Scrollable).last,
+    );
+    final otherCard = find.ancestor(
+      of: find.text('Other Adhkars'),
+      matching: find.byType(WashPanel),
+    );
+    expect(
+      find.descendant(
+        of: otherCard,
+        matching: find.byKey(const Key('progress-thirty-summary')),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: otherCard, matching: find.text('A')),
+      findsWidgets,
+    );
 
     await tester.ensureVisible(find.text('90 days'));
     await tester.tap(find.text('90 days'));

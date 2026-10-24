@@ -37,7 +37,7 @@ class Copy {
   static const previousDay = 'Previous day';
   static const nextDay = 'Next day';
   static const quickTapNote =
-      'Busy day. Tiles are this season’s mix on domains you show. Each tap steps the same list as check-in, except Other Adhkar tiles which open the activity list. Unticked stays unanswered. After unanswered, your most recorded choice comes first. Reflection can wait.';
+      'Busy day. Tiles are this season’s mix. Each tap steps the same list as check-in (Other Adhkar opens its list). Unticked stays unanswered — not missed. After unanswered, your most recorded choice comes first. Reflection can wait.';
   static const quickTapEmpty =
       'No mix rows on shown domains. Choose Domains and this season’s mix in Settings.';
   static const quickTapFajrHint = 'On time is not a khushu’ score.';
@@ -257,7 +257,7 @@ class Copy {
   static const akhlaqWhatHelped = 'What helped or could help next time?';
   static const akhlaqPrivateStruggleNote = 'Private struggle note';
   static const akhlaqCheckInNote =
-      'Each row stores one observation: virtue demonstrated, struggled, shortcoming recognised, corrective action, or no relevant situation. Corrective action is not the same as avoiding the original lapse. Colour names the recorded choice when activity colours are on. Unanswered is empty, not a relapse.';
+      'One observation per row, about yourself only. Empty is not a relapse. Colour names the choice when activity colours are on — not a grade.';
   static const akhlaqNoticed = 'I noticed this in myself';
   static const akhlaqNotToday = 'I did not notice this today';
   static String get huquqObservationNote => huquqBriefing.plainText;
@@ -274,7 +274,7 @@ class Copy {
   static const huquqReflectionHint =
       'About your own conduct only. No names or identifying details required.';
   static const huquqCheckInNote =
-      'Each row stores one observation: a positive action, partial effort, a recognised shortcoming, a corrective step, or no applicable situation. Colour names the recorded choice when activity colours are on. Unanswered is empty, not neglect. Optional follow-ups are provenance, not a relationship score.';
+      'One observation per row of a right you owe. Empty is not neglect. Do not name others’ faults. Colour names the choice when activity colours are on — not a relationship score.';
   static String get knowledgeObservationNote => knowledgeBriefing.plainText;
   static const knowledgeNoticed = 'I noticed this in myself';
   static const knowledgeNotToday = 'I did not notice this today';
@@ -292,7 +292,7 @@ class Copy {
   static const knowledgeReflectionHint =
       'What did I learn? What do I still need to verify? How could I apply it beneficially? Did I correct something I previously misunderstood?';
   static const knowledgeCheckInNote =
-      'Each row stores one observation: beneficial activity, partial engagement, a recognised gap, a correction, or no relevant situation. Colour names the recorded choice when activity colours are on. Unanswered is empty, not ignorance. Optional follow-ups are provenance, not a grade.';
+      'One observation per row. Empty is not ignorance. Colour names the choice when activity colours are on — not a grade.';
   static String get timeObservationNote => timeBriefing.plainText;
   static const timeNoticed = 'I noticed this in myself';
   static const timeNotToday = 'I did not notice this today';
@@ -306,17 +306,17 @@ class Copy {
   static const timeQuantityHint =
       'A count or approximate minutes. Not a quality or barakah measure.';
   static const timeCheckInNote =
-      'Each row stores one observation: beneficial action, partial effort, a recognised lapse, a corrective adjustment, or no relevant situation. Corrected is not ranked above acted. Colour names the recorded choice when activity colours are on. Unanswered is empty, not wasted time.';
+      'One observation per row. Corrected is not ranked above acted. Empty is not wasted time.';
   static String get healthObservationNote => healthBriefing.plainText;
   static const healthNoticed = 'I noticed this in myself';
   static const healthNotToday = 'I did not notice this today';
   static const healthCheckInNote =
-      'Each row stores one observation: care taken, partial or mixed care, a difficulty noticed, avoidable neglect, an adjustment, circumstances beyond control, no relevant need, or prefer not to record. Prefer not to record is not unanswered. Colour names the recorded choice when activity colours are on. Unanswered is empty, not a failing of the body.';
+      'One observation per row. Prefer not to record is not empty. Empty is not a failing of the body.';
   static String get wealthObservationNote => wealthBriefing.plainText;
   static const wealthNoticed = 'I noticed this in myself';
   static const wealthNotToday = 'I did not notice this today';
   static const wealthCheckInNote =
-      'Each row stores one observation: a reported action, a check or clarification, an unresolved concern, no relevant activity, or prefer not to record. Prefer not to record is not unanswered. No relevant activity is not a failure. Colour names the recorded choice when activity colours are on. Unanswered is empty, not a failing of provision.';
+      'One observation per row. Prefer not to record is not empty. No relevant activity is not a failure.';
   static String get ummahObservationNote => ummahBriefing.plainText;
   static const ummahNoticed = 'I noticed this in myself';
   static const ummahNotToday = 'I did not notice this today';
@@ -325,14 +325,14 @@ class Copy {
   static const charityNoticed = 'I noticed this in myself';
   static const charityNotToday = 'I did not notice this today';
   static const charityCheckInNote =
-      'Each row stores one observation: a reported gift or support, an intended or arranged effort, a recognised need without the wished action, no relevant opportunity, or prefer not to record. Prefer not to record is not the same as not recorded. No relevant opportunity is not withheld charity. Zakat is a separate status, not a calculator and not a daily missed obligation. Colour names the recorded choice when activity colours are on. Not recorded is empty.';
+      'One observation per row — no amounts or names. Prefer not to record is not empty. No relevant opportunity is not withheld charity. Zakat is a status, not a calculator.';
   static const ummahCheckInNote =
-      'Each row stores one observation: a reported action, remote or spoken effort, an opportunity noticed without the wished action, no relevant opportunity, or prefer not to record. Prefer not to record is not unanswered. No relevant opportunity is not neglect of the Ummah. Colour names the recorded choice when activity colours are on. Unanswered is empty, not isolation.';
+      'One observation per row. Prefer not to record is not empty. No relevant opportunity is not neglect of the Ummah.';
   static String get hadithObservationNote => hadithBriefing.plainText;
   static const hadithNoticed = 'I noticed this in myself';
   static const hadithNotToday = 'I did not notice this today';
   static const hadithDurationNote =
-      'ENGAGED with Hadith holds four rows: read and/or listened, memorization or revision, study circle or discussion, and lived or noticed in others. The first three use the same duration steps as Qur’an Engagement. Lived /Noticed others is how a teaching reached life today — not a revival score.';
+      'Four rows: read/listened, memorization or revision, study circle, and lived or noticed in others. Time is observational. Lived/noticed is not a revival score.';
   static String get hajjObservationNote => hajjBriefing.plainText;
   static String get productivityObservationNote =>
       productivityBriefing.plainText;
@@ -420,26 +420,39 @@ class Copy {
   static const firstLookDoorEmpty =
       'An empty mark is not missed. You can save a day with unanswered rows.';
   static const firstLookDoorSeason =
-      'Home shows Salah, Qur’an, and Dhikr. This season starts with a short list; the rest stays in collapsed bands and Settings.';
+      'Home starts with Salah, Qur’an, and Dhikr. Add Hadith, Fasting, Character, Rights, or Charity when you want them. Empty is not missed.';
   static const firstLookStartBlank = 'Start with a quiet week';
   static const firstLookShowSample = 'Show sample days';
+  static const firstLookDoorSample =
+      'Sample days use the same live fields so you can try looking back. Later windows can look busier than earlier ones. That is a demonstration, not a target.';
   static const seePonderExplore = 'SEE → PONDER → EXPLORE';
   static const dhikrPerformedHint =
-      'Tick the box(s) and change the respective count to actual';
+      'Tick practised formulas. Unticked stays unanswered, not missed.';
   static const dhikrPerformedHeading = 'Dhikr performed';
   static const dhikrPerformedCountHeading = 'Count';
   static const verifiedWordingAvailable = 'Verified wording available';
   static const relatedWordingAvailable = 'Related wording available';
   static const sampleDataNotice =
-      'Sample/demo records are visible. They stay until you archive them.';
+      'Sample/demo records are visible so you can try looking back. They stay until you archive them. They are not a target.';
   static const archiveSamplePrompt =
       'Would you like to archive the sample records and use only your own records?';
   static const settingsTitle = 'Settings';
   static const aboutMuhasabah = 'About Private Muhasabah';
   static const faqTitle = 'FAQ';
+  static const recordReflectLoop =
+      'RECORD → REFLECT → REVIEW → RECOGNISE → PONDER → RESPOND';
+  static const lookingBackPurpose =
+      'After you record, look back at past days. You may notice what you recorded more or less often, and optional factors you named around those days. Factors are not causes. The app does not diagnose a reason or prescribe a next step. A Response is your own note about what you might try. Sample days, if you choose them, show how Review and 30-day graphs can look — they are a demonstration, not a target or a model of practice.';
+  static const faqPurpose =
+      'Private Muhasabah is your private recorder. RECORD what you noticed, REFLECT on the day, REVIEW later windows, RECOGNISE descriptive patterns, PONDER, and RESPOND in your own words. It does not score worship, keep a streak, or issue a ruling.\n\nAfter you record, look back. You may notice what you recorded more or less often, and optional factors you named around those days. Factors are not causes. The app does not diagnose a reason, prescribe a remedy, or set a standard of practice. A Response is yours: you decide whether anything needs a change.\n\nShow only the domains you want. Leave a row unanswered when it does not apply — empty is not missed. Records stay on this device.\n\nSample days, if you choose them, use the same live fields so Review and 30-day graphs can be tried. Later windows can look busier than earlier ones so the views have something to show. That is a demonstration, not a target.\n\nThis season: Salah (prayers you recorded), Qur’an (three independent sittings), Hadith (whether a teaching reached the day), Dhikr (performed lists), Fasting (Ramadan and voluntary noticing), Character (yourself only), Rights (what you owe others), and Charity (giving without amounts).';
   static const faqNote =
-      'Clarifications only. Not advice, scores, or a verdict.';
-  static const faqSettingsNote = 'Clarifications only';
+      'Clarifications only. Not advice, scores, or a verdict. Grayed items below are not in this version.';
+  static const faqSettingsNote = 'Purpose, mix, and clarifications';
+  static const faqThisVersionHeading = 'This version';
+  static const faqNotApplicableHeading = 'Not applicable in this version';
+  static const faqNotApplicableLabel = 'Not applicable';
+  static const faqNotApplicableNote =
+      'Listed so you can find them. Not active in this season. Saved records stay. Home, Review, and check-in do not use these domains yet.';
   static const accountAndData = 'Account & data';
   static const developerSampleData = 'Developer & sample data';
   static const applicationSection = 'Preferences';
@@ -510,7 +523,7 @@ class Copy {
       'Colour names the recorded Salah choice, Qur’an duration step, post-fard Dhikr remembrance, Character & Morals, Rights of Others, Charity, Knowledge & Beneficial Speech, Time & Barakah, Physical Health & Energy, Wealth & Stewardship, Ummah, or Fasting observation. It does not rank spirituality or tell you what to do next. Other domains keep the shared mark colour.';
   static const howAttentiveWasI = 'How attentive was I';
   static const dhikrPostFardNote =
-      'Post-fard Salah Adhkar records remembrance after each fard prayer. Remembrance with action uses the same blue as congregation on time. The other steps twin the remaining Salah activity colours. How attentive was I is optional provenance, not a khushu’ score.';
+      'Tick the formulas you practised after this fard prayer. Unticked stays unanswered, not missed. Optional count is yours. Colour names the recorded choice when activity colours are on — not a khushu’ score.';
   static const visibleDomainsNote =
       'Choose which domains belong in this profile. This season’s mix, on the same screen, is a subset of those domains: bands and rows to notice. Leave a domain or row unselected if it does not apply. Home, Review, Progress, check-in, Quick Tap, and Recorded days follow the mix among the domains shown. Hidden domains keep any saved records.';
   static const shownDomainsNote =
@@ -590,7 +603,7 @@ class Copy {
       'LEARN & PRACTICE ($domainShort)';
   static String get practiceSalahTitle => practiceLearnTitle('Salah');
   static const practiceSalahNote =
-      'Qur’an verses and authentic hadith that encourage the prayers on this card, grouped as on Home. Presence of heart is not scored. Add one if you want to learn it and bring it into practice. This is not a khushu’ score, congregation requirement, or daily grade.';
+      'Verses and authentic hadith grouped like Home. Add one if you want to learn it. Presence of heart is not scored.';
   static const addPracticeSalah = '+ add reminder';
   static String get openPracticeSalahRegister =>
       openPracticeLearnRegister('Salah');
@@ -651,7 +664,7 @@ class Copy {
   static const bringThisVerseIntoLearn = 'Bring this verse into Learn';
   static String get practiceHadithTitle => practiceLearnTitle('Hadith');
   static const practiceHadithNote =
-      'A built-in list of daily-practice hadith and related supplications, with Arabic, transliteration, and translation. Add one if you want to learn it and bring it into practice. This is not a checklist, score, or revival programme.';
+      'Daily-practice hadith and related supplications (Arabic, transliteration, translation). Add one if you want to learn it. Not a checklist or revival programme.';
   static const addPracticeHadith = '+ add Hadith';
   static String openPracticeLearnRegister(String domainShort) =>
       'Learn & Practice ($domainShort) Register';
@@ -745,7 +758,7 @@ class Copy {
       'Archived hadith stay in the built-in list. Matching daily or weekly reflections are skipped when another quote is available.';
   static String get practiceDhikrTitle => practiceLearnTitle('Dhikr');
   static const practiceDhikrNote =
-      'Widely used authentic dhikr and dua, grouped by occasion. Highly recommended post-prayer, morning, and evening sets are listed together first. Add one if you want to learn it and bring it into practice. This is not a target, score, or prescription.';
+      'Authentic dhikr and dua, grouped by occasion. Post-prayer, morning, and evening sit first. Add one if you want to learn it. Not a target or score.';
   static const addPracticeDhikr = '+ add Dhikr';
   static String get openPracticeDhikrRegister =>
       openPracticeLearnRegister('Dhikr');
@@ -758,7 +771,7 @@ class Copy {
       'Remove the selected dhikr from this device? This cannot be undone.';
   static String get practiceAkhlaqTitle => practiceLearnTitle('Character');
   static const practiceAkhlaqNote =
-      'Qur’an verses and authentic hadith that encourage the behaviours on this card, grouped as on Home. Highly recommended reminders sit together first. Add one if you want to learn it and bring it into practice. This is not a character grade, score, or prescription.';
+      'Verses and authentic hadith grouped like Home. Add one if you want to learn it. Not a character grade.';
   static const addPracticeAkhlaq = '+ add reminder';
   static String get openPracticeAkhlaqRegister =>
       openPracticeLearnRegister('Character');
@@ -771,7 +784,7 @@ class Copy {
       'Remove the selected reminders from this device? This cannot be undone.';
   static String get practiceHuquqTitle => practiceLearnTitle('Rights');
   static const practiceHuquqNote =
-      'Qur’an verses and authentic hadith that encourage the rights on this card, grouped as on Home. Highly recommended reminders sit together first. Add one if you want to learn it and bring it into practice. This is not a relationship score, chore list, or prescription.';
+      'Verses and authentic hadith grouped like Home. Add one if you want to learn it. Not a relationship score or chore list.';
   static const addPracticeHuquq = '+ add reminder';
   static String get openPracticeHuquqRegister =>
       openPracticeLearnRegister('Rights');
@@ -849,7 +862,7 @@ class Copy {
       'Remove the selected reminders from this device? This cannot be undone.';
   static String get practiceFastingTitle => practiceLearnTitle('Fasting');
   static const practiceFastingNote =
-      'Qur’an verses and authentic hadith that encourage the rows on this card, grouped as on Home. Ramadan observations are descriptive, not a ruling on validity. Voluntary and make-up noticing stays separate. Add one if you want to learn it and bring it into practice. This is not a sawm score, countdown, or prescription to fast.';
+      'Verses and authentic hadith grouped like Home. Ramadan noticing is not a validity ruling. Add one if you want to learn it — not a countdown or a prescription to fast.';
   static const addPracticeFasting = '+ add reminder';
   static String get openPracticeFastingRegister =>
       openPracticeLearnRegister('Fasting');
@@ -875,7 +888,7 @@ class Copy {
       'Remove the selected reminders from this device? This cannot be undone.';
   static String get practiceCharityTitle => practiceLearnTitle('Charity');
   static const practiceCharityNote =
-      'Qur’an verses and authentic hadith that encourage the rows on this card, grouped as on Home. Giving and care — a smile is sadaqah. Amounts are not recorded. Add one if you want to learn it and bring it into practice. This is not a generosity score, leaderboard, or zakat calculator.';
+      'Verses and authentic hadith grouped like Home. A smile is sadaqah. Amounts are not recorded. Add one if you want to learn it — not a generosity score.';
   static const addPracticeCharity = '+ add reminder';
   static String get openPracticeCharityRegister =>
       openPracticeLearnRegister('Charity');
@@ -896,7 +909,7 @@ class Copy {
       'Each duration step reuses a Salah activity colour. 3–5 minutes is still a recorded sitting (same light green as 5–10, empty circle). Unanswered is never inferred as not engaged. Duration is not a khushu’ score, streak, or spiritual grade. Missed colours are not used here because these rows are not fard.';
   static const quranCheckInIntroTitle = 'About these rows';
   static const quranCheckInIntro =
-      'Three independent notice-rows share one duration list. Engagement is recitation, memorisation and/or revision. Understanding & reflection is meaning and/or tafsir plus pondering. Practical relevance is noticing implications or use of learnt verses — not a deed score. Unanswered is empty, not “not engaged”.';
+      'Three independent rows share one duration list: recitation/memorisation/revision, meaning and pondering, and noticing a verse in daily life. Unanswered is empty, not “not engaged”. Duration is not a khushu’ score.';
   static const quranCheckInFactorsIntro =
       'Factors you noticed (optional). They are things you noticed — not causes. Skipping changes nothing.';
   static const quranJourney = 'Qur’an Journey';

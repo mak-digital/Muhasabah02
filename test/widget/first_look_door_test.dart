@@ -33,6 +33,11 @@ void main() {
     expect(find.text(Copy.firstLookDoorPrivate), findsOneWidget);
     expect(find.text(Copy.firstLookDoorEmpty), findsOneWidget);
     expect(find.text(Copy.firstLookDoorSeason), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text(Copy.firstLookDoorSample),
+      200,
+    );
+    expect(find.text(Copy.firstLookDoorSample), findsOneWidget);
     expect(find.text('Continue'), findsNothing);
 
     await tester.tap(find.text(Copy.firstLookStartBlank));

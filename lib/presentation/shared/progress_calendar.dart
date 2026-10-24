@@ -449,6 +449,8 @@ class _ProgressCalendarSectionState
           todayKey: todayKey,
           idForDate: trend.idForDate,
           optionIds: trend.optionIds,
+          hitsForDate: trend.hitsForDate,
+          dayAnswered: trend.dayAnswered,
         ),
         measureTrendWindow(
           keys: shiftedPeriodDateKeys(
@@ -459,12 +461,16 @@ class _ProgressCalendarSectionState
           todayKey: todayKey,
           idForDate: trend.idForDate,
           optionIds: trend.optionIds,
+          hitsForDate: trend.hitsForDate,
+          dayAnswered: trend.dayAnswered,
         ),
         measureTrendWindow(
           keys: shiftedPeriodDateKeys(30, now: now, periodsBack: _periodsBack),
           todayKey: todayKey,
           idForDate: trend.idForDate,
           optionIds: trend.optionIds,
+          hitsForDate: trend.hitsForDate,
+          dayAnswered: trend.dayAnswered,
         ),
       ];
       final selected = selectFiveTrendOptionIds(
