@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../app/theme.dart';
 import '../../domain/copy.dart';
+import 'app_language_scope.dart';
 
 Color weekNavStripWash(Color family, Color cardWash, [BuildContext? context]) {
   final ink = MuhasabahWashTheme.harmonizeFamilyOf(context, family);
@@ -224,7 +225,7 @@ class HomeWeekChrome extends StatelessWidget {
     final titleBlock = Column(
       children: [
         Text(
-          title,
+          uiText(context, title),
           textAlign: TextAlign.center,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
@@ -239,7 +240,7 @@ class HomeWeekChrome extends StatelessWidget {
         if (question != null && question!.isNotEmpty) ...[
           const SizedBox(height: 4),
           Text(
-            question!,
+            uiText(context, question!),
             textAlign: TextAlign.center,
             maxLines: 4,
             overflow: TextOverflow.ellipsis,

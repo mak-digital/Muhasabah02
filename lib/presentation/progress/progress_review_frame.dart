@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../domain/copy.dart';
+import '../shared/app_language_scope.dart';
 import '../shared/system_insets.dart';
 import '../shared/ui_bits.dart';
 
@@ -89,7 +90,7 @@ class _ProgressReviewFrameState extends State<ProgressReviewFrame> {
                 children: [
                   if (question != null && question.isNotEmpty) ...[
                     Text(
-                      question,
+                      uiText(context, question),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.bodySmall?.copyWith(

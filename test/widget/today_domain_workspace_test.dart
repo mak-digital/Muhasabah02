@@ -6,19 +6,20 @@ import 'package:muhasabah02/application/providers.dart';
 import 'package:muhasabah02/data/app_prefs.dart';
 import 'package:muhasabah02/data/memory_repositories.dart';
 import 'package:muhasabah02/domain/activities.dart';
+import 'package:muhasabah02/domain/akhlaq_practices.dart';
 import 'package:muhasabah02/domain/copy.dart';
 import 'package:muhasabah02/domain/daily_check_in.dart';
 import 'package:muhasabah02/domain/date_key.dart';
 import 'package:muhasabah02/domain/dhikr_context.dart';
 import 'package:muhasabah02/domain/monitor_domain.dart';
 import 'package:muhasabah02/domain/personal_mix.dart';
-import 'package:muhasabah02/domain/practice_dhikr_catalog.dart';
 import 'package:muhasabah02/domain/prayer.dart';
 import 'package:muhasabah02/domain/quick_tap.dart';
 import 'package:muhasabah02/domain/quran.dart';
 import 'package:muhasabah02/domain/today_workspace.dart';
 import 'package:muhasabah02/presentation/home/today_row_record.dart';
 import 'package:muhasabah02/presentation/shared/domain_visual.dart';
+import 'package:muhasabah02/presentation/shared/salah_activity_mark.dart';
 import 'package:muhasabah02/presentation/shared/state_marker.dart';
 import 'package:muhasabah02/presentation/shared/system_insets.dart';
 
@@ -153,7 +154,7 @@ void main() {
     );
   });
 
-  testWidgets('back from a domain workspace returns to Home', (tester) async {
+  testWidgets('back from a domain workspace returns to Input', (tester) async {
     await pumpHome(tester);
     await openDomain(tester, 'salah');
     expect(find.byKey(const Key('today-workspace-salah')), findsOneWidget);
@@ -161,7 +162,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('today-workspace-salah')), findsNothing);
     expect(find.byKey(const Key('today-overview')), findsOneWidget);
-    expect(find.text(Copy.homeCheckIn), findsOneWidget);
+    expect(find.byKey(const Key('home-check-in')), findsOneWidget);
   });
 
   testWidgets('hidden domains remain unavailable from Today', (tester) async {
@@ -245,6 +246,8 @@ void main() {
       (await checkIns.getByDate('2026-09-22'))?.prayer(PrayerId.fajr),
       PrayerStatus.missed,
     );
+    await tester.tap(find.byKey(const Key('today-row-salah.fajr')));
+    await tester.pumpAndSettle();
     await chooseCheckInOption(
       tester,
       dropdownKey: const Key('today-salah-fajr'),
@@ -255,12 +258,10 @@ void main() {
       (await checkIns.getByDate('2026-09-22'))?.prayer(PrayerId.fajr),
       PrayerStatus.onTime,
     );
-    await tester.tap(find.byType(ModalBarrier).last);
-    await tester.pumpAndSettle();
     expect(
       find.descendant(
         of: find.byKey(const Key('today-row-salah.fajr')),
-        matching: find.text(Copy.todayRecorded),
+        matching: find.text('Alone on time'),
       ),
       findsOneWidget,
     );
@@ -285,6 +286,8 @@ void main() {
           ?.quranOutcome(QuranDimension.reading),
       TernaryOutcome.positive,
     );
+    await tester.tap(find.byKey(const Key('today-row-quran.reading')));
+    await tester.pumpAndSettle();
     await chooseCheckInOption(
       tester,
       dropdownKey: const Key('today-quran-reading'),
@@ -298,38 +301,88 @@ void main() {
     );
   });
 
-  testWidgets('Dhikr morning observation is recorded and editable', (
+  testWidgets(
+    'Akhlaq row opens the full list under the row without evidence actions',
+    (tester) async {
+      final checkIns = MemoryCheckInRepository();
+      await pumpHome(
+        tester,
+        checkIns: checkIns,
+        visibleDomains: {MonitorDomain.akhlaq, MonitorDomain.salah},
+        personalMix: const PersonalMix(
+          kind: PersonalMixKind.custom,
+          keys: {'akhlaq.patience', 'salah.fajr'},
+        ),
+      );
+      await openDomain(tester, 'akhlaq');
+      await tester.tap(find.byKey(const Key('today-row-akhlaq.patience')));
+      await tester.pumpAndSettle();
+      expect(find.text('Open recorded evidence'), findsNothing);
+      expect(find.text(Copy.addAResponse), findsNothing);
+      expect(find.text('Did this'), findsOneWidget);
+      expect(find.text('Unanswered'), findsWidgets);
+      await tester.tap(
+        find.byKey(
+          Key('today-trace-akhlaq.patience-${AkhlaqObservationIds.practised}'),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        (await checkIns.getByDate('2026-09-22'))
+            ?.activityFor('akhlaq.patience')
+            .id,
+        AkhlaqObservationIds.practised,
+      );
+    },
+  );
+
+  testWidgets('Dhikr morning Active Domain uses the remembrance-level list', (
     tester,
   ) async {
     final checkIns = MemoryCheckInRepository();
-    await pumpHome(tester, checkIns: checkIns);
-    tester.view.physicalSize = const Size(400, 3200);
-    await tester.pump();
+    tester.view.physicalSize = const Size(400, 1200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(
+      testApp(
+        now: DateTime(2026, 9, 22),
+        checkIns: checkIns,
+        prefs: MemoryAppPrefs(salahActivityColours: true),
+      ),
+    );
+    await tester.pumpAndSettle();
     await openDomain(tester, 'dhikr');
     await tester.tap(find.byKey(const Key('today-row-dhikr.morningAdhkar')));
     await tester.pumpAndSettle();
-    final first = practiceDhikrPrimaryForGroup(kDhikrGroupMorning).first;
-    final pick = Key('dhikr-pick-$kDhikrMorningKey.${first.id}');
-    await tester.ensureVisible(find.byKey(pick));
-    await tester.tap(find.byKey(pick));
+    expect(find.text('Verified wording available'), findsNothing);
+    expect(find.text('Attentive Remembrance'), findsOneWidget);
+    expect(find.text('Remembered as habit'), findsOneWidget);
+    expect(find.text('Intentional remembrance of the most or all'), findsOneWidget);
+    expect(find.text('Brief remembrance of some'), findsOneWidget);
+    expect(find.text('Not today'), findsOneWidget);
+    expect(find.text('Not recorded'), findsOneWidget);
+    await tester.tap(
+      find.byKey(
+        Key('today-trace-dhikr.morningAdhkar-${ActivityCatalog.dhikrIntentional}'),
+      ),
+    );
     await tester.pumpAndSettle();
     expect(
       (await checkIns.getByDate('2026-09-22'))?.homeTrace(kDhikrMorningKey),
       TernaryOutcome.positive,
     );
-    await tester.tap(find.byType(ModalBarrier).last);
-    await tester.pumpAndSettle();
-    await tester.ensureVisible(
-      find.byKey(const Key('today-row-dhikr.morningAdhkar')),
-    );
     expect(
-      tester
-          .widget<RecordedStateMarker>(
-            find.byKey(const Key('today-row-marker-dhikr.morningAdhkar')),
-          )
-          .kind,
-      MarkerKind.filled,
+      (await checkIns.getByDate('2026-09-22'))
+          ?.activityFor(kDhikrMorningKey)
+          .id,
+      ActivityCatalog.dhikrIntentional,
     );
+    final marker = tester.widget<RecordedStateMarker>(
+      find.byKey(const Key('today-row-marker-dhikr.morningAdhkar')),
+    );
+    expect(marker.kind, MarkerKind.filled);
+    expect(marker.color, SalahActivityMark.smallCongregation);
   });
 
   testWidgets('no-response rows use hollow markers and No response yet', (
@@ -388,14 +441,14 @@ void main() {
       expect(
         find.descendant(
           of: find.byKey(const Key('today-row-salah.fajr')),
-          matching: find.text(Copy.todayRecorded),
+          matching: find.text('Alone on time'),
         ),
         findsOneWidget,
       );
       expect(
         find.descendant(
           of: find.byKey(const Key('today-row-salah.dhuhr')),
-          matching: find.text(Copy.todayRecorded),
+          matching: find.text('Missed'),
         ),
         findsOneWidget,
       );
@@ -439,7 +492,7 @@ void main() {
               find.byKey(const Key('today-row-marker-salah.dhuhr')),
             )
             .kind,
-        MarkerKind.filled,
+        MarkerKind.missed,
       );
       expect(
         tester
@@ -453,13 +506,13 @@ void main() {
         tester
             .getSemantics(find.byKey(const Key('today-row-salah.fajr')))
             .label,
-        'Fajr, response recorded',
+        'Fajr, Alone on time',
       );
       expect(
         tester
             .getSemantics(find.byKey(const Key('today-row-salah.dhuhr')))
             .label,
-        'Dhuhr, response recorded',
+        'Dhuhr, Missed',
       );
     },
   );
@@ -472,10 +525,11 @@ void main() {
     );
     await pumpHome(tester, checkIns: checkIns);
     await openDomain(tester, 'dhikr');
+    expect(find.text(Copy.todayRecordedToday), findsOneWidget);
     expect(
       find.descendant(
         of: find.byKey(const Key('today-row-dhikr.morningAdhkar')),
-        matching: find.text(Copy.todayRecorded),
+        matching: find.text('Not today'),
       ),
       findsOneWidget,
     );
@@ -485,7 +539,7 @@ void main() {
             find.byKey(const Key('today-row-marker-dhikr.morningAdhkar')),
           )
           .kind,
-      MarkerKind.filled,
+      MarkerKind.outlined,
     );
   });
 
@@ -525,7 +579,7 @@ void main() {
     );
   });
 
-  testWidgets('recording sheet keeps the selector above the system inset', (
+  testWidgets('Salah menu opens under the row without a closed dropdown step', (
     tester,
   ) async {
     tester.view.padding = const FakeViewPadding(bottom: 48);
@@ -534,16 +588,19 @@ void main() {
     addTearDown(tester.view.resetViewPadding);
     await pumpHome(tester);
     await openDomain(tester, 'salah');
-    await tester.tap(find.byKey(const Key('today-row-salah.fajr')));
+    final row = find.byKey(const Key('today-row-salah.fajr'));
+    final rowBottom = tester.getRect(row).bottom;
+    await tester.tap(row);
     await tester.pumpAndSettle();
-    final control = find.byKey(const Key('today-salah-fajr'));
-    expect(control, findsOneWidget);
-    expect(tester.getRect(control).bottom, lessThanOrEqualTo(1200 - 48));
+    // Full list is open immediately (no intermediate closed dropdown).
+    expect(find.byKey(const Key('today-salah-fajr')), findsNothing);
+    final firstOption = find.byKey(const Key('today-salah-fajr-unanswered'));
+    expect(firstOption, findsOneWidget);
+    expect(tester.getRect(firstOption).top, greaterThanOrEqualTo(rowBottom - 2));
+    expect(tester.getRect(firstOption).bottom, lessThanOrEqualTo(1200 - 48));
   });
 
-  testWidgets('recording sheet uses keyboard inset instead of stacking it', (
-    tester,
-  ) async {
+  testWidgets('Salah menu stays usable with a keyboard inset', (tester) async {
     tester.view.padding = const FakeViewPadding(bottom: 48);
     tester.view.viewPadding = const FakeViewPadding(bottom: 48);
     tester.view.viewInsets = const FakeViewPadding(bottom: 280);
@@ -554,11 +611,7 @@ void main() {
     await openDomain(tester, 'salah');
     await tester.tap(find.byKey(const Key('today-row-salah.fajr')));
     await tester.pumpAndSettle();
-    expect(find.byKey(const Key('today-salah-fajr')), findsOneWidget);
-    expect(
-      tester.getRect(find.byKey(const Key('today-salah-fajr'))).bottom,
-      lessThanOrEqualTo(1200 - 280),
-    );
+    expect(find.byKey(const Key('today-salah-fajr-unanswered')), findsOneWidget);
   });
 
   testWidgets('contentBottomInset does not use a fixed oversized spacer', (
@@ -693,7 +746,7 @@ void main() {
         kind: TodayRowKind.salah,
         recordedState: TodayRecordedState.noResponse,
       ),
-      control: const Key('today-salah-dhuhr'),
+      control: const Key('today-salah-dhuhr-unanswered'),
     );
   });
 
@@ -708,7 +761,7 @@ void main() {
         kind: TodayRowKind.quran,
         recordedState: TodayRecordedState.noResponse,
       ),
-      control: const Key('today-quran-reading'),
+      control: const Key('today-quran-reading-unanswered'),
     );
   });
 
@@ -724,7 +777,7 @@ void main() {
         kind: TodayRowKind.salah,
         recordedState: TodayRecordedState.noResponse,
       ),
-      control: const Key('today-salah-jumuah'),
+      control: const Key('today-salah-jumuah-unanswered'),
     );
   });
 
@@ -739,7 +792,7 @@ void main() {
         kind: TodayRowKind.salah,
         recordedState: TodayRecordedState.noResponse,
       ),
-      control: const Key('today-salah-ishraq'),
+      control: const Key('today-salah-ishraq-unanswered'),
     );
   });
 
@@ -756,7 +809,7 @@ void main() {
         kind: TodayRowKind.salah,
         recordedState: TodayRecordedState.noResponse,
       ),
-      control: const Key('today-salah-jumuah'),
+      control: const Key('today-salah-jumuah-unanswered'),
     );
   });
 
@@ -830,16 +883,34 @@ void main() {
       greaterThanOrEqualTo(48),
     );
     expect(
+      find.descendant(
+        of: find.byKey(const Key('today-row-salah.fajr')),
+        matching: find.text('Missed'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('today-row-salah.dhuhr')),
+        matching: find.text('Alone on time'),
+      ),
+      findsOneWidget,
+    );
+    expect(
       tester
           .widget<RecordedStateMarker>(
             find.byKey(const Key('today-row-marker-salah.fajr')),
           )
           .kind,
+      MarkerKind.missed,
+    );
+    expect(
       tester
           .widget<RecordedStateMarker>(
             find.byKey(const Key('today-row-marker-salah.dhuhr')),
           )
           .kind,
+      MarkerKind.filled,
     );
   });
 
@@ -888,7 +959,6 @@ void main() {
       dropdownKey: const Key('today-salah-fajr'),
       optionLabel: 'Missed',
     );
-    await tester.tap(find.byType(ModalBarrier).last);
     await tester.pumpAndSettle();
     expect(find.text(Copy.todayRecordedToday), findsOneWidget);
     expect(
@@ -915,15 +985,49 @@ void main() {
       dropdownKey: const Key('today-salah-fajr'),
       optionLabel: 'Alone on time',
     );
-    await tester.tap(find.byType(ModalBarrier).last);
     await tester.pumpAndSettle();
     expect(find.text(Copy.todayRecordedToday), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('today-row-salah.fajr')),
+        matching: find.text('Alone on time'),
+      ),
+      findsOneWidget,
+    );
     expect(
       tester.getTopLeft(find.byKey(const Key('today-row-salah.dhuhr'))).dy,
       lessThan(
         tester.getTopLeft(find.byKey(const Key('today-row-salah.fajr'))).dy,
       ),
     );
+  });
+
+  testWidgets('activity colours paint the recorded Salah choice', (
+    tester,
+  ) async {
+    final checkIns = MemoryCheckInRepository();
+    await checkIns.save(
+      DailyCheckIn.empty('2026-09-22').withSalahActivity(
+        PrayerId.fajr,
+        const RecordedActivity(id: 'aloneOnTime'),
+      ),
+    );
+    final prefs = MemoryAppPrefs(salahActivityColours: true);
+    tester.view.physicalSize = const Size(400, 1200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(
+      testApp(now: DateTime(2026, 9, 22), checkIns: checkIns, prefs: prefs),
+    );
+    await tester.pumpAndSettle();
+    await openDomain(tester, 'salah');
+    final marker = tester.widget<RecordedStateMarker>(
+      find.byKey(const Key('today-row-marker-salah.fajr')),
+    );
+    expect(marker.kind, MarkerKind.filled);
+    expect(marker.color, SalahActivityMark.colourForId('aloneOnTime'));
+    expect(marker.color, isNot(SalahActivityMark.colourForId('missed')));
   });
 
   testWidgets('resetting Salah to unanswered returns the row to prominent', (
@@ -944,7 +1048,6 @@ void main() {
       dropdownKey: const Key('today-salah-fajr'),
       optionLabel: 'No answer recorded',
     );
-    await tester.tap(find.byType(ModalBarrier).last);
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('today-recorded-section')), findsNothing);
     expect(
@@ -1021,7 +1124,7 @@ void main() {
     expect(
       find.descendant(
         of: find.byKey(const Key('today-row-zakat')),
-        matching: find.text(Copy.todayRecorded),
+        matching: find.text('Zakat due but not yet paid'),
       ),
       findsOneWidget,
     );

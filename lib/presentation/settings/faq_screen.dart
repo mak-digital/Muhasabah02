@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../domain/copy.dart';
 import '../../domain/faq.dart';
+import '../shared/app_language_scope.dart';
 import '../shared/ui_bits.dart';
 
 class FaqScreen extends StatelessWidget {
@@ -24,12 +25,12 @@ class FaqScreen extends StatelessWidget {
     FaqSection? lastSection;
     final children = <Widget>[
       BalancedProse(
-        Copy.faqPurpose,
+        uiText(context, Copy.faqPurpose),
         style: theme.textTheme.bodyMedium?.copyWith(height: 1.45),
       ),
       const SizedBox(height: 10),
       BalancedProse(
-        Copy.faqNote,
+        uiText(context, Copy.faqNote),
         style: theme.textTheme.bodySmall?.copyWith(
           color: scheme.onSurfaceVariant,
           height: 1.45,

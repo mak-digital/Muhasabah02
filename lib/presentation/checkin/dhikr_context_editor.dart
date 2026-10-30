@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../../domain/activities.dart';
 import '../../domain/copy.dart';
 import '../../domain/daily_check_in.dart';
 import '../../domain/dhikr_context.dart';
+import '../../domain/home_traces.dart';
 import '../shared/activity_picker.dart';
+import '../shared/salah_activity_mark.dart';
+import '../shared/state_marker.dart';
 import 'dhikr_performed_list.dart';
 
 class DhikrContextEditor extends StatefulWidget {
@@ -15,6 +19,7 @@ class DhikrContextEditor extends StatefulWidget {
     required this.onChanged,
     this.compact = false,
     this.forceOpen = false,
+    this.performedStartsCollapsed = false,
     this.dropdownKey,
   });
 
@@ -24,6 +29,7 @@ class DhikrContextEditor extends StatefulWidget {
   final ValueChanged<DailyCheckIn> onChanged;
   final bool compact;
   final bool forceOpen;
+  final bool performedStartsCollapsed;
   final Key? dropdownKey;
 
   @override
@@ -45,9 +51,22 @@ class _DhikrContextEditorState extends State<DhikrContextEditor> {
   List<DhikrContextCapture> get _captures =>
       widget.record.dhikrContextFor(widget.rowKey);
 
+  (MarkerKind, Color)? _postFardLegend() {
+    if (!isDhikrPostFardTrace(widget.rowKey)) return null;
+    final id = widget.record.activityFor(widget.rowKey).id;
+    if (id == ActivityIds.unanswered) {
+      return (MarkerKind.unanswered, SalahActivityMark.unanswered);
+    }
+    if (id == ActivityIds.noActivity) {
+      return (MarkerKind.missed, SalahActivityMark.missedMadeUp);
+    }
+    return (MarkerKind.filled, SalahActivityMark.colourForId(id));
+  }
+
   @override
   Widget build(BuildContext context) {
     final captures = _captures;
+    final legend = _postFardLegend();
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Semantics(
@@ -73,6 +92,18 @@ class _DhikrContextEditorState extends State<DhikrContextEditor> {
                 children: [
                   Expanded(flex: 3, child: CheckInRowLabel(widget.label)),
                   const SizedBox(width: 8),
+                  if (legend != null) ...[
+                    RecordedStateMarker(
+                      key: Key('dhikr-summary-legend-${widget.rowKey}'),
+                      color: legend.$2,
+                      kind: legend.$1,
+                      semanticLabel: widget.record
+                          .activityFor(widget.rowKey)
+                          .id,
+                      size: 14,
+                    ),
+                    const SizedBox(width: 6),
+                  ],
                   Expanded(
                     flex: 2,
                     child: Text(
@@ -97,6 +128,7 @@ class _DhikrContextEditorState extends State<DhikrContextEditor> {
                   rowKey: widget.rowKey,
                   record: widget.record,
                   onChanged: widget.onChanged,
+                  startExpanded: !widget.performedStartsCollapsed,
                 ),
               ],
             ),

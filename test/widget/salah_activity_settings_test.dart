@@ -35,7 +35,7 @@ void main() {
     expect(find.text(MonitorDomain.quran.label), findsOneWidget);
     expect(find.textContaining('Practical relevance'), findsWidgets);
     expect(find.text(MonitorDomain.dhikr.label), findsWidgets);
-    expect(find.textContaining('Remembrance with action'), findsWidgets);
+    expect(find.textContaining('Attentive Remembrance'), findsWidgets);
     expect(find.text(MonitorDomain.akhlaq.label), findsWidgets);
     expect(find.textContaining('Virtue demonstrated'), findsOneWidget);
     expect(find.text(MonitorDomain.huquq.label), findsWidgets);

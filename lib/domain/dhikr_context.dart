@@ -596,6 +596,12 @@ String dhikrPerformedSummary(List<DhikrContextCapture> captures) {
   return '$practised performed';
 }
 
+int dhikrPractisedCount(List<DhikrContextCapture> captures) {
+  return captures
+      .where((item) => item.response == DhikrContextResponse.practised)
+      .length;
+}
+
 String dhikrRowSummary(String rowKey, List<DhikrContextCapture> captures) {
   if (isDhikrContextTrace(rowKey)) return dhikrPerformedSummary(captures);
   return dhikrContextSummary(captures);

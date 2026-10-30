@@ -4,6 +4,7 @@ import 'package:muhasabah02/domain/monitor_domain.dart';
 import 'package:muhasabah02/domain/copy.dart';
 import 'package:muhasabah02/presentation/shared/domain_line_icon.dart';
 
+import '../support/home_domain_stage.dart';
 import '../support/test_app.dart';
 
 void main() {
@@ -38,7 +39,7 @@ void main() {
     await tester.pumpWidget(testApp(now: DateTime(2026, 9, 3)));
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('domain-line-icon-salah')), findsWidgets);
-    await tester.tap(find.byKey(const Key('home-domain-next')));
+    await tester.tap(find.byKey(const Key('home-domain-tab-quran')));
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('domain-line-icon-quran')), findsWidgets);
   });
@@ -50,8 +51,7 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
     await tester.pumpWidget(testApp(now: DateTime(2026, 9, 14)));
     await tester.pumpAndSettle();
-    await tester.ensureVisible(find.text(Copy.quickTap));
-    await tester.tap(find.text(Copy.quickTap));
+    await openHomeQuickTap(tester);
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('quick-tap-domain-toggle-salah')));
     await tester.pumpAndSettle();

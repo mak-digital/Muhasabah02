@@ -33,8 +33,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.text(Copy.homeCheckIn));
-      await tester.pumpAndSettle();
+      await openHomeCheckIn(tester);
       await showCheckInDomain(tester, MonitorDomain.dhikr);
 
       await expandCheckInBand(
@@ -150,8 +149,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.text(Copy.homeCheckIn));
-      await tester.pumpAndSettle();
+      await openHomeCheckIn(tester);
       await showCheckInDomain(tester, MonitorDomain.dhikr);
       await expandCheckInBand(
         tester,
@@ -213,8 +211,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.text(Copy.homeCheckIn));
-      await tester.pumpAndSettle();
+      await openHomeCheckIn(tester);
       await showCheckInDomain(tester, MonitorDomain.dhikr);
       await expandCheckInBand(
         tester,
@@ -241,23 +238,22 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      await expandActiveDomainMix(tester);
-      await tester.ensureVisible(find.byKey(const Key('today-domain-dhikr')));
-      await tester.tap(find.byKey(const Key('today-domain-dhikr')));
-      await tester.pumpAndSettle();
-      final morning = find.byKey(const Key('today-row-dhikr.morningAdhkar'));
-      await tester.ensureVisible(morning);
-      await tester.tap(morning);
-      await tester.pumpAndSettle();
-      expect(find.text('Verified wording available'), findsWidgets);
-      expect(find.text('Open recorded evidence'), findsNothing);
-      expect(
-        find.descendant(
-          of: find.byType(BottomSheet),
-          matching: find.text(Copy.addAResponse),
-        ),
-        findsNothing,
+      await openHomeQuickTap(tester);
+      await tester.ensureVisible(
+        find.byKey(const Key('quick-tap-domain-toggle-dhikr')),
       );
+      await tester.tap(find.byKey(const Key('quick-tap-domain-toggle-dhikr')));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(
+        find.byKey(const Key('quick-tap-mark-dhikr.postFardFajr')),
+      );
+      await tester.tap(
+        find.byKey(const Key('quick-tap-mark-dhikr.postFardFajr')),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Istighfar three times'), findsOneWidget);
+      expect(find.text('Open recorded evidence'), findsNothing);
+      expect(find.text(Copy.addAResponse), findsNothing);
     },
   );
 }

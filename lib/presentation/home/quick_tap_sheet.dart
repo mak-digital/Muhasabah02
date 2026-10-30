@@ -316,9 +316,21 @@ class _QuickTapSheetState extends ConsumerState<QuickTapSheet> {
                                     }
                                   });
                                 },
+                                onOpenPerformed: (item) {
+                                  final row = homeTraceRowByKey(item.traceKey!);
+                                  if (row == null) return;
+                                  showHomeTraceRecordSheet(
+                                    context: context,
+                                    ref: ref,
+                                    row: row,
+                                    dateKey: key,
+                                    record: day,
+                                  );
+                                },
                                 onTap: (item) async {
                                   if (item.traceKey != null &&
-                                      isDhikrContextTrace(item.traceKey!)) {
+                                      isDhikrContextTrace(item.traceKey!) &&
+                                      !isDhikrPostFardTrace(item.traceKey!)) {
                                     final row = homeTraceRowByKey(
                                       item.traceKey!,
                                     );
@@ -400,6 +412,7 @@ class _QuickTapDomainPanel extends StatelessWidget {
     required this.expanded,
     required this.onToggle,
     required this.onTap,
+    required this.onOpenPerformed,
   });
 
   final MonitorDomain domain;
@@ -411,6 +424,7 @@ class _QuickTapDomainPanel extends StatelessWidget {
   final bool expanded;
   final VoidCallback onToggle;
   final ValueChanged<QuickTapItem> onTap;
+  final ValueChanged<QuickTapItem> onOpenPerformed;
 
   @override
   Widget build(BuildContext context) {
@@ -502,6 +516,11 @@ class _QuickTapDomainPanel extends StatelessWidget {
                                 gender: gender,
                               ),
                               onTap: () => onTap(item),
+                              onMarkTap:
+                                  item.traceKey != null &&
+                                      isDhikrPostFardTrace(item.traceKey!)
+                                  ? () => onOpenPerformed(item)
+                                  : null,
                             ),
                           ),
                       ],
@@ -522,12 +541,14 @@ class _QuickTapTile extends StatelessWidget {
     required this.choice,
     required this.often,
     required this.onTap,
+    this.onMarkTap,
   });
 
   final QuickTapItem item;
   final QuickTapChoice choice;
   final String? often;
   final VoidCallback onTap;
+  final VoidCallback? onMarkTap;
 
   @override
   Widget build(BuildContext context) {
@@ -548,6 +569,91 @@ class _QuickTapTile extends StatelessWidget {
     final markColor = _markColor(family);
     final caption = unanswered ? 'Not recorded' : choice.label;
     final oftenHint = often;
+    final mark = RecordedStateMarker(
+      color: markColor,
+      kind: kind,
+      semanticLabel: caption,
+      size: 12,
+    );
+    final body = Padding(
+      padding: const EdgeInsets.fromLTRB(8, 7, 8, 7),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Text(
+                  item.label,
+                  softWrap: true,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 12,
+                    height: 1.2,
+                    color: family,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 4),
+              if (onMarkTap == null)
+                mark
+              else
+                GestureDetector(
+                  key: Key('quick-tap-mark-${item.id}'),
+                  behavior: HitTestBehavior.opaque,
+                  onTap: onMarkTap,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(8, 2, 2, 2),
+                    child: mark,
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 2),
+          Text(
+            caption,
+            softWrap: true,
+            style: theme.textTheme.bodySmall?.copyWith(
+              fontWeight: FontWeight.w600,
+              fontSize: 11,
+              height: 1.25,
+              color: unanswered
+                  ? scheme.onSurfaceVariant
+                  : MuhasabahColors.recordedLabel,
+            ),
+          ),
+          if (oftenHint != null) ...[
+            const SizedBox(height: 1),
+            Text(
+              oftenHint,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.labelSmall?.copyWith(
+                fontWeight: FontWeight.w400,
+                height: 1.1,
+                color: scheme.onSurfaceVariant.withValues(alpha: 0.8),
+              ),
+            ),
+          ] else if (item.hint != null) ...[
+            const SizedBox(height: 1),
+            Text(
+              item.hint!,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.labelSmall?.copyWith(
+                fontWeight: FontWeight.w400,
+                fontStyle: FontStyle.italic,
+                height: 1.1,
+                color: scheme.onSurfaceVariant.withValues(alpha: 0.72),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+    // IconButton on the mark absorbs its own tap; the frame cycles the choice.
     return DomainActionFrame(
       key: Key('quick-tap-${item.id}'),
       semanticLabel: '${item.label}. $caption',
@@ -557,78 +663,7 @@ class _QuickTapTile extends StatelessWidget {
       outlined: true,
       minHeight: 52,
       onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(8, 7, 8, 7),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Text(
-                    item.label,
-                    softWrap: true,
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 12,
-                      height: 1.2,
-                      color: family,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 4),
-                RecordedStateMarker(
-                  color: markColor,
-                  kind: kind,
-                  semanticLabel: caption,
-                  size: 12,
-                ),
-              ],
-            ),
-            const SizedBox(height: 2),
-            Text(
-              caption,
-              softWrap: true,
-              style: theme.textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.w600,
-                fontSize: 11,
-                height: 1.2,
-                color: unanswered
-                    ? scheme.onSurfaceVariant
-                    : MuhasabahColors.recordedLabel,
-              ),
-            ),
-            if (oftenHint != null) ...[
-              const SizedBox(height: 1),
-              Text(
-                oftenHint,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.labelSmall?.copyWith(
-                  fontWeight: FontWeight.w400,
-                  height: 1.1,
-                  color: scheme.onSurfaceVariant.withValues(alpha: 0.8),
-                ),
-              ),
-            ] else if (item.hint != null) ...[
-              const SizedBox(height: 1),
-              Text(
-                item.hint!,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.labelSmall?.copyWith(
-                  fontWeight: FontWeight.w400,
-                  fontStyle: FontStyle.italic,
-                  height: 1.1,
-                  color: scheme.onSurfaceVariant.withValues(alpha: 0.72),
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
+      child: body,
     );
   }
 

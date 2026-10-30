@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import '../domain/app_appearance.dart';
+import '../domain/app_language.dart';
 import '../domain/arabic_script.dart';
 import '../domain/custom_selection_set.dart';
 import '../domain/display_calendar.dart';
@@ -42,8 +43,13 @@ abstract class AppPrefs {
   bool get salahActivityColours;
   ArabicScriptFace get arabicScriptFace;
   double get arabicScriptSize;
+  AppLanguage get appLanguage;
   Map<String, int> get dhikrCountDefaults;
   int? dhikrCountDefaultFor(String activityId);
+  Map<String, int> get dhikrProgressCounts;
+  int? dhikrProgressFor(String dateKey, String activityId);
+  double? get dhikrPracticeFabDx;
+  double? get dhikrPracticeFabDy;
 
   Future<void> setSampleSeeded(bool value);
   Future<void> setSampleRemovedByUser(bool value);
@@ -82,7 +88,10 @@ abstract class AppPrefs {
   Future<void> setSalahActivityColours(bool value);
   Future<void> setArabicScriptFace(ArabicScriptFace value);
   Future<void> setArabicScriptSize(double value);
+  Future<void> setAppLanguage(AppLanguage value);
   Future<void> setDhikrCountDefault(String activityId, int value);
+  Future<void> setDhikrProgress(String dateKey, String activityId, int count);
+  Future<void> setDhikrPracticeFabOffset(double dx, double dy);
 }
 
 class MemoryAppPrefs implements AppPrefs {
@@ -112,7 +121,11 @@ class MemoryAppPrefs implements AppPrefs {
     this.salahActivityColours = false,
     this.arabicScriptFace = ArabicScriptFace.uthmani,
     this.arabicScriptSize = kDefaultArabicScriptSize,
+    this.appLanguage = AppLanguage.english,
     Map<String, int>? dhikrCountDefaults,
+    Map<String, int>? dhikrProgressCounts,
+    this.dhikrPracticeFabDx,
+    this.dhikrPracticeFabDy,
     List<PersonalBaseline>? baselines,
     List<PersonalAspiration>? aspirations,
     Map<String, String>? weeklyJournals,
@@ -127,6 +140,9 @@ class MemoryAppPrefs implements AppPrefs {
            customSelectionSets ?? CustomSelectionSetsRecord.empty(),
        dhikrCountDefaults = Map<String, int>.from(
          dhikrCountDefaults ?? const {},
+       ),
+       dhikrProgressCounts = Map<String, int>.from(
+         dhikrProgressCounts ?? const {},
        ),
        archivedPracticeHadithCatalogIds = Set<String>.from(
          archivedPracticeHadithCatalogIds ?? const {},
@@ -208,11 +224,29 @@ class MemoryAppPrefs implements AppPrefs {
   double arabicScriptSize;
 
   @override
+  AppLanguage appLanguage;
+
+  @override
   Map<String, int> dhikrCountDefaults;
+
+  @override
+  Map<String, int> dhikrProgressCounts;
+
+  @override
+  double? dhikrPracticeFabDx;
+
+  @override
+  double? dhikrPracticeFabDy;
 
   @override
   int? dhikrCountDefaultFor(String activityId) =>
       dhikrCountDefaults[activityId];
+
+  @override
+  int? dhikrProgressFor(String dateKey, String activityId) {
+    if (dateKey.isEmpty || activityId.isEmpty) return null;
+    return dhikrProgressCounts[dhikrProgressKey(dateKey, activityId)];
+  }
 
   @override
   List<PersonalBaseline> baselines;
@@ -461,6 +495,9 @@ class MemoryAppPrefs implements AppPrefs {
       arabicScriptSize = clampArabicScriptSize(value);
 
   @override
+  Future<void> setAppLanguage(AppLanguage value) async => appLanguage = value;
+
+  @override
   Future<void> setDhikrCountDefault(String activityId, int value) async {
     if (activityId.isEmpty) return;
     final clamped = value < 1
@@ -470,7 +507,32 @@ class MemoryAppPrefs implements AppPrefs {
         : value;
     dhikrCountDefaults[activityId] = clamped;
   }
+
+  @override
+  Future<void> setDhikrProgress(
+    String dateKey,
+    String activityId,
+    int count,
+  ) async {
+    if (dateKey.isEmpty || activityId.isEmpty) return;
+    final key = dhikrProgressKey(dateKey, activityId);
+    // Keep 0 so a reset tap does not fall back to the seed (e.g. Istighfar 3).
+    if (count < 0) {
+      dhikrProgressCounts.remove(key);
+      return;
+    }
+    dhikrProgressCounts[key] = count > 999 ? 999 : count;
+  }
+
+  @override
+  Future<void> setDhikrPracticeFabOffset(double dx, double dy) async {
+    dhikrPracticeFabDx = dx;
+    dhikrPracticeFabDy = dy;
+  }
 }
+
+String dhikrProgressKey(String dateKey, String activityId) =>
+    '$dateKey|$activityId';
 
 List<PersonalBaseline> decodeBaselines(String? raw) {
   if (raw == null || raw.isEmpty) return const [];
@@ -553,4 +615,25 @@ Map<String, int> decodeDhikrCountDefaults(String? raw) {
 String encodeDhikrCountDefaults(Map<String, int> value) => jsonEncode({
   for (final entry in value.entries)
     if (entry.value > 0) entry.key: entry.value.clamp(1, 999),
+});
+
+/// Day progress may be 0 after the first count tap resets the field.
+Map<String, int> decodeDhikrProgressCounts(String? raw) {
+  if (raw == null || raw.isEmpty) return {};
+  try {
+    final decoded = jsonDecode(raw);
+    if (decoded is! Map) return {};
+    return {
+      for (final entry in decoded.entries)
+        if (entry.value is num && (entry.value as num).toInt() >= 0)
+          '${entry.key}': (entry.value as num).toInt().clamp(0, 999),
+    };
+  } catch (_) {
+    return {};
+  }
+}
+
+String encodeDhikrProgressCounts(Map<String, int> value) => jsonEncode({
+  for (final entry in value.entries)
+    if (entry.value >= 0) entry.key: entry.value.clamp(0, 999),
 });

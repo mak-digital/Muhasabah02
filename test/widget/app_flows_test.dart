@@ -10,6 +10,7 @@ import 'package:muhasabah02/domain/monitor_domain.dart';
 import 'package:muhasabah02/presentation/recorded_days/day_evidence_screen.dart';
 
 import '../support/check_in_select.dart';
+import '../support/home_domain_stage.dart';
 import '../support/test_app.dart';
 
 void main() {
@@ -18,9 +19,14 @@ void main() {
     await tester.pumpWidget(testApp(checkIns: checkIns));
     await tester.pumpAndSettle();
     expect(find.text(Copy.appName), findsWidgets);
-    expect(find.text(Copy.homeCheckIn), findsOneWidget);
-    await tester.tap(find.text(Copy.homeCheckIn));
-    await tester.pumpAndSettle();
+    expect(
+      find.descendant(
+        of: find.byType(NavigationBar),
+        matching: find.text(Copy.inputTab),
+      ),
+      findsOneWidget,
+    );
+    await openHomeCheckIn(tester);
     expect(find.text(MonitorDomain.salah.label.toUpperCase()), findsOneWidget);
     await chooseCheckInOption(
       tester,
@@ -132,12 +138,12 @@ void main() {
     await tester.tap(find.text(Copy.saveResponse));
     await tester.pumpAndSettle();
     expect(find.text('A note needs some text.'), findsOneWidget);
-    await tester.enterText(find.byType(TextField), 'الحمد لله and ধন্যবাদ');
+    await tester.enterText(find.byType(TextField), '????? ??? and ???????');
     await tester.tap(find.text(Copy.saveResponse));
     await tester.pumpAndSettle();
     final saved = await responses.allHealthy();
     expect(saved, hasLength(1));
-    expect(saved.single.text, contains('الحمد لله'));
+    expect(saved.single.text, contains('????? ???'));
     expect(saved.single.noteCode, matches(RegExp(r'^\d{6}-01$')));
     expect(find.text(Copy.noteCodeColumn), findsOneWidget);
     expect(find.text(Copy.noteContentColumn), findsOneWidget);
@@ -214,7 +220,8 @@ void main() {
     await tester.pageBack();
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
-    await tester.ensureVisible(find.text(Copy.homeCheckIn));
-    expect(find.text(Copy.homeCheckIn), findsOneWidget);
+    await openInputTab(tester);
+    await tester.ensureVisible(find.byKey(const Key('home-check-in')));
+    expect(find.byKey(const Key('home-check-in')), findsOneWidget);
   });
 }

@@ -37,8 +37,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text(Copy.homeCheckIn));
-    await tester.pumpAndSettle();
+    await openHomeCheckIn(tester);
 
     expect(find.text('Financial charity'), findsNothing);
     expect(find.text('Optional domains'), findsNothing);

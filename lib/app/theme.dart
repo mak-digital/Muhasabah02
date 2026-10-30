@@ -361,31 +361,33 @@ ThemeData buildMuhasabahTheme({
     scaffoldBackgroundColor: canvas,
     canvasColor: canvas,
     splashFactory: InkSparkle.splashFactory,
-    textTheme: text.copyWith(
-      headlineSmall: text.headlineSmall?.copyWith(
-        fontWeight: FontWeight.w600,
-        letterSpacing: -0.3,
-        height: 1.25,
-      ),
-      titleLarge: text.titleLarge?.copyWith(
-        fontWeight: FontWeight.w600,
-        letterSpacing: -0.2,
-        height: 1.25,
-      ),
-      titleMedium: text.titleMedium?.copyWith(
-        fontWeight: FontWeight.w600,
-        letterSpacing: -0.1,
-        height: 1.3,
-      ),
-      titleSmall: text.titleSmall?.copyWith(
-        fontWeight: FontWeight.w600,
-        height: 1.3,
-      ),
-      bodyLarge: text.bodyLarge?.copyWith(height: 1.45),
-      bodyMedium: text.bodyMedium?.copyWith(height: 1.45),
-      bodySmall: text.bodySmall?.copyWith(height: 1.4),
-      labelLarge: text.labelLarge?.copyWith(fontWeight: FontWeight.w600),
-    ),
+    textTheme: text
+        .copyWith(
+          headlineSmall: text.headlineSmall?.copyWith(
+            fontWeight: FontWeight.w600,
+            letterSpacing: -0.3,
+            height: 1.25,
+          ),
+          titleLarge: text.titleLarge?.copyWith(
+            fontWeight: FontWeight.w600,
+            letterSpacing: -0.2,
+            height: 1.25,
+          ),
+          titleMedium: text.titleMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+            letterSpacing: -0.1,
+            height: 1.3,
+          ),
+          titleSmall: text.titleSmall?.copyWith(
+            fontWeight: FontWeight.w600,
+            height: 1.3,
+          ),
+          bodyLarge: text.bodyLarge?.copyWith(height: 1.45),
+          bodyMedium: text.bodyMedium?.copyWith(height: 1.45),
+          bodySmall: text.bodySmall?.copyWith(height: 1.4),
+          labelLarge: text.labelLarge?.copyWith(fontWeight: FontWeight.w600),
+        )
+        .apply(fontFamilyFallback: const ['NotoSansBengali']),
     appBarTheme: AppBarTheme(
       centerTitle: false,
       elevation: 0,
@@ -397,6 +399,7 @@ ThemeData buildMuhasabahTheme({
         fontWeight: FontWeight.w600,
         color: scheme.onSurface,
         letterSpacing: -0.2,
+        fontFamilyFallback: const ['NotoSansBengali'],
       ),
     ),
     cardTheme: CardThemeData(

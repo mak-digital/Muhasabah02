@@ -1,4 +1,5 @@
 import 'akhlaq_practices.dart';
+import 'dhikr_context.dart';
 import 'home_traces.dart';
 import 'huquq_practices.dart';
 import 'knowledge_practices.dart';
@@ -1021,32 +1022,32 @@ class ActivityCatalog {
   static const dhikrPostFard = <ActivityOption>[
     ActivityOption(
       id: dhikrWithAction,
-      label: 'Remembrance with action (I noticed a beneficial response in my behaviour)',
+      label: 'Attentive Remembrance',
       ternary: TernaryOutcome.positive,
     ),
     ActivityOption(
       id: dhikrAttentive,
-      label: 'Attentive remembrance (I consciously reflected on the words or meaning)',
+      label: 'Remembered as habit',
       ternary: TernaryOutcome.positive,
     ),
     ActivityOption(
       id: dhikrIntentional,
-      label: 'Intentional remembrance (I deliberately made time for dhikr or du‘a)',
+      label: 'Intentional remembrance of the most or all',
       ternary: TernaryOutcome.positive,
     ),
     ActivityOption(
       id: dhikrBrief,
-      label: 'Brief remembrance (A short dhikr or du‘a during the time)',
+      label: 'Brief remembrance of some',
       ternary: TernaryOutcome.positive,
     ),
     ActivityOption(
       id: ActivityIds.noActivity,
-      label: 'Not today (I did not practise or do not recall doing so)',
+      label: 'Not today',
       ternary: TernaryOutcome.negative,
     ),
     ActivityOption(
       id: ActivityIds.unanswered,
-      label: 'Unanswered',
+      label: 'Not recorded',
       ternary: TernaryOutcome.unanswered,
     ),
   ];
@@ -1114,7 +1115,7 @@ class ActivityCatalog {
             ? huquqCatalogFor(storageKey)
             : isKnowledgeTrace(storageKey)
             ? knowledgeCatalogFor(storageKey)
-            : isDhikrPostFardTrace(storageKey)
+            : isDhikrContextTrace(storageKey)
             ? dhikrPostFard
             : storageKey.startsWith('time.t0')
             ? timeCatalogFor(storageKey)
@@ -1132,6 +1133,19 @@ class ActivityCatalog {
 
   static bool isDhikrPostFardCatalog(List<ActivityOption> options) {
     return identical(options, dhikrPostFard);
+  }
+
+  /// Maps ticked post-fard formulas to the remembrance-level option.
+  /// All → blue, majority → dark green, minority → light green, none →
+  /// unanswered. Lime / Not today stay available for a manual Quick Tap cycle.
+  static String postFardIdForPractised({
+    required int practised,
+    required int total,
+  }) {
+    if (total <= 0 || practised <= 0) return ActivityIds.unanswered;
+    if (practised >= total) return dhikrWithAction;
+    if (practised * 2 > total) return dhikrAttentive;
+    return dhikrIntentional;
   }
 
   static bool isAkhlaqObservationCatalog(List<ActivityOption> options) {

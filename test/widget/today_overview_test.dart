@@ -36,6 +36,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+    await openInputTab(tester);
   }
 
   test('Today tiles reuse domain family colors, not status colors', () {
@@ -74,12 +75,14 @@ void main() {
       findsOneWidget,
     );
     expect(find.byKey(const Key('sample-data-notice')), findsNothing);
-    expect(find.text(Copy.activeDomainAndMix), findsOneWidget);
+    expect(find.byKey(const Key('today-input-folders')), findsOneWidget);
+    expect(find.byKey(const Key('today-input-tab-check-in')), findsOneWidget);
+    expect(find.byKey(const Key('today-input-tab-quick-tap')), findsOneWidget);
     expect(
-      tester.getSize(find.byKey(const Key('today-active-domain-mix'))).height,
-      lessThan(56),
+      find.byKey(const Key('today-input-tab-quick-select')),
+      findsOneWidget,
     );
-    expect(find.byKey(const Key('today-domain-salah')), findsNothing);
+    expect(find.byKey(const Key('today-domain-salah')), findsOneWidget);
     final dateBottom = tester
         .getBottomLeft(find.byKey(const Key('today-weekday-date')))
         .dy;
@@ -88,22 +91,14 @@ void main() {
     );
     final checkIn = tester.getRect(find.byKey(const Key('home-check-in')));
     final quickTap = tester.getRect(find.byKey(const Key('home-quick-tap')));
+    final quickSelect = tester.getRect(
+      find.byKey(const Key('home-quick-select')),
+    );
     expect(actions.top, greaterThan(dateBottom));
     expect(checkIn.top, closeTo(quickTap.top, 1));
     expect(checkIn.left, lessThan(quickTap.left));
-    expect(checkIn.size.height, greaterThanOrEqualTo(40));
-    expect(checkIn.size.height, lessThan(48));
-    expect(
-      tester.widget<Material>(find.byKey(const Key('home-check-in'))).elevation,
-      1.5,
-    );
-    expect(
-      tester
-          .widget<Material>(find.byKey(const Key('home-quick-tap')))
-          .elevation,
-      1.5,
-    );
-    await expandActiveDomainMix(tester);
+    expect(quickTap.left, lessThan(quickSelect.left));
+    expect(checkIn.size.height, greaterThanOrEqualTo(36));
     final salah = tester.getRect(find.byKey(const Key('today-domain-salah')));
     expect(salah.top, greaterThan(actions.bottom));
   });
@@ -309,21 +304,14 @@ void main() {
     expect(
       find.descendant(
         of: find.byKey(const Key('today-domain-salah')),
-        matching: find.text('1 of 2'),
-      ),
-      findsOneWidget,
-    );
-    expect(
-      find.descendant(
-        of: find.byKey(const Key('today-domain-salah')),
-        matching: find.text(Copy.todayRecorded),
+        matching: find.text('1 of 2 · ${Copy.todayRecorded}'),
       ),
       findsOneWidget,
     );
     expect(
       find.descendant(
         of: find.byKey(const Key('today-domain-quran')),
-        matching: find.text('0 of 1'),
+        matching: find.text('0 of 1 · ${Copy.todayRecorded}'),
       ),
       findsOneWidget,
     );

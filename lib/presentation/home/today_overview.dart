@@ -13,11 +13,14 @@ import '../../domain/today_workspace.dart';
 import '../checkin/check_in_screen.dart';
 import '../shared/domain_action_frame.dart';
 import '../shared/domain_line_icon.dart';
+import '../shared/app_language_scope.dart';
 import '../shared/domain_visual.dart';
 import '../shared/ui_bits.dart';
 import '../shared/progress_calendar.dart';
 import 'quick_tap_sheet.dart';
 import 'today_domain_workspace.dart';
+
+enum TodayInputFolder { checkIn, quickTap, quickSelect }
 
 class TodayOverview extends ConsumerWidget {
   const TodayOverview({super.key, required this.records});
@@ -83,19 +86,7 @@ class TodayOverview extends ConsumerWidget {
           const _SampleDataNotice(),
           const SizedBox(height: 8),
         ],
-        const TodayEntryActions(),
-        const SizedBox(height: 12),
-        if (workspace.domains.isEmpty)
-          BalancedProse(
-            Copy.todayEmpty,
-            key: const Key('today-empty'),
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-              height: 1.4,
-            ),
-          )
-        else
-          _ActiveDomainMixPanel(workspace: workspace),
+        TodayInputFolders(workspace: workspace),
       ],
     );
   }
@@ -117,7 +108,7 @@ class _SampleDataNotice extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
         child: BalancedProse(
-          Copy.sampleDataNotice,
+          uiText(context, Copy.sampleDataNotice),
           style: Theme.of(context).textTheme.labelSmall?.copyWith(height: 1.35),
         ),
       ),
@@ -125,135 +116,90 @@ class _SampleDataNotice extends StatelessWidget {
   }
 }
 
-class _ActiveDomainMixPanel extends ConsumerWidget {
-  const _ActiveDomainMixPanel({required this.workspace});
+/// Folder-style Check-in / Quick tap / Quick select hub on Input.
+class TodayInputFolders extends ConsumerStatefulWidget {
+  const TodayInputFolders({super.key, required this.workspace});
 
   final TodayWorkspace workspace;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final mixNote = Copy.mixRowsRecorded(
-      workspace.recordedMixCount,
-      workspace.mixRowCount,
-    );
-    return Material(
-      color: Color.alphaBlend(
-        scheme.primary.withValues(alpha: 0.06),
-        scheme.surface,
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.7)),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Theme(
-        data: theme.copyWith(dividerColor: Colors.transparent),
-        child: ExpansionTile(
-          key: const Key('today-active-domain-mix'),
-          initiallyExpanded: false,
-          dense: true,
-          visualDensity: VisualDensity.compact,
-          minTileHeight: 40,
-          tilePadding: const EdgeInsets.symmetric(horizontal: 12),
-          childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-          title: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  Copy.activeDomainAndMix,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    height: 1.1,
-                    letterSpacing: 0.35,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Flexible(
-                child: Text(
-                  mixNote,
-                  key: const Key('today-active-domain-mix-total'),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.end,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    height: 1.1,
-                    color: scheme.onSurfaceVariant,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          children: [
-            LayoutBuilder(
-              builder: (context, constraints) {
-                const gap = 8.0;
-                final twoCol = constraints.maxWidth >= 340;
-                final width = twoCol
-                    ? (constraints.maxWidth - gap) / 2
-                    : constraints.maxWidth;
-                return Wrap(
-                  key: const Key('today-active-domain-mix-chips'),
-                  spacing: gap,
-                  runSpacing: gap,
-                  children: [
-                    for (final item in workspace.domains)
-                      SizedBox(
-                        width: width,
-                        child: _TodayDomainTile(item: item, ref: ref),
-                      ),
-                  ],
-                );
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  ConsumerState<TodayInputFolders> createState() => TodayInputFoldersState();
 }
 
-class TodayEntryActions extends ConsumerWidget {
-  const TodayEntryActions({super.key});
+class TodayInputFoldersState extends ConsumerState<TodayInputFolders> {
+  TodayInputFolder _folder = TodayInputFolder.quickSelect;
+
+  void selectFolder(TodayInputFolder folder) {
+    final changed = _folder != folder;
+    if (changed) setState(() => _folder = folder);
+    if (!changed) {
+      // Re-tap the active folder to re-open its focused input page.
+      if (folder == TodayInputFolder.checkIn) {
+        openTodaysCheckInFromHome(context, ref);
+      } else if (folder == TodayInputFolder.quickTap) {
+        showQuickTapSheet(context, ref);
+      }
+      return;
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (folder == TodayInputFolder.checkIn) {
+        openTodaysCheckInFromHome(context, ref);
+      } else if (folder == TodayInputFolder.quickTap) {
+        showQuickTapSheet(context, ref);
+      }
+    });
+  }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final scheme = Theme.of(context).colorScheme;
-    final checkInWash = Color.alphaBlend(
-      scheme.primary.withValues(alpha: 0.16),
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final panel = Color.alphaBlend(
+      scheme.primary.withValues(alpha: 0.05),
       scheme.surface,
     );
-    final quickTapWash = Color.alphaBlend(
-      scheme.tertiary.withValues(alpha: 0.18),
-      scheme.surface,
+    final mixNote = Copy.mixRowsRecorded(
+      widget.workspace.recordedMixCount,
+      widget.workspace.mixRowCount,
     );
-    return Row(
-      key: const Key('today-entry-actions'),
+    return Column(
+      key: const Key('today-input-folders'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Expanded(
-          child: _TodayEntryButton(
-            buttonKey: const Key('home-check-in'),
-            icon: Icons.edit_calendar_outlined,
-            label: Copy.homeCheckIn,
-            wash: checkInWash,
-            ink: scheme.primary,
-            onTap: () => openTodaysCheckInFromHome(context, ref),
-          ),
+        _FolderTabStrip(
+          selected: _folder,
+          onSelect: selectFolder,
+          panelColor: panel,
         ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: _TodayEntryButton(
-            buttonKey: const Key('home-quick-tap'),
-            icon: Icons.touch_app_outlined,
-            label: Copy.quickTap,
-            wash: quickTapWash,
-            ink: scheme.tertiary,
-            onTap: () => showQuickTapSheet(context, ref),
+        Material(
+          key: const Key('today-input-folder-panel'),
+          color: panel,
+          shape: RoundedRectangleBorder(
+            borderRadius: const BorderRadius.only(
+              topRight: Radius.circular(12),
+              bottomLeft: Radius.circular(12),
+              bottomRight: Radius.circular(12),
+            ),
+            side: BorderSide(
+              color: scheme.outlineVariant.withValues(alpha: 0.75),
+            ),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+            child: switch (_folder) {
+              TodayInputFolder.checkIn => _CheckInFolderBody(
+                onOpen: () => openTodaysCheckInFromHome(context, ref),
+              ),
+              TodayInputFolder.quickTap => _QuickTapFolderBody(
+                onOpen: () => showQuickTapSheet(context, ref),
+              ),
+              TodayInputFolder.quickSelect => _QuickSelectFolderBody(
+                workspace: widget.workspace,
+                mixNote: mixNote,
+              ),
+            },
           ),
         ),
       ],
@@ -261,65 +207,289 @@ class TodayEntryActions extends ConsumerWidget {
   }
 }
 
-class _TodayEntryButton extends StatelessWidget {
-  const _TodayEntryButton({
-    required this.buttonKey,
-    required this.icon,
+class _FolderTabStrip extends StatelessWidget {
+  const _FolderTabStrip({
+    required this.selected,
+    required this.onSelect,
+    required this.panelColor,
+  });
+
+  final TodayInputFolder selected;
+  final ValueChanged<TodayInputFolder> onSelect;
+  final Color panelColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      key: const Key('today-entry-actions'),
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Expanded(
+          child: _FolderTab(
+            tabKey: const Key('home-check-in'),
+            folderKey: const Key('today-input-tab-check-in'),
+            label: uiText(context, Copy.todayInputCheckInTab),
+            icon: Icons.edit_calendar_outlined,
+            selected: selected == TodayInputFolder.checkIn,
+            panelColor: panelColor,
+            onTap: () => onSelect(TodayInputFolder.checkIn),
+          ),
+        ),
+        const SizedBox(width: 4),
+        Expanded(
+          child: _FolderTab(
+            tabKey: const Key('home-quick-tap'),
+            folderKey: const Key('today-input-tab-quick-tap'),
+            label: uiText(context, Copy.todayInputQuickTapTab),
+            icon: Icons.touch_app_outlined,
+            selected: selected == TodayInputFolder.quickTap,
+            panelColor: panelColor,
+            onTap: () => onSelect(TodayInputFolder.quickTap),
+          ),
+        ),
+        const SizedBox(width: 4),
+        Expanded(
+          child: _FolderTab(
+            tabKey: const Key('home-quick-select'),
+            folderKey: const Key('today-input-tab-quick-select'),
+            label: uiText(context, Copy.todayInputQuickSelectTab),
+            icon: Icons.grid_view_rounded,
+            selected: selected == TodayInputFolder.quickSelect,
+            panelColor: panelColor,
+            onTap: () => onSelect(TodayInputFolder.quickSelect),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _FolderTab extends StatelessWidget {
+  const _FolderTab({
+    required this.tabKey,
+    required this.folderKey,
     required this.label,
-    required this.wash,
-    required this.ink,
+    required this.icon,
+    required this.selected,
+    required this.panelColor,
     required this.onTap,
   });
 
-  final Key buttonKey;
-  final IconData icon;
+  final Key tabKey;
+  final Key folderKey;
   final String label;
-  final Color wash;
-  final Color ink;
+  final IconData icon;
+  final bool selected;
+  final Color panelColor;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final radius = BorderRadius.circular(12);
-    return Material(
-      key: buttonKey,
-      color: wash,
-      elevation: 1.5,
-      shadowColor: ink.withValues(alpha: 0.22),
-      shape: RoundedRectangleBorder(
-        borderRadius: radius,
-        side: BorderSide(color: ink.withValues(alpha: 0.38), width: 1),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: radius,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 40),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(icon, size: 16, color: ink),
-                const SizedBox(width: 6),
-                Flexible(
-                  child: Text(
-                    label,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      height: 1.15,
-                      color: ink,
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final radius = const BorderRadius.only(
+      topLeft: Radius.circular(12),
+      topRight: Radius.circular(12),
+    );
+    final fill = selected
+        ? panelColor
+        : Color.alphaBlend(
+            scheme.onSurface.withValues(alpha: 0.04),
+            scheme.surface,
+          );
+    final ink = selected ? scheme.primary : scheme.onSurfaceVariant;
+    final outline = selected
+        ? scheme.outlineVariant.withValues(alpha: 0.75)
+        : scheme.outlineVariant.withValues(alpha: 0.45);
+    return Semantics(
+      key: folderKey,
+      button: true,
+      selected: selected,
+      label: label,
+      child: Material(
+        key: tabKey,
+        color: fill,
+        elevation: selected ? 0 : 0.5,
+        shadowColor: scheme.shadow.withValues(alpha: 0.18),
+        shape: RoundedRectangleBorder(
+          borderRadius: radius,
+          side: BorderSide(color: outline),
+        ),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: radius,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: selected ? 44 : 38),
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(
+                8,
+                selected ? 8 : 6,
+                8,
+                selected ? 10 : 6,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(icon, size: 15, color: ink),
+                  const SizedBox(width: 5),
+                  Flexible(
+                    child: Text(
+                      label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        fontWeight: selected
+                            ? FontWeight.w800
+                            : FontWeight.w600,
+                        height: 1.1,
+                        color: ink,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
       ),
+    );
+  }
+}
+
+class _CheckInFolderBody extends StatelessWidget {
+  const _CheckInFolderBody({required this.onOpen});
+
+  final VoidCallback onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Column(
+      key: const Key('today-input-body-check-in'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          uiText(context, Copy.checkInFolderHint),
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: scheme.onSurfaceVariant,
+            height: 1.35,
+          ),
+        ),
+        const SizedBox(height: 12),
+        FilledButton.icon(
+          key: const Key('today-input-open-check-in'),
+          onPressed: onOpen,
+          icon: const Icon(Icons.edit_calendar_outlined, size: 18),
+          label: Text(uiText(context, Copy.homeCheckIn)),
+        ),
+      ],
+    );
+  }
+}
+
+class _QuickTapFolderBody extends StatelessWidget {
+  const _QuickTapFolderBody({required this.onOpen});
+
+  final VoidCallback onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Column(
+      key: const Key('today-input-body-quick-tap'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          uiText(context, Copy.quickTapFolderHint),
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: scheme.onSurfaceVariant,
+            height: 1.35,
+          ),
+        ),
+        const SizedBox(height: 12),
+        FilledButton.tonalIcon(
+          key: const Key('today-input-open-quick-tap'),
+          onPressed: onOpen,
+          icon: const Icon(Icons.touch_app_outlined, size: 18),
+          label: Text(uiText(context, Copy.quickTapTitle)),
+        ),
+      ],
+    );
+  }
+}
+
+class _QuickSelectFolderBody extends ConsumerWidget {
+  const _QuickSelectFolderBody({
+    required this.workspace,
+    required this.mixNote,
+  });
+
+  final TodayWorkspace workspace;
+  final String mixNote;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    if (workspace.domains.isEmpty) {
+      return BalancedProse(
+        key: const Key('today-empty'),
+        Copy.todayEmpty,
+        style: theme.textTheme.bodySmall?.copyWith(
+          color: scheme.onSurfaceVariant,
+          height: 1.4,
+        ),
+      );
+    }
+    return Column(
+      key: const Key('today-active-domain-mix'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          mixNote,
+          key: const Key('today-active-domain-mix-total'),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: theme.textTheme.bodySmall?.copyWith(
+            fontWeight: FontWeight.w600,
+            height: 1.1,
+            color: scheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          uiText(context, Copy.quickSelectHint),
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: scheme.onSurfaceVariant,
+            height: 1.35,
+          ),
+        ),
+        const SizedBox(height: 10),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            const gap = 8.0;
+            final twoCol = constraints.maxWidth >= 340;
+            final width = twoCol
+                ? (constraints.maxWidth - gap) / 2
+                : constraints.maxWidth;
+            return Wrap(
+              key: const Key('today-active-domain-mix-chips'),
+              spacing: gap,
+              runSpacing: gap,
+              children: [
+                for (final item in workspace.domains)
+                  SizedBox(
+                    width: width,
+                    child: _TodayDomainTile(item: item, ref: ref),
+                  ),
+              ],
+            );
+          },
+        ),
+      ],
     );
   }
 }
@@ -361,45 +531,34 @@ class _TodayDomainTile extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             Expanded(
-              child: Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  height: 1.15,
-                  color: identity.familyFor(context),
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  Copy.mixRowsCount(item.recordedMixCount, item.mixRowCount),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    height: 1.1,
-                    color: identity.familyFor(context),
-                  ),
-                ),
-                Text(
-                  Copy.todayRecorded,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    height: 1.1,
-                    color: Color.alphaBlend(
-                      identity.familyFor(context).withValues(alpha: 0.55),
-                      Theme.of(context).colorScheme.onSurface,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      height: 1.15,
+                      color: identity.familyFor(context),
                     ),
                   ),
-                ),
-              ],
+                  Text(
+                    '${Copy.mixRowsCount(item.recordedMixCount, item.mixRowCount)} · ${Copy.todayRecorded}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      height: 1.1,
+                      color: Color.alphaBlend(
+                        identity.familyFor(context).withValues(alpha: 0.55),
+                        Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),

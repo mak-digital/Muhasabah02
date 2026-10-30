@@ -6,6 +6,7 @@ import '../../domain/copy.dart';
 import '../../domain/monitor_domain.dart';
 import '../../domain/personal_mix.dart';
 import '../shared/domain_stage.dart';
+import '../shared/app_language_scope.dart';
 import '../shared/ui_bits.dart';
 import 'salah_home_follow_on.dart';
 
@@ -51,7 +52,7 @@ class HomeDomainStage extends ConsumerWidget {
       aboveCard: [
         if (season != null) ...[
           BalancedProse(
-            '${Copy.personalMixSeasonPrefix} $season.',
+            '${uiText(context, Copy.personalMixSeasonPrefix)} $season.',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
               height: 1.45,

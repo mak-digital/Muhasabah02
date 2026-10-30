@@ -10,6 +10,17 @@ class Copy {
   static String todayHeading(String weekday, String dateLine) =>
       'TODAY : $weekday, $dateLine';
   static const activeDomainAndMix = 'ACTIVE DOMAIN & MIX';
+  static const todayInputCheckInTab = 'Check-in';
+  static const todayInputQuickTapTab = 'Quick tap';
+  static const todayInputQuickSelectTab = 'Quick select';
+  static const quickSelect = 'Quick select';
+  static const quickSelectTitle = 'Quick select';
+  static const quickSelectHint =
+      'Choose a domain for a quick under-row entry. Detail lists stay on Quick tap marks and Home week views.';
+  static const checkInFolderHint =
+      'Full daily record with factors and notes. Opens the check-in page for today.';
+  static const quickTapFolderHint =
+      'Busy-day tiles for this season’s mix. Opens Quick tap for one-tap cycling.';
   static String mixRowsRecorded(int recorded, int total) {
     if (total <= 0) return 'No mix rows';
     if (recorded <= 0) return 'None of $total recorded';
@@ -43,6 +54,8 @@ class Copy {
   static const quickTapFajrHint = 'On time is not a khushu’ score.';
   static const homeReview = 'Review recorded experience';
   static const homeManage = 'Manage past check-ins';
+  static const inputTab = 'Input';
+  static const inputTitle = 'Input';
   static const reviewTitle = 'Review';
   static const registryTab = 'Registry';
   static const registryTitle = 'Registry';
@@ -429,6 +442,7 @@ class Copy {
   static const dhikrPerformedHint =
       'Tick practised formulas. Unticked stays unanswered, not missed.';
   static const dhikrPerformedHeading = 'Dhikr performed';
+  static const dhikrPracticeCounter = 'Counter';
   static const dhikrPerformedCountHeading = 'Count';
   static const verifiedWordingAvailable = 'Verified wording available';
   static const relatedWordingAvailable = 'Related wording available';
@@ -460,6 +474,12 @@ class Copy {
   static const dataManagement = 'Developer & sample data';
   static const appearancePreferences = 'Preferences';
   static const appearance = 'Appearance';
+  static const language = 'Language';
+  static const languageNote =
+      'English or Bangla for this first draft. The daily path and these lines switch. The rest of the app stays in English until the next pass.';
+  static const languageReviewHeading = 'Wording for your review';
+  static const languageReviewNote =
+      'Read the Bangla under each English line. Tell me which lines to change. Screens that are not in this list stay in English for now. Arabic verses and hadith stay in Arabic.';
   static const appearanceNote =
       'System, light, dark, plus three named looks. Not a score.';
   static const textSize = 'Text size';

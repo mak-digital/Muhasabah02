@@ -6,6 +6,7 @@ import 'privacy_log.dart';
 
 import '../data/app_prefs.dart';
 import '../domain/app_appearance.dart';
+import '../domain/app_language.dart';
 import '../domain/arabic_script.dart';
 import '../domain/custom_selection_set.dart';
 import '../domain/daily_check_in.dart';
@@ -576,7 +577,11 @@ class HiveAppPrefs implements AppPrefs {
   static const _salahActivityColours = 'salah_activity_colours';
   static const _arabicScriptFace = 'arabic_script_face';
   static const _arabicScriptSize = 'arabic_script_size';
+  static const _appLanguage = 'app_language';
   static const _dhikrCountDefaults = 'dhikr_count_defaults';
+  static const _dhikrProgressCounts = 'dhikr_progress_counts';
+  static const _dhikrPracticeFabDx = 'dhikr_practice_fab_dx';
+  static const _dhikrPracticeFabDy = 'dhikr_practice_fab_dy';
 
   bool _flag(String key) => _box.get(key) == 'true';
 
@@ -937,6 +942,13 @@ class HiveAppPrefs implements AppPrefs {
       _box.put(_arabicScriptSize, '${clampArabicScriptSize(value)}');
 
   @override
+  AppLanguage get appLanguage => AppLanguageX.fromId(_box.get(_appLanguage));
+
+  @override
+  Future<void> setAppLanguage(AppLanguage value) =>
+      _box.put(_appLanguage, value.id);
+
+  @override
   Map<String, int> get dhikrCountDefaults =>
       decodeDhikrCountDefaults(_box.get(_dhikrCountDefaults));
 
@@ -954,6 +966,53 @@ class HiveAppPrefs implements AppPrefs {
         : value;
     final next = {...dhikrCountDefaults, activityId: clamped};
     return _box.put(_dhikrCountDefaults, encodeDhikrCountDefaults(next));
+  }
+
+  @override
+  Map<String, int> get dhikrProgressCounts =>
+      decodeDhikrProgressCounts(_box.get(_dhikrProgressCounts));
+
+  @override
+  int? dhikrProgressFor(String dateKey, String activityId) {
+    if (dateKey.isEmpty || activityId.isEmpty) return null;
+    return dhikrProgressCounts[dhikrProgressKey(dateKey, activityId)];
+  }
+
+  @override
+  Future<void> setDhikrProgress(
+    String dateKey,
+    String activityId,
+    int count,
+  ) {
+    if (dateKey.isEmpty || activityId.isEmpty) return Future.value();
+    final key = dhikrProgressKey(dateKey, activityId);
+    final next = {...dhikrProgressCounts};
+    if (count < 0) {
+      next.remove(key);
+    } else {
+      next[key] = count > 999 ? 999 : count;
+    }
+    return _box.put(_dhikrProgressCounts, encodeDhikrProgressCounts(next));
+  }
+
+  @override
+  double? get dhikrPracticeFabDx {
+    final raw = _box.get(_dhikrPracticeFabDx);
+    return raw == null ? null : double.tryParse(raw);
+  }
+
+  @override
+  double? get dhikrPracticeFabDy {
+    final raw = _box.get(_dhikrPracticeFabDy);
+    return raw == null ? null : double.tryParse(raw);
+  }
+
+  @override
+  Future<void> setDhikrPracticeFabOffset(double dx, double dy) {
+    return Future.wait([
+      _box.put(_dhikrPracticeFabDx, dx.toString()),
+      _box.put(_dhikrPracticeFabDy, dy.toString()),
+    ]).then((_) {});
   }
 }
 

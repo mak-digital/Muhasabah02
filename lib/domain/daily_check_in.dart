@@ -564,7 +564,21 @@ class DailyCheckIn {
     } else {
       traces[storageKey] = rolled;
     }
-    return copyWith(dhikrContext: next, homeTraces: traces);
+    var result = copyWith(dhikrContext: next, homeTraces: traces);
+    if (isDhikrPostFardTrace(storageKey)) {
+      final total = dhikrContextItemsFor(storageKey).length;
+      final practised = dhikrPractisedCount(captures);
+      result = result.withActivity(
+        storageKey,
+        RecordedActivity(
+          id: ActivityCatalog.postFardIdForPractised(
+            practised: practised,
+            total: total,
+          ),
+        ),
+      );
+    }
+    return result;
   }
 
   DailyCheckIn withHomeTrace(String storageKey, TernaryOutcome outcome) {

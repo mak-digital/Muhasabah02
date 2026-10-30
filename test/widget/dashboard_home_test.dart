@@ -49,11 +49,10 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.text(MonitorDomain.salah.label), findsWidgets);
-    expect(find.byKey(const Key('home-domain-next')), findsOneWidget);
+    expect(find.byKey(const Key('home-domain-tab-salah')), findsOneWidget);
     expect(find.textContaining('Qur’an ›'), findsNothing);
-    expect(find.byKey(const Key('home-domain-pill-salah')), findsOneWidget);
-    expect(find.byKey(const Key('home-domain-pill-dhikr')), findsOneWidget);
-    expect(find.byKey(const Key('home-domain-pill-hajj')), findsOneWidget);
+    expect(find.byKey(const Key('home-domain-tab-dhikr')), findsOneWidget);
+    expect(find.byKey(const Key('home-domain-tab-hajj')), findsOneWidget);
     expect(find.text('Family & Community Care'), findsNothing);
     expect(find.text(MonitorDomain.quran.label), findsNothing);
     expect(find.text(Copy.reflectionOfTheWeek), findsOneWidget);
@@ -71,7 +70,14 @@ void main() {
     expect(find.text(Copy.noticedThisWeek), findsNothing);
     expect(find.text(Copy.patternsNoticed), findsNothing);
     expect(find.text(Copy.addAResponse), findsNothing);
-    expect(find.text(Copy.homeCheckIn), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(NavigationBar),
+        matching: find.text(Copy.inputTab),
+      ),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('home-check-in')), findsNothing);
     expect(find.text(Copy.marksGuide), findsOneWidget);
     expect(find.byTooltip(Copy.marksGuideTitle), findsOneWidget);
     expect(find.textContaining('Score'), findsNothing);
@@ -98,14 +104,13 @@ void main() {
     await tester.pumpWidget(testApp(now: DateTime(2026, 9, 3)));
     await tester.pumpAndSettle();
     expect(find.text(MonitorDomain.salah.label), findsWidgets);
-    expect(find.byKey(const Key('home-domain-next')), findsOneWidget);
+    expect(find.byKey(const Key('home-domain-tab-salah')), findsOneWidget);
     expect(find.textContaining('Qur’an ›'), findsNothing);
-    expect(find.byKey(const Key('home-domain-pill-salah')), findsOneWidget);
-    expect(find.byKey(const Key('home-domain-pill-quran')), findsOneWidget);
-    expect(find.byKey(const Key('home-domain-pill-dhikr')), findsOneWidget);
-    expect(find.byKey(const Key('home-domain-pill-hadith')), findsNothing);
-    expect(find.byKey(const Key('home-domain-pill-charity')), findsNothing);
-    expect(find.byKey(const Key('home-domain-pill-akhlaq')), findsNothing);
+    expect(find.byKey(const Key('home-domain-tab-quran')), findsOneWidget);
+    expect(find.byKey(const Key('home-domain-tab-dhikr')), findsOneWidget);
+    expect(find.byKey(const Key('home-domain-tab-hadith')), findsNothing);
+    expect(find.byKey(const Key('home-domain-tab-charity')), findsNothing);
+    expect(find.byKey(const Key('home-domain-tab-akhlaq')), findsNothing);
     expect(find.byKey(const Key('home-domain-card-hadith')), findsNothing);
     expect(find.byKey(const Key('home-domain-card-akhlaq')), findsNothing);
     expect(find.byKey(const Key('home-domain-card-dhikr')), findsNothing);

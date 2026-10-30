@@ -227,6 +227,141 @@ class CheckInSelect<T> extends StatelessWidget {
   }
 }
 
+Key? activityPickerItemKey(String? statusKeyPrefix, ActivityOption option) {
+  if (statusKeyPrefix == null) return null;
+  if (option.id == 'aloneOnTime') {
+    return Key('$statusKeyPrefix-onTime');
+  }
+  if (option.id == 'prayedLate') {
+    return Key('$statusKeyPrefix-late');
+  }
+  if (option.id == 'missed') {
+    return Key('$statusKeyPrefix-missed');
+  }
+  if (option.id == ActivityIds.unanswered) {
+    return Key('$statusKeyPrefix-unanswered');
+  }
+  return Key('$statusKeyPrefix-${option.id}');
+}
+
+bool activityPickerUsesColourSwatches(List<ActivityOption> options) {
+  return ActivityCatalog.isObligatorySalahCatalog(options) ||
+      identical(options, ActivityCatalog.tahajjud) ||
+      identical(options, ActivityCatalog.ishraq) ||
+      identical(options, ActivityCatalog.tawbah) ||
+      ActivityCatalog.isDurationCatalog(options) ||
+      identical(options, ActivityCatalog.hadithLivedNoticed) ||
+      ActivityCatalog.isDhikrPostFardCatalog(options) ||
+      ActivityCatalog.isAkhlaqObservationCatalog(options) ||
+      ActivityCatalog.isHuquqObservationCatalog(options) ||
+      ActivityCatalog.isKnowledgeObservationCatalog(options) ||
+      ActivityCatalog.isTimeObservationCatalog(options) ||
+      ActivityCatalog.isHealthObservationCatalog(options) ||
+      ActivityCatalog.isWealthObservationCatalog(options) ||
+      ActivityCatalog.isUmmahObservationCatalog(options) ||
+      ActivityCatalog.isCharityObservationCatalog(options) ||
+      ActivityCatalog.isFastingObservationCatalog(options);
+}
+
+/// Opens the full activity list under [anchorContext], skipping a closed
+/// dropdown step. Menu top aligns just below the anchor widget.
+Future<void> showAnchoredActivityMenu({
+  required BuildContext anchorContext,
+  required List<ActivityOption> options,
+  required String selectedId,
+  required ValueChanged<ActivityOption> onSelected,
+  String? statusKeyPrefix,
+  bool showColourSwatches = false,
+}) async {
+  final box = anchorContext.findRenderObject() as RenderBox?;
+  final overlay =
+      Overlay.maybeOf(anchorContext)?.context.findRenderObject() as RenderBox?;
+  if (box == null || overlay == null || !box.hasSize) return;
+
+  final topLeft = box.localToGlobal(Offset.zero, ancestor: overlay);
+  final size = box.size;
+  final position = RelativeRect.fromLTRB(
+    topLeft.dx,
+    topLeft.dy + size.height,
+    overlay.size.width - topLeft.dx - size.width,
+    overlay.size.height - topLeft.dy - size.height,
+  );
+
+  final durationList = ActivityCatalog.isDurationCatalog(options);
+  final preserveOrder = ActivityCatalog.preservePickerOrder(options);
+  final shown = [...options];
+  if (!preserveOrder) {
+    shown.sort(
+      (a, b) => compactChoiceLabel(
+        a.label,
+        stripCatalogRowName: durationList,
+        optionId: a.id,
+      ).toLowerCase().compareTo(
+        compactChoiceLabel(
+          b.label,
+          stripCatalogRowName: durationList,
+          optionId: b.id,
+        ).toLowerCase(),
+      ),
+    );
+  }
+  final byId = {for (final option in shown) option.id: option};
+
+  final chosen = await showMenu<String>(
+    context: anchorContext,
+    position: position,
+    constraints: BoxConstraints(
+      minWidth: size.width.clamp(200, overlay.size.width - 16),
+      maxWidth: overlay.size.width - 16,
+      maxHeight: 560,
+    ),
+    items: [
+      for (final option in shown)
+        PopupMenuItem<String>(
+          key: activityPickerItemKey(statusKeyPrefix, option),
+          value: option.id,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          child: Row(
+            children: [
+              if (showColourSwatches) ...[
+                Container(
+                  width: 12,
+                  height: 12,
+                  decoration: BoxDecoration(
+                    color: SalahActivityMark.colourForId(option.id),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 8),
+              ],
+              Expanded(
+                child: Text(
+                  compactChoiceLabel(
+                    option.label,
+                    stripCatalogRowName: durationList,
+                    optionId: option.id,
+                  ),
+                  style: option.id == selectedId
+                      ? const TextStyle(fontWeight: FontWeight.w700)
+                      : null,
+                ),
+              ),
+              if (option.id == selectedId)
+                Icon(
+                  Icons.check,
+                  size: 18,
+                  color: Theme.of(anchorContext).colorScheme.primary,
+                ),
+            ],
+          ),
+        ),
+    ],
+  );
+  if (chosen == null) return;
+  final option = byId[chosen];
+  if (option != null) onSelected(option);
+}
+
 class ActivityPicker extends ConsumerWidget {
   const ActivityPicker({
     super.key,
@@ -246,39 +381,9 @@ class ActivityPicker extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(prefsTickProvider);
-    final salahList =
-        ActivityCatalog.isObligatorySalahCatalog(options) ||
-        identical(options, ActivityCatalog.tahajjud) ||
-        identical(options, ActivityCatalog.ishraq) ||
-        identical(options, ActivityCatalog.tawbah);
     final durationList = ActivityCatalog.isDurationCatalog(options);
-    final livedList = identical(options, ActivityCatalog.hadithLivedNoticed);
-    final dhikrList = ActivityCatalog.isDhikrPostFardCatalog(options);
-    final akhlaqList = ActivityCatalog.isAkhlaqObservationCatalog(options);
-    final huquqList = ActivityCatalog.isHuquqObservationCatalog(options);
-    final knowledgeList = ActivityCatalog.isKnowledgeObservationCatalog(
-      options,
-    );
-    final timeList = ActivityCatalog.isTimeObservationCatalog(options);
-    final healthList = ActivityCatalog.isHealthObservationCatalog(options);
-    final wealthList = ActivityCatalog.isWealthObservationCatalog(options);
-    final ummahList = ActivityCatalog.isUmmahObservationCatalog(options);
-    final charityList = ActivityCatalog.isCharityObservationCatalog(options);
-    final fastingList = ActivityCatalog.isFastingObservationCatalog(options);
     final swatches =
-        (salahList ||
-            durationList ||
-            livedList ||
-            dhikrList ||
-            akhlaqList ||
-            huquqList ||
-            knowledgeList ||
-            timeList ||
-            healthList ||
-            wealthList ||
-            ummahList ||
-            charityList ||
-            fastingList) &&
+        activityPickerUsesColourSwatches(options) &&
         ref.watch(appPrefsProvider).salahActivityColours;
     final extra = options.any((option) => option.id == selectedId)
         ? null
@@ -299,7 +404,7 @@ class ActivityPicker extends ConsumerWidget {
               stripCatalogRowName: durationList,
               optionId: option.id,
             ),
-            itemKey: _keyFor(option),
+            itemKey: activityPickerItemKey(statusKeyPrefix, option),
             swatch: swatches ? SalahActivityMark.colourForId(option.id) : null,
           ),
       ],
@@ -308,23 +413,6 @@ class ActivityPicker extends ConsumerWidget {
         if (option != null) onSelected(option);
       },
     );
-  }
-
-  Key? _keyFor(ActivityOption option) {
-    if (statusKeyPrefix == null) return null;
-    if (option.id == 'aloneOnTime') {
-      return Key('$statusKeyPrefix-onTime');
-    }
-    if (option.id == 'prayedLate') {
-      return Key('$statusKeyPrefix-late');
-    }
-    if (option.id == 'missed') {
-      return Key('$statusKeyPrefix-missed');
-    }
-    if (option.id == ActivityIds.unanswered) {
-      return Key('$statusKeyPrefix-unanswered');
-    }
-    return Key('$statusKeyPrefix-${option.id}');
   }
 }
 

@@ -19,7 +19,7 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.text(Copy.appLockTitle), findsOneWidget);
-    expect(find.text(Copy.homeCheckIn), findsNothing);
+    expect(find.byKey(const Key('home-scroll')), findsNothing);
   });
 
   testWidgets('successful device unlock shows Home', (tester) async {
@@ -32,7 +32,14 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.text(Copy.appLockTitle), findsNothing);
-    expect(find.text(Copy.homeCheckIn), findsOneWidget);
+    expect(find.byKey(const Key('home-scroll')), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(NavigationBar),
+        matching: find.text(Copy.inputTab),
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('privacy explains on-device storage and optional device lock', (

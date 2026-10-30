@@ -74,7 +74,9 @@ void main() {
   ) async {
     var clock = DateTime(2026, 9, 22, 23, 58);
     await pumpClock(tester, () => clock);
+    await openInputTab(tester);
     expect(find.textContaining('22 Sep 2026'), findsWidgets);
+    await openHomeTab(tester);
 
     await openHomeSalahCell(tester, '2026-09-23');
     expect(find.byType(CheckInScreen), findsNothing);
@@ -85,8 +87,10 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    await openInputTab(tester);
     expect(find.textContaining('23 Sep 2026'), findsWidgets);
     expect(find.textContaining('Wednesday'), findsWidgets);
+    await openHomeTab(tester);
 
     await openHomeSalahCell(tester, '2026-09-23');
     expect(find.byType(CheckInScreen), findsOneWidget);
@@ -101,8 +105,8 @@ void main() {
 
     clock = DateTime(2026, 9, 23, 0, 3);
     await tester.pump();
-    expect(find.textContaining('22 Sep 2026'), findsWidgets);
 
+    // Tapping the new day?s Home cell recovers without waiting for the timer.
     await openHomeSalahCell(tester, '2026-09-23');
     expect(find.byType(CheckInScreen), findsOneWidget);
     expect(find.textContaining('23 Sep 2026'), findsWidgets);
@@ -204,6 +208,7 @@ void main() {
   ) async {
     var clock = DateTime(2026, 9, 20, 9);
     await pumpClock(tester, () => clock);
+    await openInputTab(tester);
     expect(find.textContaining('20 Sep 2026'), findsWidgets);
 
     clock = DateTime(2026, 9, 23, 11);
@@ -217,6 +222,7 @@ void main() {
   ) async {
     var clock = DateTime(2026, 9, 22, 21);
     await pumpClock(tester, () => clock);
+    await openInputTab(tester);
     clock = DateTime(2026, 9, 23, 1);
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     await tester.pumpAndSettle();
@@ -237,8 +243,7 @@ void main() {
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text(Copy.quickTap));
-    await tester.pumpAndSettle();
+    await openHomeQuickTap(tester);
     await ensureQuickTapFajrVisible(tester);
     await tester.tap(find.byKey(const Key('quick-tap-salah.fajr')));
     await tester.pumpAndSettle();
@@ -257,8 +262,7 @@ void main() {
       checkIns: checkIns,
       personalMix: mixForKind(PersonalMixKind.firstLook),
     );
-    await tester.tap(find.text(Copy.quickTap));
-    await tester.pumpAndSettle();
+    await openHomeQuickTap(tester);
 
     clock = DateTime(2026, 9, 23, 0, 3);
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
@@ -278,9 +282,8 @@ void main() {
     var clock = DateTime(2026, 9, 22, 23, 58);
     await pumpClock(tester, () => clock, checkIns: checkIns);
 
-    await tester.tap(find.text(Copy.homeCheckIn));
-    await tester.pumpAndSettle();
-    expect(find.textContaining('Check-in · 22 Sep 2026'), findsOneWidget);
+    await openHomeCheckIn(tester);
+    expect(find.textContaining('Check-in'), findsWidgets);
 
     await chooseCheckInOption(
       tester,

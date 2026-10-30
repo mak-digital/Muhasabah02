@@ -44,7 +44,7 @@ void main() {
         await tester.pump(const Duration(milliseconds: 40));
       }
     }
-    await tester.tap(find.text(Copy.homeCheckIn));
+    await openHomeCheckIn(tester);
     for (var i = 0; i < 20; i++) {
       await tester.pump(const Duration(milliseconds: 40));
     }

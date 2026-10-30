@@ -169,7 +169,8 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
     _openedDateKey = dateKey(widget.date ?? ref.read(nowClockProvider)());
     _draft = DailyCheckIn.empty(_openedDateKey);
     _akhlaqStruggle = TextEditingController();
-    _briefingOpen = widget.focusBand == null && widget.focusRowId == null;
+    // Detail briefing stays collapsed until the user opens About this domain.
+    _briefingOpen = false;
     Future<void>.microtask(_hydrate);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _scrollToFocusedRow();
@@ -475,8 +476,15 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
         children: [
           CheckInDomainTitle(title, focus: MonitorDomain.salah.focusQuestion),
           const SizedBox(height: 4),
-          const Text(
-            'Each prayer is recorded independently. Absence is not missed.',
+          CollapsingIntroNote(
+            title: Copy.aboutThisDomain,
+            note:
+                'Each prayer is recorded independently. Absence is not missed.',
+            expanded: _briefingOpen,
+            onExpansionChanged: (open) {
+              if (open == _briefingOpen) return;
+              setState(() => _briefingOpen = open);
+            },
           ),
           const SizedBox(height: 12),
           if (obligatory.isNotEmpty)
@@ -1002,8 +1010,15 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
           },
         )
       else
-        const Text(
-          'Only this domain is shown. Other records for the day stay unchanged.',
+        CollapsingIntroNote(
+          title: Copy.aboutThisDomain,
+          note:
+              'Only this domain is shown. Other records for the day stay unchanged.',
+          expanded: _briefingOpen,
+          onExpansionChanged: (open) {
+            if (open == _briefingOpen) return;
+            setState(() => _briefingOpen = open);
+          },
         ),
       const SizedBox(height: 12),
       if (widget.includeHajjStatus) const HajjStandingEditor(bottomPadding: 12),
@@ -1999,28 +2014,17 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
               },
             )
           else
-            BalancedProse(
-              extraNote ??
+            CollapsingIntroNote(
+              title: Copy.aboutThisDomain,
+              note:
+                  extraNote ??
                   'Same rows as Home. Independent. Missing is not missed.',
-              style: Theme.of(context).textTheme.bodyMedium
-                  ?.copyWith(height: 1.45),
+              expanded: _briefingOpen,
+              onExpansionChanged: (open) {
+                if (open == _briefingOpen) return;
+                setState(() => _briefingOpen = open);
+              },
             ),
-          if (title == MonitorDomain.akhlaq.label) ...[
-            const SizedBox(height: 8),
-            BalancedProse(
-              Copy.akhlaqCheckInNote,
-              style: Theme.of(context).textTheme.bodySmall
-                  ?.copyWith(height: 1.45),
-            ),
-          ],
-          if (title == MonitorDomain.huquq.label) ...[
-            const SizedBox(height: 8),
-            BalancedProse(
-              Copy.huquqCheckInNote,
-              style: Theme.of(context).textTheme.bodySmall
-                  ?.copyWith(height: 1.45),
-            ),
-          ],
           const SizedBox(height: 12),
           if (includeHajjStatus) const HajjStandingEditor(bottomPadding: 12),
           for (var i = 0; i < bands.length; i++)

@@ -95,6 +95,10 @@ const huquqBriefing = DomainBriefing(
     'Safety and justice come first. Patience is not required in harm or abuse.',
     'Ordinary household support stays here. Extra gifts sit on Charity.',
   ],
+  closing: [
+    // Keep aligned with Copy.huquqCheckInNote (copy.dart imports this file).
+    'One observation per row of a right you owe. Empty is not neglect. Do not name others’ faults. Colour names the choice when activity colours are on — not a relationship score.',
+  ],
 );
 
 const akhlaqBriefing = DomainBriefing(
@@ -107,7 +111,11 @@ const akhlaqBriefing = DomainBriefing(
     'Guarded speech is tone. Thankfulness in action is character; Gratitude Dhikr is remembrance.',
     'Held back from a habit is noticed restraint. The habit is not named. Empty is not a relapse.',
   ],
-  closing: ['Perfection is not expected.'],
+  closing: [
+    'Perfection is not expected.',
+    // Keep aligned with Copy.akhlaqCheckInNote (copy.dart imports this file).
+    'One observation per row, about yourself only. Empty is not a relapse. Colour names the choice when activity colours are on — not a grade.',
+  ],
 );
 
 const knowledgeBriefing = DomainBriefing(

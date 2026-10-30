@@ -7,6 +7,7 @@ import '../../domain/copy.dart';
 import '../../domain/personal_mix.dart';
 import '../shared/brand_mark.dart';
 import '../shared/brand_title.dart';
+import '../shared/app_language_scope.dart';
 import '../shared/ui_bits.dart';
 
 class FirstLookDoorScreen extends ConsumerStatefulWidget {
@@ -55,44 +56,44 @@ class FirstLookDoorScreenState extends ConsumerState<FirstLookDoorScreen> {
           const Center(child: BrandMark(size: 112)),
           const SizedBox(height: 24),
           Text(
-            Copy.firstLookDoorTitle,
+            uiText(context, Copy.firstLookDoorTitle),
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.headlineSmall,
           ),
           const SizedBox(height: 8),
           Text(
-            Copy.appSlogan,
+            uiText(context, Copy.appSlogan),
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.titleMedium
                 ?.copyWith(color: Theme.of(context).colorScheme.primary),
           ),
           const SizedBox(height: 8),
           Text(
-            Copy.appNotice,
+            uiText(context, Copy.appNotice),
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyLarge,
           ),
           const SizedBox(height: 16),
           BalancedProse(
-            Copy.firstLookDoorPrivate,
+            uiText(context, Copy.firstLookDoorPrivate),
             style: Theme.of(context).textTheme.bodyLarge
                 ?.copyWith(height: 1.45),
           ),
           const SizedBox(height: 16),
           BalancedProse(
-            Copy.firstLookDoorEmpty,
+            uiText(context, Copy.firstLookDoorEmpty),
             style: Theme.of(context).textTheme.bodyLarge
                 ?.copyWith(height: 1.45),
           ),
           const SizedBox(height: 16),
           BalancedProse(
-            Copy.firstLookDoorSeason,
+            uiText(context, Copy.firstLookDoorSeason),
             style: Theme.of(context).textTheme.bodyLarge
                 ?.copyWith(height: 1.45),
           ),
           const SizedBox(height: 16),
           BalancedProse(
-            Copy.firstLookDoorSample,
+            uiText(context, Copy.firstLookDoorSample),
             style: Theme.of(context).textTheme.bodyLarge
                 ?.copyWith(height: 1.45),
           ),
@@ -112,12 +113,12 @@ class FirstLookDoorScreenState extends ConsumerState<FirstLookDoorScreen> {
                 ),
               FilledButton(
                 onPressed: _busy ? null : () => _finish(seedSample: false),
-                child: const Text(Copy.firstLookStartBlank),
+                child: Text(uiText(context, Copy.firstLookStartBlank)),
               ),
               const SizedBox(height: 8),
               OutlinedButton(
                 onPressed: _busy ? null : () => _finish(seedSample: true),
-                child: const Text(Copy.firstLookShowSample),
+                child: Text(uiText(context, Copy.firstLookShowSample)),
               ),
             ],
           ),

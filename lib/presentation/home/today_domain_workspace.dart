@@ -13,6 +13,7 @@ import '../shared/domain_action_frame.dart';
 import '../shared/domain_line_icon.dart';
 import '../shared/domain_visual.dart';
 import '../shared/progress_calendar.dart';
+import '../shared/salah_activity_mark.dart';
 import '../shared/state_marker.dart';
 import '../shared/system_insets.dart';
 import 'today_row_record.dart';
@@ -137,6 +138,8 @@ class TodayDomainWorkspacePage extends ConsumerWidget {
                       context: context,
                       ref: ref,
                       group: group,
+                      record: todayRecord,
+                      activityColours: prefs.salahActivityColours,
                     ),
                   ),
           ),
@@ -150,6 +153,8 @@ List<Widget> _workspaceListChildren({
   required BuildContext context,
   required WidgetRef ref,
   required TodayDomain group,
+  required DailyCheckIn? record,
+  required bool activityColours,
 }) {
   final noResponse = group.noResponseRows;
   final recorded = group.recordedRows;
@@ -160,6 +165,8 @@ List<Widget> _workspaceListChildren({
       _TodayWorkspaceRow(
         row: row,
         compact: compact,
+        record: record,
+        activityColours: activityColours,
         onTap: () {
           refreshNowIfLocalDateChanged(ref);
           final key = dateKey(ref.read(nowProvider));
@@ -219,22 +226,33 @@ class _TodayWorkspaceRow extends StatelessWidget {
   const _TodayWorkspaceRow({
     required this.row,
     required this.compact,
+    required this.record,
+    required this.activityColours,
     required this.onTap,
   });
 
   final TodayRow row;
   final bool compact;
+  final DailyCheckIn? record;
+  final bool activityColours;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final label = todayRowLabel(row);
-    final caption = compact ? Copy.todayRecorded : Copy.todayNoResponseYet;
+    final choice = compact
+        ? SalahActivityMark.forTodayRow(
+            row: row,
+            record: record,
+            activityColours: activityColours,
+          )
+        : null;
+    final caption = choice?.caption ?? Copy.todayNoResponseYet;
     final family = domainColorIdentity(row.domain).familyFor(context);
-    final spoken = compact
-        ? '$label, response recorded'
-        : '$label, no response yet';
+    final markerColor = choice?.mark.color ?? family;
+    final markerKind = choice?.mark.kind ?? MarkerKind.outlined;
+    final spoken = compact ? '$label, $caption' : '$label, no response yet';
     return DomainActionFrame(
       key: Key('today-row-${row.mixId}'),
       semanticLabel: spoken,
@@ -253,8 +271,8 @@ class _TodayWorkspaceRow extends StatelessWidget {
                 children: [
                   RecordedStateMarker(
                     key: Key('today-row-marker-${row.mixId}'),
-                    color: family,
-                    kind: MarkerKind.filled,
+                    color: markerColor,
+                    kind: markerKind,
                     semanticLabel: caption,
                     size: 18,
                   ),
@@ -270,10 +288,15 @@ class _TodayWorkspaceRow extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  Text(
-                    caption,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
+                  Flexible(
+                    child: Text(
+                      caption,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.end,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
                     ),
                   ),
                 ],

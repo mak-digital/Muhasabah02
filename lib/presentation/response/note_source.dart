@@ -62,10 +62,14 @@ Future<void> openNoteSource(BuildContext context, PersonalResponse item) async {
         );
         return;
       }
-      context.findAncestorStateOfType<AppShellState>()?.select(1);
+      context.findAncestorStateOfType<AppShellState>()?.select(
+        AppShellState.reviewTab,
+      );
       return;
     case ProvenanceOrigin.periodSummary:
-      context.findAncestorStateOfType<AppShellState>()?.select(1);
+      context.findAncestorStateOfType<AppShellState>()?.select(
+        AppShellState.reviewTab,
+      );
       return;
     case ProvenanceOrigin.recognitionPattern:
     case ProvenanceOrigin.recognitionSupportingDate:

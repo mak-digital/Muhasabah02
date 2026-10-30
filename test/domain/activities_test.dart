@@ -253,16 +253,35 @@ void main() {
     );
   });
 
+  test('post-fard practised share maps to remembrance legend levels', () {
+    expect(
+      ActivityCatalog.postFardIdForPractised(practised: 0, total: 10),
+      ActivityIds.unanswered,
+    );
+    expect(
+      ActivityCatalog.postFardIdForPractised(practised: 10, total: 10),
+      ActivityCatalog.dhikrWithAction,
+    );
+    expect(
+      ActivityCatalog.postFardIdForPractised(practised: 6, total: 10),
+      ActivityCatalog.dhikrAttentive,
+    );
+    expect(
+      ActivityCatalog.postFardIdForPractised(practised: 3, total: 10),
+      ActivityCatalog.dhikrIntentional,
+    );
+  });
+
   test('post-fard dhikr stores remembrance level and twins salah colours', () {
     expect(
       ActivityCatalog.dhikrPostFard.map((option) => option.label).toList(),
       [
-        'Remembrance with action (I noticed a beneficial response in my behaviour)',
-        'Attentive remembrance (I consciously reflected on the words or meaning)',
-        'Intentional remembrance (I deliberately made time for dhikr or du‘a)',
-        'Brief remembrance (A short dhikr or du‘a during the time)',
-        'Not today (I did not practise or do not recall doing so)',
-        'Unanswered',
+        'Attentive Remembrance',
+        'Remembered as habit',
+        'Intentional remembrance of the most or all',
+        'Brief remembrance of some',
+        'Not today',
+        'Not recorded',
       ],
     );
     expect(
@@ -283,7 +302,15 @@ void main() {
     );
     expect(
       SalahActivityMark.colourForId(ActivityIds.noActivity),
-      SalahActivityMark.prayedLate,
+      SalahActivityMark.missedMadeUp,
+    );
+    expect(
+      ActivityCatalog.forHomeTrace('dhikr.morningAdhkar'),
+      ActivityCatalog.dhikrPostFard,
+    );
+    expect(
+      ActivityCatalog.forHomeTrace('dhikr.eveningAdhkar'),
+      ActivityCatalog.dhikrPostFard,
     );
     var record = DailyCheckIn.empty('2026-09-03').withHomeTraceActivity(
       'dhikr.postFardFajr',

@@ -56,9 +56,7 @@ void main() {
     if (homeDomain != null) {
       await showHomeDomain(tester, homeDomain);
     }
-    await tester.ensureVisible(find.text(Copy.quickTap));
-    await tester.tap(find.text(Copy.quickTap));
-    await tester.pumpAndSettle();
+    await openHomeQuickTap(tester);
   }
 
   Future<void> expandQuickTapDomain(
@@ -75,7 +73,9 @@ void main() {
     if (find.byKey(const Key('quick-tap-note')).evaluate().isNotEmpty) {
       return;
     }
-    await tester.tap(find.byKey(const Key('quick-tap-note-toggle')));
+    final toggle = find.byKey(const Key('quick-tap-note-toggle'));
+    await tester.ensureVisible(toggle);
+    await tester.tap(toggle);
     await tester.pumpAndSettle();
   }
 
@@ -758,6 +758,52 @@ void main() {
       expect(find.text('SubhanAllah — Tasbih'), findsOneWidget);
       final stored = await checkIns.getByDate('2026-09-14');
       expect(stored?.dhikrContextFor('dhikr.generalDhikr'), hasLength(1));
+    },
+  );
+  testWidgets(
+    'post-fard Quick Tap cycles the choice and mark opens the Dhikr list',
+    (tester) async {
+      final checkIns = MemoryCheckInRepository();
+      await pumpQuickTap(
+        tester,
+        checkIns: checkIns,
+        visibleDomains: {MonitorDomain.dhikr},
+        personalMix: mixForKind(
+          PersonalMixKind.custom,
+          customKeys: {'dhikr.postFardFajr'},
+        ),
+      );
+      await expandQuickTapDomain(tester, MonitorDomain.dhikr);
+      await tester.tap(find.byKey(const Key('quick-tap-dhikr.postFardFajr')));
+      await tester.pumpAndSettle();
+      expect(
+        (await checkIns.getByDate('2026-09-14'))
+            ?.activityFor('dhikr.postFardFajr')
+            .id,
+        ActivityCatalog.dhikrWithAction,
+      );
+      expect(find.text(Copy.dhikrPerformedHeading), findsNothing);
+      // Finish the cycle so Fajr shows Not recorded.
+      for (var i = 0; i < 5; i++) {
+        await tester.tap(find.byKey(const Key('quick-tap-dhikr.postFardFajr')));
+        await tester.pumpAndSettle();
+      }
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('quick-tap-dhikr.postFardFajr')),
+          matching: find.text('Not recorded'),
+        ),
+        findsOneWidget,
+      );
+      await tester.tap(
+        find.byKey(const Key('quick-tap-mark-dhikr.postFardFajr')),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Istighfar three times'), findsOneWidget);
+      expect(
+        find.byKey(const Key('dhikr-legend-dhikr.postFardFajr')),
+        findsOneWidget,
+      );
     },
   );
 }

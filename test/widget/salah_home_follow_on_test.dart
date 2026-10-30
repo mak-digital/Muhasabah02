@@ -1075,7 +1075,7 @@ void main() {
         )
         .color;
     final source = tester
-        .widget<ColoredBox>(
+        .widget<Material>(
           find.byKey(
             Key(
               'health-practice-source-wash-${kPracticeHealthCatalog.first.id}',

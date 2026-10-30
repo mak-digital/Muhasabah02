@@ -25,12 +25,15 @@ void main() {
     );
     expect(huquqBriefing.plainText, contains('Safety and justice come first'));
     expect(huquqBriefing.plainText, contains('A step toward reconciliation'));
+    expect(huquqBriefing.plainText, contains(Copy.huquqCheckInNote));
     expect(huquqBriefing.lead.last, contains('Learn & Practice'));
     expect(huquqBriefing.lead.last, contains('not a daily grade'));
     expect(briefingForDomain(MonitorDomain.huquq), same(huquqBriefing));
   });
 
-  testWidgets('Huquq check-in shows example bullets', (tester) async {
+  testWidgets('Huquq check-in keeps About this domain collapsed by default', (
+    tester,
+  ) async {
     tester.view.physicalSize = const Size(400, 8000);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -38,11 +41,16 @@ void main() {
 
     await tester.pumpWidget(testApp(visibleDomains: allVisibleDomains()));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Start today’s check-in'));
-    await tester.pumpAndSettle();
+    await openHomeCheckIn(tester);
     await showCheckInDomain(tester, MonitorDomain.huquq);
 
     expect(find.text(Copy.aboutThisDomain), findsOneWidget);
+    expect(find.text('Attending can look like'), findsNothing);
+    expect(find.text(Copy.huquqCheckInNote), findsNothing);
+    expect(find.byType(CheckInScreen), findsOneWidget);
+
+    await tester.tap(find.text(Copy.aboutThisDomain));
+    await tester.pumpAndSettle();
     expect(find.text('Attending can look like'), findsOneWidget);
     expect(find.text('Repair'), findsOneWidget);
     expect(
@@ -55,10 +63,11 @@ void main() {
       ),
       findsOneWidget,
     );
-    expect(find.byType(CheckInScreen), findsOneWidget);
+    expect(find.text(Copy.huquqCheckInNote), findsOneWidget);
 
     await tester.tap(find.text(Copy.aboutThisDomain));
     await tester.pumpAndSettle();
     expect(find.text('Attending can look like'), findsNothing);
+    expect(find.text(Copy.huquqCheckInNote), findsNothing);
   });
 }

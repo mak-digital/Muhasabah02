@@ -18,8 +18,7 @@ void main() {
 
     await tester.pumpWidget(testApp(now: DateTime(2026, 9, 3)));
     await tester.pumpAndSettle();
-    await tester.tap(find.text(Copy.homeCheckIn));
-    await tester.pumpAndSettle();
+    await openHomeCheckIn(tester);
     expect(find.byType(CheckInScreen), findsOneWidget);
     expect(find.text('SALAH & PRAYER QUALITY'), findsOneWidget);
     expect(find.text('QUR’AN ENGAGEMENT'), findsNothing);
@@ -64,8 +63,7 @@ void main() {
       testApp(now: DateTime(2026, 9, 3), visibleDomains: {MonitorDomain.salah}),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text(Copy.homeCheckIn));
-    await tester.pumpAndSettle();
+    await openHomeCheckIn(tester);
     expect(find.byKey(const Key('checkin-domain-next')), findsNothing);
     expect(find.byKey(const Key('checkin-domain-pill-salah')), findsNothing);
     expect(find.text('SALAH & PRAYER QUALITY'), findsOneWidget);
@@ -86,8 +84,7 @@ void main() {
     await showHomeDomain(tester, MonitorDomain.fasting);
     expect(find.text('Fasting'), findsWidgets);
 
-    await tester.tap(find.byKey(const Key('home-check-in')));
-    await tester.pumpAndSettle();
+    await openHomeCheckIn(tester);
     expect(find.byType(CheckInScreen), findsOneWidget);
     expect(find.text('FASTING'), findsOneWidget);
     expect(find.text('SALAH & PRAYER QUALITY'), findsNothing);

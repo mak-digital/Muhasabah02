@@ -7,6 +7,7 @@ import 'package:muhasabah02/data/memory_repositories.dart';
 import 'package:muhasabah02/domain/copy.dart';
 import 'package:muhasabah02/presentation/checkin/check_in_screen.dart';
 
+import '../support/home_domain_stage.dart';
 import '../support/test_app.dart';
 
 void main() {
@@ -61,19 +62,35 @@ void main() {
       ),
     );
     expect(scrollable.position.maxScrollExtent, greaterThan(0));
-    expect(find.text(Copy.homeCheckIn), findsOneWidget);
-    expect(find.text(Copy.activeDomainAndMix), findsOneWidget);
+    expect(find.byKey(const Key('home-scroll')).hitTestable(), findsOneWidget);
 
     await tester.drag(
       find.descendant(
         of: find.byKey(const Key('home-scroll')),
         matching: find.byType(Scrollable),
       ),
-      const Offset(0, -400),
+      const Offset(0, -500),
     );
     await tester.pumpAndSettle();
     expect(scrollable.position.pixels, greaterThan(0));
-    expect(find.text(Copy.homeCheckIn), findsOneWidget);
-    expect(find.text(Copy.activeDomainAndMix), findsOneWidget);
+  });
+
+  testWidgets('Input page hosts the folder tabs', (tester) async {
+    tester.view.physicalSize = const Size(390, 700);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(testApp(now: DateTime(2026, 9, 6)));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('home-check-in')), findsNothing);
+
+    await openInputTab(tester);
+    expect(find.text(Copy.inputTitle), findsWidgets);
+    expect(find.byKey(const Key('home-check-in')).hitTestable(), findsOneWidget);
+    expect(
+      find.byKey(const Key('today-active-domain-mix')).hitTestable(),
+      findsOneWidget,
+    );
   });
 }

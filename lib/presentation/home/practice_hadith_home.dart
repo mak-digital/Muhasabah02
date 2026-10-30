@@ -861,6 +861,10 @@ class PracticeRemembranceCore extends ConsumerWidget {
     this.wash,
     this.textKey,
     this.showScriptControls = true,
+    this.scriptCornerBadge,
+    this.scriptFaceKey = const Key('arabic-script-face'),
+    this.scriptSmallerKey = const Key('arabic-script-smaller'),
+    this.scriptLargerKey = const Key('arabic-script-larger'),
   });
 
   final String contextText;
@@ -871,6 +875,10 @@ class PracticeRemembranceCore extends ConsumerWidget {
   final Color? wash;
   final Key? textKey;
   final bool showScriptControls;
+  final Widget? scriptCornerBadge;
+  final Key scriptFaceKey;
+  final Key scriptSmallerKey;
+  final Key scriptLargerKey;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -890,13 +898,10 @@ class PracticeRemembranceCore extends ConsumerWidget {
           const SizedBox(height: 6),
         ],
         if (arabic.isNotEmpty) ...[
-          if (showScriptControls) ...[
-            PracticeArabicScriptBar(ink: ink),
-            const SizedBox(height: 6),
-          ],
           PracticeScriptPane(
             ink: ink,
             wash: wash,
+            cornerBadge: scriptCornerBadge,
             child: Text(
               arabic,
               textAlign: TextAlign.right,
@@ -910,6 +915,15 @@ class PracticeRemembranceCore extends ConsumerWidget {
               ),
             ),
           ),
+          if (showScriptControls) ...[
+            const SizedBox(height: 6),
+            PracticeArabicScriptBar(
+              ink: ink,
+              faceKey: scriptFaceKey,
+              smallerKey: scriptSmallerKey,
+              largerKey: scriptLargerKey,
+            ),
+          ],
           const SizedBox(height: 6),
         ],
         if (transliteration.isNotEmpty) ...[

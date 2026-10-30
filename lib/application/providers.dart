@@ -7,6 +7,7 @@ import '../data/memory_repositories.dart';
 import '../data/quran_verse_http.dart';
 import '../data/repositories.dart';
 import '../domain/app_appearance.dart';
+import '../domain/app_language.dart';
 import '../domain/daily_check_in.dart';
 import '../domain/date_key.dart';
 import '../domain/dev_feedback.dart';
@@ -216,6 +217,10 @@ final checkInDomainStageProvider = StateProvider<MonitorDomain?>((ref) => null);
 
 final themeModePrefProvider = StateProvider<int>((ref) {
   return ref.read(appPrefsProvider).appearance.prefIndex;
+});
+
+final appLanguageProvider = StateProvider<AppLanguage>((ref) {
+  return ref.read(appPrefsProvider).appLanguage;
 });
 
 class CheckInsController extends AsyncNotifier<List<DailyCheckIn>> {

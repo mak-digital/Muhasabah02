@@ -6,6 +6,7 @@ import '../../domain/copy.dart';
 import '../../domain/monitor_domain.dart';
 import 'domain_line_icon.dart';
 import 'domain_visual.dart';
+import 'app_language_scope.dart';
 import 'week_nav_strip.dart';
 
 class DomainStage extends ConsumerWidget {
@@ -114,7 +115,7 @@ class DomainStage extends ConsumerWidget {
     final identity = domainColorIdentity(domains[index]);
     final theme = Theme.of(context);
     return WeekNavStrip(
-      label: domains[index].shortLabel,
+      label: uiText(context, domains[index].shortLabel),
       prominentLabel: true,
       compact: true,
       maxLines: 1,
@@ -132,10 +133,10 @@ class DomainStage extends ConsumerWidget {
       nextEnabled: next != null,
       previousTooltip: previous == null
           ? Copy.noPreviousDomain
-          : Copy.previousDomain(previous.shortLabel),
+          : Copy.previousDomain(uiText(context, previous.shortLabel)),
       nextTooltip: next == null
           ? Copy.noNextDomain
-          : Copy.nextDomain(next.shortLabel),
+          : Copy.nextDomain(uiText(context, next.shortLabel)),
       onPrevious: () => _select(ref, index - 1),
       onNext: () => _select(ref, index + 1),
     );

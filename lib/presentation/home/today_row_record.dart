@@ -3,17 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../application/providers.dart';
 import '../../domain/activities.dart';
-import '../../domain/copy.dart';
 import '../../domain/daily_check_in.dart';
-import '../../domain/display_calendar.dart';
 import '../../domain/home_traces.dart';
+import '../../domain/monitor_domain.dart';
 import '../../domain/prayer.dart';
 import '../../domain/quran.dart';
+import '../../domain/quick_tap.dart';
 import '../../domain/salah_extras.dart';
 import '../../domain/today_workspace.dart';
-import '../checkin/trace_record_sheets.dart';
 import '../shared/activity_picker.dart';
-import '../shared/system_insets.dart';
 
 DailyCheckIn _baseRecord(
   WidgetRef ref,
@@ -33,6 +31,13 @@ Future<void> _save(WidgetRef ref, DailyCheckIn record) {
   return ref.read(checkInsProvider.notifier).save(record);
 }
 
+bool _showSwatches(WidgetRef ref, List<ActivityOption> options) {
+  return activityPickerUsesColourSwatches(options) &&
+      ref.read(appPrefsProvider).salahActivityColours;
+}
+
+/// Active Domain Today rows: one tap opens the full choice list under the row.
+/// Dhikr performed-list detail stays on Quick Tap legend / Home week marks.
 Future<void> showTodayRowRecordSheet({
   required BuildContext context,
   required WidgetRef ref,
@@ -44,17 +49,17 @@ Future<void> showTodayRowRecordSheet({
     case TodayRowKind.homeTrace:
       final trace = homeTraceRowByKey(row.mixId);
       if (trace == null) return Future.value();
-      return showHomeTraceRecordSheet(
-        context: context,
+      return _showHomeTraceMenu(
+        anchorContext: context,
         ref: ref,
         row: trace,
+        domain: row.domain,
         dateKey: dateKey,
         record: record,
-        dropdownKey: Key('today-trace-${row.mixId}'),
       );
     case TodayRowKind.zakatStatus:
-      return showZakatRecordSheet(
-        context: context,
+      return _showZakatMenu(
+        anchorContext: context,
         ref: ref,
         dateKey: dateKey,
         record: record,
@@ -62,8 +67,8 @@ Future<void> showTodayRowRecordSheet({
     case TodayRowKind.quran:
       for (final dimension in quranDailyDimensions) {
         if (row.mixId != 'quran.${dimension.name}') continue;
-        return _showQuranActivitySheet(
-          context: context,
+        return _showQuranActivityMenu(
+          anchorContext: context,
           ref: ref,
           dimension: dimension,
           dateKey: dateKey,
@@ -76,8 +81,8 @@ Future<void> showTodayRowRecordSheet({
         if (row.mixId != 'salah.${salah.name}') continue;
         final prayer = salah.prayerId;
         if (prayer != null) {
-          return _showSalahActivitySheet(
-            context: context,
+          return _showSalahActivityMenu(
+            anchorContext: context,
             ref: ref,
             prayer: prayer,
             dateKey: dateKey,
@@ -85,15 +90,15 @@ Future<void> showTodayRowRecordSheet({
           );
         }
         if (salah == SalahTraceRow.jumuah) {
-          return _showJumuahSheet(
-            context: context,
+          return _showJumuahMenu(
+            anchorContext: context,
             ref: ref,
             dateKey: dateKey,
             record: record,
           );
         }
-        return _showVoluntarySalahSheet(
-          context: context,
+        return _showVoluntarySalahMenu(
+          anchorContext: context,
           ref: ref,
           row: salah,
           dateKey: dateKey,
@@ -104,218 +109,191 @@ Future<void> showTodayRowRecordSheet({
   }
 }
 
-Future<void> _showSalahActivitySheet({
-  required BuildContext context,
+Future<void> _showSalahActivityMenu({
+  required BuildContext anchorContext,
   required WidgetRef ref,
   required PrayerId prayer,
   required String dateKey,
   required DailyCheckIn? record,
 }) {
   final key = ActivityCatalog.salahKey(prayer);
-  final systemBottom = presentingSystemBottom(context);
-  return showModalBottomSheet<void>(
-    context: context,
-    showDragHandle: true,
-    isScrollControlled: true,
-    builder: (context) {
-      return StatefulBuilder(
-        builder: (context, setSheet) {
-          final current = _baseRecord(ref, dateKey, record);
-          final selected = current.activityFor(key);
-          return Padding(
-            padding: sheetContentPadding(context, systemBottom: systemBottom),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                CheckInRowLabel(
-                  '${prayer.label} · ${formatStoredDateKey(dateKey, ref.read(appPrefsProvider).displayCalendar)}',
-                ),
-                const SizedBox(height: 4),
-                if (prayer == PrayerId.fajr) ...[
-                  const Text(Copy.quickTapFajrHint),
-                  const SizedBox(height: 8),
-                ] else
-                  const SizedBox(height: 8),
-                ActivityPicker(
-                  options: ActivityCatalog.obligatorySalahOptions(
-                    gender: ref.read(appPrefsProvider).worshipListGender,
-                    selectedId: selected.id,
-                  ),
-                  selectedId: selected.id,
-                  statusKeyPrefix: 'today-salah-${prayer.name}',
-                  onSelected: (option) async {
-                    await _save(
-                      ref,
-                      current.withSalahActivity(
-                        prayer,
-                        RecordedActivity(id: option.id),
-                      ),
-                    );
-                    setSheet(() {});
-                  },
-                ),
-              ],
-            ),
-          );
-        },
+  final current = _baseRecord(ref, dateKey, record);
+  final selected = current.activityFor(key);
+  final options = ActivityCatalog.obligatorySalahOptions(
+    gender: ref.read(appPrefsProvider).worshipListGender,
+    selectedId: selected.id,
+  );
+  return showAnchoredActivityMenu(
+    anchorContext: anchorContext,
+    options: options,
+    selectedId: selected.id,
+    statusKeyPrefix: 'today-salah-${prayer.name}',
+    showColourSwatches: _showSwatches(ref, options),
+    onSelected: (option) async {
+      await _save(
+        ref,
+        current.withSalahActivity(prayer, RecordedActivity(id: option.id)),
       );
     },
   );
 }
 
-Future<void> _showQuranActivitySheet({
-  required BuildContext context,
+Future<void> _showQuranActivityMenu({
+  required BuildContext anchorContext,
   required WidgetRef ref,
   required QuranDimension dimension,
   required String dateKey,
   required DailyCheckIn? record,
 }) {
   final key = ActivityCatalog.quranKey(dimension);
+  final current = _baseRecord(ref, dateKey, record);
+  final selected = current.activityFor(key);
   final options = ActivityCatalog.forQuran(dimension);
-  final systemBottom = presentingSystemBottom(context);
-  return showModalBottomSheet<void>(
-    context: context,
-    showDragHandle: true,
-    isScrollControlled: true,
-    builder: (context) {
-      return StatefulBuilder(
-        builder: (context, setSheet) {
-          final current = _baseRecord(ref, dateKey, record);
-          final selected = current.activityFor(key);
-          return Padding(
-            padding: sheetContentPadding(context, systemBottom: systemBottom),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                CheckInRowLabel(
-                  '${dimension.label} · ${formatStoredDateKey(dateKey, ref.read(appPrefsProvider).displayCalendar)}',
-                ),
-                const SizedBox(height: 8),
-                ActivityPicker(
-                  options: options,
-                  selectedId: selected.id,
-                  statusKeyPrefix: 'today-quran-${dimension.name}',
-                  onSelected: (option) async {
-                    await _save(
-                      ref,
-                      current.withQuranActivity(
-                        dimension,
-                        RecordedActivity(id: option.id),
-                      ),
-                    );
-                    setSheet(() {});
-                  },
-                ),
-              ],
-            ),
-          );
-        },
+  return showAnchoredActivityMenu(
+    anchorContext: anchorContext,
+    options: options,
+    selectedId: selected.id,
+    statusKeyPrefix: 'today-quran-${dimension.name}',
+    showColourSwatches: _showSwatches(ref, options),
+    onSelected: (option) async {
+      await _save(
+        ref,
+        current.withQuranActivity(dimension, RecordedActivity(id: option.id)),
       );
     },
   );
 }
 
-Future<void> _showJumuahSheet({
-  required BuildContext context,
+Future<void> _showZakatMenu({
+  required BuildContext anchorContext,
   required WidgetRef ref,
   required String dateKey,
   required DailyCheckIn? record,
 }) {
-  final systemBottom = presentingSystemBottom(context);
-  return showModalBottomSheet<void>(
-    context: context,
-    showDragHandle: true,
-    isScrollControlled: true,
-    builder: (context) {
-      return StatefulBuilder(
-        builder: (context, setSheet) {
-          final current = _baseRecord(ref, dateKey, record);
-          return Padding(
-            padding: sheetContentPadding(context, systemBottom: systemBottom),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                CheckInRowLabel(
-                  'Jumu‘ah · ${formatStoredDateKey(dateKey, ref.read(appPrefsProvider).displayCalendar)}',
-                ),
-                const SizedBox(height: 8),
-                ActivityPicker(
-                  options: ActivityCatalog.jumuahOptions(
-                    gender: ref.read(appPrefsProvider).worshipListGender,
-                    selectedId: current.jumuahActivityId,
-                  ),
-                  selectedId: current.jumuahActivityId,
-                  statusKeyPrefix: 'today-salah-jumuah',
-                  onSelected: (option) async {
-                    await _save(
-                      ref,
-                      current.withJumuahActivity(
-                        RecordedActivity(id: option.id),
-                      ),
-                    );
-                    setSheet(() {});
-                  },
-                ),
-              ],
-            ),
+  final current = _baseRecord(ref, dateKey, record);
+  final options = ActivityCatalog.zakat;
+  final selectedId = current.zakat == ZakatStatus.unanswered
+      ? ActivityIds.unanswered
+      : current.zakat.name;
+  return showAnchoredActivityMenu(
+    anchorContext: anchorContext,
+    options: options,
+    selectedId: selectedId,
+    statusKeyPrefix: 'today-zakat',
+    showColourSwatches: _showSwatches(ref, options),
+    onSelected: (option) async {
+      final status =
+          option.zakat ??
+          ZakatStatus.values.firstWhere(
+            (value) => value.name == option.id,
+            orElse: () => ZakatStatus.unanswered,
           );
-        },
+      await _save(ref, current.copyWith(zakat: status));
+    },
+  );
+}
+
+Future<void> _showHomeTraceMenu({
+  required BuildContext anchorContext,
+  required WidgetRef ref,
+  required HomeTraceRow row,
+  required MonitorDomain domain,
+  required String dateKey,
+  required DailyCheckIn? record,
+}) {
+  final current = _baseRecord(ref, dateKey, record);
+  var options = ActivityCatalog.forHomeTrace(row.storageKey);
+  final selectedId = options.isNotEmpty
+      ? current.activityFor(row.storageKey).id
+      : current.homeTrace(row.storageKey).name;
+  if (options.isEmpty) {
+    options = [
+      for (final outcome in TernaryOutcome.values)
+        ActivityOption(
+          id: outcome.name,
+          label: traceOutcomeLabel(row.storageKey, outcome),
+          ternary: outcome,
+        ),
+    ];
+  }
+  final item = QuickTapItem(
+    id: row.storageKey,
+    kind: QuickTapKind.trace,
+    domain: domain,
+    label: row.label,
+    iconName: 'circle',
+    traceKey: row.storageKey,
+  );
+  return showAnchoredActivityMenu(
+    anchorContext: anchorContext,
+    options: options,
+    selectedId: selectedId,
+    statusKeyPrefix: 'today-trace-${row.storageKey}',
+    showColourSwatches: _showSwatches(ref, options),
+    onSelected: (option) async {
+      final next = applyQuickTapChoice(
+        current,
+        item,
+        QuickTapChoice(
+          id: option.id,
+          label: option.label,
+          mark: QuickTapMark.noticed,
+        ),
+      );
+      await _save(ref, next);
+    },
+  );
+}
+
+Future<void> _showJumuahMenu({
+  required BuildContext anchorContext,
+  required WidgetRef ref,
+  required String dateKey,
+  required DailyCheckIn? record,
+}) {
+  final current = _baseRecord(ref, dateKey, record);
+  final options = ActivityCatalog.jumuahOptions(
+    gender: ref.read(appPrefsProvider).worshipListGender,
+    selectedId: current.jumuahActivityId,
+  );
+  return showAnchoredActivityMenu(
+    anchorContext: anchorContext,
+    options: options,
+    selectedId: current.jumuahActivityId,
+    statusKeyPrefix: 'today-salah-jumuah',
+    showColourSwatches: _showSwatches(ref, options),
+    onSelected: (option) async {
+      await _save(
+        ref,
+        current.withJumuahActivity(RecordedActivity(id: option.id)),
       );
     },
   );
 }
 
-Future<void> _showVoluntarySalahSheet({
-  required BuildContext context,
+Future<void> _showVoluntarySalahMenu({
+  required BuildContext anchorContext,
   required WidgetRef ref,
   required SalahTraceRow row,
   required String dateKey,
   required DailyCheckIn? record,
 }) {
-  final systemBottom = presentingSystemBottom(context);
-  return showModalBottomSheet<void>(
-    context: context,
-    showDragHandle: true,
-    isScrollControlled: true,
-    builder: (context) {
-      return StatefulBuilder(
-        builder: (context, setSheet) {
-          final current = _baseRecord(ref, dateKey, record);
-          final selected = current.activityFor(
-            ActivityCatalog.voluntarySalahKey(row),
-          );
-          return Padding(
-            padding: sheetContentPadding(context, systemBottom: systemBottom),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                CheckInRowLabel(
-                  '${row.label} · ${formatStoredDateKey(dateKey, ref.read(appPrefsProvider).displayCalendar)}',
-                ),
-                const SizedBox(height: 8),
-                ActivityPicker(
-                  options: ActivityCatalog.forVoluntarySalah(row),
-                  selectedId: selected.id,
-                  statusKeyPrefix: 'today-salah-${row.name}',
-                  onSelected: (option) async {
-                    await _save(
-                      ref,
-                      current.withVoluntarySalahActivity(
-                        row,
-                        RecordedActivity(id: option.id),
-                      ),
-                    );
-                    setSheet(() {});
-                  },
-                ),
-              ],
-            ),
-          );
-        },
+  final current = _baseRecord(ref, dateKey, record);
+  final selected = current.activityFor(ActivityCatalog.voluntarySalahKey(row));
+  final options = ActivityCatalog.forVoluntarySalah(row);
+  return showAnchoredActivityMenu(
+    anchorContext: anchorContext,
+    options: options,
+    selectedId: selected.id,
+    statusKeyPrefix: 'today-salah-${row.name}',
+    showColourSwatches: _showSwatches(ref, options),
+    onSelected: (option) async {
+      await _save(
+        ref,
+        current.withVoluntarySalahActivity(
+          row,
+          RecordedActivity(id: option.id),
+        ),
       );
     },
   );

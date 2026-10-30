@@ -16,6 +16,7 @@ import '../../domain/ummah_practices.dart';
 import '../../domain/wealth_practices.dart';
 import '../../domain/time_practices.dart';
 import '../../domain/app_appearance.dart';
+import '../../domain/app_language.dart';
 import '../../domain/copy.dart';
 import '../../domain/display_calendar.dart';
 import '../../domain/first_day_of_week.dart';
@@ -31,8 +32,10 @@ import '../shared/quran_stage_mark.dart';
 import '../shared/salah_activity_mark.dart';
 import '../shared/state_marker.dart';
 import '../shared/system_insets.dart';
+import '../shared/app_language_scope.dart';
 import '../shared/ui_bits.dart';
 import 'application_reflection_screen.dart';
+import 'language_settings_screen.dart';
 import 'faq_screen.dart';
 import 'custom_selection_sets_editor.dart';
 import 'personal_mix_settings.dart';
@@ -56,6 +59,19 @@ class SettingsScreen extends ConsumerWidget {
           Card(
             child: Column(
               children: [
+                ListTile(
+                  leading: const Icon(Icons.translate),
+                  title: Text(uiText(context, Copy.language)),
+                  subtitle: Text(ref.watch(appLanguageProvider).endonym),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute<void>(
+                        builder: (_) => const LanguageSettingsScreen(),
+                      ),
+                    );
+                  },
+                ),
                 ListTile(
                   leading: const Icon(Icons.brightness_6_outlined),
                   title: const Text(Copy.appearance),

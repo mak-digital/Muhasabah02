@@ -44,11 +44,13 @@ class PracticeScriptPane extends StatelessWidget {
     required this.child,
     this.ink,
     this.wash,
+    this.cornerBadge,
   });
 
   final Widget child;
   final Color? ink;
   final Color? wash;
+  final Widget? cornerBadge;
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +61,7 @@ class PracticeScriptPane extends StatelessWidget {
       (ink ?? scheme.primary).withValues(alpha: 0.28),
       tint,
     );
-    return Material(
+    final pane = Material(
       key: const Key('practice-script-pane'),
       color: fill,
       elevation: 0,
@@ -76,6 +78,22 @@ class PracticeScriptPane extends StatelessWidget {
           child: Align(alignment: Alignment.centerRight, child: child),
         ),
       ),
+    );
+    if (cornerBadge == null) return pane;
+    // Badge sits above the Arabic box border, not over the script.
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Align(
+          alignment: Alignment.centerRight,
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 6, right: 2),
+            child: cornerBadge,
+          ),
+        ),
+        pane,
+      ],
     );
   }
 }
@@ -189,7 +207,7 @@ class SectionHeader extends StatelessWidget {
   }
 }
 
-/// Intro copy on a Home wash. Starts open; the parent collapses it after input.
+/// Intro / about copy on a wash. Starts collapsed unless the parent opens it.
 class CollapsingIntroNote extends StatelessWidget {
   const CollapsingIntroNote({
     super.key,

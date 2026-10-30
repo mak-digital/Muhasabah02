@@ -14,7 +14,6 @@ import '../../domain/date_key.dart';
 import '../../domain/display_calendar.dart';
 import '../../domain/factor_groups.dart';
 import '../../domain/home_traces.dart';
-import '../../domain/personal_response.dart';
 import '../../domain/prayer.dart';
 import '../../domain/quran.dart';
 import '../../domain/salah_factors.dart';
@@ -31,7 +30,6 @@ import '../shared/activity_picker.dart';
 import '../shared/akhlaq_follow_up_fields.dart';
 import '../shared/huquq_follow_up_fields.dart';
 import '../shared/knowledge_follow_up_fields.dart';
-import '../shared/add_response_button.dart';
 import '../shared/system_insets.dart';
 
 String _visibleDate(WidgetRef ref, String key) {
@@ -93,6 +91,7 @@ Future<void> showHomeTraceRecordSheet({
   required String dateKey,
   required DailyCheckIn? record,
   Key? dropdownKey,
+  bool performedStartsCollapsed = false,
 }) async {
   var outcome = record?.homeTrace(row.storageKey) ?? TernaryOutcome.unanswered;
   var selectedId =
@@ -141,6 +140,7 @@ Future<void> showHomeTraceRecordSheet({
                               _recordFor(ref, dateKey, record) ??
                               DailyCheckIn.empty(dateKey),
                           compact: true,
+                          performedStartsCollapsed: performedStartsCollapsed,
                           dropdownKey: dropdownKey,
                           onChanged: (next) async {
                             await _save(ref, next);
@@ -996,26 +996,6 @@ Future<void> showHomeTraceRecordSheet({
                             );
                           },
                         ),
-                      if (!isDhikrContextTrace(row.storageKey)) ...[
-                        const SizedBox(height: 12),
-                        OutlinedButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                            openDayEvidence(context, dateKey);
-                          },
-                          child: const Text('Open recorded evidence'),
-                        ),
-                        AddResponseButton(
-                          provenance: ResponseProvenance(
-                            originType: ProvenanceOrigin.progressDate,
-                            domain: row.storageKey.split('.').first,
-                            subject: row.storageKey,
-                            dateKey: dateKey,
-                            evidenceId: '$dateKey:${row.storageKey}',
-                            labelSnapshot: '${row.label} on $dateKey',
-                          ),
-                        ),
-                      ],
                     ],
                   ),
                 ),

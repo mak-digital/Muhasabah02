@@ -153,7 +153,9 @@ QuickTapItem? _itemForMix(MixItem mix, {required bool friday}) {
     domain: mix.domain,
     label: mix.label,
     iconName: _iconName(mix.domain),
-    hint: isDhikrContextTrace(mix.id)
+    hint: isDhikrPostFardTrace(mix.id)
+        ? null
+        : isDhikrContextTrace(mix.id)
         ? 'Opens the activity list. Not a one-tap cycle.'
         : mix.id.startsWith('dhikr.')
         ? 'Not a daily target.'
@@ -386,7 +388,10 @@ DailyCheckIn applyQuickTapChoice(
         RecordedActivity(id: choice.id),
       );
     case QuickTapKind.trace:
+      // Post-fard keeps the performed list and the remembrance cycle in sync
+      // via checkbox writes; card text may still cycle the level manually.
       if (isDhikrContextTrace(item.traceKey!) &&
+          !isDhikrPostFardTrace(item.traceKey!) &&
           record.dhikrContextFor(item.traceKey!).isNotEmpty) {
         return record;
       }

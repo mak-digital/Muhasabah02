@@ -17,6 +17,7 @@ import 'package:muhasabah02/presentation/response/response_editor_screen.dart';
 
 import '../support/check_in_select.dart';
 import '../support/controllable_check_in_repository.dart';
+import '../support/home_domain_stage.dart';
 import '../support/test_app.dart';
 
 void main() {
@@ -46,8 +47,7 @@ void main() {
   }
 
   Future<void> openFull(WidgetTester tester) async {
-    await tester.tap(find.text(Copy.homeCheckIn));
-    await tester.pumpAndSettle();
+    await openHomeCheckIn(tester);
     expect(find.byType(CheckInScreen), findsOneWidget);
   }
 
