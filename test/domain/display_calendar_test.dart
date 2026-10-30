@@ -25,6 +25,15 @@ void main() {
     expect(RegExp(r'\d+ .+ \d{4}').hasMatch(shown), isTrue);
   });
 
+  test('Gregorian and Hijri format names both calendars', () {
+    final shown = formatGregorianAndHijri(DateTime(2026, 9, 14));
+    expect(shown.contains('14 Sep 2026'), isTrue);
+    expect(shown.contains(' · '), isTrue);
+    expect(shown.contains('Sep'), isTrue);
+    expect(RegExp(r'14 Sep 2026 · \d+ .+ \d{4}').hasMatch(shown), isTrue);
+    expect(shown.contains('2026 ·'), isTrue);
+  });
+
   test('civil Islamic parts stay in calendar bounds', () {
     for (var i = 0; i < 400; i++) {
       final date = DateTime(2025, 1, 1).add(Duration(days: i));
@@ -33,6 +42,19 @@ void main() {
       expect(parts.day, inInclusiveRange(1, 30), reason: '$date');
       expect(parts.year, greaterThan(1400), reason: '$date');
     }
+  });
+
+  test('Hijri to Gregorian round-trips civil tabular days', () {
+    for (final month in [1, 6, 9, 11, 12]) {
+      for (final day in [1, 8, 13, 15, 29]) {
+        final gregorian = gregorianFromHijri(1447, month, day);
+        final parts = hijriParts(gregorian);
+        expect(parts.year, 1447, reason: 'month $month day $day');
+        expect(parts.month, month, reason: 'month $month day $day');
+        expect(parts.day, day, reason: 'month $month day $day');
+      }
+    }
+    expect(hijriMonthLength(1447, 12), inInclusiveRange(29, 30));
   });
 
   test('lunar white days are civil Hijri 13 to 15', () {

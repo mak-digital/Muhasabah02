@@ -1,6 +1,33 @@
 import 'package:flutter/material.dart';
 
+import '../../domain/copy.dart';
 import '../../domain/domain_briefing.dart';
+import 'ui_bits.dart';
+
+class CollapsingDomainBriefingNote extends StatelessWidget {
+  const CollapsingDomainBriefingNote(
+    this.briefing, {
+    super.key,
+    this.compact = false,
+    required this.expanded,
+    required this.onExpansionChanged,
+  });
+
+  final DomainBriefing briefing;
+  final bool compact;
+  final bool expanded;
+  final ValueChanged<bool> onExpansionChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return CollapsingNoteTile(
+      title: Copy.aboutThisDomain,
+      expanded: expanded,
+      onExpansionChanged: onExpansionChanged,
+      child: DomainBriefingNote(briefing, compact: compact),
+    );
+  }
+}
 
 class DomainBriefingNote extends StatelessWidget {
   const DomainBriefingNote(this.briefing, {super.key, this.compact = false});
@@ -11,7 +38,9 @@ class DomainBriefingNote extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final body = compact ? theme.textTheme.bodySmall : theme.textTheme.bodyMedium;
+    final body = compact
+        ? theme.textTheme.bodySmall
+        : theme.textTheme.bodyMedium;
     final label = theme.textTheme.labelSmall?.copyWith(
       fontWeight: FontWeight.w600,
       color: theme.colorScheme.onSurfaceVariant,
@@ -23,7 +52,7 @@ class DomainBriefingNote extends StatelessWidget {
       children: [
         for (var i = 0; i < briefing.lead.length; i++) ...[
           if (i > 0) const SizedBox(height: 8),
-          Text(briefing.lead[i], style: body?.copyWith(height: 1.45)),
+          BalancedProse(briefing.lead[i], style: body?.copyWith(height: 1.45)),
         ],
         if (briefing.examplesTitle != null) ...[
           const SizedBox(height: 10),
@@ -41,7 +70,10 @@ class DomainBriefingNote extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(group.title, style: label?.copyWith(color: theme.colorScheme.onSurface)),
+                  Text(
+                    group.title,
+                    style: label?.copyWith(color: theme.colorScheme.onSurface),
+                  ),
                   const SizedBox(height: 6),
                   _bullets(group.items, body),
                 ],
@@ -59,7 +91,7 @@ class DomainBriefingNote extends StatelessWidget {
         ],
         for (final line in briefing.closing) ...[
           const SizedBox(height: 8),
-          Text(line, style: body?.copyWith(height: 1.45)),
+          BalancedProse(line, style: body?.copyWith(height: 1.45)),
         ],
       ],
     );
@@ -76,7 +108,12 @@ class DomainBriefingNote extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text('•  ', style: style?.copyWith(height: 1.45)),
-                Expanded(child: Text(items[i], style: style?.copyWith(height: 1.45))),
+                Expanded(
+                  child: BalancedProse(
+                    items[i],
+                    style: style?.copyWith(height: 1.45),
+                  ),
+                ),
               ],
             ),
           ),

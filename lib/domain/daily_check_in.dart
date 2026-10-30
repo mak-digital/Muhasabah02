@@ -1,9 +1,17 @@
+import 'dart:convert';
+
 import 'activities.dart';
+import 'dhikr_context.dart';
+import 'akhlaq_practices.dart';
 import 'home_traces.dart';
+import 'huquq_practices.dart';
+import 'knowledge_practices.dart';
+import 'time_practices.dart';
 import 'other_domains.dart';
 import 'prayer.dart';
 import 'quran.dart';
 import 'recorded_context.dart';
+import 'salah_extras.dart';
 import 'salah_factors.dart';
 import 'situation_notes.dart';
 
@@ -48,12 +56,14 @@ class DailyCheckIn {
     this.jumuah = PrayerStatus.unanswered,
     this.tahajjud = TernaryOutcome.unanswered,
     this.ishraq = TernaryOutcome.unanswered,
+    this.tawbah = TernaryOutcome.unanswered,
     this.jumuahCongregation = false,
     this.salahFactors = const {},
     this.homeTraces = const {},
     this.homeTraceFactors = const {},
     this.situationNotes = const SituationNotes(),
     this.akhlaqStruggleNote,
+    this.dhikrContext = const {},
     this.synthetic = false,
   });
 
@@ -78,12 +88,14 @@ class DailyCheckIn {
   final PrayerStatus jumuah;
   final TernaryOutcome tahajjud;
   final TernaryOutcome ishraq;
+  final TernaryOutcome tawbah;
   final bool jumuahCongregation;
   final Map<String, SalahFactorCapture> salahFactors;
   final Map<String, TernaryOutcome> homeTraces;
   final Map<String, SalahFactorCapture> homeTraceFactors;
   final SituationNotes situationNotes;
   final String? akhlaqStruggleNote;
+  final Map<String, List<DhikrContextCapture>> dhikrContext;
   final bool synthetic;
 
   TernaryOutcome homeTrace(String storageKey) =>
@@ -122,11 +134,56 @@ class DailyCheckIn {
   TernaryOutcome quranOutcome(QuranDimension dimension) =>
       quran[dimension] ?? TernaryOutcome.unanswered;
 
+  TernaryOutcome voluntaryOutcome(SalahTraceRow row) => switch (row) {
+    SalahTraceRow.tahajjud => tahajjud,
+    SalahTraceRow.ishraq => ishraq,
+    SalahTraceRow.tawbah => tawbah,
+    _ => TernaryOutcome.unanswered,
+  };
+
+  String get jumuahActivityId {
+    final stored = activities[ActivityCatalog.jumuahKey];
+    if (stored != null) return stored.id;
+    if (jumuahCongregation && jumuah == PrayerStatus.late) {
+      return 'joinedCongregationLate';
+    }
+    if (jumuahCongregation && jumuah == PrayerStatus.onTime) {
+      return 'congregationOnTime';
+    }
+    return ActivityCatalog.canonicalSalahId(jumuah);
+  }
+
   RecordedActivity activityFor(String key) {
     final stored = activities[key];
-    if (stored != null) return stored;
+    if (stored != null) {
+      if (isTimeTrace(key)) {
+        return RecordedActivity(
+          id: canonicalizeTimeActivityId(stored.id),
+          customText: stored.customText,
+        );
+      }
+      if (isHealthTrace(key) ||
+          isWealthTrace(key) ||
+          isUmmahTrace(key) ||
+          key.startsWith('charity.')) {
+        return stored;
+      }
+      return stored;
+    }
     if (key.startsWith('salah.')) {
       final name = key.substring(6);
+      if (name == 'jumuah') {
+        return RecordedActivity(id: jumuahActivityId);
+      }
+      for (final row in kSalahVoluntaryRows) {
+        if (name != row.name) continue;
+        return RecordedActivity(
+          id: ActivityCatalog.canonicalVoluntarySalahId(
+            voluntaryOutcome(row),
+            row,
+          ),
+        );
+      }
       final id = PrayerId.values.where((item) => item.name == name);
       if (id.isNotEmpty) {
         return RecordedActivity(
@@ -184,6 +241,34 @@ class DailyCheckIn {
         },
       );
     }
+    final catalog = ActivityCatalog.forHomeTrace(key);
+    if (catalog.isNotEmpty) {
+      if (isAkhlaqTrace(key)) {
+        return RecordedActivity(id: canonicalAkhlaqId(homeTrace(key)));
+      }
+      if (isHuquqTrace(key)) {
+        return RecordedActivity(id: canonicalHuquqId(homeTrace(key)));
+      }
+      if (isKnowledgeTrace(key)) {
+        return RecordedActivity(id: canonicalKnowledgeId(homeTrace(key)));
+      }
+      if (isTimeTrace(key)) {
+        return RecordedActivity(id: canonicalTimeId(homeTrace(key)));
+      }
+      if (isHealthTrace(key) ||
+          (isWealthTrace(key) &&
+              ActivityCatalog.forHomeTrace(key).isNotEmpty) ||
+          (isUmmahTrace(key) && ActivityCatalog.forHomeTrace(key).isNotEmpty) ||
+          (key.startsWith('charity.') &&
+              ActivityCatalog.forHomeTrace(key).isNotEmpty) ||
+          (key.startsWith('fasting.') &&
+              ActivityCatalog.forHomeTrace(key).isNotEmpty)) {
+        return const RecordedActivity(id: ActivityIds.unanswered);
+      }
+      return RecordedActivity(
+        id: ActivityCatalog.canonicalTernaryId(homeTrace(key), catalog),
+      );
+    }
     return const RecordedActivity(id: ActivityIds.unanswered);
   }
 
@@ -222,6 +307,7 @@ class DailyCheckIn {
     if (jumuah.isRecorded ||
         tahajjud.isRecorded ||
         ishraq.isRecorded ||
+        tawbah.isRecorded ||
         jumuahCongregation ||
         salahFactors.isNotEmpty) {
       return true;
@@ -234,6 +320,9 @@ class DailyCheckIn {
       return true;
     }
     if (akhlaqStruggleNote != null && akhlaqStruggleNote!.trim().isNotEmpty) {
+      return true;
+    }
+    if (dhikrContext.values.any((items) => items.isNotEmpty)) {
       return true;
     }
     return contexts.isNotEmpty;
@@ -262,6 +351,7 @@ class DailyCheckIn {
     PrayerStatus? jumuah,
     TernaryOutcome? tahajjud,
     TernaryOutcome? ishraq,
+    TernaryOutcome? tawbah,
     bool? jumuahCongregation,
     Map<String, SalahFactorCapture>? salahFactors,
     Map<String, TernaryOutcome>? homeTraces,
@@ -269,6 +359,7 @@ class DailyCheckIn {
     SituationNotes? situationNotes,
     String? akhlaqStruggleNote,
     bool clearAkhlaqStruggleNote = false,
+    Map<String, List<DhikrContextCapture>>? dhikrContext,
     bool? synthetic,
   }) {
     return DailyCheckIn(
@@ -298,6 +389,7 @@ class DailyCheckIn {
       jumuah: jumuah ?? this.jumuah,
       tahajjud: tahajjud ?? this.tahajjud,
       ishraq: ishraq ?? this.ishraq,
+      tawbah: tawbah ?? this.tawbah,
       jumuahCongregation: jumuahCongregation ?? this.jumuahCongregation,
       salahFactors: salahFactors ?? this.salahFactors,
       homeTraces: homeTraces ?? this.homeTraces,
@@ -306,6 +398,7 @@ class DailyCheckIn {
       akhlaqStruggleNote: clearAkhlaqStruggleNote
           ? null
           : (akhlaqStruggleNote ?? this.akhlaqStruggleNote),
+      dhikrContext: dhikrContext ?? this.dhikrContext,
       synthetic: synthetic ?? this.synthetic,
     );
   }
@@ -335,6 +428,45 @@ class DailyCheckIn {
     );
   }
 
+  DailyCheckIn withVoluntarySalahActivity(
+    SalahTraceRow row,
+    RecordedActivity activity,
+  ) {
+    final catalog = ActivityCatalog.forVoluntarySalah(row);
+    final option = ActivityCatalog.find(catalog, activity.id);
+    final outcome = option?.ternary ?? TernaryOutcome.unanswered;
+    final key = ActivityCatalog.voluntarySalahKey(row);
+    final nextActivities = {...activities, key: activity};
+    return switch (row) {
+      SalahTraceRow.tahajjud => copyWith(
+        tahajjud: outcome,
+        activities: nextActivities,
+      ),
+      SalahTraceRow.ishraq => copyWith(
+        ishraq: outcome,
+        activities: nextActivities,
+      ),
+      SalahTraceRow.tawbah => copyWith(
+        tawbah: outcome,
+        activities: nextActivities,
+      ),
+      _ => this,
+    };
+  }
+
+  DailyCheckIn withJumuahActivity(RecordedActivity activity) {
+    final option =
+        ActivityCatalog.find(ActivityCatalog.jumuah, activity.id) ??
+        ActivityCatalog.find(ActivityCatalog.salah, activity.id);
+    return copyWith(
+      jumuah: option?.prayerStatus ?? PrayerStatus.unanswered,
+      jumuahCongregation: ActivityCatalog.jumuahActivityMeansCongregation(
+        activity.id,
+      ),
+      activities: {...activities, ActivityCatalog.jumuahKey: activity},
+    );
+  }
+
   DailyCheckIn withQuran(QuranDimension dimension, TernaryOutcome outcome) {
     if (!canSetQuranOutcome(
       quran: quran,
@@ -344,10 +476,6 @@ class DailyCheckIn {
       return this;
     }
     var nextQuran = {...quran, dimension: outcome};
-    if (dimension == QuranDimension.meaning &&
-        outcome == TernaryOutcome.positive) {
-      nextQuran[QuranDimension.reading] = TernaryOutcome.positive;
-    }
     final nextContexts = contexts.where((c) {
       final current = nextQuran[c.subject] ?? TernaryOutcome.unanswered;
       if (!contextAllowed(c.subject, current)) return false;
@@ -367,10 +495,6 @@ class DailyCheckIn {
     }
 
     writeActivity(dimension, outcome);
-    if (dimension == QuranDimension.meaning &&
-        outcome == TernaryOutcome.positive) {
-      writeActivity(QuranDimension.reading, TernaryOutcome.positive);
-    }
     return copyWith(
       quran: nextQuran,
       contexts: nextContexts,
@@ -407,7 +531,61 @@ class DailyCheckIn {
     return copyWith(salahFactors: next);
   }
 
+  DailyCheckIn withHomeTraceActivity(
+    String storageKey,
+    RecordedActivity activity,
+  ) {
+    final catalog = ActivityCatalog.forHomeTrace(storageKey);
+    final option = ActivityCatalog.find(catalog, activity.id);
+    final outcome = option?.ternary ?? TernaryOutcome.unanswered;
+    return withHomeTrace(
+      storageKey,
+      outcome,
+    ).withActivity(storageKey, activity);
+  }
+
+  List<DhikrContextCapture> dhikrContextFor(String storageKey) =>
+      dhikrContext[storageKey] ?? const [];
+
+  DailyCheckIn withDhikrContextCaptures(
+    String storageKey,
+    List<DhikrContextCapture> captures,
+  ) {
+    final next = {...dhikrContext};
+    if (captures.isEmpty) {
+      next.remove(storageKey);
+    } else {
+      next[storageKey] = captures;
+    }
+    final traces = {...homeTraces};
+    final rolled = rollupDhikrContext(captures);
+    if (rolled == TernaryOutcome.unanswered) {
+      traces.remove(storageKey);
+    } else {
+      traces[storageKey] = rolled;
+    }
+    var result = copyWith(dhikrContext: next, homeTraces: traces);
+    if (isDhikrPostFardTrace(storageKey)) {
+      final total = dhikrContextItemsFor(storageKey).length;
+      final practised = dhikrPractisedCount(captures);
+      result = result.withActivity(
+        storageKey,
+        RecordedActivity(
+          id: ActivityCatalog.postFardIdForPractised(
+            practised: practised,
+            total: total,
+          ),
+        ),
+      );
+    }
+    return result;
+  }
+
   DailyCheckIn withHomeTrace(String storageKey, TernaryOutcome outcome) {
+    if (isDhikrContextTrace(storageKey) &&
+        dhikrContextFor(storageKey).isNotEmpty) {
+      return this;
+    }
     final next = {...homeTraces};
     if (outcome == TernaryOutcome.unanswered) {
       next.remove(storageKey);
@@ -485,12 +663,14 @@ class DailyCheckIn {
       if (jumuah.isRecorded ||
           tahajjud.isRecorded ||
           ishraq.isRecorded ||
+          tawbah.isRecorded ||
           jumuahCongregation ||
           salahFactors.isNotEmpty)
         'salahTrace': {
           if (jumuah.isRecorded) 'jumuah': jumuah.jsonValue,
           if (tahajjud.isRecorded) 'tahajjud': tahajjud.name,
           if (ishraq.isRecorded) 'ishraq': ishraq.name,
+          if (tawbah.isRecorded) 'tawbah': tawbah.name,
           if (jumuahCongregation) 'jumuahCongregation': true,
           if (salahFactors.isNotEmpty)
             'factors': {
@@ -508,6 +688,8 @@ class DailyCheckIn {
       if (!situationNotes.isEmpty) 'situationNotes': situationNotes.toJson(),
       if (akhlaqStruggleNote != null && akhlaqStruggleNote!.trim().isNotEmpty)
         'akhlaqStruggleNote': akhlaqStruggleNote,
+      if (dhikrContextToJson(dhikrContext).isNotEmpty)
+        'dhikrContext': dhikrContextToJson(dhikrContext),
       if (synthetic) 'synthetic': true,
     };
   }
@@ -592,6 +774,7 @@ class DailyCheckIn {
     PrayerStatus jumuah = PrayerStatus.unanswered;
     TernaryOutcome tahajjud = TernaryOutcome.unanswered;
     TernaryOutcome ishraq = TernaryOutcome.unanswered;
+    TernaryOutcome tawbah = TernaryOutcome.unanswered;
     var jumuahCongregation = false;
     final salahFactors = <String, SalahFactorCapture>{};
     final traceJson = json['salahTrace'];
@@ -599,6 +782,7 @@ class DailyCheckIn {
       jumuah = prayerStatusFromJson(traceJson['jumuah']);
       tahajjud = ternaryFromJson(traceJson['tahajjud']);
       ishraq = ternaryFromJson(traceJson['ishraq']);
+      tawbah = ternaryFromJson(traceJson['tawbah']);
       jumuahCongregation = traceJson['jumuahCongregation'] == true;
       final factorsJson = traceJson['factors'];
       if (factorsJson is Map) {
@@ -631,12 +815,14 @@ class DailyCheckIn {
       jumuah: jumuah,
       tahajjud: tahajjud,
       ishraq: ishraq,
+      tawbah: tawbah,
       jumuahCongregation: jumuahCongregation,
       salahFactors: salahFactors,
       homeTraces: tracesFromJson(json['homeTraces']),
       homeTraceFactors: _factorsMap(json['homeTraceFactors']),
       situationNotes: SituationNotes.fromJson(json['situationNotes']),
       akhlaqStruggleNote: _optionalNote(json['akhlaqStruggleNote']),
+      dhikrContext: dhikrContextFromJson(json['dhikrContext']),
       synthetic: json['synthetic'] == true,
     );
   }
@@ -656,4 +842,58 @@ class DailyCheckIn {
     }
     return map;
   }
+}
+
+/// Observation content equality, ignoring [DailyCheckIn.savedAt].
+bool sameCheckInContent(DailyCheckIn a, DailyCheckIn b) {
+  final left = Map<String, dynamic>.from(a.toJson())..remove('savedAt');
+  final right = Map<String, dynamic>.from(b.toJson())..remove('savedAt');
+  return jsonEncode(left) == jsonEncode(right);
+}
+
+/// Overlay fields the user already changed onto a stored baseline.
+///
+/// Unchanged empty-draft fields keep the stored values so a late hydrate
+/// cannot wipe unrelated observations or text.
+DailyCheckIn overlayCheckInUserEdits({
+  required DailyCheckIn baseline,
+  required DailyCheckIn userPending,
+  required DailyCheckIn empty,
+}) {
+  final merged = _overlayChangedJson(
+    _asStringKeyedMap(baseline.toJson()),
+    _asStringKeyedMap(userPending.toJson())..remove('savedAt'),
+    _asStringKeyedMap(empty.toJson())..remove('savedAt'),
+  );
+  return DailyCheckIn.fromJson(merged);
+}
+
+Map<String, dynamic> _asStringKeyedMap(Map<String, dynamic> json) {
+  return json.map((key, value) => MapEntry(key, value));
+}
+
+bool _jsonEqual(Object? a, Object? b) => jsonEncode(a) == jsonEncode(b);
+
+Map<String, dynamic> _overlayChangedJson(
+  Map<String, dynamic> baseline,
+  Map<String, dynamic> user,
+  Map<String, dynamic> empty,
+) {
+  final result = Map<String, dynamic>.from(baseline);
+  for (final key in user.keys) {
+    final userVal = user[key];
+    final emptyVal = empty[key];
+    if (_jsonEqual(userVal, emptyVal)) continue;
+    final baseVal = result[key];
+    if (userVal is Map && emptyVal is Map && baseVal is Map) {
+      result[key] = _overlayChangedJson(
+        Map<String, dynamic>.from(baseVal.map((k, v) => MapEntry('$k', v))),
+        Map<String, dynamic>.from(userVal.map((k, v) => MapEntry('$k', v))),
+        Map<String, dynamic>.from(emptyVal.map((k, v) => MapEntry('$k', v))),
+      );
+    } else {
+      result[key] = userVal;
+    }
+  }
+  return result;
 }

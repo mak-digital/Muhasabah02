@@ -5,6 +5,7 @@ import 'package:muhasabah02/domain/monitor_domain.dart';
 import 'package:muhasabah02/domain/personal_mix.dart';
 import 'package:muhasabah02/presentation/settings/settings_screen.dart';
 
+import '../support/home_domain_stage.dart';
 import '../support/test_app.dart';
 
 void main() {
@@ -34,7 +35,9 @@ void main() {
     expect(find.text(Copy.personalMixShortListNote), findsOneWidget);
     expect(find.text(Copy.mixNotShownInDomains), findsOneWidget);
     expect(find.byKey(const Key('mix-domain-dhikr')), findsOneWidget);
-    expect(find.byKey(const Key('mix-domain-hajj')), findsOneWidget);
+    expect(find.byKey(const Key('mix-domain-hajj')), findsNothing);
+    expect(find.byKey(const Key('mix-domain-knowledge')), findsNothing);
+    expect(find.byKey(const Key('mix-domain-productivity')), findsNothing);
     await tester.ensureVisible(find.text(PersonalMixKind.worship.label));
     await tester.tap(find.text(PersonalMixKind.worship.label));
     await tester.pump();
@@ -62,13 +65,27 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.textContaining(Copy.personalMixSeasonPrefix), findsOneWidget);
+    expect(
+      find.textContaining('${Copy.personalMixSeasonPrefix} Fajr'),
+      findsOneWidget,
+    );
     expect(find.text(MonitorDomain.salah.label), findsWidgets);
     expect(find.text('Fajr'), findsWidgets);
     expect(find.text('Tahajjud'), findsNothing);
+    expect(find.text('Salat At Tawbah'), findsNothing);
     expect(find.text(MonitorDomain.akhlaq.label), findsNothing);
     expect(find.text('Charity'), findsNothing);
     expect(find.textContaining('Score'), findsNothing);
+
+    await showHomeDomain(tester, MonitorDomain.quran);
+    expect(
+      find.textContaining('${Copy.personalMixSeasonPrefix} Fajr'),
+      findsNothing,
+    );
+    expect(
+      find.textContaining('${Copy.personalMixSeasonPrefix} Engagement'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('check-in keeps mix domains first and folds the rest', (
@@ -86,10 +103,9 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text(Copy.homeCheckIn));
-    await tester.pumpAndSettle();
+    await openHomeCheckIn(tester);
     expect(find.byKey(const Key('checkin-domain-next')), findsOneWidget);
-    expect(find.textContaining('Qur’an ›'), findsNothing);
+    expect(find.textContaining('Qur?an ?'), findsNothing);
     expect(find.text(Copy.personalMixAlsoRecorded), findsNothing);
     expect(find.textContaining('Score'), findsNothing);
   });

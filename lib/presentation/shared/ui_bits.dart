@@ -2,19 +2,123 @@ import 'package:flutter/material.dart';
 
 import 'brand_mark.dart';
 
+/// Prose that fills a bounded text box evenly.
+///
+/// Uses justified wrapping only when the parent gives a finite width, so it
+/// does not overflow in unbounded [Row]s or stretch short titles.
+class BalancedProse extends StatelessWidget {
+  const BalancedProse(this.data, {super.key, this.style, this.title = false});
+
+  final String data;
+  final TextStyle? style;
+  final bool title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      data,
+      style: style,
+      textAlign: title ? TextAlign.start : TextAlign.justify,
+      softWrap: true,
+      overflow: TextOverflow.visible,
+    );
+  }
+}
+
+/// Outer wash for Hadith/Qur’an/Dhikr reading panes.
+const kPracticeSkimBodyHeight = 196.0;
+const kPracticeScriptPaneMinHeight = 104.0;
+
+Color practiceReadingWash(BuildContext context, Color domainWash) {
+  final scheme = Theme.of(context).colorScheme;
+  return Color.alphaBlend(
+    domainWash.withValues(alpha: 0.34),
+    scheme.surfaceContainerHigh,
+  );
+}
+
+/// Distinct inner pane for Arabic script so it does not sit on the page wash.
+class PracticeScriptPane extends StatelessWidget {
+  const PracticeScriptPane({
+    super.key,
+    required this.child,
+    this.ink,
+    this.wash,
+    this.cornerBadge,
+  });
+
+  final Widget child;
+  final Color? ink;
+  final Color? wash;
+  final Widget? cornerBadge;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final tint = wash ?? scheme.primaryContainer;
+    final fill = Color.alphaBlend(tint.withValues(alpha: 0.78), scheme.surface);
+    final edge = Color.alphaBlend(
+      (ink ?? scheme.primary).withValues(alpha: 0.28),
+      tint,
+    );
+    final pane = Material(
+      key: const Key('practice-script-pane'),
+      color: fill,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: edge.withValues(alpha: 0.9)),
+      ),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(
+          minHeight: kPracticeScriptPaneMinHeight,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(14, 16, 14, 18),
+          child: Align(alignment: Alignment.centerRight, child: child),
+        ),
+      ),
+    );
+    if (cornerBadge == null) return pane;
+    // Badge sits above the Arabic box border, not over the script.
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Align(
+          alignment: Alignment.centerRight,
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 6, right: 2),
+            child: cornerBadge,
+          ),
+        ),
+        pane,
+      ],
+    );
+  }
+}
+
 class WashPanel extends StatelessWidget {
-  const WashPanel({super.key, required this.color, required this.child});
+  const WashPanel({
+    super.key,
+    required this.color,
+    required this.child,
+    this.padding = const EdgeInsets.all(18),
+    this.clipBehavior = Clip.antiAlias,
+  });
 
   final Color color;
   final Widget child;
+  final EdgeInsetsGeometry padding;
+  final Clip clipBehavior;
 
   @override
   Widget build(BuildContext context) {
     return Material(
       color: color,
       borderRadius: BorderRadius.circular(18),
-      clipBehavior: Clip.antiAlias,
-      child: Padding(padding: const EdgeInsets.all(18), child: child),
+      clipBehavior: clipBehavior,
+      child: Padding(padding: padding, child: child),
     );
   }
 }
@@ -89,14 +193,82 @@ class SectionHeader extends StatelessWidget {
           if (subtitle != null)
             Padding(
               padding: const EdgeInsets.only(top: 2),
-              child: Text(
+              child: BalancedProse(
                 subtitle!,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
+                  height: 1.45,
                 ),
               ),
             ),
         ],
+      ),
+    );
+  }
+}
+
+/// Intro / about copy on a wash. Starts collapsed unless the parent opens it.
+class CollapsingIntroNote extends StatelessWidget {
+  const CollapsingIntroNote({
+    super.key,
+    required this.title,
+    required this.note,
+    required this.expanded,
+    required this.onExpansionChanged,
+  });
+
+  final String title;
+  final String note;
+  final bool expanded;
+  final ValueChanged<bool> onExpansionChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return CollapsingNoteTile(
+      title: title,
+      expanded: expanded,
+      onExpansionChanged: onExpansionChanged,
+      child: BalancedProse(
+        note,
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(height: 1.45),
+      ),
+    );
+  }
+}
+
+class CollapsingNoteTile extends StatelessWidget {
+  const CollapsingNoteTile({
+    super.key,
+    required this.title,
+    required this.expanded,
+    required this.onExpansionChanged,
+    required this.child,
+  });
+
+  final String title;
+  final bool expanded;
+  final ValueChanged<bool> onExpansionChanged;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Theme(
+      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+      child: ExpansionTile(
+        key: ValueKey<bool>(expanded),
+        initiallyExpanded: expanded,
+        dense: true,
+        visualDensity: VisualDensity.compact,
+        minTileHeight: 36,
+        tilePadding: EdgeInsets.zero,
+        childrenPadding: const EdgeInsets.only(bottom: 2),
+        onExpansionChanged: onExpansionChanged,
+        title: Text(
+          title,
+          style: Theme.of(context).textTheme.labelSmall
+              ?.copyWith(fontWeight: FontWeight.w700, letterSpacing: 0.3),
+        ),
+        children: [SizedBox(width: double.infinity, child: child)],
       ),
     );
   }
@@ -117,6 +289,10 @@ class PeriodSelector extends StatelessWidget {
     final selector = Semantics(
       label: 'Period selector',
       child: SegmentedButton<int>(
+        style: const ButtonStyle(
+          visualDensity: VisualDensity.compact,
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        ),
         segments: const [
           ButtonSegment(value: 7, label: Text('7 days')),
           ButtonSegment(value: 30, label: Text('30 days')),

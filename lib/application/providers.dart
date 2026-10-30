@@ -1,13 +1,33 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
 import '../data/app_prefs.dart';
 import '../data/memory_repositories.dart';
+import '../data/quran_verse_http.dart';
 import '../data/repositories.dart';
+import '../domain/app_appearance.dart';
+import '../domain/app_language.dart';
 import '../domain/daily_check_in.dart';
+import '../domain/date_key.dart';
+import '../domain/dev_feedback.dart';
+import '../domain/domain_action.dart';
 import '../domain/monitor_domain.dart';
+import '../domain/hadith_fetch.dart';
+import '../domain/personal_hadith.dart';
+import '../domain/personal_quran_verse.dart';
 import '../domain/personal_response.dart';
+import '../domain/practice_hadith.dart';
+import '../data/hajj_live_http.dart';
+import '../domain/hajj_live_gateway.dart';
+import '../domain/hajj_online_assist.dart';
+import '../domain/hajj_online_contracts.dart';
+import '../domain/hajj_planning.dart';
+import '../domain/productivity_planning.dart';
+import '../domain/hajj_source_catalog.dart';
+import '../domain/quran_verse_fetch.dart';
 import '../domain/review_period.dart';
+import '../domain/review_period_snapshot.dart';
 
 final appPrefsProvider = Provider<AppPrefs>((ref) => MemoryAppPrefs());
 
@@ -19,11 +39,173 @@ final responseRepositoryProvider = Provider<ResponseRepository>(
   (ref) => MemoryResponseRepository(),
 );
 
-final nowProvider = Provider<DateTime>((ref) => DateTime.now());
+final domainActionRepositoryProvider = Provider<DomainActionRepository>(
+  (ref) => MemoryDomainActionRepository(),
+);
+
+final devFeedbackRepositoryProvider = Provider<DevFeedbackRepository>(
+  (ref) => MemoryDevFeedbackRepository(),
+);
+
+final practiceHadithRepositoryProvider = Provider<PracticeHadithRepository>(
+  (ref) => MemoryPracticeHadithRepository(),
+);
+
+final personalQuranVerseRepositoryProvider =
+    Provider<PersonalQuranVerseRepository>(
+      (ref) => MemoryPersonalQuranVerseRepository(),
+    );
+
+final quranVerseFetchProvider = Provider<QuranVerseFetch>(
+  (ref) => QuranComVerseFetch(get: quranVerseHttpGet),
+);
+
+final personalHadithRepositoryProvider = Provider<PersonalHadithRepository>(
+  (ref) => MemoryPersonalHadithRepository(),
+);
+
+final hajjStoreRepositoryProvider = Provider<HajjStoreRepository>(
+  (ref) => MemoryHajjStoreRepository(),
+);
+
+final hajjStoreTickProvider = StateProvider<int>((ref) => 0);
+
+final productivityStoreRepositoryProvider =
+    Provider<ProductivityStoreRepository>(
+      (ref) => MemoryProductivityStoreRepository(),
+    );
+
+final productivityStoreTickProvider = StateProvider<int>((ref) => 0);
+
+final hajjSourceRegistryProvider = Provider<HajjSourceRegistry>(
+  (ref) => const BundledHajjSourceRegistry(),
+);
+
+final hajjPathwayResolverProvider = Provider<HajjPathwayResolver>(
+  (ref) =>
+      LocalHajjPathwayResolver(registry: ref.watch(hajjSourceRegistryProvider)),
+);
+
+final hajjOnlineAssistGatewayProvider = Provider<HajjOnlineAssistGateway>((
+  ref,
+) {
+  final demo = DemoHajjOnlineAssistGateway(
+    registry: ref.watch(hajjSourceRegistryProvider),
+  );
+  final liveUrl = kHajjLiveBaseUrl.trim();
+  if (liveUrl.isEmpty) return demo;
+  return SelectableHajjOnlineAssistGateway(
+    demo: demo,
+    live: LiveHajjOnlineAssistGateway(
+      send: (request) => hajjLiveHttpPost(
+        baseUrl: liveUrl,
+        request: request,
+        pilotGate: kHajjLiveGate,
+        accessClientId: kHajjAccessClientId,
+        accessClientSecret: kHajjAccessClientSecret,
+      ),
+    ),
+  );
+});
+
+final hajjOfficialSourceGatewayProvider = Provider<HajjOfficialSourceGateway>(
+  (ref) => DemoHajjOfficialSourceGateway(
+    inner: DemoHajjOnlineAssistGateway(
+      registry: ref.watch(hajjSourceRegistryProvider),
+    ),
+  ),
+);
+
+final hajjAiInterpretationGatewayProvider =
+    Provider<HajjAIInterpretationGateway>(
+      (ref) => const DemoHajjAIInterpretationGateway(),
+    );
+
+final hajjProviderDirectoryGatewayProvider =
+    Provider<HajjProviderDirectoryGateway>(
+      (ref) => const EmptyHajjProviderDirectoryGateway(),
+    );
+
+Future<void> persistHajjStore(
+  WidgetRef ref,
+  HajjStore Function(HajjStore current) update,
+) async {
+  final repo = ref.read(hajjStoreRepositoryProvider);
+  await repo.save(update(repo.store));
+  ref.read(hajjStoreTickProvider.notifier).state++;
+}
+
+Future<void> persistProductivityStore(
+  WidgetRef ref,
+  ProductivityStore Function(ProductivityStore current) update,
+) async {
+  final repo = ref.read(productivityStoreRepositoryProvider);
+  final next = update(repo.store);
+  if (identical(next, repo.store)) return;
+  await repo.save(next);
+  ref.read(productivityStoreTickProvider.notifier).state++;
+}
+
+final hadithFetchProvider = Provider<HadithFetch>(
+  (ref) => PublicHadithFetch(get: quranVerseHttpGet),
+);
+
+/// Source of "now". Tests override this (or [nowProvider]) for a fixed clock.
+typedef NowClock = DateTime Function();
+
+final nowClockProvider = Provider<NowClock>((ref) => DateTime.now);
+
+final nowProvider = Provider<DateTime>((ref) => ref.watch(nowClockProvider)());
+
+/// True when [cached] and [current] fall on different local Gregorian dates.
+bool localCalendarDateChanged(DateTime cached, DateTime current) {
+  return dateKey(cached) != dateKey(current);
+}
+
+/// Invalidates [nowProvider] when the local calendar date has moved.
+///
+/// Same-date resumes leave the cached value in place. Returns whether
+/// [nowProvider] was invalidated. Does not create or save a check-in.
+bool refreshNowIfLocalDateChanged(WidgetRef ref) {
+  final current = ref.read(nowClockProvider)();
+  final cached = ref.read(nowProvider);
+  if (!localCalendarDateChanged(cached, current)) return false;
+  ref.invalidate(nowProvider);
+  return true;
+}
+
+/// Tap handler that refreshes the cached date, then opens [onOpen] only when
+/// [dateKey] is today or historical. Future cells stay non-navigable.
+///
+/// Does not redirect a historical cell to today.
+VoidCallback recoverableDateCellOnTap({
+  required WidgetRef ref,
+  required String dateKey,
+  required VoidCallback onOpen,
+}) {
+  return () {
+    refreshNowIfLocalDateChanged(ref);
+    if (dateCellKind(dateKey, ref.read(nowProvider)) == DateCellKind.future) {
+      return;
+    }
+    onOpen();
+  };
+}
 
 final reviewPeriodProvider = StateProvider<ReviewPeriod>(
   (ref) => ReviewPeriod.days7,
 );
+
+/// Cached Review totals. Recomputes only when records, period, or now change.
+final reviewPeriodSnapshotProvider = Provider<ReviewPeriodSnapshot?>((ref) {
+  final records = ref.watch(checkInsProvider).value;
+  if (records == null) return null;
+  return buildReviewPeriodSnapshot(
+    records: records,
+    now: ref.watch(nowProvider),
+    period: ref.watch(reviewPeriodProvider),
+  );
+});
 
 final prefsTickProvider = StateProvider<int>((ref) => 0);
 
@@ -33,7 +215,13 @@ final homeDomainStageProvider = StateProvider<MonitorDomain?>((ref) => null);
 /// Last full-check-in domain shown in this app session. Not stored. Not a score.
 final checkInDomainStageProvider = StateProvider<MonitorDomain?>((ref) => null);
 
-final themeModePrefProvider = StateProvider<int>((ref) => 0);
+final themeModePrefProvider = StateProvider<int>((ref) {
+  return ref.read(appPrefsProvider).appearance.prefIndex;
+});
+
+final appLanguageProvider = StateProvider<AppLanguage>((ref) {
+  return ref.read(appPrefsProvider).appLanguage;
+});
 
 class CheckInsController extends AsyncNotifier<List<DailyCheckIn>> {
   @override
@@ -68,18 +256,43 @@ final checkInsProvider =
 class ResponsesController extends AsyncNotifier<List<PersonalResponse>> {
   @override
   Future<List<PersonalResponse>> build() {
-    return ref.read(responseRepositoryProvider).allHealthy();
+    return _ensureCodes();
+  }
+
+  Future<List<PersonalResponse>> _ensureCodes() async {
+    final repo = ref.read(responseRepositoryProvider);
+    final items = await repo.allHealthy();
+    final assigned = assignMissingNoteCodes(items);
+    for (final item in assigned) {
+      PersonalResponse? original;
+      for (final previous in items) {
+        if (previous.id == item.id) original = previous;
+      }
+      if (original == null || original.noteCode != item.noteCode) {
+        await repo.save(item);
+      }
+    }
+    return assigned;
   }
 
   Future<void> reload() async {
     state = const AsyncLoading();
-    state = await AsyncValue.guard(
-      () => ref.read(responseRepositoryProvider).allHealthy(),
-    );
+    state = await AsyncValue.guard(_ensureCodes);
   }
 
   Future<void> save(PersonalResponse record) async {
-    await ref.read(responseRepositoryProvider).save(record);
+    final repo = ref.read(responseRepositoryProvider);
+    var next = record;
+    if (next.noteCode == null || next.noteCode!.isEmpty) {
+      final existing = await repo.allHealthy();
+      next = next.copyWith(
+        noteCode: formatNoteCode(
+          next.createdAt,
+          nextNoteDailyIndex(existing, next.createdAt),
+        ),
+      );
+    }
+    await repo.save(next);
     await reload();
   }
 
@@ -88,9 +301,169 @@ class ResponsesController extends AsyncNotifier<List<PersonalResponse>> {
     await reload();
     return ok;
   }
+
+  Future<void> deleteMany(Iterable<String> ids) async {
+    final repo = ref.read(responseRepositoryProvider);
+    for (final id in ids) {
+      await repo.delete(id);
+    }
+    await reload();
+  }
 }
 
 final responsesProvider =
     AsyncNotifierProvider<ResponsesController, List<PersonalResponse>>(
       ResponsesController.new,
+    );
+
+class DomainActionsController extends AsyncNotifier<List<DomainAction>> {
+  @override
+  Future<List<DomainAction>> build() {
+    return ref.read(domainActionRepositoryProvider).allHealthy();
+  }
+
+  Future<void> reload() async {
+    state = await AsyncValue.guard(
+      () => ref.read(domainActionRepositoryProvider).allHealthy(),
+    );
+  }
+
+  Future<void> save(DomainAction record) async {
+    await ref.read(domainActionRepositoryProvider).save(record);
+    await reload();
+  }
+
+  Future<bool> delete(String id) async {
+    final ok = await ref.read(domainActionRepositoryProvider).delete(id);
+    await reload();
+    return ok;
+  }
+
+  Future<void> deleteMany(Iterable<String> ids) async {
+    final repo = ref.read(domainActionRepositoryProvider);
+    for (final id in ids) {
+      await repo.delete(id);
+    }
+    await reload();
+  }
+}
+
+final domainActionsProvider =
+    AsyncNotifierProvider<DomainActionsController, List<DomainAction>>(
+      DomainActionsController.new,
+    );
+
+class DevFeedbackController extends AsyncNotifier<List<DevFeedback>> {
+  @override
+  Future<List<DevFeedback>> build() {
+    return ref.read(devFeedbackRepositoryProvider).allHealthy();
+  }
+
+  Future<void> reload() async {
+    state = await AsyncValue.guard(
+      () => ref.read(devFeedbackRepositoryProvider).allHealthy(),
+    );
+  }
+
+  Future<void> save(DevFeedback record) async {
+    await ref.read(devFeedbackRepositoryProvider).save(record);
+    await reload();
+  }
+
+  Future<int> nextSerial() {
+    return ref.read(devFeedbackRepositoryProvider).nextSerial();
+  }
+
+  Future<void> deleteMany(Iterable<String> ids) async {
+    final repo = ref.read(devFeedbackRepositoryProvider);
+    for (final id in ids) {
+      await repo.delete(id);
+    }
+    await reload();
+  }
+}
+
+final devFeedbackProvider =
+    AsyncNotifierProvider<DevFeedbackController, List<DevFeedback>>(
+      DevFeedbackController.new,
+    );
+
+class PracticeHadithController
+    extends AsyncNotifier<List<PracticeHadithRecord>> {
+  @override
+  Future<List<PracticeHadithRecord>> build() {
+    return ref.read(practiceHadithRepositoryProvider).allHealthy();
+  }
+
+  Future<void> reload() async {
+    state = await AsyncValue.guard(
+      () => ref.read(practiceHadithRepositoryProvider).allHealthy(),
+    );
+  }
+
+  Future<void> save(PracticeHadithRecord record) async {
+    await ref.read(practiceHadithRepositoryProvider).save(record);
+    await reload();
+  }
+
+  Future<void> deleteMany(Iterable<String> ids) async {
+    final repo = ref.read(practiceHadithRepositoryProvider);
+    for (final id in ids) {
+      await repo.delete(id);
+    }
+    await reload();
+  }
+}
+
+final practiceHadithProvider =
+    AsyncNotifierProvider<PracticeHadithController, List<PracticeHadithRecord>>(
+      PracticeHadithController.new,
+    );
+
+class PersonalQuranVerseController
+    extends AsyncNotifier<List<PersonalQuranVerse>> {
+  @override
+  Future<List<PersonalQuranVerse>> build() {
+    return ref.read(personalQuranVerseRepositoryProvider).allHealthy();
+  }
+
+  Future<void> reload() async {
+    state = await AsyncValue.guard(
+      () => ref.read(personalQuranVerseRepositoryProvider).allHealthy(),
+    );
+  }
+
+  Future<void> save(PersonalQuranVerse record) async {
+    await ref.read(personalQuranVerseRepositoryProvider).save(record);
+    await reload();
+  }
+}
+
+final personalQuranVerseProvider =
+    AsyncNotifierProvider<
+      PersonalQuranVerseController,
+      List<PersonalQuranVerse>
+    >(PersonalQuranVerseController.new);
+
+class PersonalHadithController extends AsyncNotifier<List<PersonalHadith>> {
+  @override
+  Future<List<PersonalHadith>> build() {
+    return ref.read(personalHadithRepositoryProvider).allHealthy();
+  }
+
+  Future<void> reload() async {
+    state = await AsyncValue.guard(
+      () => ref.read(personalHadithRepositoryProvider).allHealthy(),
+    );
+  }
+
+  Future<void> save(PersonalHadith record) async {
+    await ref.read(personalHadithRepositoryProvider).save(record);
+    await reload();
+  }
+}
+
+final personalHadithProvider =
+    AsyncNotifierProvider<PersonalHadithController, List<PersonalHadith>>(
+      PersonalHadithController.new,
     );

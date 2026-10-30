@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:muhasabah02/domain/activities.dart';
 import 'package:muhasabah02/domain/daily_check_in.dart';
 import 'package:muhasabah02/domain/prayer.dart';
 import 'package:muhasabah02/domain/quran.dart';
@@ -45,11 +46,30 @@ void main() {
     expect(record.answeredRecordableCount, 4);
   });
 
+  test('Jumu‘ah activity list sets congregation from the chosen row', () {
+    final attended = DailyCheckIn.empty('2026-09-04')
+        .withJumuahActivity(const RecordedActivity(id: 'congregationOnTime'));
+    expect(attended.jumuah, PrayerStatus.onTime);
+    expect(attended.jumuahCongregation, isTrue);
+    expect(attended.jumuahActivityId, 'congregationOnTime');
+
+    final aloneLate = attended.withJumuahActivity(
+      const RecordedActivity(id: 'prayedLate'),
+    );
+    expect(aloneLate.jumuah, PrayerStatus.late);
+    expect(aloneLate.jumuahCongregation, isFalse);
+    expect(
+      ActivityCatalog.find(ActivityCatalog.jumuah, 'prayedLate')?.label,
+      'Prayed late (alone)',
+    );
+  });
+
   test('salah extras do not change recordable-field count', () {
     final record = DailyCheckIn.empty('2026-09-04').copyWith(
       jumuah: PrayerStatus.onTime,
       tahajjud: TernaryOutcome.positive,
       ishraq: TernaryOutcome.negative,
+      tawbah: TernaryOutcome.positive,
       jumuahCongregation: true,
     );
     expect(record.answeredRecordableCount, 0);
@@ -58,6 +78,7 @@ void main() {
     expect(restored.jumuah, PrayerStatus.onTime);
     expect(restored.tahajjud, TernaryOutcome.positive);
     expect(restored.ishraq, TernaryOutcome.negative);
+    expect(restored.tawbah, TernaryOutcome.positive);
     expect(restored.jumuahCongregation, isTrue);
   });
 
@@ -69,6 +90,7 @@ void main() {
     });
     expect(record.jumuah, PrayerStatus.unanswered);
     expect(record.tahajjud, TernaryOutcome.unanswered);
+    expect(record.tawbah, TernaryOutcome.unanswered);
     expect(record.jumuahCongregation, isFalse);
     expect(record.jumuah, isNot(PrayerStatus.missed));
   });

@@ -7,6 +7,10 @@ Private, local-first Islamic self-reflection. The app helps you record practice 
 
 Canonical flow: **RECORD → REFLECT → REVIEW → RECOGNISE → PONDER → RESPOND**
 
+## Development sessions
+
+The owner of this app is not expected to write code. Coding agents must follow **`AGENTS.md`** at the repository root (any tool, any machine). After a clone, restart, or resuming work, they complete **§ 3.1** before changing the app. `docs/AGENTS.md`, `CLAUDE.md`, and `.github/copilot-instructions.md` only point at that file.
+
 ## Build and run (Android)
 
 ```bash
@@ -29,11 +33,12 @@ Release builds currently sign with the Android debug keystore unless you supply 
 
 See `docs/PRODUCT_SPEC.md`. Guardrails: `docs/product_guardrails.md`. Architecture: `docs/architecture.md`. Privacy: `docs/privacy.md`. Tests: `docs/testing.md`.
 
-Home is a colour-family Summary Dashboard in this order: Start today’s check-in, Reflection of the Week, one mix domain week at a time, This week I noticed…, Add a response. Recognition, Ponder, Recorded days, Noticed This Week, and Patterns Noticed stay on Review or Progress. Opt-in cards follow Settings → Domains. Marks Guide lives in the header. Design reference: `docs/visual_review/`.
+Home is a colour-family Summary Dashboard in this order: Start today’s check-in, Reflection of the Week, one mix domain week at a time, This week I noticed…, Add a response. Recognition, Ponder, Recorded days, Noticed This Week, and Patterns Noticed stay on Review or Progress. Opt-in cards follow Settings → Preferences → Domains in Focus. Marks Guide lives in the header. Design reference: `docs/visual_review/`.
 
 ## Known limitations
 
 - No production Play signing key is configured in this repository.
+- Android Impeller is turned off so the first screen can appear after idle. Flutter may remove that opt-out in a later SDK.
 - Hive stores JSON documents on-device; this is not claimed as encryption-at-rest.
 - Delete removes the app-managed record only; it is not forensic secure erasure.
 - Nested `muhasabah02/` copy, zip, and text dump in the tree are leftover artifacts and are not the application source.

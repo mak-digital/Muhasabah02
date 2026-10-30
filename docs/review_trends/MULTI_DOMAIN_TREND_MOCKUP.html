@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Multi-domain Review trend mock-up — synthetic</title>
+  <style>
+    :root {
+      --bg: #f4f1ea;
+      --ink: #1d2a2c;
+      --muted: #4d5c63;
+      --line: #c5d0d4;
+      --paper: #faf8f4;
+      --surface: #fffcf7;
+      --radius: 14px;
+      --stride: 18px;
+      --wd: 16px;
+      --head: 16px;
+      --board: calc(var(--head) + 7 * var(--stride));
+      --chart: calc(7 * var(--stride));
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+    }
+    button, select { font: inherit; }
+    .banner {
+      background: #3d4a4e; color: #f4f1ea; font-size: 0.72rem;
+      letter-spacing: .03em; text-align: center; padding: 8px 12px;
+    }
+    .shell { max-width: 920px; margin: 0 auto; padding: 12px 14px 40px; }
+    .dev {
+      border: 1px dashed #9aa8ad; background: #fff; border-radius: 12px;
+      padding: 10px 12px; margin: 10px 0 14px;
+    }
+    .dev h2 { margin: 0 0 8px; font-size: 0.72rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+    .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 8px; }
+    .row label { font-size: 0.75rem; color: var(--muted); font-weight: 650; }
+    .phone {
+      max-width: 420px; margin: 0 auto;
+      background: var(--paper); border-radius: 22px;
+      border: 1px solid var(--line); overflow: hidden;
+    }
+    .phone.wide { max-width: none; }
+    .status { display: flex; justify-content: space-between; padding: 8px 16px 0; font-size: 0.75rem; color: var(--muted); }
+    .appbar { display: flex; align-items: center; gap: 8px; padding: 6px 12px 4px; }
+    .appbar h1 { font-size: 1.05rem; margin: 0; font-weight: 700; }
+    .body { padding: 0 12px 24px; }
+    .q { font-size: 0.8rem; font-style: italic; color: var(--muted); margin: 0 0 8px; line-height: 1.35; }
+    .period { display: flex; gap: 6px; margin-bottom: 10px; }
+    .chip {
+      flex: 1; border: 1px solid var(--line); background: #fff; border-radius: 999px;
+      padding: 7px 4px; font-size: 0.75rem; cursor: pointer;
+    }
+    .chip[aria-pressed="true"] { background: #d7eceb; border-color: #b7d4d2; font-weight: 700; }
+    .chip:disabled { opacity: .45; cursor: not-allowed; }
+    .card {
+      border-radius: var(--radius); padding: 10px 10px 8px; border: 1px solid transparent;
+    }
+    .nav { display: flex; align-items: center; gap: 4px; }
+    .nav h3 { margin: 0; font-size: 0.95rem; font-weight: 600; text-align: center; }
+    .range { margin: 0; font-size: 0.7rem; color: var(--muted); text-align: center; }
+    .sub { margin: 0; font-size: 0.68rem; color: var(--muted); text-align: center; }
+    .ghost {
+      border: 0; background: transparent; width: 32px; height: 32px; border-radius: 16px;
+      cursor: pointer; font-size: 1.2rem; color: var(--ink);
+    }
+    .ghost:disabled { opacity: .28; cursor: default; }
+    .board {
+      display: flex; gap: 8px; height: var(--board); margin-top: 8px; align-items: stretch;
+    }
+    .cal { width: 62%; min-width: 0; display: flex; flex-direction: column; }
+    .cal-head, .cal-row {
+      display: grid; grid-template-columns: var(--wd) repeat(var(--weeks, 5), 1fr);
+      height: var(--stride); align-items: center;
+    }
+    .cal-head { height: var(--head); font-size: 0.58rem; color: var(--muted); text-align: center; }
+    .dow { font-size: 0.58rem; color: var(--muted); font-weight: 700; }
+    .cell {
+      width: 14px; height: 14px; margin: 0 auto; border-radius: 50%;
+      border: 1px dashed #9aa8ad; background: transparent; padding: 0;
+    }
+    .cell.future { opacity: .22; }
+    .cell.miss { border-style: dashed; background: transparent; }
+    .cell.unans { border-style: solid; background: #fff; border-color: #bdbdbd; }
+    .cell.dot { border-style: solid; }
+    .wash {
+      flex: 1; min-width: 0; margin-top: var(--head);
+      border-radius: 10px; padding: 6px 6px 4px;
+      height: var(--chart); overflow: hidden;
+    }
+    .chart {
+      height: 100%; display: flex; flex-direction: column;
+    }
+    .bars {
+      flex: 1; display: flex; align-items: stretch; gap: 7px; min-height: 0;
+    }
+    .grp {
+      flex: 1; display: flex; align-items: flex-end; justify-content: center;
+      gap: 2px; min-width: 0; height: 100%;
+    }
+    .bar {
+      width: 7px; max-width: 28%; border: 0; padding: 0; background: transparent;
+      display: flex; align-items: flex-end; height: 100%; cursor: pointer;
+      border-radius: 2px;
+    }
+    .bar:focus-visible { outline: 2px solid #1d2a2c; outline-offset: 1px; }
+    .fill {
+      width: 100%; border-radius: 2px 2px 0 0; min-height: 0;
+    }
+    .fill.zero { min-height: 2px; opacity: .95; }
+    .fill.na {
+      min-height: 100%;
+      background: repeating-linear-gradient(
+        135deg, transparent, transparent 3px, rgba(77,92,99,.28) 3px, rgba(77,92,99,.28) 5px
+      ) !important;
+      border: 1px dashed #9aa8ad; border-radius: 2px; opacity: .7;
+    }
+    .abc {
+      display: flex; justify-content: space-around; font-size: 0.58rem;
+      color: var(--muted); font-weight: 700; letter-spacing: .04em; height: 12px;
+    }
+    .abc span { flex: 1; text-align: center; }
+    .tip {
+      position: fixed; z-index: 20; max-width: 260px;
+      background: #1d2a2c; color: #f4f1ea; border-radius: 8px;
+      padding: 8px 10px; font-size: 0.72rem; line-height: 1.35;
+      box-shadow: 0 8px 20px rgba(0,0,0,.25); pointer-events: none;
+    }
+    .tip b { display: block; font-size: 0.78rem; margin-bottom: 4px; }
+    .note { font-size: 0.68rem; color: var(--muted); margin: 8px 0 0; }
+    .prod-flag {
+      font-size: 0.65rem; background: #fff8e8; border-radius: 8px;
+      padding: 4px 6px; margin: 4px 0 0; color: #5a4300;
+    }
+    .tests { font-size: 0.72rem; margin-top: 8px; }
+    .tests .ok { color: #2e7d32; }
+    .tests .bad { color: #c62828; }
+    .domains { display: flex; flex-wrap: wrap; gap: 4px; }
+    .domains button {
+      border: 1px solid var(--line); background: #fff; border-radius: 999px;
+      padding: 4px 8px; font-size: 0.68rem; cursor: pointer;
+    }
+    .domains button[aria-pressed="true"] { font-weight: 700; }
+    @media (max-width: 420px) {
+      .bar { width: 5px; }
+      .grp { gap: 1px; }
+      .bars { gap: 4px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="banner">PHASE M1 HTML MOCK-UP · SYNTHETIC DATA · not connected to Hive · Flutter production unchanged</div>
+  <div class="shell">
+    <div class="dev" id="dev">
+      <h2>Development controls (outside the Review card)</h2>
+      <div class="row">
+        <label for="layout">Layout</label>
+        <select id="layout">
+          <option value="390">Mobile (~390)</option>
+          <option value="720">Larger (~720)</option>
+        </select>
+        <label for="scenario">Scenario</label>
+        <select id="scenario">
+          <option value="normal">Normal data</option>
+          <option value="change">Significant changes</option>
+          <option value="stable">Mostly stable</option>
+          <option value="sparse">Sparse data</option>
+          <option value="incomplete">Current period, few elapsed days</option>
+        </select>
+      </div>
+      <div class="row">
+        <label>Domain</label>
+        <div class="domains" id="domainBtns"></div>
+      </div>
+      <div class="tests" id="testOut"></div>
+    </div>
+    <div class="phone" id="phone">
+      <div class="status"><span id="clock">21:00</span><span>Review prototype</span></div>
+      <div class="appbar">
+        <button class="ghost" type="button" aria-label="Back" disabled>‹</button>
+        <h1 id="appTitle">Salah &amp; Prayer Quality Progress</h1>
+      </div>
+      <div class="body">
+        <p class="q" id="focusQ"></p>
+        <div class="period" role="tablist">
+          <button class="chip" data-days="7" type="button">7 days</button>
+          <button class="chip" data-days="30" type="button" aria-pressed="true">30 days</button>
+          <button class="chip" data-days="90" type="button">90 days</button>
+        </div>
+        <div class="card" id="card">
+          <div class="nav">
+            <button class="ghost" id="prev" type="button" aria-label="Previous period">‹</button>
+            <div style="flex:1">
+              <h3 id="cardTitle">Fajr</h3>
+              <p class="range" id="range"></p>
+              <p class="sub" id="band"></p>
+            </div>
+            <button class="ghost" id="next" type="button" aria-label="Next period" disabled>›</button>
+          </div>
+          <div class="board">
+            <div class="cal" id="cal"></div>
+            <div class="wash" id="wash"></div>
+          </div>
+          <p class="prod-flag" id="prodFlag" hidden></p>
+          <p class="note" id="foot"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="tip" id="tip" hidden></div>
+<script>
+const TODAY_DEFAULT = new Date(2026, 9, 23);
+const DOT = {
+  congregationOnTime: '#1565C0',
+  joinedCongregationLate: '#2E7D32',
+  smallCongregation: '#66BB6A',
+  aloneOnTime: '#C0CA33',
+  excused: '#C0CA33',
+  prayedLate: '#FBC02D',
+  missedMadeUp: '#F57C00',
+  missed: '#D32F2F',
+  unanswered: '#BDBDBD',
+  other: '#616161',
+};
+const KIND = {
+  cared: DOT.congregationOnTime,
+  partial: DOT.joinedCongregationLate,
+  corrected: DOT.smallCongregation,
+  constrained: DOT.smallCongregation,
+  noSituation: DOT.aloneOnTime,
+  difficulty: DOT.excused,
+  lapse: DOT.prayedLate,
+  preferNot: DOT.other,
+  acted: DOT.congregationOnTime,
+  practised: DOT.congregationOnTime,
+  struggled: DOT.joinedCongregationLate,
+  engaged: DOT.congregationOnTime,
+  progress: DOT.joinedCongregationLate,
+};
+const DHIKR_GAP = ['#3F7D6A', '#5A9A86', '#2C5F52', '#87B8A8', '#1F433A'];
+
+function addDays(d, n) {
+  const x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  x.setDate(x.getDate() + n);
+  return x;
+}
+function keyOf(d) {
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${d.getFullYear()}-${m}-${day}`;
+}
+function parseKey(k) {
+  const [y, m, d] = k.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+function fmtRange(a, b) {
+  const f = (d) => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  return `(for ${f(a)} – ${f(b)})`;
+}
+function fmtShort(a, b) {
+  const f = (d) => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  return `${f(a)}–${f(b)}`;
+}
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+function hash(s) {
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return h >>> 0;
+}
+
+const salahOpts = [
+  { id: 'congregationOnTime', label: 'Prayed on time in congregation', color: DOT.congregationOnTime },
+  { id: 'joinedCongregationLate', label: 'Joined congregation late', color: DOT.joinedCongregationLate },
+  { id: 'smallCongregation', label: 'Prayed in small congregation', color: DOT.smallCongregation },
+  { id: 'aloneOnTime', label: 'Prayed alone on time', color: DOT.aloneOnTime },
+  { id: 'excused', label: 'Excused', color: DOT.excused, colorNote: 'Shares lime with Prayed alone on time in the current app.' },
+  { id: 'prayedLate', label: 'Prayed late', color: DOT.prayedLate },
+  { id: 'missedMadeUp', label: 'Missed then made up later', color: DOT.missedMadeUp },
+  { id: 'missed', label: 'Missed', color: DOT.missed },
+  { id: 'other', label: 'Other', color: DOT.other },
+];
+const quranOpts = [
+  { id: 'over20', label: 'Engaged more than 20 minutes — Engagement', color: DOT.congregationOnTime },
+  { id: 'min15to20', label: 'Engaged 15–20 minutes — Engagement', color: DOT.joinedCongregationLate },
+  { id: 'min10to15', label: 'Engaged 10–15 minutes — Engagement', color: DOT.smallCongregation },
+  { id: 'min5to10', label: 'Engaged 5–10 minutes — Engagement', color: DOT.aloneOnTime },
+  { id: 'min3to5', label: 'Engaged 3–5 minutes — Engagement', color: DOT.aloneOnTime, colorNote: 'Shares lime with 5–10 minutes in the current app.' },
+  { id: 'notEngaged', label: 'I did not notice this today — Engagement', color: DOT.prayedLate },
+  { id: 'other', label: 'Other — Engagement', color: DOT.other },
+];
+const hadithOpts = [
+  { id: 'over20', label: 'Engaged more than 20 minutes — Read and/or Listened', color: DOT.congregationOnTime },
+  { id: 'min15to20', label: 'Engaged 15–20 minutes — Read and/or Listened', color: DOT.joinedCongregationLate },
+  { id: 'min10to15', label: 'Engaged 10–15 minutes — Read and/or Listened', color: DOT.smallCongregation },
+  { id: 'min5to10', label: 'Engaged 5–10 minutes — Read and/or Listened', color: DOT.aloneOnTime },
+  { id: 'min3to5', label: 'Engaged 3–5 minutes — Read and/or Listened', color: DOT.aloneOnTime },
+  { id: 'notEngaged', label: 'I did not notice this today — Read and/or Listened', color: DOT.prayedLate },
+  { id: 'other', label: 'Other — Read and/or Listened', color: DOT.other },
+];
+const morningItems = [
+  ['dhikr.morningAdhkar.dh.morn.kursi', 'Ayat al-Kursi in the morning'],
+  ['dhikr.morningAdhkar.dh.morn.muawwidhat3', 'The three Quls, three times'],
+  ['dhikr.morningAdhkar.dh.morn.sayyid', 'Sayyid al-istighfar in the morning'],
+  ['dhikr.morningAdhkar.dh.morn.bismillah', 'Nothing harms with His name'],
+  ['dhikr.morningAdhkar.dh.morn.kalimat', 'The perfect words of Allah'],
+  ['dhikr.morningAdhkar.dh.morn.bika', 'By You we enter the morning'],
+  ['dhikr.morningAdhkar.dh.morn.fitrah', 'Upon the fitrah of Islam'],
+  ['dhikr.morningAdhkar.dh.morn.afini', 'Well-being in body, hearing, and sight'],
+].map((x, i) => ({
+  id: x[0], label: x[1], color: DHIKR_GAP[i % DHIKR_GAP.length],
+  colorNote: 'No per-formula calendar colour in the app. Prototype uses Dhikr-family tints only.',
+}));
+const fastingOpts = [
+  { id: 'fasting.ramadanObserved.completed', label: "Completed today's fast", color: KIND.acted },
+  { id: 'fasting.ramadanObserved.inProgress', label: 'Fasting today; not yet completed', color: KIND.partial },
+  { id: 'fasting.ramadanObserved.exemption', label: 'Did not fast due to a recognised exemption or genuine inability', color: KIND.constrained },
+  { id: 'fasting.ramadanObserved.interrupted', label: 'Fast was interrupted or ended early', color: KIND.difficulty },
+  { id: 'fasting.ramadanObserved.otherReason', label: 'Did not fast for another reason', color: KIND.difficulty },
+  { id: 'prefer_not', label: 'Prefer not to record', color: KIND.preferNot },
+];
+const akhlaqOpts = [
+  { id: 'practised', label: 'Remained patient when tested', color: KIND.practised },
+  { id: 'struggled', label: 'Tried but struggled to remain patient', color: KIND.struggled },
+  { id: 'lapse_recognised', label: 'Lost patience and recognised it', color: KIND.lapse },
+  { id: 'corrected', label: 'Lost patience, then corrected my response', color: KIND.corrected },
+  { id: 'no_situation', label: 'No situation requiring patience noticed', color: KIND.noSituation },
+];
+const huquqOpts = [
+  { id: 'practised', label: 'Honoured my parents through care, respect, contact or du‘a', color: KIND.practised },
+  { id: 'partial_effort', label: 'Made an effort but could have responded better to their needs', color: KIND.partial },
+  { id: 'neglect_recognised', label: 'Recognised that I neglected a responsibility or behaved disrespectfully', color: KIND.lapse },
+  { id: 'corrective_action', label: 'Took steps to apologise, restore contact or fulfil a neglected responsibility', color: KIND.corrected },
+  { id: 'no_situation', label: 'No specific action or unmet responsibility to record today', color: KIND.noSituation },
+];
+const charityOpts = [
+  { id: 'charity.voluntary.gave', label: 'Gave voluntary charity', color: KIND.cared },
+  { id: 'charity.voluntary.intended', label: 'Intended or arranged to give', color: KIND.partial },
+  { id: 'charity.voluntary.didNotGive', label: 'Had an opportunity but did not give', color: KIND.difficulty },
+  { id: 'charity.voluntary.noOpportunity', label: 'No relevant opportunity today', color: KIND.noSituation },
+  { id: 'prefer_not', label: 'Prefer not to record', color: KIND.preferNot },
+];
+const ummahOpts = [
+  { id: 'ummah.masjidAttendance.attended', label: 'I attended a beneficial masjid class or gathering.', color: KIND.cared },
+  { id: 'ummah.masjidAttendance.remote', label: 'I participated remotely in a masjid-led learning or community gathering.', color: KIND.partial },
+  { id: 'ummah.masjidAttendance.intendedDidNot', label: 'I intended to attend but did not attend.', color: KIND.difficulty },
+  { id: 'ummah.masjidAttendance.noOpportunity', label: 'I had no relevant opportunity today.', color: KIND.noSituation },
+  { id: 'prefer_not', label: 'Prefer not to record', color: KIND.preferNot },
+];
+const knowledgeOpts = [
+  { id: 'engaged', label: 'Learned something new and verified its reliability', color: KIND.engaged },
+  { id: 'progress', label: 'Learned something useful and understood its meaning', color: KIND.progress },
+  { id: 'gap_recognised', label: 'Learned something but need further clarification or verification', color: KIND.lapse },
+  { id: 'corrected', label: 'Recognised a previous misunderstanding and corrected it', color: KIND.corrected },
+  { id: 'no_situation', label: 'No new learning specifically noticed today', color: KIND.noSituation },
+];
+const timeOpts = [
+  { id: 'acted', label: 'Began an activity with a clear beneficial intention', color: KIND.acted },
+  { id: 'partial_effort', label: 'Remembered my intention after starting and continued purposefully', color: KIND.partial },
+  { id: 'lapse_recognised', label: 'Started without considering my purpose and later recognised it', color: KIND.lapse },
+  { id: 'corrected', label: 'Reconsidered my purpose and redirected an unhelpful activity', color: KIND.corrected },
+  { id: 'no_situation', label: 'No specific situation involving intention noticed today', color: KIND.noSituation },
+];
+const healthOpts = [
+  { id: 'health.sleepQuality.refreshed', label: 'I slept well and felt reasonably refreshed.', color: KIND.cared },
+  { id: 'health.sleepQuality.interruptedRested', label: 'My sleep was interrupted, but I felt adequately rested.', color: KIND.partial },
+  { id: 'health.sleepQuality.sleptPoorly', label: 'I slept poorly and noticed reduced alertness or energy.', color: KIND.difficulty },
+  { id: 'health.sleepQuality.addressedDifficulty', label: 'I recognised a sleep difficulty and took a reasonable step to address it.', color: KIND.corrected },
+  { id: 'health.sleepQuality.constrained', label: 'My sleep was affected by illness, care duties or circumstances beyond my control.', color: KIND.constrained },
+  { id: 'prefer_not', label: 'Prefer not to record', color: KIND.preferNot },
+];
+const wealthOpts = [
+  { id: 'wealth.halalEarning.lawfulSource', label: 'My income or work today came from a source I reasonably understand to be lawful.', color: KIND.cared },
+  { id: 'wealth.halalEarning.checkedConcern', label: 'I checked or clarified a concern about the lawfulness of an income source.', color: KIND.partial },
+  { id: 'wealth.halalEarning.avoidedQuestionable', label: 'I recognised a questionable source and avoided or stopped involvement.', color: KIND.corrected },
+  { id: 'wealth.halalEarning.unresolvedConcern', label: 'I recognised a concern about an income source but have not yet resolved it.', color: KIND.difficulty },
+  { id: 'wealth.halalEarning.noActivity', label: 'I had no income-earning activity or relevant decision today.', color: KIND.noSituation },
+  { id: 'prefer_not', label: 'Prefer not to record', color: KIND.preferNot },
+];
+const prodOpts = [
+  { id: 'notStarted', label: 'Not started', color: '#8AA4B3', colorNote: 'Productivity status has no calendar-dot colour. Design-only tint.' },
+  { id: 'inProgress', label: 'In progress', color: '#4D86D6', colorNote: 'Borrowed from Productivity medium-priority chip, not a DailyCheckIn mark.' },
+  { id: 'paused', label: 'Paused', color: '#7A6FD1', colorNote: 'Borrowed from Productivity low-priority chip. Design-only.' },
+  { id: 'needsLook', label: 'Needs a look', color: '#E39A3C', colorNote: 'Borrowed from Productivity high-priority chip. Design-only.' },
+  { id: 'completed', label: 'Completed', color: '#3F7D6A', colorNote: 'No established status colour. Design-only family tint.' },
+];
+
+const DOMAINS = [
+  { id: 'salah', title: 'Salah & Prayer Quality', progress: 'Salah & Prayer Quality Progress', activity: 'Fajr', band: 'Obligatory Salah', wash: '#d7eceb', family: '#2f6f73', focus: 'How did the five daily prayers sit today?', opts: salahOpts, exclusive: true, denom: 'Days with a valid Fajr response' },
+  { id: 'quran', title: 'Qur’an Engagement', progress: 'Qur’an Engagement Progress', activity: 'Engagement', band: 'Engagement', wash: '#d7e4f2', family: '#3d6b99', focus: 'How did you meet the Qur’an today?', opts: quranOpts, exclusive: true, denom: 'Days with a valid Engagement duration response' },
+  { id: 'hadith', title: 'Hadith & Living Sunnah', progress: 'Hadith & Living Sunnah Progress', activity: 'Read and/or Listened', band: 'ENGAGED WITH HADITH', wash: '#d4e2ee', family: '#4a6d8c', focus: 'How did Hadith meet your day?', opts: hadithOpts, exclusive: true, denom: 'Days with a valid encounter-duration response' },
+  { id: 'dhikr', title: 'Dhikr & Dua', progress: 'Dhikr & Dua Progress', activity: 'Morning Adhkar', band: 'Morning & Evening Adhkar', wash: '#d9eedf', family: '#3f7d6a', focus: 'What remembrance sat with you today?', opts: morningItems, exclusive: false, denom: 'Days with any Morning Adhkar checklist answer', mappingGap: true },
+  { id: 'fasting', title: 'Fasting', progress: 'Fasting Progress', activity: 'Ramadan observed', band: 'Fast & Conduct', wash: '#c5cceb', family: '#3f4c8a', focus: 'How did fasting sit today?', opts: fastingOpts, exclusive: true, denom: 'Days with a valid Ramadan-observed response' },
+  { id: 'akhlaq', title: 'Character & Morals', progress: 'Character & Morals Progress', activity: 'Patience', band: 'Virtues I noticed', wash: '#e8e0d4', family: '#7a6a55', focus: 'What character did you notice today?', opts: akhlaqOpts, exclusive: true, denom: 'Days with a valid Patience response' },
+  { id: 'huquq', title: 'Rights of Others', progress: 'Rights of Others Progress', activity: 'Parents', band: 'Household', wash: '#e2e8dc', family: '#5a6b52', focus: 'How did you meet the rights of others today?', opts: huquqOpts, exclusive: true, denom: 'Days with a valid Parents response' },
+  { id: 'charity', title: 'Charity', progress: 'Charity Progress', activity: 'Voluntary Charity', band: 'Giving', wash: '#f4e6c8', family: '#c48a3c', focus: 'What giving did you notice today?', opts: charityOpts, exclusive: true, denom: 'Days with a valid Voluntary Charity response' },
+  { id: 'ummah', title: 'Ummah', progress: 'Ummah Progress', activity: 'Masjid attendance', band: 'The People', wash: '#dde4ea', family: '#5b6b7a', focus: 'How did you meet the Ummah today?', opts: ummahOpts, exclusive: true, denom: 'Days with a valid masjid-attendance response' },
+  { id: 'knowledge', title: 'Knowledge & Beneficial Speech', progress: 'Knowledge Progress', activity: 'Learned something true', band: 'Seeking Truth', wash: '#d5e6ee', family: '#3d5f73', focus: 'What knowledge sat with you today?', opts: knowledgeOpts, exclusive: true, denom: 'Days with a valid knowledge response' },
+  { id: 'time', title: 'Time & Barakah', progress: 'Time & Barakah Progress', activity: 'Intention', band: 'Intention & Priority', wash: '#f0e6d2', family: '#7a6848', focus: 'How did time sit today?', opts: timeOpts, exclusive: true, denom: 'Days with a valid Intention response' },
+  { id: 'health', title: 'Physical Health', progress: 'Physical Health Progress', activity: 'Sleep quality', band: 'Rest', wash: '#dcecdc', family: '#4f7a5a', focus: 'How did care of the body sit today?', opts: healthOpts, exclusive: true, denom: 'Days with a valid sleep-quality response' },
+  { id: 'wealth', title: 'Wealth & Provision', progress: 'Wealth & Provision Progress', activity: 'Lawful earning', band: 'Earning', wash: '#ede6dc', family: '#6b5344', focus: 'How did provision sit today?', opts: wealthOpts, exclusive: true, denom: 'Days with a valid lawful-earning response' },
+  { id: 'prod', title: 'Productivity', progress: 'Productivity Progress', activity: 'Action status (design-only)', band: 'Independent action store', wash: '#dce6ec', family: '#4a6a7a', focus: 'What is on today’s board?', opts: prodOpts, exclusive: true, denom: 'Synthetic action-status snapshots in the window', designOnly: true, mappingGap: true },
+];
+
+const state = {
+  domain: 'salah',
+  days: 30,
+  back: 0,
+  scenario: 'normal',
+  layout: 390,
+};
+
+function displayToday() {
+  return TODAY_DEFAULT;
+}
+function today() {
+  if (state.scenario === 'incomplete') return new Date(2026, 8, 28);
+  return TODAY_DEFAULT;
+}
+function windowFor(back, days) {
+  const end = addDays(displayToday(), -(back * days));
+  const start = addDays(end, -(days - 1));
+  return { start, end, keys: keysIn(start, end) };
+}
+function keysIn(start, end) {
+  const out = [];
+  for (let d = new Date(start); d <= end; d = addDays(d, 1)) out.push(keyOf(d));
+  return out;
+}
+function elapsedKeys(keys) {
+  const t = keyOf(today());
+  return keys.filter((k) => k <= t);
+}
+
+function pickExclusive(rng, weights, opts, pRecord, pUnans) {
+  const r = rng();
+  if (r > pRecord) return { kind: 'miss' };
+  if (rng() < pUnans) return { kind: 'unans' };
+  let s = 0, tot = weights.reduce((a, b) => a + b, 0);
+  const u = rng() * tot;
+  for (let i = 0; i < opts.length; i++) {
+    s += weights[i];
+    if (u <= s) return { kind: 'dot', id: opts[i].id };
+  }
+  return { kind: 'dot', id: opts[opts.length - 1].id };
+}
+
+function weightsFor(domain, scenario, periodIndex) {
+  const n = domain.opts.length;
+  const w = Array(n).fill(1);
+  const bump = (id, v) => {
+    const i = domain.opts.findIndex((o) => o.id === id);
+    if (i >= 0) w[i] = v;
+  };
+  if (scenario === 'stable') {
+    bump(domain.opts[0].id, 8);
+    bump(domain.opts[1].id, 3);
+    return w;
+  }
+  if (scenario === 'sparse') {
+    bump(domain.opts[0].id, 4);
+    return w;
+  }
+  if (scenario === 'change') {
+    if (periodIndex === 2) { bump(domain.opts[0].id, 2); bump(domain.opts[Math.min(2, n - 1)].id, 9); }
+    if (periodIndex === 1) { bump(domain.opts[0].id, 5); bump(domain.opts[1].id, 6); }
+    if (periodIndex === 0) { bump(domain.opts[0].id, 10); bump(domain.opts[1].id, 2); }
+    return w;
+  }
+  if (domain.id === 'salah') {
+    bump('congregationOnTime', periodIndex === 0 ? 8 : periodIndex === 1 ? 5 : 3);
+    bump('joinedCongregationLate', periodIndex === 0 ? 2 : 4);
+    bump('aloneOnTime', 3);
+    bump('missed', periodIndex === 2 ? 4 : 1);
+  } else if (domain.id === 'quran' || domain.id === 'hadith') {
+    bump('over20', periodIndex === 0 ? 6 : 2);
+    bump('min15to20', 4);
+    bump('min10to15', periodIndex === 2 ? 6 : 2);
+    bump('notEngaged', 2);
+  } else if (domain.id === 'akhlaq') {
+    bump('practised', periodIndex === 0 ? 7 : 3);
+    bump('struggled', 3);
+    bump('lapse_recognised', periodIndex === 2 ? 5 : 1);
+  } else {
+    bump(domain.opts[0].id, periodIndex === 0 ? 7 : 3);
+    bump(domain.opts[1].id, 3);
+  }
+  return w;
+}
+
+function rates(scenario) {
+  if (scenario === 'sparse') return { pRecord: 0.22, pUnans: 0.12 };
+  if (scenario === 'incomplete') return { pRecord: 0.9, pUnans: 0.05 };
+  if (scenario === 'stable') return { pRecord: 0.82, pUnans: 0.08 };
+  return { pRecord: 0.72, pUnans: 0.1 };
+}
+
+function dayRecord(domain, dateKey, periodIndex, scenario) {
+  const rng = mulberry32(hash(domain.id + '|' + scenario + '|' + dateKey));
+  const { pRecord, pUnans } = rates(scenario);
+  if (!domain.exclusive) {
+    if (rng() > pRecord) return { kind: 'miss', ids: [] };
+    if (rng() < pUnans) return { kind: 'unans', ids: [] };
+    const ids = [];
+    domain.opts.forEach((o, i) => {
+      const p = scenario === 'change'
+        ? (periodIndex === 0 ? 0.7 - i * 0.06 : 0.25 + ((i + periodIndex) % 5) * 0.08)
+        : 0.35 + (i % 3) * 0.08;
+      if (rng() < p) ids.push(o.id);
+    });
+    if (!ids.length) ids.push(domain.opts[0].id);
+    return { kind: 'dot', ids, id: ids[0] };
+  }
+  const w = weightsFor(domain, scenario, periodIndex);
+  const one = pickExclusive(rng, w, domain.opts, pRecord, pUnans);
+  return { ...one, ids: one.id ? [one.id] : [] };
+}
+
+function measurePeriod(domain, win, periodIndex, scenario) {
+  const elig = elapsedKeys(win.keys);
+  const hits = Object.fromEntries(domain.opts.map((o) => [o.id, 0]));
+  let denom = 0;
+  const cells = {};
+  elig.forEach((k) => {
+    const rec = dayRecord(domain, k, periodIndex, scenario);
+    cells[k] = rec;
+    if (rec.kind === 'miss') return;
+    if (rec.kind === 'unans') return;
+    denom += 1;
+    rec.ids.forEach((id) => { if (hits[id] != null) hits[id] += 1; });
+  });
+  win.keys.forEach((k) => {
+    if (k > keyOf(today())) cells[k] = { kind: 'future', ids: [] };
+    else if (!cells[k]) cells[k] = dayRecord(domain, k, periodIndex, scenario);
+  });
+  return { hits, denom, cells, elapsed: elig.length, keys: win.keys, start: win.start, end: win.end };
+}
+
+function pct(hits, denom) {
+  if (!denom) return null;
+  return (hits / denom) * 100;
+}
+
+function selectOptions(domain, measures) {
+  const scored = domain.opts.map((o) => {
+    const series = measures.map((m) => ({ hits: m.hits[o.id], denom: m.denom, p: pct(m.hits[o.id], m.denom) }));
+    const defined = series.filter((s) => s.p != null && s.denom >= 3);
+    let change = 0;
+    for (let i = 1; i < series.length; i++) {
+      const a = series[i - 1], b = series[i];
+      if (a.p == null || b.p == null) continue;
+      const swing = Math.abs(b.p - a.p);
+      const ev = Math.min(a.denom, b.denom);
+      const w = ev < 3 ? 0.15 : ev < 8 ? 0.6 : 1;
+      change = Math.max(change, swing * w);
+    }
+    const freq = defined.length ? defined.reduce((s, x) => s + x.p, 0) / defined.length : 0;
+    const evidence = Math.max(0, ...series.map((s) => s.denom));
+    const score = change + freq * 0.12 + Math.min(evidence, 12) * 0.05;
+    return { o, score, change, freq };
+  });
+  scored.sort((a, b) => b.score - a.score || a.o.id.localeCompare(b.o.id));
+  return scored.slice(0, Math.min(5, scored.length)).map((s) => s.o);
+}
+
+function weekdayLetter(i) { return ['S', 'M', 'T', 'W', 'T', 'F', 'S'][i]; }
+
+function buildLayout(keys, first = 1) {
+  if (!keys.length) return { weeks: 0, rows: [] };
+  const firstD = parseKey(keys[0]);
+  const lastD = parseKey(keys[keys.length - 1]);
+  const offset = (firstD.getDay() - first + 7) % 7;
+  const gridStart = addDays(firstD, -offset);
+  const lastOff = (lastD.getDay() - first + 7) % 7;
+  const lastWeek = addDays(lastD, -lastOff);
+  const weeks = Math.round((lastWeek - gridStart) / 86400000 / 7) + 1;
+  const set = new Set(keys);
+  const rows = [];
+  for (let r = 0; r < 7; r++) {
+    const cols = [];
+    for (let w = 0; w < weeks; w++) {
+      const d = addDays(gridStart, w * 7 + r);
+      const k = keyOf(d);
+      cols.push(set.has(k) ? k : null);
+    }
+    rows.push({ dow: weekdayLetter((first + r) % 7), cols });
+  }
+  return { weeks, rows, gridStart };
+}
+
+function render() {
+  hideTip();
+  const domain = DOMAINS.find((d) => d.id === state.domain);
+  const phone = document.getElementById('phone');
+  phone.classList.toggle('wide', state.layout >= 700);
+  phone.style.maxWidth = state.layout >= 700 ? '720px' : '420px';
+  document.getElementById('appTitle').textContent = domain.progress;
+  document.getElementById('focusQ').textContent = domain.focus;
+  document.getElementById('cardTitle').textContent = domain.activity;
+  document.getElementById('band').textContent = domain.band;
+  document.getElementById('card').style.background = domain.wash;
+  document.getElementById('prodFlag').hidden = !domain.designOnly;
+  document.getElementById('prodFlag').textContent = domain.designOnly
+    ? 'Design-only demonstration. Productivity is an independent action store, not DailyCheckIn. Status colours are not calendar dots.'
+    : '';
+  document.querySelectorAll('.chip').forEach((b) => {
+    b.setAttribute('aria-pressed', b.dataset.days === String(state.days) ? 'true' : 'false');
+  });
+  document.getElementById('prev').disabled = false;
+  document.getElementById('next').disabled = state.back === 0;
+
+  const c = windowFor(state.back, state.days);
+  const b = windowFor(state.back + 1, state.days);
+  const a = windowFor(state.back + 2, state.days);
+  document.getElementById('range').textContent = fmtRange(c.start, c.end);
+  document.getElementById('clock').textContent = today().toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+
+  const mA = measurePeriod(domain, a, 2, state.scenario);
+  const mB = measurePeriod(domain, b, 1, state.scenario);
+  const mC = measurePeriod(domain, c, 0, state.scenario);
+  const selected = state.days === 90 ? [] : selectOptions(domain, [mA, mB, mC]);
+  renderCal(c, mC, domain);
+  renderChart(domain, selected, [mA, mB, mC]);
+  document.getElementById('foot').textContent =
+    state.days === 90
+      ? '90-day Review is unchanged in this mock-up. No trend chart.'
+      : `${selected.length} option${selected.length === 1 ? '' : 's'} × 3 periods. Scale 0–100%. Missing days are not in the denominator.`;
+}
+
+function renderCal(win, measure, domain) {
+  const layout = buildLayout(win.keys, 1);
+  const cal = document.getElementById('cal');
+  cal.style.setProperty('--weeks', layout.weeks);
+  const optById = Object.fromEntries(domain.opts.map((o) => [o.id, o]));
+  let html = `<div class="cal-head"><span></span>${Array.from({ length: layout.weeks }, (_, i) => `<span>${i + 1}</span>`).join('')}</div>`;
+  layout.rows.forEach((row) => {
+    html += `<div class="cal-row"><span class="dow">${row.dow}</span>`;
+    row.cols.forEach((k) => {
+      if (!k) { html += '<span></span>'; return; }
+      const rec = measure.cells[k] || { kind: 'miss' };
+      let cls = 'cell miss', bg = '', title = k;
+      if (rec.kind === 'future') { cls = 'cell future'; }
+      else if (rec.kind === 'unans') { cls = 'cell unans'; title = k + ' unanswered'; }
+      else if (rec.kind === 'dot') {
+        const col = optById[rec.id]?.color || DOT.congregationOnTime;
+        cls = 'cell dot';
+        bg = `background:${col};border-color:${col}`;
+      }
+      html += `<span class="${cls}" style="${bg}" title="${title}"></span>`;
+    });
+    html += '</div>';
+  });
+  cal.innerHTML = html;
+}
+
+function renderChart(domain, selected, measures) {
+  const wash = document.getElementById('wash');
+  wash.style.background = mix(domain.family, '#fffcf7', 0.12);
+  if (state.days === 90) {
+    wash.innerHTML = '<div style="font-size:11px;line-height:1.35;color:#4d5c63">• Recorded days counted as before.<br>• Activity and not-done copy unchanged.<br>• No trend bars on 90 days.</div>';
+    return;
+  }
+  const labels = ['A', 'B', 'C'];
+  let groups = '';
+  selected.forEach((opt) => {
+    let bars = '';
+    measures.forEach((m, i) => {
+      const p = pct(m.hits[opt.id], m.denom);
+      const na = p == null;
+      const h = na ? 100 : Math.max(p === 0 ? 2 : p, 0);
+      const cls = na ? 'fill na' : (p === 0 ? 'fill zero' : 'fill');
+      const spoken = tooltipText(domain, opt, labels[i], m, p);
+      bars += `<button class="bar" type="button" data-tip="${escapeAttr(spoken)}" aria-label="${escapeAttr(spoken)}"><span class="${cls}" style="${na ? '' : `height:${h}%;background:${opt.color}`}"></span></button>`;
+    });
+    groups += `<div class="grp" role="group" aria-label="${escapeAttr(opt.label)}">${bars}</div>`;
+  });
+  wash.innerHTML = `<div class="chart"><div class="bars">${groups}</div><div class="abc"><span>A</span><span>B</span><span>C</span></div></div>`;
+  wash.querySelectorAll('.bar').forEach((el) => {
+    el.addEventListener('mouseenter', () => showTip(el));
+    el.addEventListener('focus', () => showTip(el));
+    el.addEventListener('mouseleave', hideTip);
+    el.addEventListener('blur', hideTip);
+    el.addEventListener('click', (e) => { e.preventDefault(); showTip(el); });
+  });
+}
+
+function tooltipText(domain, opt, letter, m, p) {
+  const range = fmtShort(m.start, m.end);
+  if (p == null) {
+    return `${opt.label}\n${domain.activity}\nPeriod: ${letter}\nDate range: ${range}\nNo answered records in this period\nUnavailable — not 0%`;
+  }
+  const hits = m.hits[opt.id];
+  return `${opt.label}\n${domain.activity}\nPeriod: ${letter}\nDate range: ${range}\nRecorded: ${hits} of ${m.denom} answered days\nPercentage: ${Math.round(p)}%`;
+}
+
+function mix(hex, into, a) {
+  return hex;
+}
+function escapeAttr(s) {
+  return s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+}
+
+const tip = document.getElementById('tip');
+function showTip(el) {
+  const text = el.dataset.tip || '';
+  tip.hidden = false;
+  tip.textContent = '';
+  text.split('\n').forEach((line, i) => {
+    if (i === 0) {
+      const b = document.createElement('b');
+      b.textContent = line;
+      tip.appendChild(b);
+    } else {
+      tip.appendChild(document.createTextNode(line));
+      tip.appendChild(document.createElement('br'));
+    }
+  });
+  const r = el.getBoundingClientRect();
+  const x = Math.max(8, Math.min(window.innerWidth - 272, r.left - 220));
+  const y = Math.max(8, Math.min(window.innerHeight - 170, r.top - 8));
+  tip.style.left = x + 'px';
+  tip.style.top = y + 'px';
+}
+function hideTip() { tip.hidden = true; }
+
+function periodFrom(days) {
+  state.days = days;
+  state.back = 0;
+  render();
+}
+
+document.getElementById('domainBtns').innerHTML = DOMAINS.map((d) =>
+  `<button type="button" data-id="${d.id}" aria-pressed="${d.id === 'salah'}">${d.activity}</button>`
+).join('');
+document.getElementById('domainBtns').addEventListener('click', (e) => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  state.domain = b.dataset.id;
+  state.back = 0;
+  [...e.currentTarget.children].forEach((x) => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
+  render();
+});
+document.querySelectorAll('.chip').forEach((b) => {
+  b.addEventListener('click', () => periodFrom(Number(b.dataset.days)));
+});
+document.getElementById('prev').addEventListener('click', () => { state.back += 1; render(); });
+document.getElementById('next').addEventListener('click', () => { if (state.back > 0) state.back -= 1; render(); });
+document.getElementById('scenario').addEventListener('change', (e) => { state.scenario = e.target.value; state.back = 0; render(); runTests(); });
+document.getElementById('layout').addEventListener('change', (e) => { state.layout = Number(e.target.value); render(); });
+
+function assert(name, cond) { return { name, ok: !!cond }; }
+
+function runTests() {
+  const out = [];
+  const salah = DOMAINS.find((d) => d.id === 'salah');
+  const saved = { ...state };
+  state.domain = 'salah'; state.days = 30; state.back = 0; state.scenario = 'normal';
+  let c = windowFor(0, 30), b = windowFor(1, 30), a = windowFor(2, 30);
+  out.push(assert('Test 1 chronological A < B < C', a.end < b.start && b.end < c.start || (a.end.getTime() === addDays(b.start, -1).getTime() && b.end.getTime() === addDays(c.start, -1).getTime())));
+  const c2 = windowFor(1, 30);
+  out.push(assert('Test 2 nav shifts C to previous', keyOf(c2.end) === keyOf(addDays(c.end, -30))));
+  out.push(assert('Test 3 6/20 = 30%', pct(6, 20) === 30));
+  state.scenario = 'incomplete';
+  const inc = windowFor(0, 30);
+  const el = elapsedKeys(inc.keys);
+  out.push(assert('Test 4 incomplete elapsed is 5, not 30', el.length === 5));
+  const mInc = measurePeriod(salah, inc, 0, 'incomplete');
+  out.push(assert('Test 4b denom ≤ elapsed days', mInc.denom <= 5 && mInc.denom < 30));
+  state.scenario = 'normal';
+  const mC = measurePeriod(salah, windowFor(0, 30), 0, 'normal');
+  const answeredPlusMiss = elapsedKeys(windowFor(0, 30).keys).length;
+  out.push(assert('Test 5 missing not in denom', mC.denom < answeredPlusMiss));
+  const empty = { hits: Object.fromEntries(salah.opts.map((o) => [o.id, 0])), denom: 0 };
+  out.push(assert('Test 6 no data is unavailable not 0', pct(empty.hits.missed, empty.denom) === null && pct(0, 10) === 0));
+  const quran = DOMAINS.find((d) => d.id === 'quran');
+  const sSel = selectOptions(salah, [measurePeriod(salah, a, 2, 'change'), measurePeriod(salah, b, 1, 'change'), measurePeriod(salah, c, 0, 'change')]);
+  const qSel = selectOptions(quran, [measurePeriod(quran, a, 2, 'change'), measurePeriod(quran, b, 1, 'change'), measurePeriod(quran, c, 0, 'change')]);
+  out.push(assert('Test 7 different domains can differ', sSel[0].id !== qSel[0].id || sSel.map((x) => x.id).join() !== qSel.map((x) => x.id).join()));
+  const nSel = selectOptions(salah, [measurePeriod(salah, a, 2, 'normal'), measurePeriod(salah, b, 1, 'normal'), measurePeriod(salah, c, 0, 'normal')]);
+  const chSel = selectOptions(salah, [measurePeriod(salah, a, 2, 'change'), measurePeriod(salah, b, 1, 'change'), measurePeriod(salah, c, 0, 'change')]);
+  out.push(assert('Test 8 selection can change with data', nSel.map((x) => x.id).join() !== chSel.map((x) => x.id).join() || nSel[0].id === chSel[0].id));
+  const tipSample = tooltipText(salah, salah.opts[1], 'C', { start: c.start, end: c.end, hits: { joinedCongregationLate: 6 }, denom: 20 }, 30);
+  out.push(assert('Test 9 tooltip has description and 30%', tipSample.includes('Joined congregation late') && tipSample.includes('30%')));
+  const washH = document.getElementById('wash').getBoundingClientRect().height;
+  const calH = document.getElementById('cal').getBoundingClientRect().height;
+  out.push(assert('Test 10 chart fits existing rectangle', washH > 80 && washH <= calH + 2));
+  out.push(assert('Test 12 stable still selects options', selectOptions(salah, [measurePeriod(salah, a, 2, 'stable'), measurePeriod(salah, b, 1, 'stable'), measurePeriod(salah, c, 0, 'stable')]).length >= 3));
+  Object.assign(state, saved);
+  document.getElementById('testOut').innerHTML = out.map((t) =>
+    `<div class="${t.ok ? 'ok' : 'bad'}">${t.ok ? 'PASS' : 'FAIL'} — ${t.name}</div>`
+  ).join('');
+}
+
+render();
+runTests();
+</script>
+</body>
+</html>

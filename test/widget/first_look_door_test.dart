@@ -33,6 +33,11 @@ void main() {
     expect(find.text(Copy.firstLookDoorPrivate), findsOneWidget);
     expect(find.text(Copy.firstLookDoorEmpty), findsOneWidget);
     expect(find.text(Copy.firstLookDoorSeason), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text(Copy.firstLookDoorSample),
+      200,
+    );
+    expect(find.text(Copy.firstLookDoorSample), findsOneWidget);
     expect(find.text('Continue'), findsNothing);
 
     await tester.tap(find.text(Copy.firstLookStartBlank));
@@ -60,11 +65,18 @@ void main() {
     );
     await tester.pumpAndSettle();
     await tester.tap(find.text(Copy.firstLookShowSample));
-    await tester.pumpAndSettle(const Duration(minutes: 1));
+    await tester.pump();
+    // Seed then Home loads records. decodeStoredCheckIns yields with
+    // Future.delayed(Duration.zero); flush those timers. Do not
+    // pumpAndSettle: a progress indicator never goes idle, and a
+    // Duration(minutes: 1) argument is the frame interval, not a timeout.
+    for (var i = 0; i < 12; i++) {
+      await tester.pump(Duration.zero);
+    }
     expect(prefs.applicationReflectionAcknowledged, isTrue);
     expect(prefs.personalMix.kind, PersonalMixKind.firstLook);
-    final records = await checkIns.allHealthy();
+    final records = await tester.runAsync(checkIns.allHealthy);
     expect(records, isNotEmpty);
-    expect(records.every((record) => record.synthetic), isTrue);
+    expect(records!.every((record) => record.synthetic), isTrue);
   });
 }

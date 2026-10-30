@@ -42,8 +42,8 @@ class DomainBriefing {
 
 const huquqBriefing = DomainBriefing(
   lead: [
-    'This records rights others have over you. It is an investment in people Allah placed in your life — not a chore list, and not what they owe you.',
-    'Use each row for whether you attended to that right, or neglected it. Unanswered is not neglect, and is not a relationship score.',
+    'This records rights others have over you — whether you attended to a right you owe, or neglected it. It is not a chore list, a relationship score, or a ledger of what they owe you.',
+    'Rows match Home. Empty is not neglect. Learn & Practice is a reminder list, not a daily grade.',
   ],
   examplesTitle: 'Attending can look like',
   groups: [
@@ -62,10 +62,10 @@ const huquqBriefing = DomainBriefing(
       items: ['Other relatives — keeping ties'],
     ),
     BriefingGroup(
-      title: 'Neighbours and work',
+      title: 'Neighbours & work',
       items: [
-        'Neighbour — a check-in, a gift, not harming, helping',
-        'Colleagues and friends — trustworthiness, keeping a confidence, sincere advice, not backbiting',
+        'Neighbours — a check-in, a gift, not harming, helping',
+        'Colleagues & friends — trustworthiness, keeping a confidence, sincere advice, not backbiting',
       ],
     ),
     BriefingGroup(
@@ -73,6 +73,13 @@ const huquqBriefing = DomainBriefing(
       items: [
         'Fellow Muslims — salaam, help in need, dua',
         'Non-Muslims — justice, kindness, good neighbourliness, character',
+      ],
+    ),
+    BriefingGroup(
+      title: 'Repair',
+      items: [
+        'A step toward reconciliation — optional noticing. The app does not prescribe or complete sulh.',
+        'Turned back over a neglected right — optional noticing, not completed tawbah.',
       ],
     ),
     BriefingGroup(
@@ -84,24 +91,31 @@ const huquqBriefing = DomainBriefing(
   ],
   bounds: [
     'Record only yourself. Do not log what others owe you, or name their faults.',
-    'Family conflict is not a shame mark. A step toward reconciliation is optional. The app does not prescribe or complete tawbah or sulh.',
+    'Family conflict is not a shame mark. Reconciliation is optional.',
     'Safety and justice come first. Patience is not required in harm or abuse.',
+    'Ordinary household support stays here. Extra gifts sit on Charity.',
+  ],
+  closing: [
+    // Keep aligned with Copy.huquqCheckInNote (copy.dart imports this file).
+    'One observation per row of a right you owe. Empty is not neglect. Do not name others’ faults. Colour names the choice when activity colours are on — not a relationship score.',
   ],
 );
 
 const akhlaqBriefing = DomainBriefing(
   lead: [
-    'Notice what you did. This is not a verdict of being a good or bad person, a character score, or a performance review.',
+    'Notice what you did in yourself. Not a good/bad verdict, a character score, or a performance review.',
   ],
   items: [
     'Record only yourself — not someone else’s flaw.',
     'Patience may be silence or firmness.',
-    'Guarded how I spoke is tone and modesty; Knowledge’s held-back speech is whether the words were useful.',
-    'Thankfulness in how I acted is character; Gratitude Dhikr is remembrance.',
-    'Held back from a habit I am trying to leave is noticed restraint. The habit is not named.',
-    'Unanswered is not a relapse, a sin, or a failing.',
+    'Guarded speech is tone. Thankfulness in action is character; Gratitude Dhikr is remembrance.',
+    'Held back from a habit is noticed restraint. The habit is not named. Empty is not a relapse.',
   ],
-  closing: ['Perfection is not expected.'],
+  closing: [
+    'Perfection is not expected.',
+    // Keep aligned with Copy.akhlaqCheckInNote (copy.dart imports this file).
+    'One observation per row, about yourself only. Empty is not a relapse. Colour names the choice when activity colours are on — not a grade.',
+  ],
 );
 
 const knowledgeBriefing = DomainBriefing(
@@ -123,16 +137,15 @@ const knowledgeBriefing = DomainBriefing(
 
 const timeBriefing = DomainBriefing(
   lead: [
-    'Time is a trust from Allah. Record whether you noticed presence, keeping a trust, or rest — not how many hours you clocked.',
+    'Time is a trust from Allah. Record independent observations of intention, attention, action, and balance — not how many hours you clocked, and not a productivity score.',
   ],
   items: [
-    'The fard stays on Salah. Sleep stays on Physical Health.',
-    'Presence is attention in what you were doing.',
-    'Trust may be doing something you had delayed, or stepping away from idle time.',
-    'Rest from work as needed is part of the trust; it is not failure and it is not a sleep log.',
-    'Older prayer-window marks on this domain stay stored and still appear on Historical Reflection.',
-    'Hours, productivity scores, and hustle badges are not recorded.',
-    'Unanswered is not wasted time.',
+    'The eight practices are optional observations, not eight daily achievements.',
+    'A first tap stores a descriptive observation: beneficial action, partial effort, a recognised lapse, a corrective adjustment, no relevant situation, or unanswered. Optional follow-ups are provenance, not a productivity score.',
+    'The app records what you report. It does not infer intention, sincerity, laziness, psychological health, divine reward, or barakah.',
+    'The fard stays on Salah. Sleep stays on Physical Health. Took needed rest here is recovery, not a sleep log.',
+    'Hours, productivity scores, streaks, and hustle badges are not recorded.',
+    'Unanswered is not wasted time and not a failure.',
     'The app never congratulates anyone for being productive, and does not prescribe a schedule.',
   ],
 );
@@ -143,10 +156,11 @@ const healthBriefing = DomainBriefing(
   ],
   items: [
     'Sleep quality and amount are observations, not hour badges, and not Time & Barakah’s rest from work.',
+    'A first tap stores a descriptive observation. Prefer not to record is an explicit privacy choice, distinct from unanswered.',
     'A nap that cares for the body may be noticed here. The same day may be both. The app does not fill sleep from Time, or Time from sleep.',
     'Movement is for strength to worship and serve, not aesthetics or “gains”.',
-    'Nutrition is halal, healthy, and in moderation — not calorie counting. Hydration is simple, not obsessive.',
-    'Illness and disability are not failings. Seeking treatment, patience, and gratitude may all be care.',
+    'Nutrition is lawful, sufficient, and in moderation — not calorie counting. Hydration is simple, not obsessive.',
+    'Illness, disability, ageing, fatigue, and prescribed treatment are not failings. Seeking care is not ranked above having no illness.',
     'Physical and mental health are intertwined.',
     'This is not a fitness app: no weight, body metrics, body-shaming, or beauty-as-spiritual-goal.',
     'Extreme fasting outside Ramadan is not encouraged here.',
@@ -155,11 +169,14 @@ const healthBriefing = DomainBriefing(
 
 const wealthBriefing = DomainBriefing(
   lead: [
-    'Wealth is a trust. Record whether earning and spending pleased Allah — not how much you have.',
+    'Wealth is a trust. Record how you managed earning, spending, and what was entrusted to you — not how much you have.',
   ],
   items: [
-    'Earning may be noticing a halal source, or staying clear of riba.',
+    'Earning may be noticing a lawful source, or staying clear of riba.',
     'Avoiding waste is part of stewardship.',
+    'Lawful wealth management is responsible use of money, debts, records, and trusts. It is not a bank log.',
+    'A reported action is distinct from an unresolved concern. No relevant activity is not a failure.',
+    'Self-report is not a legal or scholarly determination. Complex cases need qualified advice.',
     'Giving — sadaqah, family support, community care, and zakat due, planned, or paid — is on Charity. Amounts are not recorded. There is no zakat calculator.',
     'Net worth and savings are not spiritual metrics.',
     'Poverty and debt are not failings. Wealth is not a sign of Allah’s pleasure.',
@@ -172,8 +189,8 @@ const ummahBriefing = DomainBriefing(
     'This is about the Ummah — privately. The fard and Jumu‘ah stay on Salah. This card is not a public masjid check-in.',
   ],
   items: [
-    'A masjid class or gathering (not the fard) may be noticed here.',
-    'Da’wah here is by character, not argument, and not Character & Morals’ virtue list.',
+    'A masjid class or gathering (not the fard) may be noticed here. Remote participation is recorded as remote, not as being present.',
+    'Da’wah here is by character, not argument, and not Character & Morals’ virtue list. No quota, and no inference of anyone else’s faith.',
     'Solidarity may be dua, awareness, or material help for the oppressed; working for unity; or praying for the Ummah, especially in crisis.',
     'The earth is a trust.',
     'Help to a neighbour, community giving, and sick care stay on Rights of Others and Charity.',
@@ -186,24 +203,58 @@ const ummahBriefing = DomainBriefing(
 
 const hadithBriefing = DomainBriefing(
   lead: [
-    'Qur’an Engagement has its own card. This is the Prophet’s teaching ﷺ: reading, listening, retention, study, and whether a teaching reached how you lived today.',
+    'The Prophet’s teaching ﷺ — separate from Qur’an Engagement. Four rows: read/listened, memorization or revision, study circle, and lived or noticed in others.',
   ],
   items: [
-    'Noticed a sunnah in how I lived today is one observation, not a revival programme or a completed sunnah checklist.',
-    'Character & Morals stays who you were. The same afternoon may be both. The app does not fill this from Akhlaq.',
-    'Current Memorisation Focus is a standing preference, not a daily grade.',
-    'Unanswered is not a failed revival.',
+    'The first three rows use the same duration steps as Qur’an. Time is observational, not a grade.',
+    'Lived/noticed is one observation, not a revival programme or a completed sunnah checklist.',
+    'Character stays who you were. The same afternoon may be both. The app does not fill this from Character.',
+    'Learn & Practice is a private register you may add to. Empty is not a failed revival.',
+  ],
+);
+
+const fastingBriefing = DomainBriefing(
+  lead: [
+    'Ramadan noticing, then voluntary and make-up. Empty is not a missed fast. Prefer not to record is a privacy choice.',
+  ],
+  items: [
+    'Ramadan rows appear on civil Ramadan dates; voluntary rows appear outside it. Calendar can shift Ramadan by a day for local moon sighting.',
+    'The app does not judge validity, exemption, make-up, or fidyah. An exemption is not a failure. Fasting today is not auto-completed after iftar.',
+    'Weekly sunnah, White Days, and make-up use fasting-day distinctions, not a yes/no mark. A Shawwal fast is voluntary; an actual make-up stays on Make-up Fast.',
+    'Civil Hijri 13–15 on Progress is orientation only. Extreme fasting outside Ramadan is not encouraged.',
   ],
 );
 
 const hajjBriefing = DomainBriefing(
   lead: [
-    'Hajj is a standing status you set: not due, due as you see it, preparing, performed, or not applicable.',
+    'Hajj standing is a lifetime record you set. A journey is optional and separately stored. The app does not decide whether Hajj is obligatory.',
   ],
   items: [
-    'The app does not calculate whether Hajj is obligatory, does not set a year, and does not treat an empty mark as missed.',
-    'Daily preparation is optional noticing — saving, health, learning rites, or travel — not a countdown and not a visa checklist score.',
-    'Umrah is not this status. Performed is a record, not a trophy.',
+    'Unanswered, unsure, not planning, not applicable, and prefer not to record stay available. Empty is not missed Hajj.',
+    'Readiness is a checklist on a journey you choose to start — not a daily score and not a visa engine.',
+    'Learn & Practice is always available, independent of standing or journey. After Hajj is optional reflection, not a trophy. Umrah is not this standing.',
+  ],
+);
+
+const productivityBriefing = DomainBriefing(
+  lead: [
+    'Productivity is a user-owned action list on one dashboard. It is not a score, streak, or Time & Barakah replacement.',
+  ],
+  items: [
+    'Today’s five, remaining effort, and carry-forward are planning tools. Unfinished work is not a fail.',
+    'Needs a look means blocked or past a date you set — not a grade.',
+    'Private titles stay on the device. The app does not log them.',
+  ],
+);
+
+const charityBriefing = DomainBriefing(
+  lead: [
+    'Giving and care you noticed — privately. No amounts, names, or circumstances. Ordinary household nafaqa stays on Rights of Others.',
+  ],
+  items: [
+    'Voluntary giving is independent of Zakat. Zakat is a status you name, not a calculator.',
+    'A smile is sadaqah. Poverty is not a failing. There is no generosity rank.',
+    'Prefer not to record is not empty. No relevant opportunity is not withheld charity.',
   ],
 );
 
@@ -211,12 +262,15 @@ DomainBriefing? briefingForDomain(MonitorDomain domain) => switch (domain) {
   MonitorDomain.hadith => hadithBriefing,
   MonitorDomain.akhlaq => akhlaqBriefing,
   MonitorDomain.huquq => huquqBriefing,
+  MonitorDomain.charity => charityBriefing,
   MonitorDomain.knowledge => knowledgeBriefing,
   MonitorDomain.time => timeBriefing,
   MonitorDomain.health => healthBriefing,
   MonitorDomain.wealth => wealthBriefing,
   MonitorDomain.ummah => ummahBriefing,
+  MonitorDomain.fasting => fastingBriefing,
   MonitorDomain.hajj => hajjBriefing,
+  MonitorDomain.productivity => productivityBriefing,
   _ => null,
 };
 

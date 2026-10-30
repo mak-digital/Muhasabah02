@@ -11,6 +11,7 @@ import '../../domain/personal_response.dart';
 import '../../domain/review_period.dart';
 import '../../domain/weekly_calendar.dart';
 import '../shared/add_response_button.dart';
+import '../shared/system_insets.dart';
 import '../shared/ui_bits.dart';
 import 'day_evidence_screen.dart';
 import 'evidence_ui.dart';
@@ -43,7 +44,7 @@ class RecordedDaysScreen extends ConsumerWidget {
               );
           final calendar = ref.read(appPrefsProvider).displayCalendar;
           return ListView(
-            padding: const EdgeInsets.all(16),
+            padding: pageListPadding(context, recoverSystemBottom: true),
             children: [
               const EvidenceGuard(Copy.recordedDaysGuard),
               PeriodSelector(
@@ -96,7 +97,14 @@ class RecordedDaysScreen extends ConsumerWidget {
       padding: const EdgeInsets.only(bottom: 4),
       child: Row(
         children: [
-          Icon(Icons.circle, size: 8, color: MuhasabahColors.salahFamily),
+          Icon(
+            Icons.circle,
+            size: 8,
+            color: MuhasabahWashTheme.harmonizeFamilyOf(
+              context,
+              MuhasabahColors.salahFamily,
+            ),
+          ),
           const SizedBox(width: 4),
           Text(Copy.recordedDaysSavedLegend, style: muted),
           const SizedBox(width: 12),
@@ -203,6 +211,7 @@ class RecordedDaysScreen extends ConsumerWidget {
       MuhasabahColors.salahWash,
       MuhasabahColors.salahWashDark,
       brightness,
+      context,
     );
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 2),

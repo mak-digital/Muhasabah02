@@ -2,10 +2,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:muhasabah02/data/memory_repositories.dart';
 import 'package:muhasabah02/debug/synthetic_check_in_seeder.dart';
 import 'package:muhasabah02/debug/synthetic_check_ins.dart';
+import 'package:muhasabah02/domain/activities.dart';
 import 'package:muhasabah02/domain/daily_check_in.dart';
 import 'package:muhasabah02/domain/date_key.dart';
+import 'package:muhasabah02/domain/dhikr_context.dart';
 import 'package:muhasabah02/domain/prayer.dart';
 import 'package:muhasabah02/domain/quran.dart';
+import 'package:muhasabah02/domain/quran_duration.dart';
 import 'package:muhasabah02/domain/recognition.dart';
 import 'package:muhasabah02/domain/review_period.dart';
 
@@ -78,10 +81,12 @@ void main() {
     final patterns30 = const RecognitionEngine().detect(
       records: in30,
       period: ReviewPeriod.days30,
+      now: now,
     );
     final patterns90 = const RecognitionEngine().detect(
       records: in90,
       period: ReviewPeriod.days90,
+      now: now,
     );
     expect(patterns30, isNotEmpty);
     expect(
@@ -95,8 +100,8 @@ void main() {
     expect(
       patterns30.any(
         (pattern) =>
-            pattern.subject == QuranDimension.revision &&
-            pattern.factorId == 'fatigue',
+            pattern.subject == QuranDimension.consciousApplication &&
+            pattern.factorId == 'routine',
       ),
       isTrue,
     );
@@ -104,7 +109,7 @@ void main() {
     expect(
       patterns90.any(
         (pattern) =>
-            pattern.subject == QuranDimension.tafsir &&
+            pattern.subject == QuranDimension.consciousApplication &&
             pattern.factorId == 'quran.studyCircle',
       ),
       isTrue,
@@ -113,6 +118,90 @@ void main() {
       patterns30.every(
         (pattern) => !pattern.factorLine.toLowerCase().contains('caused'),
       ),
+      isTrue,
+    );
+  });
+
+  test('sample days use live fields and a later-window engagement pattern', () {
+    final plan = generateSyntheticCheckIns(now: now);
+    final keys30 = periodDateKeys(30, now: now).toSet();
+    final keys75 = periodDateKeys(75, now: now).toSet();
+    final recent = [
+      for (final record in plan.records)
+        if (keys30.contains(record.dateKey)) record,
+    ];
+    final earlier = [
+      for (final record in plan.records)
+        if (!keys75.contains(record.dateKey)) record,
+    ];
+    expect(recent, isNotEmpty);
+    expect(earlier, isNotEmpty);
+
+    double onTimeShare(List<DailyCheckIn> days) {
+      var hits = 0;
+      var cells = 0;
+      for (final record in days) {
+        for (final id in PrayerId.values) {
+          cells++;
+          if (record.prayer(id) == PrayerStatus.onTime) hits++;
+        }
+      }
+      return hits / cells;
+    }
+
+    int practisedDhikr(List<DailyCheckIn> days) {
+      var n = 0;
+      for (final record in days) {
+        for (final captures in record.dhikrContext.values) {
+          n += captures
+              .where((item) => item.response == DhikrContextResponse.practised)
+              .length;
+        }
+      }
+      return n;
+    }
+
+    int longerQuran(List<DailyCheckIn> days) {
+      const longer = {
+        QuranDurationIds.over20,
+        QuranDurationIds.min15to20,
+        QuranDurationIds.min10to15,
+      };
+      var n = 0;
+      for (final record in days) {
+        final id = record
+            .activityFor(ActivityCatalog.quranKey(QuranDimension.reading))
+            .id;
+        if (longer.contains(id)) n++;
+      }
+      return n;
+    }
+
+    expect(onTimeShare(recent), greaterThan(onTimeShare(earlier)));
+    expect(
+      practisedDhikr(recent) / recent.length,
+      greaterThan(practisedDhikr(earlier) / earlier.length),
+    );
+    expect(
+      longerQuran(recent) / recent.length,
+      greaterThan(longerQuran(earlier) / earlier.length),
+    );
+    expect(
+      plan.records.any((record) => record.dhikrContext.isNotEmpty),
+      isTrue,
+    );
+    expect(
+      plan.records.every((record) {
+        return record.homeTraces.keys.every((key) {
+          return !key.startsWith('knowledge.') &&
+              !key.startsWith('time.') &&
+              !key.startsWith('health.') &&
+              !key.startsWith('wealth.') &&
+              !key.startsWith('ummah.') &&
+              !key.startsWith('hajj.') &&
+              !key.startsWith('family.');
+        });
+      }),
       isTrue,
     );
   });

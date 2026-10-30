@@ -7,8 +7,11 @@ import '../../domain/date_key.dart';
 import '../../domain/display_calendar.dart';
 import '../../domain/first_day_of_week.dart';
 import '../../domain/weekly_calendar.dart';
+import '../../domain/thirty_day_trend.dart';
 import 'today_mark_halo.dart';
 import 'lunar_white_day_highlight.dart';
+import 'thirty_day_trend_chart.dart';
+import 'ui_bits.dart';
 
 Color monthDayCellWash({
   required Color family,
@@ -218,6 +221,7 @@ class ProgressCalendarGrid extends ConsumerWidget {
     if (whiteDay) {
       child = LunarWhiteDayHighlight(
         key: Key('lunar-white-$key'),
+        dense: true,
         child: child,
       );
     } else if (key != null && bandFamily != null) {
@@ -260,6 +264,8 @@ class ProgressCalendarSection extends ConsumerStatefulWidget {
     this.sectionId,
     this.subtitle,
     this.belowTitle,
+    this.summaryLines = const [],
+    this.trend,
     this.family,
     this.highlightLunarWhiteDays = false,
   });
@@ -268,6 +274,8 @@ class ProgressCalendarSection extends ConsumerStatefulWidget {
   final String? sectionId;
   final String? subtitle;
   final Widget? belowTitle;
+  final List<String> summaryLines;
+  final ThirtyDayTrendSeries? trend;
   final int periodDays;
   final Color? family;
   final bool highlightLunarWhiteDays;
@@ -281,6 +289,9 @@ class ProgressCalendarSection extends ConsumerStatefulWidget {
 class _ProgressCalendarSectionState
     extends ConsumerState<ProgressCalendarSection> {
   var _periodsBack = 0;
+  final _boardKey = GlobalKey();
+  final _washKey = GlobalKey();
+  final _washLink = LayerLink();
 
   @override
   Widget build(BuildContext context) {
@@ -297,6 +308,23 @@ class _ProgressCalendarSectionState
     final theme = Theme.of(context);
     final range =
         '(for ${formatDayMonthYear(parseDateKey(keys.first), calendar)} – ${formatDayMonthYear(parseDateKey(keys.last), calendar)})';
+    final showThirtySummary =
+        widget.periodDays == 30 &&
+        (widget.summaryLines.isNotEmpty ||
+            widget.belowTitle != null ||
+            widget.trend != null);
+    final localizations = MaterialLocalizations.of(context);
+    final firstDay = ref
+        .read(appPrefsProvider)
+        .firstDayOfWeek
+        .sundayBasedIndex(localizations.firstDayOfWeekIndex);
+    final layout = weeklyCalendarLayout(
+      periodKeys: keys,
+      firstDayOfWeekIndex: firstDay,
+    );
+    final gridWidth =
+        AppDimensions.progressWeekdayLabelWidth +
+        layout.weekCount * AppDimensions.progressCalendarStride;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -305,6 +333,7 @@ class _ProgressCalendarSectionState
             IconButton(
               key: Key('calendar-prev-$navId'),
               tooltip: 'Previous period',
+              visualDensity: VisualDensity.compact,
               onPressed: () => setState(() => _periodsBack++),
               icon: const Icon(Icons.chevron_left),
             ),
@@ -315,6 +344,11 @@ class _ProgressCalendarSectionState
                     widget.title,
                     textAlign: TextAlign.center,
                     style: theme.textTheme.titleMedium,
+                  ),
+                  Text(
+                    range,
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodySmall,
                   ),
                   if (widget.subtitle != null)
                     Text(
@@ -328,6 +362,7 @@ class _ProgressCalendarSectionState
             IconButton(
               key: Key('calendar-next-$navId'),
               tooltip: 'Next period',
+              visualDensity: VisualDensity.compact,
               onPressed: _periodsBack > 0
                   ? () => setState(() => _periodsBack--)
                   : null,
@@ -335,28 +370,182 @@ class _ProgressCalendarSectionState
             ),
           ],
         ),
-        Text(
-          range,
-          textAlign: TextAlign.center,
-          style: theme.textTheme.bodySmall,
-        ),
-        if (widget.belowTitle != null) ...[
+        if (long && widget.belowTitle != null) ...[
           const SizedBox(height: 4),
           widget.belowTitle!,
         ],
         const SizedBox(height: 8),
-        ProgressCalendarGrid(
-          key: const Key('calendar-chunk-0'),
-          dateKeys: keys,
-          cellBuilder: widget.cellBuilder,
-          expandToWidth: long,
-          showMonthLabels: long,
-          bandFamily: long ? widget.family : null,
-          highlightLunarWhiteDays: widget.highlightLunarWhiteDays,
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final grid = ProgressCalendarGrid(
+              key: const Key('calendar-chunk-0'),
+              dateKeys: keys,
+              cellBuilder: widget.cellBuilder,
+              expandToWidth: long,
+              showMonthLabels: long,
+              bandFamily: long ? widget.family : null,
+              highlightLunarWhiteDays: widget.highlightLunarWhiteDays,
+            );
+            if (!showThirtySummary) return grid;
+            final cap = constraints.maxWidth * 0.62;
+            final thirtyWidth = !cap.isFinite || gridWidth < cap
+                ? gridWidth
+                : cap;
+            const stride = AppDimensions.progressCalendarStride;
+            final rowHeight = stride < AppDimensions.todayMarkHalo
+                ? AppDimensions.todayMarkHalo
+                : stride;
+            final boardHeight =
+                AppDimensions.progressCalendarHeaderHeight +
+                kCalendarWeekdayCount * rowHeight;
+            return SizedBox(
+              key: _boardKey,
+              height: boardHeight,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SizedBox(width: thirtyWidth, child: grid),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                        top: AppDimensions.progressCalendarHeaderHeight,
+                      ),
+                      child: _summaryWash(theme, now),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
         ),
+        if (!long &&
+            widget.periodDays == 30 &&
+            widget.trend != null &&
+            widget.belowTitle != null) ...[
+          const SizedBox(height: 6),
+          KeyedSubtree(
+            key: const Key('progress-below-title'),
+            child: widget.belowTitle!,
+          ),
+        ],
       ],
     );
   }
+
+  Widget _summaryWash(ThemeData theme, DateTime now) {
+    final ink = theme.textTheme.bodySmall?.copyWith(fontSize: 11, height: 1.35);
+    final trend = widget.periodDays == 30 ? widget.trend : null;
+    Widget child;
+    if (trend != null && trend.catalog.isNotEmpty) {
+      final todayKey = dateKey(now);
+      final windows = [
+        measureTrendWindow(
+          keys: shiftedPeriodDateKeys(
+            30,
+            now: now,
+            periodsBack: _periodsBack + 2,
+          ),
+          todayKey: todayKey,
+          idForDate: trend.idForDate,
+          optionIds: trend.optionIds,
+          hitsForDate: trend.hitsForDate,
+          dayAnswered: trend.dayAnswered,
+        ),
+        measureTrendWindow(
+          keys: shiftedPeriodDateKeys(
+            30,
+            now: now,
+            periodsBack: _periodsBack + 1,
+          ),
+          todayKey: todayKey,
+          idForDate: trend.idForDate,
+          optionIds: trend.optionIds,
+          hitsForDate: trend.hitsForDate,
+          dayAnswered: trend.dayAnswered,
+        ),
+        measureTrendWindow(
+          keys: shiftedPeriodDateKeys(30, now: now, periodsBack: _periodsBack),
+          todayKey: todayKey,
+          idForDate: trend.idForDate,
+          optionIds: trend.optionIds,
+          hitsForDate: trend.hitsForDate,
+          dayAnswered: trend.dayAnswered,
+        ),
+      ];
+      final selected = selectFiveTrendOptionIds(
+        optionIds: trend.optionIds,
+        windows: windows,
+      );
+      child = Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            child: ThirtyDayTrendChart(
+              series: trend,
+              windows: windows,
+              selectedIds: selected,
+              calendar: ref.read(appPrefsProvider).displayCalendar,
+              anchorKey: _washKey,
+              washLink: _washLink,
+            ),
+          ),
+        ],
+      );
+    } else {
+      child = SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            for (final line in widget.summaryLines)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 6),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('•  ', style: ink),
+                    Expanded(child: Text(line, style: ink)),
+                  ],
+                ),
+              ),
+            if (widget.belowTitle != null) widget.belowTitle!,
+          ],
+        ),
+      );
+    }
+    return KeyedSubtree(
+      key: const Key('progress-thirty-summary'),
+      child: CompositedTransformTarget(
+        link: _washLink,
+        child: WashPanel(
+          key: _washKey,
+          color: Color.alphaBlend(
+            (widget.family ?? theme.colorScheme.primary).withValues(
+              alpha: 0.12,
+            ),
+            theme.colorScheme.surface,
+          ),
+          padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+          clipBehavior: trend != null ? Clip.none : Clip.antiAlias,
+          child: child,
+        ),
+      ),
+    );
+  }
+}
+
+List<String> progressThirtyDaySummary({
+  required int periodDays,
+  required int recordedDays,
+  required int activityDays,
+  required int notDoneDays,
+}) {
+  if (periodDays != 30) return const [];
+  return [
+    'Recorded on $recordedDays of $periodDays days',
+    'Activity days $activityDays',
+    'Recorded as not done $notDoneDays',
+  ];
 }
 
 String weekdayNameForDate(String key) {

@@ -1,4 +1,10 @@
+import 'akhlaq_practices.dart';
 import 'context_catalog.dart';
+import 'huquq_practices.dart';
+import 'knowledge_practices.dart';
+import 'time_practices.dart';
+import 'dhikr_factors.dart';
+import 'home_traces.dart';
 
 /// One helping/distracting catalog for Charity Giving and Care traces.
 /// Row-specific research tables map onto these buckets; they are not separate
@@ -92,6 +98,9 @@ List<ContextFactor> helpingFactorsForHomeTrace(
       'positive',
     );
   }
+  if (isDhikrPostFardTrace(storageKey)) {
+    return DhikrAttentivenessCatalog.withExisting(existingIds);
+  }
   return ContextCatalog.positive;
 }
 
@@ -106,6 +115,7 @@ List<ContextFactor> distractingFactorsForHomeTrace(
       'negative',
     );
   }
+  if (isDhikrPostFardTrace(storageKey)) return const [];
   return ContextCatalog.negative;
 }
 
@@ -117,6 +127,21 @@ String homeTraceFactorLabel(
   final polarity = helping ? 'positive' : 'negative';
   if (isCharityTrace(storageKey)) {
     return CharityFactorCatalog.labelFor(id, polarity);
+  }
+  if (isDhikrPostFardTrace(storageKey)) {
+    return DhikrAttentivenessCatalog.labelFor(id);
+  }
+  if (isAkhlaqTrace(storageKey)) {
+    return akhlaqFollowUpLabel(id);
+  }
+  if (isHuquqTrace(storageKey)) {
+    return huquqFollowUpLabel(id);
+  }
+  if (isKnowledgeTrace(storageKey)) {
+    return knowledgeFollowUpLabel(id);
+  }
+  if (isTimeTrace(storageKey)) {
+    return timeFollowUpLabel(id);
   }
   return ContextCatalog.labelFor(id, polarity);
 }

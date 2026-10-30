@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fajr 30-day trend — HTML mock-up (synthetic)</title>
+  <style>
+    :root {
+      --bg: #f4f1ea;
+      --ink: #1d2a2c;
+      --muted: #4d5c63;
+      --line: #c5d0d4;
+      --paper: #fffbfe;
+      --fajr: #5b6abf;
+      --card: #e1e1eb;
+      --wash: #e7e7f0;
+      --radius: 18px;
+      --list-pad: 16px;
+      --card-pad: 18px;
+      --stride: 18px;
+      --wd: 16px;
+      --head: 16px;
+      --board: 142px;
+      --wash-h: 126px;
+      --cal-w: 106px;
+      --gap: 8px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Roboto, system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+    }
+    button, select { font: inherit; }
+    .banner {
+      background: #3d4a4e; color: #f4f1ea; font-size: 12px;
+      text-align: center; padding: 8px 12px;
+    }
+    .shell { max-width: 960px; margin: 0 auto; padding: 12px 14px 48px; }
+    .dev {
+      border: 1px dashed #9aa8ad; background: #fff; border-radius: 12px;
+      padding: 10px 12px; margin: 10px 0 16px;
+    }
+    .dev h2 { margin: 0 0 8px; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+    .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 8px; }
+    .row label { font-size: 12px; color: var(--muted); font-weight: 650; }
+    .geom { font-size: 11px; color: var(--muted); font-family: ui-monospace, Consolas, monospace; }
+    .tests { font-size: 12px; column-count: 2; column-gap: 16px; }
+    .ok { color: #2e7d32; }
+    .bad { color: #c62828; }
+    .frame {
+      margin: 0 auto;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      overflow: hidden;
+    }
+    .status { display: flex; justify-content: space-between; padding: 8px 16px 0; font-size: 12px; color: var(--muted); }
+    .appbar { display: flex; align-items: center; gap: 8px; padding: 4px 8px 2px; min-height: 48px; }
+    .appbar h1 { font-size: 16px; margin: 0; font-weight: 700; line-height: 1.15; }
+    .page { padding: 16px 16px 24px; }
+    .q { margin: 0 0 6px; font-size: 12px; font-style: italic; color: var(--muted); font-weight: 500; }
+    .period { display: flex; gap: 6px; margin-bottom: 8px; }
+    .chip {
+      flex: 1; border: 1px solid var(--line); background: #fff; border-radius: 999px;
+      padding: 8px 4px; font-size: 12px;
+    }
+    .chip[aria-pressed="true"] { background: #d7eceb; border-color: #b7d4d2; font-weight: 700; }
+    .chip:disabled { opacity: .4; }
+    #fajr-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: var(--card-pad);
+    }
+    .nav { display: flex; align-items: center; }
+    .nav-btn {
+      width: 40px; height: 40px; border: 0; background: transparent;
+      border-radius: 20px; font-size: 22px; cursor: pointer; color: var(--ink); flex: 0 0 40px;
+    }
+    .nav-btn:disabled { opacity: .28; cursor: default; }
+    .nav-mid { flex: 1; text-align: center; min-width: 0; }
+    .nav-mid h3 { margin: 0; font-size: 16px; font-weight: 500; }
+    .nav-mid p { margin: 0; font-size: 12px; color: var(--muted); }
+    .board {
+      margin-top: 8px;
+      height: var(--board);
+      display: flex;
+      gap: var(--gap);
+      align-items: stretch;
+    }
+    #cal-col {
+      width: var(--cal-w);
+      flex: 0 0 var(--cal-w);
+      display: flex;
+      flex-direction: column;
+    }
+    .cal-head, .cal-row {
+      display: grid;
+      grid-template-columns: var(--wd) repeat(5, var(--stride));
+      height: var(--stride);
+      align-items: center;
+    }
+    .cal-head { height: var(--head); font-size: 10px; color: var(--muted); }
+    .dow { font-size: 10px; color: var(--muted); font-weight: 700; }
+    .cell {
+      width: 14px; height: 14px; margin: 0 auto; border-radius: 50%;
+      border: 1px dashed #9aa8ad; background: transparent;
+    }
+    .cell.future { opacity: .22; }
+    .cell.unans { border-style: solid; background: #fff; border-color: #bdbdbd; }
+    .cell.dot { border-style: solid; }
+    .cell.excused {
+      background: repeating-linear-gradient(135deg, #c0ca33, #c0ca33 2px, #f4f7d4 2px, #f4f7d4 4px);
+      border-color: #9aa318;
+    }
+    #wash {
+      flex: 1;
+      min-width: 0;
+      margin-top: var(--head);
+      height: var(--wash-h);
+      background: var(--wash);
+      border-radius: 10px;
+      padding: 8px 10px;
+      overflow: hidden;
+    }
+    .stats { font-size: 11px; line-height: 1.35; color: #3d4a4e; }
+    .stats p { margin: 0 0 6px; }
+    #chart {
+      height: 100%;
+      display: grid;
+      grid-template-columns: repeat(var(--groups, 5), minmax(0, 1fr));
+      column-gap: 5px;
+    }
+    .grp {
+      display: grid;
+      grid-template-rows: minmax(0, 1fr) 11px;
+      min-width: 0;
+      height: 100%;
+    }
+    .trio {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      column-gap: 2px;
+      align-items: end;
+      min-height: 0;
+    }
+    .bar {
+      height: 100%;
+      width: 100%;
+      max-width: 7px;
+      margin: 0 auto;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      display: flex;
+      align-items: flex-end;
+      cursor: pointer;
+      border-radius: 1px;
+    }
+    .bar:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; }
+    .fill { width: 100%; border-radius: 1px 1px 0 0; }
+    .fill.zero { min-height: 2px; }
+    .fill.na {
+      height: 100%;
+      background: repeating-linear-gradient(
+        135deg, transparent 0 3px, rgba(77,92,99,.3) 3px 5px
+      );
+      border: 1px dashed #9aa8ad;
+      border-radius: 1px;
+      opacity: .75;
+    }
+    .fill.stripe {
+      background-image: repeating-linear-gradient(
+        135deg, rgba(255,255,255,.0) 0 2px, rgba(255,255,255,.45) 2px 4px
+      );
+      box-shadow: inset 0 0 0 1px rgba(90, 99, 24, .55);
+    }
+    .abc {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      font-size: 8px;
+      line-height: 11px;
+      color: var(--muted);
+      font-weight: 700;
+      text-align: center;
+      letter-spacing: 0;
+    }
+    .tip {
+      position: fixed; z-index: 30; max-width: 240px;
+      background: transparent; color: var(--ink);
+      border: 0; border-radius: 0;
+      padding: 4px 2px; font-size: 12px; line-height: 1.35;
+      box-shadow: none; pointer-events: auto;
+      text-shadow: 0 0 6px var(--paper), 0 0 12px var(--paper);
+    }
+    .tip-title {
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 2px;
+    }
+    .tip-swatch {
+      width: 14px; height: 14px; border-radius: 50%;
+      flex: 0 0 14px; box-sizing: border-box;
+      border: 1px solid transparent;
+    }
+    .tip-swatch.stripe {
+      background: repeating-linear-gradient(135deg, #c0ca33, #c0ca33 2px, #f4f7d4 2px, #f4f7d4 4px);
+      border-color: #9aa318;
+    }
+    .tip-title b { display: block; margin: 0; font-size: 13px; flex: 1; min-width: 0; }
+    .tip-sub { margin: 0 0 0 22px; font-size: 12px; color: var(--muted); }
+    .tip button {
+      margin: 4px 0 0 22px; font-size: 11px; border: 1px solid var(--muted);
+      background: transparent; color: var(--ink); border-radius: 6px; padding: 2px 8px; cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="banner">M1-C FAJR 30-DAY HTML MOCK-UP · SYNTHETIC · Flutter unchanged · MULTI_DOMAIN_TREND_MOCKUP.html left intact</div>
+  <div class="shell">
+    <div class="dev">
+      <h2>Development controls (outside the Fajr card)</h2>
+      <div class="row">
+        <label for="vp">Viewport</label>
+        <select id="vp">
+          <option value="360">360</option>
+          <option value="390" selected>390</option>
+          <option value="420">420</option>
+          <option value="720">720 desktop</option>
+        </select>
+        <label for="mode">Card content</label>
+        <select id="mode">
+          <option value="baseline">Existing statistics text</option>
+          <option value="chart" selected>Trend chart</option>
+        </select>
+        <label for="scenario">Scenario</label>
+        <select id="scenario">
+          <option value="normal">1 Normal</option>
+          <option value="change">2 Significant changes</option>
+          <option value="stable">3 Stable</option>
+          <option value="sparse">4 Sparse</option>
+          <option value="incomplete">5 Incomplete C</option>
+          <option value="nodata">6 No data in A</option>
+          <option value="shared">7 Shared colours</option>
+        </select>
+      </div>
+      <p class="geom" id="geom"></p>
+      <div class="tests" id="testOut"></div>
+    </div>
+    <div class="frame" id="frame">
+      <div class="status"><span>23 Oct 21:00</span><span>Review prototype</span></div>
+      <div class="appbar">
+        <button class="nav-btn" type="button" disabled aria-label="Back">‹</button>
+        <h1>Salah &amp; Prayer Quality Progress</h1>
+      </div>
+      <div class="page">
+        <p class="q">How did the five daily prayers sit today?</p>
+        <div class="period">
+          <button class="chip" type="button" disabled>7 days</button>
+          <button class="chip" type="button" aria-pressed="true">30 days</button>
+          <button class="chip" type="button" disabled>90 days</button>
+        </div>
+        <div id="fajr-card">
+          <div class="nav">
+            <button class="nav-btn" id="prev" type="button" aria-label="Previous period">‹</button>
+            <div class="nav-mid">
+              <h3>Fajr</h3>
+              <p id="range"></p>
+            </div>
+            <button class="nav-btn" id="next" type="button" aria-label="Next period" disabled>›</button>
+          </div>
+          <div class="board">
+            <div id="cal-col"></div>
+            <div id="wash"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="tip" id="tip" hidden></div>
+<script>
+const DISPLAY = new Date(2026, 9, 23);
+const OPTIONS = [
+  { id: 'congregationOnTime', label: 'Prayed on time in congregation', color: '#1565C0' },
+  { id: 'joinedCongregationLate', label: 'Joined congregation late', color: '#2E7D32' },
+  { id: 'smallCongregation', label: 'Prayed in small congregation', color: '#66BB6A' },
+  { id: 'aloneOnTime', label: 'Prayed alone on time', color: '#C0CA33' },
+  { id: 'excused', label: 'Excused', color: '#C0CA33', stripe: true },
+  { id: 'prayedLate', label: 'Prayed late', color: '#FBC02D' },
+  { id: 'missedMadeUp', label: 'Missed then made up later', color: '#F57C00' },
+  { id: 'missed', label: 'Missed', color: '#D32F2F' },
+  { id: 'other', label: 'Other', color: '#616161' },
+];
+const BY_ID = Object.fromEntries(OPTIONS.map((o) => [o.id, o]));
+const state = { back: 0, scenario: 'normal', mode: 'chart', vp: 390 };
+
+function addDays(d, n) { const x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); x.setDate(x.getDate() + n); return x; }
+function keyOf(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function parseKey(k) { const [y,m,d] = k.split('-').map(Number); return new Date(y, m-1, d); }
+function fmtLong(a,b) {
+  const f = (d) => d.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+  return `(for ${f(a)} – ${f(b)})`;
+}
+function fmtShort(a,b) {
+  const f = (d) => d.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+  return `${f(a)}–${f(b)}`;
+}
+function hash(s) { let h = 2166136261; for (let i=0;i<s.length;i++){ h ^= s.charCodeAt(i); h = Math.imul(h,16777619);} return h>>>0; }
+function rng(seed) {
+  return function(){ seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed>>>15, 1|seed); t = t + Math.imul(t ^ t>>>7, 61|t) ^ t; return ((t ^ t>>>14)>>>0)/4294967296; };
+}
+function today() { return state.scenario === 'incomplete' ? new Date(2026, 8, 28) : DISPLAY; }
+function windowFor(back) {
+  const end = addDays(DISPLAY, -(back * 30));
+  const start = addDays(end, -29);
+  const keys = [];
+  for (let d = new Date(start); d <= end; d = addDays(d, 1)) keys.push(keyOf(d));
+  return { start, end, keys };
+}
+
+function fajrOn(dateKey, scenario) {
+  if (dateKey > keyOf(today())) return { kind: 'future' };
+  const r = rng(hash('fajr|' + scenario + '|' + dateKey));
+  const u = r();
+  if (scenario === 'nodata') {
+    const winA = windowFor(state.back + 2);
+    if (dateKey >= keyOf(winA.start) && dateKey <= keyOf(winA.end)) return { kind: 'miss' };
+  }
+  const pRec = scenario === 'sparse' ? 0.18 : scenario === 'incomplete' ? 0.9 : 0.7;
+  const pUnans = 0.1;
+  if (u > pRec) return { kind: 'miss' };
+  if (r() < pUnans) return { kind: 'unans' };
+  const weights = OPTIONS.map((o) => 1);
+  const bump = (id, v) => { const i = OPTIONS.findIndex((o) => o.id === id); if (i>=0) weights[i]=v; };
+  if (scenario === 'stable') { bump('congregationOnTime', 9); bump('joinedCongregationLate', 3); bump('aloneOnTime', 2); }
+  else if (scenario === 'change') { bump('congregationOnTime', 2 + (parseKey(dateKey).getMonth()%3)*4); bump('missed', 6 - (parseKey(dateKey).getMonth()%3)*2); bump('joinedCongregationLate', 5); }
+  else if (scenario === 'shared') { bump('aloneOnTime', 7); bump('excused', 7); bump('congregationOnTime', 3); }
+  else if (scenario === 'sparse') { bump('congregationOnTime', 4); bump('missed', 2); }
+  else { bump('congregationOnTime', 6); bump('joinedCongregationLate', 4); bump('aloneOnTime', 3); bump('missed', 2); bump('prayedLate', 2); }
+  let s = 0, tot = weights.reduce((a,b)=>a+b,0), pick = r()*tot;
+  for (let i=0;i<OPTIONS.length;i++){ s += weights[i]; if (pick <= s) return { kind:'dot', id: OPTIONS[i].id }; }
+  return { kind:'dot', id: OPTIONS[0].id };
+}
+
+function measure(win) {
+  const hits = Object.fromEntries(OPTIONS.map((o) => [o.id, 0]));
+  let denom = 0;
+  const cells = {};
+  win.keys.forEach((k) => {
+    const rec = fajrOn(k, state.scenario);
+    cells[k] = rec;
+    if (rec.kind === 'dot') { denom++; hits[rec.id]++; }
+  });
+  return { hits, denom, cells, start: win.start, end: win.end, keys: win.keys };
+}
+function pct(hits, denom) { return denom ? (hits / denom) * 100 : null; }
+
+function selectFive(ms) {
+  const scored = OPTIONS.map((o) => {
+    const series = ms.map((m) => ({ p: pct(m.hits[o.id], m.denom), d: m.denom, h: m.hits[o.id] }));
+    let change = 0;
+    for (let i=1;i<series.length;i++){
+      const a=series[i-1], b=series[i];
+      if (a.p==null || b.p==null) continue;
+      const ev = Math.min(a.d, b.d);
+      const w = ev < 3 ? 0.12 : ev < 8 ? 0.55 : 1;
+      change = Math.max(change, Math.abs(b.p-a.p)*w);
+    }
+    const defined = series.filter((s)=>s.p!=null);
+    const freq = defined.length ? defined.reduce((x,s)=>x+s.p,0)/defined.length : 0;
+    const evidence = Math.max(0, ...series.map((s)=>s.d));
+    const any = series.some((s)=>s.h>0);
+    const score = any ? change + freq*0.14 + Math.min(evidence,12)*0.04 : -1;
+    return { o, score, any };
+  }).filter((s)=>s.any);
+  scored.sort((a,b)=> b.score-a.score || a.o.id.localeCompare(b.o.id));
+  return scored.slice(0,5).map((s)=>s.o);
+}
+
+function calLayout(keys) {
+  const first = 1;
+  const firstD = parseKey(keys[0]);
+  const lastD = parseKey(keys[keys.length-1]);
+  const off = (firstD.getDay()-first+7)%7;
+  const gridStart = addDays(firstD, -off);
+  const lastOff = (lastD.getDay()-first+7)%7;
+  const lastWeek = addDays(lastD, -lastOff);
+  const weeks = Math.round((lastWeek-gridStart)/86400000/7)+1;
+  const set = new Set(keys);
+  const weekStarts = Array.from({length: weeks}, (_,w)=>addDays(gridStart, w*7));
+  const rows = [];
+  const letters = ['S','M','T','W','T','F','S'];
+  for (let r=0;r<7;r++){
+    const cols=[];
+    for (let w=0;w<weeks;w++){
+      const d = addDays(gridStart, w*7+r);
+      const k = keyOf(d);
+      cols.push(set.has(k)?k:null);
+    }
+    rows.push({ dow: letters[(first+r)%7], cols });
+  }
+  return { weeks, rows, weekStarts };
+}
+
+function renderCal(measure) {
+  const layout = calLayout(measure.keys);
+  const col = document.getElementById('cal-col');
+  let html = `<div class="cal-head"><span></span>${layout.weekStarts.map((d)=>`<span>${d.getDate()}</span>`).join('')}</div>`;
+  layout.rows.forEach((row) => {
+    html += `<div class="cal-row"><span class="dow">${row.dow}</span>`;
+    row.cols.forEach((k) => {
+      if (!k) { html += '<span></span>'; return; }
+      const rec = measure.cells[k];
+      let cls = 'cell', st = '';
+      if (rec.kind === 'future') cls += ' future';
+      else if (rec.kind === 'unans') cls += ' unans';
+      else if (rec.kind === 'dot') {
+        const o = BY_ID[rec.id];
+        if (o.stripe) cls += ' excused';
+        else { cls += ' dot'; st = `background:${o.color};border-color:${o.color}`; }
+      }
+      html += `<span class="${cls}" style="${st}"></span>`;
+    });
+    html += '</div>';
+  });
+  col.innerHTML = html;
+}
+
+function tooltipOf(opt, letter, m, p) {
+  const title = `${opt.label} (Fajr)`;
+  const period = `Period ${letter} (${fmtShort(m.start, m.end)})`;
+  if (p == null) {
+    const recorded = 'Recorded: no answered Fajr records (unavailable — not 0%)';
+    const spoken = `${title}, ${period}, ${recorded}`;
+    return { title, period, pct: null, recorded, spoken, na: true };
+  }
+  const pct = `${Math.round(p)}%`;
+  const recorded = `Recorded: ${m.hits[opt.id]} of ${m.denom} answered days (${pct})`;
+  const spoken = `${title}, ${period}, ${recorded}`;
+  return { title, period, pct, recorded, spoken, na: false };
+}
+
+function renderWash(selected, ms, stats) {
+  const wash = document.getElementById('wash');
+  if (state.mode === 'baseline') {
+    wash.innerHTML = `<div class="stats" id="baseline-copy">
+      <p>•  Recorded on ${stats.recorded} of 30 days</p>
+      <p>•  Activity days ${stats.activity}</p>
+      <p>•  Recorded as not done ${stats.notDone}</p>
+    </div>`;
+    return;
+  }
+  wash.innerHTML = '';
+  const chart = document.createElement('div');
+  chart.id = 'chart';
+  chart.style.setProperty('--groups', String(Math.max(1, selected.length)));
+  const letters = ['A','B','C'];
+  selected.forEach((opt) => {
+    const grp = document.createElement('div');
+    grp.className = 'grp';
+    const trio = document.createElement('div');
+    trio.className = 'trio';
+    ms.forEach((m, i) => {
+      const p = pct(m.hits[opt.id], m.denom);
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'bar';
+      const info = tooltipOf(opt, letters[i], m, p);
+      btn.dataset.tip = info.spoken;
+      btn.dataset.title = info.title;
+      btn.dataset.period = info.period;
+      btn.dataset.recorded = info.recorded;
+      btn.dataset.color = opt.color;
+      btn.dataset.stripe = opt.stripe ? '1' : '';
+      btn.setAttribute('aria-label', info.spoken);
+      const fill = document.createElement('span');
+      if (p == null) {
+        fill.className = 'fill na';
+      } else {
+        fill.className = 'fill' + (p === 0 ? ' zero' : '') + (opt.stripe ? ' stripe' : '');
+        fill.style.height = (p === 0 ? 2 : p) + '%';
+        fill.style.backgroundColor = opt.color;
+      }
+      btn.appendChild(fill);
+      btn.addEventListener('mouseenter', () => showTip(btn, false));
+      btn.addEventListener('mouseleave', () => { if (!tipPinned) hideTip(); });
+      btn.addEventListener('focus', () => showTip(btn, false));
+      btn.addEventListener('click', (e) => { e.stopPropagation(); showTip(btn, true); });
+      trio.appendChild(btn);
+    });
+    const abc = document.createElement('div');
+    abc.className = 'abc';
+    abc.innerHTML = '<span>A</span><span>B</span><span>C</span>';
+    grp.appendChild(trio);
+    grp.appendChild(abc);
+    chart.appendChild(grp);
+  });
+  wash.appendChild(chart);
+}
+
+const tip = document.getElementById('tip');
+let tipPinned = false;
+function rectsOverlap(a, b, pad) {
+  const p = pad || 0;
+  return a.left < b.right + p && a.right > b.left - p && a.top < b.bottom + p && a.bottom > b.top - p;
+}
+function placeTipOutsideChart() {
+  const gap = 10;
+  const tw = tip.offsetWidth || 220;
+  const th = tip.offsetHeight || 120;
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const cal = document.getElementById('cal-col').getBoundingClientRect();
+  const wash = document.getElementById('wash').getBoundingClientRect();
+  const card = document.getElementById('fajr-card').getBoundingClientRect();
+  const forbidden = [cal, wash];
+  const candidates = [
+    { left: card.left, top: card.bottom + gap },
+    { left: card.right + gap, top: wash.top },
+    { left: card.left, top: card.top - th - gap },
+    { left: Math.max(8, card.left - tw - gap), top: wash.top },
+  ];
+  let chosen = candidates[0];
+  for (let i = 0; i < candidates.length; i++) {
+    const c = candidates[i];
+    const box = { left: c.left, top: c.top, right: c.left + tw, bottom: c.top + th };
+    const onScreen = box.left >= 8 && box.top >= 8 && box.right <= vw - 8 && box.bottom <= vh - 8;
+    const clear = !forbidden.some((f) => rectsOverlap(box, f, 4));
+    if (onScreen && clear) { chosen = c; break; }
+  }
+  let left = Math.max(8, Math.min(vw - tw - 8, chosen.left));
+  let top = Math.max(8, Math.min(vh - th - 8, chosen.top));
+  let box = { left, top, right: left + tw, bottom: top + th };
+  if (forbidden.some((f) => rectsOverlap(box, f, 4))) {
+    left = Math.max(8, Math.min(vw - tw - 8, card.left));
+    top = Math.min(vh - th - 8, Math.max(card.bottom + gap, wash.bottom + gap));
+  }
+  tip.style.left = left + 'px';
+  tip.style.top = top + 'px';
+}
+function showTip(el, pinned) {
+  tipPinned = !!pinned;
+  tip.hidden = false;
+  tip.innerHTML = '';
+  const row = document.createElement('div');
+  row.className = 'tip-title';
+  const swatch = document.createElement('span');
+  swatch.className = 'tip-swatch' + (el.dataset.stripe ? ' stripe' : '');
+  swatch.setAttribute('aria-hidden', 'true');
+  if (!el.dataset.stripe) {
+    swatch.style.background = el.dataset.color || '#616161';
+    swatch.style.borderColor = el.dataset.color || '#616161';
+  }
+  const b = document.createElement('b');
+  b.textContent = el.dataset.title || '';
+  row.appendChild(swatch);
+  row.appendChild(b);
+  tip.appendChild(row);
+  const sub = document.createElement('p');
+  sub.className = 'tip-sub';
+  sub.textContent = el.dataset.period || '';
+  tip.appendChild(sub);
+  const rec = document.createElement('p');
+  rec.className = 'tip-sub';
+  rec.textContent = el.dataset.recorded || '';
+  tip.appendChild(rec);
+  const dismiss = document.createElement('button');
+  dismiss.type = 'button';
+  dismiss.textContent = 'Close';
+  dismiss.addEventListener('click', (e) => { e.stopPropagation(); hideTip(); });
+  tip.appendChild(dismiss);
+  placeTipOutsideChart();
+}
+function hideTip(){ tipPinned = false; tip.hidden = true; }
+document.addEventListener('click', (e) => { if (!e.target.closest('.bar') && !e.target.closest('.tip')) hideTip(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') hideTip(); });
+
+function render() {
+  hideTip();
+  document.getElementById('frame').style.width = state.vp + 'px';
+  const c = windowFor(state.back);
+  const b = windowFor(state.back+1);
+  const a = windowFor(state.back+2);
+  document.getElementById('range').textContent = fmtLong(c.start, c.end);
+  document.getElementById('next').disabled = state.back === 0;
+  const mA = measure(a), mB = measure(b), mC = measure(c);
+  const selected = selectFive([mA,mB,mC]);
+  renderCal(mC);
+  let recorded=0, activity=0, notDone=0;
+  c.keys.forEach((k) => {
+    const rec = mC.cells[k];
+    if (rec.kind !== 'dot') return;
+    recorded++;
+    if (rec.id === 'missed') notDone++;
+    else if (rec.id !== 'excused') activity++;
+  });
+  renderWash(selected, [mA,mB,mC], { recorded, activity, notDone });
+  const card = document.getElementById('fajr-card').getBoundingClientRect();
+  const cal = document.getElementById('cal-col').getBoundingClientRect();
+  const wash = document.getElementById('wash').getBoundingClientRect();
+  document.getElementById('geom').textContent =
+    `card ${Math.round(card.width)}×${Math.round(card.height)}  cal ${Math.round(cal.width)}×${Math.round(cal.height)}  wash ${Math.round(wash.width)}×${Math.round(wash.height)}  groups ${selected.length}`;
+  return { selected, mA, mB, mC, card, cal, wash };
+}
+
+function assert(name, cond){ return { name, ok: !!cond }; }
+
+function runTests() {
+  const saved = { ...state };
+  const out = [];
+  state.vp = 390; state.mode = 'baseline'; state.back = 0; state.scenario = 'normal';
+  const before = render();
+  state.mode = 'chart';
+  const after = render();
+  out.push(assert('T01 card width/height unchanged', Math.abs(before.card.width-after.card.width)<1 && Math.abs(before.card.height-after.card.height)<1));
+  out.push(assert('T02 calendar width/height/left unchanged', Math.abs(before.cal.width-after.cal.width)<1 && Math.abs(before.cal.height-after.cal.height)<1 && Math.abs(before.cal.left-after.cal.left)<1));
+  const ch = document.getElementById('chart').getBoundingClientRect();
+  const wash = document.getElementById('wash').getBoundingClientRect();
+  out.push(assert('T03 chart inside wash', ch.left>=wash.left-0.5 && ch.right<=wash.right+0.5 && ch.top>=wash.top-0.5 && ch.bottom<=wash.bottom+0.5));
+  const bars = document.querySelectorAll('#chart .bar').length;
+  out.push(assert('T04 at most 15 bars', bars <= 15 && bars === after.selected.length * 3));
+  const abcs = document.querySelectorAll('#chart .abc').length;
+  out.push(assert('T05 A/B/C under every group', abcs === after.selected.length && abcs >= 1));
+  const c = windowFor(0), b = windowFor(1), a = windowFor(2);
+  out.push(assert('T06 A oldest, C displayed', keyOf(a.end) < keyOf(b.start) && keyOf(c.start) === '2026-09-24' && keyOf(c.end)==='2026-10-23'));
+  const c2 = windowFor(1);
+  out.push(assert('T07 previous shifts C by 30 days', keyOf(c2.end)==='2026-09-23' && keyOf(c2.start)==='2026-08-25'));
+  const k = '2026-10-01';
+  const r0 = fajrOn(k, 'normal');
+  state.back = 1;
+  const r1 = fajrOn(k, 'normal');
+  out.push(assert('T08 same date same response after nav', JSON.stringify(r0)===JSON.stringify(r1)));
+  out.push(assert('T09 6/20 = 30%', pct(6,20)===30));
+  state.back = 0; state.scenario = 'incomplete';
+  const inc = measure(windowFor(0));
+  const elapsed = windowFor(0).keys.filter((x)=>x<=keyOf(today())).length;
+  out.push(assert('T10 incomplete C denom ≤ elapsed and elapsed is 5', elapsed===5 && inc.denom<=5 && inc.denom<30));
+  state.scenario = 'normal';
+  const mC = measure(windowFor(0));
+  const missDays = windowFor(0).keys.filter((x)=>mC.cells[x].kind==='miss').length;
+  out.push(assert('T11 missing not in denom', mC.denom + missDays + windowFor(0).keys.filter((x)=>mC.cells[x].kind==='unans'||mC.cells[x].kind==='future').length === 30 && mC.denom < 30));
+  const missedHits = mC.hits.missed;
+  out.push(assert('T12 explicit missed is valid', OPTIONS.find((o)=>o.id==='missed') && missedHits === Object.values(mC.cells).filter((r)=>r.id==='missed').length));
+  state.scenario = 'nodata';
+  const mA = measure(windowFor(2));
+  out.push(assert('T13 no data is unavailable not 0', mA.denom===0 && pct(0,0)===null && pct(0,10)===0));
+  state.scenario = 'normal';
+  const nSel = selectFive([measure(windowFor(2)), measure(windowFor(1)), measure(windowFor(0))]).map((o)=>o.id).join();
+  state.scenario = 'change';
+  const cSel = selectFive([measure(windowFor(2)), measure(windowFor(1)), measure(windowFor(0))]).map((o)=>o.id).join();
+  out.push(assert('T14 selection changes with data', nSel !== cSel));
+  state.scenario = 'stable';
+  const st = selectFive([measure(windowFor(2)), measure(windowFor(1)), measure(windowFor(0))]).map((o)=>o.id);
+  out.push(assert('T15 stable keeps frequent congregationOnTime', st.includes('congregationOnTime')));
+  state.scenario = 'shared';
+  const sh = selectFive([measure(windowFor(2)), measure(windowFor(1)), measure(windowFor(0))]).map((o)=>o.id);
+  out.push(assert('T16 shared lime options both selectable separately', sh.includes('aloneOnTime') && sh.includes('excused')));
+  const tipInfo = tooltipOf(BY_ID.joinedCongregationLate, 'C', { start: windowFor(0).start, end: windowFor(0).end, hits:{ joinedCongregationLate:6 }, denom:20 }, 30);
+  out.push(assert('T17 tooltip uses canonical description', tipInfo.title === 'Joined congregation late (Fajr)' && !tipInfo.spoken.toLowerCase().includes('green')));
+  out.push(assert('T18 tooltip counts and period', tipInfo.recorded === 'Recorded: 6 of 20 answered days (30%)' && tipInfo.period.startsWith('Period C (')));
+  state.vp = 360; state.mode='chart'; state.scenario='normal'; state.back=0;
+  const m360 = render();
+  const overflow = document.getElementById('fajr-card').scrollWidth > document.getElementById('fajr-card').clientWidth + 1;
+  const bars360 = document.querySelectorAll('#chart .bar').length;
+  out.push(assert('T19 360px no card overflow, groups fit', !overflow && bars360<=15 && m360.wash.width>0));
+  state.vp = 390;
+  const vis = render();
+  out.push(assert('T20 wash still beside calendar', vis.wash.left >= vis.cal.right - 1 && Math.abs(vis.cal.height-142)<2 && Math.abs(vis.wash.height-126)<2));
+  const bar = document.querySelector('#chart .bar');
+  showTip(bar, true);
+  const tipBox = tip.getBoundingClientRect();
+  const washBox = document.getElementById('wash').getBoundingClientRect();
+  const calBox = document.getElementById('cal-col').getBoundingClientRect();
+  const bg = window.getComputedStyle(tip).backgroundColor;
+  const clearChart = !rectsOverlap(tipBox, washBox, 0) && !rectsOverlap(tipBox, calBox, 0);
+  const transparentBg = bg === 'transparent' || bg === 'rgba(0, 0, 0, 0)';
+  out.push(assert('T21 tooltip outside chart and calendar, transparent', !tip.hidden && clearChart && transparentBg));
+  hideTip();
+  const lateBar = [...document.querySelectorAll('#chart .bar')].find((b) => (b.dataset.tip || '').startsWith('Joined congregation late'));
+  showTip(lateBar, true);
+  const sw = tip.querySelector('.tip-swatch');
+  const title = tip.querySelector('.tip-title b');
+  const rgb = sw ? window.getComputedStyle(sw).backgroundColor.replace(/\s/g, '') : '';
+  out.push(assert('T22 legend ball beside title matches colour', lateBar && title && title.textContent === 'Joined congregation late (Fajr)' && rgb === 'rgb(46,125,50)'));
+  hideTip();
+  state.scenario = 'shared';
+  render();
+  const excusedBar = [...document.querySelectorAll('#chart .bar')].find((b) => (b.dataset.tip || '').startsWith('Excused'));
+  showTip(excusedBar, true);
+  const exSw = tip.querySelector('.tip-swatch');
+  out.push(assert('T22b excused legend uses striped lime ball', excusedBar && exSw && exSw.classList.contains('stripe')));
+  hideTip();
+  Object.assign(state, saved);
+  render();
+  document.getElementById('testOut').innerHTML = out.map((t)=>`<div class="${t.ok?'ok':'bad'}">${t.ok?'PASS':'FAIL'} — ${t.name}</div>`).join('');
+  window.__tests = out;
+}
+
+document.getElementById('vp').addEventListener('change', (e)=>{ state.vp=Number(e.target.value); render(); });
+document.getElementById('mode').addEventListener('change', (e)=>{ state.mode=e.target.value; render(); });
+document.getElementById('scenario').addEventListener('change', (e)=>{ state.scenario=e.target.value; state.back=0; render(); runTests(); });
+document.getElementById('prev').addEventListener('click', ()=>{ state.back++; render(); });
+document.getElementById('next').addEventListener('click', ()=>{ if(state.back>0) state.back--; render(); });
+
+render();
+runTests();
+</script>
+</body>
+</html>

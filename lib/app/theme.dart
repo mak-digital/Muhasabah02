@@ -1,5 +1,8 @@
+import 'dart:ui' show lerpDouble;
+
 import 'package:flutter/material.dart';
 
+import '../domain/app_appearance.dart';
 import '../domain/prayer.dart';
 import '../domain/quran.dart';
 
@@ -30,6 +33,9 @@ class MuhasabahColors {
 
   static const salahFamily = Color(0xFF2F6F73);
   static const mark = salahFamily;
+
+  /// Readable ink for recorded choice labels. Activity colour stays on the mark.
+  static const recordedLabel = Color(0xFF1565C0);
   static const missedEarth = Color(0xFF8A6A62);
   static const salahObligatoryBand = Color(0xFFD2E8E6);
   static const salahFridayBand = Color(0xFFD8E2EE);
@@ -57,6 +63,7 @@ class MuhasabahColors {
   static const fastingFamily = Color(0xFF3F4C8A);
   static const hajjFamily = Color(0xFF4A6B52);
   static const hadithFamily = Color(0xFF4A6D8C);
+  static const productivityFamily = Color(0xFF4A6A7A);
 
   static const salahWash = Color(0xFFD7ECEB);
   static const quranWash = Color(0xFFD7E4F2);
@@ -73,7 +80,11 @@ class MuhasabahColors {
   static const fastingWash = Color(0xFFC5CCEB);
   static const hajjWash = Color(0xFFE2EDE4);
   static const hadithWash = Color(0xFFD4E2EE);
+  static const productivityWash = Color(0xFFDCE6EC);
   static const summaryWash = Color(0xFFEEF2F4);
+
+  /// Shared Learn & Practice panel. Not a domain family and not a grade.
+  static const practiceWash = Color(0xFFE4E0EC);
   static const sampleBannerWash = Color(0xFFFFF8E8);
   static const todayMarkWash = Color(0xFFFFF8D6);
   static const todayMarkRing = Color(0xFFF3ECC0);
@@ -99,13 +110,27 @@ class MuhasabahColors {
   static const fastingWashDark = Color(0xFF2A3050);
   static const hajjWashDark = Color(0xFF2A3A2E);
   static const hadithWashDark = Color(0xFF2A3848);
+  static const productivityWashDark = Color(0xFF2A3844);
   static const summaryWashDark = Color(0xFF2A3336);
+  static const practiceWashDark = Color(0xFF322E3C);
   static const sampleBannerWashDark = Color(0xFF3A3424);
   static const todayMarkWashDark = Color(0xFF5A5238);
   static const todayMarkRingDark = Color(0xFF8A8058);
 
-  static Color wash(Color light, Color dark, Brightness brightness) =>
-      brightness == Brightness.dark ? dark : light;
+  static Color wash(
+    Color light,
+    Color dark,
+    Brightness brightness, [
+    BuildContext? context,
+  ]) {
+    final base = brightness == Brightness.dark ? dark : light;
+    return MuhasabahWashTheme.harmonizeOf(context, base);
+  }
+
+  /// Paper-harmonized wash when a [BuildContext] is available.
+  static Color themeWash(BuildContext context, Color light, Color dark) {
+    return wash(light, dark, Theme.of(context).brightness, context);
+  }
 
   static Color prayer(PrayerId id) => switch (id) {
     PrayerId.fajr => fajr,
@@ -127,18 +152,201 @@ class MuhasabahColors {
   };
 }
 
-ThemeData buildMuhasabahTheme({required Brightness brightness}) {
-  final isDark = brightness == Brightness.dark;
-  const parchment = Color(0xFFF4F1EA);
-  const inkDark = Color(0xFF141C1D);
-  const cardLight = Color(0xFFFFFCF8);
-  final scheme = ColorScheme.fromSeed(
-    seedColor: const Color(0xFF2F6F73),
-    brightness: brightness,
-    surface: isDark ? inkDark : parchment,
+/// Paper, ink seed, and cards for one named look. Domain washes are blended
+/// toward this paper. Salah activity mark colours are not retinted.
+class MuhasabahPalette {
+  const MuhasabahPalette({
+    required this.brightness,
+    required this.seed,
+    required this.surface,
+    required this.card,
+    this.lockCard = true,
+    this.washBlend = 0,
+    this.familyBlend = 0,
+    this.containerBlend = 0,
+  });
+
+  final Brightness brightness;
+  final Color seed;
+  final Color surface;
+  final Color card;
+
+  /// When false, dark Material container colour is kept (current Dark).
+  final bool lockCard;
+
+  /// How far domain washes move toward [surface]. 0 keeps the Light/Dark set.
+  final double washBlend;
+
+  /// How far domain family ink moves toward [seed].
+  final double familyBlend;
+
+  /// How far Material containers move toward [surface].
+  final double containerBlend;
+
+  static const light = MuhasabahPalette(
+    brightness: Brightness.light,
+    seed: Color(0xFF2F6F73),
+    surface: Color(0xFFF4F1EA),
+    card: Color(0xFFFFFCF8),
   );
-  final canvas = isDark ? inkDark : parchment;
-  final card = isDark ? scheme.surfaceContainerLow : cardLight;
+
+  static const dark = MuhasabahPalette(
+    brightness: Brightness.dark,
+    seed: Color(0xFF2F6F73),
+    surface: Color(0xFF141C1D),
+    card: Color(0xFF1E2829),
+    lockCard: false,
+  );
+
+  static const warmPaper = MuhasabahPalette(
+    brightness: Brightness.light,
+    seed: Color(0xFF8A5A28),
+    surface: Color(0xFFF6EAD6),
+    card: Color(0xFFFFF6E8),
+    washBlend: 0.58,
+    familyBlend: 0.42,
+    containerBlend: 0.28,
+  );
+
+  static const quietSlate = MuhasabahPalette(
+    brightness: Brightness.light,
+    seed: Color(0xFF2C5D72),
+    surface: Color(0xFFE7EEF2),
+    card: Color(0xFFF7FBFD),
+    washBlend: 0.38,
+    familyBlend: 0.28,
+    containerBlend: 0.18,
+  );
+
+  static const midnight = MuhasabahPalette(
+    brightness: Brightness.dark,
+    seed: Color(0xFF7EB8C4),
+    surface: Color(0xFF0D1524),
+    card: Color(0xFF172235),
+    washBlend: 0.42,
+    familyBlend: 0.22,
+    containerBlend: 0.22,
+  );
+
+  static MuhasabahPalette lightFor(AppAppearance appearance) =>
+      switch (appearance) {
+        AppAppearance.warmPaper => warmPaper,
+        AppAppearance.quietSlate => quietSlate,
+        _ => light,
+      };
+
+  static MuhasabahPalette darkFor(AppAppearance appearance) =>
+      switch (appearance) {
+        AppAppearance.midnight => midnight,
+        _ => dark,
+      };
+}
+
+/// Blends domain washes and family ink toward the selected paper.
+class MuhasabahWashTheme extends ThemeExtension<MuhasabahWashTheme> {
+  const MuhasabahWashTheme({
+    required this.paper,
+    required this.seed,
+    required this.washBlend,
+    required this.familyBlend,
+  });
+
+  final Color paper;
+  final Color seed;
+  final double washBlend;
+  final double familyBlend;
+
+  factory MuhasabahWashTheme.fromPalette(MuhasabahPalette palette) {
+    return MuhasabahWashTheme(
+      paper: palette.surface,
+      seed: palette.seed,
+      washBlend: palette.washBlend,
+      familyBlend: palette.familyBlend,
+    );
+  }
+
+  static Color harmonizeOf(BuildContext? context, Color color) {
+    if (context == null) return color;
+    final theme = Theme.of(context).extension<MuhasabahWashTheme>();
+    return theme?.harmonize(color) ?? color;
+  }
+
+  static Color harmonizeFamilyOf(BuildContext? context, Color family) {
+    if (context == null) return family;
+    final theme = Theme.of(context).extension<MuhasabahWashTheme>();
+    return theme?.harmonizeFamily(family) ?? family;
+  }
+
+  Color harmonize(Color wash) {
+    if (washBlend <= 0) return wash;
+    return Color.lerp(wash, paper, washBlend) ?? wash;
+  }
+
+  Color harmonizeFamily(Color family) {
+    if (familyBlend <= 0) return family;
+    return Color.lerp(family, seed, familyBlend) ?? family;
+  }
+
+  @override
+  MuhasabahWashTheme copyWith({
+    Color? paper,
+    Color? seed,
+    double? washBlend,
+    double? familyBlend,
+  }) {
+    return MuhasabahWashTheme(
+      paper: paper ?? this.paper,
+      seed: seed ?? this.seed,
+      washBlend: washBlend ?? this.washBlend,
+      familyBlend: familyBlend ?? this.familyBlend,
+    );
+  }
+
+  @override
+  MuhasabahWashTheme lerp(ThemeExtension<MuhasabahWashTheme>? other, double t) {
+    if (other is! MuhasabahWashTheme) return this;
+    return MuhasabahWashTheme(
+      paper: Color.lerp(paper, other.paper, t) ?? paper,
+      seed: Color.lerp(seed, other.seed, t) ?? seed,
+      washBlend: lerpDouble(washBlend, other.washBlend, t) ?? washBlend,
+      familyBlend: lerpDouble(familyBlend, other.familyBlend, t) ?? familyBlend,
+    );
+  }
+}
+
+ThemeData buildMuhasabahTheme({
+  Brightness? brightness,
+  MuhasabahPalette? palette,
+}) {
+  final resolved =
+      palette ??
+      ((brightness ?? Brightness.light) == Brightness.dark
+          ? MuhasabahPalette.dark
+          : MuhasabahPalette.light);
+  final isDark = resolved.brightness == Brightness.dark;
+  var scheme = ColorScheme.fromSeed(
+    seedColor: resolved.seed,
+    brightness: resolved.brightness,
+    surface: resolved.surface,
+  );
+  if (resolved.containerBlend > 0) {
+    scheme = scheme.copyWith(
+      primaryContainer: Color.lerp(
+        scheme.primaryContainer,
+        resolved.surface,
+        resolved.containerBlend,
+      ),
+      secondaryContainer: Color.lerp(
+        scheme.secondaryContainer,
+        resolved.surface,
+        resolved.containerBlend,
+      ),
+    );
+  }
+  final canvas = resolved.surface;
+  final card = (!resolved.lockCard && isDark)
+      ? scheme.surfaceContainerLow
+      : resolved.card;
   final radius = BorderRadius.circular(18);
   final text = Typography.englishLike2021
       .merge(
@@ -148,35 +356,38 @@ ThemeData buildMuhasabahTheme({required Brightness brightness}) {
   return ThemeData(
     useMaterial3: true,
     colorScheme: scheme,
+    extensions: [MuhasabahWashTheme.fromPalette(resolved)],
     visualDensity: VisualDensity.standard,
     scaffoldBackgroundColor: canvas,
     canvasColor: canvas,
     splashFactory: InkSparkle.splashFactory,
-    textTheme: text.copyWith(
-      headlineSmall: text.headlineSmall?.copyWith(
-        fontWeight: FontWeight.w600,
-        letterSpacing: -0.3,
-        height: 1.25,
-      ),
-      titleLarge: text.titleLarge?.copyWith(
-        fontWeight: FontWeight.w600,
-        letterSpacing: -0.2,
-        height: 1.25,
-      ),
-      titleMedium: text.titleMedium?.copyWith(
-        fontWeight: FontWeight.w600,
-        letterSpacing: -0.1,
-        height: 1.3,
-      ),
-      titleSmall: text.titleSmall?.copyWith(
-        fontWeight: FontWeight.w600,
-        height: 1.3,
-      ),
-      bodyLarge: text.bodyLarge?.copyWith(height: 1.45),
-      bodyMedium: text.bodyMedium?.copyWith(height: 1.45),
-      bodySmall: text.bodySmall?.copyWith(height: 1.4),
-      labelLarge: text.labelLarge?.copyWith(fontWeight: FontWeight.w600),
-    ),
+    textTheme: text
+        .copyWith(
+          headlineSmall: text.headlineSmall?.copyWith(
+            fontWeight: FontWeight.w600,
+            letterSpacing: -0.3,
+            height: 1.25,
+          ),
+          titleLarge: text.titleLarge?.copyWith(
+            fontWeight: FontWeight.w600,
+            letterSpacing: -0.2,
+            height: 1.25,
+          ),
+          titleMedium: text.titleMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+            letterSpacing: -0.1,
+            height: 1.3,
+          ),
+          titleSmall: text.titleSmall?.copyWith(
+            fontWeight: FontWeight.w600,
+            height: 1.3,
+          ),
+          bodyLarge: text.bodyLarge?.copyWith(height: 1.45),
+          bodyMedium: text.bodyMedium?.copyWith(height: 1.45),
+          bodySmall: text.bodySmall?.copyWith(height: 1.4),
+          labelLarge: text.labelLarge?.copyWith(fontWeight: FontWeight.w600),
+        )
+        .apply(fontFamilyFallback: const ['NotoSansBengali']),
     appBarTheme: AppBarTheme(
       centerTitle: false,
       elevation: 0,
@@ -188,6 +399,7 @@ ThemeData buildMuhasabahTheme({required Brightness brightness}) {
         fontWeight: FontWeight.w600,
         color: scheme.onSurface,
         letterSpacing: -0.2,
+        fontFamilyFallback: const ['NotoSansBengali'],
       ),
     ),
     cardTheme: CardThemeData(
@@ -301,7 +513,7 @@ ThemeData buildMuhasabahTheme({required Brightness brightness}) {
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: isDark ? scheme.surfaceContainerHighest : cardLight,
+      fillColor: isDark ? scheme.surfaceContainerHighest : resolved.card,
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),

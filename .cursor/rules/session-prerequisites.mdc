@@ -1,0 +1,20 @@
+---
+description: After a restart or at the start of resumed work, verify tools and report readiness before coding
+alwaysApply: true
+---
+
+# Session restart prerequisites
+
+Authoritative text for every agent and machine: **`AGENTS.md` § 3.1** (repository root). If this file and AGENTS.md differ, follow AGENTS.md.
+
+When this chat resumes after idle time, a machine/IDE restart, a new clone, or the user asks to continue work, **verify prerequisites first**. Do not start feature work until the check has run. Then tell the user what is ready, what you prepared, and what is still missing.
+
+Check, in this order:
+
+1. **Git** — branch, upstream, `git status -sb`, `git fetch` (or dry-run). Confirm the GitHub remote still answers.
+2. **GitHub CLI** — `gh auth status` if PRs or issues will be needed. Do not run interactive `gh auth login` unless the user asked.
+3. **Flutter** — SDK responds (`flutter --version`). Run `flutter pub get` if dependencies may be stale.
+4. **Android** — follow `AGENTS.md` § 3.2. List devices first; reuse a running emulator; start **Medium Phone** only if none is open **and** device testing is needed.
+5. **Network** — only note if fetch, pub get, or doctor network failed.
+
+Report a short ready / prepared / blocked list. Do not hide uncommitted local work. Do not commit, push, or start a second emulator as part of this check.

@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/dimensions.dart';
 import '../../app/theme.dart';
 import '../../application/providers.dart';
-import '../../domain/copy.dart';
 import '../../domain/daily_check_in.dart';
 import '../../domain/date_key.dart';
 import '../../domain/display_calendar.dart';
@@ -17,6 +16,9 @@ import '../../domain/weekly_calendar.dart';
 import '../checkin/check_in_screen.dart';
 import '../shared/salah_activity_mark.dart';
 import '../shared/state_marker.dart';
+import '../shared/today_mark_halo.dart';
+import '../shared/home_band_heading.dart';
+import '../shared/week_nav_strip.dart';
 
 class SalahHomeCard extends ConsumerStatefulWidget {
   const SalahHomeCard({
@@ -53,10 +55,10 @@ class _SalahHomeCardState extends ConsumerState<SalahHomeCard> {
     final keys = weekDateKeys(weekStart);
     final index = {for (final record in widget.records) record.dateKey: record};
     final brightness = Theme.of(context).brightness;
-    final wash = MuhasabahColors.wash(
+    final wash = MuhasabahColors.themeWash(
+      context,
       MuhasabahColors.salahWash,
       MuhasabahColors.salahWashDark,
-      brightness,
     );
     final localizations = MaterialLocalizations.of(context);
     final display = widget.displayRows ?? SalahTraceRow.values;
@@ -66,7 +68,7 @@ class _SalahHomeCardState extends ConsumerState<SalahHomeCard> {
     ];
     final friday = display.contains(SalahTraceRow.jumuah);
     final voluntary = [
-      for (final row in const [SalahTraceRow.tahajjud, SalahTraceRow.ishraq])
+      for (final row in kSalahVoluntaryRows)
         if (display.contains(row)) row,
     ];
 
@@ -81,70 +83,35 @@ class _SalahHomeCardState extends ConsumerState<SalahHomeCard> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Row(
-                children: [
-                  IconButton(
-                    tooltip: 'Previous week',
-                    onPressed: () => setState(() => _weekOffset--),
-                    icon: const Icon(Icons.chevron_left),
-                  ),
-                  Expanded(
-                    child: InkWell(
-                      onTap: () => openFocusedCheckIn(
-                        context,
-                        dateKey: dateKey(ref.read(nowProvider)),
-                        focus: CheckInFocus.salah,
-                      ),
-                      child: Column(
-                        children: [
-                          Text(
-                            MonitorDomain.salah.label,
-                            textAlign: TextAlign.center,
-                            style: Theme.of(context).textTheme.titleMedium
-                                ?.copyWith(fontWeight: FontWeight.w600),
-                          ),
-                          if (MonitorDomain.salah.focusQuestion != null) ...[
-                            const SizedBox(height: 4),
-                            Text(
-                              MonitorDomain.salah.focusQuestion!,
-                              textAlign: TextAlign.center,
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(height: 1.35),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    tooltip: 'Next week',
-                    onPressed: _weekOffset >= 0
-                        ? null
-                        : () => setState(() => _weekOffset++),
-                    icon: const Icon(Icons.chevron_right),
-                  ),
-                ],
-              ),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      weekRangeLabel(weekStart, calendar: calendar),
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: _weekOffset == 0
-                        ? null
-                        : () => setState(() => _weekOffset = 0),
-                    child: const Text(Copy.currentWeek),
-                  ),
-                ],
+              HomeWeekChrome(
+                title: MonitorDomain.salah.label,
+                question: MonitorDomain.salah.focusQuestion,
+                family: MuhasabahColors.salahFamily,
+                cardWash: wash,
+                weekLabel: weekRangeLabel(weekStart, calendar: calendar),
+                onPreviousWeek: () => setState(() => _weekOffset--),
+                onNextWeek: () => setState(() => _weekOffset++),
+                nextWeekEnabled: _weekOffset < 0,
+                onTitleTap: () {
+                  refreshNowIfLocalDateChanged(ref);
+                  openFocusedCheckIn(
+                    context,
+                    dateKey: dateKey(ref.read(nowProvider)),
+                    focus: CheckInFocus.salah,
+                  );
+                },
               ),
               const SizedBox(height: 4),
               Row(
                 children: [
-                  if (!widget.compactWeek) const SizedBox(width: 58),
+                  if (!widget.compactWeek)
+                    CurrentWeekGutter(
+                      width: 58,
+                      family: MuhasabahColors.salahFamily,
+                      cardWash: wash,
+                      enabled: _weekOffset != 0,
+                      onPressed: () => setState(() => _weekOffset = 0),
+                    ),
                   for (var col = 0; col < kCalendarWeekdayCount; col++)
                     Expanded(
                       child: Column(
@@ -153,6 +120,8 @@ class _SalahHomeCardState extends ConsumerState<SalahHomeCard> {
                             localizations.narrowWeekdays[(firstDay + col) % 7],
                             key: Key('salah-home-weekday-$col'),
                             textAlign: TextAlign.center,
+                            overflow: TextOverflow.ellipsis,
+                            textScaler: TextScaler.noScaling,
                             style: Theme.of(context).textTheme.labelSmall
                                 ?.copyWith(
                                   fontWeight: FontWeight.w600,
@@ -163,20 +132,22 @@ class _SalahHomeCardState extends ConsumerState<SalahHomeCard> {
                                           ) ==
                                           DateTime.friday
                                       ? MuhasabahColors.salahFamily
-                                      : Theme.of(
-                                          context,
-                                        ).colorScheme.onSurfaceVariant,
+                                      : Theme.of(context)
+                                            .colorScheme
+                                            .onSurfaceVariant,
                                 ),
                           ),
                           Text(
                             '${displayParts(parseDateKey(keys[col]), calendar).day}',
                             textAlign: TextAlign.center,
+                            overflow: TextOverflow.ellipsis,
+                            textScaler: TextScaler.noScaling,
                             style: Theme.of(context).textTheme.labelSmall
                                 ?.copyWith(
                                   fontWeight: FontWeight.w600,
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onSurfaceVariant,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
                                 ),
                           ),
                         ],
@@ -259,7 +230,11 @@ class _SalahHomeCardState extends ConsumerState<SalahHomeCard> {
         dateCellKind(key, ref.read(nowProvider)) != DateCellKind.future;
     return InkWell(
       key: Key('home-compact-salah-$key'),
-      onTap: open ? () => _openSalahDay(key) : null,
+      onTap: recoverableDateCellOnTap(
+        ref: ref,
+        dateKey: key,
+        onOpen: () => _openSalahDay(key),
+      ),
       child: Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 4),
@@ -278,9 +253,7 @@ class _SalahHomeCardState extends ConsumerState<SalahHomeCard> {
     for (final row in display) {
       if (row.fridayOnly && !isFridayDateKey(key)) continue;
       if (row.isVoluntary) {
-        final outcome = row == SalahTraceRow.tahajjud
-            ? record.tahajjud
-            : record.ishraq;
+        final outcome = record.voluntaryOutcome(row);
         if (outcome.isRecorded) return true;
       } else if (row == SalahTraceRow.jumuah) {
         if (record.jumuah.isRecorded || record.jumuahCongregation) return true;
@@ -300,23 +273,21 @@ class _SalahHomeCardState extends ConsumerState<SalahHomeCard> {
     required List<String> keys,
     required Map<String, DailyCheckIn> index,
   }) {
+    final bandWash = MuhasabahColors.wash(light, dark, brightness, context);
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: MuhasabahColors.wash(light, dark, brightness),
+        color: bandWash,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(6, 8, 6, 6),
+        padding: const EdgeInsets.fromLTRB(6, 6, 6, 6),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              label.toUpperCase(),
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                letterSpacing: 0.4,
-                fontWeight: FontWeight.w600,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+            HomeBandHeading(
+              band: label,
+              family: MuhasabahColors.salahFamily,
+              baseWash: bandWash,
             ),
             const SizedBox(height: 6),
             for (final row in rows) _row(row, keys, index),
@@ -359,16 +330,28 @@ class _SalahHomeCardState extends ConsumerState<SalahHomeCard> {
     }
     final kind = dateCellKind(key, ref.read(nowProvider));
     final marker = _marker(row, key, record);
-    final open = kind != DateCellKind.future;
     return Material(
       type: MaterialType.transparency,
       child: InkWell(
-        onTap: open ? () => _openSalahDay(key, band: salahHomeBand(row)) : null,
+        onTap: recoverableDateCellOnTap(
+          ref: ref,
+          dateKey: key,
+          onOpen: () => _openSalahDay(
+            key,
+            band: salahHomeBand(row),
+            rowId: 'salah.${row.id}',
+          ),
+        ),
+        customBorder: const CircleBorder(),
         child: SizedBox(
           height: AppDimensions.progressMarker + 10,
           width: double.infinity,
           child: Center(
-            child: open ? marker : Opacity(opacity: 0.28, child: marker),
+            child: decorateWeekMark(
+              marker: marker,
+              kind: kind,
+              todayKey: Key('home-today-salah-${row.id}-$key'),
+            ),
           ),
         ),
       ),
@@ -386,15 +369,14 @@ class _SalahHomeCardState extends ConsumerState<SalahHomeCard> {
     late final Color color;
     late final String stateLabel;
     if (row.isVoluntary) {
-      final outcome = row == SalahTraceRow.tahajjud
-          ? (record?.tahajjud ?? TernaryOutcome.unanswered)
-          : (record?.ishraq ?? TernaryOutcome.unanswered);
-      kind = markerForRecorded(
-        recorded: outcome.isRecorded,
-        positive: outcome == TernaryOutcome.positive,
+      final mark = SalahActivityMark.forVoluntary(
+        record: record,
+        row: row,
+        activityColours: colours,
       );
-      color = MuhasabahColors.mark;
-      stateLabel = voluntarySalahLabel(outcome);
+      kind = mark.kind;
+      color = mark.color;
+      stateLabel = mark.label;
     } else {
       final mark = row == SalahTraceRow.jumuah
           ? SalahActivityMark.forJumuah(
@@ -422,12 +404,13 @@ class _SalahHomeCardState extends ConsumerState<SalahHomeCard> {
     );
   }
 
-  void _openSalahDay(String key, {String? band}) {
+  void _openSalahDay(String key, {String? band, String? rowId}) {
     openFocusedCheckIn(
       context,
       dateKey: key,
       focus: CheckInFocus.salah,
       focusBand: band,
+      focusRowId: rowId,
     );
   }
 }

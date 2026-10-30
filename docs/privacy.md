@@ -1,8 +1,10 @@
 # Privacy
 
-Default: local-first and offline. No telemetry, ads, cloud AI, or remote analytics in core functionality.
+Default: local-first and offline. No telemetry, ads, cloud AI, or remote analytics in core functionality. Opening a Reflection citation may load a public page in the in-app reader or, if asked, another app on this device; Qur’an Play recitation may fetch a public audio file so playback is not the site’s WebView player. Records stay here.
 
-Never log Response text, gratitude text, personal-reflection text, contextual free text, or serialized private records. `logAppEvent` records event names and opaque ids only.
+Never log Response text, gratitude text, personal-reflection text, contextual free text, domain-action titles, developer-note bodies, practice-hadith register content, or serialized private records. `logAppEvent` records event names and opaque ids only.
+
+Developer notes and domain actions stay in local Hive boxes. Download copies a file on the device; the app does not send mail.
 
 Android backup is disabled (`allowBackup=false`) with exclude rules for cloud backup and device transfer.
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muhasabah02/domain/copy.dart';
 import 'package:muhasabah02/domain/faq.dart';
+import 'package:muhasabah02/domain/monitor_domain.dart';
 import 'package:muhasabah02/presentation/settings/faq_screen.dart';
 
 import '../support/test_app.dart';
@@ -9,6 +10,7 @@ import '../support/test_app.dart';
 void main() {
   test('faq copy does not score or prescribe', () {
     final blob = [
+      Copy.faqPurpose,
       for (final entry in faqEntries) '${entry.question} ${entry.answer}',
       for (final table in [baselineAspirationCompare, manageCheckInsCompare])
         for (final row in table.rows) '${row.label} ${row.left} ${row.right}',
@@ -28,17 +30,55 @@ void main() {
     expect(blob, contains('not a revival programme'));
     expect(blob, contains('failed revival'));
     expect(blob, contains('not a relapse'));
-    expect(blob, contains('resting from work as needed'));
+    expect(blob, contains('sleep stays on physical health'));
+    expect(blob, contains('physical health & energy learn & practice'));
+    expect(blob, contains('wealth & stewardship learn & practice'));
+    expect(blob, contains('ummah learn & practice'));
+    expect(blob, contains('qur’an to learn & practice'));
+    expect(blob, contains('salah & prayer quality learn & practice'));
+    expect(blob, contains('fasting learn & practice'));
+    expect(blob, contains('charity learn & practice'));
+    expect(blob, contains('hajj learn & practice'));
     expect(blob, contains('personal mix'));
     expect(blob, contains('manual baseline'));
     expect(blob, contains('not counted from check-ins'));
     expect(blob, contains('does not encrypt the files'));
     expect(blob, contains('does not calculate whether hajj is obligatory'));
-    expect(faqPaddedNumberForId(kFaqManualBaseline), '03');
+    expect(blob, contains('this domain is not active in this version'));
+    expect(blob, contains('30-day progress'));
+    expect(blob, contains('carry-forward is not a fail'));
+    expect(blob, contains('unticked stays unanswered'));
+    expect(blob, contains('private recorder'));
+    expect(blob, contains('record what you noticed'));
+    expect(blob, contains('factors are not causes'));
+    expect(blob, contains('demonstration, not a target'));
+    expect(faqPaddedNumberForId(kFaqManualBaseline), '21');
+    expect(faqEntries.first.question, contains('score me or keep streaks'));
+    expect(
+      faqEntries
+          .where((entry) => !entry.isCurrentVersion)
+          .map((entry) => entry.domain),
+      containsAll({
+        MonitorDomain.knowledge,
+        MonitorDomain.time,
+        MonitorDomain.health,
+        MonitorDomain.wealth,
+        MonitorDomain.ummah,
+        MonitorDomain.hajj,
+        MonitorDomain.productivity,
+      }),
+    );
+    expect(
+      faqEntries
+          .where((entry) => entry.domain == MonitorDomain.dhikr)
+          .single
+          .isCurrentVersion,
+      isTrue,
+    );
   });
 
   testWidgets('settings open FAQ clarifications', (tester) async {
-    tester.view.physicalSize = const Size(400, 8200);
+    tester.view.physicalSize = const Size(400, 18000);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
@@ -51,18 +91,42 @@ void main() {
     await tester.tap(find.text(Copy.faqTitle));
     await tester.pumpAndSettle();
     expect(find.byType(FaqScreen), findsOneWidget);
-    expect(find.text(Copy.faqNote), findsOneWidget);
-    expect(find.textContaining('01. What is missing'), findsOneWidget);
-    expect(find.textContaining('02. What are Baselines'), findsOneWidget);
+    expect(find.text(Copy.faqPurpose), findsOneWidget);
     expect(
-      find.textContaining('03. How do I write a Manual baseline?'),
+      tester.widget<Text>(find.text(Copy.faqPurpose)).textAlign,
+      TextAlign.justify,
+    );
+    expect(find.text(Copy.faqNote), findsOneWidget);
+    expect(find.text(Copy.faqThisVersionHeading), findsOneWidget);
+    expect(find.text('Purpose'), findsOneWidget);
+    expect(find.text('Your mix'), findsOneWidget);
+    expect(find.text('Live domains'), findsOneWidget);
+    expect(find.text(Copy.faqNotApplicableHeading), findsOneWidget);
+    expect(find.text(Copy.faqNotApplicableNote), findsOneWidget);
+    expect(
+      find.textContaining('01. Does the app score me or keep streaks?'),
       findsOneWidget,
     );
+    expect(find.textContaining('02. What is missing'), findsOneWidget);
+    expect(
+      find.textContaining('03. Are my records private if the phone is lost?'),
+      findsOneWidget,
+    );
+    expect(
+      find.textContaining('04. Can I hide domains I do not want to monitor?'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('05. What is a Personal mix?'), findsOneWidget);
     expect(
       find.textContaining(
         'What are Baselines compared with Personal Aspirations?',
       ),
       findsOneWidget,
+    );
+    await tester.ensureVisible(
+      find.textContaining(
+        'What are Baselines compared with Personal Aspirations?',
+      ),
     );
     await tester.tap(
       find.textContaining(
@@ -75,78 +139,78 @@ void main() {
     expect(find.text('What did I record in that period?'), findsOneWidget);
     expect(find.text('What do I personally hope for?'), findsOneWidget);
     expect(
-      find.textContaining('11. Can I show Islamic dates?'),
-      findsOneWidget,
-    );
-    expect(
-      find.textContaining('12. Can I hide domains I do not want to monitor?'),
-      findsOneWidget,
-    );
-    expect(find.textContaining('13. What is a Personal mix?'), findsOneWidget);
-    expect(
-      find.textContaining('14. What is Manage past check-ins'),
+      find.textContaining('21. How do I write a Manual baseline?'),
       findsOneWidget,
     );
     await tester.ensureVisible(
-      find.textContaining('14. What is Manage past check-ins'),
+      find.textContaining('19. What is Manage past check-ins'),
     );
-    await tester.tap(find.textContaining('14. What is Manage past check-ins'));
+    await tester.tap(find.textContaining('19. What is Manage past check-ins'));
     await tester.pumpAndSettle();
-    expect(find.textContaining('housekeeping of saved days'), findsOneWidget);
+    expect(find.textContaining('housekeeping'), findsOneWidget);
     expect(find.text('Correct or remove a saved day'), findsOneWidget);
     expect(find.text('Look at what was recorded'), findsOneWidget);
-    await tester.ensureVisible(
-      find.textContaining('22. Does Ummah grade my social life?'),
-    );
     expect(
-      find.textContaining('15. Does Character & Morals grade me?'),
+      find.textContaining('11. Does Hadith & Living Sunnah'),
       findsOneWidget,
     );
     expect(
-      find.textContaining('16. Does Rights of Others score my relationships?'),
+      find.textContaining('12. Does Dhikr & Dua score my remembrance?'),
       findsOneWidget,
     );
     expect(
-      find.textContaining(
-        '17. Does Knowledge & Beneficial Speech grade how learned I am?',
+      find.textContaining('13. Does Fasting score my sawm?'),
+      findsOneWidget,
+    );
+    expect(
+      find.textContaining('14. Does Character & Morals grade me?'),
+      findsOneWidget,
+    );
+    expect(
+      find.textContaining('15. Does Rights of Others score my relationships?'),
+      findsOneWidget,
+    );
+    expect(
+      find.textContaining('16. Does Charity score my giving?'),
+      findsOneWidget,
+    );
+    expect(
+      find.textContaining('17. What do the 30-day Progress graphs show?'),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byType(ExpansionTile),
+        matching: find.textContaining(
+          '24. Does Knowledge & Beneficial Speech grade how learned I am?',
+        ),
       ),
-      findsOneWidget,
+      findsNothing,
     );
-    expect(
+    await tester.ensureVisible(
       find.textContaining(
-        '18. Does Hadith & Living Sunnah score my revival of the Sunnah?',
+        '24. Does Knowledge & Beneficial Speech grade how learned I am?',
       ),
-      findsOneWidget,
     );
+    expect(find.text(Copy.faqNotApplicableLabel), findsWidgets);
+    for (final title in const [
+      '25. Does Time & Barakah score my productivity?',
+      '26. Does Physical Health & Energy grade my body?',
+      '27. Does Wealth & Stewardship score my money?',
+      '28. Does Ummah grade my social life?',
+      '29. Does Hajj tell me I must go this year?',
+      '30. Does Productivity score my output?',
+    ]) {
+      final finder = find.textContaining(title, skipOffstage: false);
+      await tester.ensureVisible(finder);
+      expect(finder, findsOneWidget);
+    }
     expect(
-      find.textContaining('19. Does Time & Barakah score my productivity?'),
-      findsOneWidget,
-    );
-    expect(
-      find.textContaining('20. Does Physical Health & Energy grade my body?'),
-      findsOneWidget,
-    );
-    expect(
-      find.textContaining('21. Does Wealth & Stewardship score my money?'),
-      findsOneWidget,
-    );
-    expect(
-      find.textContaining('22. Does Ummah grade my social life?'),
-      findsOneWidget,
-    );
-    await tester.ensureVisible(
-      find.textContaining('23. Does Hajj tell me I must go this year?'),
-    );
-    expect(
-      find.textContaining('23. Does Hajj tell me I must go this year?'),
-      findsOneWidget,
-    );
-    await tester.ensureVisible(
-      find.textContaining('24. Are my records private if the phone is lost?'),
-    );
-    expect(
-      find.textContaining('24. Are my records private if the phone is lost?'),
-      findsOneWidget,
+      find.descendant(
+        of: find.byType(FaqScreen),
+        matching: find.byType(ExpansionTile, skipOffstage: false),
+      ),
+      findsNWidgets(faqEntries.where((entry) => entry.isCurrentVersion).length),
     );
   });
 }

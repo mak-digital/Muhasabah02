@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muhasabah02/domain/copy.dart';
 import 'package:muhasabah02/domain/first_day_of_week.dart';
+import 'package:muhasabah02/domain/worship_list_gender.dart';
 import 'package:muhasabah02/presentation/settings/settings_screen.dart';
 
 import '../support/test_app.dart';
@@ -75,5 +76,28 @@ void main() {
     Navigator.of(tester.element(find.byType(CalendarSettingsScreen))).pop();
     await tester.pumpAndSettle();
     expect(find.text('Islamic (Hijri)'), findsWidgets);
+  });
+
+  testWidgets('settings can choose the Salah list for me', (tester) async {
+    tester.view.physicalSize = const Size(400, 2200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(testApp());
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Settings'));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text(Copy.worshipListGender));
+    await tester.tap(find.text(Copy.worshipListGender));
+    await tester.pumpAndSettle();
+    expect(find.byType(WorshipListGenderSettingsScreen), findsOneWidget);
+    expect(find.text(Copy.worshipListGenderNote), findsOneWidget);
+    await tester.tap(find.text(WorshipListGender.male.label));
+    await tester.pumpAndSettle();
+    Navigator.of(tester.element(find.byType(WorshipListGenderSettingsScreen)))
+        .pop();
+    await tester.pumpAndSettle();
+    expect(find.text(WorshipListGender.male.label), findsWidgets);
   });
 }

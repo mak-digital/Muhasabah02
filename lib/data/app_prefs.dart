@@ -1,5 +1,9 @@
 import 'dart:convert';
 
+import '../domain/app_appearance.dart';
+import '../domain/app_language.dart';
+import '../domain/arabic_script.dart';
+import '../domain/custom_selection_set.dart';
 import '../domain/display_calendar.dart';
 import '../domain/first_day_of_week.dart';
 import '../domain/home_traces.dart';
@@ -8,6 +12,7 @@ import '../domain/personal_aspiration.dart';
 import '../domain/personal_baseline.dart';
 import '../domain/personal_mix.dart';
 import '../domain/quotation_cadence.dart';
+import '../domain/worship_list_gender.dart';
 
 abstract class AppPrefs {
   bool get sampleSeeded;
@@ -15,36 +20,78 @@ abstract class AppPrefs {
   bool get archivePromptDismissed;
   bool get applicationReflectionAcknowledged;
   FirstDayOfWeekPref get firstDayOfWeek;
+  AppAppearance get appearance;
+  WorshipListGender get worshipListGender;
   DisplayCalendar get displayCalendar;
   Set<MonitorDomain> get visibleDomains;
   PersonalMix get personalMix;
+  CustomSelectionSetsRecord get customSelectionSets;
   QuotationCadence get quotationCadence;
+  String? get reflectionHoldPeriod;
+  int? get reflectionHoldIndex;
   List<PersonalBaseline> get baselines;
   List<PersonalAspiration> get aspirations;
   String weeklyJournal(String weekKey);
   HadithMemorisationFocus get hadithMemorisationFocus;
-  HajjStatus get hajjStatus;
+  int get practiceHadithBrowseIndex;
+  Set<String> get archivedPracticeHadithCatalogIds;
+  int get practiceQuranBrowseIndex;
+  int get ramadanCalendarOffsetDays;
+  bool get showFastingRamadanHistory;
   bool get mixHiddenDomainHintShown;
   bool get appLockEnabled;
   bool get salahActivityColours;
+  ArabicScriptFace get arabicScriptFace;
+  double get arabicScriptSize;
+  AppLanguage get appLanguage;
+  Map<String, int> get dhikrCountDefaults;
+  int? dhikrCountDefaultFor(String activityId);
+  Map<String, int> get dhikrProgressCounts;
+  int? dhikrProgressFor(String dateKey, String activityId);
+  double? get dhikrPracticeFabDx;
+  double? get dhikrPracticeFabDy;
 
   Future<void> setSampleSeeded(bool value);
   Future<void> setSampleRemovedByUser(bool value);
   Future<void> setArchivePromptDismissed(bool value);
   Future<void> setApplicationReflectionAcknowledged(bool value);
   Future<void> setFirstDayOfWeek(FirstDayOfWeekPref value);
+  Future<void> setAppearance(AppAppearance value);
+  Future<void> setWorshipListGender(WorshipListGender value);
   Future<void> setDisplayCalendar(DisplayCalendar value);
   Future<void> setVisibleDomains(Set<MonitorDomain> value);
   Future<void> setPersonalMix(PersonalMix value);
+  Future<void> setCustomSelectionSets(CustomSelectionSetsRecord value);
+  Future<void> applyWorkingSelection({
+    required Set<MonitorDomain> domains,
+    required PersonalMix mix,
+    required CustomSelectionSetsRecord sets,
+  });
+  Future<void> activateCustomSlot(int id);
+  Future<void> saveWorkingToCustomSlot(int id);
+  Future<void> renameCustomSlot(int id, String name);
+  Future<void> clearWorkingSelection();
+  Future<void> clearCustomSlot(int id);
   Future<void> setQuotationCadence(QuotationCadence value);
+  Future<void> setReflectionHold({required String period, required int index});
   Future<void> setBaselines(List<PersonalBaseline> value);
   Future<void> setAspirations(List<PersonalAspiration> value);
   Future<void> setWeeklyJournal(String weekKey, String text);
   Future<void> setHadithMemorisationFocus(HadithMemorisationFocus value);
-  Future<void> setHajjStatus(HajjStatus value);
+  Future<void> setPracticeHadithBrowseIndex(int value);
+  Future<void> setArchivedPracticeHadithCatalogIds(Set<String> value);
+  Future<void> setPracticeQuranBrowseIndex(int value);
+  Future<void> setRamadanCalendarOffsetDays(int value);
+  Future<void> setShowFastingRamadanHistory(bool value);
   Future<void> setMixHiddenDomainHintShown(bool value);
   Future<void> setAppLockEnabled(bool value);
   Future<void> setSalahActivityColours(bool value);
+  Future<void> setArabicScriptFace(ArabicScriptFace value);
+  Future<void> setArabicScriptSize(double value);
+  Future<void> setAppLanguage(AppLanguage value);
+  Future<void> setDhikrCountDefault(String activityId, int value);
+  Future<void> setDhikrProgress(String dateKey, String activityId, int count);
+  Future<void> setDhikrPracticeFabOffset(double dx, double dy);
 }
 
 class MemoryAppPrefs implements AppPrefs {
@@ -54,15 +101,31 @@ class MemoryAppPrefs implements AppPrefs {
     this.archivePromptDismissed = false,
     this.applicationReflectionAcknowledged = true,
     this.firstDayOfWeek = FirstDayOfWeekPref.monday,
+    this.appearance = AppAppearance.system,
+    this.worshipListGender = WorshipListGender.unanswered,
     this.displayCalendar = DisplayCalendar.gregorian,
     Set<MonitorDomain>? visibleDomains,
     PersonalMix? personalMix,
+    CustomSelectionSetsRecord? customSelectionSets,
     this.quotationCadence = QuotationCadence.weekly,
+    this.reflectionHoldPeriod,
+    this.reflectionHoldIndex,
     this.hadithMemorisationFocus = HadithMemorisationFocus.unanswered,
-    this.hajjStatus = HajjStatus.unanswered,
+    this.practiceHadithBrowseIndex = 0,
+    Set<String>? archivedPracticeHadithCatalogIds,
+    this.practiceQuranBrowseIndex = 0,
+    this.ramadanCalendarOffsetDays = 0,
+    this.showFastingRamadanHistory = false,
     this.mixHiddenDomainHintShown = false,
     this.appLockEnabled = false,
     this.salahActivityColours = false,
+    this.arabicScriptFace = ArabicScriptFace.uthmani,
+    this.arabicScriptSize = kDefaultArabicScriptSize,
+    this.appLanguage = AppLanguage.english,
+    Map<String, int>? dhikrCountDefaults,
+    Map<String, int>? dhikrProgressCounts,
+    this.dhikrPracticeFabDx,
+    this.dhikrPracticeFabDy,
     List<PersonalBaseline>? baselines,
     List<PersonalAspiration>? aspirations,
     Map<String, String>? weeklyJournals,
@@ -70,9 +133,20 @@ class MemoryAppPrefs implements AppPrefs {
        aspirations = List.of(aspirations ?? const []),
        _journals = Map.of(weeklyJournals ?? const {}),
        visibleDomains = Set<MonitorDomain>.from(
-         visibleDomains ?? kBasicAkhlaqVisibleDomains,
+         visibleDomains ?? kBasicDhikrVisibleDomains,
        ),
-       personalMix = personalMix ?? PersonalMix.sameAsDomains;
+       personalMix = personalMix ?? PersonalMix.sameAsDomains,
+       customSelectionSets =
+           customSelectionSets ?? CustomSelectionSetsRecord.empty(),
+       dhikrCountDefaults = Map<String, int>.from(
+         dhikrCountDefaults ?? const {},
+       ),
+       dhikrProgressCounts = Map<String, int>.from(
+         dhikrProgressCounts ?? const {},
+       ),
+       archivedPracticeHadithCatalogIds = Set<String>.from(
+         archivedPracticeHadithCatalogIds ?? const {},
+       );
 
   @override
   bool sampleSeeded;
@@ -87,6 +161,12 @@ class MemoryAppPrefs implements AppPrefs {
   FirstDayOfWeekPref firstDayOfWeek;
 
   @override
+  AppAppearance appearance;
+
+  @override
+  WorshipListGender worshipListGender;
+
+  @override
   DisplayCalendar displayCalendar;
 
   @override
@@ -96,13 +176,37 @@ class MemoryAppPrefs implements AppPrefs {
   PersonalMix personalMix;
 
   @override
+  CustomSelectionSetsRecord customSelectionSets;
+
+  int mutationCount = 0;
+  bool throwOnApplyWorkingSelection = false;
+
+  @override
   QuotationCadence quotationCadence;
+
+  @override
+  String? reflectionHoldPeriod;
+
+  @override
+  int? reflectionHoldIndex;
 
   @override
   HadithMemorisationFocus hadithMemorisationFocus;
 
   @override
-  HajjStatus hajjStatus;
+  int practiceHadithBrowseIndex;
+
+  @override
+  Set<String> archivedPracticeHadithCatalogIds;
+
+  @override
+  int practiceQuranBrowseIndex;
+
+  @override
+  int ramadanCalendarOffsetDays;
+
+  @override
+  bool showFastingRamadanHistory;
 
   @override
   bool mixHiddenDomainHintShown;
@@ -112,6 +216,37 @@ class MemoryAppPrefs implements AppPrefs {
 
   @override
   bool salahActivityColours;
+
+  @override
+  ArabicScriptFace arabicScriptFace;
+
+  @override
+  double arabicScriptSize;
+
+  @override
+  AppLanguage appLanguage;
+
+  @override
+  Map<String, int> dhikrCountDefaults;
+
+  @override
+  Map<String, int> dhikrProgressCounts;
+
+  @override
+  double? dhikrPracticeFabDx;
+
+  @override
+  double? dhikrPracticeFabDy;
+
+  @override
+  int? dhikrCountDefaultFor(String activityId) =>
+      dhikrCountDefaults[activityId];
+
+  @override
+  int? dhikrProgressFor(String dateKey, String activityId) {
+    if (dateKey.isEmpty || activityId.isEmpty) return null;
+    return dhikrProgressCounts[dhikrProgressKey(dateKey, activityId)];
+  }
 
   @override
   List<PersonalBaseline> baselines;
@@ -144,19 +279,154 @@ class MemoryAppPrefs implements AppPrefs {
       firstDayOfWeek = value;
 
   @override
+  Future<void> setAppearance(AppAppearance value) async => appearance = value;
+
+  @override
+  Future<void> setWorshipListGender(WorshipListGender value) async =>
+      worshipListGender = value;
+
+  @override
   Future<void> setDisplayCalendar(DisplayCalendar value) async =>
       displayCalendar = value;
 
   @override
-  Future<void> setVisibleDomains(Set<MonitorDomain> value) async =>
-      visibleDomains = Set<MonitorDomain>.from(value);
+  Future<void> setVisibleDomains(Set<MonitorDomain> value) async {
+    visibleDomains = withoutDormantMonitorDomains(value);
+    mutationCount++;
+  }
 
   @override
-  Future<void> setPersonalMix(PersonalMix value) async => personalMix = value;
+  Future<void> setPersonalMix(PersonalMix value) async {
+    personalMix = value;
+    mutationCount++;
+  }
+
+  @override
+  Future<void> setCustomSelectionSets(CustomSelectionSetsRecord value) async {
+    customSelectionSets = CustomSelectionSetsRecord(
+      activeSlotId: value.activeSlotId,
+      slots: List.of(value.slots),
+    );
+    mutationCount++;
+  }
+
+  @override
+  Future<void> applyWorkingSelection({
+    required Set<MonitorDomain> domains,
+    required PersonalMix mix,
+    required CustomSelectionSetsRecord sets,
+  }) async {
+    final previousDomains = Set<MonitorDomain>.from(visibleDomains);
+    final previousMix = personalMix;
+    final previousSets = CustomSelectionSetsRecord(
+      activeSlotId: customSelectionSets.activeSlotId,
+      slots: List.of(customSelectionSets.slots),
+    );
+    visibleDomains = withoutDormantMonitorDomains(domains);
+    personalMix = mix;
+    customSelectionSets = CustomSelectionSetsRecord(
+      activeSlotId: sets.activeSlotId,
+      slots: List.of(sets.slots),
+    );
+    if (throwOnApplyWorkingSelection) {
+      visibleDomains = previousDomains;
+      personalMix = previousMix;
+      customSelectionSets = previousSets;
+      throw StateError('prefs write failed');
+    }
+    mutationCount++;
+  }
+
+  @override
+  Future<void> activateCustomSlot(int id) async {
+    final slotId = normalizeCustomSlotId(id);
+    if (slotId == null) return;
+    final slot = customSelectionSets.slotById(slotId);
+    await applyWorkingSelection(
+      domains: slot.domains,
+      mix: slot.mix,
+      sets: CustomSelectionSetsRecord(
+        activeSlotId: slotId,
+        slots: customSelectionSets.slots,
+      ),
+    );
+  }
+
+  @override
+  Future<void> saveWorkingToCustomSlot(int id) async {
+    final slotId = normalizeCustomSlotId(id);
+    if (slotId == null) return;
+    final current = customSelectionSets.slotById(slotId);
+    await setCustomSelectionSets(
+      customSelectionSets
+          .replacingSlot(
+            current.copyWith(
+              domains: Set<MonitorDomain>.from(visibleDomains),
+              mix: personalMix,
+            ),
+          )
+          .copyWithActive(slotId),
+    );
+  }
+
+  @override
+  Future<void> renameCustomSlot(int id, String name) async {
+    final slotId = normalizeCustomSlotId(id);
+    if (slotId == null) return;
+    final current = customSelectionSets.slotById(slotId);
+    await setCustomSelectionSets(
+      customSelectionSets.replacingSlot(
+        current.copyWith(name: sanitizeCustomSlotName(name)),
+      ),
+    );
+  }
+
+  @override
+  Future<void> clearWorkingSelection() async {
+    await applyWorkingSelection(
+      domains: <MonitorDomain>{},
+      mix: PersonalMix.sameAsDomains,
+      sets: CustomSelectionSetsRecord(
+        activeSlotId: null,
+        slots: customSelectionSets.slots,
+      ),
+    );
+  }
+
+  @override
+  Future<void> clearCustomSlot(int id) async {
+    final slotId = normalizeCustomSlotId(id);
+    if (slotId == null) return;
+    final current = customSelectionSets.slotById(slotId);
+    final nextSets = customSelectionSets.replacingSlot(
+      current.copyWith(
+        domains: <MonitorDomain>{},
+        mix: PersonalMix.sameAsDomains,
+      ),
+    );
+    if (customSelectionSets.activeSlotId == slotId) {
+      await applyWorkingSelection(
+        domains: <MonitorDomain>{},
+        mix: PersonalMix.sameAsDomains,
+        sets: nextSets,
+      );
+    } else {
+      await setCustomSelectionSets(nextSets);
+    }
+  }
 
   @override
   Future<void> setQuotationCadence(QuotationCadence value) async =>
       quotationCadence = value;
+
+  @override
+  Future<void> setReflectionHold({
+    required String period,
+    required int index,
+  }) async {
+    reflectionHoldPeriod = period;
+    reflectionHoldIndex = index;
+  }
 
   @override
   Future<void> setBaselines(List<PersonalBaseline> value) async =>
@@ -182,7 +452,28 @@ class MemoryAppPrefs implements AppPrefs {
   ) async => hadithMemorisationFocus = value;
 
   @override
-  Future<void> setHajjStatus(HajjStatus value) async => hajjStatus = value;
+  Future<void> setPracticeHadithBrowseIndex(int value) async =>
+      practiceHadithBrowseIndex = value;
+
+  @override
+  Future<void> setArchivedPracticeHadithCatalogIds(Set<String> value) async =>
+      archivedPracticeHadithCatalogIds = Set<String>.from(value);
+
+  @override
+  Future<void> setPracticeQuranBrowseIndex(int value) async =>
+      practiceQuranBrowseIndex = value;
+
+  @override
+  Future<void> setRamadanCalendarOffsetDays(int value) async =>
+      ramadanCalendarOffsetDays = value < -1
+      ? -1
+      : value > 1
+      ? 1
+      : value;
+
+  @override
+  Future<void> setShowFastingRamadanHistory(bool value) async =>
+      showFastingRamadanHistory = value;
 
   @override
   Future<void> setMixHiddenDomainHintShown(bool value) async =>
@@ -194,7 +485,54 @@ class MemoryAppPrefs implements AppPrefs {
   @override
   Future<void> setSalahActivityColours(bool value) async =>
       salahActivityColours = value;
+
+  @override
+  Future<void> setArabicScriptFace(ArabicScriptFace value) async =>
+      arabicScriptFace = value;
+
+  @override
+  Future<void> setArabicScriptSize(double value) async =>
+      arabicScriptSize = clampArabicScriptSize(value);
+
+  @override
+  Future<void> setAppLanguage(AppLanguage value) async => appLanguage = value;
+
+  @override
+  Future<void> setDhikrCountDefault(String activityId, int value) async {
+    if (activityId.isEmpty) return;
+    final clamped = value < 1
+        ? 1
+        : value > 999
+        ? 999
+        : value;
+    dhikrCountDefaults[activityId] = clamped;
+  }
+
+  @override
+  Future<void> setDhikrProgress(
+    String dateKey,
+    String activityId,
+    int count,
+  ) async {
+    if (dateKey.isEmpty || activityId.isEmpty) return;
+    final key = dhikrProgressKey(dateKey, activityId);
+    // Keep 0 so a reset tap does not fall back to the seed (e.g. Istighfar 3).
+    if (count < 0) {
+      dhikrProgressCounts.remove(key);
+      return;
+    }
+    dhikrProgressCounts[key] = count > 999 ? 999 : count;
+  }
+
+  @override
+  Future<void> setDhikrPracticeFabOffset(double dx, double dy) async {
+    dhikrPracticeFabDx = dx;
+    dhikrPracticeFabDy = dy;
+  }
 }
+
+String dhikrProgressKey(String dateKey, String activityId) =>
+    '$dateKey|$activityId';
 
 List<PersonalBaseline> decodeBaselines(String? raw) {
   if (raw == null || raw.isEmpty) return const [];
@@ -239,3 +577,63 @@ Map<String, String> decodeJournals(String? raw) {
 }
 
 String encodeJournals(Map<String, String> value) => jsonEncode(value);
+
+Set<String> decodeStringIdSet(String? raw) {
+  if (raw == null || raw.isEmpty) return {};
+  try {
+    final decoded = jsonDecode(raw);
+    if (decoded is! List) return {};
+    return {
+      for (final item in decoded)
+        if (item is String && item.isNotEmpty) item,
+    };
+  } catch (_) {
+    return {};
+  }
+}
+
+String encodeStringIdSet(Set<String> value) => jsonEncode([
+  for (final item in value)
+    if (item.isNotEmpty) item,
+]);
+
+Map<String, int> decodeDhikrCountDefaults(String? raw) {
+  if (raw == null || raw.isEmpty) return {};
+  try {
+    final decoded = jsonDecode(raw);
+    if (decoded is! Map) return {};
+    return {
+      for (final entry in decoded.entries)
+        if (entry.value is num && (entry.value as num).toInt() > 0)
+          '${entry.key}': (entry.value as num).toInt().clamp(1, 999),
+    };
+  } catch (_) {
+    return {};
+  }
+}
+
+String encodeDhikrCountDefaults(Map<String, int> value) => jsonEncode({
+  for (final entry in value.entries)
+    if (entry.value > 0) entry.key: entry.value.clamp(1, 999),
+});
+
+/// Day progress may be 0 after the first count tap resets the field.
+Map<String, int> decodeDhikrProgressCounts(String? raw) {
+  if (raw == null || raw.isEmpty) return {};
+  try {
+    final decoded = jsonDecode(raw);
+    if (decoded is! Map) return {};
+    return {
+      for (final entry in decoded.entries)
+        if (entry.value is num && (entry.value as num).toInt() >= 0)
+          '${entry.key}': (entry.value as num).toInt().clamp(0, 999),
+    };
+  } catch (_) {
+    return {};
+  }
+}
+
+String encodeDhikrProgressCounts(Map<String, int> value) => jsonEncode({
+  for (final entry in value.entries)
+    if (entry.value >= 0) entry.key: entry.value.clamp(0, 999),
+});

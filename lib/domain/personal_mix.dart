@@ -5,6 +5,7 @@ import 'salah_extras.dart';
 
 const kZakatMixKey = 'zakat';
 const kHajjMixKey = 'hajj';
+const kProductivityMixKey = 'productivity';
 
 enum PersonalMixKind {
   sameAsDomains,
@@ -71,6 +72,7 @@ List<HomeTraceRow> homeTraceRowsFor(MonitorDomain domain) {
     MonitorDomain.ummah => ummahHomeRows,
     MonitorDomain.fasting => fastingHomeRows,
     MonitorDomain.hajj => hajjHomeRows,
+    MonitorDomain.productivity => productivityHomeRows,
     MonitorDomain.charity => charityHomeRows,
     MonitorDomain.salah || MonitorDomain.quran => const [],
   };
@@ -138,8 +140,16 @@ List<MixItem> _buildMixCatalog() {
     const MixItem(
       id: kHajjMixKey,
       domain: MonitorDomain.hajj,
-      band: 'Hajj status',
+      band: 'Hajj standing',
       label: 'Hajj',
+    ),
+  );
+  items.add(
+    const MixItem(
+      id: kProductivityMixKey,
+      domain: MonitorDomain.productivity,
+      band: 'Actions',
+      label: 'Productivity',
     ),
   );
   return items;
@@ -157,13 +167,12 @@ final kWorshipMixKeys = mixKeysWhere(
       (item.domain == MonitorDomain.salah && item.band == 'Obligatory Salah') ||
       item.id == 'quran.reading' ||
       item.id == 'quran.meaning' ||
-      item.id == 'quran.reflection' ||
       (item.domain == MonitorDomain.hadith &&
-          (item.band == 'Encounter' || item.id == 'hadith.livedSunnah')) ||
+          (item.id == hadithEncounterKey ||
+              item.id == hadithLivedNoticedKey)) ||
       (item.domain == MonitorDomain.dhikr &&
           item.band == 'Post-fard Salah Adhkar') ||
-      item.id == kHajjMixKey ||
-      item.id == kHajjPreparationKey,
+      item.id == kHajjMixKey,
 );
 
 final kCharacterRightsMixKeys = mixKeysWhere(
@@ -191,19 +200,16 @@ final kPeopleMixKeys = mixKeysWhere(
       (item.domain == MonitorDomain.charity && item.band == 'Care'),
 );
 
+/// First-season mix for Salah, Qur’an & Dhikr: obligatory Salah,
+/// selected Qur’an stored rows, and two Dhikr rows.
 final kFirstLookMixKeys = mixKeysWhere(
   (item) =>
       (item.domain == MonitorDomain.salah && item.band == 'Obligatory Salah') ||
       item.id == 'quran.reading' ||
       item.id == 'quran.meaning' ||
-      item.id == 'quran.reflection' ||
       item.id == 'quran.consciousApplication' ||
-      item.id == 'hadith.livedSunnah' ||
-      item.id == 'akhlaq.patience' ||
-      item.id == 'akhlaq.truthfulness' ||
-      item.id == 'huquq.parents' ||
-      item.id == 'charity.voluntary' ||
-      item.id == kZakatMixKey,
+      item.id == 'dhikr.postFardFajr' ||
+      item.id == 'dhikr.morningAdhkar',
 );
 
 Set<String> namedMixKeys(PersonalMixKind kind) {
@@ -299,7 +305,7 @@ List<MonitorDomain> orderedVisibleDomains(
   return [...mixFirst, ...rest];
 }
 
-/// Home week grids follow the mix. Review still uses [orderedVisibleDomains].
+/// Home, Review, and today’s check-in follow the mix among shown domains.
 List<MonitorDomain> homeMixDomains(
   Set<MonitorDomain> visible,
   PersonalMix mix,
@@ -340,8 +346,10 @@ List<HomeTraceRow> mixTraceRows(MonitorDomain domain, Set<String> keys) {
 
 bool mixIncludesZakat(Set<String> keys) => keys.contains(kZakatMixKey);
 
-bool mixIncludesHajj(Set<String> keys) =>
-    keys.contains(kHajjMixKey) || keys.contains(kHajjPreparationKey);
+bool mixIncludesHajj(Set<String> keys) => keys.contains(kHajjMixKey);
+
+bool mixIncludesProductivity(Set<String> keys) =>
+    keys.contains(kProductivityMixKey);
 
 Set<MonitorDomain> hiddenDomainsInMix(
   PersonalMix mix,
@@ -364,17 +372,23 @@ String domainsSettingsSubtitle(Set<MonitorDomain> visible, PersonalMix mix) {
 
 String personalMixSummary(PersonalMix mix) => mix.kind.label;
 
-String? personalMixSeasonLine(PersonalMix mix, Set<MonitorDomain> visible) {
+String? personalMixSeasonLine(
+  PersonalMix mix,
+  Set<MonitorDomain> visible, {
+  MonitorDomain? domain,
+}) {
   if (mix.kind == PersonalMixKind.sameAsDomains) return null;
   final keys = resolvePersonalMixKeys(mix, visible);
   if (keys.isEmpty) return null;
   final labels = <String>[];
   for (final item in mixCatalog) {
     if (!keys.contains(item.id)) continue;
+    if (domain != null && item.domain != domain) continue;
     labels.add(item.label);
-    if (labels.length == 8) break;
+    if (domain == null && labels.length == 8) break;
   }
-  final more = keys.length > labels.length;
+  if (labels.isEmpty) return null;
+  final more = domain == null && keys.length > labels.length;
   final joined = labels.join(', ');
   return more ? '$joined…' : joined;
 }

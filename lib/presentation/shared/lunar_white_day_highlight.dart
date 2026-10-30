@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../app/dimensions.dart';
 import '../../app/theme.dart';
 
 class LunarWhiteDayHighlight extends StatelessWidget {
@@ -12,14 +13,19 @@ class LunarWhiteDayHighlight extends StatelessWidget {
   final Widget child;
   final bool dense;
 
-  static BoxDecoration decoration(Brightness brightness, {bool dense = false}) {
+  static BoxDecoration decoration(
+    Brightness brightness, {
+    bool dense = false,
+    BuildContext? context,
+  }) {
     final color = MuhasabahColors.wash(
       MuhasabahColors.lunarWhiteDayWash,
       MuhasabahColors.lunarWhiteDayWashDark,
       brightness,
+      context,
     );
     if (dense) {
-      return BoxDecoration(color: color);
+      return BoxDecoration(color: color, shape: BoxShape.circle);
     }
     return BoxDecoration(
       color: color,
@@ -30,6 +36,7 @@ class LunarWhiteDayHighlight extends StatelessWidget {
           MuhasabahColors.lunarWhiteDayRing,
           MuhasabahColors.lunarWhiteDayRingDark,
           brightness,
+          context,
         ),
       ),
     );
@@ -37,19 +44,37 @@ class LunarWhiteDayHighlight extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final box = DecoratedBox(
-      decoration: decoration(Theme.of(context).brightness, dense: dense),
-      child: child,
-    );
+    final brightness = Theme.of(context).brightness;
     if (dense) {
-      return DecoratedBox(
-        decoration: decoration(Theme.of(context).brightness, dense: true),
-        child: child,
+      const size = AppDimensions.todayMarkHalo;
+      return SizedBox(
+        width: size,
+        height: size,
+        child: Stack(
+          alignment: Alignment.center,
+          clipBehavior: Clip.none,
+          children: [
+            IgnorePointer(
+              child: DecoratedBox(
+                decoration: decoration(
+                  brightness,
+                  dense: true,
+                  context: context,
+                ),
+                child: const SizedBox.expand(),
+              ),
+            ),
+            child,
+          ],
+        ),
       );
     }
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 3),
-      child: box,
+      child: DecoratedBox(
+        decoration: decoration(brightness, context: context),
+        child: child,
+      ),
     );
   }
 }

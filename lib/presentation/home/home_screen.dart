@@ -3,31 +3,32 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/theme.dart';
 import '../../application/providers.dart';
+import '../../debug/startup_probe.dart';
 import '../../debug/synthetic_check_in_seeder.dart';
 import '../../domain/copy.dart';
 import '../../domain/daily_check_in.dart';
 import '../../domain/home_traces.dart';
 import '../../domain/monitor_domain.dart';
 import '../../domain/personal_mix.dart';
+import '../../domain/personalisation_resolver.dart';
 import '../../domain/salah_extras.dart';
 import '../../domain/sample_retirement.dart';
-import '../checkin/check_in_screen.dart';
-import '../history/history_screen.dart';
+import '../input/input_screen.dart';
+import '../registry/registry_screen.dart';
 import '../review/review_screen.dart';
 import '../response/response_editor_screen.dart';
-import '../response/response_list_screen.dart';
 import '../settings/settings_screen.dart';
 import 'first_look_door_screen.dart';
-import '../shared/brand_title.dart';
+import '../shared/domain_line_icon.dart';
 import '../shared/state_marker.dart';
+import '../shared/app_language_scope.dart';
 import '../shared/ui_bits.dart';
-import 'home_domain_stage.dart';
 import 'marks_guide_sheet.dart';
 import 'optional_domain_home_card.dart';
 import 'quran_home_card.dart';
-import 'quick_tap_sheet.dart';
 import 'reflection_home_cards.dart';
 import 'salah_home_card.dart';
+import 'salah_home_follow_on.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -35,15 +36,27 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final checkIns = ref.watch(checkInsProvider);
+    if (checkIns.isLoading) {
+      StartupProbe.mark('home_checkins_loading');
+    } else if (checkIns.hasValue) {
+      StartupProbe.mark('home_checkins_ready');
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        StartupProbe.mark('home_first_input_frame');
+      });
+    }
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: BrandTitle.toolbarHeight,
-        title: const BrandTitle(),
+        title: Text(uiText(context, Copy.appName)),
         actions: [
           Tooltip(
             message: Copy.marksGuideTitle,
             child: TextButton(
               onPressed: () => showMarksGuide(context),
+              style: TextButton.styleFrom(
+                visualDensity: VisualDensity.compact,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+              ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -102,149 +115,183 @@ class HomeScreen extends ConsumerWidget {
             now: ref.watch(nowProvider),
             dismissed: prefs.archivePromptDismissed,
           );
-          return ListView(
-            primary: false,
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.all(16),
+          final visible = prefs.visibleDomains;
+          final mix = prefs.personalMix;
+          final resolver = PersonalisationResolver(
+            visibleDomains: visible,
+            mix: mix,
+          );
+          final homeDomains = resolver.homeDomains;
+          final shown = homeDomains.isEmpty
+              ? null
+              : homeDomains[homeDomainStageIndex(
+                  homeDomains,
+                  ref.watch(homeDomainStageProvider),
+                )];
+          final season = shown == null
+              ? null
+              : personalMixSeasonLine(mix, visible, domain: shown);
+          final practice = shown == null ? null : homePracticeWash(shown);
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (records.any((record) => record.synthetic))
-                Material(
-                  color: MuhasabahColors.wash(
-                    MuhasabahColors.sampleBannerWash,
-                    MuhasabahColors.sampleBannerWashDark,
-                    Theme.of(context).brightness,
-                  ),
-                  borderRadius: BorderRadius.circular(12),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 10,
-                    ),
-                    child: Text(
-                      Copy.sampleDataNotice,
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
+              if (homeDomains.length > 1)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+                  child: Wrap(
+                    key: const Key('home-domain-tabs'),
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (final domain in homeDomains)
+                        ChoiceChip(
+                          key: Key('home-domain-tab-${domain.id}'),
+                          label: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              DomainLineIcon(domain, size: 16),
+                              const SizedBox(width: 6),
+                              Text(uiText(context, domain.shortLabel)),
+                            ],
+                          ),
+                          selected: domain == shown,
+                          onSelected: (_) {
+                            ref.read(homeDomainStageProvider.notifier).state =
+                                domain;
+                          },
+                        ),
+                    ],
                   ),
                 ),
-              if (offerArchive) ...[
-                const SizedBox(height: 8),
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(Copy.archiveSamplePrompt),
-                        const SizedBox(height: 8),
-                        Wrap(
-                          spacing: 8,
-                          children: [
-                            FilledButton(
-                              onPressed: () async {
-                                await const SyntheticCheckInSeeder().clearFrom(
-                                  ref.read(checkInRepositoryProvider),
-                                  responses: ref.read(
-                                    responseRepositoryProvider,
+              Expanded(
+                child: ListView(
+                  key: const Key('home-scroll'),
+                  primary: false,
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
+                  children: [
+                    if (offerArchive) ...[
+                      Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(Copy.archiveSamplePrompt),
+                              const SizedBox(height: 8),
+                              Wrap(
+                                spacing: 8,
+                                children: [
+                                  FilledButton(
+                                    onPressed: () async {
+                                      await const SyntheticCheckInSeeder()
+                                          .clearFrom(
+                                            ref.read(checkInRepositoryProvider),
+                                            responses: ref.read(
+                                              responseRepositoryProvider,
+                                            ),
+                                          );
+                                      await prefs.setSampleRemovedByUser(true);
+                                      await prefs.setArchivePromptDismissed(
+                                        true,
+                                      );
+                                      await ref
+                                          .read(checkInsProvider.notifier)
+                                          .reload();
+                                      await ref
+                                          .read(responsesProvider.notifier)
+                                          .reload();
+                                    },
+                                    child: const Text('Archive sample records'),
                                   ),
-                                );
-                                await prefs.setSampleRemovedByUser(true);
-                                await prefs.setArchivePromptDismissed(true);
-                                await ref
-                                    .read(checkInsProvider.notifier)
-                                    .reload();
-                                await ref
-                                    .read(responsesProvider.notifier)
-                                    .reload();
-                              },
-                              child: const Text('Archive sample records'),
-                            ),
-                            TextButton(
-                              onPressed: () async {
-                                await prefs.setArchivePromptDismissed(true);
-                                ref.read(prefsTickProvider.notifier).state++;
-                              },
-                              child: const Text('Keep sample records'),
-                            ),
-                          ],
+                                  TextButton(
+                                    onPressed: () async {
+                                      await prefs.setArchivePromptDismissed(
+                                        true,
+                                      );
+                                      ref
+                                          .read(prefsTickProvider.notifier)
+                                          .state++;
+                                    },
+                                    child: const Text('Keep sample records'),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                    ],
+                    if (season != null) ...[
+                      BalancedProse(
+                        '${uiText(context, Copy.personalMixSeasonPrefix)} $season.',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          height: 1.45,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                    ],
+                    if (shown != null)
+                      KeyedSubtree(
+                        key: Key('home-domain-card-${shown.id}'),
+                        child: _homeDomainCard(
+                          records: records,
+                          domain: shown,
+                          mix: mix,
+                          mixKeys: resolver.effectiveRowIds,
+                        ),
+                      ),
+                    if (shown != null) ...[
+                      const SizedBox(height: 10),
+                      if (shown.showsHomeActionFollowOn)
+                        DomainHomeFollowOn(domain: shown)
+                      else if (shown != MonitorDomain.productivity) ...[
+                        const WeeklyJournalCard(),
+                        const SizedBox(height: 10),
+                        FilledButton(
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute<void>(
+                                builder: (_) => const ResponseEditorScreen(),
+                              ),
+                            );
+                          },
+                          child: const Text(Copy.addAResponse),
                         ),
                       ],
-                    ),
-                  ),
+                      if (practice != null) ...[
+                        const SizedBox(height: 10),
+                        practice,
+                      ],
+                    ] else ...[
+                      const SizedBox(height: 10),
+                      const WeeklyJournalCard(),
+                      const SizedBox(height: 10),
+                      FilledButton(
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) => const ResponseEditorScreen(),
+                            ),
+                          );
+                        },
+                        child: const Text(Copy.addAResponse),
+                      ),
+                    ],
+                    const SizedBox(height: 12),
+                    const ReflectionOfTheWeekCard(),
+                  ],
                 ),
-              ],
-              const SizedBox(height: 8),
-              ..._dashboard(context, records: records, ref: ref),
+              ),
             ],
           );
         },
       ),
     );
-  }
-
-  List<Widget> _dashboard(
-    BuildContext context, {
-    required List<DailyCheckIn> records,
-    required WidgetRef ref,
-  }) {
-    final visible = ref.watch(appPrefsProvider).visibleDomains;
-    final mix = ref.watch(appPrefsProvider).personalMix;
-    final mixKeys = resolvePersonalMixKeys(mix, visible);
-    final season = personalMixSeasonLine(mix, visible);
-    final homeDomains = homeMixDomains(visible, mix);
-    void open(Widget page) {
-      Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => page));
-    }
-
-    return [
-      SizedBox(
-        width: double.infinity,
-        child: FilledButton.icon(
-          onPressed: () => open(const CheckInScreen()),
-          icon: const Icon(Icons.edit_calendar_outlined),
-          label: const Text(Copy.homeCheckIn),
-        ),
-      ),
-      const SizedBox(height: 8),
-      SizedBox(
-        width: double.infinity,
-        child: OutlinedButton.icon(
-          onPressed: () => showQuickTapSheet(context),
-          icon: const Icon(Icons.touch_app_outlined),
-          label: const Text(Copy.quickTap),
-        ),
-      ),
-      const SizedBox(height: 12),
-      const ReflectionOfTheWeekCard(),
-      const SizedBox(height: 12),
-      if (season != null) ...[
-        Text(
-          '${Copy.personalMixSeasonPrefix} $season.',
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
-        const SizedBox(height: 10),
-      ],
-      HomeDomainStage(
-        domains: homeDomains,
-        cardFor: (domain) => _homeDomainCard(
-          records: records,
-          domain: domain,
-          mix: mix,
-          mixKeys: mixKeys,
-        ),
-      ),
-      if (homeDomains.isNotEmpty) const SizedBox(height: 10),
-      const WeeklyJournalCard(),
-      const SizedBox(height: 10),
-      FilledButton(
-        onPressed: () => open(const ResponseEditorScreen()),
-        child: const Text(Copy.addAResponse),
-      ),
-      const SizedBox(height: 16),
-      Text(
-        'A private place to record, review, and respond — without scores or prescriptions. The card wash identifies the domain, not spiritual rank. Marks share one colour. ${Copy.unansweredNotMissed}',
-        style: Theme.of(context).textTheme.bodySmall,
-      ),
-    ];
   }
 
   Widget _homeDomainCard({
@@ -282,7 +329,6 @@ class HomeScreen extends ConsumerWidget {
           washLight: MuhasabahColors.hadithWash,
           washDark: MuhasabahColors.hadithWashDark,
           family: MuhasabahColors.hadithFamily,
-          includeHadithFocus: true,
           compactWeek: useCompact,
           itemRowsOn7Days: true,
         );
@@ -390,13 +436,29 @@ class HomeScreen extends ConsumerWidget {
       case MonitorDomain.fasting:
         return OptionalDomainHomeCard(
           records: records,
-          title: 'Fasting',
+          title: domain.label,
+          focus: domain.focusQuestion,
           rows: inMix ? mixTraceRows(domain, mixKeys) : fastingHomeRows,
           progressRows: fastingHomeRows,
           washLight: MuhasabahColors.fastingWash,
           washDark: MuhasabahColors.fastingWashDark,
           family: MuhasabahColors.fastingFamily,
           highlightLunarWhiteDays: true,
+          gateFastingRamadan: true,
+          compactWeek: useCompact,
+        );
+      case MonitorDomain.productivity:
+        final includeProductivity = !inMix || mixIncludesProductivity(mixKeys);
+        return OptionalDomainHomeCard(
+          records: records,
+          title: MonitorDomain.productivity.label,
+          focus: MonitorDomain.productivity.focusQuestion,
+          rows: productivityHomeRows,
+          progressRows: productivityHomeRows,
+          washLight: MuhasabahColors.productivityWash,
+          washDark: MuhasabahColors.productivityWashDark,
+          family: MuhasabahColors.productivityFamily,
+          includeProductivityDashboard: includeProductivity,
           compactWeek: useCompact,
         );
       case MonitorDomain.hajj:
@@ -438,9 +500,27 @@ class AppShell extends ConsumerStatefulWidget {
 }
 
 class AppShellState extends ConsumerState<AppShell> {
-  int index = 0;
+  static const homeTab = 0;
+  static const inputTab = 1;
+  static const reviewTab = 2;
+  static const registryTab = 3;
 
-  void select(int value) => setState(() => index = value);
+  int index = homeTab;
+
+  /// Visited tabs only. Same in debug and release; not an Impeller workaround.
+  final _opened = <int>{homeTab};
+
+  void select(int value) {
+    setState(() {
+      _opened.add(value);
+      index = value;
+    });
+  }
+
+  Widget _tab(int slot, Widget child) {
+    if (_opened.contains(slot)) return child;
+    return const SizedBox.shrink();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -449,37 +529,39 @@ class AppShellState extends ConsumerState<AppShell> {
     if (!prefs.applicationReflectionAcknowledged) {
       return const FirstLookDoorScreen();
     }
-    final pages = const [
-      HomeScreen(),
-      ReviewScreen(),
-      HistoryScreen(),
-      ResponseListScreen(),
-    ];
     return Scaffold(
-      body: IndexedStack(index: index, children: pages),
+      body: IndexedStack(
+        index: index,
+        children: [
+          const HomeScreen(),
+          _tab(inputTab, const InputScreen()),
+          _tab(reviewTab, const ReviewScreen()),
+          _tab(registryTab, const RegistryScreen()),
+        ],
+      ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: index,
         onDestinationSelected: select,
-        destinations: const [
+        destinations: [
           NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home),
-            label: 'Home',
+            icon: const Icon(Icons.home_outlined),
+            selectedIcon: const Icon(Icons.home),
+            label: uiText(context, 'Home'),
           ),
           NavigationDestination(
-            icon: Icon(Icons.insights_outlined),
-            selectedIcon: Icon(Icons.insights),
-            label: 'Review',
+            icon: const Icon(Icons.edit_note_outlined),
+            selectedIcon: const Icon(Icons.edit_note),
+            label: uiText(context, Copy.inputTab),
           ),
           NavigationDestination(
-            icon: Icon(Icons.manage_history_outlined),
-            selectedIcon: Icon(Icons.manage_history),
-            label: 'History',
+            icon: const Icon(Icons.insights_outlined),
+            selectedIcon: const Icon(Icons.insights),
+            label: uiText(context, Copy.reviewTitle),
           ),
           NavigationDestination(
-            icon: Icon(Icons.edit_note_outlined),
-            selectedIcon: Icon(Icons.edit_note),
-            label: Copy.myResponse,
+            icon: const Icon(Icons.inventory_2_outlined),
+            selectedIcon: const Icon(Icons.inventory_2),
+            label: uiText(context, Copy.registryTab),
           ),
         ],
       ),

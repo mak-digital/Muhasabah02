@@ -3,23 +3,21 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/theme.dart';
 import '../../application/providers.dart';
-import '../../domain/analytics.dart';
 import '../../domain/copy.dart';
-import '../../domain/daily_check_in.dart';
 import '../../domain/date_key.dart';
 import '../../domain/display_calendar.dart';
 import '../../domain/home_traces.dart';
+import '../../domain/hajj_planning.dart';
+import '../../domain/fasting_practices.dart';
 import '../../domain/monitor_domain.dart';
-import '../../domain/other_domains.dart';
 import '../../domain/personal_mix.dart';
-import '../../domain/personal_response.dart';
-import '../../domain/quran.dart';
+import '../../domain/personalisation_resolver.dart';
 import '../../domain/review_period.dart';
 import '../progress/optional_domain_progress_screen.dart';
 import '../progress/salah_progress_screen.dart';
-import '../recognition/recognition_screen.dart';
-import '../recorded_days/recorded_days_screen.dart';
-import '../shared/add_response_button.dart';
+import '../shared/domain_line_icon.dart';
+import '../shared/domain_visual.dart';
+import '../shared/system_insets.dart';
 import '../shared/ui_bits.dart';
 
 class ReviewScreen extends ConsumerWidget {
@@ -32,6 +30,9 @@ class ReviewScreen extends ConsumerWidget {
     final period = ref.watch(reviewPeriodProvider);
     final now = ref.watch(nowProvider);
     final async = ref.watch(checkInsProvider);
+    final snapshot = ref.watch(reviewPeriodSnapshotProvider);
+    ref.watch(hajjStoreTickProvider);
+    ref.watch(productivityStoreTickProvider);
     return Scaffold(
       appBar: AppBar(title: const Text(Copy.reviewTitle)),
       body: async.when(
@@ -40,104 +41,47 @@ class ReviewScreen extends ConsumerWidget {
           title: Copy.reviewTitle,
           message: 'Period summary could not be built from stored records.',
         ),
-        data: (records) {
+        data: (_) {
+          if (snapshot == null) {
+            return const Center(child: CircularProgressIndicator());
+          }
           ref.watch(prefsTickProvider);
-          final visible = ref.watch(appPrefsProvider).visibleDomains;
           final mix = ref.watch(appPrefsProvider).personalMix;
+          final resolver = PersonalisationResolver(
+            visibleDomains: ref.watch(appPrefsProvider).visibleDomains,
+            mix: mix,
+          );
           final calendar = ref.watch(appPrefsProvider).displayCalendar;
           final brightness = Theme.of(context).brightness;
-          final keys = periodDateKeys(period.days, now: now);
-          final index = indexByDate(records);
-          var daysRecorded = 0;
-          for (final key in keys) {
-            if (index.containsKey(key)) daysRecorded++;
+          final summary = snapshot;
+          final keys = summary.keys;
+          final inPeriod = summary.inPeriod;
+          final salah = summary.salah;
+          final reading = summary.reading;
+          final hadithDays = summary.recordedDays(MonitorDomain.hadith);
+          final dhikrDays = summary.recordedDays(MonitorDomain.dhikr);
+          final fastingDays = summary.recordedDays(MonitorDomain.fasting);
+          final akhlaqDays = summary.recordedDays(MonitorDomain.akhlaq);
+          final huquqDays = summary.recordedDays(MonitorDomain.huquq);
+          final knowledgeDays = summary.recordedDays(MonitorDomain.knowledge);
+          final timeDays = summary.recordedDays(MonitorDomain.time);
+          final healthDays = summary.recordedDays(MonitorDomain.health);
+          final wealthDays = summary.recordedDays(MonitorDomain.wealth);
+          final ummahDays = summary.recordedDays(MonitorDomain.ummah);
+          final charityDays = summary.recordedDays(MonitorDomain.charity);
+          final mixKeys = resolver.effectiveRowIds;
+          List<HomeTraceRow> rowsFor(
+            MonitorDomain domain,
+            List<HomeTraceRow> all,
+          ) {
+            if (mix.kind == PersonalMixKind.sameAsDomains) return all;
+            return mixTraceRows(domain, mixKeys);
           }
-          final inPeriod = recordsForKeys(index, keys);
-          final salah = salahShare(inPeriod, null);
-          final reading = readingShare(inPeriod);
-          var dhikrDays = 0;
-          var akhlaqDays = 0;
-          var huquqDays = 0;
-          var knowledgeDays = 0;
-          var timeDays = 0;
-          var healthDays = 0;
-          var wealthDays = 0;
-          var ummahDays = 0;
-          var fastingDays = 0;
-          var hajjDays = 0;
-          var charityDays = 0;
-          var hadithDays = 0;
-          var conductDays = 0;
-          var gratitudeEntries = 0;
-          var reflectionEntries = 0;
-          for (final record in inPeriod) {
-            if (record.dhikr.isRecorded ||
-                _hasRecordedTrace(record, dhikrHomeRows)) {
-              dhikrDays++;
-            }
-            if (_hasRecordedTrace(record, akhlaqAllHomeRows) ||
-                (record.akhlaqStruggleNote != null &&
-                    record.akhlaqStruggleNote!.trim().isNotEmpty)) {
-              akhlaqDays++;
-            }
-            if (_hasRecordedTrace(record, huquqHomeRows)) {
-              huquqDays++;
-            }
-            if (_hasRecordedTrace(record, knowledgeHomeRows)) {
-              knowledgeDays++;
-            }
-            if (_hasRecordedTrace(record, timeAllHomeRows)) {
-              timeDays++;
-            }
-            if (_hasRecordedTrace(record, healthHomeRows)) {
-              healthDays++;
-            }
-            if (_hasRecordedTrace(record, wealthAllHomeRows)) {
-              wealthDays++;
-            }
-            if (_hasRecordedTrace(record, ummahAllHomeRows)) {
-              ummahDays++;
-            }
-            if (record.fasting.isRecorded ||
-                _hasRecordedTrace(record, fastingHomeRows)) {
-              fastingDays++;
-            }
-            if (_hasRecordedTrace(record, hajjHomeRows)) {
-              hajjDays++;
-            }
-            if (record.charity.isRecorded ||
-                _hasRecordedTrace(record, charityHomeRows)) {
-              charityDays++;
-            }
-            if (record.hadith.isRecorded ||
-                _hasRecordedTrace(record, hadithHomeRows)) {
-              hadithDays++;
-            }
-            if (record.conduct.isRecorded) conductDays++;
-            if (record.gratitudeStatus.hasTextEntry) gratitudeEntries++;
-            if (record.personalReflectionStatus.hasTextEntry) {
-              reflectionEntries++;
-            }
-          }
-          final priorKeys = priorPeriodDateKeys(period.days, now: now);
-          final priorSalah = salahShare(recordsForKeys(index, priorKeys), null);
-          final narrative = period == ReviewPeriod.days90
-              ? classify90DaySalahOrReading(
-                  index: index,
-                  now: now,
-                  shareOf: (items) => salahShare(items, null),
-                )
-              : directionFromShares(
-                  period: period,
-                  current: salah,
-                  prior: priorSalah,
-                );
-          final situationLabels = <String>{};
-          for (final record in inPeriod) {
-            situationLabels.addAll(record.situationNotes.displayLabels);
-          }
+
+          bool shows(MonitorDomain domain) =>
+              resolver.reviewDomains.contains(domain);
           final builtTiles = <_ReviewDomainTile>[
-            if (visible.contains(MonitorDomain.salah))
+            if (shows(MonitorDomain.salah))
               _ReviewDomainTile(
                 tileKey: const Key('review-domain-salah'),
                 title: MonitorDomain.salah.label,
@@ -148,6 +92,7 @@ class ReviewScreen extends ConsumerWidget {
                   MuhasabahColors.salahWash,
                   MuhasabahColors.salahWashDark,
                   brightness,
+                  context,
                 ),
                 onTap: () => Navigator.push(
                   context,
@@ -156,7 +101,7 @@ class ReviewScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-            if (visible.contains(MonitorDomain.quran))
+            if (shows(MonitorDomain.quran))
               _ReviewDomainTile(
                 tileKey: const Key('review-domain-quran'),
                 title: MonitorDomain.quran.label,
@@ -167,6 +112,7 @@ class ReviewScreen extends ConsumerWidget {
                   MuhasabahColors.quranWash,
                   MuhasabahColors.quranWashDark,
                   brightness,
+                  context,
                 ),
                 onTap: () => Navigator.push(
                   context,
@@ -175,7 +121,7 @@ class ReviewScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-            if (visible.contains(MonitorDomain.hadith))
+            if (shows(MonitorDomain.hadith))
               _ReviewDomainTile(
                 tileKey: const Key('review-domain-hadith'),
                 title: MonitorDomain.hadith.label,
@@ -185,19 +131,19 @@ class ReviewScreen extends ConsumerWidget {
                   MuhasabahColors.hadithWash,
                   MuhasabahColors.hadithWashDark,
                   brightness,
+                  context,
                 ),
                 onTap: () => _openTraceProgress(
                   context,
                   title: MonitorDomain.hadith.label,
                   focusQuestion: MonitorDomain.hadith.focusQuestion,
                   note: Copy.hadithObservationNote,
-                  rows: hadithHomeRows,
+                  rows: rowsFor(MonitorDomain.hadith, hadithHomeRows),
                   family: MuhasabahColors.hadithFamily,
-                  includeHadithFocus: true,
                   itemRowsOn7Days: true,
                 ),
               ),
-            if (visible.contains(MonitorDomain.dhikr))
+            if (shows(MonitorDomain.dhikr))
               _ReviewDomainTile(
                 tileKey: const Key('review-domain-dhikr'),
                 title: MonitorDomain.dhikr.label,
@@ -207,17 +153,51 @@ class ReviewScreen extends ConsumerWidget {
                   MuhasabahColors.dhikrWash,
                   MuhasabahColors.dhikrWashDark,
                   brightness,
+                  context,
                 ),
                 onTap: () => _openTraceProgress(
                   context,
                   title: MonitorDomain.dhikr.label,
                   focusQuestion: MonitorDomain.dhikr.focusQuestion,
-                  rows: dhikrHomeRows,
+                  rows: rowsFor(MonitorDomain.dhikr, dhikrHomeRows),
                   family: MuhasabahColors.dhikrFamily,
                   itemRowsOn7Days: true,
                 ),
               ),
-            if (visible.contains(MonitorDomain.akhlaq))
+            if (shows(MonitorDomain.fasting))
+              _ReviewDomainTile(
+                tileKey: const Key('review-domain-fasting'),
+                title: MonitorDomain.fasting.label,
+                progressLabel: '${MonitorDomain.fasting.label} Progress',
+                line:
+                    '$fastingDays days with a recorded observation. White Days are orientation only.',
+                color: MuhasabahColors.wash(
+                  MuhasabahColors.fastingWash,
+                  MuhasabahColors.fastingWashDark,
+                  brightness,
+                  context,
+                ),
+                onTap: () => _openTraceProgress(
+                  context,
+                  title: MonitorDomain.fasting.label,
+                  focusQuestion: MonitorDomain.fasting.focusQuestion,
+                  note: Copy.fastingObservationNote,
+                  rows: gatedFastingHomeRows(
+                    rowsFor(MonitorDomain.fasting, fastingHomeRows),
+                    date: now,
+                    offsetDays: ref
+                        .watch(appPrefsProvider)
+                        .ramadanCalendarOffsetDays,
+                    showHistory: ref
+                        .watch(appPrefsProvider)
+                        .showFastingRamadanHistory,
+                    records: inPeriod,
+                  ),
+                  family: MuhasabahColors.fastingFamily,
+                  highlightLunarWhiteDays: true,
+                ),
+              ),
+            if (shows(MonitorDomain.akhlaq))
               _ReviewDomainTile(
                 tileKey: const Key('review-domain-akhlaq'),
                 title: MonitorDomain.akhlaq.label,
@@ -227,19 +207,20 @@ class ReviewScreen extends ConsumerWidget {
                   MuhasabahColors.akhlaqWash,
                   MuhasabahColors.akhlaqWashDark,
                   brightness,
+                  context,
                 ),
                 onTap: () => _openTraceProgress(
                   context,
                   title: MonitorDomain.akhlaq.label,
                   focusQuestion: MonitorDomain.akhlaq.focusQuestion,
                   note: Copy.akhlaqObservationNote,
-                  rows: akhlaqHomeRows,
+                  rows: rowsFor(MonitorDomain.akhlaq, akhlaqHomeRows),
                   family: MuhasabahColors.akhlaqFamily,
                   includeStruggleNote: true,
                   itemRowsOn7Days: true,
                 ),
               ),
-            if (visible.contains(MonitorDomain.huquq))
+            if (shows(MonitorDomain.huquq))
               _ReviewDomainTile(
                 tileKey: const Key('review-domain-huquq'),
                 title: MonitorDomain.huquq.label,
@@ -249,18 +230,19 @@ class ReviewScreen extends ConsumerWidget {
                   MuhasabahColors.huquqWash,
                   MuhasabahColors.huquqWashDark,
                   brightness,
+                  context,
                 ),
                 onTap: () => _openTraceProgress(
                   context,
                   title: MonitorDomain.huquq.label,
                   focusQuestion: MonitorDomain.huquq.focusQuestion,
                   note: Copy.huquqObservationNote,
-                  rows: huquqHomeRows,
+                  rows: rowsFor(MonitorDomain.huquq, huquqHomeRows),
                   family: MuhasabahColors.huquqFamily,
                   itemRowsOn7Days: true,
                 ),
               ),
-            if (visible.contains(MonitorDomain.knowledge))
+            if (shows(MonitorDomain.knowledge))
               _ReviewDomainTile(
                 tileKey: const Key('review-domain-knowledge'),
                 title: MonitorDomain.knowledge.label,
@@ -270,18 +252,19 @@ class ReviewScreen extends ConsumerWidget {
                   MuhasabahColors.knowledgeWash,
                   MuhasabahColors.knowledgeWashDark,
                   brightness,
+                  context,
                 ),
                 onTap: () => _openTraceProgress(
                   context,
                   title: MonitorDomain.knowledge.label,
                   focusQuestion: MonitorDomain.knowledge.focusQuestion,
                   note: Copy.knowledgeObservationNote,
-                  rows: knowledgeHomeRows,
+                  rows: rowsFor(MonitorDomain.knowledge, knowledgeHomeRows),
                   family: MuhasabahColors.knowledgeFamily,
                   itemRowsOn7Days: true,
                 ),
               ),
-            if (visible.contains(MonitorDomain.time))
+            if (shows(MonitorDomain.time))
               _ReviewDomainTile(
                 tileKey: const Key('review-domain-time'),
                 title: MonitorDomain.time.label,
@@ -291,17 +274,18 @@ class ReviewScreen extends ConsumerWidget {
                   MuhasabahColors.timeWash,
                   MuhasabahColors.timeWashDark,
                   brightness,
+                  context,
                 ),
                 onTap: () => _openTraceProgress(
                   context,
                   title: MonitorDomain.time.label,
                   focusQuestion: MonitorDomain.time.focusQuestion,
                   note: Copy.timeObservationNote,
-                  rows: timeHomeRows,
+                  rows: rowsFor(MonitorDomain.time, timeHomeRows),
                   family: MuhasabahColors.timeFamily,
                 ),
               ),
-            if (visible.contains(MonitorDomain.health))
+            if (shows(MonitorDomain.health))
               _ReviewDomainTile(
                 tileKey: const Key('review-domain-health'),
                 title: MonitorDomain.health.label,
@@ -311,17 +295,18 @@ class ReviewScreen extends ConsumerWidget {
                   MuhasabahColors.healthWash,
                   MuhasabahColors.healthWashDark,
                   brightness,
+                  context,
                 ),
                 onTap: () => _openTraceProgress(
                   context,
                   title: MonitorDomain.health.label,
                   focusQuestion: MonitorDomain.health.focusQuestion,
                   note: Copy.healthObservationNote,
-                  rows: healthHomeRows,
+                  rows: rowsFor(MonitorDomain.health, healthHomeRows),
                   family: MuhasabahColors.healthFamily,
                 ),
               ),
-            if (visible.contains(MonitorDomain.wealth))
+            if (shows(MonitorDomain.wealth))
               _ReviewDomainTile(
                 tileKey: const Key('review-domain-wealth'),
                 title: MonitorDomain.wealth.label,
@@ -331,17 +316,18 @@ class ReviewScreen extends ConsumerWidget {
                   MuhasabahColors.wealthWash,
                   MuhasabahColors.wealthWashDark,
                   brightness,
+                  context,
                 ),
                 onTap: () => _openTraceProgress(
                   context,
                   title: MonitorDomain.wealth.label,
                   focusQuestion: MonitorDomain.wealth.focusQuestion,
                   note: Copy.wealthObservationNote,
-                  rows: wealthHomeRows,
+                  rows: rowsFor(MonitorDomain.wealth, wealthHomeRows),
                   family: MuhasabahColors.wealthFamily,
                 ),
               ),
-            if (visible.contains(MonitorDomain.ummah))
+            if (shows(MonitorDomain.ummah))
               _ReviewDomainTile(
                 tileKey: const Key('review-domain-ummah'),
                 title: MonitorDomain.ummah.label,
@@ -351,59 +337,66 @@ class ReviewScreen extends ConsumerWidget {
                   MuhasabahColors.ummahWash,
                   MuhasabahColors.ummahWashDark,
                   brightness,
+                  context,
                 ),
                 onTap: () => _openTraceProgress(
                   context,
                   title: MonitorDomain.ummah.label,
                   focusQuestion: MonitorDomain.ummah.focusQuestion,
                   note: Copy.ummahObservationNote,
-                  rows: ummahHomeRows,
+                  rows: rowsFor(MonitorDomain.ummah, ummahHomeRows),
                   family: MuhasabahColors.ummahFamily,
                 ),
               ),
-            if (visible.contains(MonitorDomain.fasting))
+            if (shows(MonitorDomain.productivity))
               _ReviewDomainTile(
-                tileKey: const Key('review-domain-fasting'),
-                title: 'Fasting',
-                progressLabel: 'Fasting Progress',
+                tileKey: const Key('review-domain-productivity'),
+                title: MonitorDomain.productivity.label,
+                progressLabel: '${MonitorDomain.productivity.label} Progress',
                 line:
-                    '$fastingDays days with a recorded observation. White Days are orientation only.',
+                    '${ref.watch(productivityStoreRepositoryProvider).store.masterList.length} stored action(s). Effort vs plan is not a grade.',
                 color: MuhasabahColors.wash(
-                  MuhasabahColors.fastingWash,
-                  MuhasabahColors.fastingWashDark,
+                  MuhasabahColors.productivityWash,
+                  MuhasabahColors.productivityWashDark,
                   brightness,
+                  context,
                 ),
                 onTap: () => _openTraceProgress(
                   context,
-                  title: 'Fasting',
-                  rows: fastingHomeRows,
-                  family: MuhasabahColors.fastingFamily,
-                  highlightLunarWhiteDays: true,
+                  title: MonitorDomain.productivity.label,
+                  focusQuestion: MonitorDomain.productivity.focusQuestion,
+                  note: Copy.productivityObservationNote,
+                  rows: rowsFor(
+                    MonitorDomain.productivity,
+                    productivityHomeRows,
+                  ),
+                  family: MuhasabahColors.productivityFamily,
                 ),
               ),
-            if (visible.contains(MonitorDomain.hajj))
+            if (shows(MonitorDomain.hajj))
               _ReviewDomainTile(
                 tileKey: const Key('review-domain-hajj'),
                 title: MonitorDomain.hajj.label,
                 progressLabel: '${MonitorDomain.hajj.label} Progress',
                 line:
-                    'Standing status: ${ref.watch(appPrefsProvider).hajjStatus.label}. $hajjDays days with noticed preparation.',
+                    'Standing: ${ref.watch(hajjStoreRepositoryProvider).store.standing.kind.label}. ${ref.watch(hajjStoreRepositoryProvider).store.journeys.length} stored journey(s). Learn & Practice is independent.',
                 color: MuhasabahColors.wash(
                   MuhasabahColors.hajjWash,
                   MuhasabahColors.hajjWashDark,
                   brightness,
+                  context,
                 ),
                 onTap: () => _openTraceProgress(
                   context,
                   title: MonitorDomain.hajj.label,
                   focusQuestion: MonitorDomain.hajj.focusQuestion,
                   note: Copy.hajjObservationNote,
-                  rows: hajjHomeRows,
+                  rows: rowsFor(MonitorDomain.hajj, hajjHomeRows),
                   family: MuhasabahColors.hajjFamily,
                   includeHajjStatus: true,
                 ),
               ),
-            if (visible.contains(MonitorDomain.charity))
+            if (shows(MonitorDomain.charity))
               _ReviewDomainTile(
                 tileKey: const Key('review-domain-charity'),
                 title: 'Charity',
@@ -414,25 +407,29 @@ class ReviewScreen extends ConsumerWidget {
                   MuhasabahColors.charityWash,
                   MuhasabahColors.charityWashDark,
                   brightness,
+                  context,
                 ),
                 onTap: () => _openTraceProgress(
                   context,
                   title: 'Charity',
-                  rows: charityHomeRows,
+                  note: Copy.charityObservationNote,
+                  rows: rowsFor(MonitorDomain.charity, charityHomeRows),
                   family: MuhasabahColors.charityFamily,
-                  includeZakat: true,
+                  includeZakat:
+                      mix.kind == PersonalMixKind.sameAsDomains ||
+                      mixIncludesZakat(mixKeys),
                 ),
               ),
           ];
           final tiles = [
-            for (final domain in orderedVisibleDomains(visible, mix))
+            for (final domain in resolver.reviewDomains)
               for (final tile in builtTiles)
                 if (tile.tileKey == Key('review-domain-${domain.id}')) tile,
           ];
           return ListView(
             primary: false,
             physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.all(16),
+            padding: pageListPadding(context),
             children: [
               PeriodSelector(
                 days: period.days,
@@ -461,67 +458,10 @@ class ReviewScreen extends ConsumerWidget {
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
-              const SizedBox(height: 12),
-              _PeriodHero(
-                daysRecorded: daysRecorded,
-                periodDays: period.days,
-                contextNotes: situationLabels.isEmpty
-                    ? Copy.reviewNoneRecorded
-                    : situationLabels.join(', '),
-              ),
               if (tiles.isNotEmpty) ...[
                 const _ReviewSectionLabel(Copy.reviewDomainsTap),
                 _DomainMosaic(tiles: tiles),
               ],
-              const _ReviewSectionLabel(Copy.reviewLookCloser),
-              _LookCloserCard(
-                icon: Icons.calendar_view_month_outlined,
-                title: Copy.recordedDaysTitle,
-                body: Copy.historicalReflectionTitle,
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute<void>(
-                    builder: (_) => const RecordedDaysScreen(),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              if (visible.contains(MonitorDomain.quran))
-                _LookCloserCard(
-                  icon: Icons.pattern_outlined,
-                  title: 'Recognition',
-                  body: period.days >= 30
-                      ? '${period.shortLabel} view is available for this window.'
-                      : Copy.reviewRecognitionBody,
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute<void>(
-                      builder: (_) => const RecognitionScreen(),
-                    ),
-                  ),
-                ),
-              if (visible.contains(MonitorDomain.salah)) ...[
-                const _ReviewSectionLabel(Copy.reviewPonder),
-                _PonderCard(text: narrativeCopy(narrative)),
-              ],
-              const SizedBox(height: 8),
-              _AlsoRecordedCard(
-                conductDays: conductDays,
-                gratitudeEntries: gratitudeEntries,
-                reflectionEntries: reflectionEntries,
-                situationNote: situationLabels.isEmpty
-                    ? null
-                    : Copy.situationNotesNote,
-              ),
-              const SizedBox(height: 8),
-              AddResponseButton(
-                filled: true,
-                provenance: ResponseProvenance(
-                  originType: ProvenanceOrigin.periodSummary,
-                  periodDays: period.days,
-                  labelSnapshot: 'Period summary (${period.shortLabel})',
-                ),
-              ),
             ],
           );
         },
@@ -559,90 +499,6 @@ class ReviewScreen extends ConsumerWidget {
           includeStruggleNote: includeStruggleNote,
           itemRowsOn7Days: itemRowsOn7Days,
         ),
-      ),
-    );
-  }
-}
-
-class _PeriodHero extends StatelessWidget {
-  const _PeriodHero({
-    required this.daysRecorded,
-    required this.periodDays,
-    required this.contextNotes,
-  });
-
-  final int daysRecorded;
-  final int periodDays;
-  final String contextNotes;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final muted = theme.textTheme.labelSmall?.copyWith(
-      color: theme.colorScheme.onSurfaceVariant,
-    );
-    return Card(
-      margin: EdgeInsets.zero,
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(Copy.reviewThisPeriod, style: muted),
-            const SizedBox(height: 2),
-            Text(
-              '$daysRecorded of $periodDays days have a record',
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  child: _HeroMeter(
-                    label: Copy.reviewUnansweredDays,
-                    value: '${periodDays - daysRecorded} of $periodDays',
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _HeroMeter(
-                    label: Copy.situationNotesTitle,
-                    value: contextNotes,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _HeroMeter extends StatelessWidget {
-  const _HeroMeter({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    final brightness = Theme.of(context).brightness;
-    return WashPanel(
-      color: MuhasabahColors.wash(
-        MuhasabahColors.summaryWash,
-        MuhasabahColors.summaryWashDark,
-        brightness,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: Theme.of(context).textTheme.labelSmall),
-          const SizedBox(height: 4),
-          Text(value, style: Theme.of(context).textTheme.titleSmall),
-        ],
       ),
     );
   }
@@ -717,6 +573,7 @@ class _ReviewDomainTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final domain = domainForTitle(title);
     return Semantics(
       button: true,
       label: progressLabel,
@@ -734,12 +591,27 @@ class _ReviewDomainTile extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.titleSmall
-                        ?.copyWith(fontWeight: FontWeight.w700),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (domain != null) ...[
+                        DomainLineIcon(
+                          domain,
+                          size: 18,
+                          color: domainColorIdentity(domain).family,
+                        ),
+                        const SizedBox(width: 6),
+                      ],
+                      Expanded(
+                        child: Text(
+                          title,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(fontWeight: FontWeight.w700),
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 4),
                   Expanded(
@@ -765,159 +637,4 @@ class _ReviewDomainTile extends StatelessWidget {
       ),
     );
   }
-}
-
-class _LookCloserCard extends StatelessWidget {
-  const _LookCloserCard({
-    required this.icon,
-    required this.title,
-    required this.body,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String title;
-  final String body;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Theme.of(context).colorScheme.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(14),
-        side: BorderSide(color: Theme.of(context).dividerColor),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-          child: Row(
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: MuhasabahColors.wash(
-                    MuhasabahColors.summaryWash,
-                    MuhasabahColors.summaryWashDark,
-                    Theme.of(context).brightness,
-                  ),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(icon, size: 20),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: Theme.of(context).textTheme.titleSmall
-                          ?.copyWith(fontWeight: FontWeight.w600),
-                    ),
-                    Text(
-                      body,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                Icons.chevron_right,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _PonderCard extends StatelessWidget {
-  const _PonderCard({required this.text});
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return WashPanel(
-      color: MuhasabahColors.wash(
-        MuhasabahColors.sampleBannerWash,
-        MuhasabahColors.sampleBannerWashDark,
-        Theme.of(context).brightness,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            Copy.reviewWhatRecordsShow.toUpperCase(),
-            style: Theme.of(context).textTheme.labelSmall
-                ?.copyWith(letterSpacing: 0.5, fontWeight: FontWeight.w700),
-          ),
-          const SizedBox(height: 6),
-          Text(text, style: Theme.of(context).textTheme.bodyMedium),
-        ],
-      ),
-    );
-  }
-}
-
-class _AlsoRecordedCard extends StatelessWidget {
-  const _AlsoRecordedCard({
-    required this.conductDays,
-    required this.gratitudeEntries,
-    required this.reflectionEntries,
-    this.situationNote,
-  });
-
-  final int conductDays;
-  final int gratitudeEntries;
-  final int reflectionEntries;
-  final String? situationNote;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: EdgeInsets.zero,
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              Copy.reviewYouAlsoRecorded,
-              style: Theme.of(context).textTheme.titleSmall
-                  ?.copyWith(fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 8),
-            Text('• Character observations: $conductDays days'),
-            Text('• Gratitude entries: $gratitudeEntries'),
-            Text('• Personal-reflection entries: $reflectionEntries'),
-            if (situationNote != null) ...[
-              const SizedBox(height: 8),
-              Text(
-                situationNote!,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-bool _hasRecordedTrace(DailyCheckIn record, List<HomeTraceRow> rows) {
-  for (final row in rows) {
-    if (record.homeTrace(row.storageKey).isRecorded) return true;
-  }
-  return false;
 }

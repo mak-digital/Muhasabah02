@@ -5,10 +5,12 @@ import 'package:muhasabah02/application/providers.dart';
 import 'package:muhasabah02/data/app_prefs.dart';
 import 'package:muhasabah02/data/memory_repositories.dart';
 import 'package:muhasabah02/domain/copy.dart';
+import 'package:muhasabah02/domain/personal_response.dart';
 import 'package:muhasabah02/domain/monitor_domain.dart';
 import 'package:muhasabah02/presentation/recorded_days/day_evidence_screen.dart';
 
 import '../support/check_in_select.dart';
+import '../support/home_domain_stage.dart';
 import '../support/test_app.dart';
 
 void main() {
@@ -17,14 +19,19 @@ void main() {
     await tester.pumpWidget(testApp(checkIns: checkIns));
     await tester.pumpAndSettle();
     expect(find.text(Copy.appName), findsWidgets);
-    expect(find.text(Copy.homeCheckIn), findsOneWidget);
-    await tester.tap(find.text(Copy.homeCheckIn));
-    await tester.pumpAndSettle();
+    expect(
+      find.descendant(
+        of: find.byType(NavigationBar),
+        matching: find.text(Copy.inputTab),
+      ),
+      findsOneWidget,
+    );
+    await openHomeCheckIn(tester);
     expect(find.text(MonitorDomain.salah.label.toUpperCase()), findsOneWidget);
     await chooseCheckInOption(
       tester,
       dropdownKey: const Key('salah-fajr'),
-      optionLabel: 'Prayed alone on time',
+      optionLabel: 'Alone on time',
     );
     await tester.pumpAndSettle();
     await tester.ensureVisible(find.text('Save check-in'));
@@ -40,8 +47,7 @@ void main() {
     await checkIns.save(sampleDay('2026-09-01'));
     await tester.pumpWidget(testApp(checkIns: checkIns));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('History'));
-    await tester.pumpAndSettle();
+    await openRegistryTab(tester, tab: const Key('registry-tab-history'));
     expect(find.text(Copy.historyTitle), findsOneWidget);
     expect(find.textContaining('Score'), findsNothing);
     expect(find.text('1 Sep 2026'), findsOneWidget);
@@ -58,7 +64,11 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Review'));
     await tester.pumpAndSettle();
-    expect(find.text(Copy.reviewThisPeriod), findsOneWidget);
+    expect(find.text(Copy.reviewGuard), findsOneWidget);
+    expect(find.text(Copy.reviewThisPeriod), findsNothing);
+    expect(find.text(Copy.reviewLookCloser), findsNothing);
+    expect(find.text(Copy.reviewPonder), findsNothing);
+    expect(find.text(Copy.reviewYouAlsoRecorded), findsNothing);
     expect(find.text('7 days'), findsWidgets);
     expect(find.text('For the coming days'), findsNothing);
     await tester.ensureVisible(find.byKey(const Key('review-domain-salah')));
@@ -106,11 +116,12 @@ void main() {
     await tester.ensureVisible(find.byKey(const Key('review-domain-quran')));
     await tester.tap(find.byKey(const Key('review-domain-quran')));
     await tester.pumpAndSettle();
-    expect(find.text(Copy.ponderPrompt), findsWidgets);
+    expect(find.text(Copy.ponderPrompt), findsNothing);
+    expect(find.text('PONDER'), findsNothing);
+    expect(find.text(Copy.addAResponse), findsNothing);
     await tester.pageBack();
     await tester.pumpAndSettle();
-    await tester.tap(find.text(Copy.myResponse));
-    await tester.pumpAndSettle();
+    await openRegistryTab(tester, tab: const Key('registry-tab-notes'));
     expect(find.textContaining(Copy.emptyResponses), findsOneWidget);
     expect(find.text(Copy.addAResponse), findsWidgets);
   });
@@ -121,19 +132,24 @@ void main() {
     final responses = MemoryResponseRepository();
     await tester.pumpWidget(testApp(responses: responses));
     await tester.pumpAndSettle();
-    await tester.tap(find.text(Copy.myResponse));
-    await tester.pumpAndSettle();
+    await openRegistryTab(tester, tab: const Key('registry-tab-notes'));
     await tester.tap(find.text(Copy.addAResponse).first);
     await tester.pumpAndSettle();
     await tester.tap(find.text(Copy.saveResponse));
     await tester.pumpAndSettle();
-    expect(find.text('A response needs some text.'), findsOneWidget);
-    await tester.enterText(find.byType(TextField), 'الحمد لله and ধন্যবাদ');
+    expect(find.text('A note needs some text.'), findsOneWidget);
+    await tester.enterText(find.byType(TextField), '????? ??? and ???????');
     await tester.tap(find.text(Copy.saveResponse));
     await tester.pumpAndSettle();
     final saved = await responses.allHealthy();
     expect(saved, hasLength(1));
-    expect(saved.single.text, contains('الحمد لله'));
+    expect(saved.single.text, contains('????? ???'));
+    expect(saved.single.noteCode, matches(RegExp(r'^\d{6}-01$')));
+    expect(find.text(Copy.noteCodeColumn), findsOneWidget);
+    expect(find.text(Copy.noteContentColumn), findsOneWidget);
+    expect(find.text(Copy.noteDomainSourceColumn), findsOneWidget);
+    expect(find.text(kNoteGeneralDomain), findsOneWidget);
+    expect(find.text(Copy.noteActionReminder), findsOneWidget);
   });
 
   testWidgets('salah late and missed have the same add-response CTA', (
@@ -204,7 +220,8 @@ void main() {
     await tester.pageBack();
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
-    await tester.ensureVisible(find.text(Copy.homeCheckIn));
-    expect(find.text(Copy.homeCheckIn), findsOneWidget);
+    await openInputTab(tester);
+    await tester.ensureVisible(find.byKey(const Key('home-check-in')));
+    expect(find.byKey(const Key('home-check-in')), findsOneWidget);
   });
 }

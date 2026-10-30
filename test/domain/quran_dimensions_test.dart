@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muhasabah02/domain/daily_check_in.dart';
+import 'package:muhasabah02/domain/home_traces.dart';
 import 'package:muhasabah02/domain/quran.dart';
 import 'package:muhasabah02/domain/recorded_context.dart';
 
@@ -14,7 +15,7 @@ void main() {
     }
   });
 
-  test('recitation with meaning engagement records recitation engagement', () {
+  test('understanding does not fill engagement', () {
     final record = DailyCheckIn.empty('2026-09-03')
         .withQuran(QuranDimension.meaning, TernaryOutcome.positive);
     expect(
@@ -23,29 +24,17 @@ void main() {
     );
     expect(
       record.quranOutcome(QuranDimension.reading),
-      TernaryOutcome.positive,
-    );
-    expect(
-      record.quranOutcome(QuranDimension.memorisation),
       TernaryOutcome.unanswered,
     );
   });
 
-  test('recitation cannot be cleared while meaning is engagement', () {
+  test('engagement can be cleared while understanding is recorded', () {
     var record = DailyCheckIn.empty('2026-09-03')
         .withQuran(QuranDimension.meaning, TernaryOutcome.positive);
     record = record.withQuran(QuranDimension.reading, TernaryOutcome.negative);
     expect(
       record.quranOutcome(QuranDimension.reading),
-      TernaryOutcome.positive,
-    );
-    record = record.withQuran(
-      QuranDimension.reading,
-      TernaryOutcome.unanswered,
-    );
-    expect(
-      record.quranOutcome(QuranDimension.reading),
-      TernaryOutcome.positive,
+      TernaryOutcome.negative,
     );
   });
 
@@ -74,12 +63,9 @@ void main() {
         QuranDimension.applicationReflection.label,
         'Application Reflection',
       );
-      expect(QuranDimension.reading.label, 'Recitation');
-      expect(QuranDimension.meaning.label, 'Recitation with Meaning');
-      expect(
-        QuranDimension.consciousApplication.label,
-        'Conscious Application',
-      );
+      expect(QuranDimension.reading.label, 'Engagement');
+      expect(QuranDimension.meaning.label, 'Understanding & reflection');
+      expect(QuranDimension.consciousApplication.label, 'Practical relevance');
     },
   );
 
@@ -113,6 +99,35 @@ void main() {
           TernaryOutcome.positive,
         );
     expect(record.answeredRecordableCount, 0);
+    expect(quranDailyDimensions, [
+      QuranDimension.reading,
+      QuranDimension.meaning,
+      QuranDimension.consciousApplication,
+    ]);
     expect(kRecordableFieldCount, 10);
+  });
+
+  test('Home bands keep check-in groups and mix-filter rows', () {
+    final bands = quranHomeBandsFor([
+      QuranDimension.meaning,
+      QuranDimension.consciousApplication,
+    ]);
+    expect(bands.map((band) => band.$1).toList(), [kQuranEngagementBand]);
+    expect(bands.single.$2, [
+      QuranDimension.meaning,
+      QuranDimension.consciousApplication,
+    ]);
+  });
+
+  test('band headings are caps in every surface', () {
+    expect(displayHomeBand(kQuranEngagementBand), 'ENGAGEMENT WITH QUR’AN');
+    expect(
+      displayHomeBand(kQuranUnderstandingBand),
+      'UNDERSTANDING & REFLECTION',
+    );
+    expect(displayHomeBand(kHadithEngagedBand), 'ENGAGED WITH HADITH');
+    expect(displayHomeBand('Virtues I noticed'), 'VIRTUES I NOTICED');
+    expect(displayHomeBand('Restraint'), 'RESTRAINT');
+    expect(displayHomeBand('Obligatory Salah'), 'OBLIGATORY SALAH');
   });
 }

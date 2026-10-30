@@ -2,7 +2,7 @@
 
 **Status:** visual review only. Application code was not changed. Working RECORD / REVIEW / Recognition / Response behaviour is left as-is until this package is approved.
 
-Authority read: `docs/accepted_product_state.md`, `docs/PRODUCT_SPEC.md`, `docs/product_guardrails.md`, `docs/AGENTS.md`, `docs/AUTONOMOUS_BUILD_PROMPT.md`.
+Authority read: `docs/accepted_product_state.md`, `docs/PRODUCT_SPEC.md`, `docs/product_guardrails.md`, `AGENTS.md`, `docs/AUTONOMOUS_BUILD_PROMPT.md`.
 
 Open mockups: `docs/visual_review/remediation.html` (mobile width ~390px).
 

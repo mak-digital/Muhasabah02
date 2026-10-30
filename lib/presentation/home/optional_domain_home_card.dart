@@ -4,19 +4,24 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/theme.dart';
 import '../../application/providers.dart';
 import '../../domain/activities.dart';
-import '../../domain/copy.dart';
 import '../../domain/daily_check_in.dart';
 import '../../domain/date_key.dart';
 import '../../domain/display_calendar.dart';
 import '../../domain/first_day_of_week.dart';
 import '../../domain/home_traces.dart';
+import '../../domain/fasting_practices.dart';
+import '../../domain/personal_mix.dart';
 import '../../domain/quran.dart';
 import '../../domain/weekly_calendar.dart';
 import '../checkin/check_in_screen.dart';
+import 'hajj_home_dashboard.dart';
+import 'productivity_dashboard.dart';
 import '../progress/optional_domain_progress_screen.dart';
-import '../shared/activity_picker.dart';
-import '../shared/lunar_white_day_highlight.dart';
+import '../shared/salah_activity_mark.dart';
 import '../shared/state_marker.dart';
+import '../shared/today_mark_halo.dart';
+import '../shared/home_band_heading.dart';
+import '../shared/week_nav_strip.dart';
 
 class OptionalDomainHomeCard extends ConsumerStatefulWidget {
   const OptionalDomainHomeCard({
@@ -30,7 +35,9 @@ class OptionalDomainHomeCard extends ConsumerStatefulWidget {
     this.includeZakat = false,
     this.includeHadithFocus = false,
     this.includeHajjStatus = false,
+    this.includeProductivityDashboard = false,
     this.highlightLunarWhiteDays = false,
+    this.gateFastingRamadan = false,
     this.focus,
     this.includeStruggleNote = false,
     this.compactWeek = false,
@@ -47,7 +54,9 @@ class OptionalDomainHomeCard extends ConsumerStatefulWidget {
   final bool includeZakat;
   final bool includeHadithFocus;
   final bool includeHajjStatus;
+  final bool includeProductivityDashboard;
   final bool highlightLunarWhiteDays;
+  final bool gateFastingRamadan;
   final String? focus;
   final bool includeStruggleNote;
   final bool compactWeek;
@@ -78,16 +87,24 @@ class _OptionalDomainHomeCardState
     final weekStart = addCalendarDays(thisWeekStart, _weekOffset * 7);
     final keys = weekDateKeys(weekStart);
     final index = {for (final record in widget.records) record.dateKey: record};
-    final wash = MuhasabahColors.wash(
+    final wash = MuhasabahColors.themeWash(
+      context,
       widget.washLight,
       widget.washDark,
-      Theme.of(context).brightness,
     );
     final localizations = MaterialLocalizations.of(context);
-    final hajjStatus = ref.watch(appPrefsProvider).hajjStatus;
-    final visibleRows = widget.includeHajjStatus
-        ? hajjRowsForStatus(widget.rows, hajjStatus)
-        : widget.rows;
+    var visibleRows = widget.rows;
+    if (widget.gateFastingRamadan) {
+      final prefs = ref.watch(appPrefsProvider);
+      visibleRows = gatedFastingHomeRows(
+        visibleRows,
+        date: now,
+        offsetDays: prefs.ramadanCalendarOffsetDays,
+        showHistory: prefs.showFastingRamadanHistory,
+        extraDates: [for (final key in keys) parseDateKey(key)],
+        records: widget.records,
+      );
+    }
     final bands = bandsFor(visibleRows);
     final question = widget.focus;
     final showWeek = visibleRows.isNotEmpty;
@@ -103,77 +120,41 @@ class _OptionalDomainHomeCardState
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Row(
-                children: [
-                  IconButton(
-                    tooltip: 'Previous week',
-                    onPressed: () => setState(() => _weekOffset--),
-                    icon: const Icon(Icons.chevron_left),
-                  ),
-                  Expanded(
-                    child: InkWell(
-                      onTap: widget.compactWeek
-                          ? _openProgress
-                          : () =>
-                                _openDomainDay(dateKey(ref.read(nowProvider))),
-                      child: Column(
-                        children: [
-                          Text(
-                            widget.title,
-                            textAlign: TextAlign.center,
-                            style: Theme.of(context).textTheme.titleMedium
-                                ?.copyWith(fontWeight: FontWeight.w600),
-                          ),
-                          if (question != null && question.isNotEmpty) ...[
-                            const SizedBox(height: 4),
-                            Text(
-                              question,
-                              textAlign: TextAlign.center,
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(height: 1.35),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    tooltip: 'Next week',
-                    onPressed: _weekOffset >= 0
-                        ? null
-                        : () => setState(() => _weekOffset++),
-                    icon: const Icon(Icons.chevron_right),
-                  ),
-                ],
-              ),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      weekRangeLabel(weekStart, calendar: calendar),
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: _weekOffset == 0
-                        ? null
-                        : () => setState(() => _weekOffset = 0),
-                    child: const Text(Copy.currentWeek),
-                  ),
-                ],
+              HomeWeekChrome(
+                title: widget.title,
+                question: question,
+                family: widget.family,
+                cardWash: wash,
+                weekLabel: weekRangeLabel(weekStart, calendar: calendar),
+                onPreviousWeek: () => setState(() => _weekOffset--),
+                onNextWeek: () => setState(() => _weekOffset++),
+                nextWeekEnabled: _weekOffset < 0,
+                onTitleTap: widget.compactWeek
+                    ? _openProgress
+                    : () {
+                        refreshNowIfLocalDateChanged(ref);
+                        _openDomainDay(dateKey(ref.read(nowProvider)));
+                      },
               ),
               const SizedBox(height: 4),
-              if (widget.includeHajjStatus) _hajjStatus(),
               if (showWeek) ...[
                 Row(
                   children: [
-                    if (!widget.compactWeek) const SizedBox(width: 86),
+                    if (!widget.compactWeek)
+                      CurrentWeekGutter(
+                        width: 86,
+                        family: widget.family,
+                        cardWash: wash,
+                        enabled: _weekOffset != 0,
+                        onPressed: () => setState(() => _weekOffset = 0),
+                      ),
                     for (var col = 0; col < kCalendarWeekdayCount; col++)
                       Expanded(
                         child: Column(
                           children: [
                             Text(
-                              localizations.narrowWeekdays[(firstDay + col) % 7],
+                              localizations.narrowWeekdays[(firstDay + col) %
+                                  7],
                               textAlign: TextAlign.center,
                               style: Theme.of(context).textTheme.labelSmall
                                   ?.copyWith(fontWeight: FontWeight.w600),
@@ -213,81 +194,17 @@ class _OptionalDomainHomeCardState
                   if (widget.includeZakat) _zakatBand(keys: keys, index: index),
                 ],
               ],
-              if (widget.includeHadithFocus) _hadithFocus(),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _hadithFocus() {
-    final prefs = ref.watch(appPrefsProvider);
-    final current = prefs.hadithMemorisationFocus;
-    return Padding(
-      padding: const EdgeInsets.only(top: 8),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: widget.family.withValues(alpha: 0.12),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const CheckInRowLabel(Copy.hadithMemorisationFocus),
-              CheckInSelect<HadithMemorisationFocus>(
-                value: current,
-                entries: [
-                  for (final option in HadithMemorisationFocus.values)
-                    CheckInSelectEntry(value: option, label: option.label),
-                ],
-                onChanged: (option) async {
-                  await prefs.setHadithMemorisationFocus(option);
-                  ref.read(prefsTickProvider.notifier).state++;
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _hajjStatus() {
-    final prefs = ref.watch(appPrefsProvider);
-    final current = prefs.hajjStatus;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: widget.family.withValues(alpha: 0.12),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const CheckInRowLabel(Copy.hajjStatusLabel),
-              CheckInSelect<HajjStatus>(
-                dropdownKey: const Key('hajj-status'),
-                value: current,
-                entries: [
-                  for (final option in HajjStatus.values)
-                    CheckInSelectEntry(value: option, label: option.label),
-                ],
-                onChanged: (option) async {
-                  await prefs.setHajjStatus(option);
-                  ref.read(prefsTickProvider.notifier).state++;
-                },
-              ),
-              const SizedBox(height: 6),
-              Text(
-                Copy.hajjStatusNote,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
+              if (widget.includeHajjStatus) ...[
+                const SizedBox(height: 8),
+                HajjHomeDashboard(family: widget.family),
+              ],
+              if (widget.includeProductivityDashboard) ...[
+                const SizedBox(height: 8),
+                ProductivityDashboard(
+                  key: const ValueKey<String>('productivity-home'),
+                  family: widget.family,
+                ),
+              ],
             ],
           ),
         ),
@@ -301,7 +218,11 @@ class _OptionalDomainHomeCardState
     required List<HomeTraceRow> rows,
   }) {
     final domainId = rows.isEmpty
-        ? (widget.includeHajjStatus ? 'hajj' : 'domain')
+        ? (widget.includeHajjStatus
+              ? 'hajj'
+              : widget.includeProductivityDashboard
+              ? 'productivity'
+              : 'domain')
         : rows.first.storageKey.split('.').first;
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -341,29 +262,30 @@ class _OptionalDomainHomeCardState
           includeStruggleNote: widget.includeStruggleNote,
         ) ??
         false;
+    final kind = dateCellKind(key, ref.read(nowProvider));
     final marker = RecordedStateMarker(
       kind: markerForRecorded(recorded: recorded, positive: recorded),
       semanticLabel: recorded
           ? '$key ${widget.title} recorded'
           : '$key ${widget.title} not recorded',
     );
-    final open =
-        dateCellKind(key, ref.read(nowProvider)) != DateCellKind.future;
-    final mark = InkWell(
+    return InkWell(
       key: Key('home-compact-$domainId-$key'),
-      onTap: open ? () => _openDomainDay(key) : null,
+      onTap: recoverableDateCellOnTap(
+        ref: ref,
+        dateKey: key,
+        onOpen: () => _openDomainDay(key),
+      ),
+      customBorder: const CircleBorder(),
       child: Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4),
-          child: open ? marker : Opacity(opacity: 0.28, child: marker),
+        child: decorateWeekMark(
+          marker: marker,
+          kind: kind,
+          lunarWhiteDay: whiteDay,
+          todayKey: Key('home-today-$domainId-$key'),
+          lunarKey: Key('home-lunar-white-$domainId-$key'),
         ),
       ),
-    );
-    if (!whiteDay) return mark;
-    return LunarWhiteDayHighlight(
-      key: Key('home-lunar-white-$domainId-$key'),
-      dense: true,
-      child: mark,
     );
   }
 
@@ -373,23 +295,22 @@ class _OptionalDomainHomeCardState
     required List<String> keys,
     required Map<String, DailyCheckIn> index,
   }) {
+    final family = MuhasabahWashTheme.harmonizeFamilyOf(context, widget.family);
+    final bandWash = family.withValues(alpha: 0.12);
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: widget.family.withValues(alpha: 0.12),
+        color: bandWash,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(6, 8, 6, 6),
+        padding: const EdgeInsets.fromLTRB(6, 6, 6, 6),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              band.toUpperCase(),
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                letterSpacing: 0.4,
-                fontWeight: FontWeight.w600,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+            HomeBandHeading(
+              band: band,
+              family: widget.family,
+              baseWash: bandWash,
             ),
             const SizedBox(height: 6),
             for (final row in rows)
@@ -433,32 +354,35 @@ class _OptionalDomainHomeCardState
     required Map<String, DailyCheckIn> index,
   }) {
     final whiteDay = widget.highlightLunarWhiteDays && isLunarWhiteDayKey(key);
+    final record = index[key];
     final outcome =
-        index[key]?.homeTrace(row.storageKey) ?? TernaryOutcome.unanswered;
-    final marker = RecordedStateMarker(
-      kind: markerForRecorded(
-        recorded: outcome.isRecorded,
-        positive: outcome == TernaryOutcome.positive,
-      ),
+        record?.homeTrace(row.storageKey) ?? TernaryOutcome.unanswered;
+    final kind = dateCellKind(key, ref.read(nowProvider));
+    final colours = ref.watch(appPrefsProvider).salahActivityColours;
+    final marker = SalahActivityMark.recordedMarkerForTrace(
+      row: row,
+      record: record,
+      activityColours: colours,
       semanticLabel: '$key ${row.label} ${outcome.legendLabel}',
     );
-    final open =
-        dateCellKind(key, ref.read(nowProvider)) != DateCellKind.future;
-    final mark = InkWell(
+    return InkWell(
       key: Key('home-${row.storageKey}-$key'),
-      onTap: open ? () => _openDomainDay(key, band: row.band) : null,
+      onTap: recoverableDateCellOnTap(
+        ref: ref,
+        dateKey: key,
+        onOpen: () =>
+            _openDomainDay(key, band: row.band, rowId: row.storageKey),
+      ),
+      customBorder: const CircleBorder(),
       child: Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4),
-          child: open ? marker : Opacity(opacity: 0.28, child: marker),
+        child: decorateWeekMark(
+          marker: marker,
+          kind: kind,
+          lunarWhiteDay: whiteDay,
+          todayKey: Key('home-today-${row.storageKey}-$key'),
+          lunarKey: Key('home-lunar-white-${row.storageKey}-$key'),
         ),
       ),
-    );
-    if (!whiteDay) return mark;
-    return LunarWhiteDayHighlight(
-      key: Key('home-lunar-white-${row.storageKey}-$key'),
-      dense: true,
-      child: mark,
     );
   }
 
@@ -505,24 +429,40 @@ class _OptionalDomainHomeCardState
     final marker = ZakatStateMarker(
       status: record?.zakat ?? ZakatStatus.unanswered,
     );
-    final open =
-        dateCellKind(key, ref.read(nowProvider)) != DateCellKind.future;
+    final kind = dateCellKind(key, ref.read(nowProvider));
     return InkWell(
       key: Key('home-zakat-$key'),
-      onTap: open ? () => _openDomainDay(key, band: kZakatTraceBand) : null,
+      onTap: recoverableDateCellOnTap(
+        ref: ref,
+        dateKey: key,
+        onOpen: () =>
+            _openDomainDay(key, band: kZakatTraceBand, rowId: kZakatMixKey),
+      ),
+      customBorder: const CircleBorder(),
       child: Center(
-        child: open ? marker : Opacity(opacity: 0.28, child: marker),
+        child: decorateWeekMark(marker: marker, kind: kind),
       ),
     );
   }
 
   void _openProgress() {
+    final prefs = ref.read(appPrefsProvider);
+    var rows = widget.progressRows ?? widget.rows;
+    if (widget.gateFastingRamadan) {
+      rows = gatedFastingHomeRows(
+        rows,
+        date: ref.read(nowProvider),
+        offsetDays: prefs.ramadanCalendarOffsetDays,
+        showHistory: prefs.showFastingRamadanHistory,
+        records: widget.records,
+      );
+    }
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => OptionalDomainProgressScreen(
           title: widget.title,
           focusQuestion: widget.focus,
-          rows: widget.progressRows ?? widget.rows,
+          rows: rows,
           family: widget.family,
           includeZakat: widget.includeZakat,
           includeHadithFocus: widget.includeHadithFocus,
@@ -535,7 +475,7 @@ class _OptionalDomainHomeCardState
     );
   }
 
-  void _openDomainDay(String key, {String? band}) {
+  void _openDomainDay(String key, {String? band, String? rowId}) {
     openFocusedCheckIn(
       context,
       dateKey: key,
@@ -543,7 +483,8 @@ class _OptionalDomainHomeCardState
       domainTitle: widget.title,
       domainFocus: widget.focus,
       focusBand: band,
-      traceRows: widget.progressRows ?? widget.rows,
+      focusRowId: rowId,
+      traceRows: widget.rows,
       includeZakat: widget.includeZakat,
       includeHadithFocus: widget.includeHadithFocus,
       includeHajjStatus: widget.includeHajjStatus,

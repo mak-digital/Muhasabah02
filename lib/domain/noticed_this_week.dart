@@ -1,6 +1,7 @@
 import 'daily_check_in.dart';
 import 'monitor_domain.dart';
 import 'personal_mix.dart';
+import 'personalisation_resolver.dart';
 import 'quran.dart';
 
 class NoticedLine {
@@ -26,7 +27,10 @@ List<NoticedLine> noticedThisWeek({
 }) {
   final visible =
       visibleDomains ?? Set<MonitorDomain>.from(MonitorDomain.values);
-  final mixKeys = resolvePersonalMixKeys(mix, visible);
+  final mixKeys = PersonalisationResolver(
+    visibleDomains: visible,
+    mix: mix,
+  ).effectiveRowIds;
   final index = {for (final record in records) record.dateKey: record};
   final lines = <NoticedLine>[];
 
@@ -42,11 +46,11 @@ List<NoticedLine> noticedThisWeek({
     }
   }
 
-  if (mixKeys.contains('quran.reflection')) {
+  if (mixKeys.contains('quran.meaning')) {
     add(
-      'Qur’anic Reflection',
+      'Understanding & reflection',
       (record) =>
-          record?.quranOutcome(QuranDimension.reflection) ??
+          record?.quranOutcome(QuranDimension.meaning) ??
           TernaryOutcome.unanswered,
     );
   }

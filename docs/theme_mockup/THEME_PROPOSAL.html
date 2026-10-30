@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Private Muhasabah — extra appearance mockups</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: #d8d4cc;
+      color: #1d2a2c;
+    }
+    .page {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 24px 20px 48px;
+    }
+    h1 { font-size: 1.45rem; margin: 0 0 8px; }
+    .lead { color: #4d5c63; max-width: 70ch; line-height: 1.5; margin: 0 0 20px; }
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .toolbar button {
+      border: 1px solid #b9c3c7;
+      background: #faf8f4;
+      border-radius: 999px;
+      padding: 8px 14px;
+      font: inherit;
+      cursor: pointer;
+    }
+    .toolbar button[aria-pressed="true"] {
+      background: #2f6f73;
+      color: #fff;
+      border-color: #2f6f73;
+    }
+    .note {
+      background: #fff8e8;
+      border: 1px solid #e6d7a8;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 0.92rem;
+      line-height: 1.45;
+      margin-bottom: 20px;
+    }
+    .phones {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    .phone-wrap h2 {
+      font-size: 0.95rem;
+      margin: 0 0 8px;
+      color: #3a4a50;
+    }
+    .phone {
+      width: 280px;
+      height: 560px;
+      border-radius: 28px;
+      border: 10px solid #2a2a2a;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--ink);
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 12px 28px rgba(20, 28, 29, 0.18);
+    }
+    .status {
+      font-size: 11px;
+      padding: 8px 14px 0;
+      display: flex;
+      justify-content: space-between;
+      opacity: 0.7;
+    }
+    .bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px 10px;
+      font-weight: 650;
+      font-size: 1.02rem;
+    }
+    .bar .back { font-size: 1.2rem; line-height: 1; }
+    .body { flex: 1; overflow: hidden; padding: 0 12px 12px; }
+    .hint { font-size: 12px; color: var(--muted); margin: 0 0 10px; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .radio {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+    }
+    .radio:last-child { border-bottom: 0; }
+    .dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 2px solid var(--muted);
+      display: grid;
+      place-items: center;
+    }
+    .dot.on { border-color: var(--primary); }
+    .dot.on::after {
+      content: "";
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--primary);
+    }
+    .wash {
+      background: var(--salah-wash);
+      border-radius: 14px;
+      padding: 10px;
+      border: 1px solid var(--line);
+    }
+    .week-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 700;
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+    .days {
+      display: grid;
+      grid-template-columns: 72px repeat(7, 1fr);
+      gap: 4px;
+      font-size: 10px;
+      text-align: center;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: 72px repeat(7, 1fr);
+      gap: 4px;
+      align-items: center;
+      margin-bottom: 6px;
+      font-size: 11px;
+      font-weight: 650;
+    }
+    .mark {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin: 0 auto;
+      background: var(--primary);
+    }
+    .mark.empty {
+      background: transparent;
+      border: 1.5px dotted var(--muted);
+    }
+    .mark.late { background: #fbc02d; }
+    .nav {
+      margin-top: auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      padding: 8px 6px 10px;
+      border-top: 1px solid var(--line);
+      font-size: 10px;
+      text-align: center;
+      color: var(--muted);
+    }
+    .nav .on { color: var(--primary); font-weight: 700; }
+    .pill {
+      font-size: 10px;
+      letter-spacing: 0.6px;
+      font-weight: 700;
+      background: color-mix(in srgb, var(--primary) 16%, var(--salah-wash));
+      color: var(--primary);
+      border-radius: 999px;
+      padding: 5px 8px;
+      margin: 8px 0;
+    }
+    .field {
+      font-size: 12px;
+      font-weight: 700;
+      margin: 8px 0 4px;
+    }
+    .select {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-size: 13px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .menu {
+      margin-top: 6px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      font-size: 12.5px;
+      overflow: hidden;
+    }
+    .item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+    }
+    .item + .item { border-top: 1px solid var(--line); }
+    .ball { width: 12px; height: 12px; border-radius: 50%; flex: 0 0 12px; }
+    .save {
+      margin-top: 14px;
+      background: var(--primary);
+      color: var(--on-primary);
+      border: 0;
+      border-radius: 999px;
+      width: 100%;
+      padding: 10px;
+      font-weight: 700;
+    }
+    .phone.light {
+      --bg: #f4f1ea; --card: #fffcf8; --ink: #141c1d; --muted: #4d5c63;
+      --line: #d5d0c8; --primary: #2f6f73; --on-primary: #fff; --salah-wash: #d7eceb;
+    }
+    .phone.dark {
+      --bg: #141c1d; --card: #1e2829; --ink: #e8eeef; --muted: #9aa8ad;
+      --line: #314042; --primary: #8ec4c6; --on-primary: #102022; --salah-wash: #243f42;
+    }
+    .phone.paper {
+      --bg: #f6ead6; --card: #fff6e8; --ink: #3a2c1c; --muted: #7a654c;
+      --line: #e4d2b4; --primary: #8a5a28; --on-primary: #fff8ee; --salah-wash: #ead9b8;
+    }
+    .phone.slate {
+      --bg: #e7eef2; --card: #f7fbfd; --ink: #1a2a32; --muted: #5b6e78;
+      --line: #c5d3db; --primary: #2c5d72; --on-primary: #f4fafc; --salah-wash: #d4e4ee;
+    }
+    .phone.midnight {
+      --bg: #0d1524; --card: #172235; --ink: #e8eef6; --muted: #93a4b8;
+      --line: #2a3b52; --primary: #7eb8c4; --on-primary: #0c1820; --salah-wash: #1b3144;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <h1>Three extra appearances — mockup only</h1>
+    <p class="lead">
+      Today the app has System, Light, and Dark. These three extras are for
+      the international market: a warm reading look, a cool calm look, and a
+      deep evening look. They change paper, ink, and chrome. They do not
+      change Salah activity colours (congregation blue, late yellow, and so on)
+      and they do not score worship.
+    </p>
+    <div class="note">
+      <strong>Not built yet.</strong> Pick a set after you have looked at the three
+      phones. System / Light / Dark stay. Marks stay observational. Contrast is
+      meant to stay readable at larger text.
+    </div>
+    <div class="toolbar" role="tablist">
+      <button type="button" data-page="appearance" aria-pressed="true">Appearance</button>
+      <button type="button" data-page="home">Home week</button>
+      <button type="button" data-page="checkin">Check-in</button>
+    </div>
+    <div class="phones">
+      <div class="phone-wrap">
+        <h2>Warm paper</h2>
+        <p class="lead" style="font-size:0.85rem;margin-bottom:8px">Reading / journal apps. Cream paper, brown ink. Easy on the eyes in daylight.</p>
+        <div class="phone paper" data-theme="paper"></div>
+      </div>
+      <div class="phone-wrap">
+        <h2>Quiet slate</h2>
+        <p class="lead" style="font-size:0.85rem;margin-bottom:8px">Calm / wellness apps. Cool grey-blue, not a “success” green.</p>
+        <div class="phone slate" data-theme="slate"></div>
+      </div>
+      <div class="phone-wrap">
+        <h2>Midnight</h2>
+        <p class="lead" style="font-size:0.85rem;margin-bottom:8px">Evening reflection. Deep navy, not grey Material dark.</p>
+        <div class="phone midnight" data-theme="midnight"></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const screens = {
+      appearance(theme, label) {
+        const chosen = { paper: "Warm paper", slate: "Quiet slate", midnight: "Midnight" }[theme];
+        const rows = ["System", "Light", "Dark", "Warm paper", "Quiet slate", "Midnight"].map((name) => {
+          const on = name === chosen ? " on" : "";
+          return `<div class="radio"><span class="dot${on}"></span>${name}</div>`;
+        }).join("");
+        return `
+          <div class="status"><span>1:10</span><span>▌▌▌</span></div>
+          <div class="bar"><span class="back">←</span> Appearance</div>
+          <div class="body">
+            <p class="hint">System, light, dark, plus three named looks. Not a score.</p>
+            <div class="card">${rows}</div>
+          </div>`;
+      },
+      home() {
+        const cells = (filled) => filled.map((k) => `<span class="mark ${k}"></span>`).join("");
+        return `
+          <div class="status"><span>1:10</span><span>▌▌▌</span></div>
+          <div class="bar">Private Muhasabah</div>
+          <div class="body">
+            <div class="week-head"><span>‹</span> Salah & Prayer Quality <span>›</span></div>
+            <div class="wash">
+              <div class="days"><span></span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div>
+              <div class="row"><span>Fajr</span>${cells(["","empty","","late","","",""])}</div>
+              <div class="row"><span>Dhuhr</span>${cells(["","","","","empty","",""])}</div>
+              <div class="row"><span>Asr</span>${cells(["empty","","","","","",""])}</div>
+              <div class="row"><span>Maghrib</span>${cells(["","","empty","","","",""])}</div>
+              <div class="row"><span>Isha</span>${cells(["","","","","","","empty"])}</div>
+            </div>
+            <p class="hint" style="margin-top:10px">Filled marks are recorded. Dotted is unanswered, not missed.</p>
+          </div>
+          <div class="nav"><div class="on">Home</div><div>Review</div><div>Registry</div></div>`;
+      },
+      checkin() {
+        return `
+          <div class="status"><span>1:10</span><span>▌▌▌</span></div>
+          <div class="bar"><span class="back">←</span> Salah · 20 Oct</div>
+          <div class="body">
+            <p class="hint">Each prayer is recorded independently. Absence is not missed.</p>
+            <div class="pill">OBLIGATORY SALAH</div>
+            <div class="field">Fajr</div>
+            <div class="select"><span>Alone on time</span><span>▾</span></div>
+            <div class="menu">
+              <div class="item"><span class="ball" style="background:#c0ca33"></span>Alone on time</div>
+              <div class="item"><span class="ball" style="background:#2e7d32"></span>Joined congregation late</div>
+              <div class="item"><span class="ball" style="background:#d32f2f"></span>Missed</div>
+              <div class="item"><span class="ball" style="background:#f57c00"></span>Missed, made up later</div>
+              <div class="item"><span class="ball" style="background:#bdbdbd"></span>No answer recorded</div>
+              <div class="item"><span class="ball" style="background:#1565c0"></span>On time in congregation</div>
+            </div>
+            <button class="save" type="button">Save</button>
+          </div>`;
+      },
+    };
+
+    function paint(page) {
+      document.querySelectorAll("[data-theme]").forEach((el) => {
+        el.innerHTML = screens[page](el.dataset.theme);
+      });
+      document.querySelectorAll(".toolbar button").forEach((btn) => {
+        btn.setAttribute("aria-pressed", btn.dataset.page === page ? "true" : "false");
+      });
+    }
+    document.querySelectorAll(".toolbar button").forEach((btn) => {
+      btn.addEventListener("click", () => paint(btn.dataset.page));
+    });
+    paint("appearance");
+  </script>
+</body>
+</html>

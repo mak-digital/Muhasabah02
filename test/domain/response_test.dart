@@ -38,6 +38,46 @@ void main() {
     expect(json.values.join(), isNot(contains('caused')));
   });
 
+  test('note codes restart each local day from 01', () {
+    final first = PersonalResponse(
+      id: 'a',
+      text: 'one',
+      createdAt: DateTime(2026, 10, 21, 8),
+    );
+    final second = PersonalResponse(
+      id: 'b',
+      text: 'two',
+      createdAt: DateTime(2026, 10, 21, 9),
+    );
+    final nextDay = PersonalResponse(
+      id: 'c',
+      text: 'three',
+      createdAt: DateTime(2026, 10, 22, 7),
+    );
+    final assigned = assignMissingNoteCodes([first, second, nextDay]);
+    expect(assigned.map((item) => item.noteCode), [
+      '261021-01',
+      '261021-02',
+      '261022-01',
+    ]);
+    expect(noteDomainLabel(first), kNoteGeneralDomain);
+  });
+
+  test('note domain label uses the related short name', () {
+    final item = PersonalResponse(
+      id: 'q',
+      text: 'keep',
+      createdAt: DateTime(2026, 10, 21),
+      provenance: const ResponseProvenance(
+        originType: ProvenanceOrigin.quranPonder,
+        domain: 'quran',
+        labelSnapshot: 'Qur’an PONDER (90 days)',
+      ),
+    );
+    expect(noteDomainLabel(item), 'Qur’an');
+    expect(noteSourceLabel(item), 'Qur’an PONDER (90 days)');
+  });
+
   test('unknown provenance origin still keeps the response', () {
     final record = PersonalResponse.fromJson({
       'schemaVersion': 1,

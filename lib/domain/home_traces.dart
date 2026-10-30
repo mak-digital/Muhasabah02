@@ -1,3 +1,4 @@
+import 'dhikr_context.dart';
 import 'quran.dart';
 
 class HomeTraceRow {
@@ -21,6 +22,11 @@ class HomeTraceRow {
 const kZakatTraceBand = 'Zakat status';
 const kHajjPreparationKey = 'hajj.preparation';
 const kHajjPreparationBand = 'Preparation';
+const kHajjLearnBand = 'Learn';
+const kHajjReadinessBand = 'Readiness';
+const kHajjAfterBand = 'After Hajj';
+
+const kHadithEngagedBand = 'ENGAGED with Hadith';
 
 String progressBandTitle(String band) => switch (band) {
   'Morning and evening' => 'Morning & Evening Adhkar',
@@ -37,6 +43,9 @@ String progressBandTitle(String band) => switch (band) {
   'Preparation' => 'Preparation',
   _ => band,
 };
+
+/// Home/Progress/check-in/learn-and-practice band heading. Always caps.
+String displayHomeBand(String band) => progressBandTitle(band).toUpperCase();
 
 const dhikrHomeRows = [
   HomeTraceRow(
@@ -224,7 +233,14 @@ const charityHomeRows = [
   ),
 ];
 
-const hajjHomeRows = [
+/// Hajj is a lifetime standing record, not a daily Home observation.
+const hajjHomeRows = <HomeTraceRow>[];
+
+/// Productivity is a dashboard of actions, not a daily week matrix.
+const productivityHomeRows = <HomeTraceRow>[];
+
+/// Leftover daily-preparation traces from the retired Home row.
+const hajjRetiredHomeRows = [
   HomeTraceRow(
     storageKey: kHajjPreparationKey,
     label: 'Noticed preparation',
@@ -234,6 +250,62 @@ const hajjHomeRows = [
 ];
 
 const fastingHomeRows = [
+  HomeTraceRow(
+    storageKey: 'fasting.ramadanObserved',
+    label: 'Observed the Ramadan fast',
+    band: 'Fast & Conduct',
+    matrixColumn: 'Fast',
+    matrixColumnVertical: true,
+  ),
+  HomeTraceRow(
+    storageKey: 'fasting.ramadanConduct',
+    label: 'Guarded my speech and conduct',
+    band: 'Fast & Conduct',
+    matrixColumn: 'Conduct',
+    matrixColumnVertical: true,
+  ),
+  HomeTraceRow(
+    storageKey: 'fasting.ramadanAttention',
+    label: 'Protected attention and time',
+    band: 'Focused Worship',
+    matrixColumn: 'Attention',
+    matrixColumnVertical: true,
+  ),
+  HomeTraceRow(
+    storageKey: 'fasting.ramadanQuran',
+    label: 'Engaged meaningfully with the Qur’an',
+    band: 'Focused Worship',
+    matrixColumn: 'Qur’an',
+    matrixColumnVertical: true,
+  ),
+  HomeTraceRow(
+    storageKey: 'fasting.ramadanSalah',
+    label: 'Brought greater attention to obligatory Salah',
+    band: 'Focused Worship',
+    matrixColumn: 'Salah',
+    matrixColumnVertical: true,
+  ),
+  HomeTraceRow(
+    storageKey: 'fasting.ramadanExtraWorship',
+    label: 'Made room for extra worship',
+    band: 'Stewardship',
+    matrixColumn: 'Extra',
+    matrixColumnVertical: true,
+  ),
+  HomeTraceRow(
+    storageKey: 'fasting.ramadanHabits',
+    label: 'Supported worship through balanced daily habits',
+    band: 'Stewardship',
+    matrixColumn: 'Habits',
+    matrixColumnVertical: true,
+  ),
+  HomeTraceRow(
+    storageKey: 'fasting.ramadanPractice',
+    label: 'Put Ramadan learning into practice',
+    band: 'Application',
+    matrixColumn: 'Practice',
+    matrixColumnVertical: true,
+  ),
   HomeTraceRow(
     storageKey: 'fasting.weeklySunnah',
     label: 'Weekly Sunnah Fast',
@@ -259,12 +331,19 @@ const fastingHomeRows = [
     storageKey: 'fasting.ramadanPrep',
     label: 'Ramadan Preparation',
     band: 'Voluntary and make-up',
-    matrixColumn: 'Ramadan',
+    matrixColumn: 'Prep',
+    matrixColumnVertical: true,
+  ),
+  HomeTraceRow(
+    storageKey: 'fasting.postRamadan',
+    label: 'Post-Ramadan Activities',
+    band: 'Voluntary and make-up',
+    matrixColumn: 'Post',
     matrixColumnVertical: true,
   ),
 ];
 
-const hadithHomeRows = [
+const hadithRetiredHomeRows = [
   HomeTraceRow(
     storageKey: 'hadith.reading',
     label: 'Reading',
@@ -316,6 +395,42 @@ const hadithHomeRows = [
     storageKey: 'hadith.livedSunnah',
     label: 'Noticed a sunnah in how I lived today',
     band: 'Live',
+    matrixColumn: 'Lived',
+    matrixColumnVertical: true,
+  ),
+];
+
+const hadithEncounterKey = 'hadith.encounter';
+const hadithRetentionKey = 'hadith.retention';
+const hadithLearningKey = 'hadith.learning';
+const hadithLivedNoticedKey = 'hadith.livedNoticed';
+
+const hadithHomeRows = [
+  HomeTraceRow(
+    storageKey: hadithEncounterKey,
+    label: 'Read and/or Listened',
+    band: kHadithEngagedBand,
+    matrixColumn: 'Read',
+    matrixColumnVertical: true,
+  ),
+  HomeTraceRow(
+    storageKey: hadithRetentionKey,
+    label: 'Memorization/Revision',
+    band: kHadithEngagedBand,
+    matrixColumn: 'Retain',
+    matrixColumnVertical: true,
+  ),
+  HomeTraceRow(
+    storageKey: hadithLearningKey,
+    label: 'Study Circle/Discussion',
+    band: kHadithEngagedBand,
+    matrixColumn: 'Learn',
+    matrixColumnVertical: true,
+  ),
+  HomeTraceRow(
+    storageKey: hadithLivedNoticedKey,
+    label: 'Lived /Noticed others',
+    band: kHadithEngagedBand,
     matrixColumn: 'Lived',
     matrixColumnVertical: true,
   ),
@@ -598,8 +713,8 @@ const knowledgeHomeRows = [
   ),
 ];
 
-/// Prayer-window row kept for stored records and Historical Reflection.
-/// The fard is on Salah; Time Home does not show a second prayer log.
+/// Pre-launch Presence / Trust / Rest keys. Not shown; leftover Hive
+/// values are not migrated and are ignored by Home, Review, and check-in.
 const timeRetiredHomeRows = [
   HomeTraceRow(
     storageKey: 'time.guardedPrayerWindow',
@@ -608,9 +723,6 @@ const timeRetiredHomeRows = [
     matrixColumn: 'Prayer',
     matrixColumnVertical: true,
   ),
-];
-
-const timeHomeRows = [
   HomeTraceRow(
     storageKey: 'time.presentInWhatIWasDoing',
     label: 'Present in what I was doing',
@@ -644,6 +756,65 @@ const timeHomeRows = [
     label: 'Began with intention',
     band: 'Rest',
     matrixColumn: 'Intention',
+    matrixColumnVertical: true,
+  ),
+];
+
+const timeHomeRows = [
+  HomeTraceRow(
+    storageKey: 'time.t01',
+    label: 'Began with a worthwhile intention',
+    band: 'Intention & Priority',
+    matrixColumn: 'Intention',
+    matrixColumnVertical: true,
+  ),
+  HomeTraceRow(
+    storageKey: 'time.t02',
+    label: 'Chose what mattered first',
+    band: 'Intention & Priority',
+    matrixColumn: 'Priority',
+    matrixColumnVertical: true,
+  ),
+  HomeTraceRow(
+    storageKey: 'time.t03',
+    label: 'Gave focused attention',
+    band: 'Attention & Presence',
+    matrixColumn: 'Focus',
+    matrixColumnVertical: true,
+  ),
+  HomeTraceRow(
+    storageKey: 'time.t04',
+    label: 'Put aside a digital distraction',
+    band: 'Attention & Presence',
+    matrixColumn: 'Digital',
+    matrixColumnVertical: true,
+  ),
+  HomeTraceRow(
+    storageKey: 'time.t05',
+    label: 'Took a step on something delayed',
+    band: 'Responsibility & Action',
+    matrixColumn: 'Delayed',
+    matrixColumnVertical: true,
+  ),
+  HomeTraceRow(
+    storageKey: 'time.t06',
+    label: 'Used time for something beneficial',
+    band: 'Responsibility & Action',
+    matrixColumn: 'Benefit',
+    matrixColumnVertical: true,
+  ),
+  HomeTraceRow(
+    storageKey: 'time.t07',
+    label: 'Gave someone needed attention',
+    band: 'Balance & Renewal',
+    matrixColumn: 'Others',
+    matrixColumnVertical: true,
+  ),
+  HomeTraceRow(
+    storageKey: 'time.t08',
+    label: 'Took needed rest',
+    band: 'Balance & Renewal',
+    matrixColumn: 'Rest',
     matrixColumnVertical: true,
   ),
 ];
@@ -762,6 +933,13 @@ const wealthHomeRows = [
     matrixColumn: 'Waste',
     matrixColumnVertical: true,
   ),
+  HomeTraceRow(
+    storageKey: 'wealth.lawfulManagement',
+    label: 'Managed wealth responsibly and lawfully',
+    band: 'Lawful wealth management',
+    matrixColumn: 'Manage',
+    matrixColumnVertical: true,
+  ),
 ];
 
 const wealthAllHomeRows = [...wealthRetiredHomeRows, ...wealthHomeRows];
@@ -837,12 +1015,25 @@ bool isWealthTrace(String storageKey) => storageKey.startsWith('wealth.');
 
 bool isUmmahTrace(String storageKey) => storageKey.startsWith('ummah.');
 
-bool isLivedSunnahTrace(String storageKey) =>
-    storageKey == 'hadith.livedSunnah';
+bool isHadithDurationTrace(String storageKey) =>
+    storageKey == hadithEncounterKey ||
+    storageKey == hadithRetentionKey ||
+    storageKey == hadithLearningKey;
+
+bool isDhikrPostFardTrace(String storageKey) =>
+    storageKey.startsWith('dhikr.postFard');
+
+bool isHadithLivedTrace(String storageKey) =>
+    storageKey == hadithLivedNoticedKey || storageKey == 'hadith.livedSunnah';
+
+bool isLivedSunnahTrace(String storageKey) => isHadithLivedTrace(storageKey);
 
 bool isHajjTrace(String storageKey) => storageKey.startsWith('hajj.');
 
+bool isFastingTrace(String storageKey) => storageKey.startsWith('fasting.');
+
 bool hidesHomeTraceFactors(String storageKey) =>
+    isDhikrContextTrace(storageKey) ||
     isAkhlaqTrace(storageKey) ||
     isHuquqTrace(storageKey) ||
     isKnowledgeTrace(storageKey) ||
@@ -850,6 +1041,8 @@ bool hidesHomeTraceFactors(String storageKey) =>
     isHealthTrace(storageKey) ||
     isWealthTrace(storageKey) ||
     isUmmahTrace(storageKey) ||
+    storageKey.startsWith('charity.') ||
+    isFastingTrace(storageKey) ||
     isLivedSunnahTrace(storageKey) ||
     isHajjTrace(storageKey);
 
@@ -859,13 +1052,20 @@ String namedTraceOutcome(String phrase, String storageKey) {
   return '$phrase — $subject';
 }
 
-String traceOutcomeLabel(String storageKey, TernaryOutcome outcome) {
+String traceOutcomePhrase(String storageKey, TernaryOutcome outcome) {
+  if (isTimeTrace(storageKey)) {
+    return switch (outcome) {
+      TernaryOutcome.positive => 'I acted on this',
+      TernaryOutcome.negative => 'I noticed but did not act',
+      TernaryOutcome.unanswered => 'Prefer not to record',
+    };
+  }
   if (isHuquqTrace(storageKey)) {
-    return namedTraceOutcome(switch (outcome) {
+    return switch (outcome) {
       TernaryOutcome.positive => 'I attended to a right I owe',
       TernaryOutcome.negative => 'I neglected a right I owe',
       TernaryOutcome.unanswered => 'Unanswered',
-    }, storageKey);
+    };
   }
   if (isAkhlaqTrace(storageKey) ||
       isKnowledgeTrace(storageKey) ||
@@ -874,14 +1074,25 @@ String traceOutcomeLabel(String storageKey, TernaryOutcome outcome) {
       isWealthTrace(storageKey) ||
       isHajjTrace(storageKey) ||
       isUmmahTrace(storageKey) ||
+      storageKey.startsWith('charity.') ||
       isLivedSunnahTrace(storageKey)) {
-    return namedTraceOutcome(switch (outcome) {
+    return switch (outcome) {
       TernaryOutcome.positive => 'I noticed this in myself',
       TernaryOutcome.negative => 'I did not notice this today',
       TernaryOutcome.unanswered => 'Unanswered',
-    }, storageKey);
+    };
   }
-  return namedTraceOutcome(outcome.legendLabel, storageKey);
+  return outcome.legendLabel;
+}
+
+String traceOutcomeLabel(
+  String storageKey,
+  TernaryOutcome outcome, {
+  bool includeSubject = true,
+}) {
+  final phrase = traceOutcomePhrase(storageKey, outcome);
+  if (!includeSubject) return phrase;
+  return namedTraceOutcome(phrase, storageKey);
 }
 
 const allHomeTraceRows = [
@@ -897,6 +1108,8 @@ const allHomeTraceRows = [
   ...charityHomeRows,
   ...fastingHomeRows,
   ...hajjHomeRows,
+  ...hajjRetiredHomeRows,
+  ...hadithRetiredHomeRows,
   ...hadithHomeRows,
 ];
 
@@ -932,42 +1145,6 @@ Map<String, String> tracesToJson(Map<String, TernaryOutcome> traces) {
             ? 'positive'
             : 'didNot',
   };
-}
-
-enum HajjStatus { unanswered, notDue, due, preparing, performed, notApplicable }
-
-extension HajjStatusX on HajjStatus {
-  bool get isRecorded => this != HajjStatus.unanswered;
-
-  bool get showsPreparation =>
-      this == HajjStatus.due || this == HajjStatus.preparing;
-
-  String get label => switch (this) {
-    HajjStatus.unanswered => 'Not recorded',
-    HajjStatus.notDue => 'Not due',
-    HajjStatus.due => 'Due',
-    HajjStatus.preparing => 'Preparing',
-    HajjStatus.performed => 'Performed',
-    HajjStatus.notApplicable => 'Not applicable',
-  };
-
-  static HajjStatus fromId(String? id) {
-    return HajjStatus.values.firstWhere(
-      (item) => item.name == id,
-      orElse: () => HajjStatus.unanswered,
-    );
-  }
-}
-
-List<HomeTraceRow> hajjRowsForStatus(
-  List<HomeTraceRow> rows,
-  HajjStatus status,
-) {
-  if (status.showsPreparation) return rows;
-  return [
-    for (final row in rows)
-      if (row.storageKey != kHajjPreparationKey) row,
-  ];
 }
 
 enum HadithMemorisationFocus { unanswered, reviewing, memorising, memorised }

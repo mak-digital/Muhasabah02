@@ -38,8 +38,8 @@ Requirements:
 - Full offline usability.
 - No telemetry, ads, cloud AI, or remote analytics in core functionality.
 - Preserve a sound existing architecture when working in an established repository.
-- Date keys remain Gregorian `YYYY-MM-DD`. Settings → Application → Calendar may show Gregorian or civil Islamic (Hijri) dates without rewriting records.
-- Settings → Application → **Domains** may hide domains from Home, Review, and today’s check-in without deleting stored records. The first look is **Salah, Qur’an & Akhlaq**: Salah & Prayer Quality, Qur’an Engagement, Hadith & Living Sunnah, Character & Morals (Akhlaq), Rights of Others (Huquq al-Ibad), and Charity. Knowledge & Beneficial Speech, Time & Barakah, Physical Health & Energy, Wealth & Stewardship, Ummah, Dhikr & Dua, Fasting, and Hajj stay available in Domains; they are not on that preset. Stored All or custom sets are not rewritten. Sick visit, sick contact, and support under stress sit on Rights of Others as Care in hardship. Opt-in domains stay off that preset. When shown, they use the same full week matrices as the other domains (Hajj preparation only while due or preparing). Check-in later bands start closed. The same screen holds **this season’s mix**: one saved set of domains, bands, and rows to notice. It is not a score, a programme, or a second hide-list. Named starting points copy a set; Custom is the same mix after editing; Same as Domains follows visibility. Completing the first door sets **First season** (obligatory Salah, Qur’an Journey dimensions, one Hadith row, two Akhlaq rows, Parents, Zakat, and one giving row). Unset stored mix remains Same as Domains. Mix rows on a hidden domain are kept and appear on Home only when that domain is shown. The mix does not rewrite records. Unanswered mix rows are not missed. The first screen is a three-sentence door (private recorder; empty is not missed; short first season). Application Reflection stays in Settings → About. Sample days are not auto-seeded; the door asks once (quiet week or sample days).
+- Date keys remain Gregorian `YYYY-MM-DD`. Settings → Preferences → Calendar may show Gregorian or civil Islamic (Hijri) dates without rewriting records.
+- Settings → Preferences → **Domains in Focus** may hide domains from Home, Review, and today’s check-in without deleting stored records. The first look is **Salah, Qur’an & Dhikr**: Salah & Prayer Quality, Qur’an Engagement, and Dhikr & Dua. Hadith & Living Sunnah, Character & Morals (Akhlaq), Rights of Others (Huquq al-Ibad), Charity, and Fasting stay available there; they are not on that preset. **Knowledge & Beneficial Speech, Time & Barakah, Physical Health & Energy, Wealth & Stewardship, Ummah, Hajj, and Productivity** stay listed on that screen so they can be found, but they are dormant this season: not selectable, not on All domains, and not on Home, Review, or today’s check-in. Saved records in those domains are not deleted. Stored All or custom sets are not rewritten, except dormant domains are omitted from the working shown set. Sick visit, sick contact, and support under stress sit on Rights of Others as Care in hardship. Opt-in domains stay off that preset. When shown, they use the same full week matrices as the other domains (Hajj uses lifetime standing, not a daily week matrix). Check-in later bands start closed. The same screen holds **this season’s mix**: one saved set of domains, bands, and rows to notice. The mix is a subset of the domains shown on that screen (bands and rows). A domain or row that does not apply can stay unselected; saved records are not rewritten. It is not a score, a programme, or a second hide-list. Named starting points copy a set; Custom is the same mix after editing; Same as Domains follows visibility. Completing the first door sets **First season** (obligatory Salah, selected Qur’an Journey dimensions, and two Dhikr rows). Unset stored mix remains Same as Domains. Mix rows on a hidden domain are kept and appear on Home, Review, Progress, check-in, and Quick Tap only when that domain is shown. The mix does not rewrite records. Unanswered mix rows are not missed. The first screen is a three-sentence door (private recorder; empty is not missed; short first season). Application Reflection stays in Settings → About. Sample days are not auto-seeded; the door asks once (quiet week or sample days).
 - Prefer feature-oriented layers such as `domain/`, `data/`, `application/`, `presentation/` when compatible with the codebase.
 - Avoid new dependencies unless they materially reduce risk or complexity.
 
@@ -64,13 +64,19 @@ REVIEW
 ├── Progress details
 │   ├── Salah & Prayer Quality
 │   └── Qur’an Engagement
-├── Recorded days
-└── My Response
+└── Recorded days
+
+REGISTRY
+├── Action Register (visible domains ∩ mix)
+├── Hadith Register (user practice list)
+├── Note to Developer (visible domains ∩ mix)
+├── My Notes (visible domains ∩ mix; GEN always shown)
+└── History (every saved check-in day)
 ```
 
 Evidence exploration may lead to Recorded Context, Recognition, supporting dates, Historical Reflection, and optional Response creation.
 
-Home should remain simple. Do not turn it into a dense analytics dashboard. Home shows one domain week at a time (fixed previous/next chevrons, current short name centred); check-in, **Quick tap** (busy-day tiles for this season’s mix on shown domains; each tap steps the same check-in dropdown for that row, skipping Other; Jumu‘ah is Friday only; Hajj standing status stays in Settings; tiles start unanswered and are never inferred; after unanswered the person’s most recorded choice is next; not a dhikr target or khushu’ score), Reflection of the Week, the week card, the weekly journal, and Add a response stay on the same page. Recognition, Ponder, Recorded days, Noticed This Week, and Patterns Noticed live on Review or Progress. Today’s full check-in shows one domain form at a time the same way; Other and context notes stay on that page.
+Home should remain simple. Do not turn it into a dense analytics dashboard. Home shows one domain week at a time (fixed previous/next chevrons, current short name centred). After the Salah week, Home shows **Salah & Prayer Quality Learn & Practice** (Qur’an verses and authentic hadith grouped as on Home, collapsed to title, with a private register; not a khushu’ score), then a domain-action wash (collapsed by default; at most five full-width chips; the status circle on an active chip opens Completed/Closed, In progress/Active, Edit, and Delete; Edit opens a sheet for the text, target date, and priority; Delete marks an x and keeps the row; completed and deleted chips stay on the wash until the circle is tapped or a sixth chip needs the slot, then they remain in the register as Closed or Deleted until the person selects them and deletes them from the register) and a developer-note wash (collapsed by default; + add Note and Open Note Register sit as a matching pair; Open Note Register lists notes to edit or select and delete before download; developer-note wash uses a cooler mix of the domain wash so it is distinct from the actions wash). The Qur’an, Hadith, and Dhikr weeks use the same actions and notes washes in that domain’s wash colour; listed actions stay on their own domain. Dhikr also has **Dhikr & Dua Learn & Practice**: a grouped built-in list (post-fard, morning, evening, other adhkar) the person may add to a private register. It is not a dhikr target. Character & Morals, Rights of Others, Knowledge & Beneficial Speech, Time & Barakah, Physical Health & Energy, Wealth & Stewardship, Ummah, Fasting, Hajj, and Charity use the same three washes, with Learn & Practice catalogs grouped like Home. Knowledge’s catalog is residual learning and speech (not Qur’an, Hadith, or Character’s tone). Time’s catalog encourages the eight observations and is not a timetable or barakah score. Health’s catalog is care of the body as a trust, not fitness. Wealth’s catalog is earning as a trust, not giving. Ummah’s catalog is belonging beyond the household, not the fard or Charity. Fasting’s catalog is voluntary and make-up noticing, not a Ramadan grade. Hajj’s catalog is preparation noticing, not a due-date. Charity’s catalog is giving and care, not amounts. Completion is not a salah score. The app does not send mail. Check-in, **Quick tap** (busy-day tiles for this season’s mix on shown domains; weekday with Gregorian and civil Hijri dates in a full-width wash with Quick tap at the top left and the busy-day note collapsed until opened; previous/next day arrows that do not enter the local future; each mix domain shows wash and title, with cards collapsed until opened, or open if only one mix domain is shown; each tap steps the same check-in dropdown for that row, skipping Other; Jumu‘ah is Friday only; Hajj standing status stays in Settings; tiles start unanswered and are never inferred; after unanswered the person’s most recorded choice is next; not a dhikr target or khushu’ score), Reflection of the Week (previous/next through quotes; the one you stop on stays as that day’s or week’s reflection; Open citation is an in-app reader with Close and Share), and the week card stay on the same page. Recognition, Ponder, Recorded days, Noticed This Week, and Patterns Noticed live on Review or Progress. Today’s full check-in shows one domain form at a time the same way; Other and context notes stay on that page.
 
 ---
 
@@ -101,13 +107,15 @@ At minimum distinguish:
 
 Never infer `missed` from absence.
 
-Salah check-in uses a fixed activity list (congregation on time, joined congregation late, small congregation, alone on time, excused, prayed late, missed then made up, missed, no answer recorded, other). Settings → Application → **Activities** may colour Salah marks by that recorded choice. Shared mark colour remains the default. Colour names the choice; it does not rank spirituality or prescribe a next step.
+Salah check-in uses a fixed activity list (congregation on time, joined congregation late, small congregation, alone on time, excused, prayed late, missed then made up, missed, no answer recorded, other). Settings → Preferences → **Salah list for me** may record Female, Male, Prefer not to say, or Not recorded (default). This only changes whether **Excused** appears on obligatory Salah and Jumu‘ah. It is not a ruling, a public profile, or a score. Not recorded and Prefer not to say keep Excused visible. Male hides Excused on those two lists (a stored Excused mark still displays until the day is edited). Excused remains recorded and is never treated as missed. Voluntary prayers are unchanged. **Friday Prayer** is one Jumu‘ah row with that same list and Friday wording (for example prayed late (alone)); it is not a second “Friday congregation” field. **Tahajjud**, **Ishraq**, and **Salat At Tawbah** use their own five-choice lists (night timing / morning timing / turning-back extra / prayed / not prayed / not recorded), not the obligatory Salah list and not missed-red. Recording Salat At Tawbah is observational only: the app does not prescribe tawbah or treat a mark as completed tawbah. **Not Prayed** is a solid empty circle (the activity colour as the border, no fill). Settings → Preferences → **Activities & legend** may colour Salah, Jumu‘ah, Tahajjud, Ishraq, and Salat At Tawbah marks by that recorded choice, starting with congregation-on-time blue for the first option. Shared mark colour remains the default. Colour names the choice; it does not rank spirituality or prescribe a next step. Voluntary rows stay off the recordable-field count. Unanswered is not missed.
 
 Do not record or score presence of heart as a grade.
 
 Do not create a combined spiritual score.
 
-**7-day Progress** shows Obligatory Salah, Friday Prayer, and Voluntary Prayers with prayer names as rows and weekday letter + date as columns. Jumu‘ah is Friday-only (other days blank, not unanswered). **30-day and 90-day** stay one calendar per prayer, including Jumu‘ah, Tahajjud, and Ishraq. Jumu‘ah remains Friday-only.
+**7-day Progress** shows Obligatory Salah, Friday Prayer, and Voluntary Prayers with prayer names as rows and weekday letter + date as columns. Jumu‘ah is Friday-only (other days blank, not unanswered). **30-day and 90-day** stay one calendar per prayer, including Jumu‘ah, Tahajjud, Ishraq, and Salat At Tawbah. Jumu‘ah remains Friday-only.
+
+Home also lists **Salah & Prayer Quality Learn & Practice**: Qur’an verses and authentic hadith grouped as on Home (Obligatory Salah, Friday Prayer, Voluntary Prayers), collapsed to title, with citation pages and a private register (Learning, Learnt, Practicing, Habit). It is not a khushu’ score, congregation requirement, or daily grade.
 
 ### 4.2 Qur’an Engagement
 
@@ -115,83 +123,33 @@ Core question (orientation only; not scored and not a spiritual grade):
 
 **Did I let the Qur’an speak to me today?**
 
-Provide seven independent stored dimensions (not a Home matrix of seven rows):
+Daily check-in, Home, Quick tap, and Progress use **three independent notice-rows** under one wash, **ENGAGEMENT with Qur’an** (like Hadith’s ENGAGED with Hadith), not seven yes/not-done dimensions. Unanswered is never inferred as not engaged. Duration is observational: not a khushu’ score, streak, percentage, complete, or spiritual grade. 3–5 minutes is still a recorded sitting. There is no live timer. Older seven-row days are not migrated.
 
-1. Recitation (reading/listening)
-2. Recitation with Meaning
-3. Memorisation
-4. Revision
-5. Tafsir
-6. Qur’anic Reflection
-7. Conscious Application
+Stored keys stay `quran.reading`, `quran.meaning`, and `quran.consciousApplication`:
 
-**Home week** shows a Qur’an Journey matrix: Applied (Transformation), Reflected (Internalization), Understood (Comprehension), Engaged (Contact with Qur’an). Each day cell is independent. Colour names the L1 stage. A letter names the L2 activity. Tap a cell to record that row: L1 is that stage, None, or No answer recorded (clears every stored item in that row); L2 is the short list for that stage, plus No activity (recorded as not done) and No answer recorded (unanswered). Unanswered is empty, not missed. Duration is not stored in this version.
+1. **Engagement** (`reading`) — recitation, memorisation and/or revision
+2. **Understanding & reflection** (`meaning`) — meaning and/or tafsir plus pondering
+3. **Practical relevance** (`consciousApplication`) — identifying implications and/or use of learnt verses in daily life (not a deed-score)
 
-**Check-in** groups the same stored rows into L2 bands: Engagement (Recitation, Listening as a Recitation activity, Memorisation, Revision), Understanding (Read Translation, Recitation with Meaning, Tafsir Study), Reflection (Brief Reflection, Deep Reflection (Tadabbur), Personal Insight), Application (Improved Worship, Character, Relationship, Avoided a Sin, Performed a Good Deed, Other Application). Listening is not a new stored dimension.
+Each row shares the same duration list. The closed dropdown names the row. Verbs: Engagement uses “Engaged”; the other two use “Involved”.
 
-Reading/listening remains the primary daily Qur’an engagement item. The other dimensions are independent observations except the approved Recitation with Meaning fill.
+- (a) more than 20 minutes — Salah `congregationOnTime` `#1565C0`
+- (b) 15–20 minutes — `joinedCongregationLate` `#2E7D32`
+- (c) 10–15 minutes — `smallCongregation` `#66BB6A`
+- (d) 5–10 minutes — `aloneOnTime` `#C0CA33`
+- (e) 3–5 minutes — `aloneOnTime` `#C0CA33` outlined empty (same light green as 5–10; still a recorded sitting)
+- (f) I did not notice this today — {row} — `prayedLate` `#FBC02D` outlined
+- (g) no answer recorded — unanswered `#BDBDBD` dotted empty
+
+Do not use Missed or Missed-then-made-up colours: these rows are not fard. Rows stay independent (no Meaning → Recitation auto-fill). Application Reflection remains Settings → About only.
 
 Do not record or score whether the Qur’an “spoke” as a grade.
 
-**7-day Progress** shows one Qur’an Journey board: Applied, Reflected, Understood, and Engaged as rows and weekday letter + date as columns (same marks and cell sheet as Home). **30-day and 90-day Progress** keep seven peer calendars for the stored dimensions, titled with the same Home Journey stages (Applied, Reflected, Understood, Engaged) and purpose; stages with more than one stored row also name that row (Recitation, Meaning, Memorisation, Revision, Tafsir).
+**Home week** and **7-day Progress** show those three rows under **ENGAGEMENT with Qur’an**. Marks share one colour by default; Settings → Preferences → Activities & legend may colour the duration step with those Salah twins. Tap a cell to open that day’s focused Qur’an check-in, scrolled to that row.
 
-For optional activities, selecting the activity must not automatically mean a positive outcome. Ask for an explicit status.
+Home also lists **Qur’an to learn & practice**: a skimmable repository of widely used verses for daily reading and memorization (Al-Fātiḥah, openings of often-recited surahs, Āyat al-Kursī, the close of Al-Baqarah, short prayer surahs, and worship duas), with Arabic (person-chosen script face and size), transliteration, translation, citation pages, and a private register (Learning, Learnt, Practicing, Habit). Opening a Qur’an citation may Play recitation from a public audio file in this app so playback is not the page’s WebView player. It is not a khushu’ score, recitation streak, hifz programme, or Knowledge residual.
 
-Approved wording:
-
-**Meaning**
-
-Question: `Did you spend time engaging with the meaning or translation of Qur'an today?`
-
-Answers:
-
-- `Engaged with meaning/translation`
-- `Did not engage with meaning/translation`
-
-**Memorisation**
-
-Question: `Did you spend time memorising Qur'an today?`
-
-Answers:
-
-- `Practised memorisation`
-- `Did not practise`
-
-**Revision**
-
-Question: `Did you spend time revising memorised Qur'an today?`
-
-Answers:
-
-- `Practised revision`
-- `Did not practise`
-
-**Tafsir**
-
-Question: `Did you spend time studying tafsir or an explanation of an ayah or passage today?`
-
-Answers:
-
-- `Studied tafsir/explanation`
-- `Did not study tafsir/explanation`
-
-**Reflection**
-
-Question: `Did you spend time reflecting on the meaning of an ayah or passage today?`
-
-Answers:
-
-- `Spent time reflecting`
-- `Did not spend time reflecting`
-
-**Application Reflection**
-
-Question: `Did you spend time reflecting on how something from the Qur’an might relate to your daily life?`
-
-Answers:
-
-- `Reflected on possible practical relevance`
-- `Did not reflect on practical relevance`
+**30-day and 90-day Progress** keep one calendar per daily duration row, titled with the same bands and observational purpose.
 
 Application Reflection records reflection on possible practical relevance only. It is not evidence of action, implementation, obedience, compliance, successful application, or completion of a Response.
 
@@ -201,11 +159,18 @@ Core question (orientation only; not scored and not a spiritual grade):
 
 **Did a teaching of the Prophet ﷺ reach my day?**
 
-Place this domain immediately after Qur’an Engagement on Home, check-in, and Review. Storage id stays `hadith`. Include it on the Salah, Qur’an & Akhlaq preset.
+Place this domain immediately after Qur’an Engagement on Home, check-in, and Review. Storage id stays `hadith`. Include it on the Salah, Qur’an & Dhikr preset.
 
-Retain factual recording for existing Hadith rows (reading, listening, memorisation, revision, study circle, teaching/discussion, Hadith reflection). Add one application observation: **Noticed a sunnah in how I lived today** (`hadith.livedSunnah`). Unanswered is not a failed revival.
+Four observational rows under one **ENGAGED with Hadith** wash. Older eight-row keys stay stored and are not migrated.
 
-Home and **7-day Progress** show those items as rows and weekdays as columns (same orientation as Dhikr and Akhlaq). 30-day and 90-day stay one calendar per row. Current Memorisation Focus stays an AppPrefs value, not a daily grade.
+1. **Read and/or Listened** (`hadith.encounter`) — same duration list as Qur’an Engagement
+2. **Memorization/Revision** (`hadith.retention`) — same duration list
+3. **Study Circle/Discussion** (`hadith.learning`) — same duration list
+4. **Lived /Noticed others** (`hadith.livedNoticed`) — started living a new Hadith; introduced living a hadith in family; corrected a practice as per hadith; observed living a hadith by other; recorded as not engaged; not answered
+
+Duration rows twin Qur’an sitting marks (including 3–5 minutes as an empty light-green circle when activity colours are on). Lived / Noticed is one observation, not a revival programme. Unanswered is not a failed revival.
+
+Home and **7-day Progress** show those items as rows and weekdays as columns (same orientation as Dhikr and Akhlaq). 30-day and 90-day stay one calendar per row. **Hadith to learn & practice** is a collapsed Home wash (same shape as listed actions): previous/next through a built-in catalog of daily-practice hadith and related supplications, + add Hadith copies the shown item into a private register (date added, source, content, topic, Learning / Learnt / Practicing / Living it, select, archive, and delete the private copy). Archive never removes the built-in catalog item; matching Home daily/weekly reflections are skipped when another quote is available. A catalog item already in the register is shown with a different wash and cannot be added again. This is not a checklist, score, or revival programme, and it does not fill Living Sunnah.
 
 Do not:
 
@@ -222,7 +187,7 @@ Core question (orientation only; not scored and not a spiritual grade):
 
 **Did I remember Allah outside of prayer?**
 
-Retain factual recording for existing Dhikr rows (post-fard adhkar, morning and evening, other remembrance). Home and 7-day Progress show those items as rows and weekdays as columns (same orientation as Akhlaq): one week of columns, stacked Home bands, and the day-of-month only under each weekday letter. Do not score remembrance.
+Retain factual recording for existing Dhikr rows (post-fard adhkar, morning and evening, other remembrance). **Post-fard** rows (Fajr, Dhuhr, Asr, Maghrib, Isha), **Morning Adhkar**, **Evening Adhkar**, and **Other Adhkar** (General Dhikr, Gratitude Dhikr, Travel Remembrance, Personal, Other Adhkars) each open a performed list of that row’s items: tick what was involved and change the respective count to actual; the count box is sized for three digits with ordinary numbers; a typed count is that item’s default next session; heading select-all; unticked stays not recorded. The performed count sits top-right of the row title. **Verified wording available** opens the matching Learn & Practice item with the Arabic face and − A + size controls; Close returns without losing the recording in progress. Unselected stays not recorded, not “not today.” Personal dua records a topic without requiring the words. Verified wording and citations open on demand; unverified formulas are omitted. Quick Tap on those mix rows opens the same activity list instead of cycling one generic mark. Older noticed / not-noticed marks stay readable and are not converted to Not today. Home and 7-day Progress show those items as rows and weekdays as columns (same orientation as Akhlaq): one week of columns, stacked Home bands, and the day-of-month only under each weekday letter. Do not score remembrance. Unanswered is empty, not missed.
 
 ### 4.5 Character & Morals (Akhlaq)
 
@@ -230,15 +195,7 @@ Core question (orientation only; not scored and not a spiritual grade):
 
 **Did my behavior today invite people toward goodness?**
 
-Record self-focused observations only:
-
-- Virtues noticed: patience, humility, truthfulness, gentleness, courage, thankfulness in how I acted, contentment
-- Paused before reacting
-- Honesty in small matters
-- Let go of a grudge
-- Guarded how I spoke (tone); modest dress; guarded my gaze
-- Walked away from an argument; held back from a habit I am trying to leave
-- Optional struggle note (for example: I was impatient today, but I caught myself)
+Record self-focused observations only, with item-specific wording on each of the 15 Home rows (four sections: Virtues I noticed; Anger, honesty, forgiveness; Modesty; Restraint). Each row stores one of: virtue demonstrated (`practised`), attempted with difficulty (`struggled`), shortcoming recognised (`lapse_recognised`), corrective action after a lapse (`corrected`), no relevant situation (`no_situation`), or unanswered. Corrective action is not equated with avoiding the original lapse. Optional follow-ups on a recorded row: where it happened, what helped or could help next time, and a private struggle note about oneself only. These are provenance, not causes or a character grade. When activity colours are on, `practised` uses the same blue as congregation on time; the remaining codes twin the other Salah activity colours. Unanswered is empty, not a relapse.
 
 Do not:
 
@@ -251,7 +208,7 @@ Do not:
 - Name vices, keep a days-clean streak, or infer unanswered as a relapse or a sin
 - Auto-fill from Gratitude Dhikr or Knowledge’s held-back speech
 
-Unanswered is not a failing. Marks mean “I noticed this in myself” or “I did not notice this today”, not a moral verdict. Check-in and Quick tap always name the row in the selected phrase (for example “I did not notice this today — Paused before reacting”) so the closed dropdown cannot be read against the band title alone (Anger, honesty, forgiveness). The habit on the self-control row is not named in the app. Optional struggle notes are text and do not count toward `recordableFieldCount`. Older `akhlaq.guardedMyGlance` marks stay stored and still appear on Historical Reflection.
+Unanswered is not a failing. Marks name the recorded observation, not a moral verdict. Check-in and Quick tap always name the row in the selected phrase so the closed dropdown cannot be read against the band title alone. The habit on the self-control row is not named in the app. Optional struggle notes are text and do not count toward `recordableFieldCount`. Older `akhlaq.guardedMyGlance` marks stay stored and still appear on Historical Reflection. Older ternary days (`I noticed this in myself` / `I did not notice this today`) still read; they canonicalise to `practised` and `no_situation` until edited.
 
 Home and **7-day Progress** show those items as rows and weekdays as columns. **30-day and 90-day Progress** keep one calendar per row, titled with the same Home names (Patience, Guarded my gaze, and so on).
 
@@ -261,9 +218,9 @@ Core question (orientation only; not scored and not a spiritual grade):
 
 **Did I fulfill, harm, or neglect anyone’s right over me?**
 
-Record the user’s own obligations toward people Allah placed in their life, framed as investment, not a chore list:
+Record the user’s own obligations toward people Allah placed in their life, framed as investment, not a chore list. Immediate Family is the existing **Household** band. Each of the 15 Home rows uses item-specific wording for one of: appropriate positive action (`practised`), effort not fully completed (`partial_effort`), possible shortcoming or neglected right recognised (`neglect_recognised`), repair or corrective step (`corrective_action`), no applicable situation (`no_situation`), or unanswered. Default is unanswered. Corrective action is not equated with the original positive action. Optional follow-ups on a recorded row: nature of engagement, outcome observed, quantity (occasions and approximate time), and a private reflection about one’s own conduct only. These are provenance, not scores or causes. When activity colours are on, `practised` uses the same blue as congregation on time; the remaining codes twin the other Salah activity colours. Unanswered is empty, not neglect, and lack of daily contact is not neglect.
 
-- Household: parents, grandparents, spouse, children, siblings
+- Household (Immediate Family): parents, spouse, children, siblings, grandparents
 - Extended family: other relatives
 - Neighbours and work: neighbours, colleagues and friends
 - The people: fellow Muslims, non-Muslims
@@ -294,8 +251,15 @@ Do not:
 - Shame family conflict
 - Treat patience as required in harm or abuse; safety and justice come first
 - Present the domain as a to-do list
+- Interpret lack of daily contact as neglect
+- Automatically classify a reported shortcoming as a religious violation
+- Treat all rights as equal in obligation or urgency
+- Score spiritual merit, sincerity, or divine acceptance
+- Pressure users to reconcile where doing so would be unsafe or inappropriate
 
-Unanswered is not neglect. Marks mean “I attended to a right I owe” or “I neglected a right I owe”, not a grade of a relationship. The selected check-in phrase names the row (for example “I neglected a right I owe — Parents”). Reconciliation and turning back are optional observations. The app does not prescribe tawbah or sulh, and does not complete them. Care in hardship (sick visit, sick contact, support under stress) is a right of brotherhood on this domain, not a sadaqah channel. These traces do not increase `recordableFieldCount`.
+Unanswered is not neglect. Marks name the recorded observation, not a grade of a relationship or a religious verdict. The selected check-in phrase names the row (for example “Honoured my parents through care, respect, contact or du‘a — Parents”). Reconciliation and turning back are optional observations. The app does not prescribe tawbah or sulh, does not complete them, and does not pressure reconciliation where it would be unsafe or inappropriate. Review reports observed actions, identified responsibilities, and corrective steps without moral rankings. Care in hardship (sick visit, sick contact, support under stress) is a right of brotherhood on this domain, not a sadaqah channel. These traces do not increase `recordableFieldCount`. Older ternary days (`I attended to a right I owe` / `I neglected a right I owe`) still read; they canonicalise to `practised` and `neglect_recognised` until edited.
+
+Home also lists **Rights of Others Learn & Practice**: Qur’an verses and authentic hadith grouped as on Home, collapsed to title, with citation pages and a private register (Learning, Learnt, Practicing, Habit). It is not a relationship score, chore list, or daily grade.
 
 Home and **7-day Progress** show those items as rows and weekdays as columns. **30-day and 90-day Progress** keep one calendar per row, titled with the same Home names (Parents, Other relatives, Sick Visit, and so on).
 
@@ -322,7 +286,9 @@ Do not:
 - Congratulate the user for being learned
 - Treat all knowledge as equal
 
-Unanswered is not ignorance. Marks mean “I noticed this in myself” or “I did not notice this today”. These traces do not increase `recordableFieldCount`.
+Unanswered is not ignorance. Each of the seven Home rows has six item-specific observations (beneficial activity, partial engagement, a recognised gap, a correction, no relevant situation, unanswered). Optional type, source, verification, understanding, application, quantity, and private reflection are provenance only: they never grade knowledge, treat reading or AI-assisted learning as verified, or duplicate Qur’an, Hadith, or Akhlaq. These traces do not increase `recordableFieldCount`.
+
+Home also lists **Knowledge & Beneficial Speech Learn & Practice**: Qur’an verses and authentic hadith grouped as on Home, collapsed to title, with citation pages and a private register (Learning, Learnt, Practicing, Habit). It stays residual of Qur’an, Hadith, and Akhlaq tone. It is not a learnedness grade, study-hour badge, or daily grade.
 
 Home and **7-day Progress** show those items as rows and weekdays as columns. **30-day and 90-day Progress** keep one calendar per row, titled with the same Home names (Learned something true, Held back useless speech, and so on).
 
@@ -332,27 +298,32 @@ Core question (orientation only; not scored and not a spiritual grade):
 
 **Did I treat my time as a trust from Allah?**
 
-Record self-focused observations of presence, trust, and rest — not hours:
+Record eight independent observations in daily-life order (intention → attention → action → balance). They are not eight compulsory daily achievements, and no practice is treated as more spiritually valuable than another:
 
-- Presence: present in what I was doing
-- Trust: did something I had delayed; stepped away from idle time
-- Rest: rested from work as needed; began with intention
+- Intention & Priority (`time_intention`): began with a worthwhile intention (`time.t01` / `time_t01`); chose what mattered first (`time.t02`)
+- Attention & Presence (`time_attention`): gave focused attention (`time.t03`); put aside a digital distraction (`time.t04`)
+- Responsibility & Action (`time_action`): took a step on something delayed (`time.t05`); used time for something beneficial (`time.t06`)
+- Balance & Renewal (`time_balance`): gave someone needed attention (`time.t07`); took needed rest (`time.t08`)
 
-The fard stays on Salah. Sleep stays on Physical Health. Do not auto-fill Time from Salah or Health.
+Each of the eight Home rows has six item-specific observations (`acted`, `partial_effort`, `lapse_recognised`, `corrected`, `no_situation`, unanswered/`null`). These are descriptive categories, not a numerical scale. Do not assume `corrected` is spiritually better or worse than `acted`. Optional activity context, challenge, what helped, observable outcome, and quantity are provenance only. Free-text plans and reflections stay on listed Actions: they never score barakah, rank a busy day as beneficial, treat rest as wasted time, auto-classify recreation as waste, or penalise illness, disability, caregiving, recovery, or unavoidable interruptions. A first tap is enough; secondary fields are never required to save. Unanswered is distinct from an explicit outcome. These traces do not increase `recordableFieldCount`. Older four-choice days (`acted` / `noticedNotActed` / `noSituation`) still read; they canonicalise to `acted`, `lapse_recognised`, and `no_situation` until edited.
+
+The fard stays on Salah. Sleep stays on Physical Health. Do not auto-fill Time from Salah or Health. Record what the user reports. Do not infer intention, sincerity, laziness, psychological health, divine reward, or barakah.
 
 Do not:
 
 - Track hours or treat clocked time as a badge
-- Create a productivity score or hustle rank
+- Create a productivity score, streak penalty, or hustle rank
 - Shame an unanswered day as wasted
 - Congratulate the user for being productive
 - Prescribe a daily schedule
 - Treat rest as failure
 - Record a second prayer-window log on this domain
 
-Unanswered is not wasted time. Marks mean “I noticed this in myself” or “I did not notice this today”. These traces do not increase `recordableFieldCount`. Older `time.guardedPrayerWindow` marks stay stored and still appear on Historical Reflection.
+Unanswered is not wasted time. These traces do not increase `recordableFieldCount`. Pre-launch Presence / Trust / Rest keys (`time.presentInWhatIWasDoing`, `time.didWhatIDelayed`, `time.steppedAwayFromIdleTime`, `time.restedAsNeeded`, `time.beganWithIntention`, `time.guardedPrayerWindow`) are retired: leftover development values may remain in local Hive until that day is overwritten; they are not migrated and are not shown on Home, check-in, Review, or Historical Reflection. Unrelated domain records are left intact. DailyCheckIn schema remains **6** (`homeTraces` plus `activities` for the primary value; optional context in `homeTraceFactors` and help/outcome/quantity in `activities` custom text for that storage key).
 
-Home and **7-day Progress** show those items as rows and weekdays as columns. **30-day and 90-day Progress** keep one calendar per row, titled with the same Home names.
+Home also lists **Time & Barakah Learn & Practice**: Qur’an verses and authentic hadith grouped as on Home, collapsed to title, with citation pages and a private register (Learning, Learnt, Practicing, Habit). The eight practices remain independent observations, not eight daily achievements. It is not a productivity score, schedule, streak, or estimate of barakah.
+
+Home and **7-day Progress** show those items as rows and weekdays as columns. **30-day and 90-day Progress** keep one calendar per row, titled with the same Home names. Weekly review may count recorded observations and selected outcomes; it must not generate scores or claims of barakah.
 
 ### 4.9 Physical Health & Energy
 
@@ -377,7 +348,9 @@ Do not:
 - Ignore that physical and mental health are intertwined
 - Auto-fill sleep from Time’s rest, or Time from sleep
 
-Unanswered is not a failing of the body. Marks mean “I noticed this in myself” or “I did not notice this today”. These traces do not increase `recordableFieldCount`.
+Each of the eight Home rows has item-specific observations (care taken, partial or mixed care, difficulty noticed, avoidable neglect, an adjustment, circumstances beyond control, no relevant need where that applies, prefer not to record, and unanswered/`null`). Prefer not to record is an explicit privacy choice, distinct from unanswered. These are descriptive categories, not a fitness, calorie, sleep-hour, or spiritual scale. Sleeping poorly is not classified as failure. Seeking care is not interpreted as better health than having no illness. A first tap is enough. Free-text plans stay on listed Actions, not on these rows. Unanswered is distinct from an explicit outcome. These traces do not increase `recordableFieldCount`. DailyCheckIn schema remains **6**.
+
+Home also lists **Physical Health & Energy Learn & Practice**: Qur’an verses and authentic hadith grouped as on Home, collapsed to title, with citation pages and a private register (Learning, Learnt, Practicing, Habit). It is not a fitness programme, calorie log, or body grade.
 
 Home and **7-day Progress** show those items as rows and weekdays as columns. **30-day and 90-day Progress** keep one calendar per row, titled with the same Home names.
 
@@ -385,26 +358,33 @@ Home and **7-day Progress** show those items as rows and weekdays as columns. **
 
 Core question (orientation only; not scored and not a spiritual grade):
 
-**Did my spending and earning please Allah?**
+**Did I manage earning, spending and wealth as trusts from Allah?**
 
 Record self-focused stewardship of wealth as a trust, not net worth:
 
-- Earning: earned from a halal source; stayed clear of riba
-- Restraint: avoided waste
+- Earning (`wealth.halalEarning`, `wealth.avoidedRiba`): earned from a halal source; stayed clear of riba
+- Restraint (`wealth.avoidedWaste`): avoided waste
+- Lawful wealth management (`wealth.lawfulManagement`): managed wealth responsibly and lawfully
+
+Each Home row has item-specific observations (reported action, check or clarification, unresolved concern, no relevant activity, prefer not to record, and unanswered/`null`). Prefer not to record is an explicit privacy choice, distinct from unanswered. No relevant activity is not a failure. Unresolved concern is not a legal or scholarly ruling. A first tap is enough. Free-text plans stay on listed Actions, not on these rows. These traces do not increase `recordableFieldCount`. DailyCheckIn schema remains **6**.
 
 Giving (sadaqah, family support, community and care channels) and zakat due / planned / paid stay on Charity, without amounts. A smile is sadaqah. Giving rows formerly on Wealth are not shown on Home, check-in, or Progress; stored `wealth.*` giving marks are kept for Historical Reflection.
 
 Do not:
 
-- Track net worth or savings as a spiritual metric
+- Track net worth, balances, or savings as a spiritual metric
+- Store bank details, creditor identities, or account numbers
 - Show charity leaderboards or “most generous” badges
 - Require amounts
 - Shame poverty or debt
 - Treat wealth as a sign of Allah’s pleasure
+- Auto-certify a source as ḥalāl
 - Ignore that some people cannot give money
 - Duplicate Charity giving or zakat on this domain
 
-Unanswered is not a failing of provision. Marks mean “I noticed this in myself” or “I did not notice this today”. These traces do not increase `recordableFieldCount`.
+Unanswered is not a failing of provision.
+
+Home also lists **Wealth & Stewardship Learn & Practice**: Qur’an verses and authentic hadith grouped as on Home, collapsed to title, with citation pages and a private register (Learning, Learnt, Practicing, Habit). Giving stays on Charity. It is not a money score, net-worth tracker, or zakat calculator.
 
 Home and **7-day Progress** show those items as rows and weekdays as columns. **30-day and 90-day Progress** keep one calendar per row, titled with the same Home names.
 
@@ -433,20 +413,61 @@ Do not:
 - Ignore isolation (including converts and new immigrants)
 - Conflate community with an ethnic group — the Ummah is global
 
-Unanswered is not isolation or neglect of the Ummah. Marks mean “I noticed this in myself” or “I did not notice this today”. These traces do not increase `recordableFieldCount`.
+Each of the six Home rows has item-specific observations (reported action, remote or spoken effort, an opportunity noticed without the wished action, no relevant opportunity where that applies, prefer not to record, and unanswered/`null`). Prefer not to record is an explicit privacy choice, distinct from unanswered. No relevant opportunity is not neglect. Remote masjid participation is not recorded as physical attendance. Du’a for the oppressed is distinct from practical help. “Did not recall” dua is not a moral verdict. A first tap is enough. Free-text plans stay on listed Actions. These traces do not increase `recordableFieldCount`. DailyCheckIn schema remains **6**.
+
+Older generic noticed / not-noticed days are not rewritten into a specific new choice. Until that day is edited, the picker shows Unanswered rather than assuming attendance or neglect.
+
+Home also lists **Ummah Learn & Practice**: Qur’an verses and authentic hadith grouped as on Home, collapsed to title, with citation pages and a private register (Learning, Learnt, Practicing, Habit). The fard stays on Salah; neighbour and giving stay on Rights of Others and Charity. It is not a public check-in, political log, or ethnic list.
 
 Home and **7-day Progress** show those items as rows and weekdays as columns. **30-day and 90-day Progress** keep one calendar per row, titled with the same Home names.
 
-### 4.12 Other established domains
+### 4.12 Fasting
 
-If present in an existing implementation, retain factual recording for domains such as:
+Presentation order places Fasting immediately after Dhikr & Dua. Stored domain ids and mix selections are not rewritten.
+
+Two Home sections:
+
+- **Ramadan fasting & excellence** (civil Hijri month 9, with a ±1 day moon-sighting offset in Settings → Calendar): Observed the Ramadan fast; Guarded my speech and conduct; Protected attention and time; Engaged meaningfully with the Qur’an; Brought greater attention to obligatory Salah; Made room for extra worship; Supported worship through balanced daily habits; Put Ramadan learning into practice. These eight rows are hidden outside Ramadan unless Settings → Calendar → Show all Fasting rows for review is on, or that day already has a Ramadan mark.
+- **Voluntary and make-up**: Weekly Sunnah Fast; White Days (Ayyam Al-Bid); Make-up Fast; Ramadan Preparation; Post-Ramadan Activities. These five rows are hidden during Ramadan unless that review switch is on, or that day already has a voluntary or make-up mark. Weekly sunnah, White Days, and make-up keep existing storage keys and use item-specific fasting-day observations (completed, still fasting, could not because of health/travel/duties, interrupted, intended but did not, no situation for that row, prefer not to record, unanswered/`null`). Preparation and post-Ramadan also use item-specific observations. A voluntary fast is recorded on Weekly Sunnah or White Days, not on Preparation. An actual make-up stays on Make-up Fast; post-Ramadan may note a Shawwal or other voluntary fast, or make-up planning only. Older ternary weekly/White Day/make-up days are not rewritten; until edited, the picker shows unanswered rather than assuming a completed fast.
+
+Ramadan and catalog rows default to not recorded/`null`, with a separate prefer not to record state. The app does not judge validity, exemption, make-up, or fidyah. Exemption is not failure. “Fasting today” is not auto-completed after iftar. Unanswered is not a missed fast.
+
+Do not prescribe a fast, treat unanswered as missed, encourage extreme fasting outside Ramadan, or treat Progress highlighting of civil Hijri 13–15 as a record.
+
+Home also lists **Fasting Learn & Practice**: a 20–30 item bank of Qur’an verses and authentic hadith grouped as on Home, collapsed to title, with citation pages and a private register (Learning, Learnt, Practicing, Habit). It is not a sawm score, countdown, or prescription. This domain is not limited to five sources per topic.
+
+### 4.13 Hajj
+
+Hajj standing is a lifetime record the person sets (not recorded, unsure, I believe it is due, preparing, performed, not planning, not applicable, prefer not to record). It is stored in a versioned Hajj store (`schemaVersion` 1), not in DailyCheckIn and not as AppPrefs `hajj_status`. The app does not calculate istita‘ah, does not set a year, and does not treat unanswered as missed.
+
+A Hajj journey is optional and separately stored. Hajj Home is a lifetime planning dashboard: standing, an optional journey, readiness checklist, 6/9/12-month planning calendar, family/companions, readiness-learning states, and optional After Hajj. A person may have performed Hajj without planning another journey. Readiness is a checklist on a journey, not a daily score. Confirmed by the user is not official verification. Official deadlines stay as typed. After Hajj is optional reflection and continuing practice, not a trophy. Umrah is not this standing. Country rules, live official dates, provider discovery, and booking stay out of this phase.
+
+Home also lists **Hajj Learn & Practice** at all times, independent of standing or journey: Qur’an verses and authentic hadith grouped as Learn, Readiness, and After Hajj, collapsed to title, with citation pages and a private register (Learning, Learnt, Practicing, Habit). A separate readiness-learning list (conditions, rites, Ihram, Tawaf and Sa‘i, Arafat/Muzdalifah/Mina, practical care, safety, du‘a) uses self-reported states only. It is not a due-date, countdown, or trophy.
+
+Productivity is dormant this season (listed in Domains in Focus, not selectable). It uses its own store (`muhasabah_productivity_v1`, schema 1), not a DailyCheckIn field. When later re-enabled it is off on Salah, Qur’an & Dhikr. Home shows one dashboard: a user-chosen 1–5 of today’s focus (hard cap 5), effort vs plan (not a score), carry-forward of unfinished work, and a Master List that copies open listed-actions from other domains into the Productivity register. Extra Productivity items stay in that register and are not shown on the today board. Tablet layout (≥ 720 lp) keeps hours and status on the card body and a side column for calendar, time, notice, quick add, and the priority guide. Hajj stays independent and dormant. Learn & Practice is not part of this domain.
+
+### 4.14 Charity
+
+Record giving and care without amounts. Presentation order places Charity immediately after Rights of Others and before Knowledge & Beneficial Speech. Stored domain ids and mix selections are not rewritten.
+
+Each of the six Home rows has item-specific observations (reported gift or support, intended or arranged effort, a recognised need without the wished action, no relevant opportunity or need, prefer not to record, and not recorded/`null`). Prefer not to record is an explicit privacy choice, distinct from not recorded. No relevant opportunity is not withheld charity. A first tap is enough. Amounts, recipient names, and financial circumstances are not collected. Ordinary household nafaqa stays on Rights of Others. A smile is sadaqah.
+
+Zakat remains a separate standing daily status (`due`, `planned`, `paid`, `notApplicable`, plus `reviewing` and `preferNot`). Labels name those states; the app does not calculate zakat, infer liability, or treat daily nonpayment as a missed obligation. Older `due` / `planned` / `paid` / `notApplicable` / `unanswered` names still read. These traces do not increase `recordableFieldCount`. DailyCheckIn schema remains **6**.
+
+Older generic noticed / not-noticed days are not rewritten into a specific new choice. Until that day is edited, the picker shows Not recorded rather than assuming a gift.
+
+Home also lists **Charity Learn & Practice**: Qur’an verses and authentic hadith grouped as on Home, collapsed to title, with citation pages and a private register (Learning, Learnt, Practicing, Habit). It is not a generosity score or leaderboard.
+
+### 4.15 Other established domains
+
+If present in an existing implementation, retain factual recording for stored fields such as:
 
 - gratitude
 - personal reflection
 
-Do not remove valid established domains merely because Progress emphasizes Salah and Qur’an.
+Do not present those as check-in editors. A check-in may open **Add a Note**, which saves to My Notes with that day’s provenance. Stored DailyCheckIn gratitude, personal reflection, dhikr-other, and context-note values stay as they are; saving a check-in must not wipe them. Do not remove valid established stored fields merely because Progress emphasizes Salah and Qur’an.
 
-### 4.13 Persistence boundary
+### 4.16 Persistence boundary
 
 If the repository already uses `DailyCheckIn` schema v5 and `recordableFieldCount = 10`, preserve both unless a critical defect is proven.
 
@@ -500,8 +521,8 @@ Keep these concepts distinct when both exist:
 ### Recorded days / Historical Reflection
 
 - compact week grid of saved vs empty days; empty days are visible and not treated as missed
-- tapping a saved day opens a compact, read-only day view grouped by domain washes
-- one Add a response control per page, not per field
+- tapping a saved day opens a compact, read-only day view grouped by domain washes for the domains and mix currently in focus; unselected mix rows stay stored and can still be edited in Manage past check-ins
+- one Add a Note control per page, not per field
 
 The navigation and wording must make the difference obvious.
 
@@ -577,17 +598,19 @@ Display seven peer dimensions:
 - Revision
 - Tafsir
 - Reflection
-- Application Reflection
+- Practical relevance (`consciousApplication`)
 
-Use stable subdued accent colours with equal semantic weight for card washes. Marks share one colour; shape encodes the recorded state.
+Application Reflection is Settings / About only. It is not a recurring Home, 7-day, 30-day, or 90-day calendar.
+
+Use stable subdued accent colours with equal semantic weight for card washes. An outlined line mark names the domain (mosque, open mushaf, stacked books, beads, growth, handshake, lamp, clock, pulse, scale, globe, crescent, Kaaba, open hands). Colour still names the domain; the mark is identity, not a score. Recorded-state marks share one colour; shape encodes the recorded state.
 
 Recommended presentation:
 
-- 7D: Qur’an Journey matrix (stage rows × weekday columns); tap a cell to record that row
-- 30D: compact weekly calendar per stored dimension, titled as Home Journey stages
-- 90D: one full-width weekly calendar for the last 90 days (today’s week rightmost), with month labels, two alternating shades of the domain colour on day cells only, a pale yellow halo on today’s mark, and period arrows to move to earlier or later 90-day windows; titles match Home Journey stages
+- 7D: mix-filtered stored-dimension week (same bands and rows as Home); tap a cell to open that row’s check-in
+- 30D: compact weekly calendar per stored dimension, titled as check-in bands
+- 90D: one full-width weekly calendar for the last 90 days (today’s week rightmost), with month labels, two alternating shades of the domain colour on day cells only, a pale yellow halo on today’s mark, and period arrows to move to earlier or later 90-day windows; titles match check-in bands
 
-For the six newer neutral dimensions, display factual counts such as `Recorded on X of Y days` and positive activity-day counts.
+For the neutral peer dimensions, display factual counts such as `Recorded on X of Y days` and positive activity-day counts.
 
 Do not show success/failure rate, ranking, winner/loser comparison, improvement gradient, or aggregate Qur’an score for those dimensions.
 
@@ -683,27 +706,29 @@ Supporting dates/evidence must remain inspectable.
 
 ---
 
-## 11. RESPOND — My Response
+## 11. RESPOND — My Notes
 
-Personal Response is a separate domain from DailyCheckIn.
+Personal Response is a separate domain from DailyCheckIn. The visible destination is **My Notes**.
 
 Definition:
 
 > A Response is an optional, private, user-authored record of what the user chooses to keep in mind, revisit, question, or try after reflection. It may be linked to recorded evidence as its point of origin, without implying causality, recommendation, obligation, or completion.
 
-Frozen V1 wording:
+Visible wording:
 
-- Destination: `My Response`
+- Destination: Registry → `My Notes`
 - Description: `A private, optional place to write a note, question, or something you want to keep in mind.`
-- CTA: `Add a response`
+- CTA: `+ Add a Note`
 - Creation prompt: `What, if anything, would you like to note or keep in mind?`
-- Empty state: `You haven’t saved any responses. Creating one is optional.`
-- Save: `Save response`
-- Edit: `Edit response`
-- Archive: `Archive response`
-- Restore: `Restore response`
-- Delete: `Delete response`
+- Empty state: `You haven’t saved any notes. Creating one is optional.`
+- Save: `Save note`
+- Edit: `Edit note`
+- Archive: `Archive`
+- Restore: `Restore`
+- Delete: `Delete`
 - Provenance: `Created while viewing: [origin]`
+
+The My Notes table shows a daily serial `YYMMDD-XX` (restarting from `01` each local day), domain short name or `GEN`, source reference, scrollable note text (linked to origin when applicable), and a checkbox for Delete, Archive, and Action reminder. Action reminder writes a listed domain action with a target date. It is not a score, streak, or obligation.
 
 Do not use system concepts such as Intention, Commitment, Next Step, Improvement, Action Plan, completion, adherence, or success/failure.
 
@@ -721,6 +746,8 @@ PersonalResponse
 - editedAt?
 - archivedAt?
 - provenance?
+- noteCode? (YYMMDD-XX)
+- reminderDateKey?
 ```
 
 Use:
@@ -783,7 +810,7 @@ If evidence becomes unavailable, the Response remains valid. A neutral message m
 
 ### 11.4 Response entry points
 
-Allow restrained `Add a response` entry points from approved reflective/evidence surfaces, such as:
+Allow restrained `+ Add a Note` entry points from approved reflective/evidence surfaces, such as:
 
 - Qur’an PONDER
 - Salah evidence/detail
@@ -845,7 +872,7 @@ Use a coherent design system with:
 - domain accents
 - recorded-state styles
 - selected-state styles
-- light/dark theme equivalents
+- light/dark theme equivalents, plus named Warm paper, Quiet slate, and Midnight looks (paper and chrome only; not a score; Salah activity colours stay observational)
 - consistent interaction states
 
 Prefer:

@@ -1,0 +1,46 @@
+# Staging shape for the existing account workers.dev subdomain.
+# Account subdomain (do not register or rename): muhasabah-dev
+# Intended hostname after a later approved deploy:
+#   https://muhasabah-hajj-sources-staging.muhasabah-dev.workers.dev
+#
+# Copy to gitignored wrangler.staging.toml only after owner approval.
+# Do not deploy until Cloudflare Access already protects this Worker/account.
+# A deploy-before-Access window would make workers.dev public.
+# Mock origin is ignored because ENVIRONMENT=staging.
+#
+# Free-plan only: Worker + ratelimits. No KV, Cron, AI, R2, or Durable Objects.
+name = "muhasabah-hajj-sources-staging"
+main = "src/worker.js"
+compatibility_date = "2026-10-18"
+workers_dev = true
+preview_urls = false
+
+[[ratelimits]]
+name = "INCOMING_LIMITER"
+namespace_id = "1001"
+[ratelimits.simple]
+limit = 20
+period = 60
+
+[[ratelimits]]
+name = "ORIGIN_LIMITER"
+namespace_id = "1002"
+[ratelimits.simple]
+limit = 6
+period = 60
+
+[vars]
+CONTRACT_VERSION = "v1"
+ENVIRONMENT = "staging"
+CACHE_TTL_SECONDS = "86400"
+FETCH_TIMEOUT_MS = "8000"
+MAX_BODY_BYTES = "8000"
+PER_INSTALL_DAILY = "3"
+GLOBAL_ACCEPTED_DAILY = "50"
+GLOBAL_INCOMING_DAILY = "500"
+BURST_PER_MINUTE = "5"
+ORIGIN_GETS_PER_ADAPTER_DAILY = "2"
+ORIGIN_GETS_GLOBAL_DAILY = "8"
+# Leave empty in git. After an approved deploy, set a long random value as a
+# Wrangler/dashboard secret named PILOT_GATE. Staging refuses POSTs until set.
+PILOT_GATE = ""

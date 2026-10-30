@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../domain/copy.dart';
+import 'app_language_scope.dart';
 import 'brand_mark.dart';
 
 class BrandTitle extends StatelessWidget {
@@ -24,15 +25,27 @@ class BrandTitle extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(Copy.appName, maxLines: 1, overflow: TextOverflow.ellipsis),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  uiText(context, Copy.appName),
+                  maxLines: 1,
+                  softWrap: false,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    height: 1.15,
+                  ),
+                ),
+              ),
               Text(
-                Copy.appSlogan,
+                uiText(context, Copy.appSlogan),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: muted,
               ),
               Text(
-                Copy.appNotice,
+                uiText(context, Copy.appNotice),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: muted,

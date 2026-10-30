@@ -7,11 +7,11 @@ import '../../application/providers.dart';
 import '../../domain/activities.dart';
 import '../../domain/analytics.dart';
 import '../../domain/copy.dart';
+import '../../domain/home_traces.dart';
 import '../../domain/daily_check_in.dart';
 import '../../domain/monitor_domain.dart';
 import '../../domain/date_key.dart';
-import '../../domain/display_calendar.dart';
-import '../../domain/personal_response.dart';
+import '../../domain/personalisation_resolver.dart';
 import '../../domain/prayer.dart';
 import '../../domain/quran.dart';
 import '../../domain/quran_stage.dart';
@@ -19,14 +19,13 @@ import '../../domain/review_period.dart';
 import '../../domain/salah_extras.dart';
 import '../checkin/check_in_screen.dart';
 import '../checkin/trace_record_sheets.dart';
-import '../home/quran_day_sheet.dart';
 import '../progress/week_trace_matrix.dart';
-import '../shared/add_response_button.dart';
 import '../shared/progress_calendar.dart';
-import '../shared/quran_stage_mark.dart';
+import '../shared/thirty_day_trend_chart.dart';
 import '../shared/salah_activity_mark.dart';
 import '../shared/state_marker.dart';
 import '../shared/ui_bits.dart';
+import 'progress_review_frame.dart';
 
 class SalahProgressScreen extends ConsumerWidget {
   const SalahProgressScreen({super.key});
@@ -38,7 +37,7 @@ class SalahProgressScreen extends ConsumerWidget {
     final async = ref.watch(checkInsProvider);
     ref.watch(prefsTickProvider);
     return Scaffold(
-      appBar: AppBar(title: Text('${MonitorDomain.salah.label} Progress')),
+      appBar: progressAppBar(context, '${MonitorDomain.salah.label} Progress'),
       body: async.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) => EmptyState(
@@ -48,72 +47,77 @@ class SalahProgressScreen extends ConsumerWidget {
         data: (records) {
           final index = indexByDate(records);
           final colours = ref.watch(appPrefsProvider).salahActivityColours;
-          return ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              if (MonitorDomain.salah.focusQuestion != null) ...[
-                Text(
-                  MonitorDomain.salah.focusQuestion!,
-                  style: Theme.of(context).textTheme.bodyMedium
-                      ?.copyWith(fontStyle: FontStyle.italic, height: 1.35),
+          final prefs = ref.watch(appPrefsProvider);
+          final resolver = PersonalisationResolver(
+            visibleDomains: prefs.visibleDomains,
+            mix: prefs.personalMix,
+          );
+          bool allows(String id) => resolver.mixFocusAllows(id);
+          final obligatory = [
+            for (final prayer in PrayerId.values)
+              if (allows('salah.${prayer.name}')) prayer,
+          ];
+          final extras = [
+            for (final row in [SalahTraceRow.jumuah, ...kSalahVoluntaryRows])
+              if (allows('salah.${row.name}')) row,
+          ];
+          return ProgressReviewFrame(
+            focusQuestion: MonitorDomain.salah.focusQuestion,
+            days: period.days,
+            onPeriodChanged: (days) {
+              ref.read(reviewPeriodProvider.notifier).state = switch (days) {
+                30 => ReviewPeriod.days30,
+                90 => ReviewPeriod.days90,
+                _ => ReviewPeriod.days7,
+              };
+            },
+            marks: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                BalancedProse(
+                  colours
+                      ? Copy.salahMarkActivityNote
+                      : period.days == 7
+                      ? 'The card wash identifies the band, not spiritual rank. Marks share one colour. Shape encodes the recorded state. Rows are prayers; columns are weekdays.'
+                      : 'The card wash identifies the prayer, not spiritual rank. Marks share one colour. Shape encodes the recorded state. Jumu‘ah is Friday-only; other days are blank, not unanswered.',
+                  style: Theme.of(context).textTheme.bodySmall
+                      ?.copyWith(height: 1.45),
                 ),
-                const SizedBox(height: 8),
-              ],
-              PeriodSelector(
-                days: period.days,
-                onChanged: (days) {
-                  ref
-                      .read(reviewPeriodProvider.notifier)
-                      .state = switch (days) {
-                    30 => ReviewPeriod.days30,
-                    90 => ReviewPeriod.days90,
-                    _ => ReviewPeriod.days7,
-                  };
-                },
-              ),
-              const SizedBox(height: 8),
-              Text(
-                colours
-                    ? Copy.salahMarkActivityNote
-                    : period.days == 7
-                    ? 'The card wash identifies the band, not spiritual rank. Marks share one colour. Shape encodes the recorded state. Rows are prayers; columns are weekdays.'
-                    : 'The card wash identifies the prayer, not spiritual rank. Marks share one colour. Shape encodes the recorded state. Jumu‘ah is Friday-only; other days are blank, not unanswered.',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 12,
-                runSpacing: 8,
-                children: [
-                  if (colours)
-                    for (final option in ActivityCatalog.salah)
-                      _Legend(
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 12,
+                  runSpacing: 8,
+                  children: [
+                    if (colours)
+                      for (final option in ActivityCatalog.salah)
+                        _Legend(
+                          kind: MarkerKind.filled,
+                          color: SalahActivityMark.colourForId(option.id),
+                          label: option.label,
+                        )
+                    else ...[
+                      const _Legend(
                         kind: MarkerKind.filled,
-                        color: SalahActivityMark.colourForId(option.id),
-                        label: option.label,
-                      )
-                  else ...[
-                    const _Legend(kind: MarkerKind.filled, label: 'Prayed on time'),
-                    const _Legend(kind: MarkerKind.outlined, label: 'Late'),
-                    const _Legend(kind: MarkerKind.missed, label: 'Missed'),
-                    const _Legend(
-                      kind: MarkerKind.unanswered,
-                      label: 'Not recorded',
-                    ),
+                        label: 'Prayed on time',
+                      ),
+                      const _Legend(kind: MarkerKind.outlined, label: 'Late'),
+                      const _Legend(kind: MarkerKind.missed, label: 'Missed'),
+                      const _Legend(
+                        kind: MarkerKind.unanswered,
+                        label: 'Not recorded',
+                      ),
+                    ],
                   ],
-                ],
-              ),
-              const SizedBox(height: 16),
+                ),
+              ],
+            ),
+            children: [
               if (period.days == 7)
-                ..._salahWeekMatrices(context, ref, now, index)
+                ..._salahWeekMatrices(context, ref, now, index, allows)
               else ...[
-                for (final prayer in PrayerId.values)
+                for (final prayer in obligatory)
                   _prayerBlock(context, ref, now, prayer, index, period),
-                for (final row in const [
-                  SalahTraceRow.jumuah,
-                  SalahTraceRow.tahajjud,
-                  SalahTraceRow.ishraq,
-                ])
+                for (final row in extras)
                   _extraBlock(context, ref, now, row, index, period),
               ],
             ],
@@ -128,83 +132,84 @@ class SalahProgressScreen extends ConsumerWidget {
     WidgetRef ref,
     DateTime now,
     Map<String, DailyCheckIn> index,
+    bool Function(String id) allows,
   ) {
     final brightness = Theme.of(context).brightness;
+    final obligatory = [
+      for (final prayer in PrayerId.values)
+        if (allows('salah.${prayer.name}')) prayer,
+    ];
+    final showJumuah = allows('salah.jumuah');
+    final voluntary = [
+      for (final row in kSalahVoluntaryRows)
+        if (allows('salah.${row.name}')) row,
+    ];
     return [
-      WeekMatrixBoard(
-        title: kSalahObligatoryBand,
-        family: MuhasabahColors.salahFamily,
-        itemAsRows: true,
-        wash: MuhasabahColors.wash(
-          MuhasabahColors.salahObligatoryBand,
-          MuhasabahColors.salahObligatoryBandDark,
-          brightness,
-        ),
-        columns: [
-          for (final prayer in PrayerId.values)
-            WeekMatrixColumn(
-              header: prayer.label,
-              cell: (context, key) => _dayMarker(
-                context,
-                ref,
-                now,
-                prayer,
-                key,
-                index[key],
-              ),
-            ),
-        ],
-      ),
-      WeekMatrixBoard(
-        title: kSalahFridayBand,
-        family: MuhasabahColors.salahFamily,
-        itemAsRows: true,
-        wash: MuhasabahColors.wash(
-          MuhasabahColors.salahFridayBand,
-          MuhasabahColors.salahFridayBandDark,
-          brightness,
-        ),
-        columns: [
-          WeekMatrixColumn(
-            header: SalahTraceRow.jumuah.label,
-            cell: (context, key) => _extraMarker(
-              context,
-              ref,
-              now,
-              SalahTraceRow.jumuah,
-              key,
-              index[key],
-            ),
+      if (obligatory.isNotEmpty)
+        WeekMatrixBoard(
+          title: kSalahObligatoryBand,
+          family: MuhasabahColors.salahFamily,
+          itemAsRows: true,
+          wash: MuhasabahColors.wash(
+            MuhasabahColors.salahObligatoryBand,
+            MuhasabahColors.salahObligatoryBandDark,
+            brightness,
+            context,
           ),
-        ],
-      ),
-      WeekMatrixBoard(
-        title: kSalahVoluntaryBand,
-        family: MuhasabahColors.salahFamily,
-        itemAsRows: true,
-        wash: MuhasabahColors.wash(
-          MuhasabahColors.salahVoluntaryBand,
-          MuhasabahColors.salahVoluntaryBandDark,
-          brightness,
+          columns: [
+            for (final prayer in obligatory)
+              WeekMatrixColumn(
+                header: prayer.label,
+                cell: (context, key) =>
+                    _dayMarker(context, ref, now, prayer, key, index[key]),
+              ),
+          ],
         ),
-        columns: [
-          for (final row in const [
-            SalahTraceRow.tahajjud,
-            SalahTraceRow.ishraq,
-          ])
+      if (showJumuah)
+        WeekMatrixBoard(
+          title: kSalahFridayBand,
+          family: MuhasabahColors.salahFamily,
+          itemAsRows: true,
+          wash: MuhasabahColors.wash(
+            MuhasabahColors.salahFridayBand,
+            MuhasabahColors.salahFridayBandDark,
+            brightness,
+            context,
+          ),
+          columns: [
             WeekMatrixColumn(
-              header: row.label,
+              header: SalahTraceRow.jumuah.label,
               cell: (context, key) => _extraMarker(
                 context,
                 ref,
                 now,
-                row,
+                SalahTraceRow.jumuah,
                 key,
                 index[key],
               ),
             ),
-        ],
-      ),
+          ],
+        ),
+      if (voluntary.isNotEmpty)
+        WeekMatrixBoard(
+          title: kSalahVoluntaryBand,
+          family: MuhasabahColors.salahFamily,
+          itemAsRows: true,
+          wash: MuhasabahColors.wash(
+            MuhasabahColors.salahVoluntaryBand,
+            MuhasabahColors.salahVoluntaryBandDark,
+            brightness,
+            context,
+          ),
+          columns: [
+            for (final row in voluntary)
+              WeekMatrixColumn(
+                header: row.label,
+                cell: (context, key) =>
+                    _extraMarker(context, ref, now, row, key, index[key]),
+              ),
+          ],
+        ),
     ];
   }
 
@@ -216,6 +221,20 @@ class SalahProgressScreen extends ConsumerWidget {
     Map<String, DailyCheckIn> index,
     ReviewPeriod period,
   ) {
+    final keys = periodDateKeys(period.days, now: now);
+    var recordedDays = 0;
+    var activityDays = 0;
+    var notDoneDays = 0;
+    for (final key in keys) {
+      final status = index[key]?.prayer(prayer) ?? PrayerStatus.unanswered;
+      if (status == PrayerStatus.unanswered) continue;
+      recordedDays++;
+      if (status == PrayerStatus.missed) {
+        notDoneDays++;
+      } else if (status == PrayerStatus.onTime || status == PrayerStatus.late) {
+        activityDays++;
+      }
+    }
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: WashPanel(
@@ -227,6 +246,20 @@ class SalahProgressScreen extends ConsumerWidget {
           title: prayer.label,
           periodDays: period.days,
           family: MuhasabahColors.prayer(prayer),
+          summaryLines: progressThirtyDaySummary(
+            periodDays: period.days,
+            recordedDays: recordedDays,
+            activityDays: activityDays,
+            notDoneDays: notDoneDays,
+          ),
+          trend: thirtyDaySeriesOrNull(
+            periodDays: period.days,
+            activityLabel: prayer.label,
+            catalog: ActivityCatalog.salah,
+            activityColours: ref.watch(appPrefsProvider).salahActivityColours,
+            idForDate: (key) =>
+                index[key]?.activityFor(ActivityCatalog.salahKey(prayer)).id,
+          ),
           cellBuilder: (context, key) =>
               _dayMarker(context, ref, now, prayer, key, index[key]),
         ),
@@ -248,11 +281,13 @@ class SalahProgressScreen extends ConsumerWidget {
             MuhasabahColors.salahFridayBand,
             MuhasabahColors.salahFridayBandDark,
             brightness,
+            context,
           )
         : MuhasabahColors.wash(
             MuhasabahColors.salahVoluntaryBand,
             MuhasabahColors.salahVoluntaryBandDark,
             brightness,
+            context,
           );
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
@@ -260,9 +295,26 @@ class SalahProgressScreen extends ConsumerWidget {
         color: wash,
         child: ProgressCalendarSection(
           title: row.label,
-          subtitle: salahHomeBand(row),
+          subtitle: displayHomeBand(salahHomeBand(row)),
           periodDays: period.days,
           family: MuhasabahColors.salahFamily,
+          trend: thirtyDaySeriesOrNull(
+            periodDays: period.days,
+            activityLabel: row.label,
+            catalog: row.isVoluntary
+                ? ActivityCatalog.forVoluntarySalah(row)
+                : ActivityCatalog.jumuah,
+            activityColours: ref.watch(appPrefsProvider).salahActivityColours,
+            idForDate: (key) {
+              if (row.fridayOnly && !isFridayDateKey(key)) return null;
+              if (row.isVoluntary) {
+                return index[key]
+                    ?.activityFor(ActivityCatalog.voluntarySalahKey(row))
+                    .id;
+              }
+              return index[key]?.activityFor(ActivityCatalog.jumuahKey).id;
+            },
+          ),
           cellBuilder: (context, key) =>
               _extraMarker(context, ref, now, row, key, index[key]),
         ),
@@ -287,13 +339,15 @@ class SalahProgressScreen extends ConsumerWidget {
     return ProgressDayCell(
       key: Key('progress-cell-salah-${prayer.name}-$key'),
       onTap: matrixCellOnTap(
+        ref: ref,
+        context: context,
         dateKey: key,
-        now: now,
         onOpen: () => openFocusedCheckIn(
           context,
           dateKey: key,
           focus: CheckInFocus.salah,
           focusBand: kSalahObligatoryBand,
+          focusRowId: 'salah.${prayer.name}',
         ),
       ),
       marker: RecordedStateMarker(
@@ -325,15 +379,14 @@ class SalahProgressScreen extends ConsumerWidget {
     late final Color color;
     late final String stateLabel;
     if (row.isVoluntary) {
-      final outcome = row == SalahTraceRow.tahajjud
-          ? (record?.tahajjud ?? TernaryOutcome.unanswered)
-          : (record?.ishraq ?? TernaryOutcome.unanswered);
-      kind = markerForRecorded(
-        recorded: outcome.isRecorded,
-        positive: outcome == TernaryOutcome.positive,
+      final mark = SalahActivityMark.forVoluntary(
+        record: record,
+        row: row,
+        activityColours: colours,
       );
-      color = MuhasabahColors.mark;
-      stateLabel = voluntarySalahLabel(outcome);
+      kind = mark.kind;
+      color = mark.color;
+      stateLabel = mark.label;
     } else {
       final mark = SalahActivityMark.forJumuah(
         record: record,
@@ -346,19 +399,22 @@ class SalahProgressScreen extends ConsumerWidget {
     return ProgressDayCell(
       key: Key('progress-cell-salah-${row.id}-$key'),
       onTap: matrixCellOnTap(
+        ref: ref,
+        context: context,
         dateKey: key,
-        now: now,
         onOpen: () => openFocusedCheckIn(
           context,
           dateKey: key,
           focus: CheckInFocus.salah,
           focusBand: salahHomeBand(row),
+          focusRowId: 'salah.${row.id}',
         ),
       ),
       marker: RecordedStateMarker(
         kind: kind,
         color: color,
-        semanticLabel: '$key ${weekdayNameForDate(key)} ${row.label} $stateLabel',
+        semanticLabel:
+            '$key ${weekdayNameForDate(key)} ${row.label} $stateLabel',
       ),
     );
   }
@@ -404,7 +460,7 @@ class QuranProgressScreen extends ConsumerWidget {
     final now = ref.watch(nowProvider);
     final async = ref.watch(checkInsProvider);
     return Scaffold(
-      appBar: AppBar(title: Text('${MonitorDomain.quran.label} Progress')),
+      appBar: progressAppBar(context, '${MonitorDomain.quran.label} Progress'),
       body: async.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) => EmptyState(
@@ -416,83 +472,75 @@ class QuranProgressScreen extends ConsumerWidget {
           final index = indexByDate(records);
           ref.watch(prefsTickProvider);
           final colours = ref.watch(appPrefsProvider).salahActivityColours;
-          final calendar = ref.watch(appPrefsProvider).displayCalendar;
-          return ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              if (MonitorDomain.quran.focusQuestion != null) ...[
-                Text(
-                  MonitorDomain.quran.focusQuestion!,
-                  style: Theme.of(context).textTheme.bodyMedium
-                      ?.copyWith(fontStyle: FontStyle.italic, height: 1.35),
+          final prefs = ref.watch(appPrefsProvider);
+          final resolver = PersonalisationResolver(
+            visibleDomains: prefs.visibleDomains,
+            mix: prefs.personalMix,
+          );
+          final dimensions = [
+            for (final dimension in quranDailyDimensions)
+              if (resolver.mixFocusAllows('quran.${dimension.name}')) dimension,
+          ];
+          return ProgressReviewFrame(
+            focusQuestion: MonitorDomain.quran.focusQuestion,
+            days: period.days,
+            onPeriodChanged: (days) {
+              ref.read(reviewPeriodProvider.notifier).state = switch (days) {
+                30 => ReviewPeriod.days30,
+                90 => ReviewPeriod.days90,
+                _ => ReviewPeriod.days7,
+              };
+            },
+            marks: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                BalancedProse(
+                  period.days == 7
+                      ? 'Each row is a stored Qur’an activity in this season’s mix. Columns are weekdays. Tap a cell to open that row’s check-in. Marks share one colour.'
+                      : 'Each calendar is one stored row. Titles name the check-in band. Rows are weekdays; columns are weeks. The card wash identifies the row, not rank. Marks share one colour.',
+                  style: Theme.of(context).textTheme.bodySmall
+                      ?.copyWith(height: 1.45),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 12,
+                  runSpacing: 8,
+                  children: [
+                    _Legend(
+                      kind: MarkerKind.filled,
+                      label: period.days == 7
+                          ? 'Recorded'
+                          : TernaryOutcome.positive.legendLabel,
+                    ),
+                    _Legend(
+                      kind: MarkerKind.outlined,
+                      label: period.days == 7
+                          ? 'None'
+                          : TernaryOutcome.negative.legendLabel,
+                      icon: period.days == 7 ? null : Icons.remove,
+                    ),
+                    _Legend(
+                      kind: MarkerKind.unanswered,
+                      label: TernaryOutcome.unanswered.legendLabel,
+                    ),
+                  ],
+                ),
               ],
-              PeriodSelector(
-                days: period.days,
-                onChanged: (days) {
-                  ref
-                      .read(reviewPeriodProvider.notifier)
-                      .state = switch (days) {
-                    30 => ReviewPeriod.days30,
-                    90 => ReviewPeriod.days90,
-                    _ => ReviewPeriod.days7,
-                  };
-                },
-              ),
-              const SizedBox(height: 12),
-              Text('PONDER', style: Theme.of(context).textTheme.titleMedium),
-              const SizedBox(height: 8),
-              Text(
-                Copy.ponderPrompt,
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-              const SizedBox(height: 8),
-              AddResponseButton(
-                provenance: ResponseProvenance(
-                  originType: ProvenanceOrigin.quranPonder,
-                  domain: 'quran',
-                  periodDays: period.days,
-                  labelSnapshot: 'Qur’an PONDER (${period.shortLabel})',
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                period.days == 7
-                    ? 'Rows are journey stages; columns are weekdays. The card wash identifies the domain, not rank. Marks share one colour. The letter is the recorded activity.'
-                    : 'Titles match the Home Journey stages. Each calendar is still one stored row. Rows are weekdays; columns are weeks. The card wash identifies the row, not rank. Marks share one colour.',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 12,
-                runSpacing: 8,
-                children: [
-                  _Legend(
-                    kind: MarkerKind.filled,
-                    label: period.days == 7
-                        ? 'Recorded'
-                        : TernaryOutcome.positive.legendLabel,
-                  ),
-                  _Legend(
-                    kind: MarkerKind.outlined,
-                    label: period.days == 7
-                        ? 'None'
-                        : TernaryOutcome.negative.legendLabel,
-                    icon: period.days == 7 ? null : Icons.remove,
-                  ),
-                  _Legend(
-                    kind: MarkerKind.unanswered,
-                    label: TernaryOutcome.unanswered.legendLabel,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
+            ),
+            children: [
               if (period.days == 7)
-                _quranJourneyMatrix(context, now, calendar, colours, index)
+                ..._quranWeekMatrices(context, ref, colours, index, dimensions)
               else
-                for (final dimension in quranDailyDimensions)
-                  _dimensionCard(context, dimension, keys, index, period, now),
+                for (final dimension in dimensions)
+                  _dimensionCard(
+                    context,
+                    ref,
+                    dimension,
+                    keys,
+                    index,
+                    period,
+                    now,
+                  ),
             ],
           );
         },
@@ -500,60 +548,79 @@ class QuranProgressScreen extends ConsumerWidget {
     );
   }
 
-  Widget _quranJourneyMatrix(
+  List<Widget> _quranWeekMatrices(
     BuildContext context,
-    DateTime now,
-    DisplayCalendar calendar,
+    WidgetRef ref,
     bool colours,
     Map<String, DailyCheckIn> index,
+    List<QuranDimension> dimensions,
   ) {
+    final bands = quranHomeBandsFor(dimensions);
+    if (bands.isEmpty) return const [];
     final brightness = Theme.of(context).brightness;
-    return WeekMatrixBoard(
-      title: Copy.quranJourney,
-      family: MuhasabahColors.quranFamily,
-      itemAsRows: true,
-      wash: MuhasabahColors.wash(
-        MuhasabahColors.quranRecitationBand,
-        MuhasabahColors.quranRecitationBandDark,
-        brightness,
-      ),
-      columns: [
-        for (final row in QuranJourneyRow.values)
-          WeekMatrixColumn(
-            header: row.label,
-            subtitle: row.purpose,
-            cell: (context, key) {
-              final record = index[key];
-              final cell = quranJourneyCell(record, row);
-              return ProgressDayCell(
-                key: Key('progress-cell-quran-${row.name}-$key'),
-                onTap: matrixCellOnTap(
-                  dateKey: key,
-                  now: now,
-                  onOpen: () => showQuranJourneySheet(
-                    context: context,
-                    dateKey: key,
-                    calendar: calendar,
-                    row: row,
-                    record: record,
-                  ),
-                ),
-                marker: QuranJourneyMarker(
-                  row: row,
-                  cell: cell,
-                  colours: colours,
-                  semanticLabel:
-                      '$key ${weekdayNameForDate(key)} ${row.label} ${cell.code ?? cell.kind.name}',
-                ),
-              );
-            },
+    return [
+      for (final entry in bands)
+        WeekMatrixBoard(
+          title: entry.$1,
+          family: MuhasabahColors.quranFamily,
+          itemAsRows: true,
+          wash: MuhasabahColors.wash(
+            MuhasabahColors.quranWash,
+            MuhasabahColors.quranWashDark,
+            brightness,
+            context,
           ),
-      ],
-    );
+          columns: [
+            for (final dimension in entry.$2)
+              WeekMatrixColumn(
+                header: dimension.label,
+                cell: (context, key) {
+                  final record = index[key];
+                  final outcome = record == null
+                      ? TernaryOutcome.unanswered
+                      : record.quranOutcome(dimension);
+                  final id =
+                      record
+                          ?.activityFor(ActivityCatalog.quranKey(dimension))
+                          .id ??
+                      ActivityIds.unanswered;
+                  return ProgressDayCell(
+                    key: Key('progress-cell-quran-${dimension.name}-$key'),
+                    onTap: matrixCellOnTap(
+                      ref: ref,
+                      context: context,
+                      dateKey: key,
+                      onOpen: () => openFocusedCheckIn(
+                        context,
+                        dateKey: key,
+                        focus: CheckInFocus.quran,
+                        focusBand: dimension.homeBand,
+                        focusRowId: 'quran.${dimension.name}',
+                      ),
+                    ),
+                    marker: RecordedStateMarker(
+                      kind: SalahActivityMark.quranDurationKind(
+                        id,
+                        activityColours: colours,
+                      ),
+                      color: SalahActivityMark.quranDurationColour(
+                        id,
+                        colours: colours,
+                      ),
+                      semanticLabel:
+                          '$key ${weekdayNameForDate(key)} ${dimension.label} ${outcome.legendLabel}',
+                    ),
+                  );
+                },
+              ),
+          ],
+        ),
+    ];
   }
 
   Widget _dimensionCard(
     BuildContext context,
+    WidgetRef ref,
     QuranDimension dimension,
     List<String> keys,
     Map<String, DailyCheckIn> index,
@@ -585,18 +652,32 @@ class QuranProgressScreen extends ConsumerWidget {
           children: [
             ProgressCalendarSection(
               sectionId: dimension.name,
-              title: dimension.progressCalendarTitle,
+              title: displayHomeBand(dimension.progressCalendarTitle),
               subtitle: dimension.progressCalendarSubtitle,
               periodDays: period.days,
               family: MuhasabahColors.quran(dimension),
-              belowTitle: dimension.isNeutralPeerDimension
-                  ? Text(
-                      'Recorded on $recordedDays of ${keys.length} days · activity days $positiveDays · recorded as not done $negativeDays',
-                    )
-                  : dimension == QuranDimension.consciousApplication
+              summaryLines: progressThirtyDaySummary(
+                periodDays: period.days,
+                recordedDays: recordedDays,
+                activityDays: positiveDays,
+                notDoneDays: negativeDays,
+              ),
+              trend: thirtyDaySeriesOrNull(
+                periodDays: period.days,
+                activityLabel: dimension.label,
+                catalog: ActivityCatalog.forQuran(dimension),
+                activityColours: ref
+                    .watch(appPrefsProvider)
+                    .salahActivityColours,
+                idForDate: (key) => index[key]
+                    ?.activityFor(ActivityCatalog.quranKey(dimension))
+                    .id,
+              ),
+              belowTitle: dimension == QuranDimension.consciousApplication
                   ? Text(
                       Copy.consciousApplicationNote,
-                      style: Theme.of(context).textTheme.bodySmall,
+                      style: Theme.of(context).textTheme.bodySmall
+                          ?.copyWith(fontSize: 11, height: 1.35),
                     )
                   : null,
               cellBuilder: (context, key) {
@@ -604,41 +685,41 @@ class QuranProgressScreen extends ConsumerWidget {
                 final outcome = record == null
                     ? TernaryOutcome.unanswered
                     : record.quranOutcome(dimension);
-                final kind = markerForRecorded(
-                  recorded: outcome.isRecorded,
-                  positive: outcome == TernaryOutcome.positive,
-                );
+                final colours = ref
+                    .watch(appPrefsProvider)
+                    .salahActivityColours;
+                final id =
+                    record
+                        ?.activityFor(ActivityCatalog.quranKey(dimension))
+                        .id ??
+                    ActivityIds.unanswered;
                 return ProgressDayCell(
                   onTap: matrixCellOnTap(
+                    ref: ref,
+                    context: context,
                     dateKey: key,
-                    now: now,
                     onOpen: () => openFocusedCheckIn(
                       context,
                       dateKey: key,
                       focus: CheckInFocus.quran,
                       focusBand: dimension.homeBand,
+                      focusRowId: 'quran.${dimension.name}',
                     ),
                   ),
                   marker: RecordedStateMarker(
-                    kind: kind,
-                    symbol: outcome == TernaryOutcome.negative
-                        ? Icons.remove
-                        : null,
+                    kind: SalahActivityMark.quranDurationKind(
+                      id,
+                      activityColours: colours,
+                    ),
+                    color: SalahActivityMark.quranDurationColour(
+                      id,
+                      colours: colours,
+                    ),
                     semanticLabel:
                         '$key ${weekdayNameForDate(key)} ${dimension.label} ${outcome.legendLabel}',
                   ),
                 );
               },
-            ),
-            AddResponseButton(
-              compact: true,
-              provenance: ResponseProvenance(
-                originType: ProvenanceOrigin.progressDimension,
-                domain: 'quran',
-                subject: dimension.name,
-                periodDays: period.days,
-                labelSnapshot: '${dimension.label} (${period.shortLabel})',
-              ),
             ),
           ],
         ),

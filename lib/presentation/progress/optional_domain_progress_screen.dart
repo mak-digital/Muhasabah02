@@ -6,19 +6,26 @@ import '../../domain/activities.dart';
 import '../../domain/analytics.dart';
 import '../../domain/copy.dart';
 import '../../domain/daily_check_in.dart';
+import '../../domain/date_key.dart';
+import '../../domain/dhikr_context.dart';
 import '../../domain/home_traces.dart';
+import '../../domain/thirty_day_trend.dart';
+import '../../domain/hajj_planning.dart';
 import '../../domain/domain_briefing.dart';
 import '../../domain/quran.dart';
 import '../../domain/review_period.dart';
 import '../checkin/check_in_screen.dart';
 import '../checkin/trace_record_sheets.dart';
 import '../shared/progress_calendar.dart';
+import '../shared/thirty_day_trend_chart.dart';
+import '../shared/salah_activity_mark.dart';
 import '../shared/domain_briefing_note.dart';
 import '../shared/state_marker.dart';
 import '../shared/ui_bits.dart';
+import 'progress_review_frame.dart';
 import 'week_trace_matrix.dart';
 
-class OptionalDomainProgressScreen extends ConsumerWidget {
+class OptionalDomainProgressScreen extends ConsumerStatefulWidget {
   const OptionalDomainProgressScreen({
     super.key,
     required this.title,
@@ -49,13 +56,33 @@ class OptionalDomainProgressScreen extends ConsumerWidget {
   final bool itemRowsOn7Days;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<OptionalDomainProgressScreen> createState() =>
+      _OptionalDomainProgressScreenState();
+}
+
+class _OptionalDomainProgressScreenState
+    extends ConsumerState<OptionalDomainProgressScreen> {
+  String get title => widget.title;
+  String? get focusQuestion => widget.focusQuestion;
+  String? get note => widget.note;
+  List<HomeTraceRow> get rows => widget.rows;
+  Color get family => widget.family;
+  bool get includeZakat => widget.includeZakat;
+  bool get includeHadithFocus => widget.includeHadithFocus;
+  bool get includeHajjStatus => widget.includeHajjStatus;
+  bool get weekMatricesOn7Days => widget.weekMatricesOn7Days;
+  bool get highlightLunarWhiteDays => widget.highlightLunarWhiteDays;
+  bool get includeStruggleNote => widget.includeStruggleNote;
+  bool get itemRowsOn7Days => widget.itemRowsOn7Days;
+
+  @override
+  Widget build(BuildContext context) {
     final period = ref.watch(reviewPeriodProvider);
     final now = ref.watch(nowProvider);
     final async = ref.watch(checkInsProvider);
     final progressTitle = '$title Progress';
     return Scaffold(
-      appBar: AppBar(title: Text(progressTitle)),
+      appBar: progressAppBar(context, progressTitle),
       body: async.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) =>
@@ -66,61 +93,65 @@ class OptionalDomainProgressScreen extends ConsumerWidget {
           final hadithFocus = ref
               .watch(appPrefsProvider)
               .hadithMemorisationFocus;
-          final hajjStatus = ref.watch(appPrefsProvider).hajjStatus;
-          final question = focusQuestion;
-          return ListView(
-            padding: const EdgeInsets.all(16),
+          ref.watch(hajjStoreTickProvider);
+          final hajjStanding = ref
+              .watch(hajjStoreRepositoryProvider)
+              .store
+              .standing
+              .kind;
+          final briefing = briefingForLabel(title);
+          return ProgressReviewFrame(
+            focusQuestion: focusQuestion,
+            days: period.days,
+            onPeriodChanged: (days) {
+              ref.read(reviewPeriodProvider.notifier).state = switch (days) {
+                30 => ReviewPeriod.days30,
+                90 => ReviewPeriod.days90,
+                _ => ReviewPeriod.days7,
+              };
+            },
+            marksTitle: briefing != null
+                ? Copy.aboutThisDomain
+                : Copy.progressMarksTitle,
+            marks: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                BalancedProse(
+                  'Wash names the domain, not rank. Marks share one colour. Empty is not missed.',
+                  style: Theme.of(context).textTheme.bodySmall
+                      ?.copyWith(height: 1.45),
+                ),
+                if (briefing != null) ...[
+                  const SizedBox(height: 8),
+                  DomainBriefingNote(briefing, compact: true),
+                ] else if (note != null && note!.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  BalancedProse(
+                    note!,
+                    style: Theme.of(context).textTheme.bodySmall
+                        ?.copyWith(height: 1.45),
+                  ),
+                ],
+                if (highlightLunarWhiteDays) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    Copy.lunarWhiteDaysNote,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ],
+            ),
             children: [
-              if (question != null && question.isNotEmpty) ...[
-                Text(
-                  question,
-                  style: Theme.of(context).textTheme.bodyMedium
-                      ?.copyWith(fontStyle: FontStyle.italic, height: 1.35),
-                ),
-                const SizedBox(height: 8),
-              ],
-              PeriodSelector(
-                days: period.days,
-                onChanged: (days) {
-                  ref
-                      .read(reviewPeriodProvider.notifier)
-                      .state = switch (days) {
-                    30 => ReviewPeriod.days30,
-                    90 => ReviewPeriod.days90,
-                    _ => ReviewPeriod.days7,
-                  };
-                },
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'The card wash identifies the domain, not rank. Marks share one colour. Missing records are not treated as missed.',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-              if (briefingForLabel(title) != null) ...[
-                const SizedBox(height: 8),
-                DomainBriefingNote(briefingForLabel(title)!, compact: true),
-              ] else if (note != null && note!.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                Text(note!, style: Theme.of(context).textTheme.bodySmall),
-              ],
-              if (highlightLunarWhiteDays) ...[
-                const SizedBox(height: 8),
-                Text(
-                  Copy.lunarWhiteDaysNote,
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ],
               if (includeHadithFocus) ...[
-                const SizedBox(height: 8),
                 Text(
                   '${Copy.hadithMemorisationFocus}: ${hadithFocus.label}',
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
+                const SizedBox(height: 8),
               ],
               if (includeHajjStatus) ...[
-                const SizedBox(height: 8),
                 Text(
-                  '${Copy.hajjStatusLabel}: ${hajjStatus.label}',
+                  '${Copy.hajjStatusLabel}: ${hajjStanding.label}',
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 const SizedBox(height: 4),
@@ -128,8 +159,8 @@ class OptionalDomainProgressScreen extends ConsumerWidget {
                   Copy.hajjStatusNote,
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
+                const SizedBox(height: 8),
               ],
-              const SizedBox(height: 12),
               if (weekMatricesOn7Days && period.days == 7) ...[
                 if (itemRowsOn7Days)
                   HomeStyleWeekMatrix(
@@ -143,13 +174,12 @@ class OptionalDomainProgressScreen extends ConsumerWidget {
                   )
                 else ...[
                   ..._weekMatrices(index),
-                  if (includeZakat)
-                    _zakatWeekMatrix(context, ref, now, index),
+                  if (includeZakat) _zakatWeekMatrix(context, ref, now, index),
                 ],
               ] else ...[
                 for (final row in rows)
-                  _rowCard(context, row, index, period, now),
-                if (includeZakat) _zakatCard(context, index, period, now),
+                  _rowCard(context, ref, row, index, period, now),
+                if (includeZakat) _zakatCard(context, ref, index, period, now),
               ],
             ],
           );
@@ -200,9 +230,11 @@ class OptionalDomainProgressScreen extends ConsumerWidget {
         return ProgressDayCell(
           key: Key('progress-cell-zakat-$key'),
           onTap: matrixCellOnTap(
+            ref: ref,
+            context: context,
             dateKey: key,
-            now: now,
-            onOpen: () => _openDay(context, key, band: kZakatTraceBand),
+            onOpen: () =>
+                _openDay(context, key, band: kZakatTraceBand, rowId: 'zakat'),
           ),
           marker: ZakatStateMarker(status: status),
         );
@@ -210,7 +242,12 @@ class OptionalDomainProgressScreen extends ConsumerWidget {
     );
   }
 
-  void _openDay(BuildContext context, String dateKey, {String? band}) {
+  void _openDay(
+    BuildContext context,
+    String dateKey, {
+    String? band,
+    String? rowId,
+  }) {
     openFocusedCheckIn(
       context,
       dateKey: dateKey,
@@ -218,6 +255,7 @@ class OptionalDomainProgressScreen extends ConsumerWidget {
       domainTitle: title,
       domainFocus: focusQuestion,
       focusBand: band,
+      focusRowId: rowId,
       traceRows: rows,
       includeZakat: includeZakat,
       includeHadithFocus: includeHadithFocus,
@@ -227,13 +265,56 @@ class OptionalDomainProgressScreen extends ConsumerWidget {
     );
   }
 
+  ThirtyDayTrendSeries? _trendForRow(
+    HomeTraceRow row,
+    Map<String, DailyCheckIn> index,
+    ReviewPeriod period,
+    WidgetRef ref,
+  ) {
+    final colours = ref.watch(appPrefsProvider).salahActivityColours;
+    if (isDhikrContextTrace(row.storageKey)) {
+      return thirtyDaySeriesOrNull(
+        periodDays: period.days,
+        activityLabel: row.label,
+        catalog: dhikrContextTrendCatalog(row.storageKey),
+        activityColours: colours,
+        idForDate: (_) => null,
+        hitsForDate: (key) => practisedDhikrTrendIds(
+          index[key]?.dhikrContextFor(row.storageKey) ?? const [],
+        ),
+        dayAnswered: (key) =>
+            index[key]?.dhikrContextFor(row.storageKey).isNotEmpty ?? false,
+      );
+    }
+    return thirtyDaySeriesOrNull(
+      periodDays: period.days,
+      activityLabel: row.label,
+      catalog: ActivityCatalog.forHomeTrace(row.storageKey),
+      activityColours: colours,
+      idForDate: (key) => index[key]?.activityFor(row.storageKey).id,
+    );
+  }
+
   Widget _rowCard(
     BuildContext context,
+    WidgetRef ref,
     HomeTraceRow row,
     Map<String, DailyCheckIn> index,
     ReviewPeriod period,
     DateTime now,
   ) {
+    final keys = periodDateKeys(period.days, now: now);
+    var recordedDays = 0;
+    var activityDays = 0;
+    var notDoneDays = 0;
+    for (final key in keys) {
+      final outcome =
+          index[key]?.homeTrace(row.storageKey) ?? TernaryOutcome.unanswered;
+      if (!outcome.isRecorded) continue;
+      recordedDays++;
+      if (outcome == TernaryOutcome.positive) activityDays++;
+      if (outcome == TernaryOutcome.negative) notDoneDays++;
+    }
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: WashPanel(
@@ -243,25 +324,38 @@ class OptionalDomainProgressScreen extends ConsumerWidget {
         ),
         child: ProgressCalendarSection(
           title: row.label,
-          subtitle: row.band,
+          subtitle: displayHomeBand(row.band),
           periodDays: period.days,
           family: family,
           highlightLunarWhiteDays: highlightLunarWhiteDays,
+          summaryLines: progressThirtyDaySummary(
+            periodDays: period.days,
+            recordedDays: recordedDays,
+            activityDays: activityDays,
+            notDoneDays: notDoneDays,
+          ),
+          trend: _trendForRow(row, index, period, ref),
           cellBuilder: (context, key) {
+            final record = index[key];
             final outcome =
-                index[key]?.homeTrace(row.storageKey) ??
-                TernaryOutcome.unanswered;
+                record?.homeTrace(row.storageKey) ?? TernaryOutcome.unanswered;
+            final colours = ref.watch(appPrefsProvider).salahActivityColours;
             return ProgressDayCell(
               onTap: matrixCellOnTap(
+                ref: ref,
+                context: context,
                 dateKey: key,
-                now: now,
-                onOpen: () => _openDay(context, key, band: row.band),
-              ),
-              marker: RecordedStateMarker(
-                kind: markerForRecorded(
-                  recorded: outcome.isRecorded,
-                  positive: outcome == TernaryOutcome.positive,
+                onOpen: () => _openDay(
+                  context,
+                  key,
+                  band: row.band,
+                  rowId: row.storageKey,
                 ),
+              ),
+              marker: SalahActivityMark.recordedMarkerForTrace(
+                row: row,
+                record: record,
+                activityColours: colours,
                 semanticLabel:
                     '$key ${weekdayNameForDate(key)} ${row.label} ${outcome.legendLabel}',
               ),
@@ -274,6 +368,7 @@ class OptionalDomainProgressScreen extends ConsumerWidget {
 
   Widget _zakatCard(
     BuildContext context,
+    WidgetRef ref,
     Map<String, DailyCheckIn> index,
     ReviewPeriod period,
     DateTime now,
@@ -293,9 +388,15 @@ class OptionalDomainProgressScreen extends ConsumerWidget {
             final status = index[key]?.zakat ?? ZakatStatus.unanswered;
             return ProgressDayCell(
               onTap: matrixCellOnTap(
+                ref: ref,
+                context: context,
                 dateKey: key,
-                now: now,
-                onOpen: () => _openDay(context, key, band: kZakatTraceBand),
+                onOpen: () => _openDay(
+                  context,
+                  key,
+                  band: kZakatTraceBand,
+                  rowId: 'zakat',
+                ),
               ),
               marker: ZakatStateMarker(status: status),
             );

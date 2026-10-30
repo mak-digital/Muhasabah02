@@ -1,0 +1,12 @@
+{
+  "name": "muhasabah-hajj-worker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "dev": "wrangler dev --local --ip 127.0.0.1 --port 8787 --persist-to .wrangler/state"
+  },
+  "devDependencies": {
+    "wrangler": "^4.45.3"
+  }
+}

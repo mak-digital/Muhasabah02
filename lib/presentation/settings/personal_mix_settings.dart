@@ -5,6 +5,9 @@ import '../../application/providers.dart';
 import '../../domain/copy.dart';
 import '../../domain/monitor_domain.dart';
 import '../../domain/personal_mix.dart';
+import '../shared/domain_line_icon.dart';
+import '../shared/domain_visual.dart';
+import '../shared/home_band_heading.dart';
 
 class PersonalMixEditor extends ConsumerWidget {
   const PersonalMixEditor({super.key});
@@ -21,7 +24,8 @@ class PersonalMixEditor extends ConsumerWidget {
     ];
     final hidden = [
       for (final domain in MonitorDomain.values)
-        if (!visible.contains(domain)) domain,
+        if (!visible.contains(domain) && !isDormantMonitorDomain(domain))
+          domain,
     ];
 
     Future<void> save(PersonalMix next) async {
@@ -117,14 +121,16 @@ Future<void> _maybeShowHiddenMixHint({
     messenger.showSnackBar(
       SnackBar(
         content: Text(Copy.mixKeptUntilDomainShown(domain.label)),
-        action: SnackBarAction(
-          label: Copy.showDomainAction(domain.label),
-          onPressed: () async {
-            final next = {...prefs.visibleDomains, domain};
-            await prefs.setVisibleDomains(next);
-            ref.read(prefsTickProvider.notifier).state++;
-          },
-        ),
+        action: isDormantMonitorDomain(domain)
+            ? null
+            : SnackBarAction(
+                label: Copy.showDomainAction(domain.label),
+                onPressed: () async {
+                  final next = {...prefs.visibleDomains, domain};
+                  await prefs.setVisibleDomains(next);
+                  ref.read(prefsTickProvider.notifier).state++;
+                },
+              ),
       ),
     );
     return;
@@ -171,7 +177,17 @@ class _DomainMixTile extends ConsumerWidget {
       key: Key('mix-domain-${domain.name}'),
       margin: const EdgeInsets.only(bottom: 8),
       child: ExpansionTile(
-        title: Text(domain.label),
+        title: Row(
+          children: [
+            DomainLineIcon(
+              domain,
+              size: 20,
+              color: domainColorIdentity(domain).family,
+            ),
+            const SizedBox(width: 8),
+            Expanded(child: Text(domain.label)),
+          ],
+        ),
         subtitle: Text(
           shown
               ? '$selectedCount of ${items.length} in the mix'
@@ -194,10 +210,10 @@ class _DomainMixTile extends ConsumerWidget {
           for (final band in bands) ...[
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-              child: Text(
-                band.toUpperCase(),
-                style: Theme.of(context).textTheme.labelSmall
-                    ?.copyWith(letterSpacing: 0.4, fontWeight: FontWeight.w600),
+              child: HomeBandHeading(
+                band: band,
+                family: domainColorIdentity(domain).family,
+                baseWash: Theme.of(context).colorScheme.surface,
               ),
             ),
             for (final item in items)

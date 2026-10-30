@@ -5,7 +5,14 @@ import '../../application/providers.dart';
 import '../../domain/activities.dart';
 import '../../domain/charity_factors.dart';
 import '../../domain/context_catalog.dart';
+import '../../domain/copy.dart';
 import '../../domain/factor_groups.dart';
+import '../../domain/home_traces.dart';
+import '../../domain/quran.dart';
+import '../../domain/salah_factors.dart';
+import '../../domain/thirty_day_trend.dart';
+import 'domain_line_icon.dart';
+import 'domain_visual.dart';
 import 'salah_activity_mark.dart';
 
 const checkInValueIndent = 20.0;
@@ -22,14 +29,29 @@ class CheckInDomainTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final question = focus;
+    final domain = domainForTitle(text);
+    final title = Text(
+      text.toUpperCase(),
+      style: Theme.of(context).textTheme.titleMedium
+          ?.copyWith(fontWeight: FontWeight.w700, letterSpacing: 0.8),
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          text.toUpperCase(),
-          style: Theme.of(context).textTheme.titleMedium
-              ?.copyWith(fontWeight: FontWeight.w700, letterSpacing: 0.8),
-        ),
+        if (domain == null)
+          title
+        else
+          Row(
+            children: [
+              DomainLineIcon(
+                domain,
+                size: 20,
+                color: domainColorIdentity(domain).family,
+              ),
+              const SizedBox(width: 8),
+              Expanded(child: title),
+            ],
+          ),
         if (question != null && question.isNotEmpty) ...[
           const SizedBox(height: 6),
           Text(
@@ -84,6 +106,8 @@ class CheckInSelect<T> extends StatelessWidget {
     this.dropdownKey,
     this.depth = CheckInFieldDepth.value,
     this.sortLabels = true,
+    this.fillColor,
+    this.compact = false,
   });
 
   final T value;
@@ -93,14 +117,29 @@ class CheckInSelect<T> extends StatelessWidget {
   final Key? dropdownKey;
   final CheckInFieldDepth depth;
   final bool sortLabels;
+  final Color? fillColor;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final nested = depth == CheckInFieldDepth.nested;
-    final indent = nested ? checkInNestedIndent : checkInValueIndent;
-    final fill = scheme.surface.withValues(alpha: nested ? 0.52 : 0.9);
+    final indent = compact
+        ? 0.0
+        : nested
+        ? checkInNestedIndent
+        : checkInValueIndent;
+    final fill =
+        fillColor ?? scheme.surface.withValues(alpha: nested ? 0.52 : 0.9);
     final ink = nested ? scheme.onSurfaceVariant : scheme.onSurface;
+    final labelStyle = compact
+        ? Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: ink,
+            fontSize: 11,
+            height: 1.2,
+            fontWeight: FontWeight.w600,
+          )
+        : Theme.of(context).textTheme.bodyMedium?.copyWith(color: ink);
     final sorted = [...entries];
     if (sortLabels) {
       sorted.sort(
@@ -110,9 +149,9 @@ class CheckInSelect<T> extends StatelessWidget {
     Widget labelFor(CheckInSelectEntry<T> entry) {
       final text = Text(
         entry.label,
-        maxLines: 3,
+        maxLines: compact ? 1 : 6,
         overflow: TextOverflow.ellipsis,
-        style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: ink),
+        style: labelStyle,
       );
       final swatch = entry.swatch;
       if (swatch == null) return text;
@@ -128,6 +167,7 @@ class CheckInSelect<T> extends StatelessWidget {
         ],
       );
     }
+
     return Padding(
       padding: EdgeInsets.only(left: indent),
       child: KeyedSubtree(
@@ -135,22 +175,28 @@ class CheckInSelect<T> extends StatelessWidget {
         child: Material(
           color: fill,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-            side: BorderSide(
-              color: scheme.outlineVariant.withValues(alpha: nested ? 0.7 : 1),
-            ),
+            borderRadius: BorderRadius.circular(compact ? 8 : 10),
+            side: compact
+                ? BorderSide.none
+                : BorderSide(
+                    color: scheme.outlineVariant.withValues(
+                      alpha: nested ? 0.7 : 1,
+                    ),
+                  ),
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<T>(
               key: ValueKey<T>(value),
               isExpanded: true,
               isDense: true,
+              itemHeight: null,
               value: value,
               menuMaxHeight: 560,
-              style: Theme.of(context).textTheme.bodyMedium
-                  ?.copyWith(color: ink),
+              style: labelStyle,
               iconEnabledColor: scheme.onSurfaceVariant,
-              padding: const EdgeInsets.fromLTRB(12, 8, 8, 8),
+              padding: compact
+                  ? const EdgeInsets.fromLTRB(6, 2, 2, 2)
+                  : const EdgeInsets.fromLTRB(12, 8, 8, 8),
               items: [
                 for (final entry in sorted)
                   DropdownMenuItem<T>(
@@ -181,6 +227,141 @@ class CheckInSelect<T> extends StatelessWidget {
   }
 }
 
+Key? activityPickerItemKey(String? statusKeyPrefix, ActivityOption option) {
+  if (statusKeyPrefix == null) return null;
+  if (option.id == 'aloneOnTime') {
+    return Key('$statusKeyPrefix-onTime');
+  }
+  if (option.id == 'prayedLate') {
+    return Key('$statusKeyPrefix-late');
+  }
+  if (option.id == 'missed') {
+    return Key('$statusKeyPrefix-missed');
+  }
+  if (option.id == ActivityIds.unanswered) {
+    return Key('$statusKeyPrefix-unanswered');
+  }
+  return Key('$statusKeyPrefix-${option.id}');
+}
+
+bool activityPickerUsesColourSwatches(List<ActivityOption> options) {
+  return ActivityCatalog.isObligatorySalahCatalog(options) ||
+      identical(options, ActivityCatalog.tahajjud) ||
+      identical(options, ActivityCatalog.ishraq) ||
+      identical(options, ActivityCatalog.tawbah) ||
+      ActivityCatalog.isDurationCatalog(options) ||
+      identical(options, ActivityCatalog.hadithLivedNoticed) ||
+      ActivityCatalog.isDhikrPostFardCatalog(options) ||
+      ActivityCatalog.isAkhlaqObservationCatalog(options) ||
+      ActivityCatalog.isHuquqObservationCatalog(options) ||
+      ActivityCatalog.isKnowledgeObservationCatalog(options) ||
+      ActivityCatalog.isTimeObservationCatalog(options) ||
+      ActivityCatalog.isHealthObservationCatalog(options) ||
+      ActivityCatalog.isWealthObservationCatalog(options) ||
+      ActivityCatalog.isUmmahObservationCatalog(options) ||
+      ActivityCatalog.isCharityObservationCatalog(options) ||
+      ActivityCatalog.isFastingObservationCatalog(options);
+}
+
+/// Opens the full activity list under [anchorContext], skipping a closed
+/// dropdown step. Menu top aligns just below the anchor widget.
+Future<void> showAnchoredActivityMenu({
+  required BuildContext anchorContext,
+  required List<ActivityOption> options,
+  required String selectedId,
+  required ValueChanged<ActivityOption> onSelected,
+  String? statusKeyPrefix,
+  bool showColourSwatches = false,
+}) async {
+  final box = anchorContext.findRenderObject() as RenderBox?;
+  final overlay =
+      Overlay.maybeOf(anchorContext)?.context.findRenderObject() as RenderBox?;
+  if (box == null || overlay == null || !box.hasSize) return;
+
+  final topLeft = box.localToGlobal(Offset.zero, ancestor: overlay);
+  final size = box.size;
+  final position = RelativeRect.fromLTRB(
+    topLeft.dx,
+    topLeft.dy + size.height,
+    overlay.size.width - topLeft.dx - size.width,
+    overlay.size.height - topLeft.dy - size.height,
+  );
+
+  final durationList = ActivityCatalog.isDurationCatalog(options);
+  final preserveOrder = ActivityCatalog.preservePickerOrder(options);
+  final shown = [...options];
+  if (!preserveOrder) {
+    shown.sort(
+      (a, b) => compactChoiceLabel(
+        a.label,
+        stripCatalogRowName: durationList,
+        optionId: a.id,
+      ).toLowerCase().compareTo(
+        compactChoiceLabel(
+          b.label,
+          stripCatalogRowName: durationList,
+          optionId: b.id,
+        ).toLowerCase(),
+      ),
+    );
+  }
+  final byId = {for (final option in shown) option.id: option};
+
+  final chosen = await showMenu<String>(
+    context: anchorContext,
+    position: position,
+    constraints: BoxConstraints(
+      minWidth: size.width.clamp(200, overlay.size.width - 16),
+      maxWidth: overlay.size.width - 16,
+      maxHeight: 560,
+    ),
+    items: [
+      for (final option in shown)
+        PopupMenuItem<String>(
+          key: activityPickerItemKey(statusKeyPrefix, option),
+          value: option.id,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          child: Row(
+            children: [
+              if (showColourSwatches) ...[
+                Container(
+                  width: 12,
+                  height: 12,
+                  decoration: BoxDecoration(
+                    color: SalahActivityMark.colourForId(option.id),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 8),
+              ],
+              Expanded(
+                child: Text(
+                  compactChoiceLabel(
+                    option.label,
+                    stripCatalogRowName: durationList,
+                    optionId: option.id,
+                  ),
+                  style: option.id == selectedId
+                      ? const TextStyle(fontWeight: FontWeight.w700)
+                      : null,
+                ),
+              ),
+              if (option.id == selectedId)
+                Icon(
+                  Icons.check,
+                  size: 18,
+                  color: Theme.of(anchorContext).colorScheme.primary,
+                ),
+            ],
+          ),
+        ),
+    ],
+  );
+  if (chosen == null) return;
+  final option = byId[chosen];
+  if (option != null) onSelected(option);
+}
+
 class ActivityPicker extends ConsumerWidget {
   const ActivityPicker({
     super.key,
@@ -200,9 +381,10 @@ class ActivityPicker extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(prefsTickProvider);
-    final salahList = identical(options, ActivityCatalog.salah);
+    final durationList = ActivityCatalog.isDurationCatalog(options);
     final swatches =
-        salahList && ref.watch(appPrefsProvider).salahActivityColours;
+        activityPickerUsesColourSwatches(options) &&
+        ref.watch(appPrefsProvider).salahActivityColours;
     final extra = options.any((option) => option.id == selectedId)
         ? null
         : ActivityCatalog.findAnyQuran(selectedId);
@@ -217,8 +399,12 @@ class ActivityPicker extends ConsumerWidget {
         for (final option in shown)
           CheckInSelectEntry(
             value: option.id,
-            label: option.label,
-            itemKey: _keyFor(option),
+            label: compactChoiceLabel(
+              option.label,
+              stripCatalogRowName: durationList,
+              optionId: option.id,
+            ),
+            itemKey: activityPickerItemKey(statusKeyPrefix, option),
             swatch: swatches ? SalahActivityMark.colourForId(option.id) : null,
           ),
       ],
@@ -227,23 +413,6 @@ class ActivityPicker extends ConsumerWidget {
         if (option != null) onSelected(option);
       },
     );
-  }
-
-  Key? _keyFor(ActivityOption option) {
-    if (statusKeyPrefix == null) return null;
-    if (option.id == 'aloneOnTime') {
-      return Key('$statusKeyPrefix-onTime');
-    }
-    if (option.id == 'prayedLate') {
-      return Key('$statusKeyPrefix-late');
-    }
-    if (option.id == 'missed') {
-      return Key('$statusKeyPrefix-missed');
-    }
-    if (option.id == ActivityIds.unanswered) {
-      return Key('$statusKeyPrefix-unanswered');
-    }
-    return Key('$statusKeyPrefix-${option.id}');
   }
 }
 
@@ -291,7 +460,48 @@ class CheckInFactorSelects extends StatelessWidget {
     required this.onDistractingChanged,
     this.helpingKey,
     this.distractingKey,
+    this.helpingTitle = 'HELPING FACTORS',
+    this.distractingTitle = 'DISTRACTING FACTORS',
+    this.sortHelping = true,
+    this.sortDistracting = true,
   });
+
+  factory CheckInFactorSelects.forHomeTrace({
+    Key? key,
+    required String storageKey,
+    required TernaryOutcome outcome,
+    required SalahFactorCapture factors,
+    required ValueChanged<String> onHelpingChanged,
+    required ValueChanged<String> onDistractingChanged,
+    Key? helpingKey,
+    Key? distractingKey,
+  }) {
+    final postFard = isDhikrPostFardTrace(storageKey);
+    return CheckInFactorSelects(
+      key: key,
+      groups: factorGroupsForHomeTrace(storageKey, outcome),
+      helping: NamedFactor.helpingForHomeTrace(
+        storageKey,
+        existingIds: factors.supportIds,
+      ),
+      distracting: postFard
+          ? const []
+          : NamedFactor.distractingForHomeTrace(
+              storageKey,
+              existingIds: factors.challengeIds,
+            ),
+      helpingId: selectedFactorId(factors.supportIds),
+      distractingId: selectedFactorId(factors.challengeIds),
+      helpingKey: helpingKey,
+      distractingKey: distractingKey,
+      helpingTitle: postFard
+          ? Copy.howAttentiveWasI.toUpperCase()
+          : 'HELPING FACTORS',
+      sortHelping: !postFard,
+      onHelpingChanged: onHelpingChanged,
+      onDistractingChanged: onDistractingChanged,
+    );
+  }
 
   final FactorGroups groups;
   final List<NamedFactor> helping;
@@ -302,6 +512,10 @@ class CheckInFactorSelects extends StatelessWidget {
   final ValueChanged<String> onDistractingChanged;
   final Key? helpingKey;
   final Key? distractingKey;
+  final String helpingTitle;
+  final String distractingTitle;
+  final bool sortHelping;
+  final bool sortDistracting;
 
   @override
   Widget build(BuildContext context) {
@@ -330,11 +544,12 @@ class CheckInFactorSelects extends StatelessWidget {
               top: 8,
               bottom: 6,
             ),
-            child: Text('HELPING FACTORS', style: labelStyle),
+            child: Text(helpingTitle, style: labelStyle),
           ),
           CheckInSelect<String>(
             depth: CheckInFieldDepth.nested,
             dropdownKey: helpingKey,
+            sortLabels: sortHelping,
             value: helping.any((factor) => factor.id == helpingId)
                 ? helpingId
                 : kFactorNotRecorded,
@@ -356,11 +571,12 @@ class CheckInFactorSelects extends StatelessWidget {
               top: 8,
               bottom: 6,
             ),
-            child: Text('DISTRACTING FACTORS', style: labelStyle),
+            child: Text(distractingTitle, style: labelStyle),
           ),
           CheckInSelect<String>(
             depth: CheckInFieldDepth.nested,
             dropdownKey: distractingKey,
+            sortLabels: sortDistracting,
             value: distracting.any((factor) => factor.id == distractingId)
                 ? distractingId
                 : kFactorNotRecorded,

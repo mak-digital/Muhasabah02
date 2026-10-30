@@ -5,23 +5,41 @@ import '../../application/device_unlock.dart';
 import '../../application/providers.dart';
 import '../../data/privacy_log.dart';
 import '../../debug/synthetic_check_in_seeder.dart';
+import '../../domain/arabic_script.dart';
 import '../../domain/activities.dart';
+import '../../domain/akhlaq_practices.dart';
+import '../../domain/huquq_practices.dart';
+import '../../domain/knowledge_practices.dart';
+import '../../domain/health_practices.dart';
+import '../../domain/charity_practices.dart';
+import '../../domain/ummah_practices.dart';
+import '../../domain/wealth_practices.dart';
+import '../../domain/time_practices.dart';
+import '../../domain/app_appearance.dart';
+import '../../domain/app_language.dart';
 import '../../domain/copy.dart';
 import '../../domain/display_calendar.dart';
 import '../../domain/first_day_of_week.dart';
+import '../../domain/worship_list_gender.dart';
 import '../../domain/monitor_domain.dart';
 import '../../domain/personal_mix.dart';
 import '../../domain/quotation_cadence.dart';
 import '../../domain/quran_stage.dart';
-import '../history/history_screen.dart';
-import '../response/response_list_screen.dart';
+import '../registry/registry_screen.dart';
+import '../shared/domain_line_icon.dart';
+import '../shared/domain_visual.dart';
 import '../shared/quran_stage_mark.dart';
 import '../shared/salah_activity_mark.dart';
 import '../shared/state_marker.dart';
+import '../shared/system_insets.dart';
+import '../shared/app_language_scope.dart';
 import '../shared/ui_bits.dart';
 import 'application_reflection_screen.dart';
+import 'language_settings_screen.dart';
 import 'faq_screen.dart';
+import 'custom_selection_sets_editor.dart';
 import 'personal_mix_settings.dart';
+import 'productivity_settings.dart';
 import 'reflection_settings.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -35,12 +53,25 @@ class SettingsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text(Copy.settingsTitle)),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: pageListPadding(context),
         children: [
           const SectionHeader(Copy.applicationSection),
           Card(
             child: Column(
               children: [
+                ListTile(
+                  leading: const Icon(Icons.translate),
+                  title: Text(uiText(context, Copy.language)),
+                  subtitle: Text(ref.watch(appLanguageProvider).endonym),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute<void>(
+                        builder: (_) => const LanguageSettingsScreen(),
+                      ),
+                    );
+                  },
+                ),
                 ListTile(
                   leading: const Icon(Icons.brightness_6_outlined),
                   title: const Text(Copy.appearance),
@@ -68,6 +99,21 @@ class SettingsScreen extends ConsumerWidget {
                   },
                 ),
                 ListTile(
+                  leading: const Icon(Icons.font_download_outlined),
+                  title: const Text(Copy.arabicScript),
+                  subtitle: Text(
+                    '${prefs.arabicScriptFace.label} · ${prefs.arabicScriptSize.round()}',
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute<void>(
+                        builder: (_) => const ArabicScriptSettingsScreen(),
+                      ),
+                    );
+                  },
+                ),
+                ListTile(
                   leading: const Icon(Icons.calendar_view_week_outlined),
                   title: const Text(Copy.firstDayOfWeek),
                   subtitle: Text(prefs.firstDayOfWeek.label),
@@ -81,6 +127,19 @@ class SettingsScreen extends ConsumerWidget {
                   },
                 ),
                 ListTile(
+                  leading: const Icon(Icons.person_outline),
+                  title: const Text(Copy.worshipListGender),
+                  subtitle: Text(prefs.worshipListGender.label),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute<void>(
+                        builder: (_) => const WorshipListGenderSettingsScreen(),
+                      ),
+                    );
+                  },
+                ),
+                ListTile(
                   leading: const Icon(Icons.calendar_month_outlined),
                   title: const Text(Copy.calendar),
                   subtitle: Text(prefs.displayCalendar.label),
@@ -89,6 +148,20 @@ class SettingsScreen extends ConsumerWidget {
                       context,
                       MaterialPageRoute<void>(
                         builder: (_) => const CalendarSettingsScreen(),
+                      ),
+                    );
+                  },
+                ),
+                ListTile(
+                  key: const Key('settings-productivity'),
+                  leading: const Icon(Icons.task_alt_outlined),
+                  title: const Text(Copy.productivitySettings),
+                  subtitle: const Text(Copy.productivitySettingsNote),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute<void>(
+                        builder: (_) => const ProductivitySettingsScreen(),
                       ),
                     );
                   },
@@ -239,7 +312,7 @@ class SettingsScreen extends ConsumerWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute<void>(
-                        builder: (_) => const HistoryScreen(),
+                        builder: (_) => const RegistryScreen(initialTab: 4),
                       ),
                     );
                   },
@@ -252,7 +325,7 @@ class SettingsScreen extends ConsumerWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute<void>(
-                        builder: (_) => const ResponseListScreen(),
+                        builder: (_) => const RegistryScreen(initialTab: 3),
                       ),
                     );
                   },
@@ -292,13 +365,7 @@ class SettingsScreen extends ConsumerWidget {
   }
 }
 
-String _themeLabel(int index) {
-  return switch (index) {
-    1 => 'Light',
-    2 => 'Dark',
-    _ => Copy.appearanceNote,
-  };
-}
+String _themeLabel(int index) => AppAppearanceX.fromPrefIndex(index).label;
 
 class ActivitiesSettingsScreen extends ConsumerWidget {
   const ActivitiesSettingsScreen({super.key});
@@ -313,9 +380,10 @@ class ActivitiesSettingsScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Text(
+          BalancedProse(
             Copy.activitiesNote,
-            style: Theme.of(context).textTheme.bodyMedium,
+            style: Theme.of(context).textTheme.bodyMedium
+                ?.copyWith(height: 1.45),
           ),
           const SizedBox(height: 12),
           Text(
@@ -346,7 +414,7 @@ class ActivitiesSettingsScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 8),
-          Text(
+          BalancedProse(
             Copy.salahMarkActivityNote,
             style: Theme.of(context).textTheme.bodySmall,
           ),
@@ -369,7 +437,7 @@ class ActivitiesSettingsScreen extends ConsumerWidget {
               ),
             const SizedBox(height: 16),
             Text(
-              Copy.quranJourney,
+              MonitorDomain.quran.label,
               style: Theme.of(context).textTheme.titleSmall,
             ),
             const SizedBox(height: 8),
@@ -378,40 +446,255 @@ class ActivitiesSettingsScreen extends ConsumerWidget {
                 padding: const EdgeInsets.only(bottom: 8),
                 child: Row(
                   children: [
-                    QuranJourneyMarker(
-                      row: row,
-                      cell: QuranJourneyCell(
-                        kind: QuranJourneyCellKind.recorded,
-                        code: switch (row) {
-                          QuranJourneyRow.applied => 'W',
-                          QuranJourneyRow.reflected => 'T',
-                          QuranJourneyRow.understood => 'M',
-                          QuranJourneyRow.engaged => 'R',
-                        },
-                      ),
-                      colours: true,
+                    RecordedStateMarker(
+                      kind: MarkerKind.filled,
+                      color: QuranStageMark.colourFor(row),
                       semanticLabel: row.label,
                     ),
                     const SizedBox(width: 12),
-                    Expanded(
-                      child: Text('${row.label} — ${row.purpose}'),
+                    Expanded(child: Text('${row.label} — ${row.purpose}')),
+                  ],
+                ),
+              ),
+            const SizedBox(height: 16),
+            Text(
+              MonitorDomain.dhikr.label,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+            const SizedBox(height: 8),
+            BalancedProse(
+              Copy.dhikrPostFardNote,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 8),
+            for (final option in ActivityCatalog.dhikrPostFard)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  children: [
+                    RecordedStateMarker(
+                      kind: SalahActivityMark.kindForHadithLived(option.id),
+                      color: SalahActivityMark.colourForId(option.id),
+                      semanticLabel: option.label,
                     ),
+                    const SizedBox(width: 12),
+                    Expanded(child: Text(option.label)),
+                  ],
+                ),
+              ),
+            const SizedBox(height: 16),
+            Text(
+              MonitorDomain.akhlaq.label,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+            const SizedBox(height: 8),
+            BalancedProse(
+              Copy.akhlaqCheckInNote,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 8),
+            for (final option in akhlaqLegendCatalog)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  children: [
+                    RecordedStateMarker(
+                      kind: SalahActivityMark.kindForAkhlaq(option.id),
+                      color: SalahActivityMark.colourForId(option.id),
+                      semanticLabel: option.label,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(child: Text(option.label)),
+                  ],
+                ),
+              ),
+            const SizedBox(height: 16),
+            Text(
+              MonitorDomain.huquq.label,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+            const SizedBox(height: 8),
+            BalancedProse(
+              Copy.huquqCheckInNote,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 8),
+            for (final option in huquqLegendCatalog)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  children: [
+                    RecordedStateMarker(
+                      kind: SalahActivityMark.kindForAkhlaq(option.id),
+                      color: SalahActivityMark.colourForId(option.id),
+                      semanticLabel: option.label,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(child: Text(option.label)),
+                  ],
+                ),
+              ),
+            const SizedBox(height: 16),
+            Text(
+              MonitorDomain.charity.label,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+            const SizedBox(height: 8),
+            BalancedProse(
+              Copy.charityCheckInNote,
+              style: Theme.of(context).textTheme.bodySmall
+                  ?.copyWith(height: 1.45),
+            ),
+            const SizedBox(height: 8),
+            for (final option in charityLegendCatalog)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  children: [
+                    RecordedStateMarker(
+                      kind: SalahActivityMark.kindForAkhlaq(option.id),
+                      color: SalahActivityMark.colourForId(option.id),
+                      semanticLabel: option.label,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(child: Text(option.label)),
+                  ],
+                ),
+              ),
+            const SizedBox(height: 16),
+            Text(
+              MonitorDomain.knowledge.label,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+            const SizedBox(height: 8),
+            BalancedProse(
+              Copy.knowledgeCheckInNote,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 8),
+            for (final option in knowledgeLegendCatalog)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  children: [
+                    RecordedStateMarker(
+                      kind: SalahActivityMark.kindForAkhlaq(option.id),
+                      color: SalahActivityMark.colourForId(option.id),
+                      semanticLabel: option.label,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(child: Text(option.label)),
+                  ],
+                ),
+              ),
+            const SizedBox(height: 16),
+            Text(
+              MonitorDomain.time.label,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+            const SizedBox(height: 8),
+            BalancedProse(
+              Copy.timeCheckInNote,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 8),
+            for (final option in timeLegendCatalog)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  children: [
+                    RecordedStateMarker(
+                      kind: SalahActivityMark.kindForAkhlaq(option.id),
+                      color: SalahActivityMark.colourForId(option.id),
+                      semanticLabel: option.label,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(child: Text(option.label)),
+                  ],
+                ),
+              ),
+            const SizedBox(height: 16),
+            Text(
+              MonitorDomain.health.label,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+            const SizedBox(height: 8),
+            BalancedProse(
+              Copy.healthCheckInNote,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 8),
+            for (final option in healthLegendCatalog)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  children: [
+                    RecordedStateMarker(
+                      kind: SalahActivityMark.kindForAkhlaq(option.id),
+                      color: SalahActivityMark.colourForId(option.id),
+                      semanticLabel: option.label,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(child: Text(option.label)),
+                  ],
+                ),
+              ),
+            const SizedBox(height: 16),
+            Text(
+              MonitorDomain.wealth.label,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+            const SizedBox(height: 8),
+            BalancedProse(
+              Copy.wealthCheckInNote,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 8),
+            for (final option in wealthLegendCatalog)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  children: [
+                    RecordedStateMarker(
+                      kind: SalahActivityMark.kindForAkhlaq(option.id),
+                      color: SalahActivityMark.colourForId(option.id),
+                      semanticLabel: option.label,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(child: Text(option.label)),
+                  ],
+                ),
+              ),
+            const SizedBox(height: 16),
+            Text(
+              MonitorDomain.ummah.label,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+            const SizedBox(height: 8),
+            BalancedProse(
+              Copy.ummahCheckInNote,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 8),
+            for (final option in ummahLegendCatalog)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  children: [
+                    RecordedStateMarker(
+                      kind: SalahActivityMark.kindForAkhlaq(option.id),
+                      color: SalahActivityMark.colourForId(option.id),
+                      semanticLabel: option.label,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(child: Text(option.label)),
                   ],
                 ),
               ),
           ] else ...[
-            const _ActivityMarkRow(
-              kind: MarkerKind.filled,
-              label: 'On time',
-            ),
-            const _ActivityMarkRow(
-              kind: MarkerKind.outlined,
-              label: 'Late',
-            ),
-            const _ActivityMarkRow(
-              kind: MarkerKind.missed,
-              label: 'Missed',
-            ),
+            const _ActivityMarkRow(kind: MarkerKind.filled, label: 'On time'),
+            const _ActivityMarkRow(kind: MarkerKind.outlined, label: 'Late'),
+            const _ActivityMarkRow(kind: MarkerKind.missed, label: 'Missed'),
             const _ActivityMarkRow(
               kind: MarkerKind.unanswered,
               label: 'Unanswered',
@@ -461,7 +744,7 @@ class AppearanceSettingsScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Text(
+          BalancedProse(
             Copy.appearanceNote,
             style: Theme.of(context).textTheme.bodyMedium,
           ),
@@ -469,15 +752,20 @@ class AppearanceSettingsScreen extends ConsumerWidget {
           Card(
             child: RadioGroup<int>(
               groupValue: current,
-              onChanged: (value) {
+              onChanged: (value) async {
                 if (value == null) return;
-                ref.read(themeModePrefProvider.notifier).state = value;
+                final look = AppAppearanceX.fromPrefIndex(value);
+                await ref.read(appPrefsProvider).setAppearance(look);
+                ref.read(themeModePrefProvider.notifier).state = look.prefIndex;
+                ref.read(prefsTickProvider.notifier).state++;
               },
-              child: const Column(
+              child: Column(
                 children: [
-                  RadioListTile<int>(title: Text('System'), value: 0),
-                  RadioListTile<int>(title: Text('Light'), value: 1),
-                  RadioListTile<int>(title: Text('Dark'), value: 2),
+                  for (final look in AppAppearance.values)
+                    RadioListTile<int>(
+                      title: Text(look.label),
+                      value: look.prefIndex,
+                    ),
                 ],
               ),
             ),
@@ -498,7 +786,7 @@ class TextSizeSettingsScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Text(
+          BalancedProse(
             Copy.textSizeNote,
             style: Theme.of(context).textTheme.titleMedium,
           ),
@@ -506,6 +794,80 @@ class TextSizeSettingsScreen extends StatelessWidget {
           Text(
             'Muhasabah uses your device text size. Change it in the system accessibility settings. The app does not override or score how large text appears.',
             style: Theme.of(context).textTheme.bodyMedium,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class ArabicScriptSettingsScreen extends ConsumerWidget {
+  const ArabicScriptSettingsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(prefsTickProvider);
+    final prefs = ref.watch(appPrefsProvider);
+    final size = clampArabicScriptSize(prefs.arabicScriptSize);
+    return Scaffold(
+      appBar: AppBar(title: const Text(Copy.arabicScript)),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          BalancedProse(
+            Copy.arabicScriptNote,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          const SizedBox(height: 12),
+          Card(
+            child: RadioGroup<ArabicScriptFace>(
+              groupValue: prefs.arabicScriptFace,
+              onChanged: (value) async {
+                if (value == null) return;
+                await prefs.setArabicScriptFace(value);
+                ref.read(prefsTickProvider.notifier).state++;
+              },
+              child: Column(
+                children: [
+                  for (final face in ArabicScriptFace.values)
+                    RadioListTile<ArabicScriptFace>(
+                      key: Key('arabic-script-pref-${face.id}'),
+                      title: Text(face.label),
+                      value: face,
+                    ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(Copy.textSize, style: Theme.of(context).textTheme.titleMedium),
+          Slider(
+            key: const Key('arabic-script-size'),
+            min: 0,
+            max: (kArabicScriptSizes.length - 1).toDouble(),
+            divisions: kArabicScriptSizes.length - 1,
+            value: kArabicScriptSizes.indexOf(size).toDouble(),
+            label: '${size.round()}',
+            onChanged: (value) async {
+              await prefs.setArabicScriptSize(
+                kArabicScriptSizes[value.round()],
+              );
+              ref.read(prefsTickProvider.notifier).state++;
+            },
+          ),
+          PracticeScriptPane(
+            wash: domainColorIdentity(MonitorDomain.quran)
+                .washFor(Theme.of(context).brightness, context),
+            child: Text(
+              'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ',
+              textAlign: TextAlign.right,
+              textDirection: TextDirection.rtl,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontFamily: prefs.arabicScriptFace.family,
+                fontSize: size,
+                height: 1.85,
+              ),
+            ),
           ),
         ],
       ),
@@ -581,7 +943,7 @@ class FirstDayOfWeekSettingsScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Text(
+          BalancedProse(
             Copy.firstDayOfWeekNote,
             style: Theme.of(context).textTheme.bodyMedium,
           ),
@@ -615,19 +977,66 @@ class FirstDayOfWeekSettingsScreen extends ConsumerWidget {
   }
 }
 
+class WorshipListGenderSettingsScreen extends ConsumerWidget {
+  const WorshipListGenderSettingsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(prefsTickProvider);
+    final current = ref.watch(appPrefsProvider).worshipListGender;
+    return Scaffold(
+      appBar: AppBar(title: const Text(Copy.worshipListGender)),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          BalancedProse(
+            Copy.worshipListGenderNote,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          const SizedBox(height: 12),
+          Card(
+            child: RadioGroup<WorshipListGender>(
+              groupValue: current,
+              onChanged: (value) async {
+                if (value == null) return;
+                await ref.read(appPrefsProvider).setWorshipListGender(value);
+                ref.read(prefsTickProvider.notifier).state++;
+              },
+              child: Column(
+                children: [
+                  for (final option in WorshipListGender.values)
+                    RadioListTile<WorshipListGender>(
+                      title: Text(
+                        option == WorshipListGender.unanswered
+                            ? '${option.label} (default)'
+                            : option.label,
+                      ),
+                      value: option,
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class CalendarSettingsScreen extends ConsumerWidget {
   const CalendarSettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(prefsTickProvider);
-    final current = ref.watch(appPrefsProvider).displayCalendar;
+    final prefs = ref.watch(appPrefsProvider);
+    final current = prefs.displayCalendar;
     return Scaffold(
       appBar: AppBar(title: const Text(Copy.calendar)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Text(
+          BalancedProse(
             Copy.calendarNote,
             style: Theme.of(context).textTheme.bodyMedium,
           ),
@@ -655,6 +1064,54 @@ class CalendarSettingsScreen extends ConsumerWidget {
               ),
             ),
           ),
+          const SizedBox(height: 16),
+          BalancedProse(
+            Copy.ramadanCalendarOffsetNote,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          const SizedBox(height: 12),
+          Card(
+            child: RadioGroup<int>(
+              groupValue: prefs.ramadanCalendarOffsetDays,
+              onChanged: (value) async {
+                if (value == null) return;
+                await ref
+                    .read(appPrefsProvider)
+                    .setRamadanCalendarOffsetDays(value);
+                ref.read(prefsTickProvider.notifier).state++;
+              },
+              child: Column(
+                children: [
+                  RadioListTile<int>(
+                    title: const Text(Copy.ramadanOffsetCivil),
+                    value: 0,
+                  ),
+                  RadioListTile<int>(
+                    title: const Text(Copy.ramadanOffsetEarlier),
+                    value: -1,
+                  ),
+                  RadioListTile<int>(
+                    title: const Text(Copy.ramadanOffsetLater),
+                    value: 1,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Card(
+            child: SwitchListTile(
+              title: const Text(Copy.showFastingRamadanHistory),
+              subtitle: const Text(Copy.showFastingRamadanHistoryNote),
+              value: prefs.showFastingRamadanHistory,
+              onChanged: (value) async {
+                await ref
+                    .read(appPrefsProvider)
+                    .setShowFastingRamadanHistory(value);
+                ref.read(prefsTickProvider.notifier).state++;
+              },
+            ),
+          ),
         ],
       ),
     );
@@ -671,41 +1128,47 @@ class VisibleDomainsSettingsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text(Copy.visibleDomains)),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: pageListPadding(context),
         children: [
-          Text(
+          BalancedProse(
             Copy.shownDomainsNote,
             style: Theme.of(context).textTheme.bodyMedium,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           Wrap(
             spacing: 8,
             runSpacing: 8,
             children: [
               FilterChip(
+                key: const Key('clear-all-selections'),
+                label: const Text(Copy.clearAllSelections),
+                selected: current.isEmpty,
+                onSelected: (_) => confirmClearWorkingSelection(context, ref),
+              ),
+              FilterChip(
                 label: const Text(Copy.selectAllDomains),
                 selected: sameVisibleDomains(
                   current,
-                  MonitorDomain.values.toSet(),
+                  selectableMonitorDomains(),
                 ),
                 onSelected: (_) async {
                   await ref
                       .read(appPrefsProvider)
-                      .setVisibleDomains(MonitorDomain.values.toSet());
+                      .setVisibleDomains(selectableMonitorDomains());
                   ref.read(prefsTickProvider.notifier).state++;
                 },
               ),
               FilterChip(
-                label: const Text(Copy.basicAkhlaqDomains),
+                label: const Text(Copy.basicDhikrDomains),
                 selected: sameVisibleDomains(
                   current,
-                  kBasicAkhlaqVisibleDomains,
+                  kBasicDhikrVisibleDomains,
                 ),
                 onSelected: (_) async {
                   await ref
                       .read(appPrefsProvider)
                       .setVisibleDomains(
-                        Set<MonitorDomain>.from(kBasicAkhlaqVisibleDomains),
+                        Set<MonitorDomain>.from(kBasicDhikrVisibleDomains),
                       );
                   ref.read(prefsTickProvider.notifier).state++;
                 },
@@ -713,8 +1176,8 @@ class VisibleDomainsSettingsScreen extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 8),
-          Text(
-            Copy.basicAkhlaqDomainsNote,
+          BalancedProse(
+            Copy.basicDhikrDomainsNote,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
@@ -726,18 +1189,37 @@ class VisibleDomainsSettingsScreen extends ConsumerWidget {
                 for (final domain in MonitorDomain.values)
                   CheckboxListTile(
                     key: Key('domain-visible-${domain.name}'),
-                    title: Text(domain.label),
-                    value: current.contains(domain),
-                    onChanged: (checked) async {
-                      final next = Set<MonitorDomain>.from(current);
-                      if (checked == true) {
-                        next.add(domain);
-                      } else {
-                        next.remove(domain);
-                      }
-                      await ref.read(appPrefsProvider).setVisibleDomains(next);
-                      ref.read(prefsTickProvider.notifier).state++;
-                    },
+                    title: Row(
+                      children: [
+                        DomainLineIcon(
+                          domain,
+                          size: 20,
+                          color: domainColorIdentity(domain).family,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(child: Text(domain.label)),
+                      ],
+                    ),
+                    subtitle: isDormantMonitorDomain(domain)
+                        ? const Text(Copy.dormantDomainNote)
+                        : null,
+                    value: isDormantMonitorDomain(domain)
+                        ? false
+                        : current.contains(domain),
+                    onChanged: isDormantMonitorDomain(domain)
+                        ? null
+                        : (checked) async {
+                            final next = Set<MonitorDomain>.from(current);
+                            if (checked == true) {
+                              next.add(domain);
+                            } else {
+                              next.remove(domain);
+                            }
+                            await ref
+                                .read(appPrefsProvider)
+                                .setVisibleDomains(next);
+                            ref.read(prefsTickProvider.notifier).state++;
+                          },
                   ),
               ],
             ),
@@ -749,6 +1231,8 @@ class VisibleDomainsSettingsScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           const PersonalMixEditor(),
+          const SizedBox(height: 24),
+          const CustomSelectionSetsEditor(),
         ],
       ),
     );

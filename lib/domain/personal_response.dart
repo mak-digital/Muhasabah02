@@ -1,3 +1,5 @@
+import 'monitor_domain.dart';
+
 const int kPersonalResponseSchemaVersion = 1;
 const int kResponseMaxScalars = 10000;
 
@@ -110,6 +112,8 @@ class PersonalResponse {
     this.editedAt,
     this.archivedAt,
     this.provenance,
+    this.noteCode,
+    this.reminderDateKey,
     this.schemaVersion = kPersonalResponseSchemaVersion,
     this.synthetic = false,
   });
@@ -120,6 +124,8 @@ class PersonalResponse {
   final DateTime? editedAt;
   final DateTime? archivedAt;
   final ResponseProvenance? provenance;
+  final String? noteCode;
+  final String? reminderDateKey;
   final int schemaVersion;
   final bool synthetic;
 
@@ -131,6 +137,9 @@ class PersonalResponse {
     DateTime? archivedAt,
     bool clearArchivedAt = false,
     ResponseProvenance? provenance,
+    String? noteCode,
+    String? reminderDateKey,
+    bool clearReminderDateKey = false,
     bool? synthetic,
   }) {
     return PersonalResponse(
@@ -140,6 +149,10 @@ class PersonalResponse {
       editedAt: editedAt ?? this.editedAt,
       archivedAt: clearArchivedAt ? null : (archivedAt ?? this.archivedAt),
       provenance: provenance ?? this.provenance,
+      noteCode: noteCode ?? this.noteCode,
+      reminderDateKey: clearReminderDateKey
+          ? null
+          : (reminderDateKey ?? this.reminderDateKey),
       schemaVersion: schemaVersion,
       synthetic: synthetic ?? this.synthetic,
     );
@@ -154,6 +167,8 @@ class PersonalResponse {
       if (editedAt != null) 'editedAt': editedAt!.toIso8601String(),
       if (archivedAt != null) 'archivedAt': archivedAt!.toIso8601String(),
       if (provenance != null) 'provenance': provenance!.toJson(),
+      if (noteCode != null) 'noteCode': noteCode,
+      if (reminderDateKey != null) 'reminderDateKey': reminderDateKey,
       if (synthetic) 'synthetic': true,
     };
   }
@@ -176,10 +191,87 @@ class PersonalResponse {
           ? DateTime.tryParse(json['archivedAt'] as String)
           : null,
       provenance: ResponseProvenance.fromJson(json['provenance']),
+      noteCode: json['noteCode'] is String ? json['noteCode'] as String : null,
+      reminderDateKey: json['reminderDateKey'] is String
+          ? json['reminderDateKey'] as String
+          : null,
       schemaVersion: json['schemaVersion'] is int
           ? json['schemaVersion'] as int
           : kPersonalResponseSchemaVersion,
       synthetic: json['synthetic'] == true,
     );
   }
+}
+
+const kNoteGeneralDomain = 'GEN';
+
+String noteYymmdd(DateTime createdAt) {
+  final local = DateTime(createdAt.year, createdAt.month, createdAt.day);
+  final yy = (local.year % 100).toString().padLeft(2, '0');
+  final mm = local.month.toString().padLeft(2, '0');
+  final dd = local.day.toString().padLeft(2, '0');
+  return '$yy$mm$dd';
+}
+
+String formatNoteCode(DateTime createdAt, int dailyIndex) {
+  return '${noteYymmdd(createdAt)}-${dailyIndex.toString().padLeft(2, '0')}';
+}
+
+int? parseNoteDailyIndex(String? code) {
+  if (code == null || code.isEmpty) return null;
+  final dash = code.lastIndexOf('-');
+  if (dash < 0 || dash == code.length - 1) return null;
+  return int.tryParse(code.substring(dash + 1));
+}
+
+int nextNoteDailyIndex(Iterable<PersonalResponse> items, DateTime createdAt) {
+  final prefix = '${noteYymmdd(createdAt)}-';
+  var max = 0;
+  for (final item in items) {
+    final code = item.noteCode;
+    if (code == null || !code.startsWith(prefix)) continue;
+    final n = parseNoteDailyIndex(code) ?? 0;
+    if (n > max) max = n;
+  }
+  return max + 1;
+}
+
+List<PersonalResponse> assignMissingNoteCodes(List<PersonalResponse> items) {
+  final byId = {for (final item in items) item.id: item};
+  final sorted = [...items]..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+  for (final item in sorted) {
+    final current = byId[item.id]!;
+    if (current.noteCode != null && current.noteCode!.isNotEmpty) continue;
+    final index = nextNoteDailyIndex(byId.values, current.createdAt);
+    byId[item.id] = current.copyWith(
+      noteCode: formatNoteCode(current.createdAt, index),
+    );
+  }
+  return [for (final item in items) byId[item.id]!];
+}
+
+String noteDomainLabel(PersonalResponse item) {
+  final raw = item.provenance?.domain;
+  if (raw == null || raw.isEmpty) return kNoteGeneralDomain;
+  final id = raw.split('.').first;
+  for (final domain in MonitorDomain.values) {
+    if (domain.id == id) return domain.shortLabel;
+  }
+  return kNoteGeneralDomain;
+}
+
+MonitorDomain? noteMonitorDomain(PersonalResponse item) {
+  final raw = item.provenance?.domain;
+  if (raw == null || raw.isEmpty) return null;
+  final id = raw.split('.').first;
+  for (final domain in MonitorDomain.values) {
+    if (domain.id == id) return domain;
+  }
+  return null;
+}
+
+String noteSourceLabel(PersonalResponse item) {
+  final provenance = item.provenance;
+  if (provenance == null) return 'Independent';
+  return provenance.labelSnapshot;
 }

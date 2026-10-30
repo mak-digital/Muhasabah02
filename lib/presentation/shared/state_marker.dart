@@ -269,6 +269,7 @@ class _ZakatPainter extends CustomPainter {
             ..color = color,
         );
       case ZakatStatus.planned:
+      case ZakatStatus.reviewing:
         canvas.save();
         canvas.clipPath(path);
         canvas.drawRect(
@@ -283,6 +284,8 @@ class _ZakatPainter extends CustomPainter {
             ..strokeWidth = AppDimensions.progressMarkerStroke
             ..color = color,
         );
+      case ZakatStatus.preferNot:
+        canvas.drawPath(path, Paint()..color = color.withValues(alpha: 0.55));
       case ZakatStatus.unanswered:
         _drawDottedDiamond(canvas, center, side, color.withValues(alpha: 0.5));
       case ZakatStatus.notApplicable:

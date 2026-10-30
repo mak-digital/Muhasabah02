@@ -50,7 +50,7 @@ void main() {
     await chooseCheckInOption(
       tester,
       dropdownKey: const Key('salah-fajr'),
-      optionLabel: 'Prayed alone on time',
+      optionLabel: 'Alone on time',
     );
     await chooseCheckInOption(
       tester,
@@ -65,7 +65,7 @@ void main() {
     await chooseCheckInOption(
       tester,
       dropdownKey: const Key('salah-isha'),
-      optionLabel: 'Prayed alone on time',
+      optionLabel: 'Alone on time',
     );
     await tester.pumpAndSettle();
     await tester.tap(find.text('Save check-in'));

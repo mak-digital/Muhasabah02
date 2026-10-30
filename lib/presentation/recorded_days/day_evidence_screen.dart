@@ -8,26 +8,34 @@ import '../../domain/charity_factors.dart';
 import '../../domain/context_catalog.dart';
 import '../../domain/copy.dart';
 import '../../domain/daily_check_in.dart';
+import '../../domain/dhikr_context.dart';
 import '../../domain/display_calendar.dart';
 import '../../domain/home_traces.dart';
+import '../../domain/huquq_practices.dart';
+import '../../domain/knowledge_practices.dart';
 import '../../domain/monitor_domain.dart';
 import '../../domain/other_domains.dart';
+import '../../domain/personal_mix.dart';
 import '../../domain/personal_response.dart';
+import '../../domain/personalisation_resolver.dart';
 import '../../domain/prayer.dart';
 import '../../domain/quran.dart';
+import '../../domain/salah_extras.dart';
+import '../../domain/charity_practices.dart';
+import '../../domain/fasting_practices.dart';
+import '../../domain/health_practices.dart';
+import '../../domain/ummah_practices.dart';
+import '../../domain/wealth_practices.dart';
+import '../../domain/time_practices.dart';
 import '../shared/add_response_button.dart';
+import '../shared/system_insets.dart';
 import '../shared/ui_bits.dart';
 import 'evidence_ui.dart';
 
 class DayEvidenceScreen extends ConsumerWidget {
-  const DayEvidenceScreen({
-    super.key,
-    required this.dateKey,
-    this.limitToVisibleDomains = false,
-  });
+  const DayEvidenceScreen({super.key, required this.dateKey});
 
   final String dateKey;
-  final bool limitToVisibleDomains;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -55,11 +63,18 @@ class DayEvidenceScreen extends ConsumerWidget {
             );
           }
           final record = found;
-          final visible = ref.read(appPrefsProvider).visibleDomains;
+          final prefs = ref.read(appPrefsProvider);
+          final resolver = PersonalisationResolver(
+            visibleDomains: prefs.visibleDomains,
+            mix: prefs.personalMix,
+          );
           bool show(MonitorDomain domain) =>
-              !limitToVisibleDomains || visible.contains(domain);
+              resolver.reviewDomains.contains(domain);
+          bool allows(String id) => resolver.mixFocusAllows(id);
+          final sameAsDomains =
+              resolver.mix.kind == PersonalMixKind.sameAsDomains;
           return ListView(
-            padding: const EdgeInsets.all(16),
+            padding: pageListPadding(context, recoverSystemBottom: true),
             children: [
               EvidenceGuard(
                 Copy.historicalReflectionGuard,
@@ -72,29 +87,36 @@ class DayEvidenceScreen extends ConsumerWidget {
                     MuhasabahColors.salahWash,
                     MuhasabahColors.salahWashDark,
                     brightness,
+                    context,
                   ),
                   children: [
                     for (final prayer in PrayerId.values)
+                      if (allows('salah.${prayer.name}'))
+                        EvidenceRow(
+                          name: prayer.label,
+                          value: _prayerValue(record, prayer),
+                          quiet: !record.prayer(prayer).isRecorded,
+                        ),
+                    if (allows('salah.${SalahTraceRow.jumuah.id}'))
                       EvidenceRow(
-                        name: prayer.label,
-                        value: _prayerValue(record, prayer),
-                        quiet: !record.prayer(prayer).isRecorded,
+                        name: 'Jumu‘ah',
+                        value:
+                            ActivityCatalog.find(
+                              ActivityCatalog.jumuah,
+                              record.jumuahActivityId,
+                            )?.label ??
+                            record.jumuah.label,
+                        quiet: !record.jumuah.isRecorded,
                       ),
-                    EvidenceRow(
-                      name: 'Jumu‘ah',
-                      value: record.jumuah.label,
-                      quiet: !record.jumuah.isRecorded,
-                    ),
-                    EvidenceRow(
-                      name: 'Tahajjud',
-                      value: _voluntary(record.tahajjud),
-                      quiet: record.tahajjud == TernaryOutcome.unanswered,
-                    ),
-                    EvidenceRow(
-                      name: 'Ishraq',
-                      value: _voluntary(record.ishraq),
-                      quiet: record.ishraq == TernaryOutcome.unanswered,
-                    ),
+                    for (final row in kSalahVoluntaryRows)
+                      if (allows('salah.${row.id}'))
+                        EvidenceRow(
+                          name: row.label,
+                          value: _voluntaryLabel(record, row),
+                          quiet:
+                              record.voluntaryOutcome(row) ==
+                              TernaryOutcome.unanswered,
+                        ),
                   ],
                 ),
               if (show(MonitorDomain.quran))
@@ -104,28 +126,32 @@ class DayEvidenceScreen extends ConsumerWidget {
                     MuhasabahColors.quranWash,
                     MuhasabahColors.quranWashDark,
                     brightness,
+                    context,
                   ),
                   children: [
                     for (final dimension in quranDailyDimensions)
-                      EvidenceRow(
-                        name: dimension.label,
-                        value: switch (record.quranOutcome(dimension)) {
-                          TernaryOutcome.positive => dimension.positiveLabel,
-                          TernaryOutcome.negative => dimension.negativeLabel,
-                          TernaryOutcome.unanswered => 'Not recorded',
-                        },
-                        quiet:
-                            record.quranOutcome(dimension) ==
-                            TernaryOutcome.unanswered,
-                        note:
-                            dimension == QuranDimension.consciousApplication &&
-                                record.quranOutcome(dimension).isRecorded
-                            ? Copy.consciousApplicationNote
-                            : null,
-                      ),
-                    if (record
-                        .quranOutcome(QuranDimension.applicationReflection)
-                        .isRecorded)
+                      if (allows('quran.${dimension.name}'))
+                        EvidenceRow(
+                          name: dimension.label,
+                          value: switch (record.quranOutcome(dimension)) {
+                            TernaryOutcome.positive => dimension.positiveLabel,
+                            TernaryOutcome.negative => dimension.negativeLabel,
+                            TernaryOutcome.unanswered => 'Not recorded',
+                          },
+                          quiet:
+                              record.quranOutcome(dimension) ==
+                              TernaryOutcome.unanswered,
+                          note:
+                              dimension ==
+                                      QuranDimension.consciousApplication &&
+                                  record.quranOutcome(dimension).isRecorded
+                              ? Copy.consciousApplicationNote
+                              : null,
+                        ),
+                    if (allows('quran.applicationReflection') &&
+                        record
+                            .quranOutcome(QuranDimension.applicationReflection)
+                            .isRecorded)
                       EvidenceRow(
                         name: 'Application Reflection',
                         value: record
@@ -143,8 +169,9 @@ class DayEvidenceScreen extends ConsumerWidget {
                     MuhasabahColors.hadithWash,
                     MuhasabahColors.hadithWashDark,
                     brightness,
+                    context,
                   ),
-                  rows: hadithHomeRows,
+                  rows: _mixRows(hadithHomeRows, allows),
                   record: record,
                   extraName: 'Hadith engagement',
                   extraValue: _observationLabel(
@@ -152,7 +179,7 @@ class DayEvidenceScreen extends ConsumerWidget {
                     record.hadith,
                   ),
                   extraQuiet: !record.hadith.isRecorded,
-                  showExtra: record.hadith.isRecorded,
+                  showExtra: sameAsDomains && record.hadith.isRecorded,
                 ),
               if (show(MonitorDomain.dhikr))
                 ..._traceBand(
@@ -162,13 +189,14 @@ class DayEvidenceScreen extends ConsumerWidget {
                     MuhasabahColors.dhikrWash,
                     MuhasabahColors.dhikrWashDark,
                     brightness,
+                    context,
                   ),
-                  rows: dhikrHomeRows,
+                  rows: _mixRows(dhikrHomeRows, allows),
                   record: record,
                   extraName: 'Dhikr / Istighfar',
                   extraValue: record.dhikr.label,
                   extraQuiet: !record.dhikr.isRecorded,
-                  showExtra: record.dhikr.isRecorded,
+                  showExtra: sameAsDomains && record.dhikr.isRecorded,
                 ),
               if (show(MonitorDomain.akhlaq))
                 ..._traceBand(
@@ -178,8 +206,9 @@ class DayEvidenceScreen extends ConsumerWidget {
                     MuhasabahColors.akhlaqWash,
                     MuhasabahColors.akhlaqWashDark,
                     brightness,
+                    context,
                   ),
-                  rows: akhlaqAllHomeRows,
+                  rows: _mixRows(akhlaqAllHomeRows, allows),
                   record: record,
                   extraName: Copy.akhlaqStruggleNote,
                   extraValue: record.akhlaqStruggleNote ?? '',
@@ -196,123 +225,9 @@ class DayEvidenceScreen extends ConsumerWidget {
                     MuhasabahColors.huquqWash,
                     MuhasabahColors.huquqWashDark,
                     brightness,
+                    context,
                   ),
-                  rows: huquqHomeRows,
-                  record: record,
-                  extraName: '',
-                  extraValue: '',
-                  extraQuiet: true,
-                  showExtra: false,
-                ),
-              if (show(MonitorDomain.knowledge))
-                ..._traceBand(
-                  context,
-                  title: MonitorDomain.knowledge.label,
-                  color: MuhasabahColors.wash(
-                    MuhasabahColors.knowledgeWash,
-                    MuhasabahColors.knowledgeWashDark,
-                    brightness,
-                  ),
-                  rows: knowledgeHomeRows,
-                  record: record,
-                  extraName: '',
-                  extraValue: '',
-                  extraQuiet: true,
-                  showExtra: false,
-                ),
-              if (show(MonitorDomain.time))
-                ..._traceBand(
-                  context,
-                  title: MonitorDomain.time.label,
-                  color: MuhasabahColors.wash(
-                    MuhasabahColors.timeWash,
-                    MuhasabahColors.timeWashDark,
-                    brightness,
-                  ),
-                  rows: timeAllHomeRows,
-                  record: record,
-                  extraName: '',
-                  extraValue: '',
-                  extraQuiet: true,
-                  showExtra: false,
-                ),
-              if (show(MonitorDomain.health))
-                ..._traceBand(
-                  context,
-                  title: MonitorDomain.health.label,
-                  color: MuhasabahColors.wash(
-                    MuhasabahColors.healthWash,
-                    MuhasabahColors.healthWashDark,
-                    brightness,
-                  ),
-                  rows: healthHomeRows,
-                  record: record,
-                  extraName: '',
-                  extraValue: '',
-                  extraQuiet: true,
-                  showExtra: false,
-                ),
-              if (show(MonitorDomain.wealth))
-                ..._traceBand(
-                  context,
-                  title: MonitorDomain.wealth.label,
-                  color: MuhasabahColors.wash(
-                    MuhasabahColors.wealthWash,
-                    MuhasabahColors.wealthWashDark,
-                    brightness,
-                  ),
-                  rows: wealthAllHomeRows,
-                  record: record,
-                  extraName: '',
-                  extraValue: '',
-                  extraQuiet: true,
-                  showExtra: false,
-                ),
-              if (show(MonitorDomain.ummah))
-                ..._traceBand(
-                  context,
-                  title: MonitorDomain.ummah.label,
-                  color: MuhasabahColors.wash(
-                    MuhasabahColors.ummahWash,
-                    MuhasabahColors.ummahWashDark,
-                    brightness,
-                  ),
-                  rows: ummahAllHomeRows,
-                  record: record,
-                  extraName: '',
-                  extraValue: '',
-                  extraQuiet: true,
-                  showExtra: false,
-                ),
-              if (show(MonitorDomain.fasting))
-                ..._traceBand(
-                  context,
-                  title: 'Fasting',
-                  color: MuhasabahColors.wash(
-                    MuhasabahColors.fastingWash,
-                    MuhasabahColors.fastingWashDark,
-                    brightness,
-                  ),
-                  rows: fastingHomeRows,
-                  record: record,
-                  extraName: 'Fasting',
-                  extraValue: _observationLabel(
-                    ActivityCatalog.fasting,
-                    record.fasting,
-                  ),
-                  extraQuiet: !record.fasting.isRecorded,
-                  showExtra: record.fasting.isRecorded,
-                ),
-              if (show(MonitorDomain.hajj))
-                ..._traceBand(
-                  context,
-                  title: MonitorDomain.hajj.label,
-                  color: MuhasabahColors.wash(
-                    MuhasabahColors.hajjWash,
-                    MuhasabahColors.hajjWashDark,
-                    brightness,
-                  ),
-                  rows: hajjHomeRows,
+                  rows: _mixRows(huquqHomeRows, allows),
                   record: record,
                   extraName: '',
                   extraValue: '',
@@ -327,8 +242,9 @@ class DayEvidenceScreen extends ConsumerWidget {
                     MuhasabahColors.charityWash,
                     MuhasabahColors.charityWashDark,
                     brightness,
+                    context,
                   ),
-                  rows: charityHomeRows,
+                  rows: _mixRows(charityHomeRows, allows),
                   record: record,
                   extraName: 'Financial charity',
                   extraValue: _observationLabel(
@@ -336,11 +252,133 @@ class DayEvidenceScreen extends ConsumerWidget {
                     record.charity,
                   ),
                   extraQuiet: !record.charity.isRecorded,
-                  showExtra: record.charity.isRecorded,
+                  showExtra: sameAsDomains && record.charity.isRecorded,
                   extraRows: [
-                    if (record.zakat.isRecorded)
+                    if (record.zakat.isRecorded && allows(kZakatMixKey))
                       EvidenceRow(name: 'Zakat', value: record.zakat.label),
                   ],
+                ),
+              if (show(MonitorDomain.knowledge))
+                ..._traceBand(
+                  context,
+                  title: MonitorDomain.knowledge.label,
+                  color: MuhasabahColors.wash(
+                    MuhasabahColors.knowledgeWash,
+                    MuhasabahColors.knowledgeWashDark,
+                    brightness,
+                    context,
+                  ),
+                  rows: _mixRows(knowledgeHomeRows, allows),
+                  record: record,
+                  extraName: '',
+                  extraValue: '',
+                  extraQuiet: true,
+                  showExtra: false,
+                ),
+              if (show(MonitorDomain.time))
+                ..._traceBand(
+                  context,
+                  title: MonitorDomain.time.label,
+                  color: MuhasabahColors.wash(
+                    MuhasabahColors.timeWash,
+                    MuhasabahColors.timeWashDark,
+                    brightness,
+                    context,
+                  ),
+                  rows: _mixRows(timeHomeRows, allows),
+                  record: record,
+                  extraName: '',
+                  extraValue: '',
+                  extraQuiet: true,
+                  showExtra: false,
+                ),
+              if (show(MonitorDomain.health))
+                ..._traceBand(
+                  context,
+                  title: MonitorDomain.health.label,
+                  color: MuhasabahColors.wash(
+                    MuhasabahColors.healthWash,
+                    MuhasabahColors.healthWashDark,
+                    brightness,
+                    context,
+                  ),
+                  rows: _mixRows(healthHomeRows, allows),
+                  record: record,
+                  extraName: '',
+                  extraValue: '',
+                  extraQuiet: true,
+                  showExtra: false,
+                ),
+              if (show(MonitorDomain.wealth))
+                ..._traceBand(
+                  context,
+                  title: MonitorDomain.wealth.label,
+                  color: MuhasabahColors.wash(
+                    MuhasabahColors.wealthWash,
+                    MuhasabahColors.wealthWashDark,
+                    brightness,
+                    context,
+                  ),
+                  rows: _mixRows(wealthAllHomeRows, allows),
+                  record: record,
+                  extraName: '',
+                  extraValue: '',
+                  extraQuiet: true,
+                  showExtra: false,
+                ),
+              if (show(MonitorDomain.ummah))
+                ..._traceBand(
+                  context,
+                  title: MonitorDomain.ummah.label,
+                  color: MuhasabahColors.wash(
+                    MuhasabahColors.ummahWash,
+                    MuhasabahColors.ummahWashDark,
+                    brightness,
+                    context,
+                  ),
+                  rows: _mixRows(ummahAllHomeRows, allows),
+                  record: record,
+                  extraName: '',
+                  extraValue: '',
+                  extraQuiet: true,
+                  showExtra: false,
+                ),
+              if (show(MonitorDomain.fasting))
+                ..._traceBand(
+                  context,
+                  title: 'Fasting',
+                  color: MuhasabahColors.wash(
+                    MuhasabahColors.fastingWash,
+                    MuhasabahColors.fastingWashDark,
+                    brightness,
+                    context,
+                  ),
+                  rows: _mixRows(fastingHomeRows, allows),
+                  record: record,
+                  extraName: 'Fasting',
+                  extraValue: _observationLabel(
+                    ActivityCatalog.fasting,
+                    record.fasting,
+                  ),
+                  extraQuiet: !record.fasting.isRecorded,
+                  showExtra: sameAsDomains && record.fasting.isRecorded,
+                ),
+              if (show(MonitorDomain.hajj))
+                ..._traceBand(
+                  context,
+                  title: MonitorDomain.hajj.label,
+                  color: MuhasabahColors.wash(
+                    MuhasabahColors.hajjWash,
+                    MuhasabahColors.hajjWashDark,
+                    brightness,
+                    context,
+                  ),
+                  rows: _mixRows(hajjHomeRows, allows),
+                  record: record,
+                  extraName: '',
+                  extraValue: '',
+                  extraQuiet: true,
+                  showExtra: false,
                 ),
               EvidenceBand(
                 title: Copy.notesOnThisDay,
@@ -382,7 +420,7 @@ class DayEvidenceScreen extends ConsumerWidget {
                         record.personalReflectionStatus != EntryStatus.recorded,
                   ),
                   for (final ctx in record.contexts)
-                    if (show(MonitorDomain.quran))
+                    if (allows('quran.${ctx.subject.name}'))
                       EvidenceRow(
                         name: '${ctx.subject.label} · ${ctx.polarity}',
                         value: ctx.factorIds
@@ -393,13 +431,17 @@ class DayEvidenceScreen extends ConsumerWidget {
                       ),
                 ],
               ),
-              if (record.homeTraceFactors.values.any((item) => !item.isEmpty))
+              if (record.homeTraceFactors.entries.any(
+                (entry) => allows(entry.key) && !entry.value.isEmpty,
+              ))
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
+                  padding: const EdgeInsets.only(bottom: 14, top: 2),
                   child: Text(
                     Copy.factorsNotCauses,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      height: 1.4,
+                      letterSpacing: 0.2,
                     ),
                   ),
                 ),
@@ -419,6 +461,16 @@ class DayEvidenceScreen extends ConsumerWidget {
     );
   }
 
+  List<HomeTraceRow> _mixRows(
+    List<HomeTraceRow> rows,
+    bool Function(String id) allows,
+  ) {
+    return [
+      for (final row in rows)
+        if (allows(row.storageKey)) row,
+    ];
+  }
+
   List<Widget> _traceBand(
     BuildContext context, {
     required String title,
@@ -433,13 +485,120 @@ class DayEvidenceScreen extends ConsumerWidget {
   }) {
     final children = <Widget>[];
     for (final row in rows) {
+      if (isTimeTrace(row.storageKey)) {
+        final capture = readTimePractice(record, row.storageKey);
+        if (!capture.isPrimaryRecorded) continue;
+        children.add(
+          EvidenceRow(
+            name: row.label,
+            value: timeEvidenceValue(record, row.storageKey),
+            note: timeEvidenceNote(record, row.storageKey),
+          ),
+        );
+        continue;
+      }
+      if (isHealthTrace(row.storageKey)) {
+        final capture = readHealthPractice(record, row.storageKey);
+        if (!capture.isPrimaryRecorded) continue;
+        children.add(
+          EvidenceRow(
+            name: row.label,
+            value: healthEvidenceValue(record, row.storageKey),
+            note: healthEvidenceNote(record, row.storageKey),
+          ),
+        );
+        continue;
+      }
+      if (isWealthTrace(row.storageKey) &&
+          ActivityCatalog.forHomeTrace(row.storageKey).isNotEmpty) {
+        final capture = readWealthPractice(record, row.storageKey);
+        if (!capture.isPrimaryRecorded) continue;
+        children.add(
+          EvidenceRow(
+            name: row.label,
+            value: wealthEvidenceValue(record, row.storageKey),
+            note: wealthEvidenceNote(record, row.storageKey),
+          ),
+        );
+        continue;
+      }
+      if (isUmmahTrace(row.storageKey) &&
+          ActivityCatalog.forHomeTrace(row.storageKey).isNotEmpty) {
+        final capture = readUmmahPractice(record, row.storageKey);
+        if (!capture.isPrimaryRecorded) continue;
+        children.add(
+          EvidenceRow(
+            name: row.label,
+            value: ummahEvidenceValue(record, row.storageKey),
+            note: ummahEvidenceNote(record, row.storageKey),
+          ),
+        );
+        continue;
+      }
+      if (isFastingPracticeTrace(row.storageKey) &&
+          ActivityCatalog.forHomeTrace(row.storageKey).isNotEmpty) {
+        final capture = readFastingPractice(record, row.storageKey);
+        if (!capture.isPrimaryRecorded &&
+            !record.homeTrace(row.storageKey).isRecorded) {
+          continue;
+        }
+        children.add(
+          EvidenceRow(
+            name: row.label,
+            value: fastingEvidenceValue(record, row.storageKey),
+            note: fastingEvidenceNote(record, row.storageKey),
+          ),
+        );
+        continue;
+      }
+      if (row.storageKey.startsWith('charity.') &&
+          ActivityCatalog.forHomeTrace(row.storageKey).isNotEmpty) {
+        final capture = readCharityPractice(record, row.storageKey);
+        if (!capture.isPrimaryRecorded &&
+            !record.homeTrace(row.storageKey).isRecorded) {
+          continue;
+        }
+        children.add(
+          EvidenceRow(
+            name: row.label,
+            value: charityEvidenceValue(record, row.storageKey),
+            note: charityEvidenceNote(record, row.storageKey),
+          ),
+        );
+        continue;
+      }
+      if (isDhikrContextTrace(row.storageKey)) {
+        final captures = record.dhikrContextFor(row.storageKey);
+        if (captures.isNotEmpty) {
+          children.add(
+            EvidenceRow(
+              name: row.label,
+              value: dhikrContextEvidenceValue(captures),
+            ),
+          );
+          continue;
+        }
+      }
       final outcome = record.homeTrace(row.storageKey);
-      final factors = _factorLine(record, row.storageKey);
+      final factors = isHuquqTrace(row.storageKey)
+          ? huquqEvidenceNote(record, row.storageKey)
+          : isKnowledgeTrace(row.storageKey)
+          ? knowledgeEvidenceNote(record, row.storageKey)
+          : _factorLine(record, row.storageKey);
       if (outcome == TernaryOutcome.unanswered && factors == null) continue;
+      final catalog = ActivityCatalog.forHomeTrace(row.storageKey);
+      final activity = catalog.isEmpty
+          ? null
+          : ActivityCatalog.find(
+              catalog,
+              record.activityFor(row.storageKey).id,
+            );
       children.add(
         EvidenceRow(
           name: row.label,
-          value: traceOutcomeLabel(row.storageKey, outcome),
+          value:
+              activity?.label ??
+              traceOutcomeLabel(row.storageKey, outcome, includeSubject: false),
           quiet: outcome == TernaryOutcome.unanswered,
           note: factors,
         ),
@@ -468,12 +627,11 @@ class DayEvidenceScreen extends ConsumerWidget {
     return label;
   }
 
-  String _voluntary(TernaryOutcome outcome) {
-    return switch (outcome) {
-      TernaryOutcome.positive => 'Performed',
-      TernaryOutcome.negative => 'Not performed',
-      TernaryOutcome.unanswered => 'Not recorded',
-    };
+  String _voluntaryLabel(DailyCheckIn record, SalahTraceRow row) {
+    final activity = record.activityFor(ActivityCatalog.voluntarySalahKey(row));
+    final catalog = ActivityCatalog.forVoluntarySalah(row);
+    final option = ActivityCatalog.find(catalog, activity.id);
+    return option?.label ?? voluntarySalahLabel(record.voluntaryOutcome(row));
   }
 
   String _observationLabel(

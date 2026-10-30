@@ -2,8 +2,25 @@ import 'package:flutter/material.dart';
 
 import '../../app/theme.dart';
 import '../../domain/activities.dart';
+import '../../domain/copy.dart';
+import '../../domain/akhlaq_practices.dart';
+import '../../domain/huquq_practices.dart';
+import '../../domain/knowledge_practices.dart';
+import '../../domain/health_practices.dart';
+import '../../domain/charity_practices.dart';
+import '../../domain/fasting_practices.dart';
+import '../../domain/ummah_practices.dart';
+import '../../domain/wealth_practices.dart';
+import '../../domain/time_practices.dart';
 import '../../domain/daily_check_in.dart';
+import '../../domain/dhikr_context.dart';
+import '../../domain/home_traces.dart';
 import '../../domain/prayer.dart';
+import '../../domain/quran.dart';
+import '../../domain/quran_duration.dart';
+import '../../domain/salah_extras.dart';
+import '../../domain/thirty_day_trend.dart';
+import '../../domain/today_workspace.dart';
 import 'state_marker.dart';
 
 class SalahActivityMark {
@@ -29,6 +46,67 @@ class SalahActivityMark {
   static const other = Color(0xFF616161);
 
   static Color colourForId(String activityId) {
+    final healthKind = healthKindFor(activityId);
+    if (healthKind != null) {
+      return switch (healthKind) {
+        HealthResponseKind.cared => congregationOnTime,
+        HealthResponseKind.partial => joinedCongregationLate,
+        HealthResponseKind.corrected => smallCongregation,
+        HealthResponseKind.constrained ||
+        HealthResponseKind.noSituation => aloneOnTime,
+        HealthResponseKind.difficulty => excused,
+        HealthResponseKind.lapse => prayedLate,
+        HealthResponseKind.preferNot => other,
+        HealthResponseKind.unanswered => unanswered,
+      };
+    }
+    final wealthKind = wealthKindFor(activityId);
+    if (wealthKind != null) {
+      return switch (wealthKind) {
+        WealthResponseKind.cared => congregationOnTime,
+        WealthResponseKind.partial => joinedCongregationLate,
+        WealthResponseKind.corrected => smallCongregation,
+        WealthResponseKind.noSituation => aloneOnTime,
+        WealthResponseKind.difficulty => excused,
+        WealthResponseKind.preferNot => other,
+        WealthResponseKind.unanswered => unanswered,
+      };
+    }
+    final ummahKind = ummahKindFor(activityId);
+    if (ummahKind != null) {
+      return switch (ummahKind) {
+        UmmahResponseKind.cared => congregationOnTime,
+        UmmahResponseKind.partial => joinedCongregationLate,
+        UmmahResponseKind.corrected => smallCongregation,
+        UmmahResponseKind.noSituation => aloneOnTime,
+        UmmahResponseKind.difficulty => excused,
+        UmmahResponseKind.preferNot => other,
+        UmmahResponseKind.unanswered => unanswered,
+      };
+    }
+    final charityKind = charityKindFor(activityId);
+    if (charityKind != null) {
+      return switch (charityKind) {
+        CharityResponseKind.cared => congregationOnTime,
+        CharityResponseKind.partial => joinedCongregationLate,
+        CharityResponseKind.noSituation => aloneOnTime,
+        CharityResponseKind.difficulty => excused,
+        CharityResponseKind.preferNot => other,
+        CharityResponseKind.unanswered => unanswered,
+      };
+    }
+    final fastingKind = fastingKindFor(activityId);
+    if (fastingKind != null) {
+      return switch (fastingKind) {
+        FastingResponseKind.acted => congregationOnTime,
+        FastingResponseKind.partial => joinedCongregationLate,
+        FastingResponseKind.noSituation => aloneOnTime,
+        FastingResponseKind.constrained => smallCongregation,
+        FastingResponseKind.difficulty => excused,
+        FastingResponseKind.preferNot => other,
+        FastingResponseKind.unanswered => unanswered,
+      };
+    }
     return switch (activityId) {
       'congregationOnTime' => congregationOnTime,
       'joinedCongregationLate' => joinedCongregationLate,
@@ -38,6 +116,46 @@ class SalahActivityMark {
       'prayedLate' => prayedLate,
       'missedMadeUp' => missedMadeUp,
       'missed' => missed,
+      QuranDurationIds.over20 => congregationOnTime,
+      QuranDurationIds.min15to20 => joinedCongregationLate,
+      QuranDurationIds.min10to15 => smallCongregation,
+      QuranDurationIds.min5to10 => aloneOnTime,
+      QuranDurationIds.min3to5 => aloneOnTime,
+      QuranDurationIds.notNoticed => prayedLate,
+      ActivityCatalog.tahajjudEarlyMidAndLate ||
+      ActivityCatalog.ishraqFollowingFajr ||
+      ActivityCatalog.tawbahAfterSlip => congregationOnTime,
+      ActivityCatalog.tahajjudLaterPart ||
+      ActivityCatalog.ishraqLaterMorning ||
+      ActivityCatalog.tawbahTwoRakahs => joinedCongregationLate,
+      ActivityCatalog.tahajjudEarlyMid ||
+      ActivityCatalog.ishraqPrayed ||
+      ActivityCatalog.tawbahPrayed => smallCongregation,
+      ActivityCatalog.tahajjudNotPrayed ||
+      ActivityCatalog.ishraqNotPrayed ||
+      ActivityCatalog.tawbahNotPrayed => aloneOnTime,
+      ActivityCatalog.hadithLivedStartedNew => congregationOnTime,
+      ActivityCatalog.hadithLivedIntroducedFamily => joinedCongregationLate,
+      ActivityCatalog.hadithLivedCorrectedPractice => smallCongregation,
+      ActivityCatalog.hadithLivedObservedOther => aloneOnTime,
+      ActivityCatalog.dhikrWithAction => congregationOnTime,
+      ActivityCatalog.dhikrAttentive => joinedCongregationLate,
+      ActivityCatalog.dhikrIntentional => smallCongregation,
+      ActivityCatalog.dhikrBrief => aloneOnTime,
+      // Orange outline on the legend / menu for Dhikr "Not today".
+      ActivityIds.noActivity => missedMadeUp,
+      AkhlaqObservationIds.practised => congregationOnTime,
+      AkhlaqObservationIds.struggled => joinedCongregationLate,
+      AkhlaqObservationIds.corrected => smallCongregation,
+      AkhlaqObservationIds.noSituation => aloneOnTime,
+      AkhlaqObservationIds.lapseRecognised => prayedLate,
+      HuquqObservationIds.partialEffort => joinedCongregationLate,
+      HuquqObservationIds.correctiveAction => smallCongregation,
+      HuquqObservationIds.neglectRecognised => prayedLate,
+      TimeObservationIds.acted => congregationOnTime,
+      KnowledgeObservationIds.engaged => congregationOnTime,
+      KnowledgeObservationIds.progress => joinedCongregationLate,
+      KnowledgeObservationIds.gapRecognised => prayedLate,
       ActivityIds.unanswered => unanswered,
       ActivityIds.other => other,
       _ => MuhasabahColors.mark,
@@ -63,13 +181,12 @@ class SalahActivityMark {
     required PrayerStatus status,
     required String activityId,
     required bool activityColours,
+    List<ActivityOption> catalog = ActivityCatalog.salah,
   }) {
-    final option = ActivityCatalog.find(ActivityCatalog.salah, activityId);
+    final option = ActivityCatalog.find(catalog, activityId);
     return SalahActivityMark(
       kind: kindForStatus(status, activityColours: activityColours),
-      color: activityColours
-          ? colourForId(activityId)
-          : MuhasabahColors.mark,
+      color: activityColours ? colourForId(activityId) : MuhasabahColors.mark,
       label: option?.label ?? status.label,
     );
   }
@@ -97,8 +214,334 @@ class SalahActivityMark {
     final status = record?.jumuah ?? PrayerStatus.unanswered;
     return resolve(
       status: status,
-      activityId: ActivityCatalog.canonicalSalahId(status),
+      activityId: record?.jumuahActivityId ?? ActivityIds.unanswered,
       activityColours: activityColours,
+      catalog: ActivityCatalog.jumuah,
+    );
+  }
+
+  static SalahActivityMark forVoluntary({
+    required DailyCheckIn? record,
+    required SalahTraceRow row,
+    required bool activityColours,
+  }) {
+    final activity = record?.activityFor(
+      ActivityCatalog.voluntarySalahKey(row),
+    );
+    final id = activity?.id ?? ActivityIds.unanswered;
+    final catalog = ActivityCatalog.forVoluntarySalah(row);
+    final option = ActivityCatalog.find(catalog, id);
+    final outcome =
+        option?.ternary ??
+        (record?.voluntaryOutcome(row) ?? TernaryOutcome.unanswered);
+    return SalahActivityMark(
+      kind: kindForVoluntaryId(id, outcome),
+      color: activityColours ? colourForId(id) : MuhasabahColors.mark,
+      label: option?.label ?? voluntarySalahLabel(outcome),
+    );
+  }
+
+  static MarkerKind kindForVoluntaryId(
+    String activityId,
+    TernaryOutcome outcome,
+  ) {
+    if (activityId == ActivityIds.unanswered ||
+        outcome == TernaryOutcome.unanswered) {
+      return MarkerKind.unanswered;
+    }
+    if (activityId == ActivityCatalog.tahajjudNotPrayed ||
+        activityId == ActivityCatalog.ishraqNotPrayed ||
+        activityId == ActivityCatalog.tawbahNotPrayed ||
+        outcome == TernaryOutcome.negative) {
+      return MarkerKind.outlined;
+    }
+    return MarkerKind.filled;
+  }
+
+  static MarkerKind quranDurationKind(
+    String activityId, {
+    bool activityColours = false,
+  }) {
+    if (activityId == ActivityIds.unanswered || activityId.isEmpty) {
+      return MarkerKind.unanswered;
+    }
+    if (activityId == QuranDurationIds.notNoticed) {
+      return MarkerKind.outlined;
+    }
+    if (activityColours && activityId == QuranDurationIds.min3to5) {
+      return MarkerKind.outlined;
+    }
+    return MarkerKind.filled;
+  }
+
+  static Color quranDurationColour(String activityId, {required bool colours}) {
+    if (!colours) return MuhasabahColors.mark;
+    return colourForId(activityId);
+  }
+
+  static MarkerKind kindForHadithLived(String activityId) {
+    if (activityId == ActivityIds.unanswered || activityId.isEmpty) {
+      return MarkerKind.unanswered;
+    }
+    if (activityId == ActivityIds.noActivity) return MarkerKind.outlined;
+    return MarkerKind.filled;
+  }
+
+  static MarkerKind kindForAkhlaq(String activityId) {
+    if (activityId == ActivityIds.unanswered || activityId.isEmpty) {
+      return MarkerKind.unanswered;
+    }
+    if (activityId == AkhlaqObservationIds.lapseRecognised ||
+        activityId == HuquqObservationIds.neglectRecognised ||
+        activityId == KnowledgeObservationIds.gapRecognised ||
+        activityId == TimeObservationIds.lapseRecognised ||
+        healthKindFor(activityId) == HealthResponseKind.lapse) {
+      return MarkerKind.outlined;
+    }
+    return MarkerKind.filled;
+  }
+
+  static RecordedStateMarker recordedMarkerForTrace({
+    required HomeTraceRow row,
+    required DailyCheckIn? record,
+    required bool activityColours,
+    required String semanticLabel,
+  }) {
+    if (ActivityCatalog.forHomeTrace(row.storageKey).isNotEmpty) {
+      final mark = forHadithTrace(
+        record: record,
+        row: row,
+        activityColours: activityColours,
+      );
+      return RecordedStateMarker(
+        kind: mark.kind,
+        color: mark.color,
+        semanticLabel: semanticLabel,
+      );
+    }
+    final outcome =
+        record?.homeTrace(row.storageKey) ?? TernaryOutcome.unanswered;
+    return RecordedStateMarker(
+      kind: markerForRecorded(
+        recorded: outcome.isRecorded,
+        positive: outcome == TernaryOutcome.positive,
+      ),
+      semanticLabel: semanticLabel,
+    );
+  }
+
+  static SalahActivityMark forHadithTrace({
+    required DailyCheckIn? record,
+    required HomeTraceRow row,
+    required bool activityColours,
+  }) {
+    final id = record?.activityFor(row.storageKey).id ?? ActivityIds.unanswered;
+    final option = ActivityCatalog.find(
+      ActivityCatalog.forHomeTrace(row.storageKey),
+      id,
+    );
+    final outcome =
+        record?.homeTrace(row.storageKey) ?? TernaryOutcome.unanswered;
+    if (isHadithDurationTrace(row.storageKey)) {
+      return SalahActivityMark(
+        kind: quranDurationKind(id, activityColours: activityColours),
+        color: quranDurationColour(id, colours: activityColours),
+        label: option?.label ?? row.label,
+      );
+    }
+    if (isHadithLivedTrace(row.storageKey)) {
+      return SalahActivityMark(
+        kind: kindForHadithLived(id),
+        color: activityColours ? colourForId(id) : MuhasabahColors.mark,
+        label: option?.label ?? row.label,
+      );
+    }
+    if (isDhikrContextTrace(row.storageKey)) {
+      var resolvedId = id;
+      if (resolvedId == ActivityIds.unanswered || resolvedId.isEmpty) {
+        // Legacy ternary-only Dhikr rows before remembrance-level storage.
+        resolvedId = switch (outcome) {
+          TernaryOutcome.positive => ActivityCatalog.dhikrIntentional,
+          TernaryOutcome.negative => ActivityIds.noActivity,
+          TernaryOutcome.unanswered => ActivityIds.unanswered,
+        };
+      }
+      final resolved = ActivityCatalog.find(
+        ActivityCatalog.dhikrPostFard,
+        resolvedId,
+      );
+      return SalahActivityMark(
+        kind: kindForHadithLived(resolvedId),
+        color: activityColours
+            ? colourForId(resolvedId)
+            : MuhasabahColors.mark,
+        label: resolved?.label ?? option?.label ?? row.label,
+      );
+    }
+    if (isAkhlaqTrace(row.storageKey) ||
+        isHuquqTrace(row.storageKey) ||
+        isKnowledgeTrace(row.storageKey) ||
+        isTimeTrace(row.storageKey) ||
+        isHealthTrace(row.storageKey) ||
+        isWealthTrace(row.storageKey) ||
+        isUmmahTrace(row.storageKey) ||
+        row.storageKey.startsWith('charity.') ||
+        isFastingPracticeTrace(row.storageKey)) {
+      return SalahActivityMark(
+        kind: kindForAkhlaq(id),
+        color: activityColours ? colourForId(id) : MuhasabahColors.mark,
+        label: option?.label ?? row.label,
+      );
+    }
+    return SalahActivityMark(
+      kind: markerForRecorded(
+        recorded: outcome.isRecorded,
+        positive: outcome == TernaryOutcome.positive,
+      ),
+      color: MuhasabahColors.mark,
+      label: option?.label ?? row.label,
+    );
+  }
+
+  /// Colour and wording of the choice stored for a Today row.
+  ///
+  /// Colour follows the activity-colour setting, the same way the picker does.
+  /// The caption is the choice itself, not a generic "Recorded".
+  static ({SalahActivityMark mark, String caption}) forTodayRow({
+    required TodayRow row,
+    required DailyCheckIn? record,
+    required bool activityColours,
+  }) {
+    final resolved = _resolveTodayRow(
+      row: row,
+      record: record,
+      activityColours: activityColours,
+    );
+    return (
+      mark: resolved.mark,
+      caption: compactChoiceLabel(
+        resolved.mark.label,
+        optionId: resolved.optionId,
+        stripCatalogRowName: resolved.durationList,
+      ),
+    );
+  }
+
+  static ({SalahActivityMark mark, String? optionId, bool durationList})
+  _resolveTodayRow({
+    required TodayRow row,
+    required DailyCheckIn? record,
+    required bool activityColours,
+  }) {
+    switch (row.kind) {
+      case TodayRowKind.salah:
+        for (final salah in SalahTraceRow.values) {
+          if (row.mixId != 'salah.${salah.name}') continue;
+          final prayer = salah.prayerId;
+          if (prayer != null) {
+            return (
+              mark: forPrayer(
+                record: record,
+                prayer: prayer,
+                activityColours: activityColours,
+              ),
+              optionId: record
+                  ?.activityFor(ActivityCatalog.salahKey(prayer))
+                  .id,
+              durationList: false,
+            );
+          }
+          if (salah == SalahTraceRow.jumuah) {
+            return (
+              mark: forJumuah(record: record, activityColours: activityColours),
+              optionId: record?.jumuahActivityId,
+              durationList: false,
+            );
+          }
+          final id = record
+              ?.activityFor(ActivityCatalog.voluntarySalahKey(salah))
+              .id;
+          return (
+            mark: forVoluntary(
+              record: record,
+              row: salah,
+              activityColours: activityColours,
+            ),
+            optionId: id,
+            durationList: false,
+          );
+        }
+      case TodayRowKind.quran:
+        for (final dimension in quranDailyDimensions) {
+          if (row.mixId != 'quran.${dimension.name}') continue;
+          final catalog = ActivityCatalog.forQuran(dimension);
+          final id =
+              record?.activityFor(ActivityCatalog.quranKey(dimension)).id ??
+              ActivityIds.unanswered;
+          final option = ActivityCatalog.find(catalog, id);
+          return (
+            mark: SalahActivityMark(
+              kind: quranDurationKind(id, activityColours: activityColours),
+              color: quranDurationColour(id, colours: activityColours),
+              label: option?.label ?? dimension.label,
+            ),
+            optionId: id,
+            durationList: ActivityCatalog.isDurationCatalog(catalog),
+          );
+        }
+      case TodayRowKind.zakatStatus:
+        final status = record?.zakat ?? ZakatStatus.unanswered;
+        return (
+          mark: SalahActivityMark(
+            kind: status.isRecorded ? MarkerKind.filled : MarkerKind.outlined,
+            color: MuhasabahColors.mark,
+            label: status.label,
+          ),
+          optionId: null,
+          durationList: false,
+        );
+      case TodayRowKind.homeTrace:
+        final trace = homeTraceRowByKey(row.mixId);
+        if (trace != null &&
+            ActivityCatalog.forHomeTrace(trace.storageKey).isNotEmpty) {
+          final id = record?.activityFor(trace.storageKey).id;
+          return (
+            mark: forHadithTrace(
+              record: record,
+              row: trace,
+              activityColours: activityColours,
+            ),
+            optionId: id,
+            durationList: ActivityCatalog.isDurationCatalog(
+              ActivityCatalog.forHomeTrace(trace.storageKey),
+            ),
+          );
+        }
+        final outcome =
+            record?.homeTrace(row.mixId) ?? TernaryOutcome.unanswered;
+        return (
+          mark: SalahActivityMark(
+            kind: markerForRecorded(
+              recorded: outcome.isRecorded,
+              positive: outcome == TernaryOutcome.positive,
+            ),
+            color: MuhasabahColors.mark,
+            label: traceOutcomePhrase(row.mixId, outcome),
+          ),
+          optionId: null,
+          durationList: false,
+        );
+    }
+    return (
+      mark: SalahActivityMark(
+        kind: MarkerKind.filled,
+        color: activityColours
+            ? colourForId(ActivityIds.other)
+            : MuhasabahColors.mark,
+        label: Copy.todayRecorded,
+      ),
+      optionId: null,
+      durationList: false,
     );
   }
 }

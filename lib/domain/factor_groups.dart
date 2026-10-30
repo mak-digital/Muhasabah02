@@ -1,6 +1,8 @@
 import 'activities.dart';
+import 'home_traces.dart';
 import 'prayer.dart';
 import 'quran.dart';
+import 'salah_factors.dart';
 
 const kFactorNotRecorded = '__not_recorded__';
 
@@ -43,6 +45,37 @@ FactorGroups factorGroupsForTernary(TernaryOutcome outcome) {
     TernaryOutcome.positive => FactorGroups.helping,
     TernaryOutcome.negative => FactorGroups.distracting,
   };
+}
+
+FactorGroups factorGroupsForHomeTrace(
+  String storageKey,
+  TernaryOutcome outcome,
+) {
+  if (isDhikrPostFardTrace(storageKey)) {
+    return outcome == TernaryOutcome.unanswered
+        ? FactorGroups.none
+        : FactorGroups.helping;
+  }
+  return factorGroupsForTernary(outcome);
+}
+
+SalahFactorCapture nextHomeTraceFactors({
+  required String storageKey,
+  required TernaryOutcome outcome,
+  required SalahFactorCapture existing,
+}) {
+  final groups = factorGroupsForHomeTrace(storageKey, outcome);
+  return SalahFactorCapture(
+    supportIds: groups.showHelping
+        ? existing.supportIds.take(1).toList()
+        : const [],
+    challengeIds: isDhikrPostFardTrace(storageKey)
+        ? const []
+        : groups.showDistracting
+        ? existing.challengeIds.take(1).toList()
+        : const [],
+    otherText: existing.otherText,
+  );
 }
 
 FactorGroups factorGroupsForPrayerStatus(PrayerStatus status) {
